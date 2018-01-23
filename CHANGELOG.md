@@ -2,11 +2,11 @@
 
 ## v2.4.1 (2018/01/22)
 
-## v2.4.0 (2017/11/23)
-
 ### Bug Fixes
 
   - smooth: allows smooth Manifests for non-live contents to begin at a timestamp != 0
+
+## v2.4.0 (2017/11/23)
 
 ### Added
 
