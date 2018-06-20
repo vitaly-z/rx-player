@@ -47,6 +47,7 @@ import { IStalledStatus } from "../../api";
 import { SegmentFetcherCreator } from "../../fetchers";
 import SourceBuffersStore, {
   IBufferType,
+  IOverlaySourceBufferOptions,
   ITextTrackSourceBufferOptions,
   QueuedSourceBuffer,
 } from "../../source_buffers";
@@ -90,7 +91,8 @@ export interface IPeriodStreamArguments {
 
 /** Options tweaking the behavior of the PeriodStream. */
 export type IPeriodStreamOptions = IAdaptationStreamOptions &
-                                   { textTrackOptions? : ITextTrackSourceBufferOptions };
+                                   { overlayOptions? : IOverlaySourceBufferOptions;
+                                     textTrackOptions? : ITextTrackSourceBufferOptions; };
 
 /**
  * Create single PeriodStream Observable:

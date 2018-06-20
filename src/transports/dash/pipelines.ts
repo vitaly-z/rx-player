@@ -44,6 +44,15 @@ export default function(options : ITransportOptions) : ITransportPipelines {
   const audioVideoSegmentParser = generateAudioVideoSegmentParser(options);
   const textTrackLoader = generateTextTrackLoader(options);
   const textTrackParser = generateTextTrackParser(options);
+  const overlayTrackPipeline = {
+    loader() : never {
+      throw new Error("Overlay tracks not managed in DASH");
+    },
+
+    parser() : never {
+      throw new Error("Overlay tracks not yet in DASH");
+    },
+  };
 
   return { manifest: { loader: manifestLoader,
                        parser: manifestParser },
@@ -54,5 +63,6 @@ export default function(options : ITransportOptions) : ITransportPipelines {
            text: { loader: textTrackLoader,
                    parser: textTrackParser },
            image: { loader: imageLoader,
-                    parser: imageParser } };
+                    parser: imageParser },
+           overlay: overlayTrackPipeline };
 }

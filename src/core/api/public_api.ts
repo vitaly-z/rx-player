@@ -279,7 +279,8 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     lastBitrates : { audio? : number;
                      video? : number;
                      text? : number;
-                     image? : number; };
+                     image? : number;
+                     overlay? : number; };
 
     /** Store last wanted maxAutoBitrates for the next ABRManager instanciation. */
     maxAutoBitrates : { audio : BehaviorSubject<number>;
@@ -714,6 +715,9 @@ class Player extends EventEmitter<IPublicAPIEvent> {
         { textTrackMode: "html" as const,
           textTrackElement: options.textTrackElement };
 
+      const overlayOptions = options.overlayElement != null ?
+        { overlayElement: options.overlayElement } :
+        undefined;
       const bufferOptions = objectAssign({ enableFastSwitching,
                                            manualBitrateSwitchingMode },
                                          this._priv_bufferOptions);
@@ -732,7 +736,10 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                                                     transportPipelines,
                                                     speed$: this._priv_speed$,
                                                     startAt,
-                                                    textTrackOptions,
+                                                    sourceBufferOptions: {
+                                                      text: textTrackOptions,
+                                                      overlay: overlayOptions,
+                                                    },
                                                     url })
         .pipe(takeUntil(contentIsStopped$));
 

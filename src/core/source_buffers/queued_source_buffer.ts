@@ -52,7 +52,8 @@ const { APPEND_WINDOW_SECURITIES,
 export type IBufferType = "audio" |
                           "video" |
                           "text" |
-                          "image";
+                          "image" |
+                          "overlay";
 
 /**
  * Enum used by the QueuedSourceBuffer as a discriminant in its queue of

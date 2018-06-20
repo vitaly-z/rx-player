@@ -14,13 +14,28 @@
  * limitations under the License.
  */
 
-/** Enumerate the different ways a Manifest update can be done. */
-export enum MANIFEST_UPDATE_TYPE {
-  /** The full version of the Manifest has been re-downloaded. */
-  Full,
-  /** Only a shortened version of the Manifest has been downloaded. */
-  Partial,
+export type IOverlayParserFn =
+  (
+    data : IOverlayData[],
+    timeOffset : number
+  ) => IHTMLOverlay[];
+
+export interface IOverlayData {
+  start : number;
+  end : number;
+  version : number;
+  elements : Array<{
+    url : string;
+    format : string;
+    xAxis : string;
+    yAxis : string;
+    height : string;
+    width : string;
+  }>;
 }
 
-/** Every possible value for the Adaptation's `type` property. */
-export type IAdaptationType = "video" | "audio" | "text" | "image" | "overlay";
+export interface IHTMLOverlay {
+  start : number;
+  end: number;
+  element : HTMLElement;
+}
