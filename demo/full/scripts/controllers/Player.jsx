@@ -27,11 +27,13 @@ function Player() {
 
   const videoElement = useRef(null);
   const textTrackElement = useRef(null);
+  const overlayElement = useRef(null);
   const playerWrapperElement = useRef(null);
 
   useEffect(() => {
     const playerMod = createModule(PlayerModule, {
       videoElement: videoElement.current,
+      overlayElement: overlayElement,
       textTrackElement: textTrackElement.current,
     });
 
@@ -159,6 +161,10 @@ function Player() {
                   /> :
                   null
               }
+              <div
+                className="overlay-wrapper"
+                ref={overlayElement}
+              />
               <div
                 className="text-track"
                 ref={textTrackElement}
