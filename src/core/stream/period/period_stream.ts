@@ -256,7 +256,10 @@ function createOrReuseQueuedSourceBuffer<T>(
   sourceBuffersStore : SourceBuffersStore,
   bufferType : IBufferType,
   adaptation : Adaptation,
-  options: { textTrackOptions? : ITextTrackSourceBufferOptions }
+  options: {
+    overlayOptions? : IOverlaySourceBufferOptions;
+    textTrackOptions? : ITextTrackSourceBufferOptions;
+  }
 ) : QueuedSourceBuffer<T> {
   const sourceBufferStatus = sourceBuffersStore.getStatus(bufferType);
   if (sourceBufferStatus.type === "initialized") {
@@ -264,7 +267,14 @@ function createOrReuseQueuedSourceBuffer<T>(
     return sourceBufferStatus.value;
   }
   const codec = getFirstDeclaredMimeType(adaptation);
-  const sbOptions = bufferType === "text" ?  options.textTrackOptions : undefined;
+  const sbOptions = (() => {
+      if (bufferType === "text") {
+        return options.textTrackOptions;
+      }
+      if (bufferType === "overlay") {
+        return options.overlayOptions;
+      }
+    })();
   return sourceBuffersStore.createSourceBuffer(bufferType, codec, sbOptions);
 }
 
