@@ -683,18 +683,21 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     const options = parseLoadVideoOptions(opts);
     log.info("API: Calling loadvideo", options);
 
-    const { autoPlay,
-            defaultAudioTrack,
-            defaultTextTrack,
-            keySystems,
-            manualBitrateSwitchingMode,
-            networkConfig,
-            startAt,
-            supplementaryImageTracks,
-            supplementaryTextTracks,
-            transport,
-            transportOptions,
-            url } = options;
+    const {
+      autoPlay,
+      defaultAudioTrack,
+      defaultTextTrack,
+      keySystems,
+      manualBitrateSwitchingMode,
+      networkConfig,
+      startAt,
+      supplementaryImageTracks,
+      supplementaryTextTracks,
+      transport,
+      transportOptions,
+      url,
+      playbackQualityRequirements,
+    } = options;
 
     // Perform multiple checks on the given options
     if (!this.videoElement) {
@@ -768,6 +771,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
         { video: videoWidth$(videoElement, this._priv_pictureInPictureEvent$)
             .pipe(takeUntil(this._priv_stopCurrentContent$)), } :
         {},
+        playbackQualityRequirements,
       };
 
       // Options used by the TextTrack SourceBuffer

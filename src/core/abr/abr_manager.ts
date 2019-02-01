@@ -27,6 +27,7 @@ import { Representation } from "../../manifest";
 import { IBufferType } from "../source_buffers";
 import RepresentationChooser, {
   IABREstimation,
+  IPlaybackQualityRequirements,
   IRepresentationChooserClockTick,
   IRequest,
 } from "./representation_chooser";
@@ -47,6 +48,7 @@ interface IRepresentationChoosersOptions {
   initialBitrates: Partial<Record<IBufferType, number>>;
   manualBitrates: Partial<Record<IBufferType, number>>;
   maxAutoBitrates: Partial<Record<IBufferType, number>>;
+  playbackQualityRequirements?: IPlaybackQualityRequirements;
 }
 
 const defaultChooserOptions = { limitWidth: {},
@@ -54,7 +56,11 @@ const defaultChooserOptions = { limitWidth: {},
                                 throttleBitrate: {},
                                 initialBitrates: {},
                                 manualBitrates: {},
-                                maxAutoBitrates: {} };
+                                maxAutoBitrates: {},
+                                playbackQualityRequirements: {
+                                  shouldBeSmooth: false,
+                                  shouldBePowerEfficient: false,
+                                }, };
 
 /**
  * Create the right RepresentationChooser instance, from the given data.
@@ -71,7 +77,9 @@ const createChooser = (
                                      throttleBitrate$: options.throttleBitrate[type],
                                      initialBitrate: options.initialBitrates[type],
                                      manualBitrate: options.manualBitrates[type],
-                                     maxAutoBitrate: options.maxAutoBitrates[type] });
+                                     maxAutoBitrate: options.maxAutoBitrates[type],
+                                     playbackQualityRequirements:
+                                      options.playbackQualityRequirements });
 };
 
 /**
@@ -226,7 +234,7 @@ export default class ABRManager {
     clock$: Observable<IABRClockTick>,
     representations: Representation[] = []
   ) : Observable<IABREstimation> {
-    return this._lazilyCreateChooser(type).get$(clock$, representations);
+    return this._lazilyCreateChooser(type).get$(clock$, representations, type);
   }
 
   /**
@@ -328,6 +336,7 @@ export default class ABRManager {
 }
 
 export {
+  IPlaybackQualityRequirements,
   IRequest as IABRRequest,
   IMetric as IABRMetric,
   IRepresentationChoosersOptions as IABROptions,
