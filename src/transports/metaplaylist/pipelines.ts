@@ -52,7 +52,7 @@ import {
   IManifestParserWarningEvent,
   IOverlayParserObservable,
   ISegmentLoaderArguments,
-  ISegmentLoaderObservable,
+  ISegmentLoaderEvent,
   ISegmentParserArguments,
   ISegmentParserParsedSegment,
   ITextParserObservable,
@@ -425,7 +425,7 @@ export default function(options : ITransportOptions): ITransportPipelines {
   };
 
   const overlayTrackPipeline = {
-    loader() : ISegmentLoaderObservable<Uint8Array|ArrayBuffer|null> {
+    loader() : Observable<ISegmentLoaderEvent<Uint8Array|ArrayBuffer|null>> {
       // For now, nothing is downloaded.
       // Everything is parsed from the segment
       return observableOf({

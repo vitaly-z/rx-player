@@ -107,7 +107,28 @@ export default class OverlayRepresentationIndex implements IRepresentationIndex 
   /**
    * @returns {Boolean}
    */
+  isInitialized() : true {
+    return true;
+  }
+
+  /**
+   * @returns {Boolean}
+   */
   shouldRefresh() : false {
+    return false;
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  isSegmentStillAvailable() : true {
+    return true;
+  }
+
+  /**
+   * @returns {Boolean}
+   */
+  canBeOutOfSyncError() : false {
     return false;
   }
 
@@ -118,20 +139,12 @@ export default class OverlayRepresentationIndex implements IRepresentationIndex 
     return -1;
   }
 
-  canBeOutOfSyncError() : boolean {
-    return false;
-  }
-
-  isFinished() : boolean {
-    return this._periodEnd !== null;
-  }
-
   _replace() : void {
     log.warn("Tried to update an Overlay RepresentationIndex");
   }
 
-  isSegmentStillAvailable() : boolean {
-    return true;
+  isFinished() : boolean {
+    return this._periodEnd !== null;
   }
 
   _addSegments() : void {
