@@ -7166,7 +7166,7 @@ object-assign
  */        
         /**
  * Update decipherability based on a predicate given.
- * Do nothing for a Representation when the predicate returns true, mark as
+ * Do nothing for a Representation when the predicate returns false, mark as
  * undecipherable when the predicate returns false. Returns every updates in
  * an array.
  * @param {Manifest} manifest
@@ -7176,7 +7176,7 @@ object-assign
         function updateDeciperability(manifest, predicate) {
             for (var updates = [], i = 0; i < manifest.periods.length; i++) for (var period = manifest.periods[i], adaptations = period.getAdaptations(), j = 0; j < adaptations.length; j++) for (var adaptation = adaptations[j], representations = adaptation.representations, k = 0; k < representations.length; k++) {
                 var representation = representations[k];
-                predicate(representation) && (updates.push({
+                predicate(representation) || (updates.push({
                     period: period,
                     adaptation: adaptation,
                     representation: representation
