@@ -3389,7 +3389,7 @@ object-assign
         /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
             return async;
         });
-        /* harmony import */ var _AsyncAction__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(70), async = /* */ new (__webpack_require__(69).a)(_AsyncAction__WEBPACK_IMPORTED_MODULE_0__.a);
+        /* harmony import */ var _AsyncAction__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(69), async = /* */ new (__webpack_require__(68).a)(_AsyncAction__WEBPACK_IMPORTED_MODULE_0__.a);
         /* harmony import */    }, 
     /* 42 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
@@ -4643,6 +4643,113 @@ object-assign
     /* 68 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
+        // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
+                var tslib_es6 = __webpack_require__(3), Scheduler = /* */ function() {
+            function Scheduler(SchedulerAction, now) {
+                void 0 === now && (now = Scheduler.now), this.SchedulerAction = SchedulerAction, 
+                this.now = now;
+            }
+            return Scheduler.prototype.schedule = function(work, delay, state) {
+                return void 0 === delay && (delay = 0), new this.SchedulerAction(this, work).schedule(state, delay);
+            }, Scheduler.now = function() {
+                return Date.now();
+            }, Scheduler;
+        }();
+        // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/Scheduler.js
+                //# sourceMappingURL=Scheduler.js.map
+        // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/scheduler/AsyncScheduler.js
+        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() {
+            return AsyncScheduler_AsyncScheduler;
+        });
+        /** PURE_IMPORTS_START tslib,_Scheduler PURE_IMPORTS_END */
+        var AsyncScheduler_AsyncScheduler = /* */ function(_super) {
+            function AsyncScheduler(SchedulerAction, now) {
+                void 0 === now && (now = Scheduler.now);
+                var _this = _super.call(this, SchedulerAction, function() {
+                    return AsyncScheduler.delegate && AsyncScheduler.delegate !== _this ? AsyncScheduler.delegate.now() : now();
+                }) || this;
+                return _this.actions = [], _this.active = !1, _this.scheduled = void 0, _this;
+            }
+            return tslib_es6.a(AsyncScheduler, _super), AsyncScheduler.prototype.schedule = function(work, delay, state) {
+                return void 0 === delay && (delay = 0), AsyncScheduler.delegate && AsyncScheduler.delegate !== this ? AsyncScheduler.delegate.schedule(work, delay, state) : _super.prototype.schedule.call(this, work, delay, state);
+            }, AsyncScheduler.prototype.flush = function(action) {
+                var actions = this.actions;
+                if (this.active) actions.push(action); else {
+                    var error;
+                    this.active = !0;
+                    do {
+                        if (error = action.execute(action.state, action.delay)) break;
+                    } while (action = actions.shift());
+                    if (this.active = !1, error) {
+                        for (;action = actions.shift(); ) action.unsubscribe();
+                        throw error;
+                    }
+                }
+            }, AsyncScheduler;
+        }(Scheduler);
+        //# sourceMappingURL=AsyncScheduler.js.map
+        /***/    }, 
+    /* 69 */
+    /***/ function(module, __webpack_exports__, __webpack_require__) {
+        "use strict";
+        // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
+                var tslib_es6 = __webpack_require__(3), Action_Action = /* */ function(_super) {
+            function Action(scheduler, work) {
+                return _super.call(this) || this;
+            }
+            return tslib_es6.a(Action, _super), Action.prototype.schedule = function(state, delay) {
+                return void 0 === delay && (delay = 0), this;
+            }, Action;
+        }(__webpack_require__(15).a);
+        // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subscription.js + 1 modules
+                //# sourceMappingURL=Action.js.map
+        // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/scheduler/AsyncAction.js
+        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() {
+            return AsyncAction_AsyncAction;
+        });
+        /** PURE_IMPORTS_START tslib,_Action PURE_IMPORTS_END */
+        var AsyncAction_AsyncAction = /* */ function(_super) {
+            function AsyncAction(scheduler, work) {
+                var _this = _super.call(this, scheduler, work) || this;
+                return _this.scheduler = scheduler, _this.work = work, _this.pending = !1, _this;
+            }
+            return tslib_es6.a(AsyncAction, _super), AsyncAction.prototype.schedule = function(state, delay) {
+                if (void 0 === delay && (delay = 0), this.closed) return this;
+                this.state = state;
+                var id = this.id, scheduler = this.scheduler;
+                return null != id && (this.id = this.recycleAsyncId(scheduler, id, delay)), this.pending = !0, 
+                this.delay = delay, this.id = this.id || this.requestAsyncId(scheduler, this.id, delay), 
+                this;
+            }, AsyncAction.prototype.requestAsyncId = function(scheduler, id, delay) {
+                return void 0 === delay && (delay = 0), setInterval(scheduler.flush.bind(scheduler, this), delay);
+            }, AsyncAction.prototype.recycleAsyncId = function(scheduler, id, delay) {
+                if (void 0 === delay && (delay = 0), null !== delay && this.delay === delay && !1 === this.pending) return id;
+                clearInterval(id);
+            }, AsyncAction.prototype.execute = function(state, delay) {
+                if (this.closed) return new Error("executing a cancelled action");
+                this.pending = !1;
+                var error = this._execute(state, delay);
+                if (error) return error;
+                !1 === this.pending && null != this.id && (this.id = this.recycleAsyncId(this.scheduler, this.id, null));
+            }, AsyncAction.prototype._execute = function(state, delay) {
+                var errored = !1, errorValue = void 0;
+                try {
+                    this.work(state);
+                } catch (e) {
+                    errored = !0, errorValue = !!e && e || new Error(e);
+                }
+                if (errored) return this.unsubscribe(), errorValue;
+            }, AsyncAction.prototype._unsubscribe = function() {
+                var id = this.id, scheduler = this.scheduler, actions = scheduler.actions, index = actions.indexOf(this);
+                this.work = null, this.state = null, this.pending = !1, this.scheduler = null, -1 !== index && actions.splice(index, 1), 
+                null != id && (this.id = this.recycleAsyncId(scheduler, id, null)), this.delay = null;
+            }, AsyncAction;
+        }(Action_Action);
+        //# sourceMappingURL=AsyncAction.js.map
+        /***/    }, 
+    /* 70 */
+    /***/ function(module, __webpack_exports__, __webpack_require__) {
+        "use strict";
         // EXTERNAL MODULE: ./node_modules/next-tick/index.js
                 var next_tick = __webpack_require__(63), next_tick_default = /* */ __webpack_require__.n(next_tick), of = __webpack_require__(21), event_emitter = __webpack_require__(27), rx_try_catch = __webpack_require__(42), ranges = __webpack_require__(14), time_ranges_ManualTimeRanges = 
         /* */
@@ -4758,113 +4865,6 @@ object-assign
                 });
             }, AbstractSourceBuffer;
         }(event_emitter.a);
-        /***/    }, 
-    /* 69 */
-    /***/ function(module, __webpack_exports__, __webpack_require__) {
-        "use strict";
-        // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
-                var tslib_es6 = __webpack_require__(3), Scheduler = /* */ function() {
-            function Scheduler(SchedulerAction, now) {
-                void 0 === now && (now = Scheduler.now), this.SchedulerAction = SchedulerAction, 
-                this.now = now;
-            }
-            return Scheduler.prototype.schedule = function(work, delay, state) {
-                return void 0 === delay && (delay = 0), new this.SchedulerAction(this, work).schedule(state, delay);
-            }, Scheduler.now = function() {
-                return Date.now();
-            }, Scheduler;
-        }();
-        // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/Scheduler.js
-                //# sourceMappingURL=Scheduler.js.map
-        // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/scheduler/AsyncScheduler.js
-        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() {
-            return AsyncScheduler_AsyncScheduler;
-        });
-        /** PURE_IMPORTS_START tslib,_Scheduler PURE_IMPORTS_END */
-        var AsyncScheduler_AsyncScheduler = /* */ function(_super) {
-            function AsyncScheduler(SchedulerAction, now) {
-                void 0 === now && (now = Scheduler.now);
-                var _this = _super.call(this, SchedulerAction, function() {
-                    return AsyncScheduler.delegate && AsyncScheduler.delegate !== _this ? AsyncScheduler.delegate.now() : now();
-                }) || this;
-                return _this.actions = [], _this.active = !1, _this.scheduled = void 0, _this;
-            }
-            return tslib_es6.a(AsyncScheduler, _super), AsyncScheduler.prototype.schedule = function(work, delay, state) {
-                return void 0 === delay && (delay = 0), AsyncScheduler.delegate && AsyncScheduler.delegate !== this ? AsyncScheduler.delegate.schedule(work, delay, state) : _super.prototype.schedule.call(this, work, delay, state);
-            }, AsyncScheduler.prototype.flush = function(action) {
-                var actions = this.actions;
-                if (this.active) actions.push(action); else {
-                    var error;
-                    this.active = !0;
-                    do {
-                        if (error = action.execute(action.state, action.delay)) break;
-                    } while (action = actions.shift());
-                    if (this.active = !1, error) {
-                        for (;action = actions.shift(); ) action.unsubscribe();
-                        throw error;
-                    }
-                }
-            }, AsyncScheduler;
-        }(Scheduler);
-        //# sourceMappingURL=AsyncScheduler.js.map
-        /***/    }, 
-    /* 70 */
-    /***/ function(module, __webpack_exports__, __webpack_require__) {
-        "use strict";
-        // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
-                var tslib_es6 = __webpack_require__(3), Action_Action = /* */ function(_super) {
-            function Action(scheduler, work) {
-                return _super.call(this) || this;
-            }
-            return tslib_es6.a(Action, _super), Action.prototype.schedule = function(state, delay) {
-                return void 0 === delay && (delay = 0), this;
-            }, Action;
-        }(__webpack_require__(15).a);
-        // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subscription.js + 1 modules
-                //# sourceMappingURL=Action.js.map
-        // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/scheduler/AsyncAction.js
-        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() {
-            return AsyncAction_AsyncAction;
-        });
-        /** PURE_IMPORTS_START tslib,_Action PURE_IMPORTS_END */
-        var AsyncAction_AsyncAction = /* */ function(_super) {
-            function AsyncAction(scheduler, work) {
-                var _this = _super.call(this, scheduler, work) || this;
-                return _this.scheduler = scheduler, _this.work = work, _this.pending = !1, _this;
-            }
-            return tslib_es6.a(AsyncAction, _super), AsyncAction.prototype.schedule = function(state, delay) {
-                if (void 0 === delay && (delay = 0), this.closed) return this;
-                this.state = state;
-                var id = this.id, scheduler = this.scheduler;
-                return null != id && (this.id = this.recycleAsyncId(scheduler, id, delay)), this.pending = !0, 
-                this.delay = delay, this.id = this.id || this.requestAsyncId(scheduler, this.id, delay), 
-                this;
-            }, AsyncAction.prototype.requestAsyncId = function(scheduler, id, delay) {
-                return void 0 === delay && (delay = 0), setInterval(scheduler.flush.bind(scheduler, this), delay);
-            }, AsyncAction.prototype.recycleAsyncId = function(scheduler, id, delay) {
-                if (void 0 === delay && (delay = 0), null !== delay && this.delay === delay && !1 === this.pending) return id;
-                clearInterval(id);
-            }, AsyncAction.prototype.execute = function(state, delay) {
-                if (this.closed) return new Error("executing a cancelled action");
-                this.pending = !1;
-                var error = this._execute(state, delay);
-                if (error) return error;
-                !1 === this.pending && null != this.id && (this.id = this.recycleAsyncId(this.scheduler, this.id, null));
-            }, AsyncAction.prototype._execute = function(state, delay) {
-                var errored = !1, errorValue = void 0;
-                try {
-                    this.work(state);
-                } catch (e) {
-                    errored = !0, errorValue = !!e && e || new Error(e);
-                }
-                if (errored) return this.unsubscribe(), errorValue;
-            }, AsyncAction.prototype._unsubscribe = function() {
-                var id = this.id, scheduler = this.scheduler, actions = scheduler.actions, index = actions.indexOf(this);
-                this.work = null, this.state = null, this.pending = !1, this.scheduler = null, -1 !== index && actions.splice(index, 1), 
-                null != id && (this.id = this.recycleAsyncId(scheduler, id, null)), this.delay = null;
-            }, AsyncAction;
-        }(Action_Action);
-        //# sourceMappingURL=AsyncAction.js.map
         /***/    }, 
     /* 71 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
@@ -7261,6 +7261,87 @@ object-assign
     /* 107 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
+        // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/of.js
+                var of = __webpack_require__(21), defer = __webpack_require__(77), tslib_es6 = __webpack_require__(3), Subscriber = __webpack_require__(8);
+        // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/defer.js
+                // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/operators/pairwise.js
+        /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
+        function pairwise() {
+            return function(source) {
+                return source.lift(new PairwiseOperator());
+            };
+        }
+        var PairwiseOperator = /* */ function() {
+            function PairwiseOperator() {}
+            return PairwiseOperator.prototype.call = function(subscriber, source) {
+                return source.subscribe(new pairwise_PairwiseSubscriber(subscriber));
+            }, PairwiseOperator;
+        }(), pairwise_PairwiseSubscriber = /* */ function(_super) {
+            function PairwiseSubscriber(destination) {
+                var _this = _super.call(this, destination) || this;
+                return _this.hasPrev = !1, _this;
+            }
+            return tslib_es6.a(PairwiseSubscriber, _super), PairwiseSubscriber.prototype._next = function(value) {
+                var pair;
+                this.hasPrev ? pair = [ this.prev, value ] : this.hasPrev = !0, this.prev = value, 
+                pair && this.destination.next(pair);
+            }, PairwiseSubscriber;
+        }(Subscriber.a), map = __webpack_require__(34), filter = __webpack_require__(145), startWith = __webpack_require__(184), switchMap = __webpack_require__(121), tap = __webpack_require__(126), log = __webpack_require__(0);
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * Manage playback speed.
+ * Set playback rate set by the user, pause playback when the player appear to
+ * stall and restore the speed once it appears to un-stall.
+ *
+ * @param {HTMLMediaElement} mediaElement
+ * @param {Observable} speed$ - emit speed set by the user
+ * @param {Observable} clock$
+ * @param {Object} options - Contains the following properties:
+ *   - pauseWhenStalled {Boolean|undefined} - true if the player
+ *     stalling should lead to a pause until it un-stalls. True by default.
+ * @returns {Observable}
+ */
+        function updatePlaybackRate(mediaElement, speed$, clock$, _ref) {
+            var forcePause$, _ref$pauseWhenStalled = _ref.pauseWhenStalled;
+            void 0 === _ref$pauseWhenStalled || _ref$pauseWhenStalled ? forcePause$ = clock$.pipe(pairwise()).pipe(Object(map.a)(function(_ref2) {
+                var prevTiming = _ref2[0], isStalled = _ref2[1].stalled, wasStalled = prevTiming.stalled;
+                if (!wasStalled != !isStalled || // xor
+                wasStalled && isStalled && wasStalled.reason !== isStalled.reason) return !wasStalled;
+            }), Object(filter.a)(function(val) {
+                return null != val;
+            }), Object(startWith.a)(!1)) : forcePause$ = Object(of.a)(!1);
+            return forcePause$.pipe(Object(switchMap.a)(function(shouldForcePause) {
+                return shouldForcePause ? Object(defer.a)(function() {
+                    return log.a.info("Init: Pause playback to build buffer"), mediaElement.playbackRate = 0, 
+                    Object(of.a)(0);
+                }) : speed$.pipe(Object(tap.a)(function(speed) {
+                    log.a.info("Init: Resume playback speed", speed), mediaElement.playbackRate = speed;
+                }));
+            }));
+        }
+        /***/        
+        // CONCATENATED MODULE: ./src/core/init/update_playback_rate.ts
+        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() {
+            return updatePlaybackRate;
+        });
+    }, 
+    /* 108 */
+    /***/ function(module, __webpack_exports__, __webpack_require__) {
+        "use strict";
         // CONCATENATED MODULE: ./src/parsers/texttracks/srt/find_end_of_cue_block.ts
         /**
  * Copyright 2015 CANAL+ Group
@@ -7331,7 +7412,7 @@ object-assign
             return getCueBlocks;
         });
     }, 
-    /* 108 */
+    /* 109 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         // CONCATENATED MODULE: ./src/parsers/texttracks/srt/parse_timestamp.ts
@@ -7422,35 +7503,12 @@ object-assign
             return parseCueBlock;
         });
     }, 
-    /* 109 */
+    /* 110 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
-        // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/of.js
-                var of = __webpack_require__(21), defer = __webpack_require__(77), tslib_es6 = __webpack_require__(3), Subscriber = __webpack_require__(8);
-        // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/defer.js
-                // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/operators/pairwise.js
-        /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
-        function pairwise() {
-            return function(source) {
-                return source.lift(new PairwiseOperator());
-            };
-        }
-        var PairwiseOperator = /* */ function() {
-            function PairwiseOperator() {}
-            return PairwiseOperator.prototype.call = function(subscriber, source) {
-                return source.subscribe(new pairwise_PairwiseSubscriber(subscriber));
-            }, PairwiseOperator;
-        }(), pairwise_PairwiseSubscriber = /* */ function(_super) {
-            function PairwiseSubscriber(destination) {
-                var _this = _super.call(this, destination) || this;
-                return _this.hasPrev = !1, _this;
-            }
-            return tslib_es6.a(PairwiseSubscriber, _super), PairwiseSubscriber.prototype._next = function(value) {
-                var pair;
-                this.hasPrev ? pair = [ this.prev, value ] : this.hasPrev = !0, this.prev = value, 
-                pair && this.destination.next(pair);
-            }, PairwiseSubscriber;
-        }(Subscriber.a), map = __webpack_require__(34), filter = __webpack_require__(145), startWith = __webpack_require__(184), switchMap = __webpack_require__(121), tap = __webpack_require__(126), log = __webpack_require__(0);
+        // EXTERNAL MODULE: ./src/parsers/texttracks/ttml/regexps.ts
+                var regexps = __webpack_require__(17);
+        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/time_parsing.ts
         /**
  * Copyright 2015 CANAL+ Group
  *
@@ -7467,43 +7525,100 @@ object-assign
  * limitations under the License.
  */
         /**
- * Manage playback speed.
- * Set playback rate set by the user, pause playback when the player appear to
- * stall and restore the speed once it appears to un-stall.
- *
- * @param {HTMLMediaElement} mediaElement
- * @param {Observable} speed$ - emit speed set by the user
- * @param {Observable} clock$
- * @param {Object} options - Contains the following properties:
- *   - pauseWhenStalled {Boolean|undefined} - true if the player
- *     stalling should lead to a pause until it un-stalls. True by default.
- * @returns {Observable}
+ * Parses a TTML time into seconds.
+ * @param {string} text
+ * @param {Object} ttParams
+ * @returns {Number|undefined}
+ */        
+        /**
+ * Parses a TTML time in frame format
+ * @param {Object} ttParams
+ * @param {string} text
+ * @returns {Number}
  */
-        function updatePlaybackRate(mediaElement, speed$, clock$, _ref) {
-            var forcePause$, _ref$pauseWhenStalled = _ref.pauseWhenStalled;
-            void 0 === _ref$pauseWhenStalled || _ref$pauseWhenStalled ? forcePause$ = clock$.pipe(pairwise()).pipe(Object(map.a)(function(_ref2) {
-                var prevTiming = _ref2[0], isStalled = _ref2[1].stalled, wasStalled = prevTiming.stalled;
-                if (!wasStalled != !isStalled || // xor
-                wasStalled && isStalled && wasStalled.reason !== isStalled.reason) return !wasStalled;
-            }), Object(filter.a)(function(val) {
-                return null != val;
-            }), Object(startWith.a)(!1)) : forcePause$ = Object(of.a)(!1);
-            return forcePause$.pipe(Object(switchMap.a)(function(shouldForcePause) {
-                return shouldForcePause ? Object(defer.a)(function() {
-                    return log.a.info("Init: Pause playback to build buffer"), mediaElement.playbackRate = 0, 
-                    Object(of.a)(0);
-                }) : speed$.pipe(Object(tap.a)(function(speed) {
-                    log.a.info("Init: Resume playback speed", speed), mediaElement.playbackRate = speed;
-                }));
-            }));
+        function parseFramesTime(ttParams, text) {
+            // 75f or 75.5f
+            // (We cast as we're sure the regexp is respected here)
+            var results = regexps.g.exec(text);
+            return Number(results[1]) / ttParams.frameRate;
         }
-        /***/        
-        // CONCATENATED MODULE: ./src/core/init/update_playback_rate.ts
-        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() {
-            return updatePlaybackRate;
+        /**
+ * Parses a TTML time in tick format
+ * @param {Object} ttParams
+ * @param {string} text
+ * @returns {Number}
+ */        function parseTickTime(ttParams, text) {
+            // 50t or 50.5t
+            // (We cast as we're sure the regexp is respected here)
+            var results = regexps.i.exec(text);
+            return Number(results[1]) / ttParams.tickRate;
+        }
+        /**
+ * Parses a TTML colon formatted time containing frames
+ * @param {Object} ttParams
+ * @param {string} text
+ * @returns {Number}
+ */        function parseColonTimeWithFrames(ttParams, text) {
+            // 01:02:43:07 ("07" is frames) or 01:02:43:07.1 (subframes)
+            // (We cast as we're sure the regexp is respected here)
+            var results = regexps.e.exec(text), hours = Number(results[1]), minutes = Number(results[2]), seconds = Number(results[3]), frames = Number(results[4]);
+            return (seconds += (frames += (Number(results[5]) || 0) / ttParams.subFrameRate) / ttParams.frameRate) + 60 * minutes + 3600 * hours;
+        }
+        /**
+ * Parses a TTML time with a given regex. Expects regex to be some
+ * sort of a time-matcher to match hours, minutes, seconds and milliseconds
+ *
+ * @param {RegExp} regex
+ * @param {string} text
+ * @returns {number|null}
+ */        function parseTimeFromRegExp(regex, text) {
+            var results = regex.exec(text);
+            if (null === results || "" === results[0]) return null;
+ // This capture is optional, but will still be in the array as undefined,
+            // default to 0.
+                        var hours = Number(results[1]) || 0, minutes = Number(results[2]) || 0, seconds = Number(results[3]) || 0;
+            return (Number(results[4]) || 0) / 1e3 + seconds + 60 * minutes + 3600 * hours;
+        }
+        /* harmony default export */        var time_parsing = function parseTime(text, ttParams) {
+            return regexps.e.test(text) ? parseColonTimeWithFrames(ttParams, text) : regexps.d.test(text) ? parseTimeFromRegExp(regexps.d, text) : regexps.f.test(text) ? parseTimeFromRegExp(regexps.f, text) : regexps.g.test(text) ? parseFramesTime(ttParams, text) : regexps.i.test(text) ? parseTickTime(ttParams, text) : regexps.h.test(text) ? parseTimeFromRegExp(regexps.h, text) : void 0;
+        };
+        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/get_time_delimiters.ts
+        /* harmony export (binding) */        
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * Get start and end time of an element.
+ * @param {Element} element
+ * @param {Object} ttParams
+ * @returns {Object}
+ */
+        function getTimeDelimiters(element, ttParams) {
+            var beginAttr = element.getAttribute("begin"), durationAttr = element.getAttribute("dur"), endAttr = element.getAttribute("end"), start = beginAttr ? time_parsing(beginAttr, ttParams) : null, duration = durationAttr ? time_parsing(durationAttr, ttParams) : null, parsedEnd = endAttr ? time_parsing(endAttr, ttParams) : null;
+            if (null == start || null == parsedEnd && null == duration) throw new Error("Invalid text cue");
+ // Huh? Is TypeScript that dumb here?
+                        return {
+                start: start,
+                end: null == parsedEnd ? start + duration : parsedEnd
+            };
+        }
+        /***/        __webpack_require__.d(__webpack_exports__, "a", function() {
+            return getTimeDelimiters;
         });
     }, 
-    /* 110 */
+    /* 111 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         // CONCATENATED MODULE: ./src/parsers/texttracks/webvtt/parse_timestamp.ts
@@ -7618,121 +7733,6 @@ object-assign
         }
         /***/        __webpack_require__.d(__webpack_exports__, "a", function() {
             return parseCueBlock;
-        });
-    }, 
-    /* 111 */
-    /***/ function(module, __webpack_exports__, __webpack_require__) {
-        "use strict";
-        // EXTERNAL MODULE: ./src/parsers/texttracks/ttml/regexps.ts
-                var regexps = __webpack_require__(17);
-        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/time_parsing.ts
-        /**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-        /**
- * Parses a TTML time into seconds.
- * @param {string} text
- * @param {Object} ttParams
- * @returns {Number|undefined}
- */        
-        /**
- * Parses a TTML time in frame format
- * @param {Object} ttParams
- * @param {string} text
- * @returns {Number}
- */
-        function parseFramesTime(ttParams, text) {
-            // 75f or 75.5f
-            // (We cast as we're sure the regexp is respected here)
-            var results = regexps.g.exec(text);
-            return Number(results[1]) / ttParams.frameRate;
-        }
-        /**
- * Parses a TTML time in tick format
- * @param {Object} ttParams
- * @param {string} text
- * @returns {Number}
- */        function parseTickTime(ttParams, text) {
-            // 50t or 50.5t
-            // (We cast as we're sure the regexp is respected here)
-            var results = regexps.i.exec(text);
-            return Number(results[1]) / ttParams.tickRate;
-        }
-        /**
- * Parses a TTML colon formatted time containing frames
- * @param {Object} ttParams
- * @param {string} text
- * @returns {Number}
- */        function parseColonTimeWithFrames(ttParams, text) {
-            // 01:02:43:07 ("07" is frames) or 01:02:43:07.1 (subframes)
-            // (We cast as we're sure the regexp is respected here)
-            var results = regexps.e.exec(text), hours = Number(results[1]), minutes = Number(results[2]), seconds = Number(results[3]), frames = Number(results[4]);
-            return (seconds += (frames += (Number(results[5]) || 0) / ttParams.subFrameRate) / ttParams.frameRate) + 60 * minutes + 3600 * hours;
-        }
-        /**
- * Parses a TTML time with a given regex. Expects regex to be some
- * sort of a time-matcher to match hours, minutes, seconds and milliseconds
- *
- * @param {RegExp} regex
- * @param {string} text
- * @returns {number|null}
- */        function parseTimeFromRegExp(regex, text) {
-            var results = regex.exec(text);
-            if (null === results || "" === results[0]) return null;
- // This capture is optional, but will still be in the array as undefined,
-            // default to 0.
-                        var hours = Number(results[1]) || 0, minutes = Number(results[2]) || 0, seconds = Number(results[3]) || 0;
-            return (Number(results[4]) || 0) / 1e3 + seconds + 60 * minutes + 3600 * hours;
-        }
-        /* harmony default export */        var time_parsing = function parseTime(text, ttParams) {
-            return regexps.e.test(text) ? parseColonTimeWithFrames(ttParams, text) : regexps.d.test(text) ? parseTimeFromRegExp(regexps.d, text) : regexps.f.test(text) ? parseTimeFromRegExp(regexps.f, text) : regexps.g.test(text) ? parseFramesTime(ttParams, text) : regexps.i.test(text) ? parseTickTime(ttParams, text) : regexps.h.test(text) ? parseTimeFromRegExp(regexps.h, text) : void 0;
-        };
-        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/get_time_delimiters.ts
-        /* harmony export (binding) */        
-        /**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-        /**
- * Get start and end time of an element.
- * @param {Element} element
- * @param {Object} ttParams
- * @returns {Object}
- */
-        function getTimeDelimiters(element, ttParams) {
-            var beginAttr = element.getAttribute("begin"), durationAttr = element.getAttribute("dur"), endAttr = element.getAttribute("end"), start = beginAttr ? time_parsing(beginAttr, ttParams) : null, duration = durationAttr ? time_parsing(durationAttr, ttParams) : null, parsedEnd = endAttr ? time_parsing(endAttr, ttParams) : null;
-            if (null == start || null == parsedEnd && null == duration) throw new Error("Invalid text cue");
- // Huh? Is TypeScript that dumb here?
-                        return {
-                start: start,
-                end: null == parsedEnd ? start + duration : parsedEnd
-            };
-        }
-        /***/        __webpack_require__.d(__webpack_exports__, "a", function() {
-            return getTimeDelimiters;
         });
     }, 
     /* 112 */
@@ -10684,12 +10684,12 @@ object-assign
             }, QueueAction.prototype.requestAsyncId = function(scheduler, id, delay) {
                 return void 0 === delay && (delay = 0), null !== delay && 0 < delay || null === delay && 0 < this.delay ? _super.prototype.requestAsyncId.call(this, scheduler, id, delay) : scheduler.flush(this);
             }, QueueAction;
-        }(__webpack_require__(70).a), queue = /* */ new (/* */ function(_super) {
+        }(__webpack_require__(69).a), queue = /* */ new (/* */ function(_super) {
             function QueueScheduler() {
                 return null !== _super && _super.apply(this, arguments) || this;
             }
             return tslib_es6.a(QueueScheduler, _super), QueueScheduler;
-        }(__webpack_require__(69).a))(QueueAction_QueueAction), Subscription = __webpack_require__(15), observeOn = __webpack_require__(124), ObjectUnsubscribedError = __webpack_require__(49), SubjectSubscription = __webpack_require__(85);
+        }(__webpack_require__(68).a))(QueueAction_QueueAction), Subscription = __webpack_require__(15), observeOn = __webpack_require__(124), ObjectUnsubscribedError = __webpack_require__(49), SubjectSubscription = __webpack_require__(85);
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subject.js
                 // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/ReplaySubject.js
         /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() {
@@ -11166,7 +11166,7 @@ object-assign
         /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() {
             return parseSRTStringToVTTCues;
         });
-        /* harmony import */ var _compat_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(95), _get_cue_blocks__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(107), _parse_cue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(108);
+        /* harmony import */ var _compat_index__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(95), _get_cue_blocks__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(108), _parse_cue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(109);
         /* harmony import */        
         /**
  * Copyright 2015 CANAL+ Group
@@ -11350,7 +11350,7 @@ object-assign
         /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() {
             return parseSRTStringToHTML;
         });
-        /* harmony import */ var _get_cue_blocks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(107), _parse_cue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(108);
+        /* harmony import */ var _get_cue_blocks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(108), _parse_cue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(109);
         /* harmony import */        
         /**
  * Copyright 2015 CANAL+ Group
@@ -11467,7 +11467,7 @@ object-assign
         /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() {
             return initializeDirectfileContent;
         });
-        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(48), rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(179), rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(21), rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(72), rxjs_operators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(38), rxjs_operators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(124), rxjs_operators__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(150), rxjs_operators__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(34), rxjs_operators__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(145), rxjs_operators__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(114), rxjs_operators__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(149), rxjs_operators__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(125), _compat__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(73), _compat__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(116), _errors__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(52), _log__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(0), _create_eme_manager__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(100), _events_generators__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(23), _get_stalled_events__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(103), _initial_seek_and_play__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(97), _is_eme_ready__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(104), _throw_on_media_error__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(102), _update_playback_rate__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(109);
+        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(48), rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(179), rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(21), rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(72), rxjs_operators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(38), rxjs_operators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(124), rxjs_operators__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(150), rxjs_operators__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(34), rxjs_operators__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(145), rxjs_operators__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(114), rxjs_operators__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(149), rxjs_operators__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(125), _compat__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(73), _compat__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(116), _errors__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(52), _log__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(0), _create_eme_manager__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(100), _events_generators__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(23), _get_stalled_events__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(103), _initial_seek_and_play__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(97), _is_eme_ready__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(104), _throw_on_media_error__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(102), _update_playback_rate__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(107);
         /* harmony import */        
         /**
  * Copyright 2015 CANAL+ Group
@@ -15212,7 +15212,7 @@ object-assign
                 return !1 !== representation.decipherable;
             });
             if (decipherableRepresentations.length <= 0) {
-                var noRepErr = new media_error.a("NO_PLAYABLE_REPRESENTATION", "No Representation in the chosenAdaptation can be played");
+                var noRepErr = new media_error.a("NO_PLAYABLE_REPRESENTATION", "No Representation in the chosen Adaptation can be played");
                 return Object(throwError.a)(noRepErr);
             }
             var abr$ = abrManager.get$(adaptation.type, abrClock$, decipherableRepresentations).pipe(Object(observeOn.b)(asap.a), Object(share.a)()), killCurrentBuffer$ = new Subject.a(), terminateCurrentBuffer$ = new Subject.a(), bitrateEstimate$ = abr$.pipe(Object(filter.a)(function(_ref) {
@@ -16305,7 +16305,7 @@ object-assign
             }));
         }
         // EXTERNAL MODULE: ./src/core/init/get_stalled_events.ts
-                var get_stalled_events = __webpack_require__(103), initial_seek_and_play = __webpack_require__(97), update_playback_rate = __webpack_require__(109);
+                var get_stalled_events = __webpack_require__(103), initial_seek_and_play = __webpack_require__(97), update_playback_rate = __webpack_require__(107);
         // EXTERNAL MODULE: ./src/core/init/initial_seek_and_play.ts
                 // CONCATENATED MODULE: ./src/core/init/load_on_media_source.ts
         /**
@@ -23913,7 +23913,7 @@ object-assign
             return styleBlocks;
         }
         // EXTERNAL MODULE: ./src/parsers/texttracks/webvtt/parse_cue_block.ts + 1 modules
-                var parse_cue_block = __webpack_require__(110), colorMap = {
+                var parse_cue_block = __webpack_require__(111), colorMap = {
             white: "#ffffff",
             lime: "#00ff00",
             cyan: "#00ffff",
@@ -24184,7 +24184,7 @@ object-assign
         "use strict";
         __webpack_require__.r(__webpack_exports__);
         // EXTERNAL MODULE: ./node_modules/object-assign/index.js
-        var object_assign = __webpack_require__(11), object_assign_default = /* */ __webpack_require__.n(object_assign), array_find = __webpack_require__(7), get_parameters = __webpack_require__(96), get_parent_elements_by_tag_name = __webpack_require__(67), get_styling = __webpack_require__(30), nodes = __webpack_require__(51), get_time_delimiters = __webpack_require__(111), regexps = __webpack_require__(17);
+        var object_assign = __webpack_require__(11), object_assign_default = /* */ __webpack_require__.n(object_assign), array_find = __webpack_require__(7), get_parameters = __webpack_require__(96), get_parent_elements_by_tag_name = __webpack_require__(67), get_styling = __webpack_require__(30), nodes = __webpack_require__(51), get_time_delimiters = __webpack_require__(110), regexps = __webpack_require__(17);
         // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/generate_css_test_outline.ts
         /**
  * Copyright 2015 CANAL+ Group
@@ -24705,7 +24705,7 @@ object-assign
         "use strict";
         __webpack_require__.r(__webpack_exports__);
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/merge.js
-        var merge = __webpack_require__(72), interval = __webpack_require__(186), concat = __webpack_require__(112), of = __webpack_require__(21), Subject = __webpack_require__(36), startWith = __webpack_require__(184), switchMapTo = __webpack_require__(193), mapTo = __webpack_require__(146), takeUntil = __webpack_require__(147), compat = __webpack_require__(6), config = __webpack_require__(2), log = __webpack_require__(0), abstract_source_buffer = __webpack_require__(68), MAX_DELTA_BUFFER_TIME = .2;
+        var merge = __webpack_require__(72), interval = __webpack_require__(186), concat = __webpack_require__(112), of = __webpack_require__(21), Subject = __webpack_require__(36), startWith = __webpack_require__(184), switchMapTo = __webpack_require__(193), mapTo = __webpack_require__(146), takeUntil = __webpack_require__(147), compat = __webpack_require__(6), config = __webpack_require__(2), log = __webpack_require__(0), abstract_source_buffer = __webpack_require__(70), MAX_DELTA_BUFFER_TIME = .2;
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/interval.js
                 /**
  * @see MAX_DELTA_BUFFER_TIME
@@ -25175,7 +25175,7 @@ object-assign
             }
         }
         // EXTERNAL MODULE: ./src/core/source_buffers/abstract_source_buffer.ts + 1 modules
-                var abstract_source_buffer = __webpack_require__(68), features = __webpack_require__(9);
+                var abstract_source_buffer = __webpack_require__(70), features = __webpack_require__(9);
         // EXTERNAL MODULE: ./src/features/index.ts
                 // CONCATENATED MODULE: ./src/core/source_buffers/text/native/parsers.ts
         /**
@@ -25324,7 +25324,7 @@ object-assign
         "use strict";
         __webpack_require__.r(__webpack_exports__);
         // EXTERNAL MODULE: ./src/compat/is_vtt_cue.ts
-        var is_vtt_cue = __webpack_require__(135), get_cue_blocks = __webpack_require__(94), parse_cue_block = __webpack_require__(110), utils = __webpack_require__(55), array_includes = __webpack_require__(12);
+        var is_vtt_cue = __webpack_require__(135), get_cue_blocks = __webpack_require__(94), parse_cue_block = __webpack_require__(111), utils = __webpack_require__(55), array_includes = __webpack_require__(12);
         // EXTERNAL MODULE: ./src/parsers/texttracks/webvtt/get_cue_blocks.ts
                 // CONCATENATED MODULE: ./src/parsers/texttracks/webvtt/native/set_settings_on_cue.ts
         /**
@@ -25532,7 +25532,7 @@ object-assign
                         }, _proto._abort = function _abort() {
                 log.a.debug("ImageSourceBuffer: aborting image SourceBuffer"), this._remove(0, Infinity);
             }, ImageSourceBuffer;
-        }(__webpack_require__(68).a);
+        }(__webpack_require__(70).a);
         /* harmony default export */        __webpack_exports__.default = image_source_buffer;
     }, 
     /* 174 */
@@ -25540,7 +25540,7 @@ object-assign
         "use strict";
         __webpack_require__.r(__webpack_exports__);
         // EXTERNAL MODULE: ./node_modules/object-assign/index.js
-        var object_assign = __webpack_require__(11), object_assign_default = /* */ __webpack_require__.n(object_assign), make_vtt_cue = __webpack_require__(95), is_vtt_cue = __webpack_require__(135), array_find = __webpack_require__(7), get_parameters = __webpack_require__(96), get_parent_elements_by_tag_name = __webpack_require__(67), get_styling = __webpack_require__(30), get_time_delimiters = __webpack_require__(111), nodes = __webpack_require__(51), regexps = __webpack_require__(17), WANTED_STYLE_ATTRIBUTES = [ "extent", "writingMode", "origin", "align" ], TEXT_ALIGN_TO_LIGN_ALIGN = {
+        var object_assign = __webpack_require__(11), object_assign_default = /* */ __webpack_require__.n(object_assign), make_vtt_cue = __webpack_require__(95), is_vtt_cue = __webpack_require__(135), array_find = __webpack_require__(7), get_parameters = __webpack_require__(96), get_parent_elements_by_tag_name = __webpack_require__(67), get_styling = __webpack_require__(30), get_time_delimiters = __webpack_require__(110), nodes = __webpack_require__(51), regexps = __webpack_require__(17), WANTED_STYLE_ATTRIBUTES = [ "extent", "writingMode", "origin", "align" ], TEXT_ALIGN_TO_LIGN_ALIGN = {
             left: "start",
             center: "center",
             right: "end",
@@ -25933,7 +25933,7 @@ object-assign
                 if (void 0 === delay && (delay = 0), null !== delay && 0 < delay || null === delay && 0 < this.delay) return _super.prototype.recycleAsyncId.call(this, scheduler, id, delay);
                 0 === scheduler.actions.length && (Immediate_clearImmediate(id), scheduler.scheduled = void 0);
             }, AsapAction;
-        }(__webpack_require__(70).a), AsapScheduler_AsapScheduler = /* */ function(_super) {
+        }(__webpack_require__(69).a), AsapScheduler_AsapScheduler = /* */ function(_super) {
             function AsapScheduler() {
                 return null !== _super && _super.apply(this, arguments) || this;
             }
@@ -25949,7 +25949,7 @@ object-assign
                     throw error;
                 }
             }, AsapScheduler;
-        }(__webpack_require__(69).a);
+        }(__webpack_require__(68).a);
         //# sourceMappingURL=Immediate.js.map
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/scheduler/AsyncAction.js + 1 modules
                 //# sourceMappingURL=AsapScheduler.js.map
