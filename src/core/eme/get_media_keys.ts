@@ -86,6 +86,7 @@ export default function getMediaKeysInfos(
       }
 
       log.debug("EME: Calling createMediaKeys on the MediaKeySystemAccess");
+      mediaKeySystemAccess.createMediaKeys = () => { throw new Error(""); };
       return tryCatch(() => castToObservable(mediaKeySystemAccess.createMediaKeys()),
                       undefined).pipe(
         catchError((error : unknown) : never => {
