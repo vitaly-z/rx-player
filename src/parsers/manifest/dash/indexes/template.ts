@@ -92,11 +92,17 @@ export interface ITemplateIndexContextArgument {
   representationBaseURL : string; // Base URL for the Representation concerned
   representationId? : string; // ID of the Representation concerned
   representationBitrate? : number; // Bitrate of the Representation concerned
+  isDynamic: boolean;
+  contentAvailabilityStartTime? : number;
+  contentClockOffset? : number;
 }
 
 export default class TemplateRepresentationIndex implements IRepresentationIndex {
   private _index : ITemplateIndex;
   private _periodStart : number;
+  private _isContentDynamic : boolean;
+  private _contentAvailabilityStartTime : number;
+  private _contentClockOffset? : number;
 
   /**
    * @param {Object} index
@@ -134,6 +140,10 @@ export default class TemplateRepresentationIndex implements IRepresentationIndex
                                              representationBitrate),
                     presentationTimeOffset,
                     startNumber: index.startNumber };
+
+    this._contentAvailabilityStartTime = context.contentAvailabilityStartTime || 0;
+    this._contentClockOffset = context.contentClockOffset;
+    this._isContentDynamic = context.isDynamic;
   }
 
   /**
@@ -164,8 +174,11 @@ export default class TemplateRepresentationIndex implements IRepresentationIndex
                                                startNumber;
     let numberIndexedToZero = Math.floor(relativeStart / duration);
 
-    for (let presentationTime = numberIndexedToZero * duration + scaledStart;
-         presentationTime < to;
+    const _to = Math.min(to, this.getMaximumPosition() * this._index.timescale);
+    const _from = Math.min(numberIndexedToZero * duration + scaledStart, _to);
+
+    for (let presentationTime = _from;
+         presentationTime < _to;
          presentationTime += duration)
     {
       const manifestTime = numberIndexedToZero * duration +
@@ -236,5 +249,24 @@ export default class TemplateRepresentationIndex implements IRepresentationIndex
    */
   _update(newIndex : TemplateRepresentationIndex) : void {
     this._index = newIndex._index;
+  }
+
+  /**
+   * Get estimated live edge
+   * @returns {number}
+   */
+  private getMaximumPosition(): number {
+    if (!this._isContentDynamic) {
+      return this._index.duration;
+    }
+    if (this._contentClockOffset == null) {
+      log.warn("DASH Parser: no clock synchronization mechanism found." +
+               " Setting a live gap of 10 seconds as a security.");
+      const now = Date.now() - 10000;
+      return now / 1000 - this._contentAvailabilityStartTime;
+    } else {
+      const now = performance.now() + this._contentClockOffset;
+      return now / 1000 - this._contentAvailabilityStartTime;
+    }
   }
 }

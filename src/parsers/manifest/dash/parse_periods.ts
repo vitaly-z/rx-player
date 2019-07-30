@@ -27,6 +27,7 @@ const generatePeriodID = idGenerator();
 export interface IManifestInfos {
   isDynamic : boolean;
   availabilityStartTime? : number;
+  clockOffset?: number;
   duration? : number;
   baseURL? : string;
 }
@@ -93,7 +94,7 @@ export default function parsePeriods(
       start: periodStart,
       end: periodEnd,
       baseURL: periodBaseURL,
-    });
+    }, manifestInfos);
     const parsedPeriod : IParsedPeriod = {
       id: periodID,
       start: periodStart,

@@ -143,24 +143,30 @@ function parseCompleteIntermediateRepresentation(
   const availabilityStartTime = parseAvailabilityStartTime(rootAttributes,
                                                            args.referenceDateTime);
 
-  const isDynamic : boolean = rootAttributes.type === "dynamic";
-  const parsedPeriods = parsePeriods(rootChildren.periods,
-                                     { availabilityStartTime,
-                                       duration: rootAttributes.duration,
-                                       isDynamic,
-                                       baseURL });
-
-  const duration : number|undefined = parseDuration(rootAttributes, parsedPeriods);
-
   const directTiming = arrayFind(rootChildren.utcTimings, (utcTiming) =>
                          utcTiming.schemeIdUri === "urn:mpeg:dash:utc:direct:2014" &&
                          utcTiming.value != null);
 
   // second condition not needed but TS did not help there, even with a `is`
-  const clockOffsetFromDirectUTCTiming =
-    directTiming != null &&
-    directTiming.value != null ? getClockOffset(directTiming.value) :
-                                 undefined;
+  const clockOffsetFromDirectUTCTiming = directTiming != null &&
+                                         directTiming.value != null ?
+                                           getClockOffset(directTiming.value) :
+                                           undefined;
+
+  const clockOffset = clockOffsetFromDirectUTCTiming != null &&
+                      !isNaN(clockOffsetFromDirectUTCTiming) ?
+                        clockOffsetFromDirectUTCTiming :
+                        undefined;
+
+  const isDynamic : boolean = rootAttributes.type === "dynamic";
+  const parsedPeriods = parsePeriods(rootChildren.periods,
+                                     { availabilityStartTime,
+                                       duration: rootAttributes.duration,
+                                       isDynamic,
+                                       baseURL,
+                                       clockOffset });
+
+  const duration : number|undefined = parseDuration(rootAttributes, parsedPeriods);
 
   const parsedMPD : IParsedManifest = {
     availabilityStartTime,

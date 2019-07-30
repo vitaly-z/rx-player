@@ -27,6 +27,7 @@ import inferAdaptationType from "./infer_adaptation_type";
 import {
   IAdaptationSetIntermediateRepresentation,
 } from "./node_parsers/AdaptationSet";
+import { IManifestInfos } from "./parse_periods";
 import parseRepresentations from "./parse_representations";
 
 // Supplementary context about the current Period
@@ -167,7 +168,8 @@ function getAdaptationSetSwitchingIDs(
  */
 export default function parseAdaptationSets(
   adaptationsIR : IAdaptationSetIntermediateRepresentation[],
-  periodInfos : IPeriodInfos
+  periodInfos : IPeriodInfos,
+  manifestInfos : IManifestInfos
 ): IParsedAdaptations {
   return adaptationsIR
     .reduce<{
@@ -183,7 +185,7 @@ export default function parseAdaptationSets(
         start: periodInfos.start,
         end: periodInfos.end,
         baseURL: resolveURL(periodInfos.baseURL, adaptationChildren.baseURL),
-      });
+      }, manifestInfos);
       const adaptationMimeType = adaptation.attributes.mimeType;
       const adaptationCodecs = adaptation.attributes.codecs;
       const representationMimeTypes = representations

@@ -28,6 +28,7 @@ import {
 import {
   IRepresentationIntermediateRepresentation,
 } from "./node_parsers/Representation";
+import { IManifestInfos } from "./parse_periods";
 
 // Supplementary context about the current AdaptationSet
 export interface IAdaptationInfos {
@@ -48,6 +49,8 @@ interface IIndexContext {
   representationId? : string; // ID of the Representation concerned
   representationBitrate? : number; // Bitrate of the Representation concerned
   isDynamic : boolean; // Whether the Manifest can evolve with time
+  availabilityStartTime? : number;
+  clockOffset? : number;
 }
 
 /**
@@ -94,7 +97,8 @@ function findAdaptationIndex(
 export default function parseRepresentations(
   representationsIR : IRepresentationIntermediateRepresentation[],
   adaptation : IAdaptationSetIntermediateRepresentation,
-  adaptationInfos : IAdaptationInfos
+  adaptationInfos : IAdaptationInfos,
+  manifestInfos: IManifestInfos
 ): IParsedRepresentation[] {
   return representationsIR.map((representation) => {
     const baseURL = representation.children.baseURL;
@@ -108,6 +112,8 @@ export default function parseRepresentations(
       representationBaseURL,
       representationId: representation.attributes.id,
       representationBitrate: representation.attributes.bitrate,
+      availabilityStartTime: manifestInfos.availabilityStartTime,
+      clockOffset: manifestInfos.clockOffset,
     };
     let representationIndex : IRepresentationIndex;
     if (representation.children.segmentBase != null) {
