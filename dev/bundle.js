@@ -51659,6 +51659,7 @@ var events_linkPlayerEventsToState = function linkPlayerEventsToState(player, st
       stateUpdates.availableVideoTracks = [];
       stateUpdates.availableLanguages = [];
       stateUpdates.availableSubtitles = [];
+      stateUpdates.lowLatencyMode = false;
       stateUpdates.images = [];
       stateUpdates.subtitle = null;
       stateUpdates.language = null;
@@ -51738,6 +51739,7 @@ var player_PLAYER = function PLAYER(_ref, _ref2) {
     isSeeking: false,
     isStopped: true,
     language: undefined,
+    lowLatencyMode: false,
     videoTrackId: undefined,
     loadedVideo: null,
     minimumPosition: undefined,
@@ -51770,7 +51772,8 @@ var player_PLAYER = function PLAYER(_ref, _ref2) {
         manualBitrateSwitchingMode: "direct"
       }, arg));
       state.set({
-        loadedVideo: arg
+        loadedVideo: arg,
+        lowLatencyMode: arg.lowLatencyMode === true
       });
     },
     PLAY: function PLAY() {
@@ -52763,10 +52766,12 @@ function (_React$Component) {
         isContentLoaded = _this$props.isContentLoaded,
         isLive = _this$props.isLive,
         bufferGap = _this$props.bufferGap,
-        player = _this$props.player;
+        player = _this$props.player,
+        hasManuallySeeked = _this$props.hasManuallySeeked;
 
     var seek = function seek(position) {
-      return player.dispatch("SEEK", position);
+      hasManuallySeeked();
+      player.dispatch("SEEK", position);
     };
 
     var onMouseOut = function onMouseOut() {
@@ -52956,11 +52961,16 @@ function ControlBar(_ref) {
       videoElement = _ref.videoElement,
       isContentLoaded = _ref.isContentLoaded,
       isLive = _ref.isLive,
+      hasSeeked = _ref.hasSeeked,
+      toggleHasSeeked = _ref.toggleHasSeeked,
       isStopped = _ref.isStopped,
       currentTime = _ref.currentTime,
       duration = _ref.duration,
       toggleSettings = _ref.toggleSettings,
-      stopVideo = _ref.stopVideo;
+      stopVideo = _ref.stopVideo,
+      lowLatencyMode = _ref.lowLatencyMode,
+      liveGap = _ref.liveGap;
+  var isNearLiveEdge = lowLatencyMode ? liveGap < 6 : liveGap < 15;
 
   var positionElement = function () {
     if (!isContentLoaded) {
@@ -52978,7 +52988,10 @@ function ControlBar(_ref) {
   return react_default.a.createElement("div", {
     className: "controls-bar-container"
   }, react_default.a.createElement(controllers_ProgressBar, {
-    player: player
+    player: player,
+    hasManuallySeeked: function hasManuallySeeked() {
+      return toggleHasSeeked(true);
+    }
   }), react_default.a.createElement("div", {
     className: "controls-bar"
   }, react_default.a.createElement(controllers_PlayPauseButton, {
@@ -52989,9 +53002,19 @@ function ControlBar(_ref) {
     onClick: stopVideo,
     value: String.fromCharCode(0xf04d),
     disabled: isStopped
-  }), positionElement, react_default.a.createElement("div", {
+  }), positionElement, isContentLoaded && isNearLiveEdge ? react_default.a.createElement("div", {
+    className: "dot"
+  }) : null, react_default.a.createElement("div", {
     className: "controls-right-side"
-  }, react_default.a.createElement(Button, {
+  }, isLive ? react_default.a.createElement(Button, {
+    className: "control-live" + (hasSeeked ? " activated" : ""),
+    onClick: function onClick() {
+      if (hasSeeked) {
+        toggleHasSeeked(false);
+      }
+    },
+    value: String.fromCharCode(0xf01e)
+  }) : null, react_default.a.createElement(Button, {
     disabled: !isContentLoaded,
     className: "control-button",
     onClick: toggleSettings,
@@ -53017,7 +53040,9 @@ function ControlBar(_ref) {
     isLive: "isLive",
     currentTime: "currentTime",
     duration: "duration",
-    isStopped: "isStopped"
+    isStopped: "isStopped",
+    lowLatencyMode: "lowLatencyMode",
+    liveGap: "liveGap"
   }
 })(ControlBar));
 // CONCATENATED MODULE: ./demo/full/scripts/lib/localStorage.js
@@ -53105,7 +53130,8 @@ function storeContent(content) {
     transport: content.transport,
     drmInfos: content.drmInfos,
     id: id,
-    localContent: true
+    localContent: true,
+    lowLatency: content.lowLatency
   };
 
   if (index > -1) {
@@ -53625,6 +53651,7 @@ function formatContent(content) {
     drmInfos: content.drmInfos,
     displayName: displayName,
     isDisabled: isDisabled,
+    isLowLatency: !!content.lowLatency,
     isLocalContent: isLocalContent
   };
 }
@@ -53648,7 +53675,8 @@ function constructContentList() {
       drmInfos: [],
       displayName: "Custom link",
       isLocalContent: false,
-      isDisabled: false
+      isDisabled: false,
+      isLowLatency: false
     };
     acc[tech] = [customLinkContent].concat(storedAndRegularContents.filter(function (_ref) {
       var transport = _ref.transport;
@@ -53708,6 +53736,7 @@ function (_React$Component) {
       displayDRMSettings: false,
       isSavingOrUpdating: false,
       licenseServerUrl: "",
+      lowLatencyChecked: false,
       serverCertificateUrl: "",
       transportType: transportType
     };
@@ -53744,6 +53773,7 @@ function (_React$Component) {
         transport = content.transport,
         supplementaryImageTracks = content.supplementaryImageTracks,
         supplementaryTextTracks = content.supplementaryTextTracks,
+        isLowLatency = content.isLowLatency,
         _content$drmInfos = content.drmInfos,
         drmInfos = _content$drmInfos === void 0 ? [] : _content$drmInfos;
     parseDRMConfigurations(drmInfos).then(function (keySystems) {
@@ -53754,6 +53784,7 @@ function (_React$Component) {
         supplementaryImageTracks: supplementaryImageTracks,
         supplementaryTextTracks: supplementaryTextTracks,
         textTrackMode: "html",
+        lowLatencyMode: isLowLatency,
         keySystems: keySystems
       });
     });
@@ -53769,6 +53800,7 @@ function (_React$Component) {
     var _this2 = this;
 
     var loadVideo = this.props.loadVideo;
+    var lowLatencyChecked = this.state.lowLatencyChecked;
     parseDRMConfigurations(drmInfos).then(function (keySystems) {
       loadVideo({
         url: url,
@@ -53778,7 +53810,8 @@ function (_React$Component) {
         // stylized subs.  We force HTML textTrackMode to vizualise
         // styles.
         textTrackMode: "html",
-        keySystems: keySystems
+        keySystems: keySystems,
+        lowLatencyMode: lowLatencyChecked
       });
     });
   }
@@ -53797,6 +53830,7 @@ function (_React$Component) {
       displayDRMSettings: false,
       isSavingOrUpdating: false,
       licenseServerUrl: "",
+      lowLatencyChecked: false,
       serverCertificateUrl: "",
       transportType: transportType
     });
@@ -53817,6 +53851,7 @@ function (_React$Component) {
     var drm = null;
     currentManifestURL = content.url;
     contentNameField = content.contentName;
+    var isLowLatency = !!content.isLowLatency;
 
     if (hasDRMSettings) {
       drm = content.drmInfos[0].drm;
@@ -53831,6 +53866,7 @@ function (_React$Component) {
       currentManifestURL: currentManifestURL,
       displayDRMSettings: hasDRMSettings,
       isSavingOrUpdating: false,
+      lowLatencyChecked: isLowLatency,
       licenseServerUrl: licenseServerUrl,
       serverCertificateUrl: serverCertificateUrl
     });
@@ -53872,6 +53908,14 @@ function (_React$Component) {
     });
   };
 
+  _proto.onLowLatencyClick = function onLowLatencyClick(evt) {
+    var target = evt.target;
+    var value = target.type === "checkbox" ? target.checked : target.value;
+    this.setState({
+      lowLatencyChecked: value
+    });
+  };
+
   _proto.render = function render() {
     var _this3 = this;
 
@@ -53885,6 +53929,7 @@ function (_React$Component) {
         displayDRMSettings = _this$state.displayDRMSettings,
         isSavingOrUpdating = _this$state.isSavingOrUpdating,
         licenseServerUrl = _this$state.licenseServerUrl,
+        lowLatencyChecked = _this$state.lowLatencyChecked,
         serverCertificateUrl = _this$state.serverCertificateUrl,
         transportType = _this$state.transportType;
     var isCustomContent = contentChoiceIndex === 0;
@@ -53935,6 +53980,7 @@ function (_React$Component) {
       var contentToSave = {
         name: contentNameField,
         url: currentManifestURL,
+        lowLatency: lowLatencyChecked,
         transport: transportType.toLowerCase(),
         drmInfos: displayDRMSettings ? [{
           drm: currentDRMType,
@@ -54030,6 +54076,10 @@ function (_React$Component) {
 
     var onAutoPlayClick = function onAutoPlayClick(evt) {
       return _this3.onChangeAutoPlay(evt);
+    };
+
+    var onLowLatencyClick = function onLowLatencyClick(evt) {
+      _this3.onLowLatencyClick(evt);
     };
 
     var onDRMTypeClick = function onDRMTypeClick(type) {
@@ -54160,7 +54210,17 @@ function (_React$Component) {
       onChange: onServerCertificateInput,
       value: serverCertificateUrl,
       placeholder: "Server certificate URL (optional)"
-    })) : null)) : null);
+    })) : null), react_default.a.createElement("div", {
+      "class": "player-box button-low-latency"
+    }, "Low-Latency content", react_default.a.createElement("label", {
+      "class": "input switch"
+    }, react_default.a.createElement("input", {
+      type: "checkbox",
+      checked: lowLatencyChecked,
+      onChange: onLowLatencyClick
+    }), react_default.a.createElement("span", {
+      "class": "slider round"
+    })))) : null);
   };
 
   return ContentList;
@@ -63166,6 +63226,7 @@ var PlayerKnobsSettings_PlayerKnobsSettings = function PlayerKnobsSettings(_ref)
       close = _ref.close,
       player = _ref.player,
       availableVideoTracks = _ref.availableVideoTracks,
+      lowLatencyMode = _ref.lowLatencyMode,
       isContentLoaded = _ref.isContentLoaded;
 
   if (!isContentLoaded) {
@@ -63186,7 +63247,8 @@ var PlayerKnobsSettings_PlayerKnobsSettings = function PlayerKnobsSettings(_ref)
     }
   }, String.fromCharCode(0xf00d))), react_default.a.createElement("div", {
     className: "player-knobs-content"
-  }, react_default.a.createElement(SpeedKnob, {
+  }, lowLatencyMode ? null : // In lowLatencyMode, we take back control of the rate
+  react_default.a.createElement(SpeedKnob, {
     className: "black-knob",
     player: player
   }), react_default.a.createElement(AudioBitrate, {
@@ -63208,6 +63270,7 @@ var PlayerKnobsSettings_PlayerKnobsSettings = function PlayerKnobsSettings(_ref)
 
 /* harmony default export */ var controllers_PlayerKnobsSettings = (lib_withModulesState({
   player: {
+    lowLatencyMode: "lowLatencyMode",
     isStopped: "isStopped",
     isContentLoaded: "isContentLoaded",
     availableVideoTracks: "availableVideoTracks"
@@ -63247,7 +63310,10 @@ function (_React$Component) {
       player: null,
       displaySpinner: false,
       displaySettings: false,
-      isStopped: true
+      isStopped: true,
+      isCatchingUp: false,
+      lastCatchUpRate: undefined,
+      hasSeeked: false
     };
     return _this;
   }
@@ -63267,12 +63333,54 @@ function (_React$Component) {
       return player.destroy();
     });
 
-    player.$get("isSeeking", "isBuffering", "isLoading", "isReloading", "isStopped").pipe(takeUntil(this._$destroySubject)).subscribe(function (_ref) {
+    player.$get("isSeeking", "isBuffering", "isLoading", "isReloading", "isStopped", "liveGap", "lowLatencyMode").pipe(takeUntil(this._$destroySubject)).subscribe(function (_ref) {
       var isSeeking = _ref[0],
           isBuffering = _ref[1],
           isLoading = _ref[2],
           isReloading = _ref[3],
-          isStopped = _ref[4];
+          isStopped = _ref[4],
+          liveGap = _ref[5],
+          lowLatencyMode = _ref[6];
+      var _this2$state = _this2.state,
+          isCatchingUp = _this2$state.isCatchingUp,
+          lastCatchUpRate = _this2$state.lastCatchUpRate,
+          hasSeeked = _this2$state.hasSeeked;
+
+      if (player) {
+        var shouldCatchUp = (liveGap > 6 || isCatchingUp && liveGap > 4) && !hasSeeked;
+
+        if (shouldCatchUp) {
+          if (liveGap > (lowLatencyMode ? 10 : 20)) {
+            var maximumPosition = player.get("maximumPosition");
+            var distanceToLiveEdge = lowLatencyMode ? 4 : 10;
+            player.dispatch("SEEK", maximumPosition - distanceToLiveEdge);
+          } else if (lowLatencyMode) {
+            var factor = (liveGap - 4) / 4;
+            var rate = Math.round((liveGap > 4 ? Math.min(10, 1.1 + factor) : 1) * 10) / 10;
+
+            if (rate !== lastCatchUpRate) {
+              _this2.setState({
+                lastCatchUpRate: rate,
+                lowLatencyMode: lowLatencyMode,
+                isCatchingUp: true
+              });
+
+              player.dispatch("SET_PLAYBACK_RATE", rate);
+            }
+          }
+        } else if (isCatchingUp) {
+          _this2.setState({
+            lastCatchUpRate: 1,
+            isCatchingUp: false
+          });
+
+          player.dispatch("SET_PLAYBACK_RATE", 1);
+        } else {
+          _this2.setState({
+            lastCatchUpRate: undefined
+          });
+        }
+      }
 
       _this2.setState({
         isStopped: isStopped
@@ -63339,7 +63447,8 @@ function (_React$Component) {
     var _this$state = this.state,
         player = _this$state.player,
         displaySpinner = _this$state.displaySpinner,
-        isStopped = _this$state.isStopped;
+        isStopped = _this$state.isStopped,
+        hasSeeked = _this$state.hasSeeked;
 
     var loadVideo = function loadVideo(video) {
       return _this3.state.player.dispatch("LOAD", video);
@@ -63358,6 +63467,12 @@ function (_React$Component) {
     var toggleSettings = function toggleSettings() {
       _this3.setState({
         displaySettings: !_this3.state.displaySettings
+      });
+    };
+
+    var toggleHasSeeked = function toggleHasSeeked(hasSeeked) {
+      _this3.setState({
+        hasSeeked: hasSeeked
       });
     };
 
@@ -63402,6 +63517,8 @@ function (_React$Component) {
       player: player,
       videoElement: this.playerWrapperElement,
       toggleSettings: toggleSettings,
+      toggleHasSeeked: toggleHasSeeked,
+      hasSeeked: hasSeeked,
       stopVideo: stopVideo
     }) : null), player ? react_default.a.createElement(charts, {
       player: player
