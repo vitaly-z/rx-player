@@ -4791,7 +4791,7 @@ module.exports = function (it) {
 /* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var store = __webpack_require__(50)('wks');
+var store = __webpack_require__(51)('wks');
 
 var uid = __webpack_require__(31);
 
@@ -5212,7 +5212,7 @@ if (__webpack_require__(10)) {
 
   var $export = __webpack_require__(2);
 
-  var $typed = __webpack_require__(61);
+  var $typed = __webpack_require__(62);
 
   var $buffer = __webpack_require__(89);
 
@@ -5260,7 +5260,7 @@ if (__webpack_require__(10)) {
 
   var createArrayMethod = __webpack_require__(24);
 
-  var createArrayIncludes = __webpack_require__(51);
+  var createArrayIncludes = __webpack_require__(52);
 
   var speciesConstructor = __webpack_require__(49);
 
@@ -5268,7 +5268,7 @@ if (__webpack_require__(10)) {
 
   var Iterators = __webpack_require__(42);
 
-  var $iterDetect = __webpack_require__(54);
+  var $iterDetect = __webpack_require__(55);
 
   var setSpecies = __webpack_require__(43);
 
@@ -6241,7 +6241,8 @@ module.exports = function (O, D) {
 };
 
 /***/ }),
-/* 50 */
+/* 50 */,
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var core = __webpack_require__(9);
@@ -6259,7 +6260,7 @@ var store = global[SHARED] || (global[SHARED] = {});
 });
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // false -> Array#indexOf
@@ -6292,13 +6293,13 @@ module.exports = function (IS_INCLUDES) {
 };
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports) {
 
 exports.f = Object.getOwnPropertySymbols;
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.2.2 IsArray(argument)
@@ -6309,7 +6310,7 @@ module.exports = Array.isArray || function isArray(arg) {
 };
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var ITERATOR = __webpack_require__(7)('iterator');
@@ -6358,7 +6359,7 @@ module.exports = function (exec, skipClosing) {
 };
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6378,7 +6379,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6410,7 +6411,7 @@ module.exports = function (R, S) {
 };
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6537,7 +6538,7 @@ module.exports = function (KEY, length, exec) {
 };
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var ctx = __webpack_require__(19);
@@ -6577,7 +6578,7 @@ exports.BREAK = BREAK;
 exports.RETURN = RETURN;
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__(3);
@@ -6586,7 +6587,7 @@ var navigator = global.navigator;
 module.exports = navigator && navigator.userAgent || '';
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6602,7 +6603,7 @@ var redefineAll = __webpack_require__(45);
 
 var meta = __webpack_require__(29);
 
-var forOf = __webpack_require__(58);
+var forOf = __webpack_require__(59);
 
 var anInstance = __webpack_require__(44);
 
@@ -6610,7 +6611,7 @@ var isObject = __webpack_require__(6);
 
 var fails = __webpack_require__(4);
 
-var $iterDetect = __webpack_require__(54);
+var $iterDetect = __webpack_require__(55);
 
 var setToStringTag = __webpack_require__(40);
 
@@ -6703,7 +6704,7 @@ module.exports = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
 };
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var global = __webpack_require__(3);
@@ -6736,7 +6737,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 62 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*!
@@ -20842,7 +20843,6 @@ module.exports = {
 });
 
 /***/ }),
-/* 63 */,
 /* 64 */,
 /* 65 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -20868,7 +20868,7 @@ exports.f = __webpack_require__(7);
 /* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var shared = __webpack_require__(50)('keys');
+var shared = __webpack_require__(51)('keys');
 
 var uid = __webpack_require__(31);
 
@@ -21312,7 +21312,7 @@ addToUnscopables('entries');
 "use strict";
 
 
-var regexpFlags = __webpack_require__(55);
+var regexpFlags = __webpack_require__(56);
 
 var nativeExec = RegExp.prototype.exec; // This always refers to the native implementation, because the
 // String#replace polyfill uses ./fix-regexp-well-known-symbol-logic.js,
@@ -21499,7 +21499,7 @@ var DESCRIPTORS = __webpack_require__(10);
 
 var LIBRARY = __webpack_require__(32);
 
-var $typed = __webpack_require__(61);
+var $typed = __webpack_require__(62);
 
 var hide = __webpack_require__(16);
 
@@ -21922,7 +21922,7 @@ var has = __webpack_require__(15);
 
 var toIObject = __webpack_require__(17);
 
-var arrayIndexOf = __webpack_require__(51)(false);
+var arrayIndexOf = __webpack_require__(52)(false);
 
 var IE_PROTO = __webpack_require__(67)('IE_PROTO');
 
@@ -22005,7 +22005,7 @@ var DESCRIPTORS = __webpack_require__(10);
 
 var getKeys = __webpack_require__(33);
 
-var gOPS = __webpack_require__(52);
+var gOPS = __webpack_require__(53);
 
 var pIE = __webpack_require__(47);
 
@@ -22370,7 +22370,7 @@ __webpack_require__(2)({
 // 21.2.5.3 get RegExp.prototype.flags()
 if (__webpack_require__(10) && /./g.flags != 'g') __webpack_require__(11).f(RegExp.prototype, 'flags', {
   configurable: true,
-  get: __webpack_require__(55)
+  get: __webpack_require__(56)
 });
 
 /***/ }),
@@ -22396,7 +22396,7 @@ var aFunction = __webpack_require__(20);
 
 var anInstance = __webpack_require__(44);
 
-var forOf = __webpack_require__(58);
+var forOf = __webpack_require__(59);
 
 var speciesConstructor = __webpack_require__(49);
 
@@ -22408,7 +22408,7 @@ var newPromiseCapabilityModule = __webpack_require__(116);
 
 var perform = __webpack_require__(370);
 
-var userAgent = __webpack_require__(59);
+var userAgent = __webpack_require__(60);
 
 var promiseResolve = __webpack_require__(117);
 
@@ -22690,7 +22690,7 @@ $export($export.S + $export.F * (LIBRARY || !USE_NATIVE), PROMISE, {
     return promiseResolve(LIBRARY && this === Wrapper ? $Promise : this, x);
   }
 });
-$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(54)(function (iter) {
+$export($export.S + $export.F * !(USE_NATIVE && __webpack_require__(55)(function (iter) {
   $Promise.all(iter)['catch'](empty);
 })), PROMISE, {
   // 25.4.4.1 Promise.all(iterable)
@@ -22795,7 +22795,7 @@ var ctx = __webpack_require__(19);
 
 var anInstance = __webpack_require__(44);
 
-var forOf = __webpack_require__(58);
+var forOf = __webpack_require__(59);
 
 var $iterDefine = __webpack_require__(77);
 
@@ -22984,7 +22984,7 @@ var isObject = __webpack_require__(6);
 
 var anInstance = __webpack_require__(44);
 
-var forOf = __webpack_require__(58);
+var forOf = __webpack_require__(59);
 
 var createArrayMethod = __webpack_require__(24);
 
@@ -23094,7 +23094,7 @@ module.exports = function (it) {
 // all object keys, includes non-enumerable and symbols
 var gOPN = __webpack_require__(36);
 
-var gOPS = __webpack_require__(52);
+var gOPS = __webpack_require__(53);
 
 var anObject = __webpack_require__(5);
 
@@ -35789,7 +35789,7 @@ var META = __webpack_require__(29).KEY;
 
 var $fails = __webpack_require__(4);
 
-var shared = __webpack_require__(50);
+var shared = __webpack_require__(51);
 
 var setToStringTag = __webpack_require__(40);
 
@@ -35803,7 +35803,7 @@ var wksDefine = __webpack_require__(94);
 
 var enumKeys = __webpack_require__(260);
 
-var isArray = __webpack_require__(53);
+var isArray = __webpack_require__(54);
 
 var anObject = __webpack_require__(5);
 
@@ -35823,7 +35823,7 @@ var gOPNExt = __webpack_require__(97);
 
 var $GOPD = __webpack_require__(22);
 
-var $GOPS = __webpack_require__(52);
+var $GOPS = __webpack_require__(53);
 
 var $DP = __webpack_require__(11);
 
@@ -36098,7 +36098,7 @@ setToStringTag(global.JSON, 'JSON', true);
 /* 259 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(50)('native-function-to-string', Function.toString);
+module.exports = __webpack_require__(51)('native-function-to-string', Function.toString);
 
 /***/ }),
 /* 260 */
@@ -36107,7 +36107,7 @@ module.exports = __webpack_require__(50)('native-function-to-string', Function.t
 // all enumerable object keys, includes symbols
 var getKeys = __webpack_require__(33);
 
-var gOPS = __webpack_require__(52);
+var gOPS = __webpack_require__(53);
 
 var pIE = __webpack_require__(47);
 
@@ -37642,7 +37642,7 @@ module.exports = function (hint) {
 var $export = __webpack_require__(2);
 
 $export($export.S, 'Array', {
-  isArray: __webpack_require__(53)
+  isArray: __webpack_require__(54)
 });
 
 /***/ }),
@@ -37668,7 +37668,7 @@ var createProperty = __webpack_require__(82);
 
 var getIterFn = __webpack_require__(83);
 
-$export($export.S + $export.F * !__webpack_require__(54)(function (iter) {
+$export($export.S + $export.F * !__webpack_require__(55)(function (iter) {
   Array.from(iter);
 }), 'Array', {
   // 22.1.2.1 Array.from(arrayLike, mapfn = undefined, thisArg = undefined)
@@ -37856,7 +37856,7 @@ $export($export.P + $export.F * !STRICT, 'Array', {
 
 var isObject = __webpack_require__(6);
 
-var isArray = __webpack_require__(53);
+var isArray = __webpack_require__(54);
 
 var SPECIES = __webpack_require__(7)('species');
 
@@ -38006,7 +38006,7 @@ $export($export.P + $export.F * !__webpack_require__(18)([].reduceRight, true), 
 
 var $export = __webpack_require__(2);
 
-var $indexOf = __webpack_require__(51)(false);
+var $indexOf = __webpack_require__(52)(false);
 
 var $native = [].indexOf;
 var NEGATIVE_ZERO = !!$native && 1 / [1].indexOf(1, -0) < 0;
@@ -38158,7 +38158,7 @@ var gOPN = __webpack_require__(36).f;
 
 var isRegExp = __webpack_require__(79);
 
-var $flags = __webpack_require__(55);
+var $flags = __webpack_require__(56);
 
 var $RegExp = global.RegExp;
 var Base = $RegExp;
@@ -38215,7 +38215,7 @@ __webpack_require__(114);
 
 var anObject = __webpack_require__(5);
 
-var $flags = __webpack_require__(55);
+var $flags = __webpack_require__(56);
 
 var DESCRIPTORS = __webpack_require__(10);
 
@@ -38256,10 +38256,10 @@ var toLength = __webpack_require__(8);
 
 var advanceStringIndex = __webpack_require__(87);
 
-var regExpExec = __webpack_require__(56); // @@match logic
+var regExpExec = __webpack_require__(57); // @@match logic
 
 
-__webpack_require__(57)('match', 1, function (defined, MATCH, $match, maybeCallNative) {
+__webpack_require__(58)('match', 1, function (defined, MATCH, $match, maybeCallNative) {
   return [// `String.prototype.match` method
   // https://tc39.github.io/ecma262/#sec-string.prototype.match
   function match(regexp) {
@@ -38308,7 +38308,7 @@ var toInteger = __webpack_require__(21);
 
 var advanceStringIndex = __webpack_require__(87);
 
-var regExpExec = __webpack_require__(56);
+var regExpExec = __webpack_require__(57);
 
 var max = Math.max;
 var min = Math.min;
@@ -38321,7 +38321,7 @@ var maybeToString = function maybeToString(it) {
 }; // @@replace logic
 
 
-__webpack_require__(57)('replace', 2, function (defined, REPLACE, $replace, maybeCallNative) {
+__webpack_require__(58)('replace', 2, function (defined, REPLACE, $replace, maybeCallNative) {
   return [// `String.prototype.replace` method
   // https://tc39.github.io/ecma262/#sec-string.prototype.replace
   function replace(searchValue, replaceValue) {
@@ -38452,10 +38452,10 @@ var anObject = __webpack_require__(5);
 
 var sameValue = __webpack_require__(99);
 
-var regExpExec = __webpack_require__(56); // @@search logic
+var regExpExec = __webpack_require__(57); // @@search logic
 
 
-__webpack_require__(57)('search', 1, function (defined, SEARCH, $search, maybeCallNative) {
+__webpack_require__(58)('search', 1, function (defined, SEARCH, $search, maybeCallNative) {
   return [// `String.prototype.search` method
   // https://tc39.github.io/ecma262/#sec-string.prototype.search
   function search(regexp) {
@@ -38494,7 +38494,7 @@ var advanceStringIndex = __webpack_require__(87);
 
 var toLength = __webpack_require__(8);
 
-var callRegExpExec = __webpack_require__(56);
+var callRegExpExec = __webpack_require__(57);
 
 var regexpExec = __webpack_require__(86);
 
@@ -38511,7 +38511,7 @@ var SUPPORTS_Y = !fails(function () {
   RegExp(MAX_UINT32, 'y');
 }); // @@split logic
 
-__webpack_require__(57)('split', 2, function (defined, SPLIT, $split, maybeCallNative) {
+__webpack_require__(58)('split', 2, function (defined, SPLIT, $split, maybeCallNative) {
   var internalSplit;
 
   if ('abbc'[$SPLIT](/(b)*/)[1] == 'c' || 'test'[$SPLIT](/(?:)/, -1)[LENGTH] != 4 || 'ab'[$SPLIT](/(?:ab)*/)[LENGTH] != 2 || '.'[$SPLIT](/(.?)(.?)/)[LENGTH] != 4 || '.'[$SPLIT](/()()/)[LENGTH] > 1 || ''[$SPLIT](/.?/)[LENGTH]) {
@@ -38732,7 +38732,7 @@ var validate = __webpack_require__(39);
 
 var MAP = 'Map'; // 23.1 Map Objects
 
-module.exports = __webpack_require__(60)(MAP, function (get) {
+module.exports = __webpack_require__(61)(MAP, function (get) {
   return function Map() {
     return get(this, arguments.length > 0 ? arguments[0] : undefined);
   };
@@ -38761,7 +38761,7 @@ var validate = __webpack_require__(39);
 
 var SET = 'Set'; // 23.2 Set Objects
 
-module.exports = __webpack_require__(60)(SET, function (get) {
+module.exports = __webpack_require__(61)(SET, function (get) {
   return function Set() {
     return get(this, arguments.length > 0 ? arguments[0] : undefined);
   };
@@ -38825,7 +38825,7 @@ var methods = {
   }
 }; // 23.3 WeakMap Objects
 
-var $WeakMap = module.exports = __webpack_require__(60)(WEAK_MAP, wrapper, methods, weak, true, true); // IE11 WeakMap frozen keys fix
+var $WeakMap = module.exports = __webpack_require__(61)(WEAK_MAP, wrapper, methods, weak, true, true); // IE11 WeakMap frozen keys fix
 
 
 if (NATIVE_WEAK_MAP && IS_IE11) {
@@ -38863,7 +38863,7 @@ var validate = __webpack_require__(39);
 
 var WEAK_SET = 'WeakSet'; // 23.4 WeakSet Objects
 
-__webpack_require__(60)(WEAK_SET, function (get) {
+__webpack_require__(61)(WEAK_SET, function (get) {
   return function WeakSet() {
     return get(this, arguments.length > 0 ? arguments[0] : undefined);
   };
@@ -38883,7 +38883,7 @@ __webpack_require__(60)(WEAK_SET, function (get) {
 
 var $export = __webpack_require__(2);
 
-var $typed = __webpack_require__(61);
+var $typed = __webpack_require__(62);
 
 var buffer = __webpack_require__(89);
 
@@ -38945,7 +38945,7 @@ __webpack_require__(43)(ARRAY_BUFFER);
 
 var $export = __webpack_require__(2);
 
-$export($export.G + $export.W + $export.F * !__webpack_require__(61).ABV, {
+$export($export.G + $export.W + $export.F * !__webpack_require__(62).ABV, {
   DataView: __webpack_require__(89).DataView
 });
 
@@ -39469,7 +39469,7 @@ module.exports = __webpack_require__(9).Array.includes;
 
 var $export = __webpack_require__(2);
 
-var $includes = __webpack_require__(51)(true);
+var $includes = __webpack_require__(52)(true);
 
 $export($export.P, 'Array', {
   includes: function includes(el
@@ -39531,7 +39531,7 @@ __webpack_require__(38)('flatMap');
 "use strict";
  // https://tc39.github.io/proposal-flatMap/#sec-FlattenIntoArray
 
-var isArray = __webpack_require__(53);
+var isArray = __webpack_require__(54);
 
 var isObject = __webpack_require__(6);
 
@@ -39594,7 +39594,7 @@ var $export = __webpack_require__(2);
 
 var $pad = __webpack_require__(122);
 
-var userAgent = __webpack_require__(59); // https://github.com/zloirock/core-js/issues/280
+var userAgent = __webpack_require__(60); // https://github.com/zloirock/core-js/issues/280
 
 
 var WEBKIT_BUG = /Version\/10\.\d+(\.\d+)?( Mobile\/\w+)? Safari\//.test(userAgent);
@@ -39625,7 +39625,7 @@ var $export = __webpack_require__(2);
 
 var $pad = __webpack_require__(122);
 
-var userAgent = __webpack_require__(59); // https://github.com/zloirock/core-js/issues/280
+var userAgent = __webpack_require__(60); // https://github.com/zloirock/core-js/issues/280
 
 
 var WEBKIT_BUG = /Version\/10\.\d+(\.\d+)?( Mobile\/\w+)? Safari\//.test(userAgent);
@@ -39848,7 +39848,7 @@ var global = __webpack_require__(3);
 
 var $export = __webpack_require__(2);
 
-var userAgent = __webpack_require__(59);
+var userAgent = __webpack_require__(60);
 
 var slice = [].slice;
 var MSIE = /MSIE .\./.test(userAgent); // <- dirty ie9- check
@@ -51626,7 +51626,8 @@ var events_linkPlayerEventsToState = function linkPlayerEventsToState(player, st
       duration: player.getVideoDuration(),
       minimumPosition: player.getMinimumPosition(),
       maximumPosition: player.getMaximumPosition(),
-      liveGap: player.getMaximumPosition() - player.getPosition()
+      liveGap: player.getMaximumPosition() - player.getPosition(),
+      playbackPosition: player.getPlaybackRate()
     };
   }), takeUntil($destroy)).subscribe(function (arg) {
     state.set(arg);
@@ -52189,6 +52190,31 @@ var PlayPauseButton_PlayPauseButton = function PlayPauseButton(_ref) {
     stopAtEnd: "stopAtEnd"
   }
 })(PlayPauseButton_PlayPauseButton));
+// CONCATENATED MODULE: ./demo/full/scripts/controllers/StickToLiveEdgeButton.jsx
+
+
+function StickToLiveEdgeButton(_ref) {
+  var isContentLoaded = _ref.isContentLoaded,
+      lowLatencyMode = _ref.lowLatencyMode,
+      isStickingToTheLiveEdge = _ref.isStickingToTheLiveEdge,
+      changeStickToLiveEdge = _ref.changeStickToLiveEdge;
+  return isContentLoaded && lowLatencyMode ? react_default.a.createElement(Button, {
+    className: "running" + (isStickingToTheLiveEdge ? " clicked" : ""),
+    onClick: function onClick() {
+      return changeStickToLiveEdge(!isStickingToTheLiveEdge);
+    },
+    value: react_default.a.createElement("svg", {
+      version: "1.1",
+      viewBox: "0 0 21.803 21.803"
+    }, react_default.a.createElement("path", {
+      d: "m18.374 16.605l-4.076-2.101-1.107-1.773-0.757-4.503 2.219 1.092-0.375 1.494c-0.13 0.519 0.185 1.041 0.699 1.17 0.077 0.021 0.157 0.03 0.235 0.03 0.432-2e-3 0.823-0.293 0.935-0.729l0.565-2.25c0.11-0.439-0.103-0.897-0.511-1.101 0 0-5.303-2.603-5.328-2.612-0.406-0.188-0.868-0.267-1.342-0.198-0.625 0.088-1.158 0.407-1.528 0.86-0.029 0.027-2.565 3.15-2.565 3.15l-1.95 0.525c-0.514 0.141-0.818 0.668-0.679 1.184 0.116 0.43 0.505 0.713 0.93 0.713 0.083 0 0.168-0.011 0.252-0.033l2.252-0.606c0.196-0.055 0.37-0.167 0.498-0.324l1.009-1.247 0.725 4.026-1.27 1.01c-0.379 0.304-0.541 0.802-0.411 1.269l1.469 5.271c0.148 0.532 0.633 0.881 1.16 0.881 0.107 0 0.216-0.015 0.324-0.045 0.641-0.178 1.016-0.842 0.837-1.482l-1.254-4.502 1.948-1.498 1.151 1.791c0.115 0.186 0.277 0.334 0.471 0.436l4.371 2.25c0.177 0.092 0.363 0.135 0.552 0.135 0.438 0 0.856-0.238 1.072-0.653 0.303-0.6 0.07-1.325-0.521-1.63z"
+    }), react_default.a.createElement("circle", {
+      cx: "8.602",
+      cy: "2.568",
+      r: "2.568"
+    }))
+  }) : null;
+}
 // CONCATENATED MODULE: ./demo/full/scripts/controllers/FullScreenButton.jsx
 function FullScreenButton_inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
 
@@ -52767,10 +52793,10 @@ function (_React$Component) {
         isLive = _this$props.isLive,
         bufferGap = _this$props.bufferGap,
         player = _this$props.player,
-        hasManuallySeeked = _this$props.hasManuallySeeked;
+        onSeek = _this$props.onSeek;
 
     var seek = function seek(position) {
-      hasManuallySeeked();
+      onSeek();
       player.dispatch("SEEK", position);
     };
 
@@ -52945,6 +52971,7 @@ var VolumeBar_VolumeBar = function VolumeBar(_ref) {
   }
 })(VolumeBar_VolumeBar));
 // CONCATENATED MODULE: ./demo/full/scripts/controllers/ControlBar.jsx
+function ControlBar_inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
 
 
 
@@ -52956,95 +52983,194 @@ var VolumeBar_VolumeBar = function VolumeBar(_ref) {
 
 
 
-function ControlBar(_ref) {
-  var player = _ref.player,
-      videoElement = _ref.videoElement,
-      isContentLoaded = _ref.isContentLoaded,
-      isLive = _ref.isLive,
-      hasSeeked = _ref.hasSeeked,
-      toggleHasSeeked = _ref.toggleHasSeeked,
-      isStopped = _ref.isStopped,
-      currentTime = _ref.currentTime,
-      duration = _ref.duration,
-      toggleSettings = _ref.toggleSettings,
-      stopVideo = _ref.stopVideo,
-      lowLatencyMode = _ref.lowLatencyMode,
-      liveGap = _ref.liveGap;
-  var isNearLiveEdge = lowLatencyMode ? liveGap < 6 : liveGap < 15;
 
-  var positionElement = function () {
-    if (!isContentLoaded) {
-      return null;
-    } else if (isLive) {
-      return react_default.a.createElement(LivePosition, null);
-    } else {
-      return react_default.a.createElement(PositionInfos, {
-        position: currentTime,
-        duration: duration
+
+
+var ControlBar_ControlBar =
+/*#__PURE__*/
+function (_React$Component) {
+  ControlBar_inheritsLoose(ControlBar, _React$Component);
+
+  function ControlBar() {
+    var _this;
+
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    _this = _React$Component.call.apply(_React$Component, [this].concat(args)) || this;
+    _this.state = {
+      isCatchingUp: false,
+      isStickingToTheLiveEdge: true
+    };
+    return _this;
+  }
+
+  var _proto = ControlBar.prototype;
+
+  _proto.componentDidMount = function componentDidMount() {
+    var player = this.props.player;
+
+    if (player) {
+      player.$get("loadedVideo").subscribe(function () {
+        return player.dispatch("SET_PLAYBACK_RATE", 1);
       });
     }
-  }();
+  };
 
-  return react_default.a.createElement("div", {
-    className: "controls-bar-container"
-  }, react_default.a.createElement(controllers_ProgressBar, {
-    player: player,
-    hasManuallySeeked: function hasManuallySeeked() {
-      return toggleHasSeeked(true);
+  _proto.render = function render() {
+    var _this2 = this;
+
+    var changeStickToLiveEdge = function changeStickToLiveEdge(shouldStick) {
+      _this2.setState({
+        isStickingToTheLiveEdge: shouldStick
+      });
+    };
+
+    var _this$state = this.state,
+        isCatchingUp = _this$state.isCatchingUp,
+        isStickingToTheLiveEdge = _this$state.isStickingToTheLiveEdge;
+    var _this$props = this.props,
+        isContentLoaded = _this$props.isContentLoaded,
+        isLive = _this$props.isLive,
+        currentTime = _this$props.currentTime,
+        duration = _this$props.duration,
+        stopVideo = _this$props.stopVideo,
+        isStopped = _this$props.isStopped,
+        player = _this$props.player,
+        maximumPosition = _this$props.maximumPosition,
+        playbackRate = _this$props.playbackRate,
+        videoElement = _this$props.videoElement,
+        toggleSettings = _this$props.toggleSettings,
+        lowLatencyMode = _this$props.lowLatencyMode,
+        liveGap = _this$props.liveGap;
+    var isCloseToLive = undefined;
+
+    if (lowLatencyMode != null && liveGap != null) {
+      isCloseToLive = lowLatencyMode ? liveGap < 7 : liveGap < 15;
     }
-  }), react_default.a.createElement("div", {
-    className: "controls-bar"
-  }, react_default.a.createElement(controllers_PlayPauseButton, {
-    className: "control-button",
-    player: player
-  }), react_default.a.createElement(Button, {
-    className: "control-button",
-    onClick: stopVideo,
-    value: String.fromCharCode(0xf04d),
-    disabled: isStopped
-  }), positionElement, isContentLoaded && isNearLiveEdge ? react_default.a.createElement("div", {
-    className: "dot"
-  }) : null, react_default.a.createElement("div", {
-    className: "controls-right-side"
-  }, isLive ? react_default.a.createElement(Button, {
-    className: "control-live" + (hasSeeked ? " activated" : ""),
-    onClick: function onClick() {
-      if (hasSeeked) {
-        toggleHasSeeked(false);
+    /**
+     * Catch-up :
+     * - If current position is too far from live edge,
+     * then we should seek near to live edge.
+     * - If not, changed playback rate in order to move back
+     * close to the live.
+     */
+
+
+    var catchUp = function catchUp() {
+      if (liveGap > 10) {
+        player.dispatch("SEEK", maximumPosition - 5);
+      } else {
+        var factor = (liveGap - 5) / 4;
+        var rate = Math.round((liveGap > 5 ? Math.min(10, 1.1 + factor) : 1) * 10) / 10;
+
+        if (rate !== playbackRate) {
+          _this2.setState({
+            isCatchingUp: true
+          });
+
+          player.dispatch("SET_PLAYBACK_RATE", rate);
+        }
       }
-    },
-    value: String.fromCharCode(0xf01e)
-  }) : null, react_default.a.createElement(Button, {
-    disabled: !isContentLoaded,
-    className: "control-button",
-    onClick: toggleSettings,
-    value: String.fromCharCode(0xf013)
-  }), react_default.a.createElement("div", {
-    className: "volume"
-  }, react_default.a.createElement(controllers_VolumeButton, {
-    className: "control-button",
-    player: player
-  }), react_default.a.createElement(controllers_VolumeBar, {
-    className: "control-button",
-    player: player
-  })), react_default.a.createElement(FullScreenButton, {
-    className: "control-button",
-    player: player,
-    videoElement: videoElement
-  }))));
-}
+    };
+
+    if (player) {
+      var shouldCatchUp = isContentLoaded && (liveGap > 7 || isCatchingUp && liveGap > 5) && isStickingToTheLiveEdge && lowLatencyMode;
+
+      if (shouldCatchUp) {
+        catchUp();
+      } else if (isCatchingUp) {
+        this.setState({
+          isCatchingUp: false
+        });
+        player.dispatch("SET_PLAYBACK_RATE", 1);
+      }
+    }
+
+    var positionElement = function () {
+      if (!isContentLoaded) {
+        return null;
+      } else if (isLive) {
+        return react_default.a.createElement(LivePosition, null);
+      } else {
+        return react_default.a.createElement(PositionInfos, {
+          position: currentTime,
+          duration: duration
+        });
+      }
+    }();
+
+    return react_default.a.createElement("div", {
+      className: "controls-bar-container"
+    }, react_default.a.createElement(controllers_ProgressBar, {
+      player: player,
+      onSeek: function onSeek() {
+        return changeStickToLiveEdge(false);
+      }
+    }), react_default.a.createElement("div", {
+      className: "controls-bar"
+    }, react_default.a.createElement(controllers_PlayPauseButton, {
+      className: "control-button",
+      player: player
+    }), react_default.a.createElement(Button, {
+      className: "control-button",
+      onClick: stopVideo,
+      value: String.fromCharCode(0xf04d),
+      disabled: isStopped
+    }), react_default.a.createElement(StickToLiveEdgeButton, {
+      isContentLoaded: isContentLoaded,
+      lowLatencyMode: lowLatencyMode,
+      isStickingToTheLiveEdge: isStickingToTheLiveEdge,
+      changeStickToLiveEdge: changeStickToLiveEdge
+    }), positionElement, isContentLoaded ? react_default.a.createElement(Button, {
+      className: "dot" + (isCloseToLive && !isCatchingUp ? " live" : ""),
+      onClick: function onClick() {
+        if (isCatchingUp || !isCloseToLive) {
+          player.dispatch("SEEK", maximumPosition - (lowLatencyMode ? 4 : 10));
+        }
+      }
+    }) : null, react_default.a.createElement("div", {
+      className: "controls-right-side"
+    }, isLive && lowLatencyMode && playbackRate !== 1 ? react_default.a.createElement("div", {
+      className: "catch-up"
+    }, "Catch-up playback rate: " + playbackRate) : null, react_default.a.createElement(Button, {
+      disabled: !isContentLoaded,
+      className: "control-button",
+      onClick: toggleSettings,
+      value: String.fromCharCode(0xf013)
+    }), react_default.a.createElement("div", {
+      className: "volume"
+    }, react_default.a.createElement(controllers_VolumeButton, {
+      className: "control-button",
+      player: player
+    }), react_default.a.createElement(controllers_VolumeBar, {
+      className: "control-button",
+      player: player
+    })), react_default.a.createElement(FullScreenButton, {
+      className: "control-button",
+      player: player,
+      videoElement: videoElement
+    }))));
+  };
+
+  return ControlBar;
+}(react_default.a.Component);
 
 /* harmony default export */ var controllers_ControlBar = (lib_withModulesState({
   player: {
     isContentLoaded: "isContentLoaded",
+    maximumPosition: "maximumPosition",
+    playbackRate: "playbackRate",
     isLive: "isLive",
     currentTime: "currentTime",
     duration: "duration",
     isStopped: "isStopped",
     lowLatencyMode: "lowLatencyMode",
-    liveGap: "liveGap"
+    liveGap: "liveGap",
+    hasCurrentContent: "hasCurrentContent"
   }
-})(ControlBar));
+})(ControlBar_ControlBar));
 // CONCATENATED MODULE: ./demo/full/scripts/lib/localStorage.js
 var _window = window,
     localStorage = _window.localStorage;
@@ -54639,7 +54765,7 @@ function (_React$Component) {
   };
 });
 // EXTERNAL MODULE: ./node_modules/chart.js/dist/Chart.js
-var Chart = __webpack_require__(62);
+var Chart = __webpack_require__(63);
 var Chart_default = /*#__PURE__*/__webpack_require__.n(Chart);
 
 // CONCATENATED MODULE: ./demo/full/scripts/controllers/charts/BufferSize.jsx
@@ -63310,10 +63436,7 @@ function (_React$Component) {
       player: null,
       displaySpinner: false,
       displaySettings: false,
-      isStopped: true,
-      isCatchingUp: false,
-      lastCatchUpRate: undefined,
-      hasSeeked: false
+      isStopped: true
     };
     return _this;
   }
@@ -63333,54 +63456,12 @@ function (_React$Component) {
       return player.destroy();
     });
 
-    player.$get("isSeeking", "isBuffering", "isLoading", "isReloading", "isStopped", "liveGap", "lowLatencyMode").pipe(takeUntil(this._$destroySubject)).subscribe(function (_ref) {
+    player.$get("isSeeking", "isBuffering", "isLoading", "isReloading", "isStopped").pipe(takeUntil(this._$destroySubject)).subscribe(function (_ref) {
       var isSeeking = _ref[0],
           isBuffering = _ref[1],
           isLoading = _ref[2],
           isReloading = _ref[3],
-          isStopped = _ref[4],
-          liveGap = _ref[5],
-          lowLatencyMode = _ref[6];
-      var _this2$state = _this2.state,
-          isCatchingUp = _this2$state.isCatchingUp,
-          lastCatchUpRate = _this2$state.lastCatchUpRate,
-          hasSeeked = _this2$state.hasSeeked;
-
-      if (player) {
-        var shouldCatchUp = (liveGap > 6 || isCatchingUp && liveGap > 4) && !hasSeeked;
-
-        if (shouldCatchUp) {
-          if (liveGap > (lowLatencyMode ? 10 : 20)) {
-            var maximumPosition = player.get("maximumPosition");
-            var distanceToLiveEdge = lowLatencyMode ? 4 : 10;
-            player.dispatch("SEEK", maximumPosition - distanceToLiveEdge);
-          } else if (lowLatencyMode) {
-            var factor = (liveGap - 4) / 4;
-            var rate = Math.round((liveGap > 4 ? Math.min(10, 1.1 + factor) : 1) * 10) / 10;
-
-            if (rate !== lastCatchUpRate) {
-              _this2.setState({
-                lastCatchUpRate: rate,
-                lowLatencyMode: lowLatencyMode,
-                isCatchingUp: true
-              });
-
-              player.dispatch("SET_PLAYBACK_RATE", rate);
-            }
-          }
-        } else if (isCatchingUp) {
-          _this2.setState({
-            lastCatchUpRate: 1,
-            isCatchingUp: false
-          });
-
-          player.dispatch("SET_PLAYBACK_RATE", 1);
-        } else {
-          _this2.setState({
-            lastCatchUpRate: undefined
-          });
-        }
-      }
+          isStopped = _ref[4];
 
       _this2.setState({
         isStopped: isStopped
@@ -63447,8 +63528,7 @@ function (_React$Component) {
     var _this$state = this.state,
         player = _this$state.player,
         displaySpinner = _this$state.displaySpinner,
-        isStopped = _this$state.isStopped,
-        hasSeeked = _this$state.hasSeeked;
+        isStopped = _this$state.isStopped;
 
     var loadVideo = function loadVideo(video) {
       return _this3.state.player.dispatch("LOAD", video);
@@ -63467,12 +63547,6 @@ function (_React$Component) {
     var toggleSettings = function toggleSettings() {
       _this3.setState({
         displaySettings: !_this3.state.displaySettings
-      });
-    };
-
-    var toggleHasSeeked = function toggleHasSeeked(hasSeeked) {
-      _this3.setState({
-        hasSeeked: hasSeeked
       });
     };
 
@@ -63517,8 +63591,6 @@ function (_React$Component) {
       player: player,
       videoElement: this.playerWrapperElement,
       toggleSettings: toggleSettings,
-      toggleHasSeeked: toggleHasSeeked,
-      hasSeeked: hasSeeked,
       stopVideo: stopVideo
     }) : null), player ? react_default.a.createElement(charts, {
       player: player
