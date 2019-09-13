@@ -442,15 +442,42 @@ body {
 }
 
 .running {
+  display: inline;
+  position: relative;
+  margin: auto;
   background: none;
   border: none;
-  border-radius: 3px;
-  padding: 5px;
+  padding: 6px;
   cursor: pointer;
 }
 
+.running:hover:after {
+  background: #ed3656;
+  background: rgba(237,54,86,.9);
+  bottom: 40px;
+  color: #fff;
+  content: attr(title);
+  left: 32%;
+  padding: 5px 15px;
+  position: absolute;
+  text-align: center;
+  z-index: 10000;
+  width: 175px;
+}
+
+.running:hover:before{
+    border: solid;
+    border-color: #ed3656 transparent;
+    border-width: 6px 6px 0 6px;
+    bottom: 35px;
+    content: "";
+    left: 32%;
+    position: absolute;
+    z-index: 10001;
+}
+
 .running > svg {
-  width: 20px;
+  width: 22px;
   fill: #ccc;
   transform: scale(-1, 1);
 }
@@ -460,7 +487,6 @@ body {
 }
 
 .running.clicked > svg {
-  width: 20px;
   fill: #ed3656;
 }
 
@@ -987,6 +1013,10 @@ input:checked + .slider:before {
 
 @media only screen and (max-width: 650px) {
   .button-gh {
+    display: none;
+  }
+
+  .catch-up {
     display: none;
   }
 }
