@@ -53680,18 +53680,13 @@ var MetaPlaylistDASHSmooth = {
   "contents": [{
     "url": "https://www.bok.net/dash/tears_of_steel/cleartext/stream.mpd",
     "startTime": 0,
-    "endTime": 734,
+    "endTime": 733.3,
     "transport": "dash"
   }, {
     "url": "https://amssamples.streaming.mediaservices.windows.net/683f7e47-bd83-4427-b0a3-26a6c4547782/BigBuckBunny.ism/manifest",
-    "startTime": 734,
-    "endTime": 1367,
+    "startTime": 733.3,
+    "endTime": 1368,
     "transport": "smooth"
-  }, {
-    "url": "https://demo.unified-streaming.com/video/ateam/ateam.ism/ateam.mpd",
-    "startTime": 1367,
-    "endTime": 1470,
-    "transport": "dash"
   }]
 };
 var MetaPlaylistDASHSmoothBlob = new Blob([JSON.stringify(MetaPlaylistDASHSmooth)], {
@@ -53766,11 +53761,6 @@ var MetaPlaylistDASHSmoothBlob = new Blob([JSON.stringify(MetaPlaylistDASHSmooth
   "name": "Unified Streaming - Timeline - A-Team",
   "url": "https://demo.unified-streaming.com/video/ateam/ateam.ism/ateam.mpd",
   "transport": "dash"
-}, {
-  "name": "DASH-IF XLinks (onLoad)",
-  "url": "http://vm2.dashif.org/livesim-dev/periods_60/xlink_30/insertad_2/testpic_2s/Manifest.mpd",
-  "transport": "dash",
-  "live": true
 }, {
   "name": "Super SpeedWay",
   "url": "https://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest",
