@@ -9724,9 +9724,7 @@ object-assign
     /* 153 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
-        /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
-            return addClassName;
-        });
+        /* harmony export (binding) */        
         /**
  * Copyright 2015 CANAL+ Group
  *
@@ -9742,17 +9740,21 @@ object-assign
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-        var hasClassList = !1;
+        var hasClassList;
         /**
  * Add className to an HTMLElement. Do nothing if the className was already
  * added.
  * @param {HTMLElement} elt
  * @param {string} className
  */        function addClassName(elt, className) {
-            (void 0 === hasClassList && (hasClassList = void 0 !== elt.classList && "function" == typeof elt.classList.add), 
-            hasClassList) ? elt.classList.add(className) : (" " + elt.className + " ").indexOf(className) < 0 && (elt.className += " " + className);
+            (void 0 === hasClassList && (hasClassList = void 0 !== elt.classList && 
+            /* tslint:disable no-unbound-method */
+            "function" == typeof elt.classList.add), hasClassList) ? elt.classList.add(className) : (" " + elt.className + " ").indexOf(" " + className + " ") < 0 && (elt.className += " " + className);
         }
-        /***/    }, 
+        /***/        __webpack_require__.d(__webpack_exports__, "a", function() {
+            return addClassName;
+        });
+    }, 
     /* 154 */
     /***/ function(module, exports, __webpack_require__) {
         "use strict";
