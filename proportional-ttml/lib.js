@@ -26673,6 +26673,7 @@ object-assign
  * @param {HTMLElement} element - The <p> element
  * @param {Object} style - The general style object of the paragraph.
  */        function applyPStyle(element, style) {
+            element.style.margin = "0px";
             // applies to body, div, p, region, span
             var paragraphBackgroundColor = style.backgroundColor;
             paragraphBackgroundColor && (element.style.backgroundColor = ttmlColorToCSSColor(paragraphBackgroundColor));
