@@ -1498,7 +1498,7 @@ object-assign
             return Subscriber;
         });
         /* unused harmony export SafeSubscriber */
-        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _util_isFunction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(54), _Observer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(82), _Subscription__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(16), _internal_symbol_rxSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(68), _config__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(40), _util_hostReportError__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(58), Subscriber = /* */ function(_super) {
+        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _util_isFunction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(54), _Observer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(82), _Subscription__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(17), _internal_symbol_rxSubscriber__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(68), _config__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(40), _util_hostReportError__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(58), Subscriber = /* */ function(_super) {
             function Subscriber(destinationOrNext, error, complete) {
                 var _this = _super.call(this) || this;
                 switch (_this.syncErrorValue = null, _this.syncErrorThrown = !1, _this.syncErrorThrowable = !1, 
@@ -1821,6 +1821,58 @@ object-assign
     /* 15 */
     /***/ , 
     /* 15 */
+    /***/ function(module, __webpack_exports__, __webpack_require__) {
+        "use strict";
+        /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
+            return REGXP_4_HEX_COLOR;
+        }), 
+        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() {
+            return REGXP_8_HEX_COLOR;
+        }), 
+        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() {
+            return REGXP_LENGTH;
+        }), 
+        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() {
+            return REGXP_PERCENT_VALUES;
+        }), 
+        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() {
+            return REGXP_TIME_COLON;
+        }), 
+        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() {
+            return REGXP_TIME_COLON_FRAMES;
+        }), 
+        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() {
+            return REGXP_TIME_COLON_MS;
+        }), 
+        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() {
+            return REGXP_TIME_FRAMES;
+        }), 
+        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() {
+            return REGXP_TIME_HMS;
+        }), 
+        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() {
+            return REGXP_TIME_TICK;
+        });
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        // examples: 00:00:40:07 (7 frames) or 00:00:40:07.1 (7 frames, 1 subframe)
+        var REGXP_TIME_COLON_FRAMES = /^(\d{2,}):(\d{2}):(\d{2}):(\d{2})\.?(\d+)?$/, REGXP_TIME_COLON = /^(?:(\d{2,}):)?(\d{2}):(\d{2})$/, REGXP_TIME_COLON_MS = /^(?:(\d{2,}):)?(\d{2}):(\d{2}\.\d{2,})$/, REGXP_TIME_FRAMES = /^(\d*\.?\d*)f$/, REGXP_TIME_TICK = /^(\d*\.?\d*)t$/, REGXP_TIME_HMS = /^(?:(\d*\.?\d*)h)?(?:(\d*\.?\d*)m)?(?:(\d*\.?\d*)s)?(?:(\d*\.?\d*)ms)?$/, REGXP_PERCENT_VALUES = /^(\d{1,2}|100)% (\d{1,2}|100)%$/, REGXP_LENGTH = /^((?:\+|\-)?\d*(?:\.\d+)?)(px|em|c|%|rh|rw)$/, REGXP_8_HEX_COLOR = /^#([0-9A-f]{2})([0-9A-f]{2})([0-9A-f]{2})([0-9A-f]{2})$/, REGXP_4_HEX_COLOR = /^#([0-9A-f])([0-9A-f])([0-9A-f])([0-9A-f])$/;
+ // examples: 00:00:40:07 (7 frames) or 00:00:40:07.1 (7 frames, 1 subframe)
+        }, 
+    /* 16 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
@@ -2185,7 +2237,7 @@ object-assign
             return result;
         }
         /***/    }, 
-    /* 16 */
+    /* 17 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/util/isArray.js
@@ -2282,7 +2334,7 @@ object-assign
         }
         //# sourceMappingURL=Subscription.js.map
         /***/    }, 
-    /* 17 */
+    /* 18 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Observable.js + 3 modules
@@ -2375,7 +2427,7 @@ object-assign
  * limitations under the License.
  */
         /* harmony default export */    }, 
-    /* 18 */
+    /* 19 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         /* harmony import */        var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7), rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(57), rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(23);
@@ -2416,7 +2468,7 @@ object-assign
             return value && "function" == typeof value.then ? Object(rxjs__WEBPACK_IMPORTED_MODULE_1__.a)(value) : Object(rxjs__WEBPACK_IMPORTED_MODULE_2__.a)(value);
         };
     }, 
-    /* 19 */
+    /* 20 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
@@ -2453,58 +2505,6 @@ object-assign
             WARNED_MESSAGES.push(message));
         }
         /***/    }, 
-    /* 20 */
-    /***/ function(module, __webpack_exports__, __webpack_require__) {
-        "use strict";
-        /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
-            return PROPORT_FONT_SIZE;
-        }), 
-        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() {
-            return REGXP_PERCENT_VALUES;
-        }), 
-        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() {
-            return REGXP_TIME_COLON;
-        }), 
-        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() {
-            return REGXP_TIME_COLON_FRAMES;
-        }), 
-        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() {
-            return REGXP_TIME_COLON_MS;
-        }), 
-        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() {
-            return REGXP_TIME_FRAMES;
-        }), 
-        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() {
-            return REGXP_TIME_HMS;
-        }), 
-        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() {
-            return REGXP_TIME_TICK;
-        }), 
-        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() {
-            return REGXP_4_HEX_COLOR;
-        }), 
-        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() {
-            return REGXP_8_HEX_COLOR;
-        });
-        /**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-        // examples: 00:00:40:07 (7 frames) or 00:00:40:07.1 (7 frames, 1 subframe)
-        var REGXP_TIME_COLON_FRAMES = /^(\d{2,}):(\d{2}):(\d{2}):(\d{2})\.?(\d+)?$/, REGXP_TIME_COLON = /^(?:(\d{2,}):)?(\d{2}):(\d{2})$/, REGXP_TIME_COLON_MS = /^(?:(\d{2,}):)?(\d{2}):(\d{2}\.\d{2,})$/, REGXP_TIME_FRAMES = /^(\d*\.?\d*)f$/, REGXP_TIME_TICK = /^(\d*\.?\d*)t$/, REGXP_TIME_HMS = /^(?:(\d*\.?\d*)h)?(?:(\d*\.?\d*)m)?(?:(\d*\.?\d*)s)?(?:(\d*\.?\d*)ms)?$/, REGXP_PERCENT_VALUES = /^(\d{1,2}|100)% (\d{1,2}|100)%$/, PROPORT_FONT_SIZE = /(\d)\s*c/i, REGXP_8_HEX_COLOR = /^#([0-9A-f]{2})([0-9A-f]{2})([0-9A-f]{2})([0-9A-f]{2})$/, REGXP_4_HEX_COLOR = /^#([0-9A-f])([0-9A-f])([0-9A-f])([0-9A-f])$/;
- // examples: 00:00:40:07 (7 frames) or 00:00:40:07.1 (7 frames, 1 subframe)
-        }, 
     /* 21 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
@@ -3432,7 +3432,7 @@ object-assign
             return Subject;
         });
         /* unused harmony export AnonymousSubject */
-        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _Observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(7), _Subscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(10), _Subscription__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(16), _util_ObjectUnsubscribedError__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(51), _SubjectSubscription__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(100), _internal_symbol_rxSubscriber__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(68), SubjectSubscriber = /* */ function(_super) {
+        /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3), _Observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(7), _Subscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(10), _Subscription__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(17), _util_ObjectUnsubscribedError__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(51), _SubjectSubscription__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(100), _internal_symbol_rxSubscriber__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(68), SubjectSubscriber = /* */ function(_super) {
             function SubjectSubscriber(destination) {
                 var _this = _super.call(this, destination) || this;
                 return _this.destination = destination, _this;
@@ -4342,7 +4342,7 @@ object-assign
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Observable.js + 3 modules
-                var Observable = __webpack_require__(7), subscribeTo = __webpack_require__(122), Subscription = __webpack_require__(16), symbol_observable = __webpack_require__(49);
+                var Observable = __webpack_require__(7), subscribeTo = __webpack_require__(122), Subscription = __webpack_require__(17), symbol_observable = __webpack_require__(49);
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/util/subscribeTo.js + 3 modules
                 // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/scheduled/scheduleObservable.js
         /** PURE_IMPORTS_START _Observable,_Subscription,_symbol_observable PURE_IMPORTS_END */
@@ -4498,7 +4498,7 @@ object-assign
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         // EXTERNAL MODULE: ./src/log.ts + 1 modules
-                var log = __webpack_require__(0), array_find = __webpack_require__(11), event_emitter = __webpack_require__(39), id_generator = __webpack_require__(37), warn_once = __webpack_require__(19), manifest_adaptation = __webpack_require__(61), media_error = __webpack_require__(53), object_values = __webpack_require__(77), period_Period = 
+                var log = __webpack_require__(0), array_find = __webpack_require__(11), event_emitter = __webpack_require__(39), id_generator = __webpack_require__(37), warn_once = __webpack_require__(20), manifest_adaptation = __webpack_require__(61), media_error = __webpack_require__(53), object_values = __webpack_require__(77), period_Period = 
         /* */
         function() {
             /**
@@ -5653,7 +5653,7 @@ object-assign
         /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
             return scheduleArray;
         });
-        /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7), _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(16);
+        /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7), _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(17);
         /* harmony import */        
         /** PURE_IMPORTS_START _Observable,_Subscription PURE_IMPORTS_END */
         function scheduleArray(input, scheduler) {
@@ -5761,7 +5761,7 @@ object-assign
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         // EXTERNAL MODULE: ./node_modules/next-tick/index.js
-                var next_tick = __webpack_require__(67), next_tick_default = /* */ __webpack_require__.n(next_tick), of = __webpack_require__(23), event_emitter = __webpack_require__(39), rx_try_catch = __webpack_require__(33), ranges = __webpack_require__(15), time_ranges_ManualTimeRanges = 
+                var next_tick = __webpack_require__(67), next_tick_default = /* */ __webpack_require__.n(next_tick), of = __webpack_require__(23), event_emitter = __webpack_require__(39), rx_try_catch = __webpack_require__(33), ranges = __webpack_require__(16), time_ranges_ManualTimeRanges = 
         /* */
         function() {
             function ManualTimeRanges() {
@@ -5936,7 +5936,7 @@ object-assign
             return tslib_es6.a(Action, _super), Action.prototype.schedule = function(state, delay) {
                 return void 0 === delay && (delay = 0), this;
             }, Action;
-        }(__webpack_require__(16).a);
+        }(__webpack_require__(17).a);
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subscription.js + 1 modules
                 //# sourceMappingURL=Action.js.map
         // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/scheduler/AsyncAction.js
@@ -6362,7 +6362,7 @@ object-assign
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
-                var tslib_es6 = __webpack_require__(3), Subject = __webpack_require__(42), Observable = __webpack_require__(7), Subscriber = __webpack_require__(10), Subscription = __webpack_require__(16), refCount = __webpack_require__(117), ConnectableObservable_ConnectableObservable = /* */ function(_super) {
+                var tslib_es6 = __webpack_require__(3), Subject = __webpack_require__(42), Observable = __webpack_require__(7), Subscriber = __webpack_require__(10), Subscription = __webpack_require__(17), refCount = __webpack_require__(117), ConnectableObservable_ConnectableObservable = /* */ function(_super) {
             function ConnectableObservable(source, subjectFactory) {
                 var _this = _super.call(this) || this;
                 return _this.source = source, _this.subjectFactory = subjectFactory, _this._refCount = 0, 
@@ -7081,7 +7081,7 @@ object-assign
                     }
                 }
             }, SubjectSubscription;
-        }(__webpack_require__(16).a);
+        }(__webpack_require__(17).a);
         /* harmony import */    }, 
     /* 101 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
@@ -7349,7 +7349,7 @@ object-assign
         /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
             return generateManifestLoader;
         });
-        /* harmony import */ var _utils_request__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(17), _call_custom_manifest_loader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(108);
+        /* harmony import */ var _utils_request__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(18), _call_custom_manifest_loader__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(108);
         /* harmony import */        
         /**
  * Copyright 2015 CANAL+ Group
@@ -8370,7 +8370,7 @@ object-assign
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         // EXTERNAL MODULE: ./src/parsers/texttracks/ttml/regexps.ts
-                var regexps = __webpack_require__(20);
+                var regexps = __webpack_require__(15);
         // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/time_parsing.ts
         /**
  * Copyright 2015 CANAL+ Group
@@ -8869,7 +8869,7 @@ object-assign
         /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
             return play$;
         });
-        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(74), _utils_cast_to_observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(18), _utils_rx_try_catch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(33);
+        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(74), _utils_cast_to_observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(19), _utils_rx_try_catch__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(33);
         /* harmony import */        
         /**
  * Copyright 2015 CANAL+ Group
@@ -8975,7 +8975,7 @@ object-assign
         /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() {
             return requestMediaKeySystemAccess;
         });
-        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(42), rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(84), rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(59), rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(23), rxjs_operators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(171), _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(1), _utils_cast_to_observable__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(18), _utils_event_emitter__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(39), _utils_promise__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(30), _browser_compatibility_types__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(22), _browser_detection__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(21), _event_listeners__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(47), _should_use_webkit_media_keys__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(94), _custom_key_system_access__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(139);
+        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(42), rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(84), rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(59), rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(23), rxjs_operators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(171), _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(1), _utils_cast_to_observable__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(19), _utils_event_emitter__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(39), _utils_promise__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(30), _browser_compatibility_types__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(22), _browser_detection__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(21), _event_listeners__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(47), _should_use_webkit_media_keys__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(94), _custom_key_system_access__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(139);
         /* harmony import */        function _inheritsLoose(subClass, superClass) {
             subClass.prototype = Object.create(superClass.prototype), (subClass.prototype.constructor = subClass).__proto__ = superClass;
         }
@@ -9935,7 +9935,7 @@ object-assign
         "use strict";
         __webpack_require__.r(__webpack_exports__);
         // EXTERNAL MODULE: ./src/core/eme/clear_eme_session.ts
-        var clear_eme_session = __webpack_require__(145), dispose_eme = __webpack_require__(146), combineLatest = __webpack_require__(219), empty = __webpack_require__(55), merge = __webpack_require__(84), concat = __webpack_require__(127), of = __webpack_require__(23), shareReplay = __webpack_require__(172), filter = __webpack_require__(173), tap = __webpack_require__(142), map = __webpack_require__(27), mergeMap = __webpack_require__(45), catchError = __webpack_require__(213), ignoreElements = __webpack_require__(141), compat = __webpack_require__(9), get_init_data = __webpack_require__(220), generate_key_request = __webpack_require__(221), encrypted_media_error = __webpack_require__(83), log = __webpack_require__(0), defer = __webpack_require__(74), config = __webpack_require__(2), array_includes = __webpack_require__(12), cast_to_observable = __webpack_require__(18);
+        var clear_eme_session = __webpack_require__(145), dispose_eme = __webpack_require__(146), combineLatest = __webpack_require__(219), empty = __webpack_require__(55), merge = __webpack_require__(84), concat = __webpack_require__(127), of = __webpack_require__(23), shareReplay = __webpack_require__(172), filter = __webpack_require__(173), tap = __webpack_require__(142), map = __webpack_require__(27), mergeMap = __webpack_require__(45), catchError = __webpack_require__(213), ignoreElements = __webpack_require__(141), compat = __webpack_require__(9), get_init_data = __webpack_require__(220), generate_key_request = __webpack_require__(221), encrypted_media_error = __webpack_require__(83), log = __webpack_require__(0), defer = __webpack_require__(74), config = __webpack_require__(2), array_includes = __webpack_require__(12), cast_to_observable = __webpack_require__(19);
         // EXTERNAL MODULE: ./src/core/eme/dispose_eme.ts
                 // CONCATENATED MODULE: ./src/core/eme/utils/is_session_usable.ts
         /**
@@ -11549,7 +11549,7 @@ object-assign
                 return null !== _super && _super.apply(this, arguments) || this;
             }
             return tslib_es6.a(QueueScheduler, _super), QueueScheduler;
-        }(__webpack_require__(80).a))(QueueAction_QueueAction), Subscription = __webpack_require__(16), Subscriber = __webpack_require__(10), Notification = __webpack_require__(72);
+        }(__webpack_require__(80).a))(QueueAction_QueueAction), Subscription = __webpack_require__(17), Subscriber = __webpack_require__(10), Notification = __webpack_require__(72);
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subject.js
                 var observeOn_ObserveOnSubscriber = /* */ function(_super) {
             function ObserveOnSubscriber(destination, scheduler, delay) {
@@ -12700,7 +12700,7 @@ object-assign
                     this.destination.error(err);
                 }
             }, SkipWhileSubscriber;
-        }(Subscriber.a), switchMapTo = __webpack_require__(226), mergeMapTo = __webpack_require__(174), catchError = __webpack_require__(213), config = __webpack_require__(2), log = __webpack_require__(0), event_emitter = __webpack_require__(39), noop = __webpack_require__(29), promise = __webpack_require__(30), ranges = __webpack_require__(15), warn_once = __webpack_require__(19), compat = __webpack_require__(9), fullscreen = __webpack_require__(90), media_error = __webpack_require__(53), encrypted_media_error = __webpack_require__(83), error_codes = __webpack_require__(34), network_error = __webpack_require__(165), other_error = __webpack_require__(66);
+        }(Subscriber.a), switchMapTo = __webpack_require__(226), mergeMapTo = __webpack_require__(174), catchError = __webpack_require__(213), config = __webpack_require__(2), log = __webpack_require__(0), event_emitter = __webpack_require__(39), noop = __webpack_require__(29), promise = __webpack_require__(30), ranges = __webpack_require__(16), warn_once = __webpack_require__(20), compat = __webpack_require__(9), fullscreen = __webpack_require__(90), media_error = __webpack_require__(53), encrypted_media_error = __webpack_require__(83), error_codes = __webpack_require__(34), network_error = __webpack_require__(165), other_error = __webpack_require__(66);
         // CONCATENATED MODULE: ./src/errors/is_known_error.ts
         /**
  * Copyright 2015 CANAL+ Group
@@ -12752,7 +12752,7 @@ object-assign
             return new other_error.a(defaultCode, reason);
         }
         // EXTERNAL MODULE: ./src/features/index.ts
-                var features = __webpack_require__(8), dispose_eme = __webpack_require__(146), get_current_key_system = __webpack_require__(147), clear_eme_session = __webpack_require__(145), asap = __webpack_require__(89), timer = __webpack_require__(222), mergeMap = __webpack_require__(45), subscribeOn = __webpack_require__(215), switchMap = __webpack_require__(128), tap = __webpack_require__(142), ignoreElements = __webpack_require__(141), Subscription = __webpack_require__(16);
+                var features = __webpack_require__(8), dispose_eme = __webpack_require__(146), get_current_key_system = __webpack_require__(147), clear_eme_session = __webpack_require__(145), asap = __webpack_require__(89), timer = __webpack_require__(222), mergeMap = __webpack_require__(45), subscribeOn = __webpack_require__(215), switchMap = __webpack_require__(128), tap = __webpack_require__(142), ignoreElements = __webpack_require__(141), Subscription = __webpack_require__(17);
         // EXTERNAL MODULE: ./src/core/eme/dispose_eme.ts
                 // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/operators/finalize.js
         /** PURE_IMPORTS_START tslib,_Subscriber,_Subscription PURE_IMPORTS_END */
@@ -14340,7 +14340,7 @@ object-assign
             throw new assertion_error.a("Unreachable path taken");
         }
         // EXTERNAL MODULE: ./src/utils/cast_to_observable.ts
-                var cast_to_observable = __webpack_require__(18);
+                var cast_to_observable = __webpack_require__(19);
         // CONCATENATED MODULE: ./src/core/pipelines/segment/create_segment_loader.ts
         /**
  * Copyright 2015 CANAL+ Group
@@ -20252,12 +20252,12 @@ object-assign
         function initializeFeaturesObject() {
             features.a.emeManager = __webpack_require__(161).default, features.a.imageBuffer = __webpack_require__(208).default, 
             features.a.imageParser = __webpack_require__(182).default, features.a.transports.smooth = __webpack_require__(201).default, 
-            features.a.transports.dash = __webpack_require__(200).default, features.a.transports.metaplaylist = __webpack_require__(203).default, 
+            features.a.transports.dash = __webpack_require__(200).default, features.a.transports.metaplaylist = __webpack_require__(204).default, 
             features.a.nativeTextTracksBuffer = __webpack_require__(206).default, features.a.nativeTextTracksParsers.vtt = __webpack_require__(207).default, 
             features.a.nativeTextTracksParsers.ttml = __webpack_require__(209).default, features.a.nativeTextTracksParsers.sami = __webpack_require__(184).default, 
             features.a.nativeTextTracksParsers.srt = __webpack_require__(185).default, features.a.htmlTextTracksBuffer = __webpack_require__(205).default, 
-            features.a.htmlTextTracksParsers.sami = __webpack_require__(186).default, features.a.htmlTextTracksParsers.ttml = __webpack_require__(204).default, 
-            features.a.htmlTextTracksParsers.srt = __webpack_require__(187).default, features.a.htmlTextTracksParsers.vtt = __webpack_require__(202).default, 
+            features.a.htmlTextTracksParsers.sami = __webpack_require__(186).default, features.a.htmlTextTracksParsers.ttml = __webpack_require__(202).default, 
+            features.a.htmlTextTracksParsers.srt = __webpack_require__(187).default, features.a.htmlTextTracksParsers.vtt = __webpack_require__(203).default, 
             features.a.directfile = __webpack_require__(188).default;
         }();
         /* harmony default export */ __webpack_exports__.default = api;
@@ -20267,7 +20267,7 @@ object-assign
         "use strict";
         __webpack_require__.r(__webpack_exports__);
         // EXTERNAL MODULE: ./src/transports/utils/document_manifest_loader.ts
-        var document_manifest_loader = __webpack_require__(107), of = __webpack_require__(23), features = __webpack_require__(8), request = __webpack_require__(17);
+        var document_manifest_loader = __webpack_require__(107), of = __webpack_require__(23), features = __webpack_require__(8), request = __webpack_require__(18);
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/of.js
                 // CONCATENATED MODULE: ./src/transports/dash/image_pipelines.ts
         /**
@@ -23369,7 +23369,7 @@ object-assign
             };
         }
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Observable.js + 3 modules
-                var Observable = __webpack_require__(7), tap = __webpack_require__(142), fetch = __webpack_require__(85), warn_once = __webpack_require__(19), byte_range = __webpack_require__(43), check_isobmff_integrity = __webpack_require__(71);
+                var Observable = __webpack_require__(7), tap = __webpack_require__(142), fetch = __webpack_require__(85), warn_once = __webpack_require__(20), byte_range = __webpack_require__(43), check_isobmff_integrity = __webpack_require__(71);
         // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/tap.js
                 // CONCATENATED MODULE: ./src/transports/dash/init_segment_loader.ts
         /**
@@ -25092,7 +25092,7 @@ object-assign
                 };
                 return Object(check_manifest_ids.a)(manifest), manifest;
             };
-        }, request = __webpack_require__(17), string_from_utf8 = __webpack_require__(109), warn_once = __webpack_require__(19), check_isobmff_integrity = __webpack_require__(71), document_manifest_loader = __webpack_require__(107), utils = __webpack_require__(224), get_box = __webpack_require__(73);
+        }, request = __webpack_require__(18), string_from_utf8 = __webpack_require__(109), warn_once = __webpack_require__(20), check_isobmff_integrity = __webpack_require__(71), document_manifest_loader = __webpack_require__(107), utils = __webpack_require__(224), get_box = __webpack_require__(73);
         // CONCATENATED MODULE: ./src/parsers/manifest/smooth/index.ts
         /**
  * Copyright 2015 CANAL+ Group
@@ -26218,6 +26218,684 @@ object-assign
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         __webpack_require__.r(__webpack_exports__);
+        // EXTERNAL MODULE: ./node_modules/object-assign/index.js
+        var object_assign = __webpack_require__(6), object_assign_default = /* */ __webpack_require__.n(object_assign), array_find = __webpack_require__(11), get_parameters = __webpack_require__(112), get_parent_elements_by_tag_name = __webpack_require__(78), get_styling = __webpack_require__(31), nodes = __webpack_require__(52), get_time_delimiters = __webpack_require__(126), log = __webpack_require__(0), regexps = __webpack_require__(15);
+        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/apply_extent.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * Apply `tts:extent` styling to an HTML element.
+ * @param {HTMLElement} element
+ * @param {string} extent
+ */
+        function applyExtent(element, extent) {
+            var trimmedExtent = extent.trim();
+            if ("auto" !== trimmedExtent) {
+                var splittedExtent = trimmedExtent.split(" ");
+                if (2 === splittedExtent.length) {
+                    var firstExtent = regexps.c.exec(splittedExtent[1]), secondExtent = regexps.c.exec(splittedExtent[2]);
+                    null !== firstExtent && null !== secondExtent && ("px" === firstExtent[2] || "%" === firstExtent[2] || "em" === firstExtent[2] ? element.style.width = firstExtent[1] + firstExtent[2] : "c" === firstExtent[2] ? (element.className += " proportional-width", 
+                    element.setAttribute("data-proportional-width", firstExtent[1])) : log.a.warn("TTML Parser: unhandled extent unit:", firstExtent[2]), 
+                    "px" === secondExtent[2] || "%" === secondExtent[2] || "em" === secondExtent[2] ? element.style.height = secondExtent[1] + secondExtent[2] : "c" === secondExtent[2] ? (element.className += " proportional-height", 
+                    element.setAttribute("data-proportional-height", secondExtent[1])) : log.a.warn("TTML Parser: unhandled extent unit:", secondExtent[2]));
+                }
+            }
+        }
+        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/apply_font_size.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * Apply `tts:fontSize` styling to an HTML element.
+ * @param {HTMLElement} element
+ * @param {string} fontSize
+ */        function applyFontSize(element, fontSize) {
+            var splittedFontSize = fontSize.trim().split(" ");
+            if (0 !== splittedFontSize.length) {
+                var firstFontSize = regexps.c.exec(splittedFontSize[0]);
+                null !== firstFontSize && ("px" === firstFontSize[2] || "%" === firstFontSize[2] || "em" === firstFontSize[2] ? element.style.fontSize = firstFontSize[1] + firstFontSize[2] : "c" === firstFontSize[2] ? (element.style.position = "relative", 
+                element.className += " proportional-font-size", element.setAttribute("data-proportional-font-size", firstFontSize[1])) : log.a.warn("TTML Parser: unhandled fontSize unit:", firstFontSize[2]));
+            }
+        }
+        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/apply_origin.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * @param {HTMLElement} element
+ * @param {string} origin
+ */        function applyOrigin(element, origin) {
+            var trimmedOrigin = origin.trim();
+            if ("auto" !== trimmedOrigin) {
+                var splittedOrigin = trimmedOrigin.split(" ");
+                if (2 === splittedOrigin.length) {
+                    var firstOrigin = regexps.c.exec(splittedOrigin[1]), secondOrigin = regexps.c.exec(splittedOrigin[2]);
+                    null !== firstOrigin && null !== secondOrigin && ("px" === firstOrigin[2] || "%" === firstOrigin[2] || "em" === firstOrigin[2] ? (element.style.position = "relative", 
+                    element.style.left = firstOrigin[1] + firstOrigin[2]) : "c" === firstOrigin[2] ? (element.style.position = "relative", 
+                    element.className += " proportional-left", element.setAttribute("data-proportional-left", firstOrigin[1])) : log.a.warn("TTML Parser: unhandled origin unit:", firstOrigin[2]), 
+                    "px" === secondOrigin[2] || "%" === secondOrigin[2] || "em" === secondOrigin[2] ? (element.style.position = "relative", 
+                    element.style.top = secondOrigin[1] + secondOrigin[2]) : "c" === secondOrigin[2] ? (element.style.position = "relative", 
+                    element.className += " proportional-top", element.setAttribute("data-proportional-top", secondOrigin[1])) : log.a.warn("TTML Parser: unhandled origin unit:", secondOrigin[2]));
+                }
+            }
+        }
+        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/apply_padding.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * @param {HTMLElement} element
+ * @param {string} padding
+ */        function applyPadding(element, padding) {
+            var splittedPadding = padding.trim().split(" ");
+            if (!(splittedPadding.length < 1)) {
+                var firstPadding = regexps.c.exec(splittedPadding[0]);
+                if (null !== firstPadding) {
+                    if ("px" === firstPadding[2] || "%" === firstPadding[2] || "em" === firstPadding[2]) {
+                        var firstPaddingValue = firstPadding[1] + firstPadding[2];
+                        1 === splittedPadding.length ? element.style.padding = firstPaddingValue : 2 === splittedPadding.length ? (element.style.paddingTop = firstPaddingValue, 
+                        element.style.paddingBottom = firstPaddingValue) : element.style.paddingTop = firstPaddingValue;
+                    } else "c" === firstPadding[2] ? (-1 === element.className.indexOf(" proportional-padding") && (element.className += " proportional-padding"), 
+                    1 === splittedPadding.length ? (element.setAttribute("data-proportional-padding-top", firstPadding[1]), 
+                    element.setAttribute("data-proportional-padding-bottom", firstPadding[1]), element.setAttribute("data-proportional-padding-left", firstPadding[1]), 
+                    element.setAttribute("data-proportional-padding-right", firstPadding[1])) : 2 === splittedPadding.length ? (element.setAttribute("data-proportional-padding-top", firstPadding[1]), 
+                    element.setAttribute("data-proportional-padding-bottom", firstPadding[1])) : element.setAttribute("data-proportional-padding-top", firstPadding[1])) : log.a.warn("TTML Parser: unhandled padding unit:", firstPadding[2]);
+                    if (1 !== splittedPadding.length) {
+                        var secondPadding = regexps.c.exec(splittedPadding[1]);
+                        if (null !== secondPadding) {
+                            if ("px" === secondPadding[2] || "%" === secondPadding[2] || "em" === secondPadding[2]) {
+                                var secondPaddingValue = secondPadding[1] + secondPadding[2];
+                                splittedPadding.length < 4 && (element.style.paddingLeft = secondPaddingValue), 
+                                element.style.paddingRight = secondPaddingValue;
+                            } else "c" === secondPadding[2] ? (-1 === element.className.indexOf(" proportional-padding") && (element.className += " proportional-padding"), 
+                            splittedPadding.length < 4 && element.setAttribute("data-proportional-padding-left", secondPadding[1]), 
+                            element.setAttribute("data-proportional-padding-right", secondPadding[1])) : log.a.warn("TTML Parser: unhandled padding unit:", secondPadding[2]);
+                            if (2 !== splittedPadding.length) {
+                                var thirdPadding = regexps.c.exec(splittedPadding[2]);
+                                if (null !== thirdPadding) {
+                                    if ("px" === thirdPadding[2] || "%" === thirdPadding[2] || "em" === thirdPadding[2]) {
+                                        var thirdPaddingValue = thirdPadding[1] + thirdPadding[2];
+                                        element.style.paddingBottom = thirdPaddingValue;
+                                    } else "c" === thirdPadding[2] ? (-1 === element.className.indexOf(" proportional-padding") && (element.className += " proportional-padding"), 
+                                    element.setAttribute("data-proportional-padding-bottom", thirdPadding[1])) : log.a.warn("TTML Parser: unhandled padding unit:", thirdPadding[2]);
+                                    if (3 !== splittedPadding.length) {
+                                        var fourthPadding = regexps.c.exec(splittedPadding[3]);
+                                        if (null !== fourthPadding) if ("px" === fourthPadding[2] || "%" === fourthPadding[2] || "em" === fourthPadding[2]) {
+                                            var fourthPaddingValue = fourthPadding[1] + fourthPadding[2];
+                                            element.style.paddingLeft = fourthPaddingValue;
+                                        } else "c" === fourthPadding[2] ? (-1 === element.className.indexOf(" proportional-padding") && (element.className += " proportional-padding"), 
+                                        element.setAttribute("data-proportional-padding-left", fourthPadding[1])) : log.a.warn("TTML Parser: unhandled padding unit:", fourthPadding[2]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/generate_css_test_outline.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * Try to replicate the textOutline TTML style property into CSS.
+ *
+ * We mock it throught the text-shadow property, translating the TTML thickness
+ * into blur radius and the blur-radius into... nothing.
+ *
+ * @param {string} color
+ * @param {string|number} thickness
+ * @returns {string}
+ */        function generateCSSTextOutline(color, thickness) {
+            return "-1px -1px " + thickness + " " + color + ",1px -1px " + thickness + " " + color + ",-1px 1px " + thickness + " " + color + ",1px 1px " + thickness + " " + color;
+        }
+        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/ttml_color_to_css_color.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * Translate a color indicated in TTML-style to a CSS-style color.
+ * @param {string} color
+ * @returns {string} color
+ */        function ttmlColorToCSSColor(color) {
+            // TODO check all possible color fomats
+            var regRes;
+            return null != (regRes = regexps.b.exec(color)) ? "rgba(" + parseInt(regRes[1], 16) + "," + parseInt(regRes[2], 16) + "," + parseInt(regRes[3], 16) + "," + parseInt(regRes[4], 16) / 255 + ")" : null != (regRes = regexps.a.exec(color)) ? "rgba(" + parseInt(regRes[1] + regRes[1], 16) + "," + parseInt(regRes[2] + regRes[2], 16) + "," + parseInt(regRes[3] + regRes[3], 16) + "," + parseInt(regRes[4] + regRes[4], 16) / 255 + ")" : color;
+        }
+        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/create_element.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        // Styling which can be applied to <span> from any level upper.
+        // Added here as an optimization
+                var SPAN_LEVEL_ATTRIBUTES = [ "color", "direction", "display", "fontFamily", "fontSize", "fontStyle", "fontWeight", "textDecoration", "textOutline", "unicodeBidi", "visibility", "wrapOption" ];
+ // TODO
+        // tts:showBackground (applies to region)
+        // tts:zIndex (applies to region)
+        /**
+ * Apply style set for a singular text span of the current cue.
+ * @param {HTMLElement} element - The text span
+ * @param {Object} style - The style to apply
+ */        function applyTextStyle(element, style, shouldTrimWhiteSpace) {
+            // applies to span
+            var color = style.color;
+            color && (element.style.color = ttmlColorToCSSColor(color));
+ // applies to body, div, p, region, span
+                        var backgroundColor = style.backgroundColor;
+            backgroundColor && (element.style.backgroundColor = ttmlColorToCSSColor(backgroundColor));
+ // applies to span
+                        var textOutline = style.textOutline;
+            if (textOutline) {
+                var outlineData = textOutline.trim().replace(/\s+/g, " ").split(" "), len = outlineData.length;
+                if (3 === len) {
+                    var outlineColor = ttmlColorToCSSColor(outlineData[0]), thickness = outlineData[1];
+                    element.style.textShadow = generateCSSTextOutline(outlineColor, thickness);
+                } else if (color && 1 === len) {
+                    var _thickness = outlineData[0];
+                    element.style.textShadow = generateCSSTextOutline(color, _thickness);
+                } else if (2 === len) {
+                    var isFirstArgAColor = /^[#A-Z]/i.test(outlineData[0]);
+                    // XOR-ing to be sure we get what we have
+                    if (isFirstArgAColor !== /^[0-9]/.test(outlineData[0])) if (isFirstArgAColor) {
+                        var _outlineColor = ttmlColorToCSSColor(outlineData[0]), _thickness2 = outlineData[1];
+                        element.style.textShadow = generateCSSTextOutline(_outlineColor, _thickness2);
+                    } else if (color) {
+                        var _thickness3 = outlineData[0];
+                        element.style.textShadow = generateCSSTextOutline(color, _thickness3);
+                    }
+                }
+            }
+ // applies to span
+                        var textDecoration = style.textDecoration;
+            if (textDecoration) switch (textDecoration) {
+              case "noUnderline":
+              case "noLineThrough":
+              case "noOverline":
+                element.style.textDecoration = "none";
+                break;
+
+              case "lineThrough":
+                element.style.textDecoration = "line-through";
+                break;
+
+              default:
+                element.style.textDecoration = textDecoration;
+            }
+ // applies to span
+                        var fontFamily = style.fontFamily;
+            if (fontFamily) switch (fontFamily) {
+              case "proportionalSansSerif":
+                element.style.fontFamily = "Arial, Helvetica, Liberation Sans, sans-serif";
+                break;
+
+                // TODO monospace or sans-serif or font with both?
+                              case "monospaceSansSerif":
+              case "sansSerif":
+                element.style.fontFamily = "sans-serif";
+                break;
+
+              case "monospaceSerif":
+              case "default":
+                element.style.fontFamily = "Courier New, Liberation Mono, monospace";
+                break;
+
+                // TODO font with both?
+                              case "proportionalSerif":
+                element.style.fontFamily = "serif";
+                break;
+
+              default:
+                element.style.fontFamily = fontFamily;
+            }
+ // applies to span
+                        var fontStyle = style.fontStyle;
+            fontStyle && (element.style.fontStyle = fontStyle);
+ // applies to span
+                        var fontWeight = style.fontWeight;
+            fontWeight && (element.style.fontWeight = fontWeight);
+ // applies to span
+                        var fontSize = style.fontSize;
+            void 0 !== fontSize ? applyFontSize(element, fontSize) : (element.className += " proportional-font-size", 
+            element.setAttribute("data-proportional-font-size", "1"));
+ // applies to p, span
+                        var direction = style.direction;
+            direction && (element.style.direction = direction);
+ // applies to p, span
+                        var unicodeBidi = style.unicodeBidi;
+            if (unicodeBidi) switch (unicodeBidi) {
+              case "bidiOverride":
+                element.style.unicodeBidi = "bidi-override";
+                break;
+
+              case "embed":
+                element.style.unicodeBidi = "embed";
+                break;
+
+              default:
+                element.style.unicodeBidi = "normal";
+            }
+ // applies to body, div, p, region, span
+                        var visibility = style.visibility;
+            visibility && (element.style.visibility = visibility), "none" === style.display && (element.style.display = "none");
+ // applies to body, div, p, region, span
+                        // applies to body, div, p, region, span
+            var wrapOption = style.wrapOption;
+            element.style.whiteSpace = "noWrap" === wrapOption ? shouldTrimWhiteSpace ? "nowrap" : "pre" : shouldTrimWhiteSpace ? "normal" : "pre-wrap";
+        }
+        /**
+ * Apply style for the general text track div.
+ * @param {HTMLElement} element - The <div> the style will be applied on.
+ * @param {Object} style - The general style object of the paragraph.
+ */        function applyGeneralStyle(element, style) {
+            // applies to tt, region
+            var extent = style.extent;
+            void 0 !== extent && applyExtent(element, extent);
+ // applies to region
+                        style.writingMode;
+            var overflow = style.overflow;
+            element.style.overflow = overflow || "hidden";
+            // applies to region
+            var padding = style.padding;
+            padding && applyPadding(element, padding);
+ // applies to region
+                        var origin = style.origin;
+            origin && applyOrigin(element, origin);
+ // applies to region
+                        var displayAlign = style.displayAlign;
+            if (element.style.display = "flex", element.style.flexDirection = "column", displayAlign) switch (displayAlign) {
+              case "before":
+                element.style.justifyContent = "flex-start";
+                break;
+
+              case "center":
+                element.style.justifyContent = "center";
+                break;
+
+              case "after":
+                element.style.justifyContent = "flex-end";
+            }
+ // applies to region
+                        var opacity = style.opacity;
+            opacity && (element.style.opacity = opacity);
+ // applies to body, div, p, region, span
+                        var visibility = style.visibility;
+            visibility && (element.style.visibility = visibility), "none" === style.display && (element.style.display = "none");
+ // applies to body, div, p, region, span
+                }
+        /**
+ * Apply style set for a <p> element
+ * @param {HTMLElement} element - The <p> element
+ * @param {Object} style - The general style object of the paragraph.
+ */        function applyPStyle(element, style) {
+            // applies to body, div, p, region, span
+            var paragraphBackgroundColor = style.backgroundColor;
+            paragraphBackgroundColor && (element.style.backgroundColor = ttmlColorToCSSColor(paragraphBackgroundColor));
+ // applies to p
+                        var lineHeight = style.lineHeight;
+            lineHeight && (element.style.lineHeight = lineHeight);
+ // applies to p
+                        var textAlign = style.textAlign;
+            if (textAlign) switch (textAlign) {
+              case "center":
+                element.style.textAlign = "center";
+                break;
+
+              case "left":
+              case "start":
+                // TODO check what start means (difference with left, writing direction?)
+                element.style.textAlign = "left";
+                break;
+
+              case "right":
+              case "end":
+                // TODO check what end means (difference with right, writing direction?)
+                element.style.textAlign = "right";
+            }
+        }
+        /**
+ * Creates span of text for the given #text element, with the right style.
+ *
+ * TODO create text elements as string? Might help performances.
+ * @param {Element} el - the #text element, which text content should be
+ * displayed
+ * @param {Object} style - the style object for the given text
+ * @param {Boolean} shouldTrimWhiteSpace - True if the space should be
+ * trimmed.
+ * @returns {HTMLElement}
+ */        function createTextElement(el, style, shouldTrimWhiteSpace) {
+            var textElement = document.createElement("span"), textContent = el.textContent || "";
+            if (shouldTrimWhiteSpace) {
+                // 1. Trim leading and trailing whitespace.
+                // 2. Collapse multiple spaces into one.
+                var trimmed = textContent.trim();
+                textContent = trimmed = trimmed.replace(/\s+/g, " ");
+            }
+            return textElement.innerHTML = textContent, textElement.className = "rxp-texttrack-span", 
+            applyTextStyle(textElement, style, shouldTrimWhiteSpace), textElement;
+        }
+        /**
+ * Generate every text elements to display in a given paragraph.
+ * @param {Element} paragraph - The <p> tag.
+ * @param {Array.<Object>} regions
+ * @param {Array.<Object>} styles
+ * @param {Object} paragraphStyle - The general style object of the paragraph.
+ * @param {Boolean} shouldTrimWhiteSpace
+ * @returns {Array.<HTMLElement>}
+ */        function generateTextContent(paragraph, regions, styles, paragraphStyle, shouldTrimWhiteSpace) {
+            /**
+   * Recursive function, taking a node in argument and returning the
+   * corresponding array of HTMLElement in order.
+   * @param {Node} node - the node in question
+   * @param {Object} style - the current state of the style for the node.
+   * /!\ The style object can be mutated, provide a copy of it.
+   * @param {Array.<Element>} spans - The spans parent of this node.
+   * @param {Boolean} shouldTrimWhiteSpaceFromParent - True if the space should be
+   * trimmed by default. From the parent xml:space parameter.
+   * @returns {Array.<HTMLElement>}
+   */
+            return function loop(node, style, spans, shouldTrimWhiteSpaceFromParent) {
+                for (var childNodes = node.childNodes, elements = [], i = 0; i < childNodes.length; i++) {
+                    var currentNode = childNodes[i];
+                    if ("#text" === currentNode.nodeName) {
+                        var backgroundColor = Object(get_styling.a)([ "backgroundColor" ], spans, styles, regions).backgroundColor;
+                        backgroundColor ? style.backgroundColor = backgroundColor : delete style.backgroundColor;
+                        var el = createTextElement(currentNode, style, shouldTrimWhiteSpaceFromParent);
+                        elements.push(el);
+                    } else if ("br" === currentNode.nodeName) {
+                        var br = document.createElement("BR");
+                        elements.push(br);
+                    } else if ("span" === currentNode.nodeName && currentNode.nodeType === Node.ELEMENT_NODE && 0 < currentNode.childNodes.length) {
+                        var spaceAttribute = currentNode.getAttribute("xml:space"), shouldTrimWhiteSpaceOnSpan = spaceAttribute ? "default" === spaceAttribute : shouldTrimWhiteSpaceFromParent, newStyle = object_assign_default()({}, style, Object(get_styling.a)(SPAN_LEVEL_ATTRIBUTES, [ currentNode ], styles, regions));
+                        elements.push.apply(elements, loop(currentNode, newStyle, [ currentNode ].concat(spans), shouldTrimWhiteSpaceOnSpan));
+                    }
+                }
+                return elements;
+            }(paragraph, object_assign_default()({}, paragraphStyle), [], shouldTrimWhiteSpace);
+        }
+        /**
+ * @param {Element} paragraph
+ * @param {Element} body
+ * @param {Array.<Object>} regions
+ * @param {Array.<Object>} styles
+ * @param {Object} paragraphStyle
+ * @param {Boolean} shouldTrimWhiteSpaceOnParagraph
+ * @returns {HTMLElement}
+ */        function createElement(paragraph, body, regions, styles, paragraphStyle, _ref) {
+            var cellResolution = _ref.cellResolution, shouldTrimWhiteSpace = _ref.shouldTrimWhiteSpace, divs = Object(get_parent_elements_by_tag_name.a)(paragraph, "div"), parentElement = document.createElement("DIV");
+            if (parentElement.className = "rxp-texttrack-region", parentElement.setAttribute("data-resolution-columns", String(cellResolution.columns)), 
+            parentElement.setAttribute("data-resolution-rows", String(cellResolution.rows)), 
+            applyGeneralStyle(parentElement, paragraphStyle), body) {
+                // applies to body, div, p, region, span
+                var bodyBackgroundColor = Object(get_styling.a)([ "backgroundColor" ], [].concat(divs, [ body ]), styles, regions).bodyBackgroundColor;
+                bodyBackgroundColor && (parentElement.style.backgroundColor = ttmlColorToCSSColor(bodyBackgroundColor));
+            }
+            var pElement = document.createElement("p");
+            pElement.className = "rxp-texttrack-p", applyPStyle(pElement, paragraphStyle);
+            for (var textContent = generateTextContent(paragraph, regions, styles, paragraphStyle, shouldTrimWhiteSpace), i = 0; i < textContent.length; i++) pElement.appendChild(textContent[i]);
+ // NOTE:
+            // The following code is for the inclusion of div elements. This has no
+            // advantage for now, and might only with future evolutions.
+            // (This is only an indication of what the base of the code could look like).
+            // if (divs.length) {
+            //   let container = parentElement;
+            //   for (let i = divs.length - 1; i >= 0; i--) {
+            //     // TODO manage style at div level?
+            //     // They are: visibility, display and backgroundColor
+            //     // All these do not have any difference if applied to the <p> element
+            //     // instead of the div.
+            //     // The advantage might only be for multiple <p> elements dispatched
+            //     // in multiple div Which we do not manage anyway for now.
+            //     const divEl = document.createElement("DIV");
+            //     divEl.className = "rxp-texttrack-div";
+            //     container.appendChild(divEl);
+            //     container = divEl;
+            //   }
+            //   container.appendChild(pElement);
+            //   parentElement.appendChild(container);
+            // } else {
+            //   parentElement.appendChild(pElement);
+            // }
+                        return parentElement.appendChild(pElement), parentElement;
+        }
+        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/parse_cue.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * @param {Element} paragraph
+ * @param {Number} timeOffset
+ * @param {Array.<Object>} idStyles
+ * @param {Array.<Object>} regionStyles
+ * @param {Element} body
+ * @param {Object} paragraphStyle
+ * @param {Object} ttParams
+ * @param {Boolean} shouldTrimWhiteSpaceOnParagraph
+ * @returns {Object|null}
+ */        function parseCue(paragraph, timeOffset, idStyles, regionStyles, body, paragraphStyle, ttParams, shouldTrimWhiteSpace) {
+            // Disregard empty elements:
+            // TTML allows for empty elements like <div></div>.
+            // If paragraph has neither time attributes, nor
+            // non-whitespace text, don't try to make a cue out of it.
+            if (!paragraph.hasAttribute("begin") && !paragraph.hasAttribute("end") && /^\s*$/.test(paragraph.textContent || "")) return null;
+            var cellResolution = ttParams.cellResolution, _getTimeDelimiters = Object(get_time_delimiters.a)(paragraph, ttParams);
+            return {
+                start: _getTimeDelimiters.start + timeOffset,
+                end: _getTimeDelimiters.end + timeOffset,
+                element: createElement(paragraph, body, regionStyles, idStyles, paragraphStyle, {
+                    cellResolution: cellResolution,
+                    shouldTrimWhiteSpace: shouldTrimWhiteSpace
+                })
+            };
+        }
+        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/parse_ttml_to_div.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */        var STYLE_ATTRIBUTES = [ "backgroundColor", "color", "direction", "display", "displayAlign", "extent", "fontFamily", "fontSize", "fontStyle", "fontWeight", "lineHeight", "opacity", "origin", "overflow", "padding", "textAlign", "textDecoration", "textOutline", "unicodeBidi", "visibility", "wrapOption", "writingMode" ];
+        /**
+ * Create array of objects which should represent the given TTML text track.
+ * These objects have the following structure
+ *   - start {Number}: start time, in seconds, at which the cue should
+ *     be displayed
+ *   - end {Number}: end time, in seconds, at which the cue should
+ *     be displayed
+ *   - element {HTMLElement}: <div> element representing the cue, with the
+ *     right style. This div should then be appended to an element having
+ *     the exact size of the wanted region the text track provide cues for.
+ *
+ * TODO TTML parsing is still pretty heavy on the CPU.
+ * Optimizations have been done, principally to avoid using too much XML APIs,
+ * but we can still do better.
+ * @param {string} str
+ * @param {Number} timeOffset
+ * @returns {Array.<Object>}
+ */        
+        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/index.ts
+        /**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+        /**
+ * /!\ This file is feature-switchable.
+ * It always should be imported through the `features` object.
+ */
+        /* harmony default export */ __webpack_exports__.default = function parseTTMLStringToDIV(str, timeOffset) {
+            var ret = [], xml = new DOMParser().parseFromString(str, "text/xml");
+            if (xml) {
+                var tt = xml.getElementsByTagName("tt")[0];
+                if (!tt) throw new Error("invalid XML");
+                for (var body = Object(nodes.a)(tt), styleNodes = Object(nodes.c)(tt), regionNodes = Object(nodes.b)(tt), paragraphNodes = Object(nodes.d)(tt), ttParams = Object(get_parameters.a)(tt), idStyles = [], i = 0; i <= styleNodes.length - 1; i++) {
+                    var styleNode = styleNodes[i];
+                    if (styleNode instanceof Element) {
+                        var styleID = styleNode.getAttribute("xml:id");
+                        null !== styleID && 
+                        // TODO styles referencing other styles
+                        idStyles.push({
+                            id: styleID,
+                            style: Object(get_styling.b)(styleNode)
+                        });
+                    }
+                }
+ // construct regionStyles array based on the xml as an optimization
+                                for (var regionStyles = [], _i = 0; _i <= regionNodes.length - 1; _i++) {
+                    var regionNode = regionNodes[_i];
+                    if (regionNode instanceof Element) {
+                        var regionID = regionNode.getAttribute("xml:id");
+                        null !== regionID && function() {
+                            var regionStyle = Object(get_styling.b)(regionNode), associatedStyle = regionNode.getAttribute("style");
+                            if (associatedStyle) {
+                                var style = Object(array_find.a)(idStyles, function(x) {
+                                    return x.id === associatedStyle;
+                                });
+                                style && (regionStyle = object_assign_default()({}, style.style, regionStyle));
+                            }
+                            regionStyles.push({
+                                id: regionID,
+                                style: regionStyle
+                            });
+                        }();
+                    }
+                }
+ // Computing the style takes a lot of ressources.
+                // To avoid too much re-computation, let's compute the body style right
+                // now and do the rest progressively.
+                // TODO Compute corresponding CSS style here (as soon as we now the TTML
+                // style) to speed up the process even
+                // more.
+                                for (var bodyStyle = null !== body ? Object(get_styling.a)(STYLE_ATTRIBUTES, [ body ], idStyles, regionStyles) : Object(get_styling.a)(STYLE_ATTRIBUTES, [], idStyles, regionStyles), shouldTrimWhiteSpaceOnBody = "default" === (body ? body.getAttribute("xml:space") : void 0) || "default" === ttParams.spaceStyle, _i2 = 0; _i2 < paragraphNodes.length; _i2++) {
+                    var paragraph = paragraphNodes[_i2];
+                    if (paragraph instanceof Element) {
+                        var divs = Object(get_parent_elements_by_tag_name.a)(paragraph, "div"), paragraphStyle = object_assign_default()({}, bodyStyle, Object(get_styling.a)(STYLE_ATTRIBUTES, [ paragraph ].concat(divs), idStyles, regionStyles)), paragraphSpaceAttribute = paragraph.getAttribute("xml:space"), cue = parseCue(paragraph, timeOffset, idStyles, regionStyles, body, paragraphStyle, ttParams, paragraphSpaceAttribute ? "default" === paragraphSpaceAttribute : shouldTrimWhiteSpaceOnBody);
+                        cue && ret.push(cue);
+                    }
+                }
+            }
+            return ret;
+        };
+        /***/    }, 
+    /* 203 */
+    /***/ function(module, __webpack_exports__, __webpack_require__) {
+        "use strict";
+        __webpack_require__.r(__webpack_exports__);
         // EXTERNAL MODULE: ./src/parsers/texttracks/webvtt/get_cue_blocks.ts
         var get_cue_blocks = __webpack_require__(110), utils = __webpack_require__(56);
         // EXTERNAL MODULE: ./src/parsers/texttracks/webvtt/utils.ts
@@ -26528,7 +27206,7 @@ object-assign
             return cuesArray;
         };
         /***/    }, 
-    /* 203 */
+    /* 204 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
         __webpack_require__.r(__webpack_exports__);
@@ -26761,7 +27439,7 @@ object-assign
                     }
                 }
             };
-        }, request = __webpack_require__(17), call_custom_manifest_loader = __webpack_require__(108);
+        }, request = __webpack_require__(18), call_custom_manifest_loader = __webpack_require__(108);
         // EXTERNAL MODULE: ./src/utils/request/index.ts + 1 modules
                 // CONCATENATED MODULE: ./src/transports/metaplaylist/manifest_loader.ts
         /**
@@ -27019,536 +27697,6 @@ object-assign
  * It always should be imported through the `features` object.
  */
         /* harmony default export */    }, 
-    /* 204 */
-    /***/ function(module, __webpack_exports__, __webpack_require__) {
-        "use strict";
-        __webpack_require__.r(__webpack_exports__);
-        // EXTERNAL MODULE: ./node_modules/object-assign/index.js
-        var object_assign = __webpack_require__(6), object_assign_default = /* */ __webpack_require__.n(object_assign), array_find = __webpack_require__(11), get_parameters = __webpack_require__(112), get_parent_elements_by_tag_name = __webpack_require__(78), get_styling = __webpack_require__(31), nodes = __webpack_require__(52), get_time_delimiters = __webpack_require__(126), regexps = __webpack_require__(20);
-        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/generate_css_test_outline.ts
-        /**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-        /**
- * Try to replicate the textOutline TTML style property into CSS.
- *
- * We mock it throught the text-shadow property, translating the TTML thickness
- * into blur radius and the blur-radius into... nothing.
- *
- * @param {string} color
- * @param {string|number} thickness
- * @returns {string}
- */
-        function generateCSSTextOutline(color, thickness) {
-            return "-1px -1px " + thickness + " " + color + ",1px -1px " + thickness + " " + color + ",-1px 1px " + thickness + " " + color + ",1px 1px " + thickness + " " + color;
-        }
-        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/ttml_color_to_css_color.ts
-        /**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-        /**
- * Translate a color indicated in TTML-style to a CSS-style color.
- * @param {string} color
- * @returns {string} color
- */        function ttmlColorToCSSColor(color) {
-            // TODO check all possible color fomats
-            var regRes;
-            return null != (regRes = regexps.c.exec(color)) ? "rgba(" + parseInt(regRes[1], 16) + "," + parseInt(regRes[2], 16) + "," + parseInt(regRes[3], 16) + "," + parseInt(regRes[4], 16) / 255 + ")" : null != (regRes = regexps.b.exec(color)) ? "rgba(" + parseInt(regRes[1] + regRes[1], 16) + "," + parseInt(regRes[2] + regRes[2], 16) + "," + parseInt(regRes[3] + regRes[3], 16) + "," + parseInt(regRes[4] + regRes[4], 16) / 255 + ")" : color;
-        }
-        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/create_element.ts
-        /**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-        // Styling which can be applied to <span> from any level upper.
-        // Added here as an optimization
-                var SPAN_LEVEL_ATTRIBUTES = [ "color", "direction", "display", "fontFamily", "fontSize", "fontStyle", "fontWeight", "textDecoration", "textOutline", "unicodeBidi", "visibility", "wrapOption" ];
- // TODO
-        // tts:showBackground (applies to region)
-        // tts:zIndex (applies to region)
-        /**
- * Apply style set for a singular text span of the current cue.
- * @param {HTMLElement} element - The text span
- * @param {Object} style - The style to apply
- */        function applyTextStyle(element, style, shouldTrimWhiteSpace) {
-            // applies to span
-            var color = style.color;
-            color && (element.style.color = ttmlColorToCSSColor(color));
- // applies to body, div, p, region, span
-                        var backgroundColor = style.backgroundColor;
-            backgroundColor && (element.style.backgroundColor = ttmlColorToCSSColor(backgroundColor));
- // applies to span
-                        var textOutline = style.textOutline;
-            if (textOutline) {
-                var outlineData = textOutline.trim().replace(/\s+/g, " ").split(" "), len = outlineData.length;
-                if (3 === len) {
-                    var outlineColor = ttmlColorToCSSColor(outlineData[0]), thickness = outlineData[1];
-                    element.style.textShadow = generateCSSTextOutline(outlineColor, thickness);
-                } else if (color && 1 === len) {
-                    var _thickness = outlineData[0];
-                    element.style.textShadow = generateCSSTextOutline(color, _thickness);
-                } else if (2 === len) {
-                    var isFirstArgAColor = /^[#A-Z]/i.test(outlineData[0]);
-                    // XOR-ing to be sure we get what we have
-                    if (isFirstArgAColor !== /^[0-9]/.test(outlineData[0])) if (isFirstArgAColor) {
-                        var _outlineColor = ttmlColorToCSSColor(outlineData[0]), _thickness2 = outlineData[1];
-                        element.style.textShadow = generateCSSTextOutline(_outlineColor, _thickness2);
-                    } else if (color) {
-                        var _thickness3 = outlineData[0];
-                        element.style.textShadow = generateCSSTextOutline(color, _thickness3);
-                    }
-                }
-            }
- // applies to span
-                        var textDecoration = style.textDecoration;
-            if (textDecoration) switch (textDecoration) {
-              case "noUnderline":
-              case "noLineThrough":
-              case "noOverline":
-                element.style.textDecoration = "none";
-                break;
-
-              case "lineThrough":
-                element.style.textDecoration = "line-through";
-                break;
-
-              default:
-                element.style.textDecoration = textDecoration;
-            }
- // applies to span
-                        var fontFamily = style.fontFamily;
-            if (fontFamily) switch (fontFamily) {
-              case "proportionalSansSerif":
-                element.style.fontFamily = "Arial, Helvetica, Liberation Sans, sans-serif";
-                break;
-
-                // TODO monospace or sans-serif or font with both?
-                              case "monospaceSansSerif":
-              case "sansSerif":
-                element.style.fontFamily = "sans-serif";
-                break;
-
-              case "monospaceSerif":
-              case "default":
-                element.style.fontFamily = "Courier New, Liberation Mono, monospace";
-                break;
-
-                // TODO font with both?
-                              case "proportionalSerif":
-                element.style.fontFamily = "serif";
-                break;
-
-              default:
-                element.style.fontFamily = fontFamily;
-            }
- // applies to span
-                        var fontStyle = style.fontStyle;
-            fontStyle && (element.style.fontStyle = fontStyle);
- // applies to span
-                        var fontWeight = style.fontWeight;
-            fontWeight && (element.style.fontWeight = fontWeight);
- // applies to span
-                        var fontSize = style.fontSize;
-            if (void 0 !== fontSize) {
-                var proportFont = regexps.a.exec(fontSize);
-                if (null !== proportFont && 2 <= proportFont.length) {
-                    element.className += " proportional-font-size";
-                    var fSize = proportFont[1];
-                    void 0 === fSize || isNaN(+fSize) ? element.setAttribute("data-proportional-font-size", "1") : element.setAttribute("data-proportional-font-size", String(+fSize));
-                } else element.style.fontSize = fontSize;
-            } else element.className += " proportional-font-size", element.setAttribute("data-proportional-font-size", "1");
- // applies to p, span
-                        var direction = style.direction;
-            direction && (element.style.direction = direction);
- // applies to p, span
-                        var unicodeBidi = style.unicodeBidi;
-            if (unicodeBidi) switch (unicodeBidi) {
-              case "bidiOverride":
-                element.style.unicodeBidi = "bidi-override";
-                break;
-
-              case "embed":
-                element.style.unicodeBidi = "embed";
-                break;
-
-              default:
-                element.style.unicodeBidi = "normal";
-            }
- // applies to body, div, p, region, span
-                        var visibility = style.visibility;
-            visibility && (element.style.visibility = visibility), "none" === style.display && (element.style.display = "none");
- // applies to body, div, p, region, span
-                        // applies to body, div, p, region, span
-            var wrapOption = style.wrapOption;
-            element.style.whiteSpace = "noWrap" === wrapOption ? shouldTrimWhiteSpace ? "nowrap" : "pre" : shouldTrimWhiteSpace ? "normal" : "pre-wrap";
-        }
-        /**
- * Apply style for the general text track div.
- * @param {HTMLElement} element - The <div> the style will be applied on.
- * @param {Object} style - The general style object of the paragraph.
- */        function applyGeneralStyle(element, style) {
-            // applies to tt, region
-            var extent = style.extent;
-            if (extent) {
-                var results = regexps.d.exec(extent);
-                null != results && (element.style.width = results[1] + "%", element.style.height = results[2] + "%");
-            }
- // applies to region
-                        style.writingMode;
-            var overflow = style.overflow;
-            element.style.overflow = overflow || "hidden";
-            // applies to region
-            var padding = style.padding;
-            padding && (element.style.padding = padding);
- // applies to region
-                        var origin = style.origin;
-            if (origin) {
-                var resultsPercent = regexps.d.exec(origin);
-                null != resultsPercent && (element.style.position = "relative", element.style.left = resultsPercent[1] + "%", 
-                element.style.top = resultsPercent[2] + "%");
-            }
- // applies to region
-                        var displayAlign = style.displayAlign;
-            if (element.style.display = "flex", element.style.flexDirection = "column", displayAlign) switch (displayAlign) {
-              case "before":
-                element.style.justifyContent = "flex-start";
-                break;
-
-              case "center":
-                element.style.justifyContent = "center";
-                break;
-
-              case "after":
-                element.style.justifyContent = "flex-end";
-            }
- // applies to region
-                        var opacity = style.opacity;
-            opacity && (element.style.opacity = opacity);
- // applies to body, div, p, region, span
-                        var visibility = style.visibility;
-            visibility && (element.style.visibility = visibility), "none" === style.display && (element.style.display = "none");
- // applies to body, div, p, region, span
-                }
-        /**
- * Apply style set for a <p> element
- * @param {HTMLElement} element - The <p> element
- * @param {Object} style - The general style object of the paragraph.
- */        function applyPStyle(element, style) {
-            // applies to body, div, p, region, span
-            var paragraphBackgroundColor = style.backgroundColor;
-            paragraphBackgroundColor && (element.style.backgroundColor = ttmlColorToCSSColor(paragraphBackgroundColor));
- // applies to p
-                        var lineHeight = style.lineHeight;
-            lineHeight && (element.style.lineHeight = lineHeight);
- // applies to p
-                        var textAlign = style.textAlign;
-            if (textAlign) switch (textAlign) {
-              case "center":
-                element.style.textAlign = "center";
-                break;
-
-              case "left":
-              case "start":
-                // TODO check what start means (difference with left, writing direction?)
-                element.style.textAlign = "left";
-                break;
-
-              case "right":
-              case "end":
-                // TODO check what end means (difference with right, writing direction?)
-                element.style.textAlign = "right";
-            }
-        }
-        /**
- * Creates span of text for the given #text element, with the right style.
- *
- * TODO create text elements as string? Might help performances.
- * @param {Element} el - the #text element, which text content should be
- * displayed
- * @param {Object} style - the style object for the given text
- * @param {Boolean} shouldTrimWhiteSpace - True if the space should be
- * trimmed.
- * @returns {HTMLElement}
- */        function createTextElement(el, style, shouldTrimWhiteSpace) {
-            var textElement = document.createElement("span"), textContent = el.textContent || "";
-            if (shouldTrimWhiteSpace) {
-                // 1. Trim leading and trailing whitespace.
-                // 2. Collapse multiple spaces into one.
-                var trimmed = textContent.trim();
-                textContent = trimmed = trimmed.replace(/\s+/g, " ");
-            }
-            return textElement.innerHTML = textContent, textElement.className = "rxp-texttrack-span", 
-            applyTextStyle(textElement, style, shouldTrimWhiteSpace), textElement;
-        }
-        /**
- * Generate every text elements to display in a given paragraph.
- * @param {Element} paragraph - The <p> tag.
- * @param {Array.<Object>} regions
- * @param {Array.<Object>} styles
- * @param {Object} paragraphStyle - The general style object of the paragraph.
- * @param {Boolean} shouldTrimWhiteSpace
- * @returns {Array.<HTMLElement>}
- */        function generateTextContent(paragraph, regions, styles, paragraphStyle, shouldTrimWhiteSpace) {
-            /**
-   * Recursive function, taking a node in argument and returning the
-   * corresponding array of HTMLElement in order.
-   * @param {Node} node - the node in question
-   * @param {Object} style - the current state of the style for the node.
-   * /!\ The style object can be mutated, provide a copy of it.
-   * @param {Array.<Element>} spans - The spans parent of this node.
-   * @param {Boolean} shouldTrimWhiteSpaceFromParent - True if the space should be
-   * trimmed by default. From the parent xml:space parameter.
-   * @returns {Array.<HTMLElement>}
-   */
-            return function loop(node, style, spans, shouldTrimWhiteSpaceFromParent) {
-                for (var childNodes = node.childNodes, elements = [], i = 0; i < childNodes.length; i++) {
-                    var currentNode = childNodes[i];
-                    if ("#text" === currentNode.nodeName) {
-                        var backgroundColor = Object(get_styling.a)([ "backgroundColor" ], spans, styles, regions).backgroundColor;
-                        backgroundColor ? style.backgroundColor = backgroundColor : delete style.backgroundColor;
-                        var el = createTextElement(currentNode, style, shouldTrimWhiteSpaceFromParent);
-                        elements.push(el);
-                    } else if ("br" === currentNode.nodeName) {
-                        var br = document.createElement("BR");
-                        elements.push(br);
-                    } else if ("span" === currentNode.nodeName && currentNode.nodeType === Node.ELEMENT_NODE && 0 < currentNode.childNodes.length) {
-                        var spaceAttribute = currentNode.getAttribute("xml:space"), shouldTrimWhiteSpaceOnSpan = spaceAttribute ? "default" === spaceAttribute : shouldTrimWhiteSpaceFromParent, newStyle = object_assign_default()({}, style, Object(get_styling.a)(SPAN_LEVEL_ATTRIBUTES, [ currentNode ], styles, regions));
-                        elements.push.apply(elements, loop(currentNode, newStyle, [ currentNode ].concat(spans), shouldTrimWhiteSpaceOnSpan));
-                    }
-                }
-                return elements;
-            }(paragraph, object_assign_default()({}, paragraphStyle), [], shouldTrimWhiteSpace);
-        }
-        /**
- * @param {Element} paragraph
- * @param {Element} body
- * @param {Array.<Object>} regions
- * @param {Array.<Object>} styles
- * @param {Object} paragraphStyle
- * @param {Boolean} shouldTrimWhiteSpaceOnParagraph
- * @returns {HTMLElement}
- */        function createElement(paragraph, body, regions, styles, paragraphStyle, _ref) {
-            var cellResolution = _ref.cellResolution, shouldTrimWhiteSpace = _ref.shouldTrimWhiteSpace, divs = Object(get_parent_elements_by_tag_name.a)(paragraph, "div"), parentElement = document.createElement("DIV");
-            if (parentElement.className = "rxp-texttrack-region", parentElement.setAttribute("data-resolution-columns", String(cellResolution.columns)), 
-            parentElement.setAttribute("data-resolution-rows", String(cellResolution.rows)), 
-            applyGeneralStyle(parentElement, paragraphStyle), body) {
-                // applies to body, div, p, region, span
-                var bodyBackgroundColor = Object(get_styling.a)([ "backgroundColor" ], [].concat(divs, [ body ]), styles, regions).bodyBackgroundColor;
-                bodyBackgroundColor && (parentElement.style.backgroundColor = ttmlColorToCSSColor(bodyBackgroundColor));
-            }
-            var pElement = document.createElement("p");
-            pElement.className = "rxp-texttrack-p", applyPStyle(pElement, paragraphStyle);
-            for (var textContent = generateTextContent(paragraph, regions, styles, paragraphStyle, shouldTrimWhiteSpace), i = 0; i < textContent.length; i++) pElement.appendChild(textContent[i]);
- // NOTE:
-            // The following code is for the inclusion of div elements. This has no
-            // advantage for now, and might only with future evolutions.
-            // (This is only an indication of what the base of the code could look like).
-            // if (divs.length) {
-            //   let container = parentElement;
-            //   for (let i = divs.length - 1; i >= 0; i--) {
-            //     // TODO manage style at div level?
-            //     // They are: visibility, display and backgroundColor
-            //     // All these do not have any difference if applied to the <p> element
-            //     // instead of the div.
-            //     // The advantage might only be for multiple <p> elements dispatched
-            //     // in multiple div Which we do not manage anyway for now.
-            //     const divEl = document.createElement("DIV");
-            //     divEl.className = "rxp-texttrack-div";
-            //     container.appendChild(divEl);
-            //     container = divEl;
-            //   }
-            //   container.appendChild(pElement);
-            //   parentElement.appendChild(container);
-            // } else {
-            //   parentElement.appendChild(pElement);
-            // }
-                        return parentElement.appendChild(pElement), parentElement;
-        }
-        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/parse_cue.ts
-        /**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-        /**
- * @param {Element} paragraph
- * @param {Number} timeOffset
- * @param {Array.<Object>} idStyles
- * @param {Array.<Object>} regionStyles
- * @param {Element} body
- * @param {Object} paragraphStyle
- * @param {Object} ttParams
- * @param {Boolean} shouldTrimWhiteSpaceOnParagraph
- * @returns {Object|null}
- */        function parseCue(paragraph, timeOffset, idStyles, regionStyles, body, paragraphStyle, ttParams, shouldTrimWhiteSpace) {
-            // Disregard empty elements:
-            // TTML allows for empty elements like <div></div>.
-            // If paragraph has neither time attributes, nor
-            // non-whitespace text, don't try to make a cue out of it.
-            if (!paragraph.hasAttribute("begin") && !paragraph.hasAttribute("end") && /^\s*$/.test(paragraph.textContent || "")) return null;
-            var cellResolution = ttParams.cellResolution, _getTimeDelimiters = Object(get_time_delimiters.a)(paragraph, ttParams);
-            return {
-                start: _getTimeDelimiters.start + timeOffset,
-                end: _getTimeDelimiters.end + timeOffset,
-                element: createElement(paragraph, body, regionStyles, idStyles, paragraphStyle, {
-                    cellResolution: cellResolution,
-                    shouldTrimWhiteSpace: shouldTrimWhiteSpace
-                })
-            };
-        }
-        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/parse_ttml_to_div.ts
-        /**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */        var STYLE_ATTRIBUTES = [ "backgroundColor", "color", "direction", "display", "displayAlign", "extent", "fontFamily", "fontSize", "fontStyle", "fontWeight", "lineHeight", "opacity", "origin", "overflow", "padding", "textAlign", "textDecoration", "textOutline", "unicodeBidi", "visibility", "wrapOption", "writingMode" ];
-        /**
- * Create array of objects which should represent the given TTML text track.
- * These objects have the following structure
- *   - start {Number}: start time, in seconds, at which the cue should
- *     be displayed
- *   - end {Number}: end time, in seconds, at which the cue should
- *     be displayed
- *   - element {HTMLElement}: <div> element representing the cue, with the
- *     right style. This div should then be appended to an element having
- *     the exact size of the wanted region the text track provide cues for.
- *
- * TODO TTML parsing is still pretty heavy on the CPU.
- * Optimizations have been done, principally to avoid using too much XML APIs,
- * but we can still do better.
- * @param {string} str
- * @param {Number} timeOffset
- * @returns {Array.<Object>}
- */        
-        // CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/index.ts
-        /**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-        /**
- * /!\ This file is feature-switchable.
- * It always should be imported through the `features` object.
- */
-        /* harmony default export */ __webpack_exports__.default = function parseTTMLStringToDIV(str, timeOffset) {
-            var ret = [], xml = new DOMParser().parseFromString(str, "text/xml");
-            if (xml) {
-                var tt = xml.getElementsByTagName("tt")[0];
-                if (!tt) throw new Error("invalid XML");
-                for (var body = Object(nodes.a)(tt), styleNodes = Object(nodes.c)(tt), regionNodes = Object(nodes.b)(tt), paragraphNodes = Object(nodes.d)(tt), ttParams = Object(get_parameters.a)(tt), idStyles = [], i = 0; i <= styleNodes.length - 1; i++) {
-                    var styleNode = styleNodes[i];
-                    if (styleNode instanceof Element) {
-                        var styleID = styleNode.getAttribute("xml:id");
-                        null !== styleID && 
-                        // TODO styles referencing other styles
-                        idStyles.push({
-                            id: styleID,
-                            style: Object(get_styling.b)(styleNode)
-                        });
-                    }
-                }
- // construct regionStyles array based on the xml as an optimization
-                                for (var regionStyles = [], _i = 0; _i <= regionNodes.length - 1; _i++) {
-                    var regionNode = regionNodes[_i];
-                    if (regionNode instanceof Element) {
-                        var regionID = regionNode.getAttribute("xml:id");
-                        null !== regionID && function() {
-                            var regionStyle = Object(get_styling.b)(regionNode), associatedStyle = regionNode.getAttribute("style");
-                            if (associatedStyle) {
-                                var style = Object(array_find.a)(idStyles, function(x) {
-                                    return x.id === associatedStyle;
-                                });
-                                style && (regionStyle = object_assign_default()({}, style.style, regionStyle));
-                            }
-                            regionStyles.push({
-                                id: regionID,
-                                style: regionStyle
-                            });
-                        }();
-                    }
-                }
- // Computing the style takes a lot of ressources.
-                // To avoid too much re-computation, let's compute the body style right
-                // now and do the rest progressively.
-                // TODO Compute corresponding CSS style here (as soon as we now the TTML
-                // style) to speed up the process even
-                // more.
-                                for (var bodyStyle = null !== body ? Object(get_styling.a)(STYLE_ATTRIBUTES, [ body ], idStyles, regionStyles) : Object(get_styling.a)(STYLE_ATTRIBUTES, [], idStyles, regionStyles), shouldTrimWhiteSpaceOnBody = "default" === (body ? body.getAttribute("xml:space") : void 0) || "default" === ttParams.spaceStyle, _i2 = 0; _i2 < paragraphNodes.length; _i2++) {
-                    var paragraph = paragraphNodes[_i2];
-                    if (paragraph instanceof Element) {
-                        var divs = Object(get_parent_elements_by_tag_name.a)(paragraph, "div"), paragraphStyle = object_assign_default()({}, bodyStyle, Object(get_styling.a)(STYLE_ATTRIBUTES, [ paragraph ].concat(divs), idStyles, regionStyles)), paragraphSpaceAttribute = paragraph.getAttribute("xml:space"), cue = parseCue(paragraph, timeOffset, idStyles, regionStyles, body, paragraphStyle, ttParams, paragraphSpaceAttribute ? "default" === paragraphSpaceAttribute : shouldTrimWhiteSpaceOnBody);
-                        cue && ret.push(cue);
-                    }
-                }
-            }
-            return ret;
-        };
-        /***/    }, 
     /* 205 */
     /***/ function(module, __webpack_exports__, __webpack_require__) {
         "use strict";
@@ -28465,7 +28613,7 @@ object-assign
         "use strict";
         __webpack_require__.r(__webpack_exports__);
         // EXTERNAL MODULE: ./node_modules/object-assign/index.js
-        var object_assign = __webpack_require__(6), object_assign_default = /* */ __webpack_require__.n(object_assign), make_vtt_cue = __webpack_require__(111), is_vtt_cue = __webpack_require__(151), array_find = __webpack_require__(11), get_parameters = __webpack_require__(112), get_parent_elements_by_tag_name = __webpack_require__(78), get_styling = __webpack_require__(31), get_time_delimiters = __webpack_require__(126), nodes = __webpack_require__(52), regexps = __webpack_require__(20), WANTED_STYLE_ATTRIBUTES = [ "extent", "writingMode", "origin", "align" ], TEXT_ALIGN_TO_LIGN_ALIGN = {
+        var object_assign = __webpack_require__(6), object_assign_default = /* */ __webpack_require__.n(object_assign), make_vtt_cue = __webpack_require__(111), is_vtt_cue = __webpack_require__(151), array_find = __webpack_require__(11), get_parameters = __webpack_require__(112), get_parent_elements_by_tag_name = __webpack_require__(78), get_styling = __webpack_require__(31), get_time_delimiters = __webpack_require__(126), nodes = __webpack_require__(52), regexps = __webpack_require__(15), WANTED_STYLE_ATTRIBUTES = [ "extent", "writingMode", "origin", "align" ], TEXT_ALIGN_TO_LIGN_ALIGN = {
             left: "start",
             center: "center",
             right: "end",
@@ -28875,7 +29023,7 @@ object-assign
         /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
             return setMediaKeys$;
         });
-        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(74), _utils_cast_to_observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(18), _custom_media_keys__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(138);
+        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(74), _utils_cast_to_observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(19), _custom_media_keys__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(138);
         /* harmony import */        
         /**
  * Copyright 2015 CANAL+ Group
@@ -29099,7 +29247,7 @@ object-assign
         /* harmony export (binding) */        __webpack_require__.d(__webpack_exports__, "a", function() {
             return generateKeyRequest;
         });
-        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(74), _log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(0), _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1), _utils_cast_to_observable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(18), _browser_detection__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(21), _constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(101);
+        /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(74), _log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(0), _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1), _utils_cast_to_observable__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(19), _browser_detection__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(21), _constants__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(101);
         /* harmony import */        
         /**
  * Copyright 2015 CANAL+ Group
