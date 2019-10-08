@@ -26246,7 +26246,7 @@ object-assign
             if ("auto" !== trimmedExtent) {
                 var splittedExtent = trimmedExtent.split(" ");
                 if (2 === splittedExtent.length) {
-                    var firstExtent = regexps.c.exec(splittedExtent[1]), secondExtent = regexps.c.exec(splittedExtent[2]);
+                    var firstExtent = regexps.c.exec(splittedExtent[0]), secondExtent = regexps.c.exec(splittedExtent[1]);
                     null !== firstExtent && null !== secondExtent && ("px" === firstExtent[2] || "%" === firstExtent[2] || "em" === firstExtent[2] ? element.style.width = firstExtent[1] + firstExtent[2] : "c" === firstExtent[2] ? (element.className += " proportional-width", 
                     element.setAttribute("data-proportional-width", firstExtent[1])) : log.a.warn("TTML Parser: unhandled extent unit:", firstExtent[2]), 
                     "px" === secondExtent[2] || "%" === secondExtent[2] || "em" === secondExtent[2] ? element.style.height = secondExtent[1] + secondExtent[2] : "c" === secondExtent[2] ? (element.className += " proportional-height", 
@@ -26306,7 +26306,7 @@ object-assign
             if ("auto" !== trimmedOrigin) {
                 var splittedOrigin = trimmedOrigin.split(" ");
                 if (2 === splittedOrigin.length) {
-                    var firstOrigin = regexps.c.exec(splittedOrigin[1]), secondOrigin = regexps.c.exec(splittedOrigin[2]);
+                    var firstOrigin = regexps.c.exec(splittedOrigin[0]), secondOrigin = regexps.c.exec(splittedOrigin[1]);
                     null !== firstOrigin && null !== secondOrigin && ("px" === firstOrigin[2] || "%" === firstOrigin[2] || "em" === firstOrigin[2] ? (element.style.position = "relative", 
                     element.style.left = firstOrigin[1] + firstOrigin[2]) : "c" === firstOrigin[2] ? (element.style.position = "relative", 
                     element.className += " proportional-left", element.setAttribute("data-proportional-left", firstOrigin[1])) : log.a.warn("TTML Parser: unhandled origin unit:", firstOrigin[2]), 
