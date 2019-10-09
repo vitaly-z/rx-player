@@ -17813,30 +17813,20 @@ object-assign
                     return launchConsecutiveBuffersForPeriod(newInitialPeriod);
                 })), handleDecipherabilityUpdate$ = Object(event_emitter.b)(manifest, "decipherability-update").pipe(Object(mergeMap.a)(function(updates) {
                     var queuedSourceBuffer = sourceBuffersStore.get(bufferType);
-                    return updates.some(function(update) {
+                    if (!updates.some(function(update) {
                         return update.adaptation.type === bufferType;
-                    }) && null != queuedSourceBuffer ? (enableOutOfBoundsCheck = !1, destroyBuffers$.next(), 
-                    clock$.pipe(Object(mergeMap.a)(function(_ref5) {
-                        var currentTime = _ref5.currentTime, isPaused = _ref5.isPaused, rangesToClean = getBlacklistedRanges(queuedSourceBuffer, updates);
-                        if (0 === rangesToClean.length) return empty.a;
-                        if (rangesToClean.some(function(range) {
-                            return Object(ranges.j)(range, currentTime);
-                        })) {
-                            var evt = buffers_events_generators.needsMediaSourceReload({
-                                currentTime: currentTime,
-                                isPaused: isPaused
-                            });
-                            return Object(of.a)(evt);
-                        }
-                        return concat.a.apply(void 0, rangesToClean.map(function(_ref6) {
-                            var start = _ref6.start, end = _ref6.end;
-                            return queuedSourceBuffer.removeBuffer(start, end).pipe(Object(ignoreElements.a)());
-                        }).concat([ clock$.pipe(Object(mergeMap.a)(function(lastTick) {
-                            var lastPosition = lastTick.currentTime + lastTick.wantedTimeOffset, newInitialPeriod = manifest.getPeriodForTime(lastPosition);
-                            if (null == newInitialPeriod) throw new media_error.a("MEDIA_TIME_NOT_FOUND", "The wanted position is not found in the Manifest.");
-                            return launchConsecutiveBuffersForPeriod(newInitialPeriod);
-                        })) ]));
-                    }))) : empty.a;
+                    }) || null == queuedSourceBuffer) return empty.a;
+ // no need to stop the current buffers
+                                        var rangesToClean = getBlacklistedRanges(queuedSourceBuffer, updates);
+                    return 0 === rangesToClean.length ? empty.a : (enableOutOfBoundsCheck = !1, destroyBuffers$.next(), 
+                    concat.a.apply(void 0, rangesToClean.map(function(_ref5) {
+                        var start = _ref5.start, end = _ref5.end;
+                        return queuedSourceBuffer.removeBuffer(start, end).pipe(Object(ignoreElements.a)());
+                    }).concat([ clock$.pipe(Object(take.a)(1), Object(mergeMap.a)(function(lastTick) {
+                        var lastPosition = lastTick.currentTime + lastTick.wantedTimeOffset, newInitialPeriod = manifest.getPeriodForTime(lastPosition);
+                        if (null == newInitialPeriod) throw new media_error.a("MEDIA_TIME_NOT_FOUND", "The wanted position is not found in the Manifest.");
+                        return launchConsecutiveBuffersForPeriod(newInitialPeriod);
+                    })) ])));
                 }));
                 return Object(merge.a)(restartBuffersWhenOutOfBounds$, handleDecipherabilityUpdate$, launchConsecutiveBuffersForPeriod(basePeriod));
             }
@@ -17869,8 +17859,8 @@ object-assign
    */            function manageConsecutivePeriodBuffers(bufferType, basePeriod, destroy$) {
                 log.a.info("BO: Creating new Buffer for", bufferType, basePeriod);
                 // Emits the Period of the next Period Buffer when it can be created.
-                var createNextPeriodBuffer$ = new Subject.a(), destroyNextBuffers$ = new Subject.a(), endOfCurrentBuffer$ = clock$.pipe(Object(filter.a)(function(_ref7) {
-                    var currentTime = _ref7.currentTime, wantedTimeOffset = _ref7.wantedTimeOffset;
+                var createNextPeriodBuffer$ = new Subject.a(), destroyNextBuffers$ = new Subject.a(), endOfCurrentBuffer$ = clock$.pipe(Object(filter.a)(function(_ref6) {
+                    var currentTime = _ref6.currentTime, wantedTimeOffset = _ref6.wantedTimeOffset;
                     return !!basePeriod.end && currentTime + wantedTimeOffset >= basePeriod.end;
                 })), nextPeriodBuffer$ = createNextPeriodBuffer$.pipe(exhaustMap(function(nextPeriod) {
                     return manageConsecutivePeriodBuffers(bufferType, nextPeriod, destroyNextBuffers$);
