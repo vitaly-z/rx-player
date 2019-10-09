@@ -16815,7 +16815,7 @@ object-assign
  */        function getCorrespondingBufferedSegments(neededRange, segmentInventory) {
             for (var segmentRoundingError = Math.max(1 / 60, get_needed_segments_MINIMUM_SEGMENT_SIZE), minEnd = neededRange.start + segmentRoundingError, maxStart = neededRange.end - segmentRoundingError, overlappingChunks = [], i = segmentInventory.length - 1; 0 <= i; i--) {
                 var eltInventory = segmentInventory[i];
-                if (!eltInventory.partiallyPushed) {
+                if (!eltInventory.partiallyPushed && !1 !== eltInventory.infos.representation.decipherable) {
                     var inventorySegment = eltInventory.infos.segment, eltInventoryStart = inventorySegment.time / inventorySegment.timescale;
                     (minEnd < (null == inventorySegment.duration ? eltInventory.end : eltInventoryStart + inventorySegment.duration / inventorySegment.timescale) && eltInventoryStart < maxStart || eltInventory.end > minEnd && eltInventory.start < maxStart) && overlappingChunks.unshift(eltInventory);
                 }
