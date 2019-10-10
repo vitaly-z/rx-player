@@ -129,6 +129,11 @@ export interface ISegment {
    * offseted when decoded.
    */
   timestampOffset? : number;
+  /**
+   * `true` if init range was guessed because of the lack of init infos
+   * in the manifest
+   */
+  hypotheticalInitRange? : boolean;
 }
 
 /** Interface that should be implemented by any Representation's `index` value. */

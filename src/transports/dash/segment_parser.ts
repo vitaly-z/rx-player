@@ -31,6 +31,7 @@ import {
 } from "../types";
 import getISOBMFFTimingInfos from "../utils/get_isobmff_timing_infos";
 import isWEBMEmbeddedTrack from "../utils/is_webm_embedded_track";
+import extractCompleteInitChunk from "./extract_complete_init_chunk";
 
 export default function parser(
   { content,
@@ -76,9 +77,16 @@ export default function parser(
                                    appendWindow } });
   }
   // we're handling an initialization segment
+  const completeInitChunk = (segment.hypotheticalInitRange === true) ?
+    extractCompleteInitChunk(chunkData) : chunkData;
+
+  if (completeInitChunk === -1) {
+    throw new Error("Can't extract complete init chunk from loaded data.");
+  }
+
   const { indexRange } = segment;
-  const nextSegments = isWEBM ? getSegmentsFromCues(chunkData, 0) :
-                                getSegmentsFromSidx(chunkData,
+  const nextSegments = isWEBM ? getSegmentsFromCues(completeInitChunk, 0) :
+                                getSegmentsFromSidx(completeInitChunk,
                                                     Array.isArray(indexRange) ?
                                                       indexRange[0] :
                                                       0);
@@ -87,12 +95,12 @@ export default function parser(
     representation.index._addSegments(nextSegments);
   }
 
-  const timescale = isWEBM ? getTimeCodeScale(chunkData, 0) :
-                             getMDHDTimescale(chunkData);
+  const timescale = isWEBM ? getTimeCodeScale(completeInitChunk, 0) :
+                             getMDHDTimescale(completeInitChunk);
   const parsedTimescale = timescale !== null && timescale > 0 ? timescale :
                                                                 undefined;
   if (!isWEBM) { // TODO extract webm protection information
-    const psshInfo = takePSSHOut(chunkData);
+    const psshInfo = takePSSHOut(completeInitChunk);
     for (let i = 0; i < psshInfo.length; i++) {
       const { systemID, data: psshData } = psshInfo[i];
       representation._addProtectionData("cenc", systemID, psshData);
@@ -101,7 +109,7 @@ export default function parser(
 
   const segmentProtections = representation.getProtectionsInitializationData();
   return observableOf({ type: "parsed-init-segment",
-                        value: { initializationData: chunkData,
+                        value: { initializationData: completeInitChunk,
                                  segmentProtections,
                                  initTimescale: parsedTimescale } });
 }
