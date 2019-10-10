@@ -195,7 +195,7 @@ export default class BaseRepresentationIndex implements IRepresentationIndex {
     // to buffers.
     let range: [number, number] | undefined;
     this._hypotheticalInitRange = true;
-    if (index.initialization == null && index.indexRange === null) {
+    if (index.initialization === undefined && index.indexRange === undefined) {
       range = [0, 1500];
     } else {
       if (index.initialization != null) {
