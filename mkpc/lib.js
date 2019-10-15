@@ -1866,6 +1866,9 @@ object-assign
             return isTimeInRange;
         }), 
         /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() {
+            return isTimeInRanges;
+        }), 
+        /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() {
             return keepRangeIntersection;
         });
         /* unused harmony export mergeContiguousRanges */
@@ -1964,6 +1967,16 @@ object-assign
  */
         function isBefore(range1, range2) {
             return range1.end <= range2.start;
+        }
+        /**
+ * Returns true if the time given can be considered as part of any of the given
+ * ranges.
+ * @param {Array.<Object>} ranges
+ * @param {number} time
+ * @returns {boolean}
+ */        function isTimeInRanges(ranges, time) {
+            for (var i = 0; i < ranges.length; i++) if (isTimeInRange(ranges[i], time)) return !0;
+            return !1;
         }
         /**
  * Returns true if the time given can be considered as part of the given range.
@@ -2187,10 +2200,16 @@ object-assign
                         end: Math.min(range.end, overlappingRange.end)
                     });
                 }
-                if (0 === intersections.length) result.push(range); else for (var lastStart = range.start, _j = 0; _j < overlappingRanges.length; _j++) overlappingRanges[_j].start > lastStart && result.push({
-                    start: lastStart,
-                    end: overlappingRanges[_j].start
-                }), lastStart = overlappingRanges[_j].end;
+                if (0 === intersections.length) result.push(range); else {
+                    for (var lastStart = range.start, _j = 0; _j < intersections.length; _j++) intersections[_j].start > lastStart && result.push({
+                        start: lastStart,
+                        end: intersections[_j].start
+                    }), lastStart = intersections[_j].end;
+                    lastStart < range.end && result.push({
+                        start: lastStart,
+                        end: range.end
+                    });
+                }
             }
             return result;
         }
@@ -5789,7 +5808,7 @@ object-assign
                 }), end < Infinity && rangesToIntersect.push({
                     start: end,
                     end: Infinity
-                }), this._ranges = Object(ranges.k)(this._ranges, rangesToIntersect), this.length = this._ranges.length;
+                }), this._ranges = Object(ranges.l)(this._ranges, rangesToIntersect), this.length = this._ranges.length;
             }, _proto.start = function start(index) {
                 if (index >= this._ranges.length) throw new Error("INDEX_SIZE_ERROR");
                 return this._ranges[index].start;
@@ -6227,22 +6246,25 @@ object-assign
  */
         /**
  * Clear element's src attribute.
- *
- * On IE11, element.src = "" is not sufficient as it
- * does not clear properly the current MediaKey Session.
- * Microsoft recommended to use element.removeAttr("src").
  * @param {HTMLMediaElement} element
  */
         function clearElementSrc(element) {
+            // On Firefox, we also have to make sure the textTracks elements are both
+            // disabled and removed from the DOM.
+            // If we do not do that, we may be left with displayed text tracks on the
+            // screen
             if (_browser_detection__WEBPACK_IMPORTED_MODULE_1__.a) {
                 for (var textTracks = element.textTracks, i = 0; i < textTracks.length; i++) textTracks[i].mode = "disabled";
                 if (element.hasChildNodes()) for (var childNodes = element.childNodes, j = childNodes.length - 1; 0 <= j; j--) if ("track" === childNodes[j].nodeName) try {
                     element.removeChild(childNodes[j]);
                 } catch (err) {
-                    _log__WEBPACK_IMPORTED_MODULE_0__.a.warn("Could not remove text track child from element.");
+                    _log__WEBPACK_IMPORTED_MODULE_0__.a.warn("Compat: Could not remove text track child from element.");
                 }
             }
-            element.src = "", element.removeAttribute("src");
+            element.src = "", // On IE11, element.src = "" is not sufficient as it
+            // does not clear properly the current MediaKey Session.
+            // Microsoft recommended to use element.removeAttr("src").
+            element.removeAttribute("src");
         }
         /***/    }, 
     /* 85 */
@@ -9675,6 +9697,7 @@ object-assign
  *   - track {TextTrack}: the added text track
  *   - trackElement {HTMLElement|undefined}: the added <track> element.
  *     undefined if no trackElement was added.
+ *
  * @param {HTMLMediaElement} mediaElement
  * @param {Boolean} hidden
  * @returns {Object}
@@ -16530,6 +16553,12 @@ object-assign
                     }
                 };
             },
+            needsNudgingSeek: function needsNudgingSeek() {
+                return {
+                    type: "needs-nudging-seek",
+                    value: null
+                };
+            },
             periodBufferReady: function periodBufferReady(type, period, adaptation$) {
                 return {
                     type: "periodBufferReady",
@@ -17489,7 +17518,7 @@ object-assign
                 type: "continue",
                 value: void 0
             };
-            var bufferedRanges = Object(ranges.a)(buffered), start = period.start, end = period.end || Infinity, intersection = Object(ranges.k)(bufferedRanges, [ {
+            var bufferedRanges = Object(ranges.a)(buffered), start = period.start, end = period.end || Infinity, intersection = Object(ranges.l)(bufferedRanges, [ {
                 start: start,
                 end: end
             } ]);
@@ -17502,9 +17531,7 @@ object-assign
             if ("video" === adaptation.type && 1 < clockTick.readyState && Object(ranges.j)({
                 start: start,
                 end: end
-            }, currentTime) && adaptationInBuffer.every(function(range) {
-                return !Object(ranges.j)(range, currentTime);
-            })) return {
+            }, currentTime) && Object(ranges.k)(bufferedRanges, currentTime) && !Object(ranges.k)(adaptationInBuffer, currentTime)) return {
                 type: "needs-reload",
                 value: void 0
             };
@@ -17818,15 +17845,14 @@ object-assign
                     }) || null == queuedSourceBuffer) return empty.a;
  // no need to stop the current buffers
                                         var rangesToClean = getBlacklistedRanges(queuedSourceBuffer, updates);
-                    return 0 === rangesToClean.length ? empty.a : (enableOutOfBoundsCheck = !1, destroyBuffers$.next(), 
-                    concat.a.apply(void 0, rangesToClean.map(function(_ref5) {
+                    return enableOutOfBoundsCheck = !1, destroyBuffers$.next(), concat.a.apply(void 0, rangesToClean.map(function(_ref5) {
                         var start = _ref5.start, end = _ref5.end;
                         return queuedSourceBuffer.removeBuffer(start, end).pipe(Object(ignoreElements.a)());
-                    }).concat([ clock$.pipe(Object(take.a)(1), Object(mergeMap.a)(function(lastTick) {
+                    }).concat([ Object(of.a)(buffers_events_generators.needsNudgingSeek()), clock$.pipe(Object(take.a)(1), Object(mergeMap.a)(function(lastTick) {
                         var lastPosition = lastTick.currentTime + lastTick.wantedTimeOffset, newInitialPeriod = manifest.getPeriodForTime(lastPosition);
                         if (null == newInitialPeriod) throw new media_error.a("MEDIA_TIME_NOT_FOUND", "The wanted position is not found in the Manifest.");
                         return launchConsecutiveBuffersForPeriod(newInitialPeriod);
-                    })) ])));
+                    })) ]));
                 }));
                 return Object(merge.a)(restartBuffersWhenOutOfBounds$, handleDecipherabilityUpdate$, launchConsecutiveBuffersForPeriod(basePeriod));
             }
@@ -18226,6 +18252,10 @@ object-assign
                         var _evt$value = evt.value, bufferType = _evt$value.bufferType, gap = _evt$value.gap;
                         return source_buffers.isNative(bufferType) && handleDiscontinuity(gap[1], mediaElement), 
                         empty.a;
+
+                      case "needs-nudging-seek":
+                        var currentTime = mediaElement.currentTime;
+                        currentTime + .001 < mediaElement.duration ? mediaElement.currentTime += .001 : mediaElement.currentTime -= currentTime - .001 < 0 ? 0 : .001;
 
                       default:
                         return Object(of.a)(evt);
@@ -20428,15 +20458,16 @@ object-assign
                     if (this.state !== PLAYER_STATES_RELOADING) {
                         var _this$_priv_contentIn14 = this._priv_contentInfos, isDirectFile = _this$_priv_contentIn14.isDirectFile, manifest = _this$_priv_contentIn14.manifest;
                         if ((isDirectFile || null != manifest) && clockTick) {
-                            var positionData = {
+                            var maximumPosition = null !== manifest ? manifest.getMaximumPosition() : void 0, positionData = {
                                 position: clockTick.currentTime,
                                 duration: clockTick.duration,
                                 playbackRate: clockTick.playbackRate,
+                                maximumBufferTime: maximumPosition,
                                 // TODO fix higher up?
                                 bufferGap: isFinite(clockTick.bufferGap) ? clockTick.bufferGap : 0
                             };
-                            null != manifest && manifest.isLive && 0 < clockTick.currentTime && (positionData.wallClockTime = clockTick.currentTime + (manifest.availabilityStartTime || 0), 
-                            positionData.liveGap = manifest.getMaximumPosition() - clockTick.currentTime), this.trigger("positionUpdate", positionData);
+                            null !== manifest && null != maximumPosition && manifest.isLive && 0 < clockTick.currentTime && (positionData.wallClockTime = clockTick.currentTime + (manifest.availabilityStartTime || 0), 
+                            positionData.liveGap = maximumPosition - clockTick.currentTime), this.trigger("positionUpdate", positionData);
                         }
                     }
                 } else log.a.warn("API: Cannot perform time update: no content loaded.");
@@ -20864,11 +20895,10 @@ object-assign
  * limitations under the License.
  */
         /**
- * Get presentation live gap from manifest information.
  * @param {Object} manifest
- * @returns {number}
+ * @returns {Array.<number>}
  */        function getMinimumAndMaximumPosition(manifest) {
-            if (0 === manifest.periods.length) throw new Error("DASH Parser: no period available for a live content");
+            if (0 === manifest.periods.length) throw new Error("DASH Parser: no period available for a dynamic content");
             return [ getMinimumPosition(manifest), getMaximumPosition(manifest) ];
         }
         // CONCATENATED MODULE: ./src/parsers/manifest/dash/node_parsers/ContentComponent.ts
