@@ -90,6 +90,9 @@ export interface IPrivateInfos {
   metaplaylistInfos? : IMetaPlaylistPrivateInfos;
   localManifestInitSegment? : ILocalManifestInitSegmentPrivateInfos;
   localManifestSegment? : ILocalManifestSegmentPrivateInfos;
+  hypotheticalInitRange? : boolean; // `true` if init range was guessed
+                                    // because of the lack of init infos
+                                    // in the manifest
 }
 
 /** Represent a single Segment from a Representation. */
@@ -129,11 +132,6 @@ export interface ISegment {
    * offseted when decoded.
    */
   timestampOffset? : number;
-  /**
-   * `true` if init range was guessed because of the lack of init infos
-   * in the manifest
-   */
-  hypotheticalInitRange? : boolean;
 }
 
 /** Interface that should be implemented by any Representation's `index` value. */
