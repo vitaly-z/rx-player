@@ -79,7 +79,7 @@ export default function parser(
   // we're handling an initialization segment
   const { privateInfos } = segment;
   const shouldExtractCompleteInitChunk = privateInfos !== undefined &&
-                                         privateInfos.hypotheticalInitRange === true;
+                                         privateInfos.shouldGuessInitRange === true;
   const completeInitChunk = shouldExtractCompleteInitChunk ?
     extractCompleteInitChunk(chunkData) : chunkData;
 

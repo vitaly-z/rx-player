@@ -90,9 +90,9 @@ export interface IPrivateInfos {
   metaplaylistInfos? : IMetaPlaylistPrivateInfos;
   localManifestInitSegment? : ILocalManifestInitSegmentPrivateInfos;
   localManifestSegment? : ILocalManifestSegmentPrivateInfos;
-  hypotheticalInitRange? : boolean; // `true` if init range was guessed
-                                    // because of the lack of init infos
-                                    // in the manifest
+  shouldGuessInitRange? : boolean; // `true` if init range should be guessed
+                                   // because of the lack of init infos
+                                   // in the manifest
 }
 
 /** Represent a single Segment from a Representation. */
