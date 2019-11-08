@@ -77,9 +77,7 @@ export default function parser(
                                    appendWindow } });
   }
   // we're handling an initialization segment
-  const { privateInfos } = segment;
-  const shouldExtractCompleteInitChunk = privateInfos !== undefined &&
-                                         privateInfos.shouldGuessInitRange === true;
+  const shouldExtractCompleteInitChunk = segment.range === undefined;
   const completeInitChunk = shouldExtractCompleteInitChunk ?
     extractCompleteInitChunk(chunkData) : chunkData;
 
