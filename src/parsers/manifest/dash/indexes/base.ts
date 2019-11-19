@@ -156,7 +156,6 @@ function _addSegmentInfos(
 export default class BaseRepresentationIndex implements IRepresentationIndex {
   /** Underlying structure to retrieve segment information. */
   private _index : IBaseIndex;
-  private _isContentFragmented: boolean;
 
   /** Absolute end of the period, timescaled and converted to index time. */
   private _scaledPeriodEnd : number | undefined;
@@ -166,15 +165,13 @@ export default class BaseRepresentationIndex implements IRepresentationIndex {
    * @param {Object} context
    */
   constructor(index : IBaseIndexIndexArgument,
-              context : IBaseIndexContextArgument,
-              isContentFragmented: boolean) {
+              context : IBaseIndexContextArgument) {
     const { periodStart,
             periodEnd,
             representationBaseURLs,
             representationId,
             representationBitrate } = context;
     const { timescale } = index;
-    this._isContentFragmented = isContentFragmented;
     const presentationTimeOffset = index.presentationTimeOffset != null ?
       index.presentationTimeOffset : 0;
 
@@ -223,9 +220,6 @@ export default class BaseRepresentationIndex implements IRepresentationIndex {
    */
   getInitSegment() : ISegment | null {
     // As content is not fragmented, no init segment by default
-    if (!this._isContentFragmented) {
-      return null;
-    }
     const initSegment = getInitSegment(this._index);
     return initSegment;
   }
@@ -236,16 +230,6 @@ export default class BaseRepresentationIndex implements IRepresentationIndex {
    * @returns {Array.<Object>}
    */
   getSegments(_up : number, _to : number) : ISegment[] {
-    if (!this._isContentFragmented) {
-      // Return whole segment
-      return [{ id: "0",
-                isInit: false,
-                number: 0,
-                time: 0,
-                duration: Number.MAX_VALUE,
-                timescale: 1,
-                mediaURL: this._index.mediaURL }];
-    }
     return getSegmentsFromTimeline(this._index, _up, _to, this._scaledPeriodEnd);
   }
 

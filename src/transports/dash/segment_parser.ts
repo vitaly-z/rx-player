@@ -24,6 +24,7 @@ import {
   getSegmentsFromCues,
   getTimeCodeScale,
 } from "../../parsers/containers/matroska";
+import BaseRepresentationIndex from "../../parsers/manifest/dash/indexes/base";
 import takeFirstSet from "../../utils/take_first_set";
 import {
   IAudioVideoParserObservable,
@@ -81,32 +82,48 @@ export default function parser(
   const completeInitChunk = shouldExtractCompleteInitChunk ?
     extractCompleteInitChunk(chunkData) : chunkData;
 
-  if (completeInitChunk === null) {
-    throw new Error("Can't extract complete init chunk from loaded data.");
-  }
-
   const { indexRange } = segment;
-  const nextSegments = isWEBM ? getSegmentsFromCues(completeInitChunk, 0) :
-                                getSegmentsFromSidx(completeInitChunk,
+  const nextSegments = isWEBM ? getSegmentsFromCues(chunkData, 0) :
+                                getSegmentsFromSidx(chunkData,
                                                     Array.isArray(indexRange) ?
                                                       indexRange[0] :
                                                       0);
+
+  if (completeInitChunk === null &&
+      (
+        nextSegments === null ||
+        nextSegments.length === 0
+      )
+  ) {
+    if (!(representation.index instanceof BaseRepresentationIndex)) {
+      throw new Error("Can't extract complete init chunk and segment" +
+                      "references from loaded data.");
+    }
+    representation.index._addSegments([{ time: 0,
+                                         duration: Number.MAX_VALUE,
+                                         timescale: 1 }]);
+  }
 
   if (nextSegments !== null && nextSegments.length > 0) {
     representation.index._addSegments(nextSegments);
   }
 
-  const timescale = isWEBM ? getTimeCodeScale(completeInitChunk, 0) :
-                             getMDHDTimescale(completeInitChunk);
-  const parsedTimescale = timescale !== null && timescale > 0 ? timescale :
-                                                                undefined;
+  let timescale = null;
+  if (completeInitChunk !== null) {
+    timescale = isWEBM ? getTimeCodeScale(completeInitChunk, 0) :
+                         getMDHDTimescale(completeInitChunk);
+  }
+
   if (!isWEBM) { // TODO extract webm protection information
-    const psshInfo = takePSSHOut(completeInitChunk);
+    const psshInfo = takePSSHOut(chunkData);
     for (let i = 0; i < psshInfo.length; i++) {
       const { systemID, data: psshData } = psshInfo[i];
       representation._addProtectionData("cenc", systemID, psshData);
     }
   }
+
+  const parsedTimescale = timescale !== null && timescale > 0 ? timescale :
+                                                                undefined;
 
   const segmentProtections = representation.getProtectionsInitializationData();
   return observableOf({ type: "parsed-init-segment",
