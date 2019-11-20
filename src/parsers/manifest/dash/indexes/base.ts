@@ -79,8 +79,8 @@ export interface IBaseIndex {
  * Most of the properties here are already defined in IBaseIndex.
  */
 export interface IBaseIndexIndexArgument {
-  timeline? : IIndexSegment[];
-  timescale? : number;
+  timeline : IIndexSegment[];
+  timescale : number;
   media? : string;
   indexRange?: [number, number];
   initialization?: { media?: string; range?: [number, number] };
@@ -175,8 +175,7 @@ export default class BaseRepresentationIndex implements IRepresentationIndex {
     const presentationTimeOffset = index.presentationTimeOffset != null ?
       index.presentationTimeOffset : 0;
 
-    const realTimescale = (timescale != null ? timescale : 1);
-    const indexTimeOffset = presentationTimeOffset - periodStart * realTimescale;
+    const indexTimeOffset = presentationTimeOffset - periodStart * timescale;
 
     const mediaURLs = createIndexURLs(representationBaseURLs,
                                      index.initialization !== undefined ?
@@ -207,9 +206,8 @@ export default class BaseRepresentationIndex implements IRepresentationIndex {
                                                representationId,
                                                representationBitrate),
                     startNumber: index.startNumber,
-                    timeline: index.timeline !== undefined ? index.timeline :
-                                                             [],
-                    timescale: realTimescale };
+                    timeline: index.timeline,
+                    timescale };
     this._scaledPeriodEnd = periodEnd == null ? undefined :
                                                 toIndexTime(periodEnd, this._index);
   }
