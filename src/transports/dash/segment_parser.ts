@@ -47,6 +47,12 @@ export default function parser(
 
   if (data === null) {
     if (segment.isInit) {
+      const isStaticContent = segment.range === undefined;
+      if (isStaticContent) {
+        representation.index._addSegments([{ time: 0,
+                                             duration: Number.MAX_VALUE,
+                                             timescale: 1 }]);
+      }
       const _segmentProtections = representation.getProtectionsInitializationData();
       return observableOf({ type: "parsed-init-segment" as const,
                             value: { initializationData: null,
