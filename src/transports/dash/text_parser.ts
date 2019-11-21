@@ -19,6 +19,7 @@ import {
   getMDHDTimescale,
   getSegmentsFromSidx,
 } from "../../parsers/containers/isobmff";
+import { BaseRepresentationIndex } from "../../parsers/manifest/dash/indexes";
 import {
   bytesToStr,
   strToBytes,
@@ -34,6 +35,7 @@ import {
   getISOBMFFEmbeddedTextTrackData,
   getPlainTextTrackData,
 } from "../utils/parse_text_track";
+import extractCompleteInitChunk from "./extract_complete_init_chunk";
 
 /**
  * Parse TextTrack data when it is embedded in an ISOBMFF file.
@@ -54,19 +56,49 @@ function parseISOBMFFEmbeddedTextTrack(
   const chunkBytes = typeof data === "string" ? strToBytes(data) :
                      data instanceof Uint8Array ? data :
                                                   new Uint8Array(data);
+  const sidxSegments =
+    getSegmentsFromSidx(chunkBytes, Array.isArray(indexRange) ? indexRange[0] :
+                                                                0);
+
+  if (Array.isArray(sidxSegments) && sidxSegments.length > 0) {
+    representation.index._addSegments(sidxSegments);
+  }
+
   if (isInit) {
-    const sidxSegments =
-      getSegmentsFromSidx(chunkBytes, Array.isArray(indexRange) ? indexRange[0] :
-                                                                  0);
-    const mdhdTimescale = getMDHDTimescale(chunkBytes);
-    if (sidxSegments !== null && sidxSegments.length > 0) {
-      representation.index._addSegments(sidxSegments);
+    const { privateInfos } = segment;
+    const shouldExtractCompleteInitChunk = privateInfos !== undefined &&
+                                           privateInfos.shouldGuessInitRange === true;
+
+    const completeInitChunk = shouldExtractCompleteInitChunk ?
+      extractCompleteInitChunk(chunkBytes) : chunkBytes;
+
+    if (completeInitChunk === null &&
+        (
+          sidxSegments === null ||
+          sidxSegments.length === 0
+        )
+    ) {
+      if (!(representation.index instanceof BaseRepresentationIndex)) {
+        throw new Error("Can't extract complete init chunk and segment" +
+                        "references from loaded data.");
+      }
+      representation.index._addSegments([{ time: 0,
+                                           duration: Number.MAX_VALUE,
+                                           timescale: 1 }]);
     }
-    return observableOf({ type: "parsed-init-segment",
-                          value: { initializationData: null,
-                                   segmentProtections: [],
-                                   initTimescale: mdhdTimescale > 0 ? mdhdTimescale :
-                                                                       undefined } });
+
+    let mdhdTimescale;
+    if (completeInitChunk !== null) {
+      mdhdTimescale = getMDHDTimescale(completeInitChunk);
+    }
+
+    return observableOf({
+      type: "parsed-init-segment",
+      value: { initializationData: null,
+               segmentProtections: [],
+               initTimescale: mdhdTimescale !== undefined && mdhdTimescale > 0 ?
+                 mdhdTimescale :
+                 undefined } });
   }
   const chunkInfos = getISOBMFFTimingInfos(chunkBytes,
                                            isChunked,
@@ -139,6 +171,12 @@ export default function textTrackParser(
   const { data, isChunked } = response;
   if (data === null) { // No data, just return empty infos
     if (segment.isInit) {
+      const isStaticContent = segment.range === undefined;
+      if (isStaticContent) {
+        representation.index._addSegments([{ time: 0,
+                                             duration: Number.MAX_VALUE,
+                                             timescale: 1 }]);
+      }
       return observableOf({ type: "parsed-init-segment",
                             value: { initializationData: null,
                                      segmentProtections: [],
