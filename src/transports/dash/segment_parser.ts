@@ -24,7 +24,6 @@ import {
   getSegmentsFromCues,
   getTimeCodeScale,
 } from "../../parsers/containers/matroska";
-import BaseRepresentationIndex from "../../parsers/manifest/dash/indexes/base";
 import takeFirstSet from "../../utils/take_first_set";
 import {
   IAudioVideoParserObservable,
@@ -103,7 +102,7 @@ export default function parser(
         nextSegments.length === 0
       )
   ) {
-    if (!(representation.index instanceof BaseRepresentationIndex)) {
+    if (!shouldExtractCompleteInitChunk) {
       throw new Error("Can't extract complete init chunk and segment" +
                       "references from loaded data.");
     }
