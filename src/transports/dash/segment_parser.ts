@@ -51,7 +51,8 @@ export default function parser(
       // - No init segment was found
       // - No next segments are present or parsed
       if (segment.range === undefined &&
-          segment.indexRange === undefined) {
+          segment.indexRange === undefined &&
+          segment.privateInfos?.shouldGuessInitRange === true) {
         representation.index._addSegments([{ time: 0,
                                              duration: Number.MAX_VALUE,
                                              timescale: 1 }]);

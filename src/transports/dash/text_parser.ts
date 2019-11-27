@@ -173,7 +173,8 @@ export default function textTrackParser(
   if (data === null) { // No data, just return empty infos
     if (segment.isInit) {
       if (segment.range === undefined &&
-          segment.indexRange === undefined) {
+          segment.indexRange === undefined &&
+          segment.privateInfos?.shouldGuessInitRange === true) {
         representation.index._addSegments([{ time: 0,
                                              duration: Number.MAX_VALUE,
                                              timescale: 1 }]);
