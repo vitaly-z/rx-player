@@ -172,8 +172,8 @@ export default function textTrackParser(
   const { data, isChunked } = response;
   if (data === null) { // No data, just return empty infos
     if (segment.isInit) {
-      const isStaticContent = segment.range === undefined;
-      if (isStaticContent) {
+      if (segment.range === undefined &&
+          segment.indexRange === undefined) {
         representation.index._addSegments([{ time: 0,
                                              duration: Number.MAX_VALUE,
                                              timescale: 1 }]);

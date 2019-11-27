@@ -46,8 +46,12 @@ export default function parser(
 
   if (data === null) {
     if (segment.isInit) {
-      const isStaticContent = segment.range === undefined;
-      if (isStaticContent) {
+      // here, it means that we probably are loading a static content as :
+      // - (Init + index) had to be guessed
+      // - No init segment was found
+      // - No next segments are present or parsed
+      if (segment.range === undefined &&
+          segment.indexRange === undefined) {
         representation.index._addSegments([{ time: 0,
                                              duration: Number.MAX_VALUE,
                                              timescale: 1 }]);
