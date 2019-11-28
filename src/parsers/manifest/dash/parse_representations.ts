@@ -195,7 +195,9 @@ export default function parseRepresentations(
                       representationBaseURLs,
                       representationBitrate: representation.attributes.bitrate,
                       representationId: representation.attributes.id,
-                      timeShiftBufferDepth: adaptationInfos.timeShiftBufferDepth };
+                      timeShiftBufferDepth: adaptationInfos.timeShiftBufferDepth,
+                      mimeType: representation.attributes.mimeType ??
+                                adaptation.attributes.mimeType };
     let representationIndex : IRepresentationIndex;
     if (representation.children.segmentBase != null) {
       const { segmentBase } = representation.children;

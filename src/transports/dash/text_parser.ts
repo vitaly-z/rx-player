@@ -65,8 +65,7 @@ function parseISOBMFFEmbeddedTextTrack(
 
   if (isInit) {
     const { privateInfos } = segment;
-    const shouldExtractCompleteInitChunk = privateInfos !== undefined &&
-                                           privateInfos.shouldGuessInitRange === true;
+    const shouldExtractCompleteInitChunk = privateInfos?.shouldGuessInitRange === true;
 
     const completeInitChunk = shouldExtractCompleteInitChunk ?
       extractCompleteInitChunk(chunkBytes) : chunkBytes;
@@ -76,7 +75,7 @@ function parseISOBMFFEmbeddedTextTrack(
         sidxSegments === null ||
         sidxSegments.length === 0
       ) &&
-      shouldExtractCompleteInitChunk &&
+      privateInfos?.shouldGuessInitRange === true &&
       segment.indexRange === undefined
     ) {
       // here, it means that we probably are loading a static content as :
@@ -172,13 +171,6 @@ export default function textTrackParser(
   const { data, isChunked } = response;
   if (data === null) { // No data, just return empty infos
     if (segment.isInit) {
-      if (segment.range === undefined &&
-          segment.indexRange === undefined &&
-          segment.privateInfos?.shouldGuessInitRange === true) {
-        representation.index._addSegments([{ time: 0,
-                                             duration: Number.MAX_VALUE,
-                                             timescale: 1 }]);
-      }
       return observableOf({ type: "parsed-init-segment",
                             value: { initializationData: null,
                                      segmentProtections: [],

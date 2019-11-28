@@ -46,17 +46,6 @@ export default function parser(
 
   if (data === null) {
     if (segment.isInit) {
-      // here, it means that we probably are loading a static content as :
-      // - (Init + index) had to be guessed
-      // - No init segment was found
-      // - No next segments are present or parsed
-      if (segment.range === undefined &&
-          segment.indexRange === undefined &&
-          segment.privateInfos?.shouldGuessInitRange === true) {
-        representation.index._addSegments([{ time: 0,
-                                             duration: Number.MAX_VALUE,
-                                             timescale: 1 }]);
-      }
       const _segmentProtections = representation.getProtectionsInitializationData();
       return observableOf({ type: "parsed-init-segment" as const,
                             value: { initializationData: null,
@@ -89,8 +78,7 @@ export default function parser(
   }
   // we're handling an initialization segment
   const { privateInfos } = segment;
-  const shouldExtractCompleteInitChunk = privateInfos !== undefined &&
-                                         privateInfos.shouldGuessInitRange === true;
+  const shouldExtractCompleteInitChunk = privateInfos?.shouldGuessInitRange === true;
   const completeInitChunk = shouldExtractCompleteInitChunk ?
     extractCompleteInitChunk(chunkData) : chunkData;
 
@@ -106,7 +94,7 @@ export default function parser(
         nextSegments === null ||
         nextSegments.length === 0
       ) &&
-      shouldExtractCompleteInitChunk &&
+      privateInfos?.shouldGuessInitRange === true &&
       segment.indexRange === undefined
   ) {
     // here, it means that we probably are loading a static content as :
