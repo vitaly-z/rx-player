@@ -56824,6 +56824,7 @@ function (_React$Component) {
   _proto.changeSelectedContent = function changeSelectedContent(index, content) {
     var currentManifestURL = "";
     var contentNameField = "";
+    var customKeySystem = "";
     var licenseServerUrl = "";
     var serverCertificateUrl = "";
     var hasDRMSettings = content.drmInfos != null && content.drmInfos.length > 0;
@@ -56836,6 +56837,7 @@ function (_React$Component) {
 
     if (hasDRMSettings) {
       drm = content.drmInfos[0].drm;
+      customKeySystem = content.drmInfos[0].customKeySystem || "";
       licenseServerUrl = content.drmInfos[0].licenseServerUrl;
       serverCertificateUrl = content.drmInfos[0].serverCertificateUrl;
     }
@@ -56844,7 +56846,7 @@ function (_React$Component) {
       contentChoiceIndex: index,
       contentNameField: contentNameField,
       chosenDRMType: drm != null ? drm : DRM_TYPES[0],
-      customKeySystem: "",
+      customKeySystem: customKeySystem,
       currentManifestURL: currentManifestURL,
       displayDRMSettings: hasDRMSettings,
       displayGeneratedLink: false,
