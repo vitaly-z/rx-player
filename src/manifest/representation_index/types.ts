@@ -91,6 +91,7 @@ export interface IPrivateInfos {
   localManifestInitSegment? : ILocalManifestInitSegmentPrivateInfos;
   localManifestSegment? : ILocalManifestSegmentPrivateInfos;
   shouldGuessInitRange? : boolean;
+  mightBeStaticContent? : boolean;
 }
 
 /** Represent a single Segment from a Representation. */
