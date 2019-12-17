@@ -161,7 +161,6 @@ export default class BaseRepresentationIndex implements IRepresentationIndex {
 
   /** Absolute end of the period, timescaled and converted to index time. */
   private _scaledPeriodEnd : number | undefined;
-  private _mimeType? : string;
 
   /**
    * @param {Object} index
@@ -176,7 +175,6 @@ export default class BaseRepresentationIndex implements IRepresentationIndex {
             representationBitrate,
             mimeType } = context;
     const { timescale } = index;
-    this._mimeType = mimeType;
     const presentationTimeOffset = index.presentationTimeOffset != null ?
       index.presentationTimeOffset : 0;
 
@@ -191,9 +189,20 @@ export default class BaseRepresentationIndex implements IRepresentationIndex {
 
     // TODO If indexRange is behind the initialization segment
     // the following logic will not work.
-    const range = index.initialization?.range ??
-                  (index.indexRange !== undefined ? [0, index.indexRange[0] - 1] :
-                                                    undefined);
+
+    const isMP4 = mimeType !== undefined &&
+                  /\/mp4$/.exec(mimeType) !== null;
+
+    const initialization = (() => {
+      if (index.initialization === undefined && !isMP4) {
+        return null; // no init segment in content
+      }
+
+      const range = index.initialization?.range ??
+        (index.indexRange !== undefined ? [0, index.indexRange[0] - 1] :
+                                          undefined);
+      return { mediaURL, range }; // there may be an init segment
+    })();
 
     this._index = { indexRange: index.indexRange,
                     indexTimeOffset,
@@ -205,6 +214,14 @@ export default class BaseRepresentationIndex implements IRepresentationIndex {
                     startNumber: index.startNumber,
                     timeline: index.timeline,
                     timescale };
+
+    if (initialization === null &&
+        index.timeline.length === 0 &&
+        index.indexRange === undefined) {
+      this._addSegments([{ time: 0,
+                           duration: Number.MAX_VALUE,
+                           timescale: 1 }]);
+    }
     this._scaledPeriodEnd = periodEnd == null ? undefined :
                                                 toIndexTime(periodEnd, this._index);
   }
@@ -215,11 +232,7 @@ export default class BaseRepresentationIndex implements IRepresentationIndex {
    */
   getInitSegment() : ISegment | null {
     const initSegment = getInitSegment(this._index);
-    if (initSegment.range === undefined) {
-      if (this._mimeType !== undefined &&
-          /\/mp4$/.exec(this._mimeType) === null) {
-        return null;
-      }
+    if (initSegment !== null && initSegment.range === undefined) {
       if (initSegment.privateInfos === undefined) {
         initSegment.privateInfos = {
           shouldGuessInitRange: true,
@@ -237,16 +250,6 @@ export default class BaseRepresentationIndex implements IRepresentationIndex {
    * @returns {Array.<Object>}
    */
   getSegments(_up : number, _to : number) : ISegment[] {
-    if (this._index.initialization?.range === undefined &&
-        this._mimeType !== undefined &&
-        /\/mp4$/.exec(this._mimeType) === null) {
-      return [{ isInit: false,
-                id: "",
-                mediaURL: this._index.mediaURL,
-                time: 0,
-                duration: Number.MAX_VALUE,
-                timescale: 1 }];
-    }
     return getSegmentsFromTimeline(this._index, _up, _to, this._scaledPeriodEnd);
   }
 
