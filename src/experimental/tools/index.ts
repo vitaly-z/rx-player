@@ -15,15 +15,15 @@
  */
 
 import createMetaplaylist from "./createMetaplaylist";
+import contentDownloader from "./contentDownloader";
 import mediaCapabilitiesProber from "./mediaCapabilitiesProber";
 import parseBifThumbnails from "./parseBIFThumbnails";
 import VideoThumbnailLoader from "./VideoThumbnailLoader";
-import download2Go from "./download2go";
 
 export {
   createMetaplaylist,
   mediaCapabilitiesProber,
   parseBifThumbnails,
   VideoThumbnailLoader,
-  download2Go,
+  contentDownloader,
 };
