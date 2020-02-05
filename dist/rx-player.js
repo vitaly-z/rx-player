@@ -17818,19 +17818,12 @@ var MAX_32_BIT_INT = Math.pow(2, 32) - 1;
 /* harmony import */ var _utils_assert__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(811);
 /* harmony import */ var _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(6968);
 /**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Normalized Adaptation structure.
+ * An Adaptation describes a single `Track`. For example a specific audio
+ * track (in a given language) or a specific video track.
+ * It istelf can be represented in different qualities, which we call here
+ * `Representation`.
+ * @class Adaptation
  */
 
 
@@ -18195,13 +18188,22 @@ function getEMSG(buffer, offset) {
 }
 
 
+/**
+ * Update old periods by adding new periods and removing
+ * not available ones.
+ * @param {Array.<Object>} oldPeriods
+ * @param {Array.<Object>} newPeriods
+ */
 
 /***/ }),
 
 /***/ 6490:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
-"use strict";
+  for (var i = 0; i < newPeriods.length; i++) {
+    var newPeriod = newPeriods[i];
+    var j = firstUnhandledPeriodIdx;
+    var oldPeriod = oldPeriods[j];
 
 // EXPORTS
 __webpack_require__.d(__webpack_exports__, {
@@ -18250,6 +18252,9 @@ function arraySlice(arr, start, end) {
  * @returns {Uint8Array}
  */
 
+  if (firstUnhandledPeriodIdx < oldPeriods.length) {
+    oldPeriods.splice(firstUnhandledPeriodIdx, oldPeriods.length - firstUnhandledPeriodIdx);
+  }
 
 function uint8ArraySlice(arr, start, end) {
   return arr.slice(start, end);
@@ -18277,6 +18282,21 @@ var get_box = __webpack_require__(2297);
  * limitations under the License.
  */
 
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 
@@ -18407,9 +18427,28 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
  * limitations under the License.
  */
 
+    for (var adaptationType in adaptationsByType) {
+      if (adaptationsByType.hasOwnProperty(adaptationType)) {
+        var adaptations = adaptationsByType[adaptationType];
+        adaptationsList.push.apply(adaptationsList, adaptations);
+      }
+    }
 
+    return adaptationsList;
+  }
+  /**
+   * @deprecated only returns adaptations for the first period
+   * @returns {Array.<Object>}
+   */
+  ;
 
+  _proto.getAdaptationsForType = function getAdaptationsForType(adaptationType) {
+    Object(warn_once["a" /* default */])("manifest.getAdaptationsForType(type) is deprecated." + " Please use manifest.period[].getAdaptationsForType(type) instead");
+    var firstPeriod = this.periods[0];
 
+    if (firstPeriod == null) {
+      return [];
+    }
 
 
 
@@ -18433,6 +18472,11 @@ function getSegmentsFromSidx(buf, sidxOffsetInWholeSegment) {
   if (sidxOffsets === null) {
     return null;
   }
+  /**
+   * Get maximum position currently defined by the Manifest, in seconds.
+   * @returns {number}
+   */
+  ;
 
   var offset = sidxOffsetInWholeSegment;
   var boxSize = sidxOffsets[2] - sidxOffsets[0];
@@ -18777,6 +18821,11 @@ function patchPssh(buf, psshList) {
  * @returns {Uint8Array}
  */
 
+function checkISOBMFFIntegrity(buffer, isInit) {
+  if (isInit) {
+    var ftypIndex = Object(_find_complete_box__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"])(buffer, 0x66747970
+    /* ftyp */
+    );
 
 function updateBoxLength(buf) {
   var newLen = buf.length;
@@ -18829,6 +18878,9 @@ function updateBoxLength(buf) {
  * @returns {Array.<Object> | undefined}
  */
 
+    var moovIndex = Object(_find_complete_box__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"])(buffer, 0x6D6F6F76
+    /* moov */
+    );
 
 function parseEmsgBoxes(buffer) {
   var emsgs = [];
@@ -19056,8 +19108,20 @@ function parseBif(buf) {
  * limitations under the License.
  */
 
+/**
+ * @param {Object|Array} o
+ * @returns {Array.<*>}
+ */
+function objectValues(o) {
+  return Object.keys(o).map(function (k) {
+    return o[k];
+  });
+}
+/* tslint:disable no-unbound-method */
 
 
+/* harmony default export */ __webpack_exports__["a"] = (typeof Object.values === "function" ? Object.values : objectValues);
+/* tslint:enable no-unbound-method */
 
 
 /**
@@ -19314,6 +19378,8 @@ var BaseRepresentationIndex = /*#__PURE__*/function () {
   return BaseRepresentationIndex;
 }();
 
+// EXTERNAL MODULE: ./src/utils/event_emitter.ts
+var event_emitter = __webpack_require__(25);
 
 
 /***/ }),
@@ -19877,6 +19943,8 @@ function getFirstPositionFromAdaptation(adaptation) {
       // we cannot tell
       return undefined;
     }
+  } else {
+    startTime = chunkInfos.time;
 
     if (firstPosition !== null) {
       max = max == null ? firstPosition : Math.max(max, firstPosition);
@@ -20384,6 +20452,18 @@ function attachTrickModeTrack(adaptations, trickModeTracks) {
  */
 
 
+/**
+ * Clear element's src attribute.
+ * @param {HTMLMediaElement} element
+ */
+
+function clearElementSrc(element) {
+  // On Firefox, we also have to make sure the textTracks elements are both
+  // disabled and removed from the DOM.
+  // If we do not do that, we may be left with displayed text tracks on the
+  // screen
+  if (_browser_detection__WEBPACK_IMPORTED_MODULE_1__[/* isFirefox */ "a"]) {
+    var textTracks = element.textTracks;
 
 /** Different `role`s a text Adaptation can be. */
 
@@ -28254,6 +28334,10 @@ function applyOrigin(element, origin) {
  * limitations under the License.
  */
 
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return shareReplay; });
+/* harmony import */ var _ReplaySubject__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(175);
+/** PURE_IMPORTS_START _ReplaySubject PURE_IMPORTS_END */
 
 
 /**
@@ -28408,19 +28492,21 @@ function generateCSSTextOutline(color, thickness) {
 }
 ;// CONCATENATED MODULE: ./src/parsers/texttracks/ttml/html/ttml_color_to_css_color.ts
 /**
- * Copyright 2015 CANAL+ Group
+ * Parse the sidx part (segment index) of the isobmff.
+ * Returns null if not found.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @param {Uint8Array} buf
+ * @param {Number} initialOffset
+ * @returns {Object|null} {Array.<Object>} - Information about each subsegment.
+ * Contains those keys:
+ *   - time {Number}: starting _presentation time_ for the subsegment,
+ *     timescaled
+ *   - duration {Number}: duration of the subsegment, timescaled
+ *   - timescale {Number}: the timescale in which the time and duration are set
+ *   - count {Number}: always at 0
+ *   - range {Array.<Number>}: first and last bytes in the media file
+ *     from the anchor point (first byte after the sidx box) for the
+ *     concerned subsegment.
  */
 
 /**
@@ -56280,6 +56366,7 @@ function StreamOrchestrator(content, playbackObserver, abrManager, segmentBuffer
       } // We have to remove the undecipherable media data and then ask the
       // current media element to be "flushed"
 
+    var typeAttribute = root.getAttribute("Type");
 
       enableOutOfBoundsCheck = false;
       destroyStreams$.next();
@@ -56611,6 +56698,9 @@ function setMediaSourceDuration(mediaSource, manifest, lastSetDuration) {
  * @returns {Observable}
  */
 
+/* harmony default export */ var smooth = (create_parser);
+// EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
+var is_null_or_undefined = __webpack_require__(8);
 
 function whenSourceBuffersEndedUpdates$(sourceBuffers) {
   if (sourceBuffers.length === 0) {
@@ -57668,8 +57758,7 @@ var throw_on_media_error = __webpack_require__(2447);
 
 
 
-
-
+var OUT_OF_SYNC_MANIFEST_REFRESH_DELAY = config/* default.OUT_OF_SYNC_MANIFEST_REFRESH_DELAY */.Z.OUT_OF_SYNC_MANIFEST_REFRESH_DELAY;
 /**
  * Begin content playback.
  *
