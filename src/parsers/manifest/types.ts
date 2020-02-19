@@ -173,6 +173,23 @@ export interface IParsedPeriod {
    * `undefined` if no parsed stream event in manifest.
    */
   streamEvents?: IManifestStreamEvent[];
+  /** Every tracks that can be played together. */
+  variants : IParsedVariant[];
+}
+
+export interface IParsedVariantTypedSet {
+  adaptation : IParsedAdaptation;
+  representation : IParsedRepresentation;
+}
+
+export interface IParsedVariant {
+  video : IParsedVariantTypedSet |
+          null;
+  audio : IParsedVariantTypedSet |
+          null;
+  text : IParsedVariantTypedSet |
+          null;
+  bitrate : number;
 }
 
 /** Information on the whole content */
