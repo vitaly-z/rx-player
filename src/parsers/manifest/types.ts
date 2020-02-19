@@ -178,8 +178,9 @@ export interface IParsedPeriod {
 }
 
 export interface IParsedVariantTypedSet {
-  adaptation : IParsedAdaptation;
-  representation : IParsedRepresentation;
+  adaptation : IParsedAdaptation; // The "track" from this set
+  representation : IParsedRepresentation; // The quality linked to the track of
+                                          // this set
 }
 
 export interface IParsedVariant {

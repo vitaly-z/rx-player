@@ -26,6 +26,7 @@ import {
   IParsedManifest,
   IParsedPeriod,
 } from "../types";
+import createVariants from "../utils/create_variants";
 import MetaRepresentationIndex from "./representation_index";
 
 export type IParserResponse<T> =
@@ -272,6 +273,7 @@ function createManifest(
         adaptations,
         duration: currentPeriod.duration,
         start: contentOffset + currentPeriod.start,
+        variants: createVariants(adaptations),
       };
       manifestPeriods.push(newPeriod);
     }

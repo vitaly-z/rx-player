@@ -31,6 +31,7 @@ import {
   IParsedRepresentation,
 } from "../types";
 import checkManifestIDs from "../utils/check_manifest_ids";
+import createVariants from "../utils/create_variants";
 import {
   getAudioCodecs,
   getVideoCodecs,
@@ -632,7 +633,8 @@ function createSmoothStreamingParser(
                     periodEnd - periodStart : duration,
                   end: periodEnd,
                   id: "gen-smooth-period-0",
-                  start: periodStart }],
+                  start: periodStart,
+                  variants: createVariants(adaptations) }],
       suggestedPresentationDelay,
       transportType: "smooth",
       uris: url == null ? [] : [url],
