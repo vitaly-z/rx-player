@@ -77,7 +77,7 @@ export interface ITMTextTrack { language : string;
  * TrackChoiceManager.
  */
 interface ITMVideoRepresentation { id : string|number;
-                                   bitrate : number;
+                                   bitrate? : number;
                                    width? : number;
                                    height? : number;
                                    codec? : string;
