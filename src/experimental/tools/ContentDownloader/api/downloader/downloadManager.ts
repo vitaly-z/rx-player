@@ -18,21 +18,22 @@ import { IDBPDatabase } from "idb";
 import { AsyncSubject, combineLatest, of } from "rxjs";
 import { filter, startWith, tap } from "rxjs/operators";
 
-import SegmentPipelineCreator from "../../../../../core/fetchers/segment/segment_fetcher_creator";
+import { SegmentPipelineCreator } from "../../../../../core/pipelines";
 import { ICallbacks, IInitSettings, IStoredManifest } from "../../types";
 import { initDownloader$ } from "./initSegment";
 import { getTransportPipelineByTransport } from "./manifest";
 import { segmentPipelineDownloader$ } from "./segment";
+import { IDownloadManagerOptions } from "./types";
 
 /**
  * DownloadManager that will handle actions to take depending if we are in
  * resuming or downloading from scratch.
  */
 class DownloadManager {
-  readonly db: IDBPDatabase;
+  readonly downloadManagerOptions: IDownloadManagerOptions;
 
-  constructor(db: IDBPDatabase) {
-    this.db = db;
+  constructor(downloadManagerOptions: IDownloadManagerOptions) {
+    this.downloadManagerOptions = downloadManagerOptions;
   }
 
   initDownload(initSettings: IInitSettings, pause$: AsyncSubject<void>) {
@@ -46,9 +47,9 @@ class DownloadManager {
       size: 0,
     };
     const pipelineSegmentDownloader$ = segmentPipelineDownloader$(
-      initDownloader$(initSettings, this.db),
+      initDownloader$(initSettings, this.downloadManagerOptions.db),
       builderInit,
-      { contentID, onError, onProgress, db: this.db, pause$ }
+      { contentID, onError, onProgress, db: this.downloadManagerOptions.db, pause$ }
     );
     return combineLatest([
       pipelineSegmentDownloader$.pipe(
@@ -102,7 +103,7 @@ class DownloadManager {
         type: "resume",
       }),
       builderInit,
-      { contentID, db: this.db, pause$, onError }
+      { contentID, db: this.downloadManagerOptions.db, pause$, ...callbacks }
     );
     return combineLatest([
       pipelineSegmentDownloader$.pipe(
