@@ -151,7 +151,7 @@ compatibility with every browsers. To work around those, we usually rely on
 "ponyfills" which are JavaScript re-implementations.
 
 This concerns the following static methods:
-  - `Object.assign`: use the `object-assign` dependency instead
+  - `Object.assign`: use `src/utils/object_assign.ts` instead
   - `Object.values`: use `src/utils/object_values.ts` instead
 
 The following methods:
@@ -259,40 +259,13 @@ We have a naming convention for commits, roughly under the form:
 `namespace: what the commit does`.
 
 Adding a paragraph (by setting multiple `-m` options to git-commit for
-example) to explain why you did those modifications is preferred.
+example) to explain why you did those modifications is preferred. The goal here
+is to help understand your changes at a later time, in case things go wrong in
+the future.
 
-The `namespace` here describe here the area of the code the commit modifies.
-It usually is one of the following:
-  - `abr`
-  - `api`
-  - `bif`
-  - `buffers`
-  - `compat`
-  - `dash`
-  - `eme`
-  - `errors`
-  - `init`
-  - `isobmff`
-  - `manifest`
-  - `matroska`
-  - `pipelines`
-  - `sami`
-  - `scripts`
-  - `smooth`
-  - `source-buffers`
-  - `srt`
-  - `subtitles`
-  - `tests`
-  - `ttml`
-  - `utils`
-  - `webvtt`
-
-But it could be any other values you feel to be consistent with that
-convention.
-
-This namespace helps us quickly evaluate the area of the code a commit impact,
-to easily evaluate where testing need to be done and to better detect a
-problematic commit if a regression is detected.
+The `namespace` here should describe the area of the code the commit modifies,
+so we can tell quickly the impact of one when glancing through git logs. In
+doubt, you can set it to the name of the most updated directory.
 
 
 

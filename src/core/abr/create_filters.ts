@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import objectAssign from "object-assign";
 import {
   combineLatest as observableCombineLatest,
   Observable,
   of as observableOf,
 } from "rxjs";
 import { map } from "rxjs/operators";
-import { IABRFilters } from "./representation_estimator";
+import objectAssign from "../../utils/object_assign";
+import { IABRFiltersObject } from "./representation_estimator";
 
 /**
  * Create Observable that merge several throttling Observables into one.
@@ -36,8 +36,8 @@ export default function createFilters(
   limitWidth$? : Observable<number>,
   throttleBitrate$? : Observable<number>,
   throttle$? : Observable<number>
-) : Observable<IABRFilters> {
-  const deviceEventsArray : Array<Observable<IABRFilters>> = [];
+) : Observable<IABRFiltersObject> {
+  const deviceEventsArray : Array<Observable<IABRFiltersObject>> = [];
 
   if (limitWidth$ != null) {
     deviceEventsArray.push(limitWidth$.pipe(map(width => ({ width }))));
@@ -53,6 +53,7 @@ export default function createFilters(
   // from.
   return deviceEventsArray.length > 0 ?
     observableCombineLatest(deviceEventsArray)
-      .pipe(map((args : IABRFilters[]) => objectAssign({}, ...args))) :
+      .pipe(map((args : IABRFiltersObject[]) : IABRFiltersObject =>
+        objectAssign({}, ...args) as IABRFiltersObject)) :
     observableOf({});
 }

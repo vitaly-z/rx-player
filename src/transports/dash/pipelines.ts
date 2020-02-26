@@ -18,16 +18,16 @@ import {
   ITransportOptions,
   ITransportPipelines,
 } from "../types";
-import generateManifestLoader from "../utils/document_manifest_loader";
+import generateManifestLoader from "../utils/text_manifest_loader";
 import {
   imageLoader,
   imageParser,
 } from "./image_pipelines";
 import generateManifestParser from "./manifest_parser";
 import generateSegmentLoader from "./segment_loader";
-import segmentParser from "./segment_parser";
+import generateAudioVideoSegmentParser from "./segment_parser";
 import generateTextTrackLoader from "./text_loader";
-import textTrackParser from "./text_parser";
+import generateTextTrackParser from "./text_parser";
 
 /**
  * Returns pipelines used for DASH streaming.
@@ -41,14 +41,16 @@ export default function(options : ITransportOptions) : ITransportPipelines {
   });
   const manifestParser = generateManifestParser(options);
   const segmentLoader = generateSegmentLoader(options);
+  const audioVideoSegmentParser = generateAudioVideoSegmentParser(options);
   const textTrackLoader = generateTextTrackLoader(options);
+  const textTrackParser = generateTextTrackParser(options);
 
   return { manifest: { loader: manifestLoader,
                        parser: manifestParser },
            audio: { loader: segmentLoader,
-                    parser: segmentParser },
+                    parser: audioVideoSegmentParser },
            video: { loader: segmentLoader,
-                    parser: segmentParser },
+                    parser: audioVideoSegmentParser },
            text: { loader: textTrackLoader,
                    parser: textTrackParser },
            image: { loader: imageLoader,

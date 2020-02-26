@@ -15,7 +15,8 @@
  */
 
 import log from "../../log";
-import IRepresentationIndex, {
+import {
+  IRepresentationIndex,
   ISegment,
 } from "./types";
 
@@ -26,7 +27,7 @@ export interface IStaticRepresentationIndexInfos { media: string; }
  * @class StaticRepresentationIndex
  */
 export default class StaticRepresentationIndex implements IRepresentationIndex {
-  // URL of the content
+  /** URL at which the content is available. */
   private readonly _mediaURLs: string;
 
   /**
@@ -113,8 +114,19 @@ export default class StaticRepresentationIndex implements IRepresentationIndex {
     return true;
   }
 
+  /**
+   * @returns {Boolean}
+   */
+  isInitialized() : true {
+    return true;
+  }
+
   _addSegments() : void {
     log.warn("Tried add Segments to a static RepresentationIndex");
+  }
+
+  _replace() : void {
+    log.warn("Tried to replace a static RepresentationIndex");
   }
 
   _update() : void {

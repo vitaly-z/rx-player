@@ -19,7 +19,8 @@ import {
   getDurationFromTrun,
   getTrackFragmentDecodeTime,
 } from "../../parsers/containers/isobmff";
-import { IChunkTimingInfos } from "../types";
+import isNullOrUndefined from "../../utils/is_null_or_undefined";
+import { IChunkTimeInfo } from "../types";
 
 /**
  * Get precize start and duration of a chunk.
@@ -40,7 +41,7 @@ export default function getISOBMFFTimingInfos(
   isChunked : boolean,
   segment : ISegment,
   initTimescale? : number
-) : IChunkTimingInfos | null {
+) : IChunkTimeInfo | null {
   let startTime;
   let duration;
   const trunDuration = getDurationFromTrun(buffer);
@@ -51,12 +52,11 @@ export default function getISOBMFFTimingInfos(
     if (initTimescale === undefined) {
       return null;
     }
-    if (baseDecodeTime < 0) {
+    if (baseDecodeTime === undefined) {
       return null;
     }
     return { time: baseDecodeTime,
-             duration: trunDuration >= 0 ? trunDuration :
-                                           undefined,
+             duration: trunDuration,
              timescale: initTimescale };
   }
 
@@ -70,32 +70,33 @@ export default function getISOBMFFTimingInfos(
 
   if (timescale === segment.timescale) {
     maxDecodeTimeDelta = Math.min(timescale * 0.9,
-                                  segment.duration != null ? segment.duration / 4 :
-                                                             0.25);
+                                  !isNullOrUndefined(segment.duration) ?
+                                    segment.duration / 4 :
+                                    0.25);
     segmentDuration = segment.duration;
   } else {
     maxDecodeTimeDelta =
       Math.min(timescale * 0.9,
-               segment.duration != null ?
+               !isNullOrUndefined(segment.duration) ?
                  ((segment.duration / segment.timescale) * timescale) / 4 :
                    0.25
     );
-    segmentDuration = segment.duration != null ?
+    segmentDuration = !isNullOrUndefined(segment.duration) ?
                         (segment.duration / segment.timescale) * timescale :
                         undefined;
   }
 
-  if (baseDecodeTime >= 0) {
-    startTime = segment.timestampOffset != null ?
+  if (baseDecodeTime !== undefined) {
+    startTime = segment.timestampOffset !== undefined ?
                   baseDecodeTime + (segment.timestampOffset * timescale) :
                   baseDecodeTime;
   } else {
     return null;
   }
 
-  if (trunDuration >= 0 &&
+  if (trunDuration !== undefined &&
       (
-        segmentDuration == null ||
+        segmentDuration === undefined ||
         Math.abs(trunDuration - segmentDuration) <= maxDecodeTimeDelta
       ))
   {

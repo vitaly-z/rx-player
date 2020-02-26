@@ -18,24 +18,41 @@ import BufferGarbageCollector from "./garbage_collector";
 import QueuedSourceBuffer, {
   IBufferedChunk,
   IBufferType,
+  IEndOfSegmentInfos,
+  IEndOfSegmentOperation,
   IPushChunkInfos,
   IPushedChunkData,
+  IPushedChunkInventoryInfos,
+  IPushOperation,
+  IQSBOperation,
+  IRemoveOperation,
+  SourceBufferOperation,
 } from "./queued_source_buffer";
 import SourceBuffersStore, {
-  getBufferTypes,
   ISourceBufferOptions,
   ITextTrackSourceBufferOptions,
 } from "./source_buffers_store";
 
 export default SourceBuffersStore;
 export {
+  QueuedSourceBuffer,
   BufferGarbageCollector,
-  IBufferType,
-  IBufferedChunk,
-  IPushChunkInfos,
-  IPushedChunkData,
+
   ISourceBufferOptions,
   ITextTrackSourceBufferOptions,
-  QueuedSourceBuffer,
-  getBufferTypes,
+
+  IBufferType,
+  IBufferedChunk,
+
+  IPushChunkInfos,
+  IPushedChunkData,
+  IPushedChunkInventoryInfos,
+
+  IEndOfSegmentInfos,
+
+  SourceBufferOperation,
+  IQSBOperation,
+  IEndOfSegmentOperation,
+  IPushOperation,
+  IRemoveOperation,
 };

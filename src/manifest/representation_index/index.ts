@@ -15,16 +15,19 @@
  */
 
 import StaticRepresentationIndex from "./static";
-import IRepresentationIndex, {
+import {
   IBaseContentInfos,
   IMetaPlaylistPrivateInfos,
+  IRepresentationIndex,
   ISegment,
+  ISupplementarySegmentsInfo,
 } from "./types";
 
-export default IRepresentationIndex;
 export {
   IBaseContentInfos,
   IMetaPlaylistPrivateInfos,
+  IRepresentationIndex,
   ISegment,
+  ISupplementarySegmentsInfo,
   StaticRepresentationIndex,
 };

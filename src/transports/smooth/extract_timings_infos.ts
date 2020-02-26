@@ -20,15 +20,39 @@ import {
   getDurationFromTrun,
   getTRAF,
 } from "../../parsers/containers/isobmff";
-import {
-  IChunkTimingInfos,
-  INextSegmentsInfos,
-} from "../types";
+import isNullOrUndefined from "../../utils/is_null_or_undefined";
+import { IChunkTimeInfo } from "../types";
 import {
   IISOBMFFBasicSegment,
   parseTfrf,
   parseTfxd,
 } from "./isobmff";
+
+/** Information on future segments. */
+export interface INextSegmentsInfos {
+  /**
+   * Difference between the latest and the earliest presentation time
+   * available in that segment. The unit is in the corresponding timescale (see
+   * `timescale` property).
+   */
+  duration : number;
+  /**
+   * Earliest presentation time available in that segment.
+   * The unit is in the corresponding timescale (see `timescale` property).
+   */
+  time : number;
+  /**
+   * Allow to convert `duration` and `time` into seconds by dividing them to
+   * that value.
+   * e.g.:
+   *   timeInSeconds = time / timescale
+   *   durationInSeconds = duration / timescale
+   *
+   * Expressing those values relative to a "timescale" allows a greater
+   * precision for the `time` and `duration` values.
+   */
+  timescale : number; // time unit for seconds conversion.
+}
 
 /**
  * Try to obtain time information from the given data.
@@ -44,10 +68,10 @@ export default function extractTimingsInfos(
   segment : ISegment,
   isLive : boolean
 ) : { nextSegments : INextSegmentsInfos[];
-      chunkInfos : IChunkTimingInfos | null; }
+      chunkInfos : IChunkTimeInfo | null; }
 {
   const nextSegments : INextSegmentsInfos[] = [];
-  let chunkInfos : IChunkTimingInfos;
+  let chunkInfos : IChunkTimeInfo;
 
   let tfxdSegment : IISOBMFFBasicSegment|undefined;
   let tfrfSegments : IISOBMFFBasicSegment[]|undefined;
@@ -87,7 +111,7 @@ export default function extractTimingsInfos(
                                       segment.duration / 4);
 
   const trunDuration = getDurationFromTrun(data);
-  if (trunDuration >= 0 && (segment.duration == null ||
+  if (trunDuration !== undefined && (isNullOrUndefined(segment.duration) ||
       Math.abs(trunDuration - segment.duration) <= maxDecodeTimeDelta)
   ) {
     chunkInfos = { time: segment.time,

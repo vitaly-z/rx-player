@@ -26,10 +26,22 @@ import MediaKeysInfosStore from "./media_keys_infos_store";
 import { IMediaKeysInfos } from "./types";
 
 /**
+ * Dispose the media keys on media element.
+ * @param {Object} mediaElement
+ * @returns {Observable}
+ */
+export function disableMediaKeys(
+  mediaElement : HTMLMediaElement
+): Observable<unknown> {
+  return observableDefer(() => {
+    MediaKeysInfosStore.setState(mediaElement, null);
+    return setMediaKeys(mediaElement, null);
+  });
+}
+
+/**
  * Set the MediaKeys object on the HTMLMediaElement if it is not already on the
  * element.
- * If a MediaKeys was already set on it, dispose of it before setting the new
- * one.
  *
  * /!\ Mutates heavily MediaKeysInfosStore
  * @param {Object} mediaKeysInfos
@@ -44,26 +56,27 @@ export default function attachMediaKeys(
     const { keySystemOptions,
             mediaKeySystemAccess,
             mediaKeys,
-            sessionsStore } = mediaKeysInfos;
+            loadedSessionsStore } = mediaKeysInfos;
 
     const previousState = MediaKeysInfosStore.getState(mediaElement);
-    MediaKeysInfosStore.setState(mediaElement,
-                                 { keySystemOptions,
-                                   mediaKeySystemAccess,
-                                   mediaKeys,
-                                   sessionsStore });
+    const closeAllSessions$ = previousState !== null &&
+                              previousState.loadedSessionsStore !== loadedSessionsStore ?
+                                previousState.loadedSessionsStore.closeAllSessions() :
+                                observableOf(null);
 
-    return (previousState != null &&
-            previousState.sessionsStore !== sessionsStore ?
-              previousState.sessionsStore.closeAllSessions() :
-              observableOf(null)
-    ).pipe(mergeMap(() => {
-      if (mediaElement.mediaKeys === mediaKeys) {
-        return observableOf(null);
-      }
-
-      log.debug("EME: Setting MediaKeys");
-      return setMediaKeys(mediaElement, mediaKeys);
-    }));
+    return closeAllSessions$.pipe(
+      mergeMap(() => {
+        MediaKeysInfosStore.setState(mediaElement,
+                                    { keySystemOptions,
+                                      mediaKeySystemAccess,
+                                      mediaKeys,
+                                      loadedSessionsStore });
+        if (mediaElement.mediaKeys === mediaKeys) {
+          return observableOf(null);
+        }
+        log.debug("EME: Setting MediaKeys");
+        return setMediaKeys(mediaElement, mediaKeys);
+      })
+    );
   });
 }

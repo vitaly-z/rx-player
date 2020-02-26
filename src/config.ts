@@ -63,6 +63,20 @@ export default {
                                                        "direct",
 
   /**
+   * Default behavior for the `enableFastSwitching` loadVideo options.
+   *
+   * Fast-switching allows to provide quicker transitions from lower quality
+   * segments to higher quality segments but might be badly supported on some
+   * devices.
+   * When enabled, the RxPlayer might replace segments of a lower-quality
+   * (with a lower bitrate) with segments of a higher quality (with a higher
+   * bitrate). This allows to have a fast transition when network conditions
+   * improve.
+   * When disabled, segments of a lower-quality will not be replaced.
+   */
+  DEFAULT_ENABLE_FAST_SWITCHING: true,
+
+  /**
    * If set to true, video through loadVideo will auto play by default
    * @type {Boolean}
    */
@@ -275,13 +289,13 @@ export default {
    *   - if the error is an HTTP error code, but not a 500-smthg or a 404, no
    *     retry will be performed.
    *   - if it has a high chance of being due to the user being offline, a
-   *     separate counter is used (see DEFAULT_MAX_PIPELINES_RETRY_ON_OFFLINE).
+   *     separate counter is used (see DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE).
    * @type Number
    */
   DEFAULT_MAX_MANIFEST_REQUEST_RETRY: 4,
 
   /**
-   * The default number of times a pipeline request will be re-performed when
+   * The default number of times a segment request will be re-performed when
    * on error which justify a retry.
    *
    * Note that some errors do not use this counter:
@@ -289,10 +303,10 @@ export default {
    *   - if the error is an HTTP error code, but not a 500-smthg or a 404, no
    *     retry will be performed.
    *   - if it has a high chance of being due to the user being offline, a
-   *     separate counter is used (see DEFAULT_MAX_PIPELINES_RETRY_ON_OFFLINE).
+   *     separate counter is used (see DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE).
    * @type Number
    */
-  DEFAULT_MAX_PIPELINES_RETRY_ON_ERROR: 4,
+  DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR: 4,
 
   /**
    * Under some circonstances, we're able to tell that the user is offline (see
@@ -305,7 +319,7 @@ export default {
    * A capped exponential backoff will still be used (like for an error code).
    * @type {Number}
    */
-  DEFAULT_MAX_PIPELINES_RETRY_ON_OFFLINE: Infinity,
+  DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE: Infinity,
 
   /**
    * Initial backoff delay when a segment / manifest download fails, in
@@ -340,7 +354,7 @@ export default {
    * directfile API.
    *
    * Those events are the base of various important mechanisms in the player:
-   *   - set the clock for the buffer.
+   *   - set the clock used to regularly check which segments should be loaded
    *   - set the clock for the ABR strategy.
    *   - used to trigger positionUpdate events.
    *
@@ -394,7 +408,7 @@ export default {
    */
   ABR_STARVATION_FACTOR: {
     DEFAULT: 0.72,
-    LOW_LATENCY: 0.64,
+    LOW_LATENCY: 0.72,
   },
 
   /**
@@ -403,8 +417,8 @@ export default {
    * @type {Object}
    */
   ABR_REGULAR_FACTOR: {
-    DEFAULT: 0.9,
-    LOW_LATENCY: 0.9,
+    DEFAULT: 0.8,
+    LOW_LATENCY: 0.8,
   },
 
   /**
@@ -688,6 +702,11 @@ export default {
    * Distances which will be used as limit points, from which a new step is
    * reached (see example).
    *
+   * In the RxPlayer's code, each step is then translated in to a priority
+   * number.
+   * The lower is that number, the lower is the step and the lower is the step,
+   * the higher is the priority.
+   *
    * Note: You can set an empty array to deactivate the steps feature (every
    * Segments have the same priority).
    *
@@ -696,24 +715,57 @@ export default {
    * let's imagine the following SEGMENT_PRIORITIES_STEPS array:
    * [5, 11, 17, 25]
    *
-   * To link each Segments to a corresponding priority (and thus to a specific
-   * step), we have to consider the distance d between the current position and
-   * the start time of the Segment.
+   * To link each Segments to a corresponding priority number (and thus to a
+   * specific step), we have to consider the distance between the current
+   * position and the start time of the Segment.
    *
    * We have in our example 5 groups, which correspond to the following possible
-   * d values:
-   *   1. inferior to 5
-   *   2. between 5 and 11
-   *   3. between 11 and 17
-   *   4. between 17 and 25
-   *   5. superior to 25
+   * distances:
+   *   1. inferior to 5 => first step (priority number = 0)
+   *   2. between 5 and 11 => second step (priority number = 1)
+   *   3. between 11 and 17 => third step (priority number = 2)
+   *   4. between 17 and 25 => fourth step (priority number = 3)
+   *   5. superior to 25 => fifth step (priority number = 4)
    *
    * Segments corresponding to a lower-step will need to all be downloaded
    * before Segments of a newer step begin.
    *
    * @type {Array.<Number>}
    */
-  SEGMENT_PRIORITIES_STEPS : [6, 14],
+   SEGMENT_PRIORITIES_STEPS : [ 2,  // 1st Step (priority number = 0):  < 2
+                               4,   // 2nd Step (priority number = 1):  2-4
+                               8,   // 3rd Step (priority number = 2):  4-8
+                               12,  // 4th Step (priority number = 3):  8-12
+                               18,  // 5th Step (priority number = 4):  12-18
+                               25], // 6th Step (priority number = 5):  18-25
+                                    // 7th Step (priority number = 6):  >= 25
+
+  /**
+   * Some segment requests are said to be "high priority".
+   *
+   * Requests in that category once done will cancel any segment request that
+   * has a low priority number (see `SEGMENT_PRIORITIES_STEPS`) - meaning a
+   * priority number equal to `MIN_CANCELABLE_PRIORITY` or more.
+   *
+   * Enter here the last priority number that is considered high priority
+   * (beginning by the first step, which has the priority number `0`).
+   * @type {number}
+   */
+  MAX_HIGH_PRIORITY_LEVEL: 1, // priority number 1 and lower is high priority
+
+  /**
+   * Enter here the first priority step (see `SEGMENT_PRIORITIES_STEPS`) that
+   * will be considered as low priority.
+   *
+   * Segment requests with a low priority will be cancelled if a high priority
+   * segment request (see MAX_HIGH_PRIORITY_LEVEL) is scheduled while they are
+   * pending.
+   *
+   * This number should be strictly superior to the value indicated in
+   * `MAX_HIGH_PRIORITY_LEVEL`.
+   * @type {number}
+   */
+  MIN_CANCELABLE_PRIORITY: 3, // priority number 3 onward can be cancelled
 
   /**
    * Robustnesses used in the {audio,video}Capabilities of the
@@ -745,8 +797,37 @@ export default {
     playready: [ "com.microsoft.playready",
                  "com.chromecast.playready",
                  "com.youtube.playready" ],
+    fairplay: [ "com.apple.fps.1_0" ],
   } as Partial<Record<string, string[]>>,
   /* tslint:enable no-object-literal-type-assertion */
+
+  /**
+   * The Manifest parsing logic has a notion of "unsafeMode" which allows to
+   * speed-up this process a lot with a small risk of de-synchronization with
+   * what actually is on the server.
+   * Because using that mode is risky, and can lead to all sort of problems, we
+   * regularly should fall back to a regular "safe" parsing every once in a
+   * while.
+   * This value defines how many consecutive time maximum the "unsafeMode"
+   * parsing can be done.
+   */
+  MAX_CONSECUTIVE_MANIFEST_PARSING_IN_UNSAFE_MODE: 10,
+
+  /**
+   * Minimum time spent parsing the Manifest before we can authorize parsing
+   * it in an "unsafeMode", to speed-up the process with a little risk.
+   * Please note that this parsing time also sometimes includes idle time such
+   * as when the parser is waiting for a request to finish.
+   */
+  MIN_MANIFEST_PARSING_TIME_TO_ENTER_UNSAFE_MODE: 200,
+
+  /**
+   * Minimum amount of <S> elements in a DASH MPD's <SegmentTimeline> element
+   * necessary to begin parsing the current SegmentTimeline element in an
+   * unsafe manner (meaning: with risks of de-synchronization).
+   * This is only done when the "unsafeMode" parsing mode is enabled.
+   */
+  MIN_DASH_S_ELEMENTS_TO_PARSE_UNSAFELY: 300,
 
   /**
    * When we detect that the local Manifest might be out-of-sync with the
@@ -761,6 +842,32 @@ export default {
   OUT_OF_SYNC_MANIFEST_REFRESH_DELAY: 3000,
 
   /**
+   * When a partial Manifest update (that is an update with a partial sub-set
+   * of the Manifest) fails, we will perform an update with the whole Manifest
+   * instead.
+   * To not overload the client - as parsing a Manifest can be resource heavy -
+   * we set a minimum delay to wait before doing the corresponding request.
+   * @type {Number}
+   */
+  FAILED_PARTIAL_UPDATE_MANIFEST_REFRESH_DELAY: 3000,
+
+  /**
+   * DASH Manifest based on a SegmentTimeline should normally have an
+   * MPD@minimumUpdatePeriod attribute which should be sufficient to
+   * know when to refresh it.
+   * However, there is a specific case, for when it is equal to 0.
+   * As of DASH-IF IOP (valid in v4.3), when a DASH's MPD set a
+   * MPD@minimumUpdatePeriod to `0`, a client should not refresh the MPD
+   * unless told to do so through inband events, in the stream.
+   * In reality however, we found it to not always be the case (even with
+   * DASH-IF own streams) and moreover to not always be the best thing to do.
+   * We prefer to refresh in average at a regular interval when we do not have
+   * this information.
+   * /!\ This value is expressed in seconds.
+   */
+  DASH_FALLBACK_LIFETIME_WHEN_MINIMUM_UPDATE_PERIOD_EQUAL_0: 3,
+
+  /**
    * Max simultaneous MediaKeySessions that will be kept as a cache to avoid
    * doing superfluous license requests.
    * If this number is reached, any new session creation will close the oldest
@@ -768,6 +875,39 @@ export default {
    * @type {Number}
    */
   EME_MAX_SIMULTANEOUS_MEDIA_KEY_SESSIONS: 50,
+
+  /**
+   * When playing contents with a persistent license, we will usually store some
+   * information related to that MediaKeySession, to be able to play it at a
+   * later time.
+   *
+   * Those information are removed once a MediaKeySession is not considered
+   * as "usable" anymore. But to know that, the RxPlayer has to load it.
+   *
+   * But the RxPlayer does not re-load every persisted MediaKeySession every
+   * time to check each one of them one by one, as this would not be a
+   * performant thing to do.
+   *
+   * So this is only done when and if the corresponding content is encountered
+   * again and only if it contains the same initialization data.
+   *
+   * We have to consider that those "information" contain binary data which can
+   * be of arbitrary length. Size taken by an array of them can relatively
+   * rapidly take a lot of space in JS memory.
+   *
+   * So to avoid this storage to take too much space (would it be in the chosen
+   * browser's storage or in JS memory), we now set a higher bound for the
+   * amount of MediaKeySession information that can be stored at the same time.
+   *
+   * I set the value of 1000 here, as it seems big enough to not be considered a
+   * problem (though it can become one, when contents have a lot of keys per
+   * content), and still low enough so it should not cause much problem (my
+   * method to choose that number was to work with power of 10s and choosing the
+   * amount which seemed the most sensible one).
+   *
+   * This wasn't battle-tested however.
+   */
+  EME_MAX_STORED_PERSISTENT_SESSION_INFORMATION: 1000,
 
   /**
    * The player relies on browser events and properties to update its status to
@@ -818,5 +958,26 @@ export default {
    * SourceBuffer is currently updating.
    * @type {Number}
    */
-  SOURCE_BUFFER_FLUSHING_INTERVAL: 2000,
+  SOURCE_BUFFER_FLUSHING_INTERVAL: 500,
+
+  /**
+   * Padding under which we should not buffer from the current time, on
+   * Safari. To avoid some buffer appending issues on it, we decide not
+   * to load a segment if it may be pushed during playback time.
+   * @type {Number} - in seconds
+   */
+  CONTENT_REPLACEMENT_PADDING: 2,
+
+  /**
+   * For video and audio segments, determines two thresholds below which :
+   * - The segment is considered as loaded from cache
+   * - The segment may be loaded from cache depending on the previous request
+   */
+  CACHE_LOAD_DURATION_THRESHOLDS: {
+    video: 50,
+    audio: 10,
+  },
+
+  /** Interval we will use to poll for checking if an event shall be emitted */
+  STREAM_EVENT_EMITTER_POLL_INTERVAL: 250,
 };

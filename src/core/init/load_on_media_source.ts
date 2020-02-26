@@ -15,7 +15,6 @@
  */
 
 import {
-  BehaviorSubject,
   EMPTY,
   merge as observableMerge,
   Observable,
@@ -33,25 +32,25 @@ import {
 } from "rxjs/operators";
 import { MediaError } from "../../errors";
 import log from "../../log";
-import Manifest, {
-  Period,
-} from "../../manifest";
+import Manifest from "../../manifest";
 import ABRManager from "../abr";
-import BufferOrchestrator, {
-  IBufferOrchestratorEvent,
-} from "../buffers";
-import { SegmentPipelineCreator } from "../pipelines";
-import SourceBuffersStore, {
-  ITextTrackSourceBufferOptions,
-} from "../source_buffers";
-import createBufferClock from "./create_buffer_clock";
+import { SegmentFetcherCreator } from "../fetchers";
+import SourceBuffersStore from "../source_buffers";
+import StreamOrchestrator, {
+  IStreamOrchestratorEvent,
+  IStreamOrchestratorOptions,
+} from "../stream";
 import { setDurationToMediaSource } from "./create_media_source";
+import createStreamClock from "./create_stream_clock";
 import { maintainEndOfStream } from "./end_of_stream";
 import EVENTS from "./events_generators";
 import getDiscontinuities from "./get_discontinuities";
 import getStalledEvents from "./get_stalled_events";
 import handleDiscontinuity from "./handle_discontinuity";
 import seekAndLoadOnMediaEvents from "./initial_seek_and_play";
+import streamEventsEmitter, {
+  IStreamEvent
+} from "./stream_events_emitter";
 import {
   IInitClockTick,
   ILoadedEvent,
@@ -64,20 +63,12 @@ import updatePlaybackRate from "./update_playback_rate";
 // Arguments needed by `createMediaSourceLoader`
 export interface IMediaSourceLoaderArguments {
   abrManager : ABRManager; // Helps to choose the right Representation
-  bufferOptions : { // Buffers-related options
-    wantedBufferAhead$ : BehaviorSubject<number>; // buffer "goal"
-    maxBufferAhead$ : Observable<number>; // To GC after the current position
-    maxBufferBehind$ : Observable<number>; // to GC before the current position
-    textTrackOptions : ITextTrackSourceBufferOptions; // TextTrack configuration
-
-    // strategy when switching the current bitrate manually
-    manualBitrateSwitchingMode : "seamless"|"direct";
-  };
+  bufferOptions : IStreamOrchestratorOptions;
   clock$ : Observable<IInitClockTick>; // Emit position information
   manifest : Manifest; // Manifest of the content we want to play
   mediaElement : HTMLMediaElement; // Media Element on which the content will be
                                    // played
-  segmentPipelineCreator : SegmentPipelineCreator<any>; // Interface to download
+  segmentFetcherCreator : SegmentFetcherCreator<any>; // Interface to download
                                                         // segments
   speed$ : Observable<number>; // Emit the speed.
                                // /!\ Should replay the last value on subscription.
@@ -88,7 +79,8 @@ export type IMediaSourceLoaderEvent = IStalledEvent |
                                       ISpeedChangedEvent |
                                       ILoadedEvent |
                                       IWarningEvent |
-                                      IBufferOrchestratorEvent;
+                                      IStreamOrchestratorEvent |
+                                      IStreamEvent;
 
 /**
  * Returns a function allowing to load or reload the content in arguments into
@@ -103,7 +95,7 @@ export default function createMediaSourceLoader({
   speed$,
   bufferOptions,
   abrManager,
-  segmentPipelineCreator,
+  segmentFetcherCreator,
 } : IMediaSourceLoaderArguments) : (
   mediaSource : MediaSource,
   initialTime : number,
@@ -135,18 +127,6 @@ export default function createMediaSourceLoader({
     // single SourceBuffer per type.
     const sourceBuffersStore = new SourceBuffersStore(mediaElement, mediaSource);
 
-    // Initialize all native source buffers from the first period at the same
-    // time.
-    // We cannot lazily create native sourcebuffers since the spec does not
-    // allow adding them during playback.
-    //
-    // From https://w3c.github.io/media-source/#methods
-    //    For example, a user agent may throw a QuotaExceededError
-    //    exception if the media element has reached the HAVE_METADATA
-    //    readyState. This can occur if the user agent's media engine
-    //    does not support adding more tracks during playback.
-    createNativeSourceBuffersForPeriod(sourceBuffersStore, initialPeriod);
-
     const { seek$, load$ } = seekAndLoadOnMediaEvents({ clock$,
                                                         mediaElement,
                                                         startTime: initialTime,
@@ -154,7 +134,12 @@ export default function createMediaSourceLoader({
                                                         isDirectfile: false });
 
     const initialPlay$ = load$.pipe(filter((evt) => evt !== "not-loaded-metadata"));
-    const bufferClock$ = createBufferClock(clock$, { autoPlay,
+
+    const streamEvents$ = initialPlay$.pipe(
+      mergeMap(() => streamEventsEmitter(manifest, mediaElement, clock$))
+    );
+
+    const streamClock$ = createStreamClock(clock$, { autoPlay,
                                                      initialPlay$,
                                                      initialSeek$: seek$,
                                                      manifest,
@@ -164,13 +149,13 @@ export default function createMediaSourceLoader({
     // Will be used to cancel any endOfStream tries when the contents resume
     const cancelEndOfStream$ = new Subject<null>();
 
-    // Creates Observable which will manage every Buffer for the given Content.
-    const buffers$ = BufferOrchestrator({ manifest, initialPeriod },
-                                        bufferClock$,
-                                        abrManager,
-                                        sourceBuffersStore,
-                                        segmentPipelineCreator,
-                                        bufferOptions
+    // Creates Observable which will manage every Stream for the given Content.
+    const streams$ = StreamOrchestrator({ manifest, initialPeriod },
+                                          streamClock$,
+                                          abrManager,
+                                          sourceBuffersStore,
+                                          segmentFetcherCreator,
+                                          bufferOptions
     ).pipe(
       mergeMap((evt) : Observable<IMediaSourceLoaderEvent> => {
         switch (evt.type) {
@@ -236,38 +221,11 @@ export default function createMediaSourceLoader({
                            loadedEvent$,
                            playbackRate$,
                            stalled$,
-                           buffers$
+                           streams$,
+                           streamEvents$
     ).pipe(finalize(() => {
         // clean-up every created SourceBuffers
         sourceBuffersStore.disposeAll();
       }));
   };
-}
-
-/**
- * Create all native SourceBuffers needed for a given Period.
- *
- * Native Buffers have the particulary to need to be created at the beginning of
- * the content.
- * Custom source buffers (entirely managed in JS) can generally be created and
- * disposed at will during the lifecycle of the content.
- * @param {SourceBuffersStore} sourceBuffersStore
- * @param {Period} period
- */
-function createNativeSourceBuffersForPeriod(
-  sourceBuffersStore : SourceBuffersStore,
-  period : Period
-) : void {
-  Object.keys(period.adaptations).forEach(bufferType => {
-    if (SourceBuffersStore.isNative(bufferType)) {
-      const adaptations = period.adaptations[bufferType];
-      const representations = adaptations != null &&
-                              adaptations.length > 0 ? adaptations[0].representations :
-                                                       [];
-      if (representations.length > 0) {
-        const codec = representations[0].getMimeTypeString();
-        sourceBuffersStore.createSourceBuffer(bufferType, codec);
-      }
-    }
-  });
 }

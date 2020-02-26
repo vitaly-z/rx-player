@@ -81,6 +81,7 @@ describe("API - parseConstructorOptions", () => {
     stopAtEnd: true,
     preferredAudioTracks: [],
     preferredTextTracks: [],
+    preferredVideoTracks: [],
   };
 
   it("should create default values if no option is given", () => {
@@ -337,6 +338,17 @@ describe("API - parseConstructorOptions", () => {
     });
   });
 
+  it("should authorize setting a preferredVideoTracks option", () => {
+    const preferredVideoTracks = [
+      { codec: { all: true, test: /hvc/ } },
+      null,
+    ];
+    expect(parseConstructorOptions({ preferredVideoTracks })).toEqual({
+      ...defaultConstructorOptions,
+      preferredVideoTracks,
+    });
+  });
+
   it("should throw if the maxBufferAhead given is not a number", () => {
     expect(() => parseConstructorOptions({ maxBufferAhead: "a" as any })).toThrow();
     expect(() => parseConstructorOptions({ maxBufferAhead: /a/ as any })).toThrow();
@@ -406,6 +418,7 @@ describe("API - parseLoadVideoOptions", () => {
     autoPlay: false,
     defaultAudioTrack: undefined,
     defaultTextTrack: undefined,
+    enableFastSwitching: true,
     hideNativeSubtitle: false,
     keySystems: [],
     lowLatencyMode: false,
@@ -752,6 +765,30 @@ describe("API - parseLoadVideoOptions", () => {
       url: "foo",
       transport: "bar",
       manualBitrateSwitchingMode: "seamless",
+    });
+  });
+
+  it("should authorize setting a valid enableFastSwitching option", () => {
+    expect(parseLoadVideoOptions({
+      enableFastSwitching: false,
+      url: "foo",
+      transport: "bar",
+    })).toEqual({
+      ...defaultLoadVideoOptions,
+      url: "foo",
+      transport: "bar",
+      enableFastSwitching: false,
+    });
+
+    expect(parseLoadVideoOptions({
+      enableFastSwitching: true,
+      url: "foo",
+      transport: "bar",
+    })).toEqual({
+      ...defaultLoadVideoOptions,
+      url: "foo",
+      transport: "bar",
+      enableFastSwitching: true,
     });
   });
 
@@ -1199,5 +1236,24 @@ describe("API - parseLoadVideoOptions", () => {
     expect(logWarnMock).toHaveBeenCalledWith("API: You have set a textTrackElement " +
       "without being in an \"html\" textTrackMode. It will be ignored.");
   });
+
+  /* tslint:disable max-line-length */
+  it("should set non-documented variables in `transportOptions`", () => {
+  /* tslint:enable max-line-length */
+    expect(parseLoadVideoOptions({
+      url: "foo",
+      transport: "bar",
+      transportOptions: { __priv_toto: 4 } as any,
+    })).toEqual({
+      ...defaultLoadVideoOptions,
+      url: "foo",
+      transport: "bar",
+      transportOptions: { lowLatencyMode: false,
+                          __priv_toto: 4,
+                          supplementaryImageTracks: [],
+                          supplementaryTextTracks: [] },
+    });
+  });
+
 });
 /* tslint:enable no-unsafe-any */

@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-import { of as observableOf } from "rxjs";
-import { tap } from "rxjs/operators";
+import {
+  Observable,
+  of as observableOf,
+} from "rxjs";
 import request, {
   fetchIsSupported,
 } from "../../utils/request";
 import warnOnce from "../../utils/warn_once";
 import {
   ISegmentLoaderArguments,
-  ISegmentLoaderObservable,
+  ISegmentLoaderEvent,
 } from "../types";
 import byteRange from "../utils/byte_range";
-import checkISOBMFFIntegrity from "../utils/check_isobmff_integrity";
 import isMP4EmbeddedTextTrack from "../utils/is_mp4_embedded_text_track";
+import addSegmentIntegrityChecks from "./add_segment_integrity_checks_to_loader";
 import initSegmentLoader from "./init_segment_loader";
 import lowLatencySegmentLoader from "./low_latency_segment_loader";
 
@@ -39,21 +41,11 @@ export default function generateTextTrackLoader(
   { lowLatencyMode,
     checkMediaSegmentIntegrity } : { lowLatencyMode : boolean;
                                      checkMediaSegmentIntegrity? : boolean; }
-) : (x : ISegmentLoaderArguments) => ISegmentLoaderObservable< ArrayBuffer |
-                                                               string |
-                                                               null > {
-  if (checkMediaSegmentIntegrity !== true) {
-    return textTrackLoader;
-  }
-  return (content) => textTrackLoader(content).pipe(tap(res => {
-    if ((res.type === "data-loaded" || res.type === "data-chunk") &&
-        res.value.responseData !== null &&
-        typeof res.value.responseData !== "string")
-    {
-      checkISOBMFFIntegrity(new Uint8Array(res.value.responseData),
-                            content.segment.isInit);
-    }
-  }));
+) : (x : ISegmentLoaderArguments) => Observable< ISegmentLoaderEvent< ArrayBuffer |
+                                                                      string |
+                                                                      null > > {
+  return checkMediaSegmentIntegrity !== true ? textTrackLoader :
+                                               addSegmentIntegrityChecks(textTrackLoader);
 
   /**
    * @param {Object} args
@@ -61,11 +53,11 @@ export default function generateTextTrackLoader(
    */
   function textTrackLoader(
     args : ISegmentLoaderArguments
-  ) : ISegmentLoaderObservable< ArrayBuffer | string | null > {
+  ) : Observable< ISegmentLoaderEvent< ArrayBuffer | string | null > > {
     const { range } = args.segment;
     const { url } = args;
 
-    if (url == null) {
+    if (url === null) {
       return observableOf({ type: "data-created",
                             value: { responseData: null } });
     }

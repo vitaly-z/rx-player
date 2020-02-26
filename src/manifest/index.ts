@@ -15,7 +15,6 @@
  */
 
 import Adaptation, {
-  IAdaptationType,
   IRepresentationFilter,
   SUPPORTED_ADAPTATIONS_TYPE,
 } from "./adaptation";
@@ -27,12 +26,15 @@ import Manifest, {
 } from "./manifest";
 import Period from "./period";
 import Representation from "./representation";
-import IRepresentationIndex, {
+import {
   IBaseContentInfos,
   IMetaPlaylistPrivateInfos,
+  IRepresentationIndex,
   ISegment,
+  ISupplementarySegmentsInfo,
   StaticRepresentationIndex,
 } from "./representation_index";
+import { IAdaptationType } from "./types";
 
 export default Manifest;
 export {
@@ -54,6 +56,7 @@ export {
   ISegment,
   ISupplementaryImageTrack,
   ISupplementaryTextTrack,
+  ISupplementarySegmentsInfo,
   StaticRepresentationIndex,
   SUPPORTED_ADAPTATIONS_TYPE,
 };

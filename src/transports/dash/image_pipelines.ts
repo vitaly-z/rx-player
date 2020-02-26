@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-import { of as observableOf } from "rxjs";
+import {
+  Observable,
+  of as observableOf,
+} from "rxjs";
 import features from "../../features";
 import request from "../../utils/request";
 import takeFirstSet from "../../utils/take_first_set";
 import {
   IImageParserObservable,
   ISegmentLoaderArguments,
-  ISegmentLoaderObservable,
+  ISegmentLoaderEvent,
   ISegmentParserArguments,
 } from "../types";
 
@@ -32,7 +35,7 @@ import {
 export function imageLoader(
   { segment,
     url } : ISegmentLoaderArguments
-) : ISegmentLoaderObservable< ArrayBuffer | null > {
+) : Observable< ISegmentLoaderEvent< ArrayBuffer | null > > {
   if (segment.isInit || url === null) {
     return observableOf({ type: "data-created" as const,
                           value: { responseData: null } });
@@ -67,7 +70,7 @@ export function imageParser(
   const chunkOffset = takeFirstSet<number>(segment.timestampOffset, 0);
 
   // TODO image Parsing should be more on the sourceBuffer side, no?
-  if (data === null || features.imageParser == null) {
+  if (data === null || features.imageParser === null) {
     return observableOf({ type: "parsed-segment",
                           value: { chunkData: null,
                                    chunkInfos: segment.timescale > 0 ?

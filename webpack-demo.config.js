@@ -14,7 +14,7 @@ const isDevMode = RXP_ENV === "development";
 
 module.exports = {
   mode: isDevMode ? "development" : "production",
-  entry: path.join(__dirname, "./demo/full/scripts/index.js"),
+  entry: path.join(__dirname, "./demo/full/scripts/index.jsx"),
   output: {
     path: path.join(__dirname, "./demo/full"),
     filename: "bundle.js",
@@ -26,8 +26,8 @@ module.exports = {
     ] : [],
   },
   performance: {
-    maxEntrypointSize: shouldMinify ? 1000000 : 2000000,
-    maxAssetSize: shouldMinify ? 1000000 : 2000000,
+    maxEntrypointSize: shouldMinify ? 1000000 : 2500000,
+    maxAssetSize: shouldMinify ? 1000000 : 2500000,
   },
   module: {
     rules: [

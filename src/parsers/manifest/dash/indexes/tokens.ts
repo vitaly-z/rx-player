@@ -32,6 +32,10 @@ function padLeftWithZeros(n : number|string, l : number) : string {
   return arr.slice(-l);
 }
 
+/**
+ * @param {string|number} replacer
+ * @returns {Function}
+ */
 function processFormatedToken(
   replacer : string | number
 ) : (x: unknown, y: unknown, widthStr: string) => string {
@@ -92,36 +96,43 @@ export function replaceRepresentationDASHTokens(
 }
 
 /**
- * Replace "tokens" written in a given path (e.g. $Time$) by the corresponding
- * infos, taken from the given segment.
- * @param {string} path
- * @param {number} time
- * @param {number} number
- * @returns {string}
- *
- * @throws Error - Throws if we do not have enough data to construct the URL
+ * Create function allowing to replace "tokens" in a given DASH segment URL
+ * (e.g. $Time$, which has to be replaced by the segment's start time) by the
+ * right information.
+ * @param {number|undefined} time
+ * @param {number|undefined} nb
+ * @returns {Function}
  */
-export function replaceSegmentDASHTokens(
-  path : string,
-  time? : number,
-  nb? : number
-) : string {
-  if (path.indexOf("$") === -1) {
-    return path;
-  } else {
-    return path
-      .replace(/\$\$/g, "$")
-      .replace(/\$Number(|\%0(\d+)d)\$/g, (_x, _y, widthStr : string) => {
-        if (nb == null) {
-          throw new Error("Segment number not defined in a $Number$ scheme");
-        }
-        return processFormatedToken(nb)(_x, _y, widthStr);
-      })
-      .replace(/\$Time(|\%0(\d+)d)\$/g, (_x, _y, widthStr : string) => {
-        if (time == null) {
-          throw new Error("Segment time not defined in a $Time$ scheme");
-        }
-        return processFormatedToken(time)(_x, _y, widthStr);
-      });
-  }
+export function createDashUrlDetokenizer(
+  time : number | undefined,
+  nb : number | undefined
+) : (url : string) => string {
+  /**
+   * Replace the tokens in the given `url` by the segment information defined
+   * by the outer function.
+   * @param {string} url
+   * @returns {string}
+   *
+   * @throws Error - Throws if we do not have enough data to construct the URL
+   */
+  return function replaceTokensInUrl(url : string) : string {
+    if (url.indexOf("$") === -1) {
+      return url;
+    } else {
+      return url
+        .replace(/\$\$/g, "$")
+        .replace(/\$Number(|\%0(\d+)d)\$/g, (_x, _y, widthStr : string) => {
+          if (nb === undefined) {
+            throw new Error("Segment number not defined in a $Number$ scheme");
+          }
+          return processFormatedToken(nb)(_x, _y, widthStr);
+        })
+        .replace(/\$Time(|\%0(\d+)d)\$/g, (_x, _y, widthStr : string) => {
+          if (time === undefined) {
+            throw new Error("Segment time not defined in a $Time$ scheme");
+          }
+          return processFormatedToken(time)(_x, _y, widthStr);
+        });
+    }
+  };
 }

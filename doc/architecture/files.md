@@ -25,11 +25,12 @@ a single directory or subdirectory, in alphabetical order.
 - [src/core/: The core directory](#core)
   - [src/core/abr/: The adaptive bitrate code](#core-abr)
   - [src/core/api/: The API definition](#core-api)
-  - [src/core/buffers/: The Buffer management](#core-buffers)
+  - [src/core/stream/: Load the right segments](#core-stream)
   - [src/core/eme/: Encryption management](#core-eme)
-  - [src/core/pipelines/: The networking pipelines](#core-pipelines)
+  - [src/core/fetchers/: The fetchers](#core-fetchers)
   - [src/core/source_buffers/: SourceBuffers definitions](#core-sb)
   - [src/core/init/: Media streaming logic](#core-init)
+- [src/**/__tests__: the unit tests directories](#src-tests)
 - [tests/: Test strategies, integration and memory tests](#tests)
 
 
@@ -120,9 +121,8 @@ the streaming technology used.
 
 That's where:
   - the api is defined
-  - the buffer is managed
   - the MSE and EME APIs are called and managed
-  - the segments are downloaded
+  - the segments are downloaded and pushed to then be decoded by the browser
   - adaptive bitrate strategies are set
 
 This directory contains other subdirectories which are listed in the next
@@ -253,8 +253,8 @@ Defines the rx-player API. This is the part the library user will directly
 interact with.
 
 
-<a name="core-buffers"></a>
-### src/core/buffers/: The Buffer management ###################################
+<a name="core-stream"></a>
+### src/core/stream/: Load the right segments ##################################
 
 The code there calculate which segments should be downloaded, ask for their
 download and push the segments into the SourceBuffers.
@@ -266,11 +266,11 @@ download and push the segments into the SourceBuffers.
 Defines functions allowing to handle encrypted contents through the EME APIs.
 
 
-<a name="core-pipelines"></a>
-### src/core/pipelines/: The networking pipelines ##############################
+<a name="core-fetchers"></a>
+### src/core/fetchers/: The fetchers ###########################################
 
-Handle the segment downloading pipelines (load and parse) as defined in the
-``src/transports/`` directory.
+Handle the segments and Manifest downloading pipelines (load and parse) as
+defined in the ``src/transports/`` directory.
 
 This is the layer directly interacting with the transport part (HSS, DASH).
 It facilitates the role of loading the Manifest and new segments for the rest of
@@ -292,7 +292,32 @@ defined in `src/custom_source_buffers`.
 ### src/core/init/: Content initialization #####################################
 
 This is the central part which download manifests, initialize MSE and EME APIs,
-instanciate the Buffer and link together many subparts of the player.
+instanciate the central `StreamOrchestrator` (which will allow to download and
+push segments so the content can play) and link together many subparts of the
+player.
+
+
+<a name="src-tests"></a>
+## src/**/__tests__: the unit tests directories ################################
+
+You will find multiple directories named `__tests__` in the RxPlayer.
+Those contain unit tests and are put in the same directory than the code it
+tests.
+
+Most unit tests files contain only tests for a single source file. Those will
+be put directly at the root of `__tests__` under the name
+`<ORIGINAL_SRC_FILE>.test.ts` (where `<ORIGINAL_SRC_FILE>` is the filename of
+the tested file).
+
+`__tests__` directories can also contain files defining tests for multiple files
+contained in the tested directory.
+Those can be quicker to write and easier to maintain at the expense of being
+less thorough.
+
+Those type of "global" unit tests are put in a special `__global__` directory,
+itself directly at the root of the corresponding `__tests__` directory.
+Their filename don't follow the same convention than single-source unit tests
+but should still be suffixed by `.test.ts`.
 
 
 <a name="tests"></a>
@@ -308,5 +333,5 @@ subdirectory.
 Memory tests are entirely written in the ``tests/memory`` subdirectory.
 
 As for unit tests, they are written alongside the code, in ``__tests__``
-directories, the ``tests/unit`` directory only contains the configuration files
-to launch them.
+directories. All its configuration can be found at the root of the project,
+in `jest.config.js` (we use the jest library for unit tests).

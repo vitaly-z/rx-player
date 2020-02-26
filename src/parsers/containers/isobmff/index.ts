@@ -23,6 +23,7 @@ export {
 export {
   getBox,
   getBoxContent,
+  getNextBoxOffsets,
   getBoxOffsets,
   getUuidContent,
 } from "./get_box";
@@ -39,5 +40,6 @@ export {
   getSegmentsFromSidx,
   ISidxSegment,
   patchPssh,
+  updateBoxLength,
 } from "./utils";
 export { takePSSHOut };

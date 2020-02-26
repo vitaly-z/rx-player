@@ -19,25 +19,27 @@ import {
   Observer,
   of as observableOf,
 } from "rxjs";
-import { tap } from "rxjs/operators";
 import xhr, {
   fetchIsSupported,
 } from "../../utils/request";
 import warnOnce from "../../utils/warn_once";
 import {
   CustomSegmentLoader,
-  ILoaderRegularDataEvent,
+  ILoaderProgressEvent,
   ISegmentLoaderArguments,
-  ISegmentLoaderObservable,
+  ISegmentLoaderDataLoadedEvent,
+  ISegmentLoaderEvent,
+  ITransportAudioVideoSegmentLoader,
 } from "../types";
 import byteRange from "../utils/byte_range";
-import checkISOBMFFIntegrity from "../utils/check_isobmff_integrity";
 import isWEBMEmbeddedTrack from "../utils/is_webm_embedded_track";
+import addSegmentIntegrityChecks from "./add_segment_integrity_checks_to_loader";
 import initSegmentLoader from "./init_segment_loader";
 import lowLatencySegmentLoader from "./low_latency_segment_loader";
 
 type ICustomSegmentLoaderObserver =
-  Observer<ILoaderRegularDataEvent<Uint8Array|ArrayBuffer>>;
+  Observer<ILoaderProgressEvent |
+           ISegmentLoaderDataLoadedEvent<Uint8Array|ArrayBuffer>>;
 
 /**
  * Segment loader triggered if there was no custom-defined one in the API.
@@ -48,7 +50,7 @@ function regularSegmentLoader(
   url : string,
   args : ISegmentLoaderArguments,
   lowLatencyMode : boolean
-) : ISegmentLoaderObservable<ArrayBuffer> {
+) : Observable< ISegmentLoaderEvent<ArrayBuffer>> {
 
   if (args.segment.isInit) {
     return initSegmentLoader(url, args);
@@ -68,16 +70,13 @@ function regularSegmentLoader(
   return xhr({ url,
                responseType: "arraybuffer",
                sendProgressEvents: true,
-               headers: segment.range != null ? { Range: byteRange(segment.range) } :
-                                                undefined });
+               headers: segment.range !== undefined ?
+                 { Range: byteRange(segment.range) } :
+                 undefined });
 }
 
 /**
- * Generate a segment loader:
- *   - call a custom SegmentLoader if defined
- *   - call the regular loader if not
- * @param {boolean} lowLatencyMode
- * @param {Function} [customSegmentLoader]
+ * @param {Object} config
  * @returns {Function}
  */
 export default function generateSegmentLoader(
@@ -86,21 +85,9 @@ export default function generateSegmentLoader(
     checkMediaSegmentIntegrity } : { lowLatencyMode: boolean;
                                      segmentLoader? : CustomSegmentLoader;
                                      checkMediaSegmentIntegrity? : boolean; }
-) : (x : ISegmentLoaderArguments) => ISegmentLoaderObservable< Uint8Array |
-                                                               ArrayBuffer |
-                                                               null > {
-  if (checkMediaSegmentIntegrity !== true) {
-    return segmentLoader;
-  }
-  return (content) => segmentLoader(content).pipe(tap(res => {
-    if ((res.type === "data-loaded" || res.type === "data-chunk") &&
-        res.value.responseData !== null &&
-        !isWEBMEmbeddedTrack(content.representation))
-    {
-      checkISOBMFFIntegrity(new Uint8Array(res.value.responseData),
-                            content.segment.isInit);
-    }
-  }));
+) : ITransportAudioVideoSegmentLoader {
+  return checkMediaSegmentIntegrity !== true ? segmentLoader :
+                                               addSegmentIntegrityChecks(segmentLoader);
 
   /**
    * @param {Object} content
@@ -108,14 +95,14 @@ export default function generateSegmentLoader(
    */
   function segmentLoader(
     content : ISegmentLoaderArguments
-  ) : ISegmentLoaderObservable< Uint8Array | ArrayBuffer | null > {
+  ) : Observable< ISegmentLoaderEvent< Uint8Array | ArrayBuffer | null > > {
     const { url } = content;
     if (url == null) {
       return observableOf({ type: "data-created" as const,
                             value: { responseData: null } });
     }
 
-    if (lowLatencyMode || customSegmentLoader == null) {
+    if (lowLatencyMode || customSegmentLoader === undefined) {
       return regularSegmentLoader(url, content, lowLatencyMode);
     }
 

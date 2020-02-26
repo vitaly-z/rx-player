@@ -14,34 +14,56 @@
  * limitations under the License.
  */
 
+import { Subject } from "rxjs";
 import {
-  ICompatMediaKeySystemAccess,
   ICustomMediaKeys,
   ICustomMediaKeySession,
   ICustomMediaKeySystemAccess,
 } from "../../compat";
 import { ICustomError } from "../../errors";
-import SessionsStore from "./utils/open_sessions_store";
-import PersistedSessionsStore from "./utils/persisted_session_store";
+import LoadedSessionsStore from "./utils/loaded_sessions_store";
+import PersistentSessionsStore from "./utils/persistent_sessions_store";
 
-// Emitted when a minor error happened.
+/** Information concerning a MediaKeySession. */
+export interface IMediaKeySessionInfo {
+  /** The MediaKeySession itself. */
+  mediaKeySession : MediaKeySession |
+                    ICustomMediaKeySession;
+  /** The type of MediaKeySession (e.g. "temporary"). */
+  sessionType : MediaKeySessionType;
+  /** Initialization data assiociated to this MediaKeySession. */
+  initData : Uint8Array;
+  /** Initialization data type for the given initialization data. */
+  initDataType : string |
+                 undefined;
+}
+
+/** Event emitted when a minor - recoverable - error happened. */
 export interface IEMEWarningEvent { type : "warning";
                                     value : ICustomError; }
 
-// Emitted when we receive an "encrypted" event from the browser.
-// This is usually sent when pushing an initialization segment, if it stores
-// encryption information.
+/**
+ * Event emitted when we receive an "encrypted" event from the browser.
+ * This is usually sent when pushing an initialization segment, if it stores
+ * encryption information.
+ */
 export interface IEncryptedEvent { type: "encrypted-event-received";
                                    value: { type? : string;
                                             data : ArrayBuffer |
                                                    Uint8Array; }; }
 
-// Sent when a MediaKeys has been created (or is already created) for the
-// current content.
-// This is necessary before creating a MediaKeySession which will allow
-// encryption keys to be communicated.
-export interface ICreatedMediaKeysEvent { type: "created-media-keys";
-                                          value: IMediaKeysInfos; }
+/**
+ * Sent when a MediaKeys has been created (or is already created) for the
+ * current content.
+ * This is necessary before creating a MediaKeySession which will allow
+ * encryption keys to be communicated.
+ * It carries a subject (attachMediaKeys$) that will be used by the init to
+ * ask the EME to attach the mediakeys.
+ */
+export interface ICreatedMediaKeysEvent {
+  type: "created-media-keys";
+  value: { mediaKeysInfos: IMediaKeysInfos;
+           attachMediaKeys$: Subject<void>; }; }
 
 // Sent when the created (or already created) MediaKeys is attached to the
 // current HTMLMediaElement element.
@@ -78,14 +100,14 @@ export interface IInitDataIgnoredEvent { type: "init-data-ignored";
 export interface ISessionMessageEvent { type: "session-message";
                                         value : { messageType : string;
                                                   initData : Uint8Array;
-                                                  initDataType? : string; }; }
+                                                  initDataType : string | undefined; }; }
 
 // Emitted when a `getLicense` call resolves with null.
 // In that case, we do not call `MediaKeySession.prototype.update` and no
 // `session-updated` event will be sent.
 export interface INoUpdateEvent { type : "no-update";
                                   value : { initData : Uint8Array;
-                                            initDataType? : string; }; }
+                                            initDataType : string | undefined; }; }
 
 // Emitted after the `MediaKeySession.prototype.update` function resolves.
 // This function is called when the `getLicense` callback resolves with a data
@@ -95,7 +117,7 @@ export interface ISessionUpdatedEvent { type: "session-updated";
                                                           ICustomMediaKeySession;
                                                  license: ILicense|null;
                                                  initData : Uint8Array;
-                                                 initDataType? : string; }; }
+                                                 initDataType : string | undefined; }; }
 
 // Emitted when individual keys are considered undecipherable and are thus
 // blacklisted.
@@ -125,7 +147,7 @@ export type IEMEManagerEvent = IEMEWarningEvent | // minor error
                                IBlacklistKeysEvent | // keyIDs undecipherable
                                IBlacklistProtectionDataEvent; // initData undecipherable
 
-export type ILicense = TypedArray |
+export type ILicense = BufferSource |
                        ArrayBuffer;
 
 // Segment protection manually sent to the EMEManager
@@ -146,66 +168,140 @@ export interface IKeyMessageHandledEvent { type: "key-message-handled";
 
 // Infos indentifying a MediaKeySystemAccess
 export interface IKeySystemAccessInfos {
-  keySystemAccess: ICompatMediaKeySystemAccess |
+  keySystemAccess: MediaKeySystemAccess |
                    ICustomMediaKeySystemAccess;
   keySystemOptions: IKeySystemOption;
 }
 
 // Infos identyfing a single MediaKey
 export interface IMediaKeysInfos {
-  mediaKeySystemAccess: ICompatMediaKeySystemAccess |
+  mediaKeySystemAccess: MediaKeySystemAccess |
                         ICustomMediaKeySystemAccess;
   keySystemOptions: IKeySystemOption; // options set by the user
   mediaKeys : MediaKeys |
               ICustomMediaKeys;
-  sessionsStore : SessionsStore;
-  sessionStorage : PersistedSessionsStore|null;
+  loadedSessionsStore : LoadedSessionsStore;
+  persistentSessionsStore : PersistentSessionsStore|null;
 }
 
-// Data stored in a persistent MediaKeySession storage
-export interface IPersistedSessionData { sessionId : string;
-                                         initData : number;
-                                         initDataType? : string|undefined; }
+/**
+ * Data stored in a persistent MediaKeySession storage.
+ * Has to be versioned to be able to play MediaKeySessions persisted in an old
+ * RxPlayer version when in a new one.
+ */
+export type IPersistentSessionInfo = IPersistentSessionInfoV2 |
+                                     IPersistentSessionInfoV1 |
+                                     IPersistentSessionInfoV0;
 
-// MediaKeySession storage interface
-export interface IPersistedSessionStorage { load() : IPersistedSessionData[];
-                                            save(x : IPersistedSessionData[]) : void; }
+/** Wrap initialization data and allow linearization of it into base64. */
+interface IInitDataContainer {
+  /** The initData itself. */
+  initData : Uint8Array;
 
-export type TypedArray = Int8Array |
-                         Int16Array |
-                         Int32Array |
-                         Uint8Array |
-                         Uint16Array |
-                         Uint32Array |
-                         Uint8ClampedArray |
-                         Float32Array |
-                         Float64Array;
+  /**
+   * Convert it to base64.
+   * `toJSON` is specially interpreted by JavaScript engines to be able to rely
+   * on it when calling `JSON.stringify` on it or any of its parent objects:
+   * https://tc39.es/ecma262/#sec-serializejsonproperty
+   */
+  toJSON() : string;
+}
+
+/**
+ * Stored information about a single persistent `MediaKeySession`, when created
+ * in RxPlayer versions after the v3.21.0 included.
+ * The previous implementation (version 1) was fine enough but did not linearize
+ * well due to it containing an Uint8Array. This data is now wrapped into a
+ * container which will convert it to base64 when linearized through
+ * `JSON.stringify`.
+ */
+export interface IPersistentSessionInfoV2 {
+  /** Version for this object. */
+  version : 2;
+  /** The persisted MediaKeySession's `id`. Used to load it at a later time. */
+  sessionId : string;
+  /**
+   * The initialization data associated to the `MediaKeySession`, wrapped in a
+   * container to allow efficient linearization.
+   */
+  initData : IInitDataContainer;
+  /**
+   * A hash of the initialization data (generated by the `hashBuffer` function,
+   * at the time of v3.20.1 at least). Allows for a faster comparison than just
+   * comparing initialization data multiple times.
+   */
+  initDataHash : number;
+  /** Type giving information about the format of the initialization data. */
+  initDataType? : string | undefined;
+}
+
+/**
+ * Stored information about a single persistent `MediaKeySession`, when created
+ * in the v3.20.1 RxPlayer version.
+ * Add sub-par (as in not performant) collision prevention by setting both
+ * the hash of the initialization data and the initialization data itself.
+ * The hash could be checked first for a fast comparison, then the full data.
+ * Had to do this way because this structure is documented in the API as being
+ * put in an array with one element per sessionId.
+ * We might implement a HashMap in future versions instead.
+ */
+export interface IPersistentSessionInfoV1 {
+  /** Version for this object. */
+  version : 1;
+  /** The persisted MediaKeySession's `id`. Used to load it at a later time. */
+  sessionId : string;
+  /** The initialization data associated to the `MediaKeySession`, untouched. */
+  initData : Uint8Array;
+  /**
+   * A hash of the initialization data (generated by the `hashBuffer` function,
+   * at the time of v3.20.1 at least). Allows for a faster comparison than just
+   * comparing initialization data multiple times.
+   */
+  initDataHash : number;
+  /** Type giving information about the format of the initialization data. */
+  initDataType? : string | undefined;
+}
+
+/**
+ * Stored information about a single persistent `MediaKeySession`, when created
+ * in RxPlayer versions before the v3.20.1
+ * Here we have no collision detection. We could theorically load the wrong
+ * persistent session.
+ */
+export interface IPersistentSessionInfoV0 {
+  /** Version for this object. Usually not defined here. */
+  version? : undefined;
+  /** The persisted MediaKeySession's `id`. Used to load it at a later time. */
+  sessionId : string;
+  /** This initData is a hash of a real one. Here we don't handle collision. */
+  initData : number;
+  /** Type giving information about the format of the initialization data. */
+  initDataType? : string | undefined;
+}
+
+/** Persistent MediaKeySession storage interface. */
+export interface IPersistentSessionStorage { load() : IPersistentSessionInfo[];
+                                             save(x : IPersistentSessionInfo[]) : void; }
 
 // Options given by the caller
 export interface IKeySystemOption {
   type : string;
   getLicense : (message : Uint8Array, messageType : string)
-                 => Promise<TypedArray |
-                            ArrayBuffer |
-                            null> |
-                    TypedArray |
-                    ArrayBuffer |
+                 => Promise<BufferSource | null> |
+                    BufferSource |
                     null;
   getLicenseConfig? : { retry? : number;
                         timeout? : number; };
-  serverCertificate? : ArrayBuffer | TypedArray;
+  serverCertificate? : BufferSource;
   persistentLicense? : boolean;
-  licenseStorage? : IPersistedSessionStorage;
+  licenseStorage? : IPersistentSessionStorage;
   persistentStateRequired? : boolean;
   distinctiveIdentifierRequired? : boolean;
   closeSessionsOnStop? : boolean;
   onKeyStatusesChange? : (evt : Event, session : MediaKeySession |
                                                  ICustomMediaKeySession)
-                           => Promise<TypedArray |
-                                      ArrayBuffer |
-                                      null> |
-                              TypedArray |
-                              ArrayBuffer |
+                           => Promise<BufferSource | null> |
+                              BufferSource |
                               null;
   videoRobustnesses?: Array<string|undefined>;
   audioRobustnesses?: Array<string|undefined>;

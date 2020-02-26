@@ -23,9 +23,10 @@ import assert from "../../utils/assert";
 import request from "../../utils/request";
 import {
   CustomSegmentLoader,
-  ILoaderRegularDataEvent,
+  ILoaderProgressEvent,
   ISegmentLoaderArguments,
-  ISegmentLoaderObservable,
+  ISegmentLoaderDataLoadedEvent,
+  ISegmentLoaderEvent,
 } from "../types";
 import byteRange from "../utils/byte_range";
 import {
@@ -38,7 +39,8 @@ interface IRegularSegmentLoaderArguments extends ISegmentLoaderArguments {
 }
 
 type ICustomSegmentLoaderObserver =
-  Observer< ILoaderRegularDataEvent< Uint8Array | ArrayBuffer > >;
+  Observer<ILoaderProgressEvent |
+           ISegmentLoaderDataLoadedEvent<Uint8Array|ArrayBuffer>>;
 
 /**
  * Segment loader triggered if there was no custom-defined one in the API.
@@ -47,7 +49,7 @@ type ICustomSegmentLoaderObserver =
  */
 function regularSegmentLoader(
   { url, segment } : IRegularSegmentLoaderArguments
-) : ISegmentLoaderObservable<ArrayBuffer> {
+) : Observable< ISegmentLoaderEvent<ArrayBuffer> > {
   let headers;
   const range = segment.range;
   if (Array.isArray(range)) {
@@ -73,19 +75,23 @@ const generateSegmentLoader = (
   period,
   manifest,
   url,
-} : ISegmentLoaderArguments) : ISegmentLoaderObservable<Uint8Array|ArrayBuffer|null> => {
+} : ISegmentLoaderArguments
+) : Observable< ISegmentLoaderEvent<Uint8Array|ArrayBuffer|null> > => {
   if (segment.isInit) {
     if (segment.privateInfos === undefined ||
-        segment.privateInfos.smoothInit == null)
+        segment.privateInfos.smoothInit === undefined)
     {
       throw new Error("Smooth: Invalid segment format");
     }
     const smoothInitPrivateInfos = segment.privateInfos.smoothInit;
     let responseData : Uint8Array;
-    const { codecPrivateData = "",
+    const { codecPrivateData,
             protection = { keyId: undefined,
                            keySystems: undefined } } = smoothInitPrivateInfos;
 
+    if (codecPrivateData === undefined) {
+      throw new Error("Smooth: no codec private data.");
+    }
     switch (adaptation.type) {
       case "video": {
         const { width = 0, height = 0 } = representation;
@@ -122,7 +128,8 @@ const generateSegmentLoader = (
 
     return observableOf({ type: "data-created" as const,
                           value: { responseData } });
-  } else if (url == null) {
+  }
+  else if (url === null) {
     return observableOf({ type: "data-created" as const,
                           value: { responseData: null } });
   } else {

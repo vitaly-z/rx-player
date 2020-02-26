@@ -17,8 +17,6 @@
 import addClassName from "./add_class_name";
 import addTextTrack from "./add_text_track";
 import {
-  ICompatMediaKeySystemAccess,
-  ICompatMediaKeySystemConfiguration,
   ICompatTextTrack,
   ICompatVTTCue,
   MediaSource_,
@@ -30,7 +28,7 @@ import tryToChangeSourceBufferType, {
 } from "./change_source_buffer_type";
 import clearElementSrc from "./clear_element_src";
 import {
-  createSession,
+  closeSession,
   CustomMediaKeySystemAccess,
   generateKeyRequest,
   getInitData,
@@ -64,7 +62,9 @@ import shouldWaitForDataBeforeLoaded from "./should_wait_for_data_before_loaded"
 import whenLoadedMetadata$ from "./when_loaded_metadata";
 import whenMediaSourceOpen$ from "./when_media_source_open";
 
-// TODO TO REMOVE
+// TODO To remove. This seems to be the only side-effect done on import, which
+// we  would prefer to disallow (both for the understandability of the code and
+// to better exploit tree shaking.
 patchWebkitSourceBuffer();
 
 export {
@@ -72,15 +72,13 @@ export {
   addTextTrack,
   canPatchISOBMFFSegment,
   clearElementSrc,
-  createSession,
+  closeSession,
   CustomMediaKeySystemAccess,
   events,
   exitFullscreen,
   generateKeyRequest,
   getInitData,
   hasEMEAPIs,
-  ICompatMediaKeySystemAccess,
-  ICompatMediaKeySystemConfiguration,
   ICompatTextTrack,
   ICompatVTTCue,
   ICustomMediaKeySession,

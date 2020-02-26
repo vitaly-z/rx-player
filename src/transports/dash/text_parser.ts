@@ -20,13 +20,14 @@ import {
   getSegmentsFromSidx,
 } from "../../parsers/containers/isobmff";
 import {
-  bytesToStr,
-  strToBytes,
-} from "../../utils/byte_parsing";
+  strToUtf8,
+  utf8ToStr,
+} from "../../utils/string_parsing";
 import takeFirstSet from "../../utils/take_first_set";
 import {
   ISegmentParserArguments,
   ITextParserObservable,
+  ITransportTextSegmentParser,
 } from "../types";
 import getISOBMFFTimingInfos from "../utils/get_isobmff_timing_infos";
 import isMP4EmbeddedTextTrack from "../utils/is_mp4_embedded_text_track";
@@ -45,19 +46,38 @@ function parseISOBMFFEmbeddedTextTrack(
     content,
     initTimescale } : ISegmentParserArguments< Uint8Array |
                                                ArrayBuffer |
-                                               string >
+                                               string >,
+  __priv_patchLastSegmentInSidx? : boolean
 ) : ITextParserObservable {
   const { period, representation, segment } = content;
   const { isInit, indexRange } = segment;
   const { data, isChunked } = response;
 
-  const chunkBytes = typeof data === "string" ? strToBytes(data) :
+  const chunkBytes = typeof data === "string"   ? strToUtf8(data) :
                      data instanceof Uint8Array ? data :
                                                   new Uint8Array(data);
   if (isInit) {
     const sidxSegments =
       getSegmentsFromSidx(chunkBytes, Array.isArray(indexRange) ? indexRange[0] :
                                                                   0);
+
+    // This is a very specific handling for streams we know have a very
+    // specific problem at Canal+: The last reference gives a truncated
+    // segment.
+    // Sadly, people on the packaging side could not fix all legacy contents.
+    // This is an easy-but-ugly fix for those.
+    // TODO Cleaner way? I tried to always check the obtained segment after
+    // a byte-range request but it leads to a lot of code.
+    if (__priv_patchLastSegmentInSidx === true &&
+        sidxSegments !== null &&
+        sidxSegments.length > 0)
+    {
+      const lastSegment = sidxSegments[ sidxSegments.length - 1 ];
+      if (Array.isArray(lastSegment.range)) {
+        lastSegment.range[1] = Infinity;
+      }
+    }
+
     const mdhdTimescale = getMDHDTimescale(chunkBytes);
     if (sidxSegments !== null && sidxSegments.length > 0) {
       representation.index._addSegments(sidxSegments);
@@ -65,8 +85,7 @@ function parseISOBMFFEmbeddedTextTrack(
     return observableOf({ type: "parsed-init-segment",
                           value: { initializationData: null,
                                    segmentProtections: [],
-                                   initTimescale: mdhdTimescale > 0 ? mdhdTimescale :
-                                                                       undefined } });
+                                   initTimescale: mdhdTimescale } });
   }
   const chunkInfos = getISOBMFFTimingInfos(chunkBytes,
                                            isChunked,
@@ -109,7 +128,7 @@ function parsePlainTextTrack(
   if (typeof data !== "string") {
     const bytesData = data instanceof Uint8Array ? data :
                                                    new Uint8Array(data);
-    textTrackData = bytesToStr(bytesData);
+    textTrackData = utf8ToStr(bytesData);
   } else {
     textTrackData = data;
   }
@@ -122,41 +141,50 @@ function parsePlainTextTrack(
 }
 
 /**
- * Parse TextTrack data.
- * @param {Object} infos
- * @returns {Observable.<Object>}
+ * @param {Object} config
+ * @returns {Function}
  */
-export default function textTrackParser(
-  { response,
-    content,
-    initTimescale } : ISegmentParserArguments< Uint8Array |
-                                               ArrayBuffer |
-                                               string |
-                                               null >
-) : ITextParserObservable {
-  const { period, representation, segment } = content;
-  const { timestampOffset = 0 } = segment;
-  const { data, isChunked } = response;
-  if (data == null) { // No data, just return empty infos
-    if (segment.isInit) {
-      return observableOf({ type: "parsed-init-segment",
-                            value: { initializationData: null,
-                                     segmentProtections: [],
-                                     initTimescale: undefined } });
+export default function generateTextTrackParser(
+  { __priv_patchLastSegmentInSidx } : { __priv_patchLastSegmentInSidx? : boolean }
+) : ITransportTextSegmentParser {
+  /**
+   * Parse TextTrack data.
+   * @param {Object} infos
+   * @returns {Observable.<Object>}
+   */
+  return function textTrackParser(
+    { response,
+      content,
+      initTimescale } : ISegmentParserArguments< Uint8Array |
+                                                 ArrayBuffer |
+                                                 string |
+                                                 null >
+  ) : ITextParserObservable {
+    const { period, representation, segment } = content;
+    const { timestampOffset = 0 } = segment;
+    const { data, isChunked } = response;
+    if (data === null) { // No data, just return empty infos
+      if (segment.isInit) {
+        return observableOf({ type: "parsed-init-segment",
+                              value: { initializationData: null,
+                                       segmentProtections: [],
+                                       initTimescale: undefined } });
+      }
+      return observableOf({ type: "parsed-segment",
+                            value: { chunkData: null,
+                                     chunkInfos: null,
+                                     chunkOffset: timestampOffset,
+                                     appendWindow: [period.start, period.end] } });
     }
-    return observableOf({ type: "parsed-segment",
-                          value: { chunkData: null,
-                                   chunkInfos: null,
-                                   chunkOffset: timestampOffset,
-                                   appendWindow: [period.start, period.end] } });
-  }
 
-  const isMP4 = isMP4EmbeddedTextTrack(representation);
-  if (isMP4) {
-    return parseISOBMFFEmbeddedTextTrack({ response: { data, isChunked },
-                                           content,
-                                           initTimescale });
-  } else {
-    return parsePlainTextTrack({ response: { data, isChunked }, content });
-  }
+    const isMP4 = isMP4EmbeddedTextTrack(representation);
+    if (isMP4) {
+      return parseISOBMFFEmbeddedTextTrack({ response: { data, isChunked },
+                                             content,
+                                             initTimescale },
+                                             __priv_patchLastSegmentInSidx);
+    } else {
+      return parsePlainTextTrack({ response: { data, isChunked }, content });
+    }
+  };
 }

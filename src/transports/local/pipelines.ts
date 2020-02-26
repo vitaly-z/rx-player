@@ -19,7 +19,7 @@
  * It always should be imported through the `features` object.
  */
 
-import { of as observableOf } from "rxjs";
+import { Observable } from "rxjs";
 import Manifest from "../../manifest";
 import parseLocalManifest, {
   ILocalManifest,
@@ -27,13 +27,14 @@ import parseLocalManifest, {
 import isNullOrUndefined from "../../utils/is_null_or_undefined";
 import {
   IManifestLoaderArguments,
-  IManifestLoaderObservable,
+  IManifestLoaderEvent,
   IManifestParserArguments,
   IManifestParserObservable,
   ITransportOptions,
   ITransportPipelines,
 } from "../types";
 import callCustomManifestLoader from "../utils/call_custom_manifest_loader";
+import returnParsedManifest from "../utils/return_parsed_manifest";
 import segmentLoader from "./segment_loader";
 import segmentParser from "./segment_parser";
 import textTrackParser from "./text_parser";
@@ -49,7 +50,7 @@ export default function getLocalManifestPipelines(
 
   const customManifestLoader = options.manifestLoader;
   const manifestPipeline = {
-    loader(args : IManifestLoaderArguments) : IManifestLoaderObservable {
+    loader(args : IManifestLoaderArguments) : Observable< IManifestLoaderEvent > {
       if (isNullOrUndefined(customManifestLoader)) {
         throw new Error("A local Manifest is not loadable through regular HTTP(S) " +
                         " calls. You have to set a `manifestLoader` when calling " +
@@ -72,7 +73,7 @@ export default function getLocalManifestPipelines(
       }
       const parsed = parseLocalManifest(response.responseData as ILocalManifest);
       const manifest = new Manifest(parsed, options);
-      return observableOf({ manifest, url: undefined });
+      return returnParsedManifest(manifest);
     },
   };
 

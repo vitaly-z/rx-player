@@ -9,7 +9,7 @@
 </div></div><div class="content-wrapper"><div class="header"><div class="header-content"><a href="../index.html"><span class="nav-icon">🏠</span><span class="nav-text">Home</span></a><a href="../../list.html"><span class="nav-icon">🗎</span><span class="nav-text">Page List</span></a><a href="#"><span class="nav-icon">↑</span><span class="nav-text">Top</span></a></div></div><div class="content"><html><head></head><body><p><a name="title-Tutorial:%20Quick%20Start"></a></p>
 <h1>Tutorial: Quick Start</h1>
 <p>Because the RxPlayer exports a lot of functionnalities, you might want to
-quickly test basic usecases before you dive deep into the <a href="../api/index.html">whole API
+quickly test basic use cases before you dive deep into the <a href="../api/index.html">whole API
 documentation</a>.</p>
 <p>We will here learn how to simply load a video and to react to basic events.</p>
 <p><a name="chapter-Instanciating%20a%20Player"></a></p>
@@ -74,13 +74,13 @@ method</a>.</p>
 HTML elements.</p>
 <p>For example, to know if a fatal error happened (this is an error which
 interrupted the playback of the current content), you will just have to do:</p>
-<pre><code class="language-js">player.addEventListener(<span class="hljs-string">&quot;error&quot;</span>, (err) =&gt; {
+<pre><code class="language-js">player.addEventListener(<span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-function">(<span class="hljs-params">err</span>) =&gt;</span> {
   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;the content stopped with the following error&quot;</span>, err);
 });
 </code></pre>
 <p>And to know if the player successfully loaded a content and if you can now
 interact with it, you can just do:</p>
-<pre><code class="language-js">player.addEventListener(<span class="hljs-string">&quot;playerStateChange&quot;</span>, (state) =&gt; {
+<pre><code class="language-js">player.addEventListener(<span class="hljs-string">&quot;playerStateChange&quot;</span>, <span class="hljs-function">(<span class="hljs-params">state</span>) =&gt;</span> {
   <span class="hljs-keyword">if</span> (state === <span class="hljs-string">&quot;LOADED&quot;</span>) {
     <span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;the content is loaded&quot;</span>);
     <span class="hljs-comment">// interact with the content...</span>
@@ -112,11 +112,11 @@ on the video element.</li>
 
 <span class="hljs-keyword">const</span> player = <span class="hljs-keyword">new</span> RxPlayer({ videoElement });
 
-player.addEventListener(<span class="hljs-string">&quot;error&quot;</span>, (err) =&gt; {
+player.addEventListener(<span class="hljs-string">&quot;error&quot;</span>, <span class="hljs-function">(<span class="hljs-params">err</span>) =&gt;</span> {
   <span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;the content stopped with the following error&quot;</span>, err);
 });
 
-player.addEventListener(<span class="hljs-string">&quot;playerStateChange&quot;</span>, (state) =&gt; {
+player.addEventListener(<span class="hljs-string">&quot;playerStateChange&quot;</span>, <span class="hljs-function">(<span class="hljs-params">state</span>) =&gt;</span> {
   <span class="hljs-keyword">if</span> (state === <span class="hljs-string">&quot;LOADED&quot;</span>) {
     <span class="hljs-built_in">console</span>.log(<span class="hljs-string">&quot;the content is loaded&quot;</span>);
 

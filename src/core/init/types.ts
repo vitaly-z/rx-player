@@ -20,8 +20,9 @@ import Manifest, {
   Period,
   Representation,
 } from "../../manifest";
-import { IRepresentationChangeEvent } from "../buffers";
+import { IStalledStatus } from "../api";
 import SourceBuffersStore from "../source_buffers";
+import { IRepresentationChangeEvent } from "../stream";
 import { IStallingItem } from "./get_stalled_events";
 
 // Object emitted when the clock ticks
@@ -36,10 +37,7 @@ export interface IInitClockTick { currentTime : number;
                                                  null;
                                   readyState : number;
                                   paused : boolean;
-                                  stalled : { reason : "seeking" |
-                                                       "not-ready" |
-                                                       "buffering";
-                                              timestamp : number; } |
+                                  stalled : IStalledStatus |
                                             null;
                                   seeking : boolean; }
 

@@ -3,9 +3,12 @@
 const coverageIsWanted = !!process.env.RXP_COVERAGE;
 
 module.exports = {
+  // to uncomment to display logs.
+  // verbose: false,
   roots: ["<rootDir>/src"],
   preset: "ts-jest",
   testEnvironment: "jsdom",
+  testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
   collectCoverage: coverageIsWanted,
   collectCoverageFrom: [
     "src/**/*.ts",

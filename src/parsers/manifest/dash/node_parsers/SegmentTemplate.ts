@@ -14,56 +14,38 @@
  * limitations under the License.
  */
 
-import objectAssign from "object-assign";
+import objectAssign from "../../../../utils/object_assign";
 import { IParsedInitialization } from "./Initialization";
 import parseSegmentBase, {
   IParsedSegmentBase
 } from "./SegmentBase";
-import parseSegmentTimeline, {
-  IParsedTimeline,
+import createSegmentTimelineParser, {
+  ITimelineParser,
 } from "./SegmentTimeline";
 import {
   parseBoolean,
+  parseMPDInteger,
+  ValueParser,
 } from "./utils";
 
 export interface IParsedSegmentTemplate extends IParsedSegmentBase {
-  indexType: "template";
-  duration : number;
-  availabilityTimeComplete : boolean;
-  indexRangeExact : boolean;
-  timescale : number;
-
-  presentationTimeOffset? : number;
+  availabilityTimeComplete? : boolean;
   availabilityTimeOffset?: number;
-  indexRange?: [number, number];
-  initialization?: IParsedInitialization;
-  startNumber? : number;
-
-  media? : string;
-  index? : string;
   bitstreamSwitching? : boolean;
-}
-
-export interface IParsedSegmentTimeline {
-  indexType: "timeline";
-  timeline: IParsedTimeline;
-  availabilityTimeComplete : boolean;
-  indexRangeExact : boolean;
-  timescale : number;
-
-  presentationTimeOffset? : number;
-  availabilityTimeOffset?: number;
   duration? : number;
-  indexRange?: [number, number];
-  initialization?: IParsedInitialization;
-  startNumber? : number;
-  media? : string;
   index? : string;
-  bitstreamSwitching? : boolean;
+  indexRange?: [number, number];
+  indexRangeExact? : boolean;
+  initialization?: IParsedInitialization;
+  media? : string;
+  presentationTimeOffset? : number;
+  startNumber? : number;
+  timelineParser? : ITimelineParser;
+  timescale? : number;
 }
 
 /**
- * Parse initialization attribute found in segment Template to
+ * Parse initialization attribute found in SegmentTemplateTemplate to
  * correspond to the initialization found in a regular segmentBase.
  * @param {string} attrValue
  * @returns {Object}
@@ -73,94 +55,69 @@ function parseInitializationAttribute(attrValue : string) : IParsedInitializatio
 }
 
 /**
- * @param {Element} root
- * @returns {Object}
+ * Parse a SegmentTemplate element into a SegmentTemplate intermediate
+ * representation.
+ * @param {Element} root - The SegmentTemplate root element.
+ * @returns {Array}
  */
 export default function parseSegmentTemplate(
   root: Element
-) : IParsedSegmentTemplate|IParsedSegmentTimeline {
+) : [IParsedSegmentTemplate, Error[]] {
+  const [base, segmentBaseWarnings] = parseSegmentBase(root);
+  const warnings : Error[] = segmentBaseWarnings;
 
-  const base = parseSegmentBase(root);
-  let ret : IParsedSegmentTemplate|IParsedSegmentTimeline;
+  let ret : IParsedSegmentTemplate;
+  let timelineParser : ITimelineParser|undefined;
 
-  let index : string|undefined;
-  let availabilityTimeOffset : string|undefined;
-  let media : string|undefined;
-  let bitstreamSwitching : boolean|undefined;
-  let timeline : IParsedTimeline|undefined;
-
+  // First look for a possible SegmentTimeline
   for (let i = 0; i < root.childNodes.length; i++) {
     if (root.childNodes[i].nodeType === Node.ELEMENT_NODE) {
       const currentNode = root.childNodes[i] as Element;
       if (currentNode.nodeName === "SegmentTimeline") {
-        timeline = parseSegmentTimeline(currentNode);
+        timelineParser = createSegmentTimelineParser(currentNode);
       }
     }
   }
 
+  ret = objectAssign({}, base, { duration: base.duration,
+                                 timelineParser });
+
+  const parseValue = ValueParser(ret, warnings);
   for (let i = 0; i < root.attributes.length; i++) {
     const attribute = root.attributes[i];
 
     switch (attribute.nodeName) {
 
       case "initialization":
-        if (base.initialization == null) {
-          base.initialization = parseInitializationAttribute(attribute.value);
+        if (ret.initialization == null) {
+          ret.initialization = parseInitializationAttribute(attribute.value);
         }
         break;
 
       case "index":
-        index = attribute.value;
+        ret.index = attribute.value;
         break;
 
       case "availabilityTimeOffset":
-        availabilityTimeOffset = attribute.value;
+        if (attribute.value === "INF") {
+          ret.availabilityTimeOffset = Infinity;
+        }
+        parseValue(attribute.value, { asKey: "availabilityTimeOffset",
+                                      parser: parseMPDInteger,
+                                      dashName: "availabilityTimeOffset" });
         break;
 
       case "media":
-        media = attribute.value;
+        ret.media = attribute.value;
         break;
 
       case "bitstreamSwitching":
-        bitstreamSwitching = parseBoolean(attribute.value);
+        parseValue(attribute.value, { asKey: "bitstreamSwitching",
+                                      parser: parseBoolean,
+                                      dashName: "bitstreamSwitching" });
         break;
     }
   }
 
-  if (timeline != null) {
-    ret = objectAssign({}, base, {
-      indexType: "timeline" as "timeline",
-      timeline,
-    });
-  } else {
-    const segmentDuration = base.duration;
-
-    if (segmentDuration == null) {
-      throw new Error("Invalid SegmentTemplate: no duration");
-    }
-    ret = objectAssign({}, base, {
-      indexType: "template" as "template",
-      duration: segmentDuration,
-    });
-  }
-
-  if (index != null) {
-    ret.index = index;
-  }
-
-  if (media != null) {
-    ret.media = media;
-  }
-
-  if (bitstreamSwitching != null) {
-    ret.bitstreamSwitching = bitstreamSwitching;
-  }
-
-  if (availabilityTimeOffset != null) {
-    ret.availabilityTimeOffset =
-      availabilityTimeOffset === "INF" ? Infinity :
-                                         parseInt(availabilityTimeOffset, 10);
-  }
-
-  return ret;
+  return [ret, warnings];
 }

@@ -20,7 +20,7 @@ import {
   IIndexSegment,
   toIndexTime,
 } from "../../utils/index_helpers";
-import { replaceSegmentDASHTokens } from "./tokens";
+import { createDashUrlDetokenizer } from "./tokens";
 
 /**
  * For the given start time and duration of a timeline element, calculate how
@@ -46,6 +46,7 @@ function getWantedRepeatIndex(
  * @param {Object} index - index object, constructed by parsing the manifest.
  * @param {number} from - starting timestamp wanted, in seconds
  * @param {number} durationWanted - duration wanted, in seconds
+ * @param {number|undefined} maximumTime
  * @returns {Array.<Object>}
  */
 export default function getSegmentsFromTimeline(
@@ -87,9 +88,10 @@ export default function getSegmentsFromTimeline(
       const segmentNumber = currentNumber != null ?
         currentNumber + segmentNumberInCurrentRange : undefined;
 
-      const detokenizedURLs = mediaURLs?.map(url => {
-        return replaceSegmentDASHTokens(url, segmentTime, segmentNumber);
-      }) ?? null;
+      const detokenizedURLs = mediaURLs === null ?
+        null :
+        mediaURLs.map(createDashUrlDetokenizer(segmentTime, segmentNumber));
+
       const segment = { id: String(segmentTime),
                         time: segmentTime - index.indexTimeOffset,
                         isInit: false,
