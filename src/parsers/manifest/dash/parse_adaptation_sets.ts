@@ -42,7 +42,8 @@ export interface IPeriodInfos {
   manifestBoundsCalculator : ManifestBoundsCalculator; // Allows to obtain the first
                                                        // available position of a content
   end? : number; // End time of the current period, in seconds
-  isDynamic : boolean; // Whether the Manifest can evolve with time
+  isDynamic : boolean; // If `true` the MPD might need to be updated
+  isLive : boolean; // If `true` the MPD represents a live content
   receivedTime? : number; // time (in terms of `performance.now`) at which the
                           // XML file containing this AdaptationSet was received
   start : number; // Start time of the current period, in seconds
@@ -213,6 +214,7 @@ export default function parseAdaptationSets(
         manifestBoundsCalculator: periodInfos.manifestBoundsCalculator,
         end: periodInfos.end,
         isDynamic: periodInfos.isDynamic,
+        isLive: periodInfos.isLive,
         receivedTime: periodInfos.receivedTime,
         start: periodInfos.start,
         timeShiftBufferDepth: periodInfos.timeShiftBufferDepth,

@@ -61,12 +61,20 @@ export default class ManifestBoundsCalculator {
   private _timeShiftBufferDepth : number | null;
   private _positionTime : number | undefined;
   private _lastPosition : number | undefined;
+
+  // Whether this Manifest can change over time.
   private _isDynamic : boolean;
 
-  constructor(args : { timeShiftBufferDepth? : number;
-                       isDynamic : boolean; }
+  // Whether this Manifest is for a "live" content (i.e. stream
+  // which should be played maximum at a given live time).
+  private _isLive : boolean;
+
+  constructor(args : { isDynamic : boolean;
+                       isLive : boolean;
+                       timeShiftBufferDepth? : number; }
   ) {
     this._isDynamic = args.isDynamic;
+    this._isLive = args.isLive;
     this._timeShiftBufferDepth = !args.isDynamic ||
                                  args.timeShiftBufferDepth == null ?
                                    null :
@@ -110,7 +118,7 @@ export default class ManifestBoundsCalculator {
    * @return {number|undefined}
    */
   getMinimumBound(): number | undefined {
-    if (!this._isDynamic || this._timeShiftBufferDepth === null) {
+    if (!this._isLive || this._timeShiftBufferDepth === null) {
       return 0;
     }
     const maximumBound = this.getMaximumBound();

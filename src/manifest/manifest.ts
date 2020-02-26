@@ -119,6 +119,10 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
   // E.g., a TV channel is a live content.
   public isLive : boolean;
 
+  // If true this Manifest defines a content that is "Finished".
+  // This means that the player can end when it reaches its current end.
+  public isFinished : boolean;
+
   // Every URI linking to that Manifest, used for refreshing it.
   // Listed from the most important to the least important.
   public uris : string[];
@@ -200,6 +204,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
     this.minimumTime = args.minimumTime;
     this.isDynamic = args.isDynamic;
     this.isLive = args.isLive;
+    this.isFinished = args.isFinished;
     this.uris = args.uris === undefined ? [] :
                                           args.uris;
 
@@ -562,6 +567,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
     this.id = newManifest.id;
     this.isDynamic = newManifest.isDynamic;
     this.isLive = newManifest.isLive;
+    this.isFinished = newManifest.isFinished;
     this.lifetime = newManifest.lifetime;
     this.maximumTime = newManifest.maximumTime;
 

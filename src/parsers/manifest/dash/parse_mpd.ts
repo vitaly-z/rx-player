@@ -95,7 +95,7 @@ function loadExternalRessourcesAndParse(
 
   const xlinkInfos : IXLinkInfos = new WeakMap();
   if (args.externalClockOffset == null) {
-    const isDynamic : boolean = rootAttributes.type === "dynamic";
+    const isLive : boolean = rootAttributes.type === "dynamic";
 
     const directTiming = arrayFind(rootChildren.utcTimings, (utcTiming) => {
       return utcTiming.schemeIdUri === "urn:mpeg:dash:utc:direct:2014" &&
@@ -113,7 +113,7 @@ function loadExternalRessourcesAndParse(
 
     if (clockOffset != null) {
       args.externalClockOffset = clockOffset;
-    } else if (isDynamic && hasLoadedClock !== true) {
+    } else if (isLive && hasLoadedClock !== true) {
       const UTCTimingHTTPURL = getHTTPUTCTimingURL(mpdIR);
       if (UTCTimingHTTPURL != null && UTCTimingHTTPURL.length > 0) {
         // TODO fetch UTCTiming and XLinks at the same time
@@ -201,7 +201,10 @@ function parseCompleteIntermediateRepresentation(
 ) : IParserResponse<IParsedManifest> {
   const { children: rootChildren,
           attributes: rootAttributes } = mpdIR;
-  const isDynamic : boolean = rootAttributes.type === "dynamic";
+  const isLive : boolean = rootAttributes.type === "dynamic";
+  const isDynamic : boolean = rootAttributes.type !== "static" &&
+                              (rootAttributes.duration === undefined ||
+                               rootAttributes.minimumUpdatePeriod !== undefined);
   const baseURLs = resolveBaseURLs(args.url === undefined ?
                                      [] :
                                      [normalizeBaseURL(args.url)],
@@ -220,6 +223,7 @@ function parseCompleteIntermediateRepresentation(
                           clockOffset,
                           duration: rootAttributes.duration,
                           isDynamic,
+                          isLive,
                           receivedTime: args.manifestReceivedTime,
                           timeShiftBufferDepth,
                           xlinkInfos };
@@ -232,7 +236,7 @@ function parseCompleteIntermediateRepresentation(
     id: rootAttributes.id != null ? rootAttributes.id :
                                     "gen-dash-manifest-" + generateManifestID(),
     isDynamic,
-    isLive: isDynamic,
+    isLive,
     periods: parsedPeriods,
     suggestedPresentationDelay: rootAttributes.suggestedPresentationDelay,
     transportType: "dash",
@@ -283,16 +287,16 @@ function parseCompleteIntermediateRepresentation(
       }
     }
   } else {
-    if (minTime != null) {
-      parsedMPD.minimumTime = { isContinuous: timeShiftBufferDepth != null,
+    if (minTime !== undefined) {
+      parsedMPD.minimumTime = { isContinuous: timeShiftBufferDepth !== undefined,
                                 value: minTime,
                                 time: now };
     }
-    if (maxTime != null) {
+    if (maxTime !== undefined) {
       parsedMPD.maximumTime = { isContinuous: true,
                                 value: maxTime,
                                 time: now };
-      if (minTime == null) {
+      if (minTime === undefined) {
         parsedMPD.minimumTime = { isContinuous: true,
                                   value: maxTime,
                                   time: now };

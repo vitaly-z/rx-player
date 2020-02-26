@@ -72,6 +72,8 @@ export default function createBufferClock(
           duration: tick.duration,
           isPaused: initialPlayPerformed ? tick.paused :
                                            !autoPlay,
+
+          // Note: this variable does not mean anything when a live is finished
           liveGap: isLive ? manifest.getMaximumPosition() - tick.currentTime :
                             Infinity,
           readyState: tick.readyState,

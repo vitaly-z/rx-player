@@ -88,7 +88,8 @@ export interface ITemplateIndexContextArgument {
   manifestBoundsCalculator : ManifestBoundsCalculator; // Allows to obtain the
                                                        // minimum and maximum
                                                        // of a content
-  isDynamic : boolean; // if true, the MPD can be updated over time
+  isDynamic : boolean; // If `true` the MPD might need to be updated
+  isLive : boolean; // If `true` the MPD represents a live content
   periodEnd : number|undefined; // End of the Period concerned by this
                                 // RepresentationIndex, in seconds
   periodStart : number; // Start of the Period concerned by this
@@ -115,6 +116,10 @@ export default class TemplateRepresentationIndex implements IRepresentationIndex
   // Whether this RepresentationIndex can change over time.
   private _isDynamic : boolean;
 
+  // Whether this RepresentationIndex is for a "live" content (i.e. stream
+  // which should be played maximum at a given live time).
+  private _isLive : boolean;
+
   /**
    * @param {Object} index
    * @param {Object} context
@@ -128,6 +133,7 @@ export default class TemplateRepresentationIndex implements IRepresentationIndex
             availabilityTimeOffset,
             manifestBoundsCalculator,
             isDynamic,
+            isLive,
             periodEnd,
             periodStart,
             representationBaseURLs,
@@ -163,6 +169,7 @@ export default class TemplateRepresentationIndex implements IRepresentationIndex
                     presentationTimeOffset,
                     startNumber: index.startNumber };
     this._isDynamic = isDynamic;
+    this._isLive = isLive;
     this._periodStart = periodStart;
     this._relativePeriodEnd = periodEnd == null ? undefined :
                                                   periodEnd - periodStart;
@@ -337,7 +344,7 @@ export default class TemplateRepresentationIndex implements IRepresentationIndex
    * @returns {Boolean}
    */
   isFinished() : boolean {
-    if (!this._isDynamic) {
+    if (!this._isLive) {
       return true;
     }
     if (this._relativePeriodEnd == null) {
@@ -375,6 +382,7 @@ export default class TemplateRepresentationIndex implements IRepresentationIndex
     this._index = newIndex._index;
     this._aggressiveMode = newIndex._aggressiveMode;
     this._isDynamic = newIndex._isDynamic;
+    this._isLive = newIndex._isLive;
     this._periodStart = newIndex._periodStart;
     this._relativePeriodEnd = newIndex._relativePeriodEnd;
     this._manifestBoundsCalculator = newIndex._manifestBoundsCalculator;
@@ -395,12 +403,12 @@ export default class TemplateRepresentationIndex implements IRepresentationIndex
    * @returns {number | null | undefined}
    */
   private _getFirstSegmentStart() : number | null | undefined {
-    if (!this._isDynamic) {
+    if (!this._isLive) {
       return 0; // it is the start of the Period
     }
 
     // 1 - check that this index is already available
-    if (this._relativePeriodEnd === 0 || this._relativePeriodEnd == null) {
+    if (this._relativePeriodEnd === 0 || this._relativePeriodEnd === undefined) {
       // /!\ The scaled max position augments continuously and might not
       // reflect exactly the real server-side value. As segments are
       // generated discretely.
@@ -434,7 +442,7 @@ export default class TemplateRepresentationIndex implements IRepresentationIndex
   private _getLastSegmentStart() : number | null | undefined {
     const { duration, timescale } = this._index;
 
-    if (this._isDynamic) {
+    if (this._isLive) {
       const lastPos = this._manifestBoundsCalculator.getMaximumBound();
       if (lastPos === undefined) {
         return undefined;

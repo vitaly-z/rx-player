@@ -50,7 +50,8 @@ export interface IManifestInfos {
   baseURLs : string[];
   clockOffset? : number;
   duration? : number;
-  isDynamic : boolean;
+  isDynamic : boolean; // If `true` the MPD might need to be updated
+  isLive : boolean; // If `true` the MPD represents a live content
   receivedTime? : number; // time (in terms of `performance.now`) at which the
                           // XML file containing this Period was received
   timeShiftBufferDepth? : number; // Depth of the buffer for the whole content,
@@ -76,11 +77,13 @@ export default function parsePeriods(
 
   // We might to communicate the depth of the Buffer while parsing
   const { isDynamic,
+          isLive,
           timeShiftBufferDepth } = manifestInfos;
   const manifestBoundsCalculator = new ManifestBoundsCalculator({ isDynamic,
+                                                                  isLive,
                                                                   timeShiftBufferDepth });
 
-  if (!isDynamic && manifestInfos.duration != null) {
+  if (!isDynamic && manifestInfos.duration !== undefined) {
     manifestBoundsCalculator.setLastPosition(manifestInfos.duration);
   }
 

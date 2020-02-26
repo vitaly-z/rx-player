@@ -136,7 +136,8 @@ export interface ITimelineIndexContextArgument {
                         // RepresentationIndex, in seconds
   periodEnd : number|undefined; // End of the period concerned by this
                                 // RepresentationIndex, in seconds
-  isDynamic : boolean; // Whether the corresponding Manifest is dynamic
+  isDynamic : boolean; // If `true` the MPD might need to be updated
+  isLive : boolean; // If `true` the MPD represents a live content
   receivedTime? : number; // time (in terms of `performance.now`) at which the
                           // XML file containing this index was received
   representationBaseURLs : string[]; // Base URL for the Representation concerned
@@ -240,6 +241,10 @@ export default class TimelineRepresentationIndex implements IRepresentationIndex
   // Whether this RepresentationIndex can change over time.
   private _isDynamic : boolean;
 
+  // Whether this RepresentationIndex is for a "live" content (i.e. stream
+  // which should be played maximum at a given live time).
+  private _isLive : boolean;
+
   private _manifestBoundsCalculator : ManifestBoundsCalculator;
 
   private _parseTimeline : () => IParsedS[];
@@ -254,6 +259,7 @@ export default class TimelineRepresentationIndex implements IRepresentationIndex
   ) {
     const { manifestBoundsCalculator,
             isDynamic,
+            isLive,
             representationBaseURLs,
             representationId,
             representationBitrate,
@@ -274,6 +280,7 @@ export default class TimelineRepresentationIndex implements IRepresentationIndex
                                  performance.now() :
                                  context.receivedTime;
 
+    this._isLive = isLive;
     this._isDynamic = isDynamic;
     this._parseTimeline = index.parseTimeline;
     this._index = { indexRange: index.indexRange,
@@ -480,6 +487,7 @@ export default class TimelineRepresentationIndex implements IRepresentationIndex
     this._parseTimeline = newIndex._parseTimeline;
     this._index = newIndex._index;
     this._isDynamic = newIndex._isDynamic;
+    this._isLive = newIndex._isLive;
     this._scaledPeriodStart = newIndex._scaledPeriodStart;
     this._scaledPeriodEnd = newIndex._scaledPeriodEnd;
     this._lastUpdate = newIndex._lastUpdate;
@@ -522,7 +530,7 @@ export default class TimelineRepresentationIndex implements IRepresentationIndex
    * @returns {Boolean}
    */
   isFinished() : boolean {
-    if (!this._isDynamic) {
+    if (!this._isLive) {
       return true;
     }
     if (this._index.timeline === null) {
