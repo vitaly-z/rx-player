@@ -6967,7 +6967,6 @@ var manifest_Manifest = /*#__PURE__*/function (_EventEmitter) {
     _this.suggestedPresentationDelay = args.suggestedPresentationDelay;
     _this.availabilityStartTime = args.availabilityStartTime;
     _this.maximumTime = args.maximumTime;
-    _this.baseURLs = args.baseURLs;
 
     if (supplementaryImageTracks.length > 0) {
       _this.addSupplementaryImageAdaptations(supplementaryImageTracks);
@@ -7365,7 +7364,6 @@ var manifest_Manifest = /*#__PURE__*/function (_EventEmitter) {
 
   _proto._performUpdate = function _performUpdate(newManifest, updateType) {
     this.availabilityStartTime = newManifest.availabilityStartTime;
-    this.baseURLs = newManifest.baseURLs;
     this.id = newManifest.id;
     this.isDynamic = newManifest.isDynamic;
     this.isLive = newManifest.isLive;
@@ -41673,7 +41671,6 @@ function parseCompleteIntermediateRepresentation(mpdIR, args, xlinkInfos) {
   var mediaPresentationDuration = rootAttributes.duration;
   var parsedMPD = {
     availabilityStartTime: availabilityStartTime,
-    baseURLs: baseURLs,
     clockOffset: args.externalClockOffset,
     id: rootAttributes.id != null ? rootAttributes.id : "gen-dash-manifest-" + generateManifestID(),
     isDynamic: isDynamic,
@@ -43516,7 +43513,6 @@ function createSmoothStreamingParser(parserOptions) {
     var periodEnd = isLive ? undefined : maximumTime === null || maximumTime === void 0 ? void 0 : maximumTime.value;
     var manifest = {
       availabilityStartTime: availabilityStartTime === undefined ? 0 : availabilityStartTime,
-      baseURLs: null,
       clockOffset: serverTimeOffset,
       id: "gen-smooth-manifest-" + generateManifestID(),
       isLive: isLive,
@@ -46359,17 +46355,18 @@ var representation_index_HLSRepresentationIndex = /*#__PURE__*/function () {
   ;
 
   _proto.getSegments = function getSegments(up, duration) {
-    var end = up + duration;
+    var from = up * 1000;
+    var to = from + duration * 1000;
 
     for (var i = 0; i < this._timeline.length; i++) {
       var segment = this._timeline[i];
 
-      if (segment.time / 1000 >= end) {
+      if (segment.time >= to) {
         return [];
-      } else if ((segment.time + segment.duration) / 1000 > up) {
+      } else if (segment.time + segment.duration > from) {
         var j = i + 1;
 
-        while (j < this._timeline.length && end < this._timeline[j].time) {
+        while (j < this._timeline.length && to > this._timeline[j].time) {
           j++;
         }
 
@@ -46557,7 +46554,6 @@ function parseMasterPlaylist(playlist, args) {
       }
     };
     var manifest = {
-      baseURLs: null,
       id: generatePlaylistID(),
       isDynamic: false,
       isLive: false,
@@ -48946,7 +48942,6 @@ function createManifest(mplData, manifests, parserOptions) {
   var time = performance.now();
   var manifest = {
     availabilityStartTime: 0,
-    baseURLs: null,
     clockOffset: clockOffset,
     suggestedPresentationDelay: 10,
     id: "gen-metaplaylist-man-" + generateManifestID(),
