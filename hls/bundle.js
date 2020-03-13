@@ -56238,8 +56238,13 @@ var MetaPlaylistDASHSmoothBlob = new Blob([JSON.stringify(MetaPlaylistDASHSmooth
 // CONCATENATED MODULE: ./demo/full/scripts/contents.js
 
 /* harmony default export */ var scripts_contents = ([{
-  "name": "HLS Demo 1",
+  "name": "HLS Demo 1 BitMovin",
   "url": "https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s-fmp4/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8",
+  "transport": "hls",
+  "live": false
+}, {
+  "name": "HLS Demo 2 Google",
+  "url": "https://storage.googleapis.com/shaka-demo-assets/angel-one-hls/hls.m3u8",
   "transport": "hls",
   "live": false
 }, {

@@ -1793,7 +1793,7 @@ var next_tick_default = /*#__PURE__*/__webpack_require__.n(next_tick);
 var event_emitter = __webpack_require__(26);
 
 // EXTERNAL MODULE: ./src/compat/is_node.ts
-var is_node = __webpack_require__(32);
+var is_node = __webpack_require__(31);
 
 // CONCATENATED MODULE: ./src/compat/patch_webkit_source_buffer.ts
 /**
@@ -3604,7 +3604,7 @@ function warnOnce(message) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return isSafari; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return isSafariMobile; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return isSamsungBrowser; });
-/* harmony import */ var _is_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(32);
+/* harmony import */ var _is_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(31);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -4069,7 +4069,7 @@ function fromEvent(target, eventName) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return READY_STATES; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return VTTCue_; });
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(55);
-/* harmony import */ var _is_node__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(32);
+/* harmony import */ var _is_node__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(31);
 /* harmony import */ var _should_use_webkit_media_keys__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(104);
 /**
  * Copyright 2015 CANAL+ Group
@@ -4353,52 +4353,6 @@ var INIT_EVENTS = {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return startsWith; });
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * String.prototype.startsWith ponyfill.
- * Indicates Whether a string starts with another substring.
- *
- * Inspired from MDN polyfill, but ponyfilled instead.
- * @param {string} completeString
- * @param {string} searchString
- * @param {number} [position]
- * @returns {boolean}
- */
-function startsWith(completeString, searchString, position) {
-  /* tslint:disable no-unbound-method */
-  if (typeof String.prototype.startsWith === "function") {
-    /* tslint:enable no-unbound-method */
-
-    /* tslint:disable ban */
-    return completeString.startsWith(searchString, position);
-    /* tslint:enable ban */
-  }
-
-  var initialPosition = typeof position === "number" ? Math.max(position, 0) : 0;
-  return completeString.substring(initialPosition, initialPosition + searchString.length) === searchString;
-}
-
-/***/ }),
-/* 32 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -4418,96 +4372,7 @@ var isNode = typeof window === "undefined";
 /* harmony default export */ __webpack_exports__["a"] = (isNode);
 
 /***/ }),
-/* 33 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return map; });
-/* unused harmony export MapOperator */
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
-/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(13);
-/** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
-
-
-function map(project, thisArg) {
-    return function mapOperation(source) {
-        if (typeof project !== 'function') {
-            throw new TypeError('argument is not a function. Are you looking for `mapTo()`?');
-        }
-        return source.lift(new MapOperator(project, thisArg));
-    };
-}
-var MapOperator = /*@__PURE__*/ (function () {
-    function MapOperator(project, thisArg) {
-        this.project = project;
-        this.thisArg = thisArg;
-    }
-    MapOperator.prototype.call = function (subscriber, source) {
-        return source.subscribe(new MapSubscriber(subscriber, this.project, this.thisArg));
-    };
-    return MapOperator;
-}());
-
-var MapSubscriber = /*@__PURE__*/ (function (_super) {
-    tslib__WEBPACK_IMPORTED_MODULE_0__[/* __extends */ "a"](MapSubscriber, _super);
-    function MapSubscriber(destination, project, thisArg) {
-        var _this = _super.call(this, destination) || this;
-        _this.project = project;
-        _this.count = 0;
-        _this.thisArg = thisArg || _this;
-        return _this;
-    }
-    MapSubscriber.prototype._next = function (value) {
-        var result;
-        try {
-            result = this.project.call(this.thisArg, value, this.count++);
-        }
-        catch (err) {
-            this.destination.error(err);
-            return;
-        }
-        this.destination.next(result);
-    };
-    return MapSubscriber;
-}(_Subscriber__WEBPACK_IMPORTED_MODULE_1__[/* Subscriber */ "a"]));
-//# sourceMappingURL=map.js.map
-
-
-/***/ }),
-/* 34 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return idGenerator; });
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Creates an ID generator which generates an ID each time you call it.
- * @returns {Function}
- */
-function idGenerator() {
-  var lastID = 0;
-  return function generateNewId() {
-    return String(lastID++);
-  };
-}
-
-/***/ }),
-/* 35 */
+/* 32 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4644,6 +4509,141 @@ function normalizeBaseURL(url) {
 
 
 /***/ }),
+/* 33 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return map; });
+/* unused harmony export MapOperator */
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(13);
+/** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
+
+
+function map(project, thisArg) {
+    return function mapOperation(source) {
+        if (typeof project !== 'function') {
+            throw new TypeError('argument is not a function. Are you looking for `mapTo()`?');
+        }
+        return source.lift(new MapOperator(project, thisArg));
+    };
+}
+var MapOperator = /*@__PURE__*/ (function () {
+    function MapOperator(project, thisArg) {
+        this.project = project;
+        this.thisArg = thisArg;
+    }
+    MapOperator.prototype.call = function (subscriber, source) {
+        return source.subscribe(new MapSubscriber(subscriber, this.project, this.thisArg));
+    };
+    return MapOperator;
+}());
+
+var MapSubscriber = /*@__PURE__*/ (function (_super) {
+    tslib__WEBPACK_IMPORTED_MODULE_0__[/* __extends */ "a"](MapSubscriber, _super);
+    function MapSubscriber(destination, project, thisArg) {
+        var _this = _super.call(this, destination) || this;
+        _this.project = project;
+        _this.count = 0;
+        _this.thisArg = thisArg || _this;
+        return _this;
+    }
+    MapSubscriber.prototype._next = function (value) {
+        var result;
+        try {
+            result = this.project.call(this.thisArg, value, this.count++);
+        }
+        catch (err) {
+            this.destination.error(err);
+            return;
+        }
+        this.destination.next(result);
+    };
+    return MapSubscriber;
+}(_Subscriber__WEBPACK_IMPORTED_MODULE_1__[/* Subscriber */ "a"]));
+//# sourceMappingURL=map.js.map
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return startsWith; });
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * String.prototype.startsWith ponyfill.
+ * Indicates Whether a string starts with another substring.
+ *
+ * Inspired from MDN polyfill, but ponyfilled instead.
+ * @param {string} completeString
+ * @param {string} searchString
+ * @param {number} [position]
+ * @returns {boolean}
+ */
+function startsWith(completeString, searchString, position) {
+  /* tslint:disable no-unbound-method */
+  if (typeof String.prototype.startsWith === "function") {
+    /* tslint:enable no-unbound-method */
+
+    /* tslint:disable ban */
+    return completeString.startsWith(searchString, position);
+    /* tslint:enable ban */
+  }
+
+  var initialPosition = typeof position === "number" ? Math.max(position, 0) : 0;
+  return completeString.substring(initialPosition, initialPosition + searchString.length) === searchString;
+}
+
+/***/ }),
+/* 35 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return idGenerator; });
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Creates an ID generator which generates an ID each time you call it.
+ * @returns {Function}
+ */
+function idGenerator() {
+  var lastID = 0;
+  return function generateNewId() {
+    return String(lastID++);
+  };
+}
+
+/***/ }),
 /* 36 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4711,7 +4711,7 @@ function normalizeBaseURL(url) {
 /* harmony import */ var _utils_array_find__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(14);
 /* harmony import */ var _utils_array_includes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(12);
 /* harmony import */ var _utils_is_non_empty_string__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2);
-/* harmony import */ var _utils_starts_with__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(31);
+/* harmony import */ var _utils_starts_with__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(34);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -5999,7 +5999,7 @@ var is_non_empty_string = __webpack_require__(2);
 var browser_compatibility_types = __webpack_require__(27);
 
 // EXTERNAL MODULE: ./src/compat/is_node.ts
-var is_node = __webpack_require__(32);
+var is_node = __webpack_require__(31);
 
 // CONCATENATED MODULE: ./src/compat/event_listeners.ts
 /**
@@ -6471,7 +6471,7 @@ var byte_parsing = __webpack_require__(1);
 var event_emitter = __webpack_require__(26);
 
 // EXTERNAL MODULE: ./src/utils/id_generator.ts
-var id_generator = __webpack_require__(34);
+var id_generator = __webpack_require__(35);
 
 // EXTERNAL MODULE: ./src/utils/warn_once.ts
 var warn_once = __webpack_require__(21);
@@ -12709,7 +12709,6 @@ function stringFromUTF8(data) {
 /* harmony import */ var _utils_is_webm_embedded_track__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(95);
 /* harmony import */ var _init_segment_loader__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(123);
 /* harmony import */ var _low_latency_segment_loader__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(145);
-/* harmony import */ var _utils_starts_with__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(31);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -12725,7 +12724,6 @@ function stringFromUTF8(data) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -12807,10 +12805,6 @@ function generateSegmentLoader(_ref) {
           responseData: null
         }
       });
-    }
-
-    if (Object(_utils_starts_with__WEBPACK_IMPORTED_MODULE_11__[/* default */ "a"])(url, "URI=")) {
-      url = url.substring(5, url.length - 1);
     }
 
     if (lowLatencyMode || customSegmentLoader === undefined) {
@@ -18614,7 +18608,7 @@ function hasEMEAPIs() {
 /* harmony import */ var _browser_compatibility_types__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(27);
 /* harmony import */ var _browser_detection__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(22);
 /* harmony import */ var _event_listeners__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(54);
-/* harmony import */ var _is_node__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(32);
+/* harmony import */ var _is_node__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(31);
 /* harmony import */ var _should_use_webkit_media_keys__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(104);
 /* harmony import */ var _custom_key_system_access__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(161);
 function _inheritsLoose(subClass, superClass) { subClass.prototype = Object.create(superClass.prototype); subClass.prototype.constructor = subClass; subClass.__proto__ = superClass; }
@@ -19564,7 +19558,7 @@ function isVTTCue(cue) {
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(33);
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(162);
 /* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(0);
-/* harmony import */ var _is_node__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(32);
+/* harmony import */ var _is_node__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(31);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -26126,7 +26120,7 @@ var prioritizer_ObservablePrioritizer = /*#__PURE__*/function () {
 
 
 // EXTERNAL MODULE: ./src/utils/id_generator.ts
-var id_generator = __webpack_require__(34);
+var id_generator = __webpack_require__(35);
 
 // EXTERNAL MODULE: ./src/errors/assertion_error.ts
 var assertion_error = __webpack_require__(223);
@@ -36781,10 +36775,10 @@ var config = __webpack_require__(3);
 var array_find = __webpack_require__(14);
 
 // EXTERNAL MODULE: ./src/utils/id_generator.ts
-var id_generator = __webpack_require__(34);
+var id_generator = __webpack_require__(35);
 
 // EXTERNAL MODULE: ./src/utils/resolve_url.ts
-var resolve_url = __webpack_require__(35);
+var resolve_url = __webpack_require__(32);
 
 // EXTERNAL MODULE: ./src/parsers/manifest/utils/check_manifest_ids.ts
 var check_manifest_ids = __webpack_require__(119);
@@ -42062,7 +42056,7 @@ var array_includes = __webpack_require__(12);
 var assert = __webpack_require__(51);
 
 // EXTERNAL MODULE: ./src/utils/id_generator.ts
-var id_generator = __webpack_require__(34);
+var id_generator = __webpack_require__(35);
 
 // EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
 var is_non_empty_string = __webpack_require__(2);
@@ -42071,7 +42065,7 @@ var is_non_empty_string = __webpack_require__(2);
 var object_assign = __webpack_require__(6);
 
 // EXTERNAL MODULE: ./src/utils/resolve_url.ts
-var resolve_url = __webpack_require__(35);
+var resolve_url = __webpack_require__(32);
 
 // EXTERNAL MODULE: ./src/utils/take_first_set.ts
 var take_first_set = __webpack_require__(16);
@@ -45534,10 +45528,10 @@ var mergeMap = __webpack_require__(50);
 var src_manifest = __webpack_require__(56);
 
 // EXTERNAL MODULE: ./src/utils/id_generator.ts
-var id_generator = __webpack_require__(34);
+var id_generator = __webpack_require__(35);
 
 // EXTERNAL MODULE: ./src/utils/resolve_url.ts
-var resolve_url = __webpack_require__(35);
+var resolve_url = __webpack_require__(32);
 
 // EXTERNAL MODULE: ./src/parsers/manifest/utils/get_maximum_position.ts + 1 modules
 var get_maximum_position = __webpack_require__(147);
@@ -45549,7 +45543,7 @@ var get_minimum_position = __webpack_require__(146);
 var log = __webpack_require__(0);
 
 // EXTERNAL MODULE: ./src/utils/starts_with.ts
-var starts_with = __webpack_require__(31);
+var starts_with = __webpack_require__(34);
 
 // CONCATENATED MODULE: ./src/parsers/manifest/hls/get_line_type.ts
 /**
@@ -46149,9 +46143,10 @@ function createMediaPlaylistIR(playlist) {
       } else if (line === "#EXT-X-I-FRAMES-ONLY") {
         iFramesOnly = true;
       } else if (Object(starts_with["a" /* default */])(line, "#EXT-X-MAP:")) {
-        var _indexOfComma = line.indexOf(",");
+        var _indexOfComma = line.indexOf(","); // XXX TODO URI=
 
-        var uri = line.substring(11, _indexOfComma < 11 ? line.length : _indexOfComma);
+
+        var uri = line.substring(16, _indexOfComma < 16 ? line.length - 1 : _indexOfComma - 1);
 
         var _byteRange = _indexOfComma >= 0 ? (_a = parseByteRange(line, _indexOfComma + 1)) !== null && _a !== void 0 ? _a : undefined : undefined;
 
@@ -46291,7 +46286,13 @@ var representation_index_HLSRepresentationIndex = /*#__PURE__*/function () {
   function HLSRepresentationIndex(infos) {
     var _a;
 
-    this._initSegmentInfo = infos.initSegmentInfo;
+    if (infos.initSegmentInfo !== undefined) {
+      this._initSegmentInfo = {
+        uri: Object(resolve_url["a" /* default */])(infos.mediaPlaylistURL, infos.initSegmentInfo.uri),
+        byteRange: infos.initSegmentInfo.byteRange
+      };
+    }
+
     this._isFinished = infos.endList;
     var timeline = [];
     var mediaSequence = (_a = infos.mediaSequence) !== null && _a !== void 0 ? _a : 0;
@@ -48547,7 +48548,7 @@ var manifest_adaptation = __webpack_require__(69);
 var representation_index_static = __webpack_require__(234);
 
 // EXTERNAL MODULE: ./src/utils/id_generator.ts
-var id_generator = __webpack_require__(34);
+var id_generator = __webpack_require__(35);
 
 // EXTERNAL MODULE: ./src/utils/object_assign.ts
 var object_assign = __webpack_require__(6);
