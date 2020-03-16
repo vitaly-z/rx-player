@@ -41,7 +41,32 @@ export interface IContentProtections {
   initData : Partial<Record<string, IContentProtectionInitData[]>>;
 }
 
-/** Representation of a "quality" available in an Adaptation. */
+// Representation of a "quality" available in any Adaptation
+// This is the partial version, meaning that not all information about this
+// Representation are available yet. They first have to be fetched from a
+// server
+export interface IParsedPartialRepresentation {
+  // required
+  id : string;
+  isFetched : false;
+
+  // optional
+  bitrate? : number;
+  codecs?: string;
+  contentProtections? : IContentProtections;
+  frameRate?: string;
+  height?: number;
+  index? : IRepresentationIndex;
+  mimeType?: string;
+  url? : string;
+  width?: number;
+}
+
+/**
+ * Representation of a "quality" available in any Adaptation
+ * This is the full version, meaning that all information about this
+ * Representation are available.
+ */
 export interface IParsedRepresentation {
   /** Average bitrate the Representation is available in, in bits per seconds. */
   bitrate : number;
@@ -56,7 +81,8 @@ export interface IParsedRepresentation {
    * in the same Adaptation.
    */
   id: string;
-
+  /** To separate it from a `IParsedPartialRepresentation`. */
+  isFetched : true;
   /** Codec(s) associated with this Representation. */
   codecs?: string;
   /**
@@ -85,6 +111,11 @@ export interface IParsedRepresentation {
    * Not set if unknown or if it makes no sense (e.g. for audio).
    */
   width?: number;
+  /**
+   * Possible URL at which the Representation can be directly fetched.
+   * Not set if the Representation has no associated URL.
+   */
+  url? : string;
 }
 
 /** Every possible types an Adaptation can have. */
@@ -109,7 +140,8 @@ export interface IParsedAdaptation {
    */
   id: string;
   /** Describes every qualities this Adaptation is in. */
-  representations: IParsedRepresentation[];
+  representations: Array<IParsedPartialRepresentation |
+                         IParsedRepresentation>;
   /** The type of track (e.g. "video", "audio" or "text"). */
   type: IParsedAdaptationType;
   /**

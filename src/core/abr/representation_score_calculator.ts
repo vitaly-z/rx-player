@@ -15,7 +15,7 @@
  */
 
 import log from "../../log";
-import { Representation } from "../../manifest";
+import { IFetchedRepresentation } from "../../manifest";
 import EWMA from "./ewma";
 
 /**
@@ -48,11 +48,11 @@ import EWMA from "./ewma";
  * @class RepresentationScoreCalculator
  */
 export default class RepresentationScoreCalculator {
-  private _currentRepresentationData : { representation : Representation;
+  private _currentRepresentationData : { representation : IFetchedRepresentation;
                                          ewma : EWMA; } |
                                        null;
 
-  private _lastRepresentationWithGoodScore : Representation | null;
+  private _lastRepresentationWithGoodScore : IFetchedRepresentation | null;
 
   constructor() {
     this._currentRepresentationData = null;
@@ -68,7 +68,7 @@ export default class RepresentationScoreCalculator {
    * seconds.
    */
   public addSample(
-    representation : Representation,
+    representation : IFetchedRepresentation,
     requestDuration : number,
     segmentDuration : number
   ) : void {
@@ -98,7 +98,7 @@ export default class RepresentationScoreCalculator {
    * @param {Representation} representation
    * @returns {number|undefined}
    */
-  public getEstimate(representation : Representation) : number | undefined {
+  public getEstimate(representation : IFetchedRepresentation) : number | undefined {
     const ewma = this._getEWMA(representation);
     if (ewma != null) {
       return ewma.getEstimate();
@@ -113,7 +113,7 @@ export default class RepresentationScoreCalculator {
    * `null` if no Representation ever reach that score.
    * @returns {Representation|null}
    */
-  public getLastStableRepresentation() : Representation | null {
+  public getLastStableRepresentation() : IFetchedRepresentation | null {
     return this._lastRepresentationWithGoodScore;
   }
 
@@ -123,7 +123,7 @@ export default class RepresentationScoreCalculator {
    * @param {Representation} representation
    * @returns {EWMA|null}
    */
-  private _getEWMA(representation : Representation) : EWMA | null {
+  private _getEWMA(representation : IFetchedRepresentation) : EWMA | null {
     if (this._currentRepresentationData != null &&
         this._currentRepresentationData.representation.id === representation.id)
     {

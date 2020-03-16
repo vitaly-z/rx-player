@@ -54,6 +54,7 @@ import {
 import log from "../../../log";
 import Manifest, {
   Adaptation,
+  IFetchedRepresentation,
   Period,
   Representation,
 } from "../../../manifest";
@@ -297,8 +298,14 @@ export default function AdaptationBuffer<T>({
       );
 
       log.info("Buffer: changing representation", adaptation.type, representation);
+
+      // XXX TODO
+      if (!representation.isFetched()) {
+        throw new Error("NOPE");
+      }
+      const rep = representation as IFetchedRepresentation;
       return RepresentationBuffer({ clock$,
-                                    content: { representation,
+                                    content: { representation: rep,
                                                adaptation,
                                                period,
                                                manifest },

@@ -15,11 +15,7 @@
  */
 
 import config from "../../config";
-import {
-  Adaptation,
-  ISegment,
-  Representation,
-} from "../../manifest";
+import { Adaptation } from "../../manifest";
 
 const { CACHE_LOAD_DURATION_THRESHOLDS } = config;
 
@@ -43,9 +39,7 @@ function mayBeFromCache(contentType: "audio"|"video",
  * @returns {function}
  */
 export default function generateCachedSegmentDetector():
-  (content: { representation: Representation;
-               adaptation: Adaptation;
-               segment: ISegment; },
+  (content: { adaptation: Adaptation },
    duration: number) => boolean
 {
   let hasAlreadyLoadedNonCachedContent = false;
@@ -58,9 +52,7 @@ export default function generateCachedSegmentDetector():
    * @param {number} duration
    * @returns {boolean}
    */
-  return function shouldIgnoreMetrics(content: { representation: Representation;
-                                                   adaptation: Adaptation;
-                                                   segment: ISegment; },
+  return function shouldIgnoreMetrics(content: { adaptation: Adaptation },
                                       downloadDuration: number): boolean {
     const contentType = content.adaptation.type;
     if (contentType === "text" || contentType === "image") {

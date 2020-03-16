@@ -34,9 +34,9 @@ import { ManualTimeRanges } from "../../custom_source_buffers";
 import log from "../../log";
 import {
   Adaptation,
+  IFetchedRepresentation,
   ISegment,
   Period,
-  Representation,
 } from "../../manifest";
 import assertUnreachable from "../../utils/assert_unreachable";
 import objectAssign from "../../utils/object_assign";
@@ -65,8 +65,8 @@ export interface IPushedChunkData<T> {
                         // chunk. `null` if none.
   chunk : T | null; // Chunk you want to push. `null` if you just
                     // want to push the initialization segment.
-  codec : string; // string corresponding to the mime-type + codec to set the
-                  // underlying SourceBuffer to.
+  codec : string | undefined; // string corresponding to the mime-type + codec
+                              // to set the underlying SourceBuffer to.
   timestampOffset : number; // time offset in seconds to apply to this segment.
   appendWindow: [ number | undefined, // start appendWindow for the segment
                                       // (part of the segment before that time
@@ -82,7 +82,7 @@ export interface IPushedChunkData<T> {
 export interface IPushedChunkInventoryInfos {
   adaptation : Adaptation;
   period : Period;
-  representation : Representation;
+  representation : IFetchedRepresentation;
   segment : ISegment; // The  segment object linked to the chunk.
   estimatedStart? : number; // Estimated start time, in s, of the chunk
   estimatedDuration? : number; // Estimated end time, in s, of the chunk
@@ -97,7 +97,7 @@ export interface IPushChunkInfos<T> { data : IPushedChunkData<T>;
 export interface IEndOfSegmentInfos {
   adaptation : Adaptation; // The Adaptation linked to the segment.
   period : Period; // The Period linked to the segment.
-  representation : Representation; // The Representation linked to the segment.
+  representation : IFetchedRepresentation; // The Representation linked to the segment.
   segment : ISegment; // The corresponding Segment object.
 }
 
@@ -143,7 +143,7 @@ type IQSBQueueItem<T> = IPushQueueItem<T> |
 
 interface IPushData<T> { isInit : boolean;
                          segmentData : T;
-                         codec : string;
+                         codec : string | undefined;
                          timestampOffset : number;
                          appendWindow : [ number | undefined,
                                           number | undefined ]; }
@@ -197,13 +197,13 @@ export default class QueuedSourceBuffer<T> {
 
   // Current `type` of the underlying SourceBuffer.
   // Might be changed for codec-switching purposes.
-  private _currentCodec : string;
+  private _currentCodec : string | undefined;
 
   /**
    * Public access to the SourceBuffer's current codec.
    * @returns {string}
    */
-  public get codec() : string {
+  public get codec() : string | undefined {
     return this._currentCodec;
   }
 
@@ -215,7 +215,7 @@ export default class QueuedSourceBuffer<T> {
    */
   constructor(
     bufferType : IBufferType,
-    codec : string,
+    codec : string | undefined,
     sourceBuffer : ICustomSourceBuffer<T>
   ) {
     this._destroy$ = new Subject<void>();
@@ -531,7 +531,7 @@ export default class QueuedSourceBuffer<T> {
             timestampOffset,
             appendWindow,
             codec } = data;
-    if (this._currentCodec !== codec) {
+    if (codec !== undefined && this._currentCodec !== codec) {
       log.debug("QSB: updating codec");
       const couldUpdateType = tryToChangeSourceBufferType(this._sourceBuffer,
                                                           codec);

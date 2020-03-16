@@ -18,6 +18,7 @@ import { Subject } from "rxjs";
 import { ICustomError } from "../../errors";
 import {
   Adaptation,
+  IFetchedRepresentation,
   ISegment,
   Period,
   Representation,
@@ -70,7 +71,7 @@ const EVENTS = {
   addedSegment<T>(
     content : { adaptation : Adaptation;
                 period : Period;
-                representation : Representation; },
+                representation : IFetchedRepresentation; },
     segment : ISegment,
     buffered : TimeRanges,
     segmentData : T

@@ -20,43 +20,53 @@ import updatePeriodInPlace from "../update_period_in_place";
 
 const oldVideoRepresentation1 = { parsingErrors: [],
                                   id: "rep-video-1",
+                                  update() { /* noop */ },
                                   index: { _update() { /* noop */ },
                                            _replace() { /* noop */ } } };
 const oldVideoRepresentation2 = { parsingErrors: [],
                                   id: "rep-video-2",
+                                  update() { /* noop */ },
                                   index: { _update() { /* noop */ },
                                            _replace() { /* noop */ } } };
 const oldVideoRepresentation3 = { parsingErrors: [],
                                   id: "rep-video-3",
+                                  update() { /* noop */ },
                                   index: { _update() { /* noop */ },
                                            _replace() { /* noop */ } } };
 const oldVideoRepresentation4 = { parsingErrors: [],
                                   id: "rep-video-4",
+                                  update() { /* noop */ },
                                   index: { _update() { /* noop */ },
                                            _replace() { /* noop */ } } };
 const oldAudioRepresentation = { parsingErrors: [],
                                  id: "rep-audio-1",
+                                 update() { /* noop */ },
                                  index: { _update() { /* noop */ },
                                           _replace() { /* noop */ } } };
 
 const newVideoRepresentation1 = { parsingErrors: [],
                                   id: "rep-video-1",
+                                  update() { /* noop */ },
                                   index: { _update() { /* noop */ },
                                            _replace() { /* noop */ } } };
 const newVideoRepresentation2 = { parsingErrors: [],
                                   id: "rep-video-2",
+                                  update() { /* noop */ },
                                   index: { _update() { /* noop */ },
                                            _replace() { /* noop */ } } };
 const newVideoRepresentation3 = { parsingErrors: [],
                                   id: "rep-video-3",
+                                  update() { /* noop */ },
                                   index: { _update() { /* noop */ },
                                            _replace() { /* noop */ } } };
 const newVideoRepresentation4 = { parsingErrors: [],
                                   id: "rep-video-4",
+                                  update() { /* noop */ },
                                   index: { _update() { /* noop */ },
                                            _replace() { /* noop */ } } };
 const newAudioRepresentation = { parsingErrors: [],
                                  id: "rep-audio-1",
+                                 update() { /* noop */ },
                                  index: { _update() { /* noop */ },
                                           _replace() { /* noop */ } } };
 
@@ -83,6 +93,7 @@ describe("Manifest - updatePeriodInPlace", () => {
    let newAudioRepresentationUpdateSpy : jest.MockInstance<void, []> | undefined;
 
   beforeEach(() => {
+    // XXX TODO
     oldVideoRepresentation1ReplaceSpy =
       jest.spyOn(oldVideoRepresentation1.index, "_replace");
     oldVideoRepresentation2ReplaceSpy =

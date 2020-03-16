@@ -22,9 +22,9 @@ import {
 import { map } from "rxjs/operators";
 import Manifest, {
   Adaptation,
+  IFetchedRepresentation,
   ISegment,
   Period,
-  Representation,
 } from "../../../manifest";
 import objectAssign from "../../../utils/object_assign";
 import {
@@ -52,7 +52,7 @@ export default function pushInitSegment<T>(
                              content: { adaptation : Adaptation;
                                         manifest : Manifest;
                                         period : Period;
-                                        representation : Representation; };
+                                        representation : IFetchedRepresentation; };
                              segmentData : T | null;
                              segment : ISegment;
                              queuedSourceBuffer : QueuedSourceBuffer<T>; }

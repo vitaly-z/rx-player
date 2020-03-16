@@ -55,7 +55,7 @@ export type IVideoTrackPreference = null |
  * TrackChoiceManager.
  */
 interface ITMAudioRepresentation { id : string|number;
-                                   bitrate : number;
+                                   bitrate? : number;
                                    codec? : string; }
 
 /** Audio track returned by the TrackChoiceManager. */
@@ -77,7 +77,7 @@ export interface ITMTextTrack { language : string;
  * TrackChoiceManager.
  */
 interface ITMVideoRepresentation { id : string|number;
-                                   bitrate : number;
+                                   bitrate? : number;
                                    width? : number;
                                    height? : number;
                                    codec? : string;

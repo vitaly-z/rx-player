@@ -19,9 +19,9 @@ import log from "../../log";
 import {
   Adaptation,
   areSameContent,
+  IFetchedRepresentation,
   ISegment,
   Period,
-  Representation,
 } from "../../manifest";
 import takeFirstSet from "../../utils/take_first_set";
 
@@ -31,7 +31,7 @@ const { MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE,
 
 interface IBufferedChunkInfos { adaptation : Adaptation;
                                 period : Period;
-                                representation : Representation;
+                                representation : IFetchedRepresentation;
                                 segment : ISegment; }
 
 // Stored information for each chunk
@@ -70,7 +70,7 @@ export interface IBufferedChunk {
 export interface IInsertedChunkInfos {
   adaptation : Adaptation;
   period : Period;
-  representation : Representation;
+  representation : IFetchedRepresentation;
   segment : ISegment;
   start : number; // Start time the segment should most probably begin from when
                   // pushed, in seconds
@@ -569,7 +569,7 @@ export default class SegmentInventory {
   public completeSegment(
     content : { period: Period;
                 adaptation: Adaptation;
-                representation: Representation;
+                representation: IFetchedRepresentation;
                 segment: ISegment; }
   ) : void {
     if (content.segment.isInit) {

@@ -271,5 +271,5 @@ function getFirstDeclaredMimeType(adaptation : Adaptation) : string {
   if (representations[0] == null) {
     return "";
   }
-  return representations[0].getMimeTypeString();
+  return representations[0].getMimeTypeString() ?? "";
 }

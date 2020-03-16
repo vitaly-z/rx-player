@@ -26,7 +26,7 @@ import features from "../../features";
 import log from "../../log";
 import Manifest, {
   Adaptation,
-  Representation,
+  IFetchedRepresentation,
 } from "../../manifest";
 import {
   getMDAT,
@@ -85,7 +85,9 @@ function addNextSegments(
   const representations = adaptation.representations;
   for (let i = 0; i < representations.length; i++) {
     const representation = representations[i];
-    representation.index._addSegments(nextSegments, dlSegment);
+    if (representation.isFetched()) {
+      representation.index._addSegments(nextSegments, dlSegment);
+    }
   }
 }
 
@@ -464,10 +466,10 @@ export default function(options : ITransportOptions) : ITransportPipelines {
 /**
  * Returns true if the given texttrack segment represents a textrack embedded
  * in a mp4 file.
- * @param {Representation} representation
+ * @param {Object} representation
  * @returns {Boolean}
  */
-function isMP4EmbeddedTrack(representation : Representation) : boolean {
+function isMP4EmbeddedTrack(representation : IFetchedRepresentation) : boolean {
   return typeof representation.mimeType === "string" &&
          representation.mimeType.indexOf("mp4") >= 0;
 }

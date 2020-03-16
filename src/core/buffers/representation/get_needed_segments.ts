@@ -30,9 +30,9 @@ import log from "../../../log";
 import Manifest, {
   Adaptation,
   // areSameContent,
+  IFetchedRepresentation,
   ISegment,
   Period,
-  Representation,
 } from "../../../manifest";
 import SimpleSet from "../../../utils/simple_set";
 import { IBufferedChunk } from "../../source_buffers";
@@ -42,10 +42,12 @@ const { CONTENT_REPLACEMENT_PADDING,
         MAX_TIME_MISSING_FROM_COMPLETE_SEGMENT,
         MINIMUM_SEGMENT_SIZE } = config;
 
-export interface ISegmentFilterArgument { content: { adaptation : Adaptation;
-                                                     manifest : Manifest;
-                                                     period : Period;
-                                                     representation : Representation; };
+interface IContent { adaptation : Adaptation;
+                     manifest : Manifest;
+                     period : Period;
+                     representation : IFetchedRepresentation; }
+
+export interface ISegmentFilterArgument { content: IContent;
                                           currentPlaybackTime: number;
                                           knownStableBitrate : number | undefined;
                                           loadedSegmentPendingPush : SimpleSet;
@@ -163,11 +165,11 @@ export default function getNeededSegments({
 function shouldContentBeReplaced(
   oldContent : { adaptation : Adaptation;
                  period : Period;
-                 representation : Representation;
+                 representation : IFetchedRepresentation;
                  segment : ISegment; },
   currentContent : { adaptation : Adaptation;
                      period : Period;
-                     representation : Representation; },
+                     representation : IFetchedRepresentation; },
   currentPlaybackTime: number,
   knownStableBitrate? : number
 ) : boolean {

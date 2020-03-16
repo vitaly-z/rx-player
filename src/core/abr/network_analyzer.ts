@@ -143,7 +143,9 @@ function estimateStarvationModeBitrate(
   const requestElapsedTime = (now - concernedRequest.requestTimestamp) / 1000;
   const reasonableElapsedTime = requestElapsedTime <=
     ((chunkDuration * 1.5 + 1) / clock.speed);
-  if (currentRepresentation == null || reasonableElapsedTime) {
+  if (currentRepresentation === null ||
+      currentRepresentation.bitrate === undefined ||
+      reasonableElapsedTime) {
     return undefined;
   }
 
@@ -268,7 +270,8 @@ export default class NetworkAnalyzer {
       if (bandwidthEstimate != null) {
         log.info("ABR: starvation mode emergency estimate:", bandwidthEstimate);
         bandwidthEstimator.reset();
-        newBitrateCeil = currentRepresentation == null ?
+        newBitrateCeil = currentRepresentation === null ||
+                         currentRepresentation.bitrate === undefined ?
           bandwidthEstimate :
           Math.min(bandwidthEstimate, currentRepresentation.bitrate);
       }
@@ -310,7 +313,7 @@ export default class NetworkAnalyzer {
     currentRequests : IRequestInfo[],
     clockTick: INetworkAnalizerClockTick
    ) : boolean {
-    if (currentRepresentation == null) {
+    if (currentRepresentation === null || currentRepresentation.bitrate === undefined) {
       return true;
     } else if (bitrate === currentRepresentation.bitrate) {
       return false;

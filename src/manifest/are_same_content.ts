@@ -16,7 +16,7 @@
 
 import Adaptation from "./adaptation";
 import Period from "./period";
-import Representation from "./representation";
+import { IFetchedRepresentation } from "./representation";
 import { ISegment } from "./representation_index";
 
 /**
@@ -25,7 +25,7 @@ import { ISegment } from "./representation_index";
  */
 interface IBufferedChunkInfos { adaptation : Adaptation;
                                 period : Period;
-                                representation : Representation;
+                                representation : IFetchedRepresentation;
                                 segment : ISegment; }
 
 /**

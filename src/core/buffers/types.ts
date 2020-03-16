@@ -18,6 +18,7 @@ import { Subject } from "rxjs";
 import { ICustomError } from "../../errors";
 import {
   Adaptation,
+  IFetchedRepresentation,
   ISegment,
   Period,
   Representation,
@@ -29,7 +30,7 @@ export interface IBufferEventAddedSegment<T> {
   type : "added-segment";
   value : { content: { period : Period;
                        adaptation : Adaptation;
-                       representation : Representation; };
+                       representation : IFetchedRepresentation; };
             segment : ISegment; // The concerned Segment
             buffered : TimeRanges; // TimeRanges of the concerned SourceBuffer
             segmentData : T; /* The data pushed */ };

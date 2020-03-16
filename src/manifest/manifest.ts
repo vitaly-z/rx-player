@@ -524,6 +524,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
                                              representations: [{
                                                bitrate: 0,
                                                id: representationID,
+                                               isFetched: true,
                                                mimeType,
                                                index: new StaticRepresentationIndex({
                                                  media: url,
@@ -577,6 +578,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
                                                representations: [{
                                                  bitrate: 0,
                                                  id: representationID,
+                                                 isFetched: true,
                                                  mimeType,
                                                  codecs,
                                                  index: new StaticRepresentationIndex({

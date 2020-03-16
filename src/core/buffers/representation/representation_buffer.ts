@@ -52,9 +52,9 @@ import { ICustomError } from "../../../errors";
 import log from "../../../log";
 import Manifest, {
   Adaptation,
+  IFetchedRepresentation,
   ISegment,
   Period,
-  Representation,
 } from "../../../manifest";
 import {
   ISegmentParserInitSegment,
@@ -103,7 +103,7 @@ export interface IRepresentationBufferArguments<T> {
   content: { adaptation : Adaptation;
              manifest : Manifest;
              period : Period;
-             representation : Representation; };
+             representation : IFetchedRepresentation; };
   queuedSourceBuffer : QueuedSourceBuffer<T>;
   segmentFetcher : IPrioritizedSegmentFetcher<T>;
   terminate$ : Observable<void>;

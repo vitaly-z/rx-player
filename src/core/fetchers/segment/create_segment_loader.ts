@@ -28,9 +28,9 @@ import {
 import { ICustomError } from "../../../errors";
 import Manifest, {
   Adaptation,
+  IFetchedRepresentation,
   ISegment,
   Period,
-  Representation,
 } from "../../../manifest";
 import {
   ILoaderDataLoadedValue,
@@ -105,7 +105,7 @@ export type ISegmentPipelineLoader<T> =
 export interface ISegmentLoaderContent { manifest : Manifest;
                                          period : Period;
                                          adaptation : Adaptation;
-                                         representation : Representation;
+                                         representation : IFetchedRepresentation;
                                          segment : ISegment; }
 
 /**
@@ -157,7 +157,7 @@ export default function createSegmentLoader<T>(
    *   - get it from cache if present
    *   - call the transport loader - with an exponential backoff - if not
    *
-   * @param {Object} loaderArgument - Input given to the loader
+   * @param {Object} wantedContent - Input given to the loader
    * @returns {Observable}
    */
   function loadData(

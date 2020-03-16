@@ -24,6 +24,7 @@ const minimalIndex = { getInitSegment() { return null; },
                        isSegmentStillAvailable() : undefined { return ; },
                        canBeOutOfSyncError() : true { return true; },
                        isFinished() : true { return true; },
+                       isFetched() : true { return true; },
                        _replace() { /* noop */ },
                        _update() { /* noop */ },
                        _addSegments() { /* noop */ } };
@@ -44,7 +45,8 @@ describe("Manifest - Representation", () => {
     const Representation = require("../representation").default;
     const args = { bitrate: 12,
                    id: "test",
-                   index: minimalIndex };
+                   index: minimalIndex,
+                   isFetched: true };
     const representation = new Representation(args, { type: "audio" });
     expect(representation.id).toBe("test");
     expect(representation.bitrate).toBe(12);
@@ -55,8 +57,8 @@ describe("Manifest - Representation", () => {
     expect(representation.height).toBe(undefined);
     expect(representation.mimeType).toBe(undefined);
     expect(representation.width).toBe(undefined);
-    expect(representation.getMimeTypeString()).toBe(";codecs=\"\"");
-    expect(representation.isSupported).toBe(true);
+    expect(representation.getMimeTypeString()).toBe(undefined);
+    expect(representation.isSupported).toBe(false);
     expect(representation.decipherable).toBe(undefined);
     expect(defaultIsCodecSupported).toHaveBeenCalledTimes(1);
   });
@@ -65,7 +67,11 @@ describe("Manifest - Representation", () => {
     jest.mock("../../compat", () => ({ __esModule: true,
                                        isCodecSupported: defaultIsCodecSupported }));
     const Representation = require("../representation").default;
-    const args = { bitrate: 12, id: "test", height: 57, index: minimalIndex };
+    const args = { bitrate: 12,
+                   id: "test",
+                   height: 57,
+                   index: minimalIndex,
+                   isFetched: true };
     const representation = new Representation(args, { type: "video" });
     expect(representation.id).toBe("test");
     expect(representation.bitrate).toBe(12);
@@ -76,8 +82,8 @@ describe("Manifest - Representation", () => {
     expect(representation.height).toBe(57);
     expect(representation.mimeType).toBe(undefined);
     expect(representation.width).toBe(undefined);
-    expect(representation.getMimeTypeString()).toBe(";codecs=\"\"");
-    expect(representation.isSupported).toBe(true);
+    expect(representation.getMimeTypeString()).toBe(undefined);
+    expect(representation.isSupported).toBe(false);
     expect(representation.decipherable).toBe(undefined);
     expect(defaultIsCodecSupported).toHaveBeenCalledTimes(1);
   });
@@ -86,7 +92,11 @@ describe("Manifest - Representation", () => {
     jest.mock("../../compat", () => ({ __esModule: true,
                                        isCodecSupported: defaultIsCodecSupported }));
     const Representation = require("../representation").default;
-    const args = { bitrate: 12, id: "test", width: 2, index: minimalIndex };
+    const args = { bitrate: 12,
+                   id: "test",
+                   width: 2,
+                   isFetched: true,
+                   index: minimalIndex };
     const representation = new Representation(args, { type: "video" });
     expect(representation.id).toBe("test");
     expect(representation.bitrate).toBe(12);
@@ -97,8 +107,8 @@ describe("Manifest - Representation", () => {
     expect(representation.height).toBe(undefined);
     expect(representation.mimeType).toBe(undefined);
     expect(representation.width).toBe(2);
-    expect(representation.getMimeTypeString()).toBe(";codecs=\"\"");
-    expect(representation.isSupported).toBe(true);
+    expect(representation.getMimeTypeString()).toBe(undefined);
+    expect(representation.isSupported).toBe(false);
     expect(representation.decipherable).toBe(undefined);
     expect(defaultIsCodecSupported).toHaveBeenCalledTimes(1);
   });
@@ -110,6 +120,7 @@ describe("Manifest - Representation", () => {
     const args = { bitrate: 12,
                    id: "test",
                    codecs: "vp9",
+                   isFetched: true,
                    index: minimalIndex };
     const representation = new Representation(args, { type: "audio" });
     expect(representation.id).toBe("test");
@@ -121,8 +132,8 @@ describe("Manifest - Representation", () => {
     expect(representation.height).toBe(undefined);
     expect(representation.mimeType).toBe(undefined);
     expect(representation.width).toBe(undefined);
-    expect(representation.getMimeTypeString()).toBe(";codecs=\"vp9\"");
-    expect(representation.isSupported).toBe(true);
+    expect(representation.getMimeTypeString()).toBe(undefined);
+    expect(representation.isSupported).toBe(false);
     expect(representation.decipherable).toBe(undefined);
     expect(defaultIsCodecSupported).toHaveBeenCalledTimes(1);
   });
@@ -134,6 +145,7 @@ describe("Manifest - Representation", () => {
     const args = { bitrate: 12,
                    id: "test",
                    mimeType: "audio/mp4",
+                   isFetched: true,
                    index: minimalIndex };
     const representation = new Representation(args, { type: "audio" });
     expect(representation.id).toBe("test");
@@ -145,8 +157,8 @@ describe("Manifest - Representation", () => {
     expect(representation.height).toBe(undefined);
     expect(representation.mimeType).toBe("audio/mp4");
     expect(representation.width).toBe(undefined);
-    expect(representation.getMimeTypeString()).toBe("audio/mp4;codecs=\"\"");
-    expect(representation.isSupported).toBe(true);
+    expect(representation.getMimeTypeString()).toBe(undefined);
+    expect(representation.isSupported).toBe(false);
     expect(representation.decipherable).toBe(undefined);
     expect(defaultIsCodecSupported).toHaveBeenCalledTimes(1);
   });
@@ -160,6 +172,7 @@ describe("Manifest - Representation", () => {
                    index: minimalIndex,
                    mimeType: "video/mp4",
                    codecs: "vp12",
+                   isFetched: true,
                    contentProtections: { keyIds: [{ keyId: new Uint8Array([45]) }],
                                          initData: {
                                            cenc: [{
@@ -192,6 +205,7 @@ describe("Manifest - Representation", () => {
                    frameRate: "1/60",
                    mimeType: "audio/mp4",
                    codecs: "mp4a.40.2",
+                   isFetched: true,
                    index: minimalIndex };
     const representation = new Representation(args, { type: "audio" });
     expect(representation.id).toBe("test");
@@ -215,28 +229,32 @@ describe("Manifest - Representation", () => {
     const Representation = require("../representation").default;
     const args1 = { bitrate: 12,
                     id: "test",
+                    isFetched: true,
                     index: minimalIndex };
     expect(new Representation(args1, { type: "audio" }).getMimeTypeString())
-      .toBe(";codecs=\"\"");
+      .toBe(undefined);
 
     const args2 = { bitrate: 12,
                     id: "test",
                     mimeType: "foo",
+                    isFetched: true,
                     index: minimalIndex };
     expect(new Representation(args2, { type: "audio" }).getMimeTypeString())
-      .toBe("foo;codecs=\"\"");
+      .toBe(undefined);
 
     const args3 = { bitrate: 12,
                     id: "test",
                     codecs: "bar",
+                    isFetched: true,
                     index: minimalIndex };
     expect(new Representation(args3, { type: "audio" }).getMimeTypeString())
-      .toBe(";codecs=\"bar\"");
+      .toBe(undefined);
 
     const args4 = { bitrate: 12,
                     id: "test",
                     mimeType: "foo",
                     codecs: "bar",
+                    isFetched: true,
                     index: minimalIndex };
     expect(new Representation(args4, { type: "audio" }).getMimeTypeString())
       .toBe("foo;codecs=\"bar\"");

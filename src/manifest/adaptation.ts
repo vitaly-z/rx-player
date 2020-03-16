@@ -192,7 +192,15 @@ export default class Adaptation {
         }
       }
     }
-    this.representations = representations.sort((a, b) => a.bitrate - b.bitrate);
+    this.representations = representations
+      .sort((a, b) => {
+        if (b.bitrate === undefined) {
+          return 1;
+        } else if (a.bitrate === undefined) {
+          return -1;
+        }
+        return a.bitrate - b.bitrate;
+      });
 
     this.decipherable = decipherable;
     this.isSupported = isSupported;
@@ -216,7 +224,9 @@ export default class Adaptation {
     const bitrates : number[] = [];
     for (let i = 0; i < this.representations.length; i ++) {
       const representation = this.representations[i];
-      if (representation.decipherable !== false) {
+      if (representation.bitrate !== undefined &&
+          representation.decipherable !== false)
+      {
         bitrates.push(representation.bitrate);
       }
     }

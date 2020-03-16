@@ -33,6 +33,7 @@ import {
 import log from "../../log";
 import {
   Adaptation,
+  IFetchedRepresentation,
   ISegment,
   Representation,
 } from "../../manifest";
@@ -70,7 +71,7 @@ export interface IRepresentationEstimatorClockTick {
 
 interface IABRMetricValue { duration: number;
                             size: number;
-                            content: { representation: Representation;
+                            content: { representation: IFetchedRepresentation;
                                        adaptation: Adaptation;
                                        segment: ISegment; }; }
 
@@ -112,7 +113,7 @@ export interface IABRFilters { bitrate?: number;
 interface IBufferEventAddedSegment {
   type : "added-segment";
   value : { buffered : TimeRanges;
-            content : { representation : Representation }; };
+            content : { representation : IFetchedRepresentation }; };
 }
 
 // Buffer events needed by the ABRManager
@@ -300,7 +301,9 @@ export default function RepresentationEstimator({
         })
       );
 
-      const bitrates = representations.map(r => r.bitrate);
+      const bitrates : number[] = representations
+        .map(r => r.bitrate)
+        .filter((bitrate) : bitrate is number => bitrate !== undefined);
       const bufferBasedEstimation$ = BufferBasedChooser(bufferBasedClock$, bitrates)
         .pipe(startWith(undefined));
 
@@ -356,7 +359,8 @@ export default function RepresentationEstimator({
                       chosenRepFromBandwidth);
             return { bitrate: bandwidthEstimate,
                      representation: chosenRepFromBandwidth,
-                     urgent: networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate,
+                     urgent: chosenRepFromBandwidth.bitrate === undefined ||
+                             networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate,
                                                       currentRepresentation,
                                                       requests,
                                                       clock),
@@ -364,13 +368,15 @@ export default function RepresentationEstimator({
                      knownStableBitrate };
           }
           if (bufferBasedBitrate == null ||
+              chosenRepFromBandwidth.bitrate === undefined || // XXX TODO
               chosenRepFromBandwidth.bitrate >= bufferBasedBitrate)
           {
             log.debug("ABR: Choosing representation with bandwith estimation.",
                       chosenRepFromBandwidth);
             return { bitrate: bandwidthEstimate,
                      representation: chosenRepFromBandwidth,
-                     urgent: networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate,
+                     urgent: chosenRepFromBandwidth.bitrate === undefined ||
+                             networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate,
                                                       currentRepresentation,
                                                       requests,
                                                       clock),

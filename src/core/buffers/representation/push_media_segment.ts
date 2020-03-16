@@ -22,9 +22,9 @@ import {
 import { map } from "rxjs/operators";
 import Manifest, {
   Adaptation,
+  IFetchedRepresentation,
   ISegment,
   Period,
-  Representation,
 } from "../../../manifest";
 import { ISegmentParserParsedSegment } from "../../../transports";
 import objectAssign from "../../../utils/object_assign";
@@ -51,7 +51,7 @@ export default function pushMediaSegment<T>(
                              content: { adaptation : Adaptation;
                                         manifest : Manifest;
                                         period : Period;
-                                        representation : Representation; };
+                                        representation : IFetchedRepresentation; };
                              initSegmentData : T | null;
                              parsedSegment : ISegmentParserParsedSegment<T>;
                              segment : ISegment;
