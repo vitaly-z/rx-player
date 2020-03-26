@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
+import ContentDownloader from "./ContentDownloader";
 import createMetaplaylist from "./createMetaplaylist";
-import contentDownloader from "./contentDownloader";
 import mediaCapabilitiesProber from "./mediaCapabilitiesProber";
 import parseBifThumbnails from "./parseBIFThumbnails";
 import VideoThumbnailLoader from "./VideoThumbnailLoader";
 import download2Go from "./download2go";
 
 export {
+  ContentDownloader,
   createMetaplaylist,
   mediaCapabilitiesProber,
   parseBifThumbnails,
   VideoThumbnailLoader,
-  contentDownloader,
   download2Go,
 };
