@@ -102,7 +102,7 @@ class DownloadManager {
         type: "resume",
       }),
       builderInit,
-      { contentID, db: this.db, pause$, ...callbacks }
+      { contentID, db: this.db, pause$, onError }
     );
     return combineLatest([
       pipelineSegmentDownloader$.pipe(

@@ -233,7 +233,7 @@ function handleAbstractSegmentPipelineContextFor(
 export function segmentPipelineDownloader$(
   builderObs$: Observable<IInitGroupedSegments>,
   builderInit: IManifestDBState,
-  { contentID, pause$, db, ...cbsEvt }: IUtils
+  { contentID, pause$, db, onError }: IUtils
 ): Observable<IManifestDBState> {
   return builderObs$.pipe(
     mergeMap(
@@ -287,7 +287,7 @@ export function segmentPipelineDownloader$(
           data: chunkData.data,
           size: chunkData.data.byteLength,
         }).catch((err: Error) => {
-          cbsEvt.onError?.(new IndexedDBError(`
+           onError?.(new IndexedDBError(`
             ${contentID}: Impossible
             to store the current segment (${contentType}) at ${timeScaled}: ${err.message}
           `));
@@ -344,8 +344,7 @@ export function segmentPipelineDownloader$(
       },
       builderInit
     ),
-    tap(({ size, progress }) =>
-      cbsEvt.onProgress?.({ progress: progress.percentage, size })),
+    distinct(({ progress }) => progress.percentage),
     takeUntil(pause$)
   );
 }
