@@ -24,5 +24,6 @@ export default function handleDiscontinuity(seekTo, mediaElement) {
         return;
     }
     log.warn("Init: discontinuity seek", mediaElement.currentTime, seekTo);
+    log.debug("Setting HTML5 video current time: ", seekTo);
     mediaElement.currentTime = seekTo;
 }

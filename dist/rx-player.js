@@ -11929,6 +11929,7 @@ function seekAndLoadOnMediaEvents(_ref) {
       isDirectfile = _ref.isDirectfile;
   var seek$ = Object(_compat__WEBPACK_IMPORTED_MODULE_12__[/* default */ "a"])(mediaElement).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__[/* take */ "a"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_6__[/* tap */ "a"])(function () {
     _log__WEBPACK_IMPORTED_MODULE_13__[/* default */ "a"].info("Init: Set initial time", startTime);
+    _log__WEBPACK_IMPORTED_MODULE_13__[/* default */ "a"].debug("Setting HTML5 video current time: ", startTime);
     mediaElement.currentTime = typeof startTime === "function" ? startTime() : startTime;
   }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_7__[/* shareReplay */ "a"])({
     refCount: true
@@ -28808,6 +28809,7 @@ function handleDiscontinuity(seekTo, mediaElement) {
   }
 
   log["a" /* default */].warn("Init: discontinuity seek", mediaElement.currentTime, seekTo);
+  log["a" /* default */].debug("Setting HTML5 video current time: ", seekTo);
   mediaElement.currentTime = seekTo;
 }
 // EXTERNAL MODULE: ./src/core/init/initial_seek_and_play.ts
@@ -29276,8 +29278,10 @@ function InitializeOnMediaSource(_ref) {
             var currentTime = evt.value.currentTime;
 
             if (currentTime + 0.001 < evt.value.duration) {
+              log["a" /* default */].debug("Setting HTML5 video current time: ", currentTime + 0.01);
               mediaElement.currentTime += 0.001;
             } else {
+              log["a" /* default */].debug("Setting HTML5 video current time: ", currentTime);
               mediaElement.currentTime = currentTime;
             }
 

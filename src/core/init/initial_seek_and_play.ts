@@ -138,6 +138,7 @@ export default function seekAndLoadOnMediaEvents(
     take(1),
     tap(() => {
       log.info("Init: Set initial time", startTime);
+      log.debug("Setting HTML5 video current time: ", startTime);
       mediaElement.currentTime = typeof startTime === "function" ? startTime() :
                                                                    startTime;
     }),

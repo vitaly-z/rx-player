@@ -153,9 +153,11 @@ export default function InitializeOnMediaSource(_a) {
                         // simple seek close to the current position to flush the buffers
                         var currentTime = evt.value.currentTime;
                         if (currentTime + 0.001 < evt.value.duration) {
+                            log.debug("Setting HTML5 video current time: ", currentTime + 0.01);
                             mediaElement.currentTime += 0.001;
                         }
                         else {
+                            log.debug("Setting HTML5 video current time: ", currentTime);
                             mediaElement.currentTime = currentTime;
                         }
                         break;

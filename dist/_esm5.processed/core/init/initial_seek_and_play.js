@@ -82,6 +82,7 @@ export default function seekAndLoadOnMediaEvents(_a) {
     var clock$ = _a.clock$, mediaElement = _a.mediaElement, startTime = _a.startTime, mustAutoPlay = _a.mustAutoPlay, isDirectfile = _a.isDirectfile;
     var seek$ = whenLoadedMetadata$(mediaElement).pipe(take(1), tap(function () {
         log.info("Init: Set initial time", startTime);
+        log.debug("Setting HTML5 video current time: ", startTime);
         mediaElement.currentTime = typeof startTime === "function" ? startTime() :
             startTime;
     }), shareReplay({ refCount: true }));
