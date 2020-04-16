@@ -2,14 +2,6 @@
 <ul>
 <li><a href="#chapter-Overview">Overview</a></li>
 <li><a href="#chapter-Instantiation">Instantiation</a></li>
-<li><a href="#chapter-Static%20properties">Static properties</a>
-<ul>
-<li><a href="#subchapter-version">version</a></li>
-<li><a href="#subchapter-ErrorTypes">ErrorTypes</a></li>
-<li><a href="#subchapter-ErrorCodes">ErrorCodes</a></li>
-<li><a href="#subchapter-LogLevel">LogLevel</a></li>
-</ul>
-</li>
 <li><a href="#chapter-Basic%20methods">Basic methods</a>
 <ul>
 <li><a href="#subchapter-loadVideo">loadVideo</a></li>
@@ -30,13 +22,13 @@
 <li><a href="#subchapter-dispose">dispose</a></li>
 </ul>
 </li>
-<li><a href="#chapter-Speed%20controls">Speed controls</a>
+<li><a href="#chapter-Speed%20control">Speed control</a>
 <ul>
 <li><a href="#subchapter-setPlaybackRate">setPlaybackRate</a></li>
 <li><a href="#subchapter-getPlaybackRate">getPlaybackRate</a></li>
 </ul>
 </li>
-<li><a href="#chapter-Volume%20controls">Volume controls</a>
+<li><a href="#chapter-Volume%20control">Volume control</a>
 <ul>
 <li><a href="#subchapter-setVolume">setVolume</a></li>
 <li><a href="#subchapter-getVolume">getVolume</a></li>
@@ -88,23 +80,40 @@
 <li><a href="#subchapter-getMaxBufferBehind">getMaxBufferBehind</a></li>
 <li><a href="#subchapter-setMaxBufferAhead">setMaxBufferAhead</a></li>
 <li><a href="#subchapter-getMaxBufferAhead">getMaxBufferAhead</a></li>
-<li><a href="#subchapter-Buffer%20information">Buffer information</a></li>
+</ul>
+</li>
+<li><a href="#chapter-Buffer%20information">Buffer information</a>
+<ul>
 <li><a href="#subchapter-getVideoLoadedTime">getVideoLoadedTime</a></li>
 <li><a href="#subchapter-getVideoPlayedTime">getVideoPlayedTime</a></li>
 <li><a href="#subchapter-getVideoBufferGap">getVideoBufferGap</a></li>
-<li><a href="#subchapter-Content%20information">Content information</a></li>
+</ul>
+</li>
+<li><a href="#chapter-Content%20information">Content information</a>
+<ul>
 <li><a href="#subchapter-isLive">isLive</a></li>
 <li><a href="#subchapter-getUrl">getUrl</a></li>
 <li><a href="#subchapter-getManifest">getManifest</a></li>
 <li><a href="#subchapter-getCurrentAdaptations">getCurrentAdaptations</a></li>
 <li><a href="#subchapter-getCurrentRepresentations">getCurrentRepresentations</a></li>
 <li><a href="#subchapter-getCurrentKeySystem">getCurrentKeySystem</a></li>
-<li><a href="#subchapter-Deprecated">Deprecated</a></li>
+</ul>
+</li>
+<li><a href="#chapter-Deprecated">Deprecated</a>
+<ul>
 <li><a href="#subchapter-getImageTrackData">getImageTrackData</a></li>
 <li><a href="#subchapter-setFullscreen">setFullscreen</a></li>
 <li><a href="#subchapter-exitFullscreen">exitFullscreen</a></li>
 <li><a href="#subchapter-isFullscreen">isFullscreen</a></li>
 <li><a href="#subchapter-getNativeTextTrack">getNativeTextTrack</a></li>
+</ul>
+</li>
+<li><a href="#chapter-Static%20properties">Static properties</a>
+<ul>
+<li><a href="#subchapter-version">version</a></li>
+<li><a href="#subchapter-ErrorTypes">ErrorTypes</a></li>
+<li><a href="#subchapter-ErrorCodes">ErrorCodes</a></li>
+<li><a href="#subchapter-LogLevel">LogLevel</a></li>
 </ul>
 </li>
 <li><a href="#chapter-Tools">Tools</a>
@@ -148,61 +157,6 @@ the RxPlayer <a href="../terms.html">here</a>.</em></p>
 </code></pre>
 <p>The options are all&#x2026; optional. They are all defined in the <a href="player_options.html">Player Options
 page</a>.</p>
-<p><a name="static"></a>
-<a name="chapter-Static%20properties"></a></p>
-<h2>Static properties</h2>
-<p>This chapter documents the static properties that can be found on the RxPlayer
-class.</p>
-<p><a name="static-version"></a>
-<a name="subchapter-version"></a></p>
-<h3>version</h3>
-<p><em>type</em>: <code>Number</code></p>
-<p>The current version of the RxPlayer.</p>
-<p><a name="static-ErrorTypes"></a>
-<a name="subchapter-ErrorTypes"></a></p>
-<h3>ErrorTypes</h3>
-<p><em>type</em>: <code>Object</code></p>
-<p>The different &#x201C;types&#x201D; of Error you can get on playback error,</p>
-<p>See <a href="errors.html">the Player Error documentation</a> for more information.</p>
-<p><a name="static-ErrorCodes"></a>
-<a name="subchapter-ErrorCodes"></a></p>
-<h3>ErrorCodes</h3>
-<p><em>type</em>: <code>Object</code></p>
-<p>The different Error &#x201C;codes&#x201D; you can get on playback error,</p>
-<p>See <a href="errors.html">the Player Error documentation</a> for more information.</p>
-<p><a name="static-LogLevel"></a>
-<a name="subchapter-LogLevel"></a></p>
-<h3>LogLevel</h3>
-<p><em>type</em>: <code>string</code></p>
-<p><em>default</em>: <code>&quot;NONE&quot;</code></p>
-<p>The current level of verbosity for the RxPlayer logs. Those logs all use the
-console.</p>
-<p>From the less verbose to the most:</p>
-<ul>
-<li>
-<p><code>&quot;NONE&quot;</code>: no log</p>
-</li>
-<li>
-<p><code>&quot;ERROR&quot;</code>: unexpected errors (via <code>console.error</code>)</p>
-</li>
-<li>
-<p><code>&quot;WARNING&quot;</code>: The previous level + minor problems encountered (via
-<code>console.warn</code>)</p>
-</li>
-<li>
-<p><code>&quot;INFO&quot;</code>: The previous levels + noteworthy events (via <code>console.info</code>)</p>
-</li>
-<li>
-<p><code>&quot;DEBUG&quot;</code>: The previous levels + normal events of the player (via
-<code>console.log</code>)</p>
-</li>
-</ul>
-<p>If the value set to this property is different than those, it will be
-automatically set to <code>&quot;NONE&quot;</code>.</p>
-<h4>Example</h4>
-<pre><code class="language-js"><span class="hljs-keyword">import</span> RxPlayer <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;rx-player&quot;</span>;
-RxPlayer.LogLevel = <span class="hljs-string">&quot;WARNING&quot;</span>;
-</code></pre>
 <p><a name="meth"></a>
 <a name="chapter-Basic%20methods"></a></p>
 <h2>Basic methods</h2>
@@ -577,9 +531,9 @@ videoElement.className = <span class="hljs-string">&quot;my-video-element&quot;<
 <p>Free the ressources used by the player.</p>
 <p>You can call this method if you know you won&#x2019;t need the RxPlayer anymore.</p>
 <p><span class="emoji emoji_warning">&#x26A0;&#xFE0F;</span> The player won&#x2019;t work correctly after calling this method.</p>
-<p><a name="meth-group-speed-controls"></a>
-<a name="chapter-Speed%20controls"></a></p>
-<h2>Speed controls</h2>
+<p><a name="meth-group-speed-control"></a>
+<a name="chapter-Speed%20control"></a></p>
+<h2>Speed control</h2>
 <p>The following methods allows to update the current speed of playback (also
 called the &#x201C;playback rate&#x201D;).</p>
 <p><a name="meth-setPlaybackRate"></a>
@@ -607,9 +561,9 @@ playing at double the speed, etc.</p>
 <pre><code class="language-js"><span class="hljs-keyword">const</span> currentPlaybackRate = player.getPlaybackRate();
 <span class="hljs-built_in">console</span>.log(<span class="hljs-string">`Playing at a x<span class="hljs-subst">${currentPlaybackRate}</span>} speed`</span>);
 </code></pre>
-<p><a name="meth-group-volume-controls"></a>
-<a name="chapter-Volume%20controls"></a></p>
-<h2>Volume controls</h2>
+<p><a name="meth-group-volume-control"></a>
+<a name="chapter-Volume%20control"></a></p>
+<h2>Volume control</h2>
 <p>Those methods allows to have control over the current audio volume of playing
 contents.</p>
 <p><a name="meth-setVolume"></a>
@@ -1637,8 +1591,8 @@ mode (see <a href="loadVideo_options.html#prop-transport">loadVideo options</a>)
 <li>instanciating an RxPlayer with a <code>maxBufferAhead</code> property set.</li>
 </ul>
 <p><a name="meth-group-buffer-info"></a>
-<a name="subchapter-Buffer%20information"></a></p>
-<h3>Buffer information</h3>
+<a name="chapter-Buffer%20information"></a></p>
+<h2>Buffer information</h2>
 <p>The methods in this chapter allows to retrieve information about what is
 currently buffered.</p>
 <p><a name="meth-getVideoLoadedTime"></a>
@@ -1668,9 +1622,9 @@ currently buffered.</p>
 <li>the current time.</li>
 <li>the end of the current contiguous loaded range.</li>
 </ul>
-<p><a name="meth-group-buffer-info"></a>
-<a name="subchapter-Content%20information"></a></p>
-<h3>Content information</h3>
+<p><a name="meth-group-content-info"></a>
+<a name="chapter-Content%20information"></a></p>
+<h2>Content information</h2>
 <p>The methods documented in this chapter allows to obtain general information
 about the current loaded content.</p>
 <p><a name="meth-isLive"></a>
@@ -1742,9 +1696,9 @@ options</a>).</p>
 <h3>getCurrentKeySystem</h3>
 <p><em>return value</em>: <code>string|undefined</code></p>
 <p>Returns the type of keySystem used for DRM-protected contents.</p>
-<p><a name="meth-group-buffer-info"></a>
-<a name="subchapter-Deprecated"></a></p>
-<h3>Deprecated</h3>
+<p><a name="meth-group-deprecated"></a>
+<a name="chapter-Deprecated"></a></p>
+<h2>Deprecated</h2>
 <p>The following methods are deprecated. They are still supported but we advise
 users to not use those as they might become not supported in the future.</p>
 <p><a name="meth-getImageTrackData"></a>
@@ -1820,6 +1774,61 @@ release <code>v4.0.0</code> (see <a href="deprecated.html">Deprecated APIs</a>).
 <p>This is equivalent to:</p>
 <pre><code class="language-js"><span class="hljs-keyword">const</span> el = player.getVideoElement();
 <span class="hljs-keyword">const</span> textTrack = el.textTracks.length ? el.textTracks[<span class="hljs-number">0</span>] : <span class="hljs-literal">null</span>;
+</code></pre>
+<p><a name="static"></a>
+<a name="chapter-Static%20properties"></a></p>
+<h2>Static properties</h2>
+<p>This chapter documents the static properties that can be found on the RxPlayer
+class.</p>
+<p><a name="static-version"></a>
+<a name="subchapter-version"></a></p>
+<h3>version</h3>
+<p><em>type</em>: <code>Number</code></p>
+<p>The current version of the RxPlayer.</p>
+<p><a name="static-ErrorTypes"></a>
+<a name="subchapter-ErrorTypes"></a></p>
+<h3>ErrorTypes</h3>
+<p><em>type</em>: <code>Object</code></p>
+<p>The different &#x201C;types&#x201D; of Error you can get on playback error,</p>
+<p>See <a href="errors.html">the Player Error documentation</a> for more information.</p>
+<p><a name="static-ErrorCodes"></a>
+<a name="subchapter-ErrorCodes"></a></p>
+<h3>ErrorCodes</h3>
+<p><em>type</em>: <code>Object</code></p>
+<p>The different Error &#x201C;codes&#x201D; you can get on playback error,</p>
+<p>See <a href="errors.html">the Player Error documentation</a> for more information.</p>
+<p><a name="static-LogLevel"></a>
+<a name="subchapter-LogLevel"></a></p>
+<h3>LogLevel</h3>
+<p><em>type</em>: <code>string</code></p>
+<p><em>default</em>: <code>&quot;NONE&quot;</code></p>
+<p>The current level of verbosity for the RxPlayer logs. Those logs all use the
+console.</p>
+<p>From the less verbose to the most:</p>
+<ul>
+<li>
+<p><code>&quot;NONE&quot;</code>: no log</p>
+</li>
+<li>
+<p><code>&quot;ERROR&quot;</code>: unexpected errors (via <code>console.error</code>)</p>
+</li>
+<li>
+<p><code>&quot;WARNING&quot;</code>: The previous level + minor problems encountered (via
+<code>console.warn</code>)</p>
+</li>
+<li>
+<p><code>&quot;INFO&quot;</code>: The previous levels + noteworthy events (via <code>console.info</code>)</p>
+</li>
+<li>
+<p><code>&quot;DEBUG&quot;</code>: The previous levels + normal events of the player (via
+<code>console.log</code>)</p>
+</li>
+</ul>
+<p>If the value set to this property is different than those, it will be
+automatically set to <code>&quot;NONE&quot;</code>.</p>
+<h4>Example</h4>
+<pre><code class="language-js"><span class="hljs-keyword">import</span> RxPlayer <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;rx-player&quot;</span>;
+RxPlayer.LogLevel = <span class="hljs-string">&quot;WARNING&quot;</span>;
 </code></pre>
 <p><a name="tools"></a>
 <a name="chapter-Tools"></a></p>
