@@ -138,6 +138,8 @@ export default function seekAndLoadOnMediaEvents(
     take(1),
     tap(() => {
       log.info("Init: Set initial time", startTime);
+      log.info("SamsungDebug: readyState after loadedmetadata event.",
+               mediaElement.readyState);
       mediaElement.currentTime = typeof startTime === "function" ? startTime() :
                                                                    startTime;
     }),

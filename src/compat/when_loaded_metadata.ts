@@ -19,6 +19,7 @@ import {
   of as observableOf,
 } from "rxjs";
 import { take } from "rxjs/operators";
+import log from "../log";
 import { READY_STATES } from "./browser_compatibility_types";
 import { onLoadedMetadata$ } from "./event_listeners";
 
@@ -31,6 +32,8 @@ import { onLoadedMetadata$ } from "./event_listeners";
 export default function whenLoadedMetadata$(
   mediaElement : HTMLMediaElement
 ) : Observable<unknown> {
+  log.info("SamsungDebug: before listening to loadedmetadata event",
+           mediaElement.readyState);
   if (mediaElement.readyState >= READY_STATES.HAVE_METADATA) {
     return observableOf(null);
   } else {

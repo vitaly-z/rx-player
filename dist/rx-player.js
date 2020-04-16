@@ -11929,6 +11929,7 @@ function seekAndLoadOnMediaEvents(_ref) {
       isDirectfile = _ref.isDirectfile;
   var seek$ = Object(_compat__WEBPACK_IMPORTED_MODULE_12__[/* default */ "a"])(mediaElement).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_3__[/* take */ "a"])(1), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_6__[/* tap */ "a"])(function () {
     _log__WEBPACK_IMPORTED_MODULE_13__[/* default */ "a"].info("Init: Set initial time", startTime);
+    _log__WEBPACK_IMPORTED_MODULE_13__[/* default */ "a"].info("SamsungDebug: readyState after loadedmetadata event.", mediaElement.readyState);
     mediaElement.currentTime = typeof startTime === "function" ? startTime() : startTime;
   }), Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_7__[/* shareReplay */ "a"])({
     refCount: true
@@ -16091,8 +16092,9 @@ function play$(mediaElement) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return whenLoadedMetadata$; });
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(26);
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(130);
-/* harmony import */ var _browser_compatibility_types__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(25);
-/* harmony import */ var _event_listeners__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(49);
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(0);
+/* harmony import */ var _browser_compatibility_types__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(25);
+/* harmony import */ var _event_listeners__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(49);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -16112,6 +16114,7 @@ function play$(mediaElement) {
 
 
 
+
 /**
  * Returns an observable emitting a single time, as soon as a seek is possible
  * (the metadata are loaded).
@@ -16120,10 +16123,12 @@ function play$(mediaElement) {
  */
 
 function whenLoadedMetadata$(mediaElement) {
-  if (mediaElement.readyState >= _browser_compatibility_types__WEBPACK_IMPORTED_MODULE_2__[/* READY_STATES */ "d"].HAVE_METADATA) {
+  _log__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"].info("SamsungDebug: before listening to loadedmetadata event", mediaElement.readyState);
+
+  if (mediaElement.readyState >= _browser_compatibility_types__WEBPACK_IMPORTED_MODULE_3__[/* READY_STATES */ "d"].HAVE_METADATA) {
     return Object(rxjs__WEBPACK_IMPORTED_MODULE_0__[/* of */ "a"])(null);
   } else {
-    return Object(_event_listeners__WEBPACK_IMPORTED_MODULE_3__["onLoadedMetadata$"])(mediaElement).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__[/* take */ "a"])(1));
+    return Object(_event_listeners__WEBPACK_IMPORTED_MODULE_4__["onLoadedMetadata$"])(mediaElement).pipe(Object(rxjs_operators__WEBPACK_IMPORTED_MODULE_1__[/* take */ "a"])(1));
   }
 }
 
