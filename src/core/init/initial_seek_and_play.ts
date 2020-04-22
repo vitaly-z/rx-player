@@ -35,6 +35,7 @@ import {
   whenLoadedMetadata$,
 } from "../../compat";
 import log from "../../log";
+import initialSeekWithBackOff$ from "./initial_seek";
 import { IInitClockTick } from "./types";
 
 export type ILoadEvents =
@@ -134,14 +135,14 @@ export default function seekAndLoadOnMediaEvents(
                        mustAutoPlay : boolean;
                        startTime : number|(() => number); }
 ) : { seek$ : Observable<unknown>; load$ : Observable<ILoadEvents> } {
+
   const seek$ = whenLoadedMetadata$(mediaElement).pipe(
     take(1),
-    tap(() => {
-      log.info("Init: Set initial time", startTime);
+    mergeMap(() => {
       log.info("SamsungDebug: readyState after loadedmetadata event.",
                mediaElement.readyState);
-      mediaElement.currentTime = typeof startTime === "function" ? startTime() :
-                                                                   startTime;
+      log.info("Init: Set initial time", startTime);
+      return initialSeekWithBackOff$(startTime, mediaElement);
     }),
     shareReplay({ refCount: true })
   );
