@@ -32,7 +32,6 @@ import {
 import { IContentProtection } from "../../../../../core/eme";
 import { SegmentPipelineCreator } from "../../../../../core/pipelines";
 import { IInitSettings } from "../../types";
-import { IndexedDBError, SegmentConstuctionError } from "../../utils";
 import EMETransaction from "../drm/keySystems";
 import DownloadTracksPicker from "../tracksPicker/DownloadTracksPicker";
 import { ContentType } from "../tracksPicker/types";
@@ -124,36 +123,21 @@ export function initDownloader$(initSettings: IInitSettings, db: IDBPDatabase) {
           }
           const { ctx, chunkData } = initSegmentCustomSegment;
           const { id: representationID } = ctx.representation;
-          const { time } = ctx.segment;
-          db.put("segments", {
-            contentID,
-            segmentKey: `init--${representationID}--${contentID}`,
-            data: chunkData.data,
-            size: chunkData.data.byteLength,
-            contentProtection: chunkData.contentProtection,
-          }).then(() => {
-            initSettings.onProgress?.({ progress: 0, size: 0 });
-          }).catch((err: Error) => {
-            initSettings.onError?.(new IndexedDBError(`
-              ${contentID}: Impossible to store the current INIT
-              segment (${contentType}) at ${time}: ${err.message}
-            `));
-          });
+          return from(
+            db.put("segments", {
+              contentID,
+              segmentKey: `init--${representationID}--${contentID}`,
+              data: chunkData.data,
+              size: chunkData.data.byteLength,
+              contentProtection: chunkData.contentProtection,
+            })
+          ).pipe(
+            retry(3),
+            map(() => initSegmentCustomSegment)
+          );
         }),
         map(({ ctx, contentType, chunkData }) => {
           const durationForCurrentPeriod = ctx.period.duration;
-          if (durationForCurrentPeriod === undefined) {
-            initSettings.onError?.(new SegmentConstuctionError(`
-              Impossible to get future video segments for ${contentType} buffer,
-              the duration should be an valid integer but: ${durationForCurrentPeriod}
-            `));
-            return {
-              nextSegments: [],
-              ctx,
-              segmentPipelineCreator,
-              contentType,
-            };
-          }
           const nextSegments = ctx.representation.index.getSegments(
             0,
             durationForCurrentPeriod !== undefined
