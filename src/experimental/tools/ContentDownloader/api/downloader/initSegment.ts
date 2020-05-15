@@ -30,7 +30,7 @@ import {
 } from "rxjs/operators";
 
 import { IContentProtection } from "../../../../../core/eme";
-import { SegmentPipelineCreator } from "../../../../../core/pipelines";
+import SegmentPipelineCreator from "../../../../../core/fetchers/segment/segment_fetcher_creator";
 import { IInitSettings } from "../../types";
 import EMETransaction from "../drm/keySystems";
 import DownloadTracksPicker from "../tracksPicker/DownloadTracksPicker";
