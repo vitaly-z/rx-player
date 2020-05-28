@@ -47,27 +47,32 @@ export default function parseLocalManifest(
                     " is not compatible with the current version of the RxPlayer");
   }
   const periodIdGenerator = idGenerator();
-  const { minimumPosition,
-          maximumPosition,
-          isFinished } = localManifest;
-  const parsedPeriods = localManifest.periods
-    .map(period => parsePeriod(period, { periodIdGenerator,
-                                         isFinished }));
-
-  return { availabilityStartTime: 0,
-           expired: localManifest.expired,
-           transportType: "local",
-           isDynamic: !isFinished,
-           isLastPeriodKnown: isFinished,
-           isLive: false,
-           uris: [],
-           timeBounds: { minimumSafePosition: minimumPosition ?? 0,
-                         timeshiftDepth: null,
-                         maximumTimeData: { isLinear: false,
-                                            maximumSafePosition: maximumPosition,
-                                            livePosition: undefined,
-                                            time: performance.now() } },
-           periods: parsedPeriods };
+  const { isFinished } = localManifest;
+  const manifest: IParsedManifest = {
+    availabilityStartTime: 0,
+    expired: localManifest.expired,
+    transportType: "local",
+    isDynamic: !localManifest.isFinished,
+    isLive: false,
+    uris: [],
+    periods: localManifest.periods
+      .map(period => parsePeriod(period, periodIdGenerator, isFinished)),
+  };
+  const maximumPosition = getMaximumPosition(manifest);
+  if (maximumPosition !== undefined) {
+    manifest.maximumTime = {
+        isContinuous : false,
+        value : localManifest.duration,
+        time : performance.now(),
+    };
+  }
+  const minimumPosition = getMinimumPosition(manifest);
+  manifest.minimumTime = {
+    isContinuous : false,
+    value : minimumPosition !== undefined ? minimumPosition : 0,
+    time : performance.now(),
+  };
+  return manifest;
 }
 
 /**
