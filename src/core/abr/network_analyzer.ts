@@ -276,14 +276,10 @@ export default class NetworkAnalyzer {
 
     // if newBitrateCeil is not yet defined, do the normal estimation
     if (newBitrateCeil == null) {
-      bandwidthEstimate = bandwidthEstimator.getEstimate();
+      bandwidthEstimate = bandwidthEstimator.getEstimate() ?? lastEstimatedBitrate;
 
-      if (bandwidthEstimate != null) {
+      if (bandwidthEstimate !== undefined) {
         newBitrateCeil = bandwidthEstimate *
-          (this._inStarvationMode ? localConf.starvationBitrateFactor :
-                                    localConf.regularBitrateFactor);
-      } else if (lastEstimatedBitrate != null) {
-        newBitrateCeil = lastEstimatedBitrate *
           (this._inStarvationMode ? localConf.starvationBitrateFactor :
                                     localConf.regularBitrateFactor);
       } else {

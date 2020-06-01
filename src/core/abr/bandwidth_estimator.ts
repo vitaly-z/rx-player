@@ -33,8 +33,10 @@ export default class BandwidthEstimator {
   private _fastEWMA : EWMA;
   private _slowEWMA : EWMA;
   private _bytesSampled : number;
+  private _lowLatencyMode : boolean;
+  private _lowLatencyBandwidthBuffer: number[];
 
-  constructor() {
+  constructor(lowLatencyMode: boolean) {
     /**
      * A fast-moving average.
      * @private
@@ -53,6 +55,17 @@ export default class BandwidthEstimator {
      */
     this._bytesSampled = 0;
 
+    /**
+     * If in low latency mode, maintain an estimation that takes into account
+     * that the bandwidth may be limited by server.
+     */
+    this._lowLatencyMode = lowLatencyMode;
+
+    /**
+     * Array that contains the last three bandwidth estimations made with low latency
+     * chunks.
+     */
+    this._lowLatencyBandwidthBuffer = [];
   }
 
   /**
@@ -61,13 +74,21 @@ export default class BandwidthEstimator {
    *   particular request.
    * @param {number} numBytes - The total number of bytes transferred in that
    *   request.
+   * @param {Boolean} isChunk - Tells if the sample is a chunk from media segment
    */
-  public addSample(durationInMs : number, numberOfBytes : number) : void {
-    if (numberOfBytes < ABR_MINIMUM_CHUNK_SIZE) {
+  public addSample(durationInMs : number,
+                   numberOfBytes : number,
+                   isChunk: boolean) : void {
+    const bandwidth = numberOfBytes * 8000 / durationInMs;
+    if (isChunk &&
+        this._lowLatencyMode &&
+        !this._shouldConsiderLowLatencySample(bandwidth)) {
       return;
     }
 
-    const bandwidth = numberOfBytes * 8000 / durationInMs;
+    if (numberOfBytes < ABR_MINIMUM_CHUNK_SIZE) {
+      return;
+    }
     const weight = durationInMs / 1000;
     this._bytesSampled += numberOfBytes;
 
@@ -77,6 +98,7 @@ export default class BandwidthEstimator {
 
   /**
    * Get estimate of the bandwidth, in bits per seconds.
+   * @param {Boolean} bandwidthMayBeServerLimited
    * @returns {Number|undefined}
    */
   public getEstimate() : number|undefined {
@@ -96,6 +118,37 @@ export default class BandwidthEstimator {
   public reset() : void {
     this._fastEWMA = new EWMA(ABR_FAST_EMA);
     this._slowEWMA = new EWMA(ABR_SLOW_EMA);
+    this._lowLatencyBandwidthBuffer = [];
     this._bytesSampled = 0;
+  }
+
+  /**
+   * Add a sample to the low latency bandwidth buffer.
+   * @param {Number} bandwidth
+   */
+  private _shouldConsiderLowLatencySample(bandwidth: number): boolean {
+    const lastEstimatedBandwidth = this._getMeanOfLastLowLatencyBandwidth();
+    if (lastEstimatedBandwidth !== undefined &&
+        bandwidth > (lastEstimatedBandwidth * 0.8) &&
+        bandwidth <= lastEstimatedBandwidth) {
+      return false;
+    }
+    this._lowLatencyBandwidthBuffer.push(bandwidth);
+    if (this._lowLatencyBandwidthBuffer.length > 3) {
+      this._lowLatencyBandwidthBuffer.shift();
+    }
+    return true;
+  }
+
+  /**
+   * Get bandwidth estimate from low latency chunks
+   * @returns {Number|undefined}
+   */
+  private _getMeanOfLastLowLatencyBandwidth(): number|undefined {
+    if (this._lowLatencyBandwidthBuffer.length < 3) {
+      return undefined;
+    }
+    return this._lowLatencyBandwidthBuffer.reduce((acc: number, val) => acc + val, 0) /
+           this._lowLatencyBandwidthBuffer.length;
   }
 }
