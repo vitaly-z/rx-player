@@ -21723,7 +21723,12 @@ function createMediaSource(mediaElement) {
 
 function openMediaSource(mediaElement) {
   return createMediaSource(mediaElement).pipe(Object(mergeMap["a" /* mergeMap */])(function (mediaSource) {
-    return onSourceOpen$(mediaSource).pipe(Object(take["a" /* take */])(1), Object(mapTo["a" /* mapTo */])(mediaSource));
+    return onSourceOpen$(mediaSource).pipe(Object(tap["a" /* tap */])(function () {
+      console.warn("OPENNED, ", mediaSource.readyState);
+      setTimeout(function () {
+        console.warn("OPENNED2, ", mediaSource.readyState);
+      }, 500);
+    }), Object(take["a" /* take */])(1), Object(mapTo["a" /* mapTo */])(mediaSource));
   }));
 }
 // EXTERNAL MODULE: ./src/core/init/events_generators.ts
