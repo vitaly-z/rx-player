@@ -22,7 +22,7 @@ import parseBaseURL, {
   IBaseURL,
 } from "./BaseURL";
 import parseEventStream, {
-  IParsedStreamEvent,
+  IParsedDASHStreamEvent,
 } from "./EventStream";
 import parseSegmentTemplate, {
   IParsedSegmentTemplate,
@@ -44,7 +44,7 @@ export interface IPeriodChildren {
   adaptations : IAdaptationSetIntermediateRepresentation[];
   baseURLs : IBaseURL[];
   segmentTemplate? : IParsedSegmentTemplate;
-  streamEvents? : IParsedStreamEvent[];
+  streamEvents? : IParsedDASHStreamEvent[];
 }
 
 // intermediate representation for a Period's attributes

@@ -46,15 +46,14 @@ export interface IISOBMFFPSSHInfo {
   /** Additional data contained in the PSSH Box. */
   privateData : Uint8Array;
 }
-interface IEMSG {
-  schemeId: string;
-  value: string;
-  timescale: number;
-  presentationTimeDelta: number;
-  eventDuration: number;
-  id: number;
-  messageData: Uint8Array;
-}
+
+export interface IEMSG { schemeId: string;
+                         value: string;
+                         timescale: number;
+                         presentationTimeDelta: number;
+                         eventDuration: number;
+                         id: number;
+                         messageData: Uint8Array; }
 
 /** Segment information from a parsed sidx. */
 export interface ISidxSegment {
@@ -421,47 +420,53 @@ function updateBoxLength(buf : Uint8Array) : Uint8Array {
 }
 
 /**
- * Parse EMSG box from ISOBMFF data.
+ * Parse EMSG boxes from ISOBMFF data.
  * @param {Uint8Array} buf
- * @returns {Object|null}
+ * @returns {Array.<Object>}
  */
-function parseEmsg(buffer: Uint8Array) : IEMSG|undefined {
-  const emsg = getEMSG(buffer);
-  if (emsg === null) {
-    return undefined;
+function parseEmsgBoxes(buffer: Uint8Array) : IEMSG[] {
+  const emsgs: IEMSG[] = [];
+  let offset = 0;
+  while (offset < buffer.length) {
+    const emsg = getEMSG(buffer, offset);
+    if (emsg === null) {
+      return emsgs;
+    }
+    const length = emsg.length;
+    offset += length;
+
+    let position = 4; // skip version + flags
+
+    const { end: schemeIdEnd, string: schemeId } = readTerminatedString(emsg, position);
+    position = schemeIdEnd; // skip schemeId
+
+    const { end: valueEnd, string: value } = readTerminatedString(emsg, position);
+    position = valueEnd; // skip value
+
+    const timescale = be4toi(emsg, position);
+    position += 4; // skip timescale
+
+    const presentationTimeDelta = be4toi(emsg, position);
+    position += 4; // skip presentationTimeDelta
+
+    const eventDuration = be4toi(emsg, position);
+    position += 4; // skip eventDuration
+
+    const id = be4toi(emsg, position);
+    position += 4; // skip id
+
+    const messageData = emsg.subarray(position, length);
+
+    const emsgData = { schemeId,
+                       value,
+                       timescale,
+                       presentationTimeDelta,
+                       eventDuration,
+                       id,
+                       messageData };
+    emsgs.push(emsgData);
   }
-
-  const length = emsg.length;
-
-  let position = 4; // skip version + flags
-
-  const { end: schemeIdEnd, string: schemeId } = readTerminatedString(emsg, position);
-  position = schemeIdEnd; // skip schemeId
-
-  const { end: valueEnd, string: value } = readTerminatedString(emsg, position);
-  position = valueEnd; // skip value
-
-  const timescale = be4toi(emsg, position);
-  position += 4; // skip timescale
-
-  const presentationTimeDelta = be4toi(emsg, position);
-  position += 4; // skip presentationTimeDelta
-
-  const eventDuration = be4toi(emsg, position);
-  position += 4; // skip eventDuration
-
-  const id = be4toi(emsg, position);
-  position += 4; // skip id
-
-  const messageData = emsg.subarray(position, length);
-
-  return { schemeId,
-           value,
-           timescale,
-           presentationTimeDelta,
-           eventDuration,
-           id,
-           messageData };
+  return emsgs;
 }
 
 export {
@@ -471,6 +476,6 @@ export {
   getDurationFromTrun,
   getSegmentsFromSidx,
   patchPssh,
-  parseEmsg,
+  parseEmsgBoxes,
   updateBoxLength,
 };
