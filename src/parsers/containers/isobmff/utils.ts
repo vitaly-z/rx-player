@@ -23,6 +23,7 @@ import {
   concat,
   itobe4,
   itobe8,
+  readTerminatedString,
 } from "../../../utils/byte_parsing";
 import { hexToBytes } from "../../../utils/string_parsing";
 import { MAX_32_BIT_INT } from "./constants";
@@ -33,6 +34,7 @@ import {
   getBoxOffsets,
 } from "./get_box";
 import {
+  getEMSG,
   getMDIA,
   getTRAF,
 } from "./read";
@@ -43,6 +45,15 @@ export interface IISOBMFFPSSHInfo {
   systemId : string;
   /** Additional data contained in the PSSH Box. */
   privateData : Uint8Array;
+}
+interface IEMSG {
+  schemeId: string;
+  value: string;
+  timescale: number;
+  presentationTimeDelta: number;
+  eventDuration: number;
+  id: number;
+  messageData: Uint8Array;
 }
 
 /** Segment information from a parsed sidx. */
@@ -409,6 +420,50 @@ function updateBoxLength(buf : Uint8Array) : Uint8Array {
   }
 }
 
+/**
+ * Parse EMSG box from ISOBMFF data.
+ * @param {Uint8Array} buf
+ * @returns {Object|null}
+ */
+function parseEmsg(buffer: Uint8Array) : IEMSG|undefined {
+  const emsg = getEMSG(buffer);
+  if (emsg === null) {
+    return undefined;
+  }
+
+  const length = emsg.length;
+
+  let position = 4; // skip version + flags
+
+  const { end: schemeIdEnd, string: schemeId } = readTerminatedString(emsg, position);
+  position = schemeIdEnd; // skip schemeId
+
+  const { end: valueEnd, string: value } = readTerminatedString(emsg, position);
+  position = valueEnd; // skip value
+
+  const timescale = be4toi(emsg, position);
+  position += 4; // skip timescale
+
+  const presentationTimeDelta = be4toi(emsg, position);
+  position += 4; // skip presentationTimeDelta
+
+  const eventDuration = be4toi(emsg, position);
+  position += 4; // skip eventDuration
+
+  const id = be4toi(emsg, position);
+  position += 4; // skip id
+
+  const messageData = emsg.subarray(position, length);
+
+  return { schemeId,
+           value,
+           timescale,
+           presentationTimeDelta,
+           eventDuration,
+           id,
+           messageData };
+}
+
 export {
   getMDHDTimescale,
   getPlayReadyKIDFromPrivateData,
@@ -416,5 +471,6 @@ export {
   getDurationFromTrun,
   getSegmentsFromSidx,
   patchPssh,
+  parseEmsg,
   updateBoxLength,
 };

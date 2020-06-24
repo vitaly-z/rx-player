@@ -245,12 +245,38 @@ function toUint8Array(
                                         new Uint8Array(input.buffer);
 }
 
+/**
+ * Decode string from bytes (UTF-8).
+ * Keeps reading until it reaches a byte that equals to zero.
+ * @param {Uint8Array} buffer
+ * @param {number} offset
+ * @returns {Object}
+ */
+function readTerminatedString(buffer: Uint8Array, offset: number): {
+  end: number;
+  string: string;
+} {
+  let position = offset;
+  while (position < buffer.length) {
+    const value = buffer[position];
+    if (value === 0) {
+      break;
+    }
+    position += 1;
+  }
+
+  const bytes = new Uint8Array(buffer.buffer, offset, position - offset);
+  return { end: position + 1,
+           string: new TextDecoder().decode(bytes) };
+}
+
 export {
   concat,
   be2toi, be3toi, be4toi, be8toi,
   le2toi, le4toi, le8toi,
   itobe2, itobe4, itobe8,
   itole2, itole4,
+  readTerminatedString,
   isABEqualBytes,
   toUint8Array,
 };
