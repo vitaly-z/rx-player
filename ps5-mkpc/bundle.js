@@ -60009,6 +60009,7 @@ var player_PLAYER = function PLAYER(_ref, _ref2) {
       state = _ref.state;
   var videoElement = _ref2.videoElement,
       textTrackElement = _ref2.textTrackElement;
+  window.RxPlayer.LogLevel = "DEBUG";
   var player = new window.RxPlayer({
     limitVideoWidth: false,
     stopAtEnd: false,
@@ -62548,6 +62549,7 @@ var ContentList_ContentList = /*#__PURE__*/function (_React$Component) {
       }, 150);
       this.canClick = false;
     }
+    window.clickouille = onClickLoad;
 
     var saveCurrentContent = function saveCurrentContent() {
       var contentToSave = {
