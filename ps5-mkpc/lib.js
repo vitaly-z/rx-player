@@ -29112,6 +29112,7 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
         sessionType = _sessionInfosEvt$valu.sessionType,
         keySystemOptions = _sessionInfosEvt$valu.keySystemOptions,
         persistentSessionsStore = _sessionInfosEvt$valu.persistentSessionsStore;
+    console.warn("IN IT !!! 1");
     var generateRequest$ = sessionInfosEvt.type !== "created-session" ? empty["a" /* EMPTY */] : Object(generate_key_request["a" /* default */])(mediaKeySession, initData, initDataType).pipe(Object(tap["a" /* tap */])(function () {
       if (sessionType === "persistent-license" && persistentSessionsStore !== null) {
         cleanOldStoredPersistentInfo(persistentSessionsStore, EME_MAX_STORED_PERSISTENT_SESSION_INFORMATION - 1);
@@ -55874,6 +55875,7 @@ function patchInitData(initData) {
  */
 
 function generateKeyRequest(session, initData, initDataType) {
+  console.warn("IN IT !!!! 2");
   return Object(rxjs__WEBPACK_IMPORTED_MODULE_0__[/* defer */ "a"])(function () {
     _log__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].debug("Compat: Calling generateRequest on the MediaKeySession");
     var patchedInit;
