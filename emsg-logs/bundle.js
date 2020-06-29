@@ -60009,7 +60009,6 @@ var player_PLAYER = function PLAYER(_ref, _ref2) {
       state = _ref.state;
   var videoElement = _ref2.videoElement,
       textTrackElement = _ref2.textTrackElement;
-  window.RxPlayer.LogLevel = "DEBUG";
   var player = new window.RxPlayer({
     limitVideoWidth: false,
     stopAtEnd: false,
@@ -61459,8 +61458,6 @@ function parseDRMConfigurations(drmConfigurations) {
     var type = drm.toLowerCase();
     var keySystem = {
       type: type,
-      persistentStateRequired: true,
-      distinctiveIdentifierRequired: true,
       getLicense: generateGetLicense(licenseServerUrl, type, !!fallbackLicenseRequest),
       fallbackOn: {
         keyInternalError: !!fallbackKeyError,
@@ -62310,7 +62307,6 @@ var ContentList_ContentList = /*#__PURE__*/function (_React$Component) {
         }
 
         this.setState(newState);
-        this.canClick = true;
         return;
       }
     } // estimate first index which should be selected
@@ -62542,14 +62538,6 @@ var ContentList_ContentList = /*#__PURE__*/function (_React$Component) {
         _this3.loadContent(contentsToSelect[contentChoiceIndex]);
       }
     };
-
-    if (this.canClick) {
-      setTimeout(function () {
-        /* onClickLoad(); */
-      }, 150);
-      this.canClick = false;
-    }
-    window.clickouille = onClickLoad;
 
     var saveCurrentContent = function saveCurrentContent() {
       var contentToSave = {

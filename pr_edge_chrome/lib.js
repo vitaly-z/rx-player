@@ -12962,7 +12962,6 @@ function isFullscreen() {
 /* harmony import */ var _compat__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(152);
 /* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(0);
 /* harmony import */ var _utils_are_arrays_of_numbers_equal__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(45);
-/* harmony import */ var _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(1);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -12978,7 +12977,6 @@ function isFullscreen() {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -13043,9 +13041,6 @@ var Representation = /*#__PURE__*/function () {
   ;
 
   _proto.getProtectionsInitializationData = function getProtectionsInitializationData() {
-    if (window.NO_PROC) {
-      return [];
-    }
     var contentProtections = this.contentProtections;
 
     if (contentProtections === undefined) {
@@ -13059,10 +13054,11 @@ var Representation = /*#__PURE__*/function () {
         return acc;
       }
 
-      var initData = _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_3__[/* concat */ "h"].apply(void 0, initDataArr.map(function (_ref) {
-        var data = _ref.data;
-        return data;
-      }));
+      var initData = initDataArr.filter(function (_ref) {
+        var systemId = _ref.systemId;
+        return systemId === "9a04f07998404286ab92e65be0885f95"; // playready
+        // return systemId === "edef8ba979d64acea3c827dcd51d21ed"; // widevine
+      })[0].data;
       acc.push({
         type: initDataType,
         data: initData
@@ -13081,9 +13077,6 @@ var Representation = /*#__PURE__*/function () {
   ;
 
   _proto._addProtectionData = function _addProtectionData(initDataType, systemId, data) {
-    if (window.SHOULD_IGN) {
-      return true;
-    }
     var newElement = {
       systemId: systemId,
       data: data
@@ -13113,7 +13106,6 @@ var Representation = /*#__PURE__*/function () {
         }
 
         _log__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].warn("Manifest: Two PSSH for the same system ID");
-        return;
       }
     }
 
@@ -28993,9 +28985,6 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
   var mediaEncryptedEvents$ = onEncrypted$(mediaElement).pipe(Object(tap["a" /* tap */])(function (evt) {
     log["a" /* default */].debug("EME: Encrypted event received from media element.", evt);
   }), Object(filter_map["a" /* default */])(function (evt) {
-    if (window.SHOULD_NOT_D) {
-      return null;
-    }
     var _getInitData = Object(get_init_data["a" /* default */])(evt),
         initData = _getInitData.initData,
         initDataType = _getInitData.initDataType;
@@ -29121,7 +29110,6 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
         sessionType = _sessionInfosEvt$valu.sessionType,
         keySystemOptions = _sessionInfosEvt$valu.keySystemOptions,
         persistentSessionsStore = _sessionInfosEvt$valu.persistentSessionsStore;
-    console.warn("IN IT !!! 1");
     var generateRequest$ = sessionInfosEvt.type !== "created-session" ? empty["a" /* EMPTY */] : Object(generate_key_request["a" /* default */])(mediaKeySession, initData, initDataType).pipe(Object(tap["a" /* tap */])(function () {
       if (sessionType === "persistent-license" && persistentSessionsStore !== null) {
         cleanOldStoredPersistentInfo(persistentSessionsStore, EME_MAX_STORED_PERSISTENT_SESSION_INFORMATION - 1);
@@ -41092,7 +41080,7 @@ function segment_parser_parser(_ref) {
   var timescale = isWEBM ? getTimeCodeScale(chunkData, 0) : Object(utils["b" /* getMDHDTimescale */])(chunkData);
   var parsedTimescale = timescale !== null && timescale > 0 ? timescale : undefined;
 
-  if (!isWEBM && window.SHOULD_OUT) {
+  if (!isWEBM) {
     // TODO extract webm protection information
     var psshInfo = Object(take_pssh_out["a" /* default */])(chunkData);
 
@@ -44855,7 +44843,7 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
 
       var responseBuffer = data instanceof Uint8Array ? data : new Uint8Array(data);
 
-      if (segment.isInit && window.SHOULD_OUT) {
+      if (segment.isInit) {
         var psshInfo = Object(take_pssh_out["a" /* default */])(responseBuffer);
 
         if (psshInfo.length > 0) {
@@ -55884,7 +55872,6 @@ function patchInitData(initData) {
  */
 
 function generateKeyRequest(session, initData, initDataType) {
-  console.warn("IN IT !!!! 2");
   return Object(rxjs__WEBPACK_IMPORTED_MODULE_0__[/* defer */ "a"])(function () {
     _log__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].debug("Compat: Calling generateRequest on the MediaKeySession");
     var patchedInit;
