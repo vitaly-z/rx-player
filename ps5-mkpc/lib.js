@@ -13107,6 +13107,7 @@ var Representation = /*#__PURE__*/function () {
         }
 
         _log__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].warn("Manifest: Two PSSH for the same system ID");
+        return;
       }
     }
 
