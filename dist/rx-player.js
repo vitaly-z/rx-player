@@ -3074,7 +3074,7 @@ function removeEmptyRanges(ranges) {
     var range = ranges[index];
 
     if (range.start === range.end) {
-      ranges.splice(index++, 1);
+      ranges.splice(index--, 1);
     }
   }
 
@@ -8551,6 +8551,11 @@ function guessBufferedEndFromRangeEnd(lastSegmentInRange, rangeEnd) {
 
 var APPEND_WINDOW_SECURITIES = config["a" /* default */].APPEND_WINDOW_SECURITIES,
     SOURCE_BUFFER_FLUSHING_INTERVAL = config["a" /* default */].SOURCE_BUFFER_FLUSHING_INTERVAL;
+/**
+ * Enum used internally by the QueuedSourceBuffer as a discriminant in its
+ * queue of "actions".
+ */
+
 var SourceBufferAction;
 
 (function (SourceBufferAction) {
@@ -8729,7 +8734,7 @@ var queued_source_buffer_QueuedSourceBuffer = /*#__PURE__*/function () {
 
     this._destroy$.complete();
 
-    if (this._pendingTask != null) {
+    if (this._pendingTask !== null) {
       this._pendingTask.subject.complete();
 
       this._pendingTask = null;
@@ -8738,7 +8743,7 @@ var queued_source_buffer_QueuedSourceBuffer = /*#__PURE__*/function () {
     while (this._queue.length > 0) {
       var nextElement = this._queue.shift();
 
-      if (nextElement != null) {
+      if (nextElement !== undefined) {
         nextElement.subject.complete();
       }
     }
@@ -8766,7 +8771,7 @@ var queued_source_buffer_QueuedSourceBuffer = /*#__PURE__*/function () {
     var error = err instanceof Error ? err : new Error("An unknown error occured when appending buffer");
     this._lastInitSegment = null; // initialize init segment as a security
 
-    if (this._pendingTask != null) {
+    if (this._pendingTask !== null) {
       this._pendingTask.subject.error(error);
     }
   }
@@ -8786,7 +8791,7 @@ var queued_source_buffer_QueuedSourceBuffer = /*#__PURE__*/function () {
     var _this2 = this;
 
     return new Observable["a" /* Observable */](function (obs) {
-      var shouldRestartQueue = _this2._queue.length === 0 && _this2._pendingTask == null;
+      var shouldRestartQueue = _this2._queue.length === 0 && _this2._pendingTask === null;
       var subject = new Subject["a" /* Subject */]();
       var queueItem = Object(object_assign["a" /* default */])({
         subject: subject
@@ -8823,7 +8828,7 @@ var queued_source_buffer_QueuedSourceBuffer = /*#__PURE__*/function () {
     } // handle end of previous task if needed
 
 
-    if (this._pendingTask != null) {
+    if (this._pendingTask !== null) {
       if (this._pendingTask.type !== SourceBufferAction.Push || this._pendingTask.steps.length === 0) {
         switch (this._pendingTask.type) {
           case SourceBufferAction.Push:
@@ -8860,7 +8865,7 @@ var queued_source_buffer_QueuedSourceBuffer = /*#__PURE__*/function () {
     } else {
       var newQueueItem = this._queue.shift();
 
-      if (newQueueItem == null) {
+      if (newQueueItem === undefined) {
         // TODO TypeScrypt do not get the previous length check. Find solution /
         // open issue
         throw new Error("An item from the QueuedSourceBuffer queue was not defined");
@@ -8868,7 +8873,7 @@ var queued_source_buffer_QueuedSourceBuffer = /*#__PURE__*/function () {
 
       this._pendingTask = convertQueueItemToTask(newQueueItem);
 
-      if (this._pendingTask == null) {
+      if (this._pendingTask === null) {
         // nothing to do, complete and go to next item
         newQueueItem.subject.next();
         newQueueItem.subject.complete();
@@ -8895,7 +8900,7 @@ var queued_source_buffer_QueuedSourceBuffer = /*#__PURE__*/function () {
         case SourceBufferAction.Push:
           var nextStep = task.steps.shift();
 
-          if (nextStep == null || nextStep.isInit && this._lastInitSegment === nextStep.segmentData) {
+          if (nextStep === undefined || nextStep.isInit && this._lastInitSegment === nextStep.segmentData) {
             this._flush();
 
             return;
@@ -8953,7 +8958,7 @@ var queued_source_buffer_QueuedSourceBuffer = /*#__PURE__*/function () {
       this._sourceBuffer.timestampOffset = newTimestampOffset;
     }
 
-    if (appendWindow[0] == null) {
+    if (appendWindow[0] === undefined) {
       if (this._sourceBuffer.appendWindowStart > 0) {
         this._sourceBuffer.appendWindowStart = 0;
       }
@@ -8965,7 +8970,7 @@ var queued_source_buffer_QueuedSourceBuffer = /*#__PURE__*/function () {
       this._sourceBuffer.appendWindowStart = appendWindow[0];
     }
 
-    if (appendWindow[1] == null) {
+    if (appendWindow[1] === undefined) {
       if (this._sourceBuffer.appendWindowEnd !== Infinity) {
         this._sourceBuffer.appendWindowEnd = Infinity;
       }
@@ -19638,15 +19643,13 @@ function estimateStarvationModeBitrate(pendingRequests, clock, currentRepresenta
   }
 
   var requestElapsedTime = (now - concernedRequest.requestTimestamp) / 1000;
-  var reasonableElapsedTime = requestElapsedTime <= (chunkDuration * 1.5 + 1) / clock.speed;
 
-  if (currentRepresentation == null || reasonableElapsedTime) {
+  if (currentRepresentation == null || requestElapsedTime <= (chunkDuration * 1.5 + 1) / clock.speed) {
     return undefined;
   } // calculate a reduced bitrate from the current one
 
 
-  var factor = chunkDuration / requestElapsedTime;
-  var reducedBitrate = currentRepresentation.bitrate * Math.min(0.7, factor);
+  var reducedBitrate = currentRepresentation.bitrate * 0.7;
 
   if (lastEstimatedBitrate == null || reducedBitrate < lastEstimatedBitrate) {
     return reducedBitrate;
