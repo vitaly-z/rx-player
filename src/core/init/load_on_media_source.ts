@@ -34,7 +34,7 @@ import { MediaError } from "../../errors";
 import log from "../../log";
 import Manifest from "../../manifest";
 import ABRManager from "../abr";
-import { SegmentFetcherCreator } from "../fetchers";
+import { SegmentRequestScheduler } from "../fetchers";
 import SourceBuffersStore from "../source_buffers";
 import StreamOrchestrator, {
   IStreamOrchestratorEvent,
@@ -68,7 +68,7 @@ export interface IMediaSourceLoaderArguments {
   manifest : Manifest; // Manifest of the content we want to play
   mediaElement : HTMLMediaElement; // Media Element on which the content will be
                                    // played
-  segmentFetcherCreator : SegmentFetcherCreator<any>; // Interface to download
+  segmentRequestScheduler : SegmentRequestScheduler; // Interface to download
                                                         // segments
   speed$ : Observable<number>; // Emit the speed.
                                // /!\ Should replay the last value on subscription.
@@ -95,7 +95,7 @@ export default function createMediaSourceLoader({
   speed$,
   bufferOptions,
   abrManager,
-  segmentFetcherCreator,
+  segmentRequestScheduler,
 } : IMediaSourceLoaderArguments) : (
   mediaSource : MediaSource,
   initialTime : number,
@@ -154,7 +154,7 @@ export default function createMediaSourceLoader({
                                           streamClock$,
                                           abrManager,
                                           sourceBuffersStore,
-                                          segmentFetcherCreator,
+                                          segmentRequestScheduler,
                                           bufferOptions
     ).pipe(
       mergeMap((evt) : Observable<IMediaSourceLoaderEvent> => {

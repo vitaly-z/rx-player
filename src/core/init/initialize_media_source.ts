@@ -59,7 +59,7 @@ import {
   createManifestFetcher,
   IManifestFetcherParsedResult,
   IManifestFetcherParserOptions,
-  SegmentFetcherCreator,
+  SegmentRequestScheduler,
 } from "../fetchers";
 import { ITextTrackSourceBufferOptions } from "../source_buffers";
 import createEMEManager, {
@@ -229,10 +229,10 @@ export default function InitializeOnMediaSource(
         share()));
 
   /** Interface used to download segments. */
-  const segmentFetcherCreator =
-    new SegmentFetcherCreator<any>(transportPipelines, { lowLatencyMode,
-                                                         maxRetryOffline: offlineRetry,
-                                                         maxRetryRegular: segmentRetry });
+  const segmentRequestScheduler =
+    new SegmentRequestScheduler(transportPipelines, { lowLatencyMode,
+                                                      maxRetryOffline: offlineRetry,
+                                                      maxRetryRegular: segmentRetry });
 
   /** Choose the right "Representation" for a given "Adaptation". */
   const abrManager = new ABRManager(adaptiveOptions);
@@ -332,7 +332,7 @@ export default function InitializeOnMediaSource(
         clock$,
         manifest,
         mediaElement,
-        segmentFetcherCreator,
+        segmentRequestScheduler,
         speed$,
       });
 

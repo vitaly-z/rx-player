@@ -44,7 +44,7 @@ import { getLeftSizeOfRange } from "../../../utils/ranges";
 import WeakMapMemory from "../../../utils/weak_map_memory";
 import ABRManager from "../../abr";
 import { IStalledStatus } from "../../api";
-import { SegmentFetcherCreator } from "../../fetchers";
+import { SegmentRequestScheduler } from "../../fetchers";
 import SourceBuffersStore, {
   IBufferType,
   ITextTrackSourceBufferOptions,
@@ -82,7 +82,7 @@ export interface IPeriodStreamArguments {
   content : { manifest : Manifest;
               period : Period; };
   garbageCollectors : WeakMapMemory<QueuedSourceBuffer<unknown>, Observable<never>>;
-  segmentFetcherCreator : SegmentFetcherCreator<any>;
+  segmentRequestScheduler : SegmentRequestScheduler;
   sourceBuffersStore : SourceBuffersStore;
   options: IPeriodStreamOptions;
   wantedBufferAhead$ : BehaviorSubject<number>;
@@ -108,7 +108,7 @@ export default function PeriodStream({
   clock$,
   content,
   garbageCollectors,
-  segmentFetcherCreator,
+  segmentRequestScheduler,
   sourceBuffersStore,
   options,
   wantedBufferAhead$,
@@ -220,7 +220,7 @@ export default function PeriodStream({
                               content: { manifest, period, adaptation },
                               options,
                               queuedSourceBuffer: qSourceBuffer,
-                              segmentFetcherCreator,
+                              segmentRequestScheduler,
                               wantedBufferAhead$ })
     .pipe(catchError((error : unknown) => {
       // Stream linked to a non-native SourceBuffer should not impact the

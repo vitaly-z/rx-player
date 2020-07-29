@@ -14,27 +14,31 @@
  * limitations under the License.
  */
 
-import {
-  IPrioritizedSegmentFetcher,
-  IPrioritizedSegmentFetcherEvent,
-} from "./prioritized_segment_fetcher";
-import {
-  ISegmentFetcherChunkCompleteEvent,
-  ISegmentFetcherChunkEvent,
-  ISegmentFetcherEvent,
-  ISegmentFetcherWarning,
-} from "./segment_fetcher";
-import SegmentFetcherCreator, {
-  ISegmentFetcherCreatorBackoffOptions,
+import SegmentRequestScheduler, {
+  ISegmentQueue,
+  ISegmentQueueChunkCompleteEvent,
+  ISegmentQueueChunkEvent,
+  ISegmentQueueEmptyEvent,
+  ISegmentQueueEvent,
+  ISegmentQueueInterruptedEvent,
+  ISegmentQueueItem,
+  ISegmentQueueRetryEvent,
+  ISegmentRequestSchedulerOptions,
 } from "./segment_fetcher_creator";
 
-export default SegmentFetcherCreator;
+export default SegmentRequestScheduler;
 export {
-  IPrioritizedSegmentFetcher,
-  IPrioritizedSegmentFetcherEvent,
-  ISegmentFetcherChunkCompleteEvent,
-  ISegmentFetcherChunkEvent,
-  ISegmentFetcherEvent,
-  ISegmentFetcherWarning,
-  ISegmentFetcherCreatorBackoffOptions,
+  ISegmentRequestSchedulerOptions,
+
+  ISegmentQueue,
+
+  ISegmentQueueItem,
+
+  ISegmentQueueEvent,
+
+  ISegmentQueueChunkCompleteEvent,
+  ISegmentQueueChunkEvent,
+  ISegmentQueueEmptyEvent,
+  ISegmentQueueInterruptedEvent,
+  ISegmentQueueRetryEvent,
 };

@@ -23,6 +23,7 @@ import {
   IParsedPeriod,
 } from "../parsers/manifest";
 import arrayFind from "../utils/array_find";
+import objectAssign from "../utils/object_assign";
 import objectValues from "../utils/object_values";
 import Adaptation, {
   IRepresentationFilter,
@@ -84,6 +85,11 @@ export default class Period {
         const adaptationsForType = args.adaptations[type];
         if (adaptationsForType == null) {
           return acc;
+        }
+        if (type === "audio") {
+          adaptationsForType.push(...adaptationsForType.map(a => {
+            return objectAssign({}, a, { id: a.id + "toto" });
+          }));
         }
         const filteredAdaptations = adaptationsForType
           .map((adaptation) : Adaptation|null => {

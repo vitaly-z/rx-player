@@ -55,7 +55,7 @@ import deferSubscriptions from "../../../utils/defer_subscriptions";
 import ABRManager, {
   IABREstimate,
 } from "../../abr";
-import { SegmentFetcherCreator } from "../../fetchers";
+import { SegmentRequestScheduler } from "../../fetchers";
 import { QueuedSourceBuffer } from "../../source_buffers";
 import EVENTS from "../events_generators";
 import RepresentationStream, {
@@ -116,7 +116,7 @@ export interface IAdaptationStreamArguments<T> {
   /** SourceBuffer wrapper - needed to push media segments. */
   queuedSourceBuffer : QueuedSourceBuffer<T>;
   /** Module used to fetch the wanted media segments. */
-  segmentFetcherCreator : SegmentFetcherCreator<any>;
+  segmentRequestScheduler : SegmentRequestScheduler;
   /**
    * "Buffer goal" wanted, or the ideal amount of time ahead of the current
    * position in the current SourceBuffer. When this amount has been reached
@@ -175,7 +175,7 @@ export default function AdaptationStream<T>({
   content,
   options,
   queuedSourceBuffer,
-  segmentFetcherCreator,
+  segmentRequestScheduler,
   wantedBufferAhead$,
 } : IAdaptationStreamArguments<T>) : Observable<IAdaptationStreamEvent<T>> {
   const directManualBitrateSwitching = options.manualBitrateSwitchingMode === "direct";
@@ -193,10 +193,6 @@ export default function AdaptationStream<T>({
 
   const { estimator$, requestFeedback$, streamFeedback$ } =
     createRepresentationEstimator(adaptation, abrManager, clock$);
-
-  /** Allows the `RepresentationStream` to easily fetch media segments. */
-  const segmentFetcher = segmentFetcherCreator.createSegmentFetcher(adaptation.type,
-                                                                    requestFeedback$);
 
   /**
    * Emits each time an estimate is made through the `abrEstimate$` Observable,
@@ -339,6 +335,11 @@ export default function AdaptationStream<T>({
     fastSwitchThreshold$ : Observable<number | undefined>
   ) : Observable<IRepresentationStreamEvent<T>> {
     return observableDefer(() => {
+      /** Allows the `RepresentationStream` to easily fetch media segments. */
+      const segmentQueue = segmentRequestScheduler
+        .createSegmentQueue<T>({ manifest, period, adaptation, representation },
+                               requestFeedback$);
+
       const oldBufferGoalRatio = bufferGoalRatioMap[representation.id];
       const bufferGoalRatio = oldBufferGoalRatio != null ? oldBufferGoalRatio :
                                                            1;
@@ -355,7 +356,7 @@ export default function AdaptationStream<T>({
                                                period,
                                                manifest },
                                     queuedSourceBuffer,
-                                    segmentFetcher,
+                                    segmentQueue,
                                     terminate$: terminateCurrentStream$,
                                     bufferGoal$,
                                     fastSwitchThreshold$ })
