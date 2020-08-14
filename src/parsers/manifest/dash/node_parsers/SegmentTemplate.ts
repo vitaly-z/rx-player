@@ -149,5 +149,6 @@ export default function parseSegmentTemplate(
     }
   }
 
+  ret.presentationTimeOffset = ret.timescale * 177000000;
   return [ret, warnings];
 }
