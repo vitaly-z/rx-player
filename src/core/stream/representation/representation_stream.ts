@@ -46,14 +46,9 @@ import {
 import log from "../../../log";
 import Manifest, {
   Adaptation,
-  ISegment,
   Period,
   Representation,
 } from "../../../manifest";
-import {
-  ISegmentParserParsedInitSegment,
-  ISegmentParserResponse,
-} from "../../../transports";
 import assertUnreachable from "../../../utils/assert_unreachable";
 import objectAssign from "../../../utils/object_assign";
 import { IStalledStatus } from "../../api";
@@ -189,17 +184,15 @@ export default function RepresentationStream<T>({
 } : IRepresentationStreamArguments<T>) : Observable<IRepresentationStreamEvent<T>> {
   const { period, adaptation, representation } = content;
   const bufferType = adaptation.type;
-  const initSegment = representation.index.getInitSegment();
 
   /**
-   * Saved initialization segment state for this representation.
-   * `null` if the initialization segment hasn't been loaded yet.
+   * XXX TODO
+   * Saved initialization segment data for this RepresentationStream.
+   * `null` if either:
+   *   - there's no initialization segment data for this Representation.
+   *   - we do not know the v
    */
-  let initSegmentObject : ISegmentParserParsedInitSegment<T> | null =
-    initSegment == null ? { initializationData: null,
-                            segmentProtections: [],
-                            initTimescale: undefined } :
-                          null;
+  let initSegmentData : T | null = null;
 
   /** Immediately checks the Stream's status when it emits. */
   const reCheckStatus$ = new Subject<void>();
@@ -225,19 +218,21 @@ export default function RepresentationStream<T>({
                    IStreamStateActive>
     {
       queuedSourceBuffer.synchronizeInventory();
-      let neededSegments : ISegmentQueueItem[] = [];
       const neededRange = getWantedRange(period, timing, bufferGoal);
+      let neededSegments : ISegmentQueueItem[];
       if (!representation.index.isInitialized()) {
+        const initSegment = representation.index.getInitSegment();
         if (initSegment === null) {
           log.warn("Stream: Uninitialized index without an initialization segment");
-        } else if (initSegmentObject !== null) {
-          log.warn("Stream: Uninitialized index with an already loaded " +
-                   "initialization segment");
+          neededSegments = [];
         } else {
-          neededSegments.push({ segment: initSegment,
-                                priority: getPriorityForTime(period.start, timing) });
+          neededSegments = [{ segment: initSegment,
+                              priority: getPriorityForTime(period.start, timing) }];
         }
       } else {
+        // Here we do not need to specify that we want to load the initialization
+        // segment. The `segmentQueue` will implicitely load it with the priority
+        // of the first needed segment.
         neededSegments = getNeededSegments({ content,
                                              currentPlaybackTime: timing.currentTime,
                                              fastSwitchThreshold,
@@ -245,16 +240,6 @@ export default function RepresentationStream<T>({
                                              queuedSourceBuffer })
           .map((segment) => ({ priority: getSegmentPriority(segment, timing),
                                segment }));
-
-        if (neededSegments.length > 0 &&
-            initSegment !== null && initSegmentObject === null)
-        {
-          // prepend initialization segment
-          const initSegmentPriority = neededSegments[0].priority;
-          neededSegments = [ { segment: initSegment,
-                               priority: initSegmentPriority },
-                             ...neededSegments ];
-        }
       }
 
       segmentQueue.update(neededSegments);
@@ -363,11 +348,27 @@ export default function RepresentationStream<T>({
             return EMPTY; // else, ignore.
           }));
 
-      case "chunk": {
-        const initTimescale = initSegmentObject?.initTimescale;
-        const { segment, parse } = evt.value;
-        return parse(initTimescale).pipe(
-          mergeMap((parserEvt) => onParsedSegment(segment, parserEvt)));
+      case "init-segment": {
+        const { parsed, segment } = evt.value;
+        const segmentData = parsed.initializationData;
+        initSegmentData = segmentData;
+        const protectedEvents$ = observableOf(...parsed.segmentProtections
+          .map(segmentProt => EVENTS.protectedSegment(segmentProt)));
+        const pushEvent$ = pushInitSegment({ clock$,
+                                             content,
+                                             segment,
+                                             segmentData,
+                                             queuedSourceBuffer });
+        return observableMerge(protectedEvents$, pushEvent$);
+      }
+
+      case "media-chunk": {
+        return pushMediaSegment({ clock$,
+                                  content,
+                                  initSegmentData,
+                                  parsedSegment: evt.value.parsed,
+                                  segment: evt.value.segment,
+                                  queuedSourceBuffer });
       }
 
       case "chunk-complete": {
@@ -388,44 +389,6 @@ export default function RepresentationStream<T>({
 
       default:
         assertUnreachable(evt);
-    }
-  }
-
-  /**
-   * Logic ran when a new segment has been parsed.
-   * @param {Object} segment
-   * @param {Object} parsed
-   * @returns {Observable}
-   */
-  function onParsedSegment(
-    segment : ISegment,
-    parsed : ISegmentParserResponse<T>
-  ) : Observable<IStreamEventAddedSegment<T> | IProtectedSegmentEvent> {
-    switch (parsed.type) {
-      case "parsed-init-segment":
-        initSegmentObject = parsed.value;
-        const protectedEvents$ = observableOf(
-          ...parsed.value.segmentProtections.map(segmentProt => {
-            return EVENTS.protectedSegment(segmentProt);
-          }));
-        const segmentData = parsed.value.initializationData;
-        const pushEvent$ = pushInitSegment({ clock$,
-                                             content,
-                                             segment,
-                                             segmentData,
-                                             queuedSourceBuffer });
-        return observableMerge(protectedEvents$, pushEvent$);
-
-      case "parsed-segment":
-        const initSegmentData = initSegmentObject?.initializationData ?? null;
-        return pushMediaSegment({ clock$,
-                                  content,
-                                  initSegmentData,
-                                  parsedSegment: parsed.value,
-                                  segment,
-                                  queuedSourceBuffer });
-      default:
-        assertUnreachable(parsed);
     }
   }
 }

@@ -26,6 +26,8 @@ export interface IBackoffBaseOptions {
   maxRetryRegular? : number;
   maxRetryOffline? : number;
   lowLatencyMode : boolean;
+  /** If `true`, all */
+  parallelizeInitSegmentLoading? : boolean;
 }
 
 /**

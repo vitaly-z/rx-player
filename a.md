@@ -59,9 +59,8 @@ Here, we will be downloading concurrently an audio segment, a video segment and
 a text segment.
 
 It's important to consider that all three of those Segment Queues run
-concurrently. Most of the time (the exception being described in the next part),
-the audio queue won't wait for the video queue to download its next segment.
-
+concurrently. With some exceptions - described in the next parts - the audio
+queue won't wait for the video queue to download its next segment.
 
 
 ## Segment priorities ##########################################################
@@ -106,7 +105,30 @@ highest priority between all of them (the lowest priority number) will be
 requested.
 
 If multiple Segment Queues have the same priority for their next segment, the
-segments are requested in parallel. This situation happens very often.
+segments are requested in parallel.
+
+
+## Notes about the initialization segment #############################
+
+For optimization reasons, a special status is given to the initialization
+segment.
+
+On very specific conditions, it is possible that the two first segments of a
+SegmentQueue are - behind the hood - loaded in parallel:
+
+  - if the first segment in that Segment Queue is an initialization segment
+
+  - if the next segment in that queue has the same priority than that
+    initialization segment's request
+
+  - if both segments concern the same Representation
+
+This is because an initialization
+
+I've specified "behind the hood" because data events communicated by the segment
+queue will still be sent in the right order (first the initialization segment's
+data, then the other segment's data).
+This is because this behavioran initialization segment generally allows to load
 
 
 ### High priorities ############################################################

@@ -37,7 +37,12 @@ import Manifest, {
   Period,
   Representation,
 } from "../../../manifest";
-import { ISegmentParserResponse, ITransportPipelines } from "../../../transports";
+import {
+  ISegmentParserParsedInitSegment,
+  ISegmentParserParsedSegment,
+  ISegmentParserResponse,
+  ITransportPipelines,
+} from "../../../transports";
 import assertUnreachable from "../../../utils/assert_unreachable";
 import {
   IABRMetricsEvent,
@@ -88,6 +93,7 @@ export interface ISegmentQueueContext {
 export interface ISegmentQueueItem {
   /** The segment you want to request. */
   segment : ISegment;
+
   /**
    * The priority of the segment request (lower number = higher priority).
    * Starting at 0.
@@ -132,8 +138,27 @@ export interface ISegmentQueueChunkCompleteEvent { type: "chunk-complete";
 /** Event sent when no element is left on the current segment queue. */
 export interface ISegmentQueueEmptyEvent { type : "empty"; }
 
+// What a segment parser returns when parsing an init segment
+export interface ISegmentQueueParsedInitSegment<T> {
+  type : "init-segment";
+  value : {
+    parsed: ISegmentParserParsedInitSegment<T>;
+    segment: ISegment;
+  };
+}
+
+// What a segment parser returns when parsing a regular (non-init) segment
+export interface ISegmentQueueParsedSegment<T> {
+  type : "media-chunk";
+  value : {
+    parsed: ISegmentParserParsedSegment<T>;
+    segment: ISegment;
+  };
+}
+
 /** Every events that can be sent from a segment queue. */
-export type ISegmentQueueEvent<T> = ISegmentQueueChunkEvent<T> |
+export type ISegmentQueueEvent<T> = ISegmentQueueParsedInitSegment<T> |
+                                    ISegmentQueueParsedSegment<T> |
                                     ISegmentQueueChunkCompleteEvent |
                                     ISegmentQueueInterruptedEvent |
                                     ISegmentQueueEmptyEvent |
@@ -267,6 +292,15 @@ export default class SegmentRequestScheduler {
                                                    backoffOptions);
     const fetcher = applyPrioritizerToSegmentFetcher(this._prioritizer, segmentFetcher);
 
+    /** Initialization segment linked to that Representation.  */
+    const initSegment = context.representation.index.getInitSegment();
+
+    let initSegmentObject : ISegmentParserParsedInitSegment<T>|null =
+      initSegment === null ? { initializationData: null,
+                               segmentProtections: [],
+                               initTimescale: undefined } :
+                             null;
+
     /**
      * Current queue of segments needed.
      * When the first segment in that queue has been loaded, it is removed
@@ -293,6 +327,21 @@ export default class SegmentRequestScheduler {
       obs: Observable<IPrioritizedSegmentFetcherEvent<T>>;
     } | null = null;
 
+    let pendingInitSegmentDownload : {
+      /** The requested segment. */
+      segment: ISegment;
+      /** The priority with which it was requested. */
+      priority: number;
+      /**
+       * If `true` the `fetcher` is currently loading the segment.
+       * If `false`, the `fetcher` is waiting for higher-priority requests
+       * to finish before starting to load this segment.
+       */
+      isLoading: boolean;
+      /** Observable created through the `fetcher`. */
+      obs: Observable<IPrioritizedSegmentFetcherEvent<T>>;
+    } | null = null;
+
     /**
      * Allows to manually check the current queue, to see if our current
      * request is still for the most wanted segment in the queue.
@@ -301,6 +350,9 @@ export default class SegmentRequestScheduler {
 
     /** Allows to cancel a previously-created downloading queue. */
     let cancelDownloadQueue$ = new Subject();
+
+    /** Allows to cancel a previously-created downloading queue. */
+    const cancelInitDataRequest = new Subject();
 
     /**
      * Observable returned by the `start` method of the SegmentQueue.
@@ -313,24 +365,53 @@ export default class SegmentRequestScheduler {
             currentQueue[0].segment.id === pendingTask.segment.id)
         {
           // Still same segment needed, only thing that may change is the priority.
-          fetcher.updatePriority(pendingTask.obs, currentQueue[0].priority);
+          const { priority } = currentQueue[0];
+          fetcher.updatePriority(pendingTask.obs, priority);
+
+          // Update the priority of the linked initialization segment request if one
+          if (pendingInitSegmentDownload !== null) {
+            fetcher.updatePriority(pendingInitSegmentDownload.obs, priority);
+          }
           return EMPTY;
         }
 
         // we will want to cancel the previous queue just after this one starts.
         const cancelPreviousDownloadQueue$ = cancelDownloadQueue$;
-        cancelDownloadQueue$ = new Subject();
-        return observableMerge(requestSegmentsInQueue(),
 
-                               // Note: we want to cancel the previous task
-                               // AFTER adding the request for the new preferred
-                               // segment, so that the latter is considered when
-                               // `fetcher` makes its next choice.
-                               observableDefer(() => {
-                                 cancelPreviousDownloadQueue$.next();
-                                 cancelPreviousDownloadQueue$.complete();
-                                 return EMPTY;
-                               })).pipe(takeUntil(cancelDownloadQueue$));
+        if (currentQueue.length === 0) {
+          cancelPreviousDownloadQueue$.next();
+          cancelPreviousDownloadQueue$.complete();
+
+          if (pendingInitSegmentDownload !== null &&
+              context.representation.index.isInitialized())
+          {
+            cancelInitDataRequest.next();
+          }
+          return EMPTY;
+        }
+
+        cancelDownloadQueue$ = new Subject();
+
+        const initSegment$ =
+          initSegmentObject === null &&
+          pendingInitSegmentDownload === null ?
+            requestInitSegment(currentQueue[0].priority)
+              .pipe(takeUntil(cancelInitDataRequest)) :
+            EMPTY;
+
+        const mediaSegments$ =
+          observableMerge(requestSegmentsInQueue(),
+
+                          // Note: we want to cancel the previous task
+                          // AFTER adding the request for the new preferred
+                          // segment, so that the latter is considered when
+                          // `fetcher` makes its next choice.
+                          observableDefer(() => {
+                            cancelPreviousDownloadQueue$.next();
+                            cancelPreviousDownloadQueue$.complete();
+                            return EMPTY;
+                          })).pipe(takeUntil(cancelDownloadQueue$));
+        return observableMerge(initSegment$, mediaSegments$);
       }),
       share());
 
@@ -344,6 +425,62 @@ export default class SegmentRequestScheduler {
         return segmentQueue$;
       },
     };
+    /**
+     * Requests all segments in `currentQueue` with the right priority, one
+     * after another, starting with the first one.
+     * @returns {Observable}
+     */
+
+    function requestInitSegment(
+      priority : number
+    ) : Observable<ISegmentQueueEvent<T>> {
+      return observableDefer(() => {
+        if (initSegment === null) {
+          // XXX TODO
+          return EMPTY;
+        }
+        const request$ = fetcher.createRequest(initSegment, priority);
+        pendingInitSegmentDownload = { segment: initSegment,
+                                       priority,
+                                       isLoading: false,
+                                       obs: request$ };
+        return request$.pipe(mergeMap((evt) : Observable<ISegmentQueueEvent<T>> => {
+            switch (evt.type) {
+              case "chunk":
+                return evt.value.parse(undefined).pipe(mergeMap((parseEvt) => {
+                  if (parseEvt.type === "parsed-init-segment") {
+                    initSegmentObject = parseEvt.value;
+                    return observableOf({ type: "init-segment" as const,
+                                          value: { segment: initSegment,
+                                                   parsed: parseEvt.value } });
+                  }
+                  log.error("SQ: expected \"parsed-init-segment\" event, got", evt.type);
+                  return EMPTY;
+                }));
+              case "chunk-complete":
+                return observableOf({ type: "chunk-complete" as const,
+                                      value: { segment: initSegment } });
+              case "warning":
+                return observableOf({ type: "retry" as const,
+                                      value: { error: evt.value,
+                                               segment: initSegment } });
+              case "interrupted":
+                if (pendingInitSegmentDownload === null) {
+                  log.error("SQ: An unknown pending task was interrupted");
+                } else {
+                  pendingInitSegmentDownload.isLoading = false;
+                }
+                return observableOf({ type: "interrupted" as const,
+                                      value: { segment: initSegment } });
+              case "ended":
+                pendingInitSegmentDownload = null;
+                return EMPTY;
+              default:
+                assertUnreachable(evt);
+            }
+        }));
+      });
+    }
 
     /**
      * Requests all segments in `currentQueue` with the right priority, one
@@ -361,8 +498,19 @@ export default class SegmentRequestScheduler {
         return request$.pipe(mergeMap((evt) : Observable<ISegmentQueueEvent<T>> => {
             switch (evt.type) {
               case "chunk":
-                return observableOf({ type: "chunk" as const,
-                                      value: { parse: evt.value.parse, segment } });
+                if (pendingInitSegmentDownload !== null) {
+                  // XXX TODO
+                }
+                return evt.value.parse(initSegmentObject?.initTimescale)
+                  .pipe(mergeMap((parserEvt) => {
+                    if (parserEvt.type === "parsed-segment") {
+                      return observableOf({ type: "media-chunk" as const,
+                                            value: { segment,
+                                                     parsed: parserEvt.value } });
+                    }
+                    log.error("SQ: expected \"parsed-segment\" event, got", evt.type);
+                    return EMPTY;
+                  }));
               case "chunk-complete":
                 return observableOf({ type: "chunk-complete" as const,
                                       value: { segment } });
