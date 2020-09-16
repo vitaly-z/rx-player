@@ -121,7 +121,8 @@ export default function parseSegmentTemplate(
 
   /* tslint:disable no-unsafe-any */
   ret.presentationTimeOffset = (ret.presentationTimeOffset ?? 0) +
-                               (ret.timescale * ((window as any).contentOffset ?? 0));
+                               ((ret.timescale ?? 1) *
+                                 ((window as any).contentOffset ?? 0));
   /* tslint:enable no-unsafe-any */
 
   return [ret, warnings];
