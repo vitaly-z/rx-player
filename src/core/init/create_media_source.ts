@@ -43,7 +43,7 @@ export function setDurationToMediaSource(
   mediaSource : MediaSource,
   duration : number
 ) : void {
-  const newDuration = duration === Infinity ? Number.MAX_VALUE :
+  const newDuration = duration === Infinity ? Math.pow(2, 32) :
                                               duration;
   if (mediaSource.duration !== newDuration) {
     log.info("Init: Setting duration", newDuration);

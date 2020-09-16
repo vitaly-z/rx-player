@@ -696,7 +696,11 @@ export default class QueuedSourceBuffer<T> {
                 this.bufferType,
                 this._sourceBuffer.timestampOffset,
                 newTimestampOffset);
-      this._sourceBuffer.timestampOffset = newTimestampOffset;
+      const contentOffset: number = (window as any).videoContentOffset !== undefined &&
+                                    this.bufferType === "video" ?
+                                      ((window as any).videoContentOffset as number) :
+                                      0;
+      this._sourceBuffer.timestampOffset = newTimestampOffset + contentOffset;
     }
 
     if (appendWindow[0] === undefined) {
