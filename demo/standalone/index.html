@@ -97,6 +97,8 @@
           const { url, licenseURL, isPlayready, isLive } = window.contentSets[index];
           if (isLive) {
             window.videoContentOffset = -0.12;
+          } else {
+            window.videoContentOffset = 0;
           }
           player.loadVideo({ url,
                              transport: "dash",
