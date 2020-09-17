@@ -6,7 +6,7 @@
       <title>RxPlayer - CANAL+ (stand-alone demo)</title>
     </head>
     <body>
-      <video id="video"></video>
+      <video id="video" height="1080px" width="1920px"></video>
       <script type="text/javascript" src="./lib.js" charset="utf-8"></script>
       <script charset="utf-8">
         const player = new window.RxPlayer({
@@ -14,6 +14,104 @@
         });
 
         window.player = player;
+        window.contentOffset = 180000000;
+        window.contentSets = [
+          { url: "https://dash-od-aka-canalplus.akamaized.net/MDRM/MKPC/CLEAR_AUDIO/H264/index.mpd",
+            isLive: false,
+            licenseURL: "https://cors-anywhere.herokuapp.com/https://secure-webtv.canal-bis.com/WebPortal-vabf/TestDRMDASH/api/Playready",
+            isPlayready: true },
+          { url: "https://dsh-m005-live-aka-canalplus.akamaized.net/live/disk/tvbreizh-hd/dash-fhddvr/tvbreizh-hd.mpd",
+            isLive: true,
+            licenseURL: "https://cors-anywhere.herokuapp.com/https://secure-webtv.canal-bis.com/WebPortal-vabf/TestDRMDASH/api/Playready",
+            isPlayready: true },
+        ];
+
+        function bytesToStr(bytes) {
+          return String.fromCharCode.apply(null, bytes);
+        }
+
+        function strToBytes(str) {
+          const len = str.length;
+          const arr = new Uint8Array(len);
+          for (let i = 0; i < len; i += 1) {
+            arr[i] = str.charCodeAt(i) & 0xFF;
+          }
+          return arr;
+        }
+
+        function bytesToUTF16Str(bytes) {
+          let str = "";
+          const len = bytes.length;
+          for (let i = 0; i < len; i += 2) {
+            str += String.fromCharCode(bytes[i]);
+          }
+          return str;
+        }
+
+        function formatPlayreadyChallenge(challenge) {
+          const str = bytesToUTF16Str(challenge);
+          const match = /<Challenge encoding="base64encoded">(.*)<\/Challenge>/.exec(str);
+          const xml = match ?
+            atob(match[1]) : /* IE11 / EDGE */
+            bytesToStr(new Uint8Array(challenge)); // Chromecast
+          return xml;
+        }
+
+        function generateGetLicense(licenseServerUrl, isPlayready, fallbackOnLastTry) {
+          return (rawChallenge) => {
+            const challenge =  isPlayready ?
+              formatPlayreadyChallenge(rawChallenge) : rawChallenge;
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", licenseServerUrl, true);
+            return new Promise((resolve, reject) => {
+              xhr.onerror = () => {
+                const error = new Error("getLicense's request failed on an error");
+                error.fallbackOnLastTry = fallbackOnLastTry;
+                reject(error);
+              };
+              xhr.onload = (evt) => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                  const license = evt.target.response;
+                  resolve(license);
+                } else {
+                  const error = new Error("getLicense's request finished with a " +
+                                          `${xhr.status} HTTP error`);
+                  error.noRetry = fallbackOnLastTry;
+                  error.fallbackOnLastTry = fallbackOnLastTry;
+                  reject(error);
+                }
+              };
+              if (isPlayready) {
+                xhr.setRequestHeader("content-type", "text/xml; charset=utf-8");
+              } else {
+                xhr.responseType = "arraybuffer";
+              }
+              xhr.send(challenge);
+            }).then(license =>
+              isPlayready && typeof license === "string" ? strToBytes(license) : license
+            );
+          };
+        }
+
+        window.loadContent = function(index) {
+          const { url, licenseURL, isPlayready, isLive } = window.contentSets[index];
+          if (isLive) {
+            window.videoContentOffset = -0.12;
+          }
+          player.loadVideo({ url,
+                             transport: "dash",
+                             autoPlay: true,
+                             keySystems: licenseURL !== undefined ?
+                              [{ type: isPlayready ? "playready" : "widevine",
+                                 fallbackOn: { keyInternalError: true,
+                                               keyOutputRestricted: true },
+                                 getLicense: generateGetLicense(licenseURL, isPlayready, true) }] :
+                              undefined });
+        }
+
+        window.getKIDFromBase64KID = (kid) => {
+          return strToBytes(atob(kid));
+        }
       </script>
     </body>
 
