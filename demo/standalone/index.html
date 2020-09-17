@@ -14,7 +14,6 @@
         });
 
         window.player = player;
-        window.contentOffset = 180000000;
         window.contentSets = [
           { url: "https://dash-od-aka-canalplus.akamaized.net/MDRM/MKPC/CLEAR_AUDIO/H264/index.mpd",
             isLive: false,
@@ -96,8 +95,10 @@
         window.loadContent = function(index) {
           const { url, licenseURL, isPlayready, isLive } = window.contentSets[index];
           if (isLive) {
+            window.contentOffset = 180000000;
             window.videoContentOffset = -0.12;
           } else {
+            window.contentOffset = 0;
             window.videoContentOffset = 0;
           }
           player.loadVideo({ url,
