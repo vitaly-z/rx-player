@@ -133,14 +133,6 @@ export default function createSegmentFetcher<T>(
             break;
           }
 
-          case "direct-retry": {
-            if (requestBeginSent) {
-              requests$.next({ type: "requestEnd", value: { id } });
-            }
-            requests$.next(generateRequestBeginEvent(content.segment, id));
-            break;
-          }
-
           case "request": {
             requestBeginSent = true;
             requests$.next(generateRequestBeginEvent(content.segment, id));
@@ -181,7 +173,6 @@ export default function createSegmentFetcher<T>(
                             case "progress":
                             case "metrics":
                             case "request":
-                            case "direct-retry":
                               return false;
                             default:
                               assertUnreachable(e);

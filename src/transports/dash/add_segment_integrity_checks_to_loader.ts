@@ -102,9 +102,7 @@ export default function addSegmentIntegrityChecks(
                    err);
           return observableOf(res); // return orginal response
         }));
-        return observableConcat(observableOf({ type: "direct-retry" as const,
-                                               value: null }),
-                                newRequest$);
+        return newRequest$;
       }
     }
 
