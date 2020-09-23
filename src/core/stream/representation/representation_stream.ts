@@ -570,12 +570,12 @@ export default function RepresentationStream<T>({
         if (adaptation.type === "video" && (window as any).TOTO_LE_HEROS === undefined) {
           if (evt.value.chunkInfos?.time !== undefined) {
             (window as any).TOTO_LE_HEROS =
-              (evt.value.chunkInfos.time / evt.value.chunkInfos.timescale) + 0.001
+              (evt.value.chunkInfos.time / evt.value.chunkInfos.timescale) + 0.001;
           }
           if ((window as any).TOTO_LE_HEROS !== undefined) {
-            debugger;
             const vid : any = document.querySelector("video");
             vid.currentTime = (window as any).TOTO_LE_HEROS;
+            (window as any).TOTO_LE_HEROS = undefined;
           }
         }
         const initSegmentData = initSegmentObject?.initializationData ?? null;
