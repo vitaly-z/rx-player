@@ -142,7 +142,6 @@ export default function seekAndLoadOnMediaEvents(
       log.info("Init: Set initial time", startTime);
       if (typeof (window as any).TOTO_LE_HEROS === "number") {
         mediaElement.currentTime = (window as any).TOTO_LE_HEROS;
-        (window as any).TOTO_LE_HEROS = undefined;
       } else {
         mediaElement.currentTime = typeof startTime === "function" ? startTime() :
                                                                      startTime;

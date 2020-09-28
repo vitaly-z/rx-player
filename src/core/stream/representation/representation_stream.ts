@@ -575,7 +575,6 @@ export default function RepresentationStream<T>({
           if ((window as any).TOTO_LE_HEROS !== undefined) {
             const vid : any = document.querySelector("video");
             vid.currentTime = (window as any).TOTO_LE_HEROS;
-            (window as any).TOTO_LE_HEROS = undefined;
           }
         }
         const initSegmentData = initSegmentObject?.initializationData ?? null;

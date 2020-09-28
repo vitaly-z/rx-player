@@ -608,6 +608,9 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @param {Object} opts
    */
   loadVideo(opts : ILoadVideoOptions) : void {
+    if (typeof (window as any).TOTO_LE_HEROS === "number") {
+      (window as any).TOTO_LE_HEROS = undefined;
+    }
     const options = parseLoadVideoOptions(opts);
     log.info("API: Calling loadvideo", options);
 
