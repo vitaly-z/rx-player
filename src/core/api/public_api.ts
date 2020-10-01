@@ -612,6 +612,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     log.info("API: Calling loadvideo", options);
 
     const { autoPlay,
+            audioTrackSwitchingMode,
             defaultAudioTrack,
             defaultTextTrack,
             enableFastSwitching,
@@ -714,7 +715,8 @@ class Player extends EventEmitter<IPublicAPIEvent> {
         { textTrackMode: "html" as const,
           textTrackElement: options.textTrackElement };
 
-      const bufferOptions = objectAssign({ enableFastSwitching,
+      const bufferOptions = objectAssign({ audioTrackSwitchingMode,
+                                           enableFastSwitching,
                                            manualBitrateSwitchingMode },
                                          this._priv_bufferOptions);
 
