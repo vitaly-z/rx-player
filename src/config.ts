@@ -74,7 +74,7 @@ export default {
    * improve.
    * When disabled, segments of a lower-quality will not be replaced.
    */
-  DEFAULT_ENABLE_FAST_SWITCHING: true,
+  DEFAULT_ENABLE_FAST_SWITCHING: false,
 
   /**
    * Strategy to adopt when manually switching of audio adaptation.
@@ -86,7 +86,7 @@ export default {
    *    - "reload": The quality switch will be immediate, to achieve that we will
    *      reload the media source, by destroying it and rebuilding it from scratch.
    */
-  DEFAULT_AUDIO_TRACK_SWITCHING_MODE: "smooth" as "smooth" |
+  DEFAULT_AUDIO_TRACK_SWITCHING_MODE: "reload" as "smooth" |
                                                   "flush" |
                                                   "reload",
 
