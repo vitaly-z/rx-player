@@ -475,6 +475,40 @@ function isNonEmptyString(x) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return isNullOrUndefined; });
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Returns true if the argument given is either null or undefined.
+ * This function was added to have a clearer alternative to `== null` which is
+ * not always understood by newcomers to the code, and which can be overused when
+ * only one of the possibility can arise.
+ * @param {*} x
+ * @returns {*}
+ */
+function isNullOrUndefined(x) {
+  return x === null || x === undefined;
+}
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -536,6 +570,32 @@ function isNonEmptyString(x) {
    * @type {string}
    */
   DEFAULT_MANUAL_BITRATE_SWITCHING_MODE: "seamless",
+
+  /**
+   * Default behavior for the `enableFastSwitching` loadVideo options.
+   *
+   * Fast-switching allows to provide quicker transitions from lower quality
+   * segments to higher quality segments but might be badly supported on some
+   * devices.
+   * When enabled, the RxPlayer might replace segments of a lower-quality
+   * (with a lower bitrate) with segments of a higher quality (with a higher
+   * bitrate). This allows to have a fast transition when network conditions
+   * improve.
+   * When disabled, segments of a lower-quality will not be replaced.
+   */
+  DEFAULT_ENABLE_FAST_SWITCHING: false,
+
+  /**
+   * Strategy to adopt when manually switching of audio adaptation.
+   * Can be either:
+   *    - "smooth": transitions are smooth but could be not immediate.
+   *    - "flush": The quality switch will be almost immediate, to achieve that
+   *      we will perform a very small seek in the media element to flush the
+   *      previous adaptation buffer.
+   *    - "reload": The quality switch will be immediate, to achieve that we will
+   *      reload the media source, by destroying it and rebuilding it from scratch.
+   */
+  DEFAULT_AUDIO_TRACK_SWITCHING_MODE: "reload",
 
   /**
    * If set to true, video through loadVideo will auto play by default
@@ -1448,7 +1508,7 @@ function isNonEmptyString(x) {
 });
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1696,40 +1756,6 @@ function __classPrivateFieldSet(receiver, privateMap, value) {
 
 
 /***/ }),
-/* 5 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return isNullOrUndefined; });
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Returns true if the argument given is neither null or undefined.
- * This function was added to have a clearer alternative to `== null` which is
- * not always understood by newcomers to the code, and which can be overused when
- * only one of the possibility can arise.
- * @param {*} x
- * @returns {*}
- */
-function isNullOrUndefined(x) {
-  return x === null || x === undefined;
-}
-
-/***/ }),
 /* 6 */,
 /* 7 */,
 /* 8 */
@@ -1893,7 +1919,7 @@ patchWebkitSourceBuffer();
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Subscriber; });
 /* unused harmony export SafeSubscriber */
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(65);
 /* harmony import */ var _Observer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(94);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(27);
@@ -2188,12 +2214,108 @@ objectAssign);
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return arrayIncludes; });
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Array.prototype.includes ponyfill.
+ * Returns ``true`` if the given array ``arr`` contains the element
+ * ``searchElement``. false ``otherwise``.
+ *
+ * Inspired from MDN polyfill, but ponyfilled instead
+ *
+ * @example
+ * ```js
+ * arrayIncludes([1, 2, 3], 3);
+ * // => true
+ *
+ * arrayIncludes([1, 2, 3], 7);
+ * // => false
+ *
+ * const obj = { a: 4 };
+ * arrayIncludes([obj, { b: 7 }, { a: 3 }], obj);
+ * // => true
+ *
+ * // does not perform deep equality
+ * arrayIncludes([{ a: 4 }, { b: 7 }, { a: 3 }], { a: 4 });
+ * // => false
+ *
+ * // the third argument state the starting index. 0 if not set.
+ *
+ * arrayIncludes([1, 2, 3], 2, 1);
+ * // => true
+ *
+ * arrayIncludes([1, 2, 3], 2, 2);
+ * // => false
+ * ```
+ *
+ * @param {Array} arr
+ * @param {*} searchElement
+ * @param {number} [fromIndex]
+ * @returns {boolean}
+ */
+function arrayIncludes(arr, searchElement, fromIndex) {
+  /* tslint:disable no-unbound-method */
+  if (typeof Array.prototype.includes === "function") {
+    /* tslint:enable no-unbound-method */
+
+    /* tslint:disable ban */
+    return arr.includes(searchElement, fromIndex);
+    /* tslint:enable ban */
+  }
+
+  var len = arr.length >>> 0;
+
+  if (len === 0) {
+    return false;
+  }
+
+  var n = fromIndex | 0;
+  var k = n >= 0 ? Math.min(n, len - 1) : Math.max(len + n, 0);
+
+  var areTheSame = function areTheSame(x, y) {
+    return x === y || // Viva las JavaScriptas!
+    typeof x === "number" && typeof y === "number" && isNaN(x) && isNaN(y);
+  };
+
+  while (k < len) {
+    if (areTheSame(arr[k], searchElement)) {
+      return true;
+    }
+
+    k++;
+  }
+
+  return false;
+}
+
+/***/ }),
+/* 12 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return bytesToHex; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return hexToBytes; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return strToUtf8; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return strToUtf8; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return utf8ToStr; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return strToLeUtf16; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return leUtf16ToStr; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return strToUtf16LE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return utf16LEToStr; });
+/* unused harmony export strToBeUtf16 */
+/* unused harmony export beUtf16ToStr */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return guidToUuid; });
 /* harmony import */ var _assert__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(53);
 /**
@@ -2219,7 +2341,7 @@ objectAssign);
  * @returns {Uint8Array}
  */
 
-function strToLeUtf16(str) {
+function strToUtf16LE(str) {
   var buffer = new ArrayBuffer(str.length * 2);
   var res = new Uint8Array(buffer);
 
@@ -2232,17 +2354,53 @@ function strToLeUtf16(str) {
   return res;
 }
 /**
+ * Convert a string to an Uint8Array containing the corresponding UTF-16 code
+ * units in little-endian.
+ * @param {string} str
+ * @returns {Uint8Array}
+ */
+
+
+function strToBeUtf16(str) {
+  var buffer = new ArrayBuffer(str.length * 2);
+  var res = new Uint8Array(buffer);
+
+  for (var i = 0; i < res.length; i += 2) {
+    var value = str.charCodeAt(i / 2);
+    res[i + 1] = value & 0xFF;
+    res[i] = value >> 8 & 0xFF;
+  }
+
+  return res;
+}
+/**
  * Construct string from the little-endian UTF-16 code units given.
  * @param {Uint8Array} bytes
  * @returns {string}
  */
 
 
-function leUtf16ToStr(bytes) {
+function utf16LEToStr(bytes) {
   var str = "";
 
   for (var i = 0; i < bytes.length; i += 2) {
     str += String.fromCharCode((bytes[i + 1] << 8) + bytes[i]);
+  }
+
+  return str;
+}
+/**
+ * Construct string from the little-endian UTF-16 code units given.
+ * @param {Uint8Array} bytes
+ * @returns {string}
+ */
+
+
+function beUtf16ToStr(bytes) {
+  var str = "";
+
+  for (var i = 0; i < bytes.length; i += 2) {
+    str += String.fromCharCode((bytes[i] << 8) + bytes[i + 1]);
   }
 
   return str;
@@ -2498,100 +2656,6 @@ function guidToUuid(guid) {
 }
 
 
-
-/***/ }),
-/* 12 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return arrayIncludes; });
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Array.prototype.includes ponyfill.
- * Returns ``true`` if the given array ``arr`` contains the element
- * ``searchElement``. false ``otherwise``.
- *
- * Inspired from MDN polyfill, but ponyfilled instead
- *
- * @example
- * ```js
- * arrayIncludes([1, 2, 3], 3);
- * // => true
- *
- * arrayIncludes([1, 2, 3], 7);
- * // => false
- *
- * const obj = { a: 4 };
- * arrayIncludes([obj, { b: 7 }, { a: 3 }], obj);
- * // => true
- *
- * // does not perform deep equality
- * arrayIncludes([{ a: 4 }, { b: 7 }, { a: 3 }], { a: 4 });
- * // => false
- *
- * // the third argument state the starting index. 0 if not set.
- *
- * arrayIncludes([1, 2, 3], 2, 1);
- * // => true
- *
- * arrayIncludes([1, 2, 3], 2, 2);
- * // => false
- * ```
- *
- * @param {Array} arr
- * @param {*} searchElement
- * @param {number} [fromIndex]
- * @returns {boolean}
- */
-function arrayIncludes(arr, searchElement, fromIndex) {
-  /* tslint:disable no-unbound-method */
-  if (typeof Array.prototype.includes === "function") {
-    /* tslint:enable no-unbound-method */
-
-    /* tslint:disable ban */
-    return arr.includes(searchElement, fromIndex);
-    /* tslint:enable ban */
-  }
-
-  var len = arr.length >>> 0;
-
-  if (len === 0) {
-    return false;
-  }
-
-  var n = fromIndex | 0;
-  var k = n >= 0 ? Math.min(n, len - 1) : Math.max(len + n, 0);
-
-  var areTheSame = function areTheSame(x, y) {
-    return x === y || // Viva las JavaScriptas!
-    typeof x === "number" && typeof y === "number" && isNaN(x) && isNaN(y);
-  };
-
-  while (k < len) {
-    if (areTheSame(arr[k], searchElement)) {
-      return true;
-    }
-
-    k++;
-  }
-
-  return false;
-}
 
 /***/ }),
 /* 13 */
@@ -2983,7 +3047,7 @@ var REGXP_RGBA_COLOR = /^rgba\( *(\d+) *, *(\d+) *, *(\d+) *, *(\d+) *\)/;
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return takeFirstSet; });
-/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
+/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -3138,7 +3202,7 @@ function getTimescaledRange(start, duration, timescale) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return warnOnce; });
-/* harmony import */ var _array_includes__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(12);
+/* harmony import */ var _array_includes__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(11);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -3705,7 +3769,7 @@ function excludeFromRanges(baseRanges, rangesToExclude) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return SimpleOuterSubscriber; });
 /* unused harmony export ComplexOuterSubscriber */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return innerSubscribe; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(13);
 /* harmony import */ var _util_subscribeTo__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(89);
@@ -3864,7 +3928,7 @@ var isSafariMobile = !_is_node__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"] &
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return fromEvent; });
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(13);
 /* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(0);
-/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(5);
+/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -4211,7 +4275,7 @@ function flattenUnsubscriptionErrors(errors) {
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(13);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(69);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(31);
-/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(5);
+/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(3);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -4282,7 +4346,7 @@ function castToObservable(value) {
 var Observable = __webpack_require__(13);
 
 // EXTERNAL MODULE: ./src/config.ts
-var config = __webpack_require__(3);
+var config = __webpack_require__(4);
 
 // EXTERNAL MODULE: ./src/errors/request_error.ts
 var request_error = __webpack_require__(143);
@@ -4291,7 +4355,7 @@ var request_error = __webpack_require__(143);
 var is_non_empty_string = __webpack_require__(2);
 
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
-var is_null_or_undefined = __webpack_require__(5);
+var is_null_or_undefined = __webpack_require__(3);
 
 // CONCATENATED MODULE: ./src/utils/request/xhr.ts
 /**
@@ -4532,7 +4596,7 @@ function of() {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return map; });
 /* unused harmony export MapOperator */
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
@@ -4748,7 +4812,7 @@ var INIT_EVENTS = {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return READY_STATES; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return VTTCue_; });
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(58);
-/* harmony import */ var _utils_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(5);
+/* harmony import */ var _utils_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
 /* harmony import */ var _is_node__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(30);
 /**
  * Copyright 2015 CANAL+ Group
@@ -5240,7 +5304,7 @@ var distinctUntilChanged = __webpack_require__(152);
 var switchMap = __webpack_require__(139);
 
 // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
-var tslib_es6 = __webpack_require__(4);
+var tslib_es6 = __webpack_require__(5);
 
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/scheduler/async.js
 var scheduler_async = __webpack_require__(47);
@@ -5535,7 +5599,7 @@ function dispatchNext(arg) {
 //# sourceMappingURL=throttleTime.js.map
 
 // EXTERNAL MODULE: ./src/config.ts
-var src_config = __webpack_require__(3);
+var src_config = __webpack_require__(4);
 
 // EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
 var is_non_empty_string = __webpack_require__(2);
@@ -5972,7 +6036,7 @@ __webpack_require__.d(__webpack_exports__, "b", function() { return /* binding *
 var array_find = __webpack_require__(15);
 
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
-var array_includes = __webpack_require__(12);
+var array_includes = __webpack_require__(11);
 
 // EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
 var is_non_empty_string = __webpack_require__(2);
@@ -6529,7 +6593,7 @@ function byteRange(_ref) {
 /* unused harmony export MergeMapOperator */
 /* unused harmony export MergeMapSubscriber */
 /* unused harmony export flatMap */
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(32);
 /* harmony import */ var _observable_from__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(69);
 /* harmony import */ var _innerSubscribe__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(23);
@@ -6801,7 +6865,7 @@ function base64ToBytes(str) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return assert; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return assertInterface; });
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(183);
-/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(5);
+/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -6878,7 +6942,7 @@ function isScheduler(value) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return SubjectSubscriber; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return Subject; });
 /* unused harmony export AnonymousSubject */
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _Observable__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(13);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(9);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(27);
@@ -7592,7 +7656,7 @@ function findEndOfCueBlock(linified, startOfCueBlock) {
 __webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ deferSubscriptions; });
 
 // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
-var tslib_es6 = __webpack_require__(4);
+var tslib_es6 = __webpack_require__(5);
 
 // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/util/Immediate.js
 /** PURE_IMPORTS_START  PURE_IMPORTS_END */
@@ -8740,10 +8804,10 @@ var media_error = __webpack_require__(58);
 var log = __webpack_require__(0);
 
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
-var array_includes = __webpack_require__(12);
+var array_includes = __webpack_require__(11);
 
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
-var is_null_or_undefined = __webpack_require__(5);
+var is_null_or_undefined = __webpack_require__(3);
 
 // EXTERNAL MODULE: ./src/utils/languages/index.ts
 var utils_languages = __webpack_require__(56);
@@ -10332,7 +10396,7 @@ function scheduleArray(input, scheduler) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return OuterSubscriber; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
@@ -10855,7 +10919,7 @@ var abstract_source_buffer_AbstractSourceBuffer = /*#__PURE__*/function (_EventE
 __webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ AsyncScheduler_AsyncScheduler; });
 
 // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
-var tslib_es6 = __webpack_require__(4);
+var tslib_es6 = __webpack_require__(5);
 
 // CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/Scheduler.js
 var Scheduler = /*@__PURE__*/ (function () {
@@ -10949,7 +11013,7 @@ var AsyncScheduler_AsyncScheduler = /*@__PURE__*/ (function (_super) {
 __webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ AsyncAction_AsyncAction; });
 
 // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
-var tslib_es6 = __webpack_require__(4);
+var tslib_es6 = __webpack_require__(5);
 
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subscription.js + 1 modules
 var Subscription = __webpack_require__(27);
@@ -11082,7 +11146,7 @@ var AsyncAction_AsyncAction = /*@__PURE__*/ (function (_super) {
 __webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ subscribeToResult; });
 
 // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
-var tslib_es6 = __webpack_require__(4);
+var tslib_es6 = __webpack_require__(5);
 
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subscriber.js
 var Subscriber = __webpack_require__(9);
@@ -11181,11 +11245,11 @@ var empty = {
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(179);
 /* harmony import */ var _babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_asyncToGenerator__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(13);
-/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(3);
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(4);
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(143);
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(45);
 /* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(0);
-/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(5);
+/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(3);
 
 
 
@@ -11637,7 +11701,7 @@ __webpack_require__.d(__webpack_exports__, "a", function() { return /* binding *
 // UNUSED EXPORTS: MulticastOperator
 
 // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
-var tslib_es6 = __webpack_require__(4);
+var tslib_es6 = __webpack_require__(5);
 
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subject.js
 var Subject = __webpack_require__(55);
@@ -12031,7 +12095,7 @@ __webpack_require__.d(__webpack_exports__, "c", function() { return /* binding *
 var is_non_empty_string = __webpack_require__(2);
 
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
-var is_null_or_undefined = __webpack_require__(5);
+var is_null_or_undefined = __webpack_require__(3);
 
 // CONCATENATED MODULE: ./src/utils/languages/ISO_639-1_to_ISO_639-3.ts
 /**
@@ -12570,7 +12634,7 @@ function shouldFavourCustomSafariEME() {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return SubjectSubscription; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _Subscription__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(27);
 /** PURE_IMPORTS_START tslib,_Subscription PURE_IMPORTS_END */
 
@@ -12634,7 +12698,7 @@ var ArgumentOutOfRangeError = ArgumentOutOfRangeErrorImpl;
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PSSH_TO_INTEGER; });
 /* harmony import */ var _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
-/* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(11);
+/* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(12);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -12653,7 +12717,7 @@ var ArgumentOutOfRangeError = ArgumentOutOfRangeErrorImpl;
 
  // The way "pssh" will be written in ISOBMFF files
 
-var PSSH_TO_INTEGER = Object(_utils_byte_parsing__WEBPACK_IMPORTED_MODULE_0__[/* be4toi */ "c"])(Object(_utils_string_parsing__WEBPACK_IMPORTED_MODULE_1__[/* strToUtf8 */ "f"])("pssh"), 0);
+var PSSH_TO_INTEGER = Object(_utils_byte_parsing__WEBPACK_IMPORTED_MODULE_0__[/* be4toi */ "c"])(Object(_utils_string_parsing__WEBPACK_IMPORTED_MODULE_1__[/* strToUtf8 */ "e"])("pssh"), 0);
 
 /***/ }),
 /* 117 */
@@ -13298,7 +13362,7 @@ function getParameters(tt) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return resolveStylesInheritance; });
 /* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
 /* harmony import */ var _utils_array_find_index__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(36);
-/* harmony import */ var _utils_array_includes__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(12);
+/* harmony import */ var _utils_array_includes__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(11);
 /* harmony import */ var _utils_object_assign__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(10);
 /**
  * Copyright 2015 CANAL+ Group
@@ -13656,7 +13720,7 @@ function createEMEManager(mediaElement, keySystems, contentProtections$) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return refCount; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
@@ -14134,7 +14198,7 @@ function parseCueBlock(cueLines, timeOffset) {
 __webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ generateManifestLoader; });
 
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
-var is_null_or_undefined = __webpack_require__(5);
+var is_null_or_undefined = __webpack_require__(3);
 
 // EXTERNAL MODULE: ./src/utils/request/index.ts + 1 modules
 var request = __webpack_require__(29);
@@ -14662,7 +14726,7 @@ function getTimeDelimiters(element, ttParams) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return switchMap; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _map__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(32);
 /* harmony import */ var _observable_from__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(69);
 /* harmony import */ var _innerSubscribe__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(23);
@@ -14879,7 +14943,7 @@ function merge() {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return take; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /* harmony import */ var _util_ArgumentOutOfRangeError__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(115);
 /* harmony import */ var _observable_empty__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(62);
@@ -15068,7 +15132,7 @@ var get_init_data = __webpack_require__(231);
 var generate_key_request = __webpack_require__(232);
 
 // EXTERNAL MODULE: ./src/config.ts
-var config = __webpack_require__(3);
+var config = __webpack_require__(4);
 
 // EXTERNAL MODULE: ./src/errors/encrypted_media_error.ts
 var encrypted_media_error = __webpack_require__(103);
@@ -15190,7 +15254,7 @@ function cleanOldLoadedSessions(loadedSessionsStore, limit) {
   return merge["a" /* merge */].apply(void 0, cleaningOldSessions$);
 }
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
-var array_includes = __webpack_require__(12);
+var array_includes = __webpack_require__(11);
 
 // EXTERNAL MODULE: ./src/utils/cast_to_observable.ts
 var cast_to_observable = __webpack_require__(28);
@@ -15873,7 +15937,7 @@ function getMediaKeySystemAccess(mediaElement, keySystemsConfigs) {
 var close_session = __webpack_require__(230);
 
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
-var is_null_or_undefined = __webpack_require__(5);
+var is_null_or_undefined = __webpack_require__(3);
 
 // EXTERNAL MODULE: ./src/utils/are_arrays_of_numbers_equal.ts
 var are_arrays_of_numbers_equal = __webpack_require__(48);
@@ -16850,7 +16914,7 @@ var TimeoutError = TimeoutErrorImpl;
 var scheduler_async = __webpack_require__(47);
 
 // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
-var tslib_es6 = __webpack_require__(4);
+var tslib_es6 = __webpack_require__(5);
 
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/util/isDate.js
 var isDate = __webpack_require__(112);
@@ -17037,7 +17101,7 @@ function retryObsWithBackoff(obs$, options) {
   }));
 }
 // EXTERNAL MODULE: ./src/utils/string_parsing.ts
-var string_parsing = __webpack_require__(11);
+var string_parsing = __webpack_require__(12);
 
 // EXTERNAL MODULE: ./src/compat/browser_detection.ts
 var browser_detection = __webpack_require__(24);
@@ -18076,7 +18140,7 @@ module.exports = __webpack_require__(205);
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return distinctUntilChanged; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
@@ -18146,7 +18210,7 @@ var DistinctUntilChangedSubscriber = /*@__PURE__*/ (function (_super) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ignoreElements; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
@@ -18182,7 +18246,7 @@ var IgnoreElementsSubscriber = /*@__PURE__*/ (function (_super) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return filter; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
@@ -18235,7 +18299,7 @@ var FilterSubscriber = /*@__PURE__*/ (function (_super) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return tap; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /* harmony import */ var _util_noop__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(57);
 /* harmony import */ var _util_isFunction__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(65);
@@ -19520,7 +19584,7 @@ var NetworkError = /*#__PURE__*/function (_Error) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return createBox; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return createBoxWithChildren; });
 /* harmony import */ var _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
-/* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(11);
+/* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(12);
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(99);
 /**
  * Copyright 2015 CANAL+ Group
@@ -19564,7 +19628,7 @@ function boxName(str) {
     return boxNamesMem[str];
   }
 
-  var nameInBytes = Object(_utils_string_parsing__WEBPACK_IMPORTED_MODULE_1__[/* strToUtf8 */ "f"])(str);
+  var nameInBytes = Object(_utils_string_parsing__WEBPACK_IMPORTED_MODULE_1__[/* strToUtf8 */ "e"])(str);
   boxNamesMem[str] = nameInBytes;
   return nameInBytes;
 }
@@ -19687,7 +19751,7 @@ module.exports = _asyncToGenerator;
 __webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ ReplaySubject_ReplaySubject; });
 
 // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
-var tslib_es6 = __webpack_require__(4);
+var tslib_es6 = __webpack_require__(5);
 
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subject.js
 var Subject = __webpack_require__(55);
@@ -20007,7 +20071,7 @@ function startWith() {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return mapTo; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
@@ -20105,7 +20169,7 @@ var AssertionError = /*#__PURE__*/function (_Error) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return catchError; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _innerSubscribe__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23);
 /** PURE_IMPORTS_START tslib,_innerSubscribe PURE_IMPORTS_END */
 
@@ -20166,7 +20230,7 @@ var CatchSubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return race; });
 /* unused harmony export RaceOperator */
 /* unused harmony export RaceSubscriber */
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(59);
 /* harmony import */ var _fromArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(74);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(87);
@@ -20717,7 +20781,7 @@ function getIE11MediaKeysCallbacks() {
 var base64 = __webpack_require__(52);
 
 // EXTERNAL MODULE: ./src/utils/string_parsing.ts
-var string_parsing = __webpack_require__(11);
+var string_parsing = __webpack_require__(12);
 
 // CONCATENATED MODULE: ./src/compat/eme/custom_media_keys/old_webkit_media_keys.ts
 
@@ -20956,10 +21020,10 @@ function getWebKitFairPlayInitData(initDataBytes, serverCertificateBytes) {
     throw new Error("Unsupported WebKit initData.");
   }
 
-  var initDataUri = Object(string_parsing["d" /* leUtf16ToStr */])(initData);
+  var initDataUri = Object(string_parsing["f" /* utf16LEToStr */])(initData);
   var skdIndexInInitData = initDataUri.indexOf("skd://");
   var contentIdStr = skdIndexInInitData > -1 ? initDataUri.substring(skdIndexInInitData + 6) : initDataUri;
-  var id = Object(string_parsing["e" /* strToLeUtf16 */])(contentIdStr);
+  var id = Object(string_parsing["d" /* strToUtf16LE */])(contentIdStr);
   var offset = 0;
   var res = new Uint8Array(initData.byteLength
   /* id length */
@@ -21517,7 +21581,7 @@ module.exports = g;
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
-/* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(11);
+/* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(12);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -21647,7 +21711,7 @@ function parseBif(buf) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getPlayReadyKIDFromPrivateData; });
 /* harmony import */ var _utils_base64__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(52);
 /* harmony import */ var _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
-/* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(11);
+/* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(12);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -21674,7 +21738,7 @@ function parseBif(buf) {
 
 function getPlayReadyKIDFromPrivateData(data) {
   var xmlLength = Object(_utils_byte_parsing__WEBPACK_IMPORTED_MODULE_1__[/* le2toi */ "k"])(data, 8);
-  var xml = Object(_utils_string_parsing__WEBPACK_IMPORTED_MODULE_2__[/* leUtf16ToStr */ "d"])(data.subarray(10, xmlLength + 10));
+  var xml = Object(_utils_string_parsing__WEBPACK_IMPORTED_MODULE_2__[/* utf16LEToStr */ "f"])(data.subarray(10, xmlLength + 10));
   var doc = new DOMParser().parseFromString(xml, "application/xml");
   var kidElement = doc.querySelector("KID");
 
@@ -24343,7 +24407,7 @@ var Subject = __webpack_require__(55);
 var ReplaySubject = __webpack_require__(180);
 
 // EXTERNAL MODULE: ./node_modules/tslib/tslib.es6.js
-var tslib_es6 = __webpack_require__(4);
+var tslib_es6 = __webpack_require__(5);
 
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/util/ObjectUnsubscribedError.js
 var ObjectUnsubscribedError = __webpack_require__(63);
@@ -24503,7 +24567,7 @@ var switchMapTo = __webpack_require__(236);
 var mergeMapTo = __webpack_require__(188);
 
 // EXTERNAL MODULE: ./src/config.ts
-var config = __webpack_require__(3);
+var config = __webpack_require__(4);
 
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(0);
@@ -24515,7 +24579,7 @@ var are_arrays_of_numbers_equal = __webpack_require__(48);
 var event_emitter = __webpack_require__(25);
 
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
-var is_null_or_undefined = __webpack_require__(5);
+var is_null_or_undefined = __webpack_require__(3);
 
 // EXTERNAL MODULE: ./src/utils/noop.ts
 var noop = __webpack_require__(40);
@@ -27602,7 +27666,7 @@ var prioritizer_ObservablePrioritizer = /*#__PURE__*/function () {
 
 
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
-var array_includes = __webpack_require__(12);
+var array_includes = __webpack_require__(11);
 
 // EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
 var assert_unreachable = __webpack_require__(49);
@@ -30675,13 +30739,22 @@ var EVENTS = {
       }
     };
   },
-  adaptationChange: function adaptationChange(bufferType, adaptation, period) {
+  adaptationChange: function adaptationChange(bufferType, adaptation, period, isFirstAdaptation) {
     return {
       type: "adaptationChange",
       value: {
         type: bufferType,
         adaptation: adaptation,
-        period: period
+        period: period,
+        isFirstAdaptation: isFirstAdaptation
+      }
+    };
+  },
+  addedSegmentOnAdaptationChange: function addedSegmentOnAdaptationChange(bufferType) {
+    return {
+      type: "addedSegmentOnAdaptationChange",
+      value: {
+        type: bufferType
       }
     };
   },
@@ -30972,7 +31045,7 @@ var ROUNDING_ERROR = Math.min(1 / 60, get_needed_segments_MINIMUM_SEGMENT_SIZE);
 function getNeededSegments(_ref) {
   var content = _ref.content,
       currentPlaybackTime = _ref.currentPlaybackTime,
-      knownStableBitrate = _ref.knownStableBitrate,
+      fastSwitchThreshold = _ref.fastSwitchThreshold,
       neededRange = _ref.neededRange,
       queuedSourceBuffer = _ref.queuedSourceBuffer;
   var segmentInventory = queuedSourceBuffer.getInventory();
@@ -30994,7 +31067,7 @@ function getNeededSegments(_ref) {
   }, segmentInventory); // 2 - remove from pushed list of current segments the contents we want to replace
 
   bufferedSegments = bufferedSegments.filter(function (bufferedSegment) {
-    return !shouldContentBeReplaced(bufferedSegment.infos, content, currentPlaybackTime, knownStableBitrate);
+    return !shouldContentBeReplaced(bufferedSegment.infos, content, currentPlaybackTime, fastSwitchThreshold);
   }); // 3 - remove from that list the segments who appeared to have been GCed
 
   bufferedSegments = filterGarbageCollectedSegments(bufferedSegments, neededRange); // 4 - now filter the list of segments we can download
@@ -31050,7 +31123,7 @@ function getNeededSegments(_ref) {
           return false;
         }
 
-        return !shouldContentBeReplaced(pendingSegment, contentObject, currentPlaybackTime, knownStableBitrate);
+        return !shouldContentBeReplaced(pendingSegment, contentObject, currentPlaybackTime, fastSwitchThreshold);
       });
 
       if (waitForPushedSegment) {
@@ -31109,11 +31182,11 @@ function getNeededSegments(_ref) {
  * @param {Object} oldContent
  * @param {Object} currentContent
  * @param {number} currentPlaybackTime
- * @param {number} [knownStableBitrate]
+ * @param {number} [fastSwitchThreshold]
  * @returns {boolean}
  */
 
-function shouldContentBeReplaced(oldContent, currentContent, currentPlaybackTime, knownStableBitrate) {
+function shouldContentBeReplaced(oldContent, currentContent, currentPlaybackTime, fastSwitchThreshold) {
   if (oldContent.period.id !== currentContent.period.id) {
     return false; // keep segments from another Period by default.
   }
@@ -31128,7 +31201,7 @@ function shouldContentBeReplaced(oldContent, currentContent, currentPlaybackTime
     return true; // replace segments from another Adaptation
   }
 
-  return canFastSwitch(oldContent.representation, currentContent.representation, knownStableBitrate);
+  return canFastSwitch(oldContent.representation, currentContent.representation, fastSwitchThreshold);
 }
 /**
  * Returns `true` if segments from the new Representation can replace
@@ -31137,21 +31210,21 @@ function shouldContentBeReplaced(oldContent, currentContent, currentPlaybackTime
  * This behavior is called "fast-switching".
  * @param {Object} oldSegmentRepresentation
  * @param {Object} newSegmentRepresentation
- * @param {number|undefined} knownStableBitrate
+ * @param {number|undefined} fastSwitchThreshold
  * @returns {boolean}
  */
 
 
-function canFastSwitch(oldSegmentRepresentation, newSegmentRepresentation, knownStableBitrate) {
+function canFastSwitch(oldSegmentRepresentation, newSegmentRepresentation, fastSwitchThreshold) {
   var oldContentBitrate = oldSegmentRepresentation.bitrate;
 
-  if (knownStableBitrate === undefined) {
+  if (fastSwitchThreshold === undefined) {
     // only re-load comparatively-poor bitrates for the same Adaptation.
     var bitrateCeil = oldContentBitrate * BITRATE_REBUFFERING_RATIO;
     return newSegmentRepresentation.bitrate > bitrateCeil;
   }
 
-  return oldContentBitrate < knownStableBitrate && newSegmentRepresentation.bitrate > oldContentBitrate;
+  return oldContentBitrate < fastSwitchThreshold && newSegmentRepresentation.bitrate > oldContentBitrate;
 }
 /**
  * Returns an Array which removed the segments from `consideredSegments` which
@@ -31720,7 +31793,7 @@ function RepresentationStream(_ref) {
   var bufferGoal$ = _ref.bufferGoal$,
       clock$ = _ref.clock$,
       content = _ref.content,
-      knownStableBitrate$ = _ref.knownStableBitrate$,
+      fastSwitchThreshold$ = _ref.fastSwitchThreshold$,
       queuedSourceBuffer = _ref.queuedSourceBuffer,
       segmentFetcher = _ref.segmentFetcher,
       terminate$ = _ref.terminate$;
@@ -31755,12 +31828,12 @@ function RepresentationStream(_ref) {
    */
 
   var currentSegmentRequest = null;
-  var status$ = Object(combineLatest["a" /* combineLatest */])([clock$, bufferGoal$, terminate$.pipe(Object(take["a" /* take */])(1), Object(startWith["a" /* startWith */])(null)), reCheckNeededSegments$.pipe(Object(startWith["a" /* startWith */])(undefined))]).pipe(withLatestFrom(knownStableBitrate$), Object(map["a" /* map */])(function getCurrentStatus(_ref2) {
+  var status$ = Object(combineLatest["a" /* combineLatest */])([clock$, bufferGoal$, terminate$.pipe(Object(take["a" /* take */])(1), Object(startWith["a" /* startWith */])(null)), reCheckNeededSegments$.pipe(Object(startWith["a" /* startWith */])(undefined))]).pipe(withLatestFrom(fastSwitchThreshold$), Object(map["a" /* map */])(function getCurrentStatus(_ref2) {
     var _ref2$ = _ref2[0],
         timing = _ref2$[0],
         bufferGoal = _ref2$[1],
         terminate = _ref2$[2],
-        knownStableBitrate = _ref2[1];
+        fastSwitchThreshold = _ref2[1];
     queuedSourceBuffer.synchronizeInventory();
     var neededRange = getWantedRange(period, timing, bufferGoal);
     var discontinuity = timing.stalled != null ? representation.index.checkDiscontinuity(timing.currentTime) : -1;
@@ -31782,7 +31855,7 @@ function RepresentationStream(_ref) {
       neededSegments = getNeededSegments({
         content: content,
         currentPlaybackTime: timing.currentTime,
-        knownStableBitrate: knownStableBitrate,
+        fastSwitchThreshold: fastSwitchThreshold,
         neededRange: neededRange,
         queuedSourceBuffer: queuedSourceBuffer
       }).map(function (segment) {
@@ -32328,16 +32401,23 @@ function AdaptationStream(_ref) {
       }
     }));
     /**
-     * Bitrate higher or equal to this value should not be replaced by segments of
-     * better quality.
-     * undefined means everything can potentially be replaced
+     * "Fast-switching" is a behavior allowing to replace low-quality segments
+     * (i.e. with a low bitrate) with higher-quality segments (higher bitrate) in
+     * the buffer.
+     * This threshold defines a bitrate from which "fast-switching" is disabled.
+     * For example with a fastSwitchThreshold set to `100`, segments with a
+     * bitrate of `90` can be replaced. But segments with a bitrate of `100`
+     * onward won't be replaced by higher quality segments.
+     * Set to `undefined` to indicate that there's no threshold (anything can be
+     * replaced by higher-quality segments).
      */
 
-    var knownStableBitrate$ = lastEstimate$.pipe(Object(map["a" /* map */])(function (estimate) {
+    var fastSwitchThreshold$ = !options.enableFastSwitching ? Object(of["a" /* of */])(0) : // Do not fast-switch anything
+    lastEstimate$.pipe(Object(map["a" /* map */])(function (estimate) {
       return estimate === null ? undefined : estimate.knownStableBitrate;
     }), Object(distinctUntilChanged["a" /* distinctUntilChanged */])());
     var representationChange$ = Object(of["a" /* of */])(stream_events_generators.representationChange(adaptation.type, period, representation));
-    return Object(concat["a" /* concat */])(representationChange$, createRepresentationStream(representation, terminateCurrentStream$, knownStableBitrate$)).pipe(Object(tap["a" /* tap */])(function (evt) {
+    return Object(concat["a" /* concat */])(representationChange$, createRepresentationStream(representation, terminateCurrentStream$, fastSwitchThreshold$)).pipe(Object(tap["a" /* tap */])(function (evt) {
       if (evt.type === "representationChange" || evt.type === "added-segment") {
         return streamFeedback$.next(evt);
       }
@@ -32363,7 +32443,7 @@ function AdaptationStream(_ref) {
    */
 
 
-  function createRepresentationStream(representation, terminateCurrentStream$, knownStableBitrate$) {
+  function createRepresentationStream(representation, terminateCurrentStream$, fastSwitchThreshold$) {
     return Object(defer["a" /* defer */])(function () {
       var oldBufferGoalRatio = bufferGoalRatioMap[representation.id];
       var bufferGoalRatio = oldBufferGoalRatio != null ? oldBufferGoalRatio : 1;
@@ -32384,7 +32464,7 @@ function AdaptationStream(_ref) {
         segmentFetcher: segmentFetcher,
         terminate$: terminateCurrentStream$,
         bufferGoal$: bufferGoal$,
-        knownStableBitrate$: knownStableBitrate$
+        fastSwitchThreshold$: fastSwitchThreshold$
       }).pipe(Object(catchError["a" /* catchError */])(function (err) {
         var formattedError = formatError(err, {
           defaultCode: "NONE",
@@ -32400,7 +32480,7 @@ function AdaptationStream(_ref) {
           }
 
           bufferGoalRatioMap[representation.id] = lastBufferGoalRatio - 0.25;
-          return createRepresentationStream(representation, terminateCurrentStream$, knownStableBitrate$);
+          return createRepresentationStream(representation, terminateCurrentStream$, fastSwitchThreshold$);
         }
 
         throw formattedError;
@@ -32649,7 +32729,7 @@ function PeriodStream(_ref) {
   // `null` when no Adaptation is chosen (e.g. no subtitles)
 
   var adaptation$ = new ReplaySubject["a" /* ReplaySubject */](1);
-  return adaptation$.pipe(Object(switchMap["a" /* switchMap */])(function (adaptation) {
+  return adaptation$.pipe(Object(switchMap["a" /* switchMap */])(function (adaptation, index) {
     if (adaptation === null) {
       log["a" /* default */].info("Stream: Set no " + bufferType + " Adaptation", period);
       var sourceBufferStatus = sourceBuffersStore.getStatus(bufferType);
@@ -32673,7 +32753,7 @@ function PeriodStream(_ref) {
         cleanBuffer$ = Object(of["a" /* of */])(null);
       }
 
-      return Object(concat["a" /* concat */])(cleanBuffer$.pipe(Object(mapTo["a" /* mapTo */])(stream_events_generators.adaptationChange(bufferType, null, period))), createEmptyAdaptationStream(clock$, wantedBufferAhead$, bufferType, {
+      return Object(concat["a" /* concat */])(cleanBuffer$.pipe(Object(mapTo["a" /* mapTo */])(stream_events_generators.adaptationChange(bufferType, null, period, index === 0))), createEmptyAdaptationStream(clock$, wantedBufferAhead$, bufferType, {
         period: period
       }));
     }
@@ -32704,7 +32784,7 @@ function PeriodStream(_ref) {
         return Object(concat["a" /* concat */])(cleanBuffer$, Object(merge["a" /* merge */])(adaptationStream$, bufferGarbageCollector$));
       }));
     }));
-    return Object(concat["a" /* concat */])(Object(of["a" /* of */])(stream_events_generators.adaptationChange(bufferType, adaptation, period)), newStream$);
+    return Object(concat["a" /* concat */])(Object(of["a" /* of */])(stream_events_generators.adaptationChange(bufferType, adaptation, period, index === 0)), newStream$);
   }), Object(startWith["a" /* startWith */])(stream_events_generators.periodStreamReady(bufferType, period, adaptation$)));
   /**
    * @param {Object} adaptation
@@ -33371,7 +33451,8 @@ function StreamOrchestrator(content, clock$, abrManager, sourceBuffersStore, seg
 
 
   function manageConsecutivePeriodStreams(bufferType, basePeriod, destroy$) {
-    log["a" /* default */].info("SO: Creating new Stream for", bufferType, basePeriod); // Emits the Period of the next Period Stream when it can be created.
+    log["a" /* default */].info("SO: Creating new Stream for", bufferType, basePeriod);
+    var isReadyToAdaptAudioSwitchingStategy = false; // Emits the Period of the next Period Stream when it can be created.
 
     var createNextPeriodStream$ = new Subject["a" /* Subject */](); // Emits when the Streams for the next Periods should be destroyed, if
     // created.
@@ -33429,6 +33510,19 @@ function StreamOrchestrator(content, clock$, abrManager, sourceBuffersStore, seg
       } else if (type === "active-stream") {
         // current Stream is active, destroy next Stream if created
         destroyNextStreams$.next();
+      } else if (evt.type === "adaptationChange" && evt.value.type === "audio" && !evt.value.isFirstAdaptation) {
+        isReadyToAdaptAudioSwitchingStategy = true;
+      } else if (evt.type === "added-segment" && evt.value.content.adaptation.type === "audio" && isReadyToAdaptAudioSwitchingStategy) {
+        var audioTrackSwitchingMode = options.audioTrackSwitchingMode;
+        isReadyToAdaptAudioSwitchingStategy = false;
+
+        if (audioTrackSwitchingMode === "reload") {
+          return clock$.pipe(Object(mergeMap["a" /* mergeMap */])(function (tick) {
+            return Object(merge["a" /* merge */])(Object(of["a" /* of */])(evt), Object(of["a" /* of */])(stream_events_generators.needsMediaSourceReload(basePeriod, tick)));
+          }));
+        } else {
+          return Object(merge["a" /* merge */])(Object(of["a" /* of */])(evt), Object(of["a" /* of */])(stream_events_generators.addedSegmentOnAdaptationChange("audio")));
+        }
       }
 
       return Object(of["a" /* of */])(evt);
@@ -34246,6 +34340,15 @@ function createMediaSourceLoader(_ref) {
 
           if (source_buffers.isNative(bufferType)) {
             handleDiscontinuity(gap[1], mediaElement);
+          }
+
+          return empty["a" /* EMPTY */];
+
+        case "addedSegmentOnAdaptationChange":
+          var audioTrackSwitchingMode = bufferOptions.audioTrackSwitchingMode;
+
+          if (audioTrackSwitchingMode === "flush" && evt.value.type === "audio" && mediaElement.currentTime + 0.001 < mediaElement.duration) {
+            mediaElement.currentTime += 0.001;
           }
 
           return empty["a" /* EMPTY */];
@@ -35277,10 +35380,14 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 
 
+
+
 var DEFAULT_AUTO_PLAY = config["a" /* default */].DEFAULT_AUTO_PLAY,
+    DEFAULT_ENABLE_FAST_SWITCHING = config["a" /* default */].DEFAULT_ENABLE_FAST_SWITCHING,
     DEFAULT_INITIAL_BITRATES = config["a" /* default */].DEFAULT_INITIAL_BITRATES,
     DEFAULT_LIMIT_VIDEO_WIDTH = config["a" /* default */].DEFAULT_LIMIT_VIDEO_WIDTH,
     DEFAULT_MANUAL_BITRATE_SWITCHING_MODE = config["a" /* default */].DEFAULT_MANUAL_BITRATE_SWITCHING_MODE,
+    DEFAULT_AUDIO_TRACK_SWITCHING_MODE = config["a" /* default */].DEFAULT_AUDIO_TRACK_SWITCHING_MODE,
     DEFAULT_MAX_BITRATES = config["a" /* default */].DEFAULT_MAX_BITRATES,
     DEFAULT_MAX_BUFFER_AHEAD = config["a" /* default */].DEFAULT_MAX_BUFFER_AHEAD,
     DEFAULT_MAX_BUFFER_BEHIND = config["a" /* default */].DEFAULT_MAX_BUFFER_BEHIND,
@@ -35317,7 +35424,7 @@ function parseConstructorOptions(options) {
   var maxVideoBitrate;
   var stopAtEnd;
 
-  if (options.maxBufferAhead == null) {
+  if (Object(is_null_or_undefined["a" /* default */])(options.maxBufferAhead)) {
     maxBufferAhead = DEFAULT_MAX_BUFFER_AHEAD;
   } else {
     maxBufferAhead = Number(options.maxBufferAhead);
@@ -35327,7 +35434,7 @@ function parseConstructorOptions(options) {
     }
   }
 
-  if (options.maxBufferBehind == null) {
+  if (Object(is_null_or_undefined["a" /* default */])(options.maxBufferBehind)) {
     maxBufferBehind = DEFAULT_MAX_BUFFER_BEHIND;
   } else {
     maxBufferBehind = Number(options.maxBufferBehind);
@@ -35337,7 +35444,7 @@ function parseConstructorOptions(options) {
     }
   }
 
-  if (options.wantedBufferAhead == null) {
+  if (Object(is_null_or_undefined["a" /* default */])(options.wantedBufferAhead)) {
     wantedBufferAhead = DEFAULT_WANTED_BUFFER_AHEAD;
   } else {
     wantedBufferAhead = Number(options.wantedBufferAhead);
@@ -35349,9 +35456,9 @@ function parseConstructorOptions(options) {
     }
   }
 
-  limitVideoWidth = options.limitVideoWidth == null ? DEFAULT_LIMIT_VIDEO_WIDTH : !!options.limitVideoWidth;
+  limitVideoWidth = Object(is_null_or_undefined["a" /* default */])(options.limitVideoWidth) ? DEFAULT_LIMIT_VIDEO_WIDTH : !!options.limitVideoWidth;
 
-  if (options.throttleWhenHidden != null) {
+  if (!Object(is_null_or_undefined["a" /* default */])(options.throttleWhenHidden)) {
     Object(warn_once["a" /* default */])("`throttleWhenHidden` API is deprecated. Consider using " + "`throttleVideoBitrateWhenHidden` instead.");
     throttleWhenHidden = !!options.throttleWhenHidden;
   } else {
@@ -35363,7 +35470,7 @@ function parseConstructorOptions(options) {
   if (throttleWhenHidden) {
     throttleVideoBitrateWhenHidden = false;
   } else {
-    throttleVideoBitrateWhenHidden = options.throttleVideoBitrateWhenHidden == null ? DEFAULT_THROTTLE_VIDEO_BITRATE_WHEN_HIDDEN : !!options.throttleVideoBitrateWhenHidden;
+    throttleVideoBitrateWhenHidden = Object(is_null_or_undefined["a" /* default */])(options.throttleVideoBitrateWhenHidden) ? DEFAULT_THROTTLE_VIDEO_BITRATE_WHEN_HIDDEN : !!options.throttleVideoBitrateWhenHidden;
   }
 
   if (options.preferredTextTracks !== undefined) {
@@ -35399,7 +35506,7 @@ function parseConstructorOptions(options) {
     preferredVideoTracks = [];
   }
 
-  if (options.videoElement == null) {
+  if (Object(is_null_or_undefined["a" /* default */])(options.videoElement)) {
     videoElement = document.createElement("video");
   } else if (options.videoElement instanceof HTMLMediaElement) {
     videoElement = options.videoElement;
@@ -35409,7 +35516,7 @@ function parseConstructorOptions(options) {
     /* tslint:enable:max-line-length */
   }
 
-  if (options.initialVideoBitrate == null) {
+  if (Object(is_null_or_undefined["a" /* default */])(options.initialVideoBitrate)) {
     initialVideoBitrate = DEFAULT_INITIAL_BITRATES.video;
   } else {
     initialVideoBitrate = Number(options.initialVideoBitrate);
@@ -35421,7 +35528,7 @@ function parseConstructorOptions(options) {
     }
   }
 
-  if (options.initialAudioBitrate == null) {
+  if (Object(is_null_or_undefined["a" /* default */])(options.initialAudioBitrate)) {
     initialAudioBitrate = DEFAULT_INITIAL_BITRATES.audio;
   } else {
     initialAudioBitrate = Number(options.initialAudioBitrate);
@@ -35433,7 +35540,7 @@ function parseConstructorOptions(options) {
     }
   }
 
-  if (options.maxVideoBitrate == null) {
+  if (Object(is_null_or_undefined["a" /* default */])(options.maxVideoBitrate)) {
     maxVideoBitrate = DEFAULT_MAX_BITRATES.video;
   } else {
     maxVideoBitrate = Number(options.maxVideoBitrate);
@@ -35443,7 +35550,7 @@ function parseConstructorOptions(options) {
     }
   }
 
-  if (options.maxAudioBitrate == null) {
+  if (Object(is_null_or_undefined["a" /* default */])(options.maxAudioBitrate)) {
     maxAudioBitrate = DEFAULT_MAX_BITRATES.audio;
   } else {
     maxAudioBitrate = Number(options.maxAudioBitrate);
@@ -35453,7 +35560,7 @@ function parseConstructorOptions(options) {
     }
   }
 
-  stopAtEnd = options.stopAtEnd == null ? DEFAULT_STOP_AT_END : !!options.stopAtEnd;
+  stopAtEnd = Object(is_null_or_undefined["a" /* default */])(options.stopAtEnd) ? DEFAULT_STOP_AT_END : !!options.stopAtEnd;
   return {
     maxBufferAhead: maxBufferAhead,
     maxBufferBehind: maxBufferBehind,
@@ -35487,7 +35594,7 @@ function parseConstructorOptions(options) {
 
 
 function parseLoadVideoOptions(options) {
-  var _a, _b, _c;
+  var _a, _b, _c, _d, _e, _f;
 
   var url;
   var transport;
@@ -35496,25 +35603,25 @@ function parseLoadVideoOptions(options) {
   var textTrackElement;
   var startAt;
 
-  if (options == null) {
+  if (Object(is_null_or_undefined["a" /* default */])(options)) {
     throw new Error("No option set on loadVideo");
   }
 
-  if (options.url != null) {
+  if (!Object(is_null_or_undefined["a" /* default */])(options.url)) {
     url = String(options.url);
-  } else if (options.transportOptions == null || options.transportOptions.manifestLoader == null) {
+  } else if (Object(is_null_or_undefined["a" /* default */])((_a = options.transportOptions) === null || _a === void 0 ? void 0 : _a.manifestLoader)) {
     throw new Error("No url set on loadVideo");
   }
 
-  if (options.transport == null) {
+  if (Object(is_null_or_undefined["a" /* default */])(options.transport)) {
     throw new Error("No transport set on loadVideo");
   } else {
     transport = String(options.transport);
   }
 
-  var autoPlay = options.autoPlay == null ? DEFAULT_AUTO_PLAY : !!options.autoPlay;
+  var autoPlay = Object(is_null_or_undefined["a" /* default */])(options.autoPlay) ? DEFAULT_AUTO_PLAY : !!options.autoPlay;
 
-  if (options.keySystems == null) {
+  if (Object(is_null_or_undefined["a" /* default */])(options.keySystems)) {
     keySystems = [];
   } else {
     keySystems = Array.isArray(options.keySystems) ? options.keySystems : [options.keySystems];
@@ -35530,8 +35637,15 @@ function parseLoadVideoOptions(options) {
 
   var lowLatencyMode = options.lowLatencyMode === undefined ? false : !!options.lowLatencyMode;
   var transportOptsArg = typeof options.transportOptions === "object" && options.transportOptions !== null ? options.transportOptions : {};
-  var manifestUpdateUrl = (_a = options.transportOptions) === null || _a === void 0 ? void 0 : _a.manifestUpdateUrl;
-  var minimumManifestUpdateInterval = (_c = (_b = options.transportOptions) === null || _b === void 0 ? void 0 : _b.minimumManifestUpdateInterval) !== null && _c !== void 0 ? _c : 0;
+  var manifestUpdateUrl = (_b = options.transportOptions) === null || _b === void 0 ? void 0 : _b.manifestUpdateUrl;
+  var minimumManifestUpdateInterval = (_d = (_c = options.transportOptions) === null || _c === void 0 ? void 0 : _c.minimumManifestUpdateInterval) !== null && _d !== void 0 ? _d : 0;
+  var audioTrackSwitchingMode = (_e = options.audioTrackSwitchingMode) !== null && _e !== void 0 ? _e : DEFAULT_AUDIO_TRACK_SWITCHING_MODE;
+
+  if (!Object(array_includes["a" /* default */])(["smooth", "flush", "reload"], audioTrackSwitchingMode)) {
+    Object(warn_once["a" /* default */])("The `audioTrackSwitchingMode` loadVideo option must match one of the following strategy name:\n" + "- `smooth`\n" + "- `flush`\n" + "- `reload`\n" + "If badly set, `smooth` strategy will be used as default");
+    audioTrackSwitchingMode = DEFAULT_AUDIO_TRACK_SWITCHING_MODE;
+  }
+
   var transportOptions = Object(object_assign["a" /* default */])({}, transportOptsArg, {
     /* tslint:disable deprecation */
     supplementaryImageTracks: [],
@@ -35574,7 +35688,7 @@ function parseLoadVideoOptions(options) {
     transportOptions.supplementaryImageTracks = supplementaryImageTracks;
   }
 
-  if (options.textTrackMode == null) {
+  if (Object(is_null_or_undefined["a" /* default */])(options.textTrackMode)) {
     textTrackMode = DEFAULT_TEXT_TRACK_MODE;
   } else {
     if (options.textTrackMode !== "native" && options.textTrackMode !== "html") {
@@ -35584,40 +35698,41 @@ function parseLoadVideoOptions(options) {
     textTrackMode = options.textTrackMode;
   }
 
-  if (options.defaultAudioTrack != null) {
+  if (!Object(is_null_or_undefined["a" /* default */])(options.defaultAudioTrack)) {
     Object(warn_once["a" /* default */])("The `defaultAudioTrack` loadVideo option is deprecated.\n" + "Please use the `preferredAudioTracks` constructor option or the" + "`setPreferredAudioTracks` method instead");
   }
 
   var defaultAudioTrack = Object(normalize["b" /* normalizeAudioTrack */])(options.defaultAudioTrack);
 
-  if (options.defaultTextTrack != null) {
+  if (!Object(is_null_or_undefined["a" /* default */])(options.defaultTextTrack)) {
     Object(warn_once["a" /* default */])("The `defaultTextTrack` loadVideo option is deprecated.\n" + "Please use the `preferredTextTracks` constructor option or the" + "`setPreferredTextTracks` method instead");
   }
 
   var defaultTextTrack = Object(normalize["c" /* normalizeTextTrack */])(options.defaultTextTrack);
   var hideNativeSubtitle = !DEFAULT_SHOW_NATIVE_SUBTITLE;
 
-  if (options.hideNativeSubtitle != null) {
+  if (!Object(is_null_or_undefined["a" /* default */])(options.hideNativeSubtitle)) {
     Object(warn_once["a" /* default */])("The `hideNativeSubtitle` loadVideo option is deprecated");
     hideNativeSubtitle = !!options.hideNativeSubtitle;
   }
 
-  var manualBitrateSwitchingMode = options.manualBitrateSwitchingMode == null ? DEFAULT_MANUAL_BITRATE_SWITCHING_MODE : options.manualBitrateSwitchingMode;
+  var manualBitrateSwitchingMode = (_f = options.manualBitrateSwitchingMode) !== null && _f !== void 0 ? _f : DEFAULT_MANUAL_BITRATE_SWITCHING_MODE;
+  var enableFastSwitching = Object(is_null_or_undefined["a" /* default */])(options.enableFastSwitching) ? DEFAULT_ENABLE_FAST_SWITCHING : options.enableFastSwitching;
 
   if (textTrackMode === "html") {
     // TODO Better way to express that in TypeScript?
-    if (options.textTrackElement == null) {
+    if (Object(is_null_or_undefined["a" /* default */])(options.textTrackElement)) {
       throw new Error("You have to provide a textTrackElement " + "in \"html\" textTrackMode.");
     } else if (!(options.textTrackElement instanceof HTMLElement)) {
       throw new Error("textTrackElement should be an HTMLElement.");
     } else {
       textTrackElement = options.textTrackElement;
     }
-  } else if (options.textTrackElement != null) {
+  } else if (!Object(is_null_or_undefined["a" /* default */])(options.textTrackElement)) {
     log["a" /* default */].warn("API: You have set a textTrackElement without being in " + "an \"html\" textTrackMode. It will be ignored.");
   }
 
-  if (options.startAt != null) {
+  if (!Object(is_null_or_undefined["a" /* default */])(options.startAt)) {
     // TODO Better way to express that in TypeScript?
     if (options.startAt.wallClockTime instanceof Date) {
       var wallClockTime = options.startAt.wallClockTime.getTime() / 1000;
@@ -35629,7 +35744,7 @@ function parseLoadVideoOptions(options) {
     }
   }
 
-  var networkConfig = options.networkConfig == null ? {} : {
+  var networkConfig = Object(is_null_or_undefined["a" /* default */])(options.networkConfig) ? {} : {
     manifestRetry: options.networkConfig.manifestRetry,
     offlineRetry: options.networkConfig.offlineRetry,
     segmentRetry: options.networkConfig.segmentRetry
@@ -35641,10 +35756,12 @@ function parseLoadVideoOptions(options) {
     autoPlay: autoPlay,
     defaultAudioTrack: defaultAudioTrack,
     defaultTextTrack: defaultTextTrack,
+    enableFastSwitching: enableFastSwitching,
     hideNativeSubtitle: hideNativeSubtitle,
     keySystems: keySystems,
     lowLatencyMode: lowLatencyMode,
     manualBitrateSwitchingMode: manualBitrateSwitchingMode,
+    audioTrackSwitchingMode: audioTrackSwitchingMode,
     manifestUpdateUrl: manifestUpdateUrl,
     minimumManifestUpdateInterval: minimumManifestUpdateInterval,
     networkConfig: networkConfig,
@@ -37110,8 +37227,10 @@ var public_api_Player = /*#__PURE__*/function (_EventEmitter) {
     var options = parseLoadVideoOptions(opts);
     log["a" /* default */].info("API: Calling loadvideo", options);
     var autoPlay = options.autoPlay,
+        audioTrackSwitchingMode = options.audioTrackSwitchingMode,
         defaultAudioTrack = options.defaultAudioTrack,
         defaultTextTrack = options.defaultTextTrack,
+        enableFastSwitching = options.enableFastSwitching,
         keySystems = options.keySystems,
         lowLatencyMode = options.lowLatencyMode,
         manualBitrateSwitchingMode = options.manualBitrateSwitchingMode,
@@ -37201,6 +37320,8 @@ var public_api_Player = /*#__PURE__*/function (_EventEmitter) {
         textTrackElement: options.textTrackElement
       };
       var bufferOptions = Object(object_assign["a" /* default */])({
+        audioTrackSwitchingMode: audioTrackSwitchingMode,
+        enableFastSwitching: enableFastSwitching,
         manualBitrateSwitchingMode: manualBitrateSwitchingMode
       }, this._priv_bufferOptions); // We've every options set up. Start everything now
 
@@ -39695,7 +39816,7 @@ var mergeMap = __webpack_require__(51);
 var src_manifest = __webpack_require__(85);
 
 // EXTERNAL MODULE: ./src/config.ts
-var config = __webpack_require__(3);
+var config = __webpack_require__(4);
 
 // EXTERNAL MODULE: ./src/utils/array_find.ts
 var array_find = __webpack_require__(15);
@@ -40559,7 +40680,7 @@ function parseContentComponent(root) {
   return ret;
 }
 // EXTERNAL MODULE: ./src/utils/string_parsing.ts
-var string_parsing = __webpack_require__(11);
+var string_parsing = __webpack_require__(12);
 
 // CONCATENATED MODULE: ./src/parsers/manifest/dash/node_parsers/ContentProtection.ts
 /**
@@ -42523,7 +42644,7 @@ var ManifestBoundsCalculator = /*#__PURE__*/function () {
 
 
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
-var array_includes = __webpack_require__(12);
+var array_includes = __webpack_require__(11);
 
 // CONCATENATED MODULE: ./src/parsers/manifest/dash/infer_adaptation_type.ts
 /**
@@ -46968,7 +47089,7 @@ function bytesToNumber(buffer, offset, length) {
   return value;
 }
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
-var is_null_or_undefined = __webpack_require__(5);
+var is_null_or_undefined = __webpack_require__(3);
 
 // CONCATENATED MODULE: ./src/transports/utils/get_isobmff_timing_infos.ts
 /**
@@ -47523,7 +47644,7 @@ function parseISOBMFFEmbeddedTextTrack(_ref, __priv_patchLastSegmentInSidx) {
       indexRange = segment.indexRange;
   var data = response.data,
       isChunked = response.isChunked;
-  var chunkBytes = typeof data === "string" ? Object(string_parsing["f" /* strToUtf8 */])(data) : data instanceof Uint8Array ? data : new Uint8Array(data);
+  var chunkBytes = typeof data === "string" ? Object(string_parsing["e" /* strToUtf8 */])(data) : data instanceof Uint8Array ? data : new Uint8Array(data);
 
   if (isInit) {
     var sidxSegments = Object(utils["c" /* getSegmentsFromSidx */])(chunkBytes, Array.isArray(indexRange) ? indexRange[0] : 0); // This is a very specific handling for streams we know have a very
@@ -47810,7 +47931,7 @@ var take_pssh_out = __webpack_require__(233);
 var read = __webpack_require__(140);
 
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
-var array_includes = __webpack_require__(12);
+var array_includes = __webpack_require__(11);
 
 // EXTERNAL MODULE: ./src/utils/assert.ts
 var assert = __webpack_require__(53);
@@ -48047,7 +48168,7 @@ var base64 = __webpack_require__(52);
 var byte_parsing = __webpack_require__(1);
 
 // EXTERNAL MODULE: ./src/utils/string_parsing.ts
-var string_parsing = __webpack_require__(11);
+var string_parsing = __webpack_require__(12);
 
 // EXTERNAL MODULE: ./src/parsers/containers/isobmff/drm/playready.ts
 var playready = __webpack_require__(204);
@@ -49413,7 +49534,7 @@ function createSmoothStreamingParser(parserOptions) {
 
 /* harmony default export */ var smooth = (create_parser);
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
-var is_null_or_undefined = __webpack_require__(5);
+var is_null_or_undefined = __webpack_require__(3);
 
 // EXTERNAL MODULE: ./src/utils/request/index.ts + 1 modules
 var request = __webpack_require__(29);
@@ -49669,7 +49790,7 @@ function createAVC1Box(width, height, hRes, vRes, encName, colorDepth, avcc) {
   Object(byte_parsing["g" /* itobe2 */])(hRes), 2, // reso 4 h
   Object(byte_parsing["g" /* itobe2 */])(vRes), 2 + 4, // reso 4 v + QuickTime reserved, zeroes
   [0, 1, encName.length], // frame count (default 1)
-  Object(string_parsing["f" /* strToUtf8 */])(encName), // 1byte len + encoder name str
+  Object(string_parsing["e" /* strToUtf8 */])(encName), // 1byte len + encoder name str
   31 - encName.length, // + padding
   Object(byte_parsing["g" /* itobe2 */])(colorDepth), // color depth
   [0xFF, 0xFF], // reserved ones
@@ -49697,7 +49818,7 @@ function createENCVBox(width, height, hRes, vRes, encName, colorDepth, avcc, sin
   Object(byte_parsing["g" /* itobe2 */])(hRes), 2, // reso 4 h
   Object(byte_parsing["g" /* itobe2 */])(vRes), 2 + 4, // reso 4 v + QuickTime reserved, zeroes
   [0, 1, encName.length], // frame count (default 1)
-  Object(string_parsing["f" /* strToUtf8 */])(encName), // 1byte len + encoder name str
+  Object(string_parsing["e" /* strToUtf8 */])(encName), // 1byte len + encoder name str
   31 - encName.length, // + padding
   Object(byte_parsing["g" /* itobe2 */])(colorDepth), // color depth
   [0xFF, 0xFF], // reserved ones
@@ -49754,7 +49875,7 @@ function createDREFBox(url) {
 
 
 function createFTYPBox(majorBrand, brands) {
-  return Object(create_box["a" /* createBox */])("ftyp", byte_parsing["e" /* concat */].apply(null, [Object(string_parsing["f" /* strToUtf8 */])(majorBrand), [0, 0, 0, 1]].concat(brands.map(string_parsing["f" /* strToUtf8 */]))));
+  return Object(create_box["a" /* createBox */])("ftyp", byte_parsing["e" /* concat */].apply(null, [Object(string_parsing["e" /* strToUtf8 */])(majorBrand), [0, 0, 0, 1]].concat(brands.map(string_parsing["e" /* strToUtf8 */]))));
 }
 /**
  * @param {string} schemeType - four letters (eg "cenc" for Common Encryption)
@@ -49764,7 +49885,7 @@ function createFTYPBox(majorBrand, brands) {
 
 
 function createSCHMBox(schemeType, schemeVersion) {
-  return Object(create_box["a" /* createBox */])("schm", Object(byte_parsing["e" /* concat */])(4, Object(string_parsing["f" /* strToUtf8 */])(schemeType), Object(byte_parsing["h" /* itobe4 */])(schemeVersion)));
+  return Object(create_box["a" /* createBox */])("schm", Object(byte_parsing["e" /* concat */])(4, Object(string_parsing["e" /* strToUtf8 */])(schemeType), Object(byte_parsing["h" /* itobe4 */])(schemeVersion)));
 }
 /**
  * Create tfdt box from a decoding time.
@@ -49823,7 +49944,7 @@ function createESDSBox(stream, codecPrivateData) {
 
 
 function createFRMABox(dataFormat) {
-  return Object(create_box["a" /* createBox */])("frma", Object(string_parsing["f" /* strToUtf8 */])(dataFormat));
+  return Object(create_box["a" /* createBox */])("frma", Object(string_parsing["e" /* strToUtf8 */])(dataFormat));
 }
 /**
  * @param {Uint8Array} sps
@@ -49870,7 +49991,7 @@ function createHDLRBox(type) {
       break;
   }
 
-  return Object(create_box["a" /* createBox */])("hdlr", Object(byte_parsing["e" /* concat */])(8, Object(string_parsing["f" /* strToUtf8 */])(name), 12, Object(string_parsing["f" /* strToUtf8 */])(handlerName), 1 // handler name is C-style string (0 terminated)
+  return Object(create_box["a" /* createBox */])("hdlr", Object(byte_parsing["e" /* concat */])(8, Object(string_parsing["e" /* strToUtf8 */])(name), 12, Object(string_parsing["e" /* strToUtf8 */])(handlerName), 1 // handler name is C-style string (0 terminated)
   ));
 }
 /**
@@ -51091,7 +51212,7 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
         var chunkBytes;
 
         if (typeof data === "string") {
-          chunkBytes = Object(string_parsing["f" /* strToUtf8 */])(data);
+          chunkBytes = Object(string_parsing["e" /* strToUtf8 */])(data);
         } else {
           chunkBytes = data instanceof Uint8Array ? data : new Uint8Array(data);
         }
@@ -52690,7 +52811,7 @@ function parseStyleBlocks(styleBlocks) {
   };
 }
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
-var array_includes = __webpack_require__(12);
+var array_includes = __webpack_require__(11);
 
 // CONCATENATED MODULE: ./src/parsers/texttracks/webvtt/html/create_styled_element.ts
 /**
@@ -53211,7 +53332,7 @@ var compat = __webpack_require__(8);
 var on_height_width_change = __webpack_require__(166);
 
 // EXTERNAL MODULE: ./src/config.ts
-var config = __webpack_require__(3);
+var config = __webpack_require__(4);
 
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(0);
@@ -54567,7 +54688,7 @@ var parse_cue_block = __webpack_require__(137);
 var utils = __webpack_require__(67);
 
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
-var array_includes = __webpack_require__(12);
+var array_includes = __webpack_require__(11);
 
 // EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
 var is_non_empty_string = __webpack_require__(2);
@@ -55441,7 +55562,7 @@ function dispatch(state) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return combineLatest; });
 /* unused harmony export CombineLatestOperator */
 /* unused harmony export CombineLatestSubscriber */
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _util_isScheduler__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(54);
 /* harmony import */ var _util_isArray__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(59);
 /* harmony import */ var _OuterSubscriber__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(87);
@@ -55556,7 +55677,7 @@ var CombineLatestSubscriber = /*@__PURE__*/ (function (_super) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return takeUntil; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _innerSubscribe__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23);
 /** PURE_IMPORTS_START tslib,_innerSubscribe PURE_IMPORTS_END */
 
@@ -55942,7 +56063,7 @@ function generateKeyRequest(session, initData, initDataType) {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return takePSSHOut; });
 /* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
-/* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(11);
+/* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(12);
 /* harmony import */ var _get_box__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(35);
 /**
  * Copyright 2015 CANAL+ Group
@@ -56058,7 +56179,7 @@ function getSystemID(buff, initialDataOffset) {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return updateBoxLength; });
 /* harmony import */ var _utils_assert__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(53);
 /* harmony import */ var _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
-/* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(11);
+/* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(12);
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(99);
 /* harmony import */ var _create_box__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(177);
 /* harmony import */ var _get_box__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(35);
@@ -56497,7 +56618,7 @@ function updateBoxLength(buf) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return scan; });
-/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
 /* harmony import */ var _Subscriber__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9);
 /** PURE_IMPORTS_START tslib,_Subscriber PURE_IMPORTS_END */
 
