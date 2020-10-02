@@ -18,6 +18,8 @@ const PLAYER = ({ $destroy, state }, { videoElement, textTrackElement }) => {
     throttleVideoBitrateWhenHidden: true,
     videoElement,
   });
+  player.setMaxBufferBehind(10);
+  player.setMaxBufferAhead(50);
 
   // facilitate DEV mode
   window.player = window.rxPlayer = player;
@@ -83,6 +85,8 @@ const PLAYER = ({ $destroy, state }, { videoElement, textTrackElement }) => {
 
     LOAD: (arg) => {
       player.loadVideo(Object.assign({
+        audioTrackSwitchingMode: "reload",
+        enableFastSwitching: false,
         textTrackElement,
         networkConfig: {
           segmentRetry: Infinity,
