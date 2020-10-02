@@ -16,15 +16,6 @@
 /tests/integration/coverage
 /coverage
 
-/dist/*.d.ts
-/dist/_esm5.processed
 /dist/_esm5.raw
 
 /doc/generated
-
-/features
-/logger
-/minimal
-/experimental
-/types
-/tools
