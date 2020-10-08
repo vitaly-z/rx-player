@@ -6,6 +6,7 @@
  * application.
  */
 
+import MPDTranslator from "mpd-translator";
 import RxPlayer from "rx-player";
 import { linkPlayerEventsToState } from "./events.js";
 import { Subject } from "rxjs";
@@ -13,6 +14,7 @@ import { takeUntil } from "rxjs/operators";
 import $handleCatchUpMode from "./catchUp";
 
 const PLAYER = ({ $destroy, state }, { videoElement, textTrackElement }) => {
+  const translator = new MPDTranslator("http://127.0.0.1:8080/b.mpd");
   const player = new RxPlayer({
     limitVideoWidth: false,
     stopAtEnd: false,
@@ -22,6 +24,7 @@ const PLAYER = ({ $destroy, state }, { videoElement, textTrackElement }) => {
 
   // facilitate DEV mode
   window.player = window.rxPlayer = player;
+  window.RxPlayer = RxPlayer;
 
   // initial state. Written here to easily showcase it exhaustively
   state.set({
@@ -91,8 +94,11 @@ const PLAYER = ({ $destroy, state }, { videoElement, textTrackElement }) => {
           offlineRetry: Infinity,
         },
         manualBitrateSwitchingMode: "direct",
-        transportOptions: { checkMediaSegmentIntegrity: true },
-      }, arg));
+        transportOptions: {
+          checkMediaSegmentIntegrity: true,
+          manifestLoader: translator.generateManifestLoader(),
+        },
+      }, arg, { url: undefined, transport: "local" }));
       state.set({
         loadedVideo: arg,
         lowLatencyMode: arg.lowLatencyMode === true,
