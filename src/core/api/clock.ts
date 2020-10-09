@@ -226,13 +226,11 @@ function getMediaInfos(
             paused,
             playbackRate,
             readyState,
-            timestamp,
             ended } = currentTimings;
 
     const { stalled: prevStalled,
             state: prevState,
             currentTime: prevTime,
-            timestamp: prevTimestamp,
             paused: prevPaused,
             playbackRate: prevPlaybackRate,
             readyState: prevReadyState } = prevTimings;
@@ -256,15 +254,13 @@ function getMediaInfos(
      */
     const canFreeze = ((!paused &&
                         !prevPaused) ||
-                       (readyState === 4 &&
-                        prevReadyState === 4)
+                       (readyState >= 1 &&
+                        prevReadyState >= 1)
                       ) &&
                       (playbackRate !== 0 && prevPlaybackRate !== 0) &&
-                      currentRange !== null && (currentRange.end - currentTime >= 10);
+                      currentRange !== null;
 
-    const isFreezing = (currentTime === prevTime) &&
-                       (timestamp - prevTimestamp) > 50 &&
-                       canFreeze;
+    const isFreezing = (currentTime === prevTime) && canFreeze;
 
     let shouldStall : boolean | undefined;
     let shouldUnstall : boolean | undefined;

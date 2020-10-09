@@ -209,6 +209,7 @@ export default function createMediaSourceLoader({
         if (clockTick.stalled !== null &&
             clockTick.stalled.reason === "freezing" &&
             performance.now() - clockTick.stalled.timestamp > 1000) {
+          log.warn("Init: content is freezing", mediaElement.currentTime);
           mediaElement.currentTime = clockTick.currentTime + 0.001;
         } else {
           const discontinuity = getDiscontinuity(clockTick, manifest);
