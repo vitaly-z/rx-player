@@ -201,6 +201,28 @@ function getMediaInfos(
            timestamp: performance.now() };
 }
 
+function getMaximumPlayableTime(currentTime: number,
+                                buffered: TimeRanges): number|null {
+  for (let i = 0; i < buffered.length; i++) {
+    const bufferedRangeStart = buffered.start(i);
+    const bufferedRangeEnd = buffered.end(i);
+    if (currentTime >= bufferedRangeStart &&
+        currentTime < bufferedRangeEnd) {
+      let lastBufferedRangeEnd = bufferedRangeEnd;
+      for (let j = i + 1; j < buffered.length; j++) {
+        const _bufferedRangeStart = buffered.start(j);
+        const _bufferedRangeEnd = buffered.end(j);
+        if (_bufferedRangeStart > lastBufferedRangeEnd + 1) {
+          return lastBufferedRangeEnd;
+        }
+        lastBufferedRangeEnd = _bufferedRangeEnd;
+      }
+      return lastBufferedRangeEnd;
+    }
+  }
+  return null;
+}
+
   /**
    * Infer stalled status of the media based on:
    *   - the return of the function getMediaInfos
@@ -220,9 +242,9 @@ function getMediaInfos(
   ) : IStalledStatus {
     const { state: currentState,
             currentTime,
-            bufferGap,
             currentRange,
             duration,
+            buffered,
             paused,
             playbackRate,
             readyState,
@@ -235,6 +257,8 @@ function getMediaInfos(
             playbackRate: prevPlaybackRate,
             readyState: prevReadyState } = prevTimings;
 
+    const maximumPlayableTime = getMaximumPlayableTime(currentTime, buffered);
+    const bufferGap = (maximumPlayableTime ?? Infinity) - currentTime;
     const fullyLoaded = hasLoadedUntilTheEnd(currentRange, duration, lowLatencyMode);
 
     const canStall = (readyState >= 1 &&
