@@ -98,6 +98,26 @@ function getMediaInfos(mediaElement, currentState) {
         seeking: seeking, state: currentState,
         timestamp: performance.now() };
 }
+function getMaximumPlayableTime(currentTime, buffered) {
+    for (var i = 0; i < buffered.length; i++) {
+        var bufferedRangeStart = buffered.start(i);
+        var bufferedRangeEnd = buffered.end(i);
+        if (currentTime >= bufferedRangeStart &&
+            currentTime < bufferedRangeEnd) {
+            var lastBufferedRangeEnd = bufferedRangeEnd;
+            for (var j = i + 1; j < buffered.length; j++) {
+                var _bufferedRangeStart = buffered.start(j);
+                var _bufferedRangeEnd = buffered.end(j);
+                if (_bufferedRangeStart > lastBufferedRangeEnd + 1) {
+                    return lastBufferedRangeEnd;
+                }
+                lastBufferedRangeEnd = _bufferedRangeEnd;
+            }
+            return lastBufferedRangeEnd;
+        }
+    }
+    return null;
+}
 /**
  * Infer stalled status of the media based on:
  *   - the return of the function getMediaInfos
@@ -112,8 +132,10 @@ function getMediaInfos(mediaElement, currentState) {
  */
 function getStalledStatus(prevTimings, currentTimings, _a) {
     var withMediaSource = _a.withMediaSource, lowLatencyMode = _a.lowLatencyMode;
-    var currentState = currentTimings.state, currentTime = currentTimings.currentTime, bufferGap = currentTimings.bufferGap, currentRange = currentTimings.currentRange, duration = currentTimings.duration, paused = currentTimings.paused, playbackRate = currentTimings.playbackRate, readyState = currentTimings.readyState, ended = currentTimings.ended;
+    var currentState = currentTimings.state, currentTime = currentTimings.currentTime, currentRange = currentTimings.currentRange, duration = currentTimings.duration, buffered = currentTimings.buffered, paused = currentTimings.paused, playbackRate = currentTimings.playbackRate, readyState = currentTimings.readyState, ended = currentTimings.ended;
     var prevStalled = prevTimings.stalled, prevState = prevTimings.state, prevTime = prevTimings.currentTime, prevPaused = prevTimings.paused, prevPlaybackRate = prevTimings.playbackRate, prevReadyState = prevTimings.readyState;
+    var maximumPlayableTime = getMaximumPlayableTime(currentTime, buffered);
+    var bufferGap = (maximumPlayableTime !== null && maximumPlayableTime !== void 0 ? maximumPlayableTime : Infinity) - currentTime;
     var fullyLoaded = hasLoadedUntilTheEnd(currentRange, duration, lowLatencyMode);
     var canStall = (readyState >= 1 &&
         currentState !== "loadedmetadata" &&
