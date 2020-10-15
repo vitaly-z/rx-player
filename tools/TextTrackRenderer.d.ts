@@ -13,6 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import TextTrackRenderer from "../../dist/_esm5.processed/tools/TextTrackRenderer/index";
-export * from "../../dist/_esm5.processed/tools/TextTrackRenderer/index";
+import TextTrackRenderer from "../dist/_esm5.processed/tools/TextTrackRenderer/index";
+export * from "../dist/_esm5.processed/tools/TextTrackRenderer/index";
 export default TextTrackRenderer;

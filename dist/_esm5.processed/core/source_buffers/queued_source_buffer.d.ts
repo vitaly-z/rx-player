@@ -15,7 +15,6 @@
  */
 import { Observable } from "rxjs";
 import { ICustomSourceBuffer } from "../../compat";
-import { ManualTimeRanges } from "../../custom_source_buffers";
 import { Adaptation, ISegment, Period, Representation } from "../../manifest";
 import { IBufferedChunk } from "./segment_inventory";
 /** Every QueuedSourceBuffer types. */
@@ -287,7 +286,7 @@ export default class QueuedSourceBuffer<T> {
      * Returns the currently buffered data, in a TimeRanges object.
      * @returns {TimeRanges}
      */
-    getBufferedRanges(): TimeRanges | ManualTimeRanges;
+    getBufferedRanges(): TimeRanges;
     /**
      * Returns the currently buffered data for which the content is known with
      * the corresponding content information.

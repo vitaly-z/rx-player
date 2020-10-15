@@ -13,6 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import StringUtils from "../../dist/_esm5.processed/tools/string_utils.js";
-export * from "../../dist/_esm5.processed/tools/string_utils.js";
+import StringUtils from "../dist/_esm5.processed/tools/string_utils.js";
+export * from "../dist/_esm5.processed/tools/string_utils.js";
 export default StringUtils;

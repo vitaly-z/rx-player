@@ -13,4 +13,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export * from "../../dist/_esm5.processed/tools/index";
+export * from "../dist/_esm5.processed/tools/index";

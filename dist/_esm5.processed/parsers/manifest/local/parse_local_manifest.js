@@ -43,18 +43,15 @@ export default function parseLocalManifest(localManifest) {
     };
     var maximumPosition = getMaximumPosition(manifest);
     if (maximumPosition !== undefined) {
-        manifest.maximumTime = {
-            isContinuous: false,
+        manifest.maximumTime = { isContinuous: false,
             value: maximumPosition,
-            time: performance.now(),
-        };
+            time: performance.now() };
     }
     var minimumPosition = getMinimumPosition(manifest);
-    manifest.minimumTime = {
-        isContinuous: false,
-        value: minimumPosition !== undefined ? minimumPosition : 0,
-        time: performance.now(),
-    };
+    manifest.minimumTime = { isContinuous: false,
+        value: minimumPosition !== undefined ? minimumPosition :
+            0,
+        time: performance.now() };
     return manifest;
 }
 /**

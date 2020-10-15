@@ -13,6 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import StringUtils from "../../dist/_esm5.processed/tools/string_utils";
-export * from "../../dist/_esm5.processed/tools/string_utils";
+import StringUtils from "../dist/_esm5.processed/tools/string_utils";
+export * from "../dist/_esm5.processed/tools/string_utils";
 export default StringUtils;

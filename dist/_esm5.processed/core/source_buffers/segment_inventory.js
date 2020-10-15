@@ -21,9 +21,9 @@ var MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE = config.MAX_MANIFEST_BUFFERED_ST
 /**
  * Keep track of every chunk downloaded and currently in the browser's memory.
  *
- * The main point of this class is to know which CDN chunks are already
- * pushed to the SourceBuffer, at which bitrate, and which have been
- * garbage-collected since by the browser (and thus should be re-downloaded).
+ * The main point of this class is to know which chunks are already pushed to
+ * the SourceBuffer, at which bitrate, and which have been garbage-collected
+ * since by the browser (and thus may need to be re-loaded).
  * @class SegmentInventory
  */
 var SegmentInventory = /** @class */ (function () {
@@ -38,7 +38,14 @@ var SegmentInventory = /** @class */ (function () {
     };
     /**
      * Infer each segment's bufferedStart and bufferedEnd from the TimeRanges
-     * given (coming from the SourceBuffer).
+     * given.
+     *
+     * The TimeRanges object given should come from the SourceBuffer linked to
+     * that SegmentInventory.
+     *
+     * /!\ A SegmentInventory should not be associated to multiple SourceBuffers
+     * at a time, so each `synchronizeBuffered` call should be given a TimeRanges
+     * coming from the same SourceBuffer instance.
      * @param {TimeRanges}
      */
     SegmentInventory.prototype.synchronizeBuffered = function (buffered) {
@@ -142,11 +149,10 @@ var SegmentInventory = /** @class */ (function () {
         }
     };
     /**
-     * Add a new segment in the inventory.
+     * Add a new chunk in the inventory.
      *
-     * Note: As new segments can "replace" partially or completely old ones, we
-     * have to perform a complex logic and might update previously added segments.
-     *
+     * Chunks are decodable sub-parts of a whole segment. Once all chunks in a
+     * segment have been inserted, you should call the `completeSegment` method.
      * @param {Object} chunkInformation
      */
     SegmentInventory.prototype.insertChunk = function (_a) {
@@ -504,6 +510,10 @@ var SegmentInventory = /** @class */ (function () {
         }
     };
     /**
+     * Returns the whole inventory.
+     *
+     * To get a list synchronized with what a SourceBuffer actually has buffered
+     * you might want to call `synchronizeBuffered` before calling this method.
      * @returns {Array.<Object>}
      */
     SegmentInventory.prototype.getInventory = function () {
