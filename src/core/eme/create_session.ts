@@ -67,7 +67,7 @@ function loadPersistentSession(
   session: MediaKeySession|ICustomMediaKeySession
 ) : Observable<boolean> {
   return observableDefer(() => {
-    log.debug("EME: Load persisted session", sessionId);
+    log.info("EME: Load persisted session", sessionId);
     return castToObservable(session.load(sessionId));
   });
 }
@@ -108,7 +108,7 @@ export default function createSession(
       keySystemOptions.persistentLicense === true ? "persistent-license" :
                                                     "temporary";
 
-    log.debug(`EME: Create a new ${sessionType} session`);
+    log.info(`EME: Create a new ${sessionType} session`);
 
     const session = loadedSessionsStore
       .createSession(initData, initDataType, sessionType);
