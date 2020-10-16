@@ -18,13 +18,19 @@ import {
   defer as observableDefer,
   Observable,
   of as observableOf,
+  race as observableRace,
 } from "rxjs";
 import {
   catchError,
+  ignoreElements,
   map,
   mergeMap,
+  tap,
 } from "rxjs/operators";
-import { ICustomMediaKeySession } from "../../compat";
+import {
+  events,
+  ICustomMediaKeySession,
+} from "../../compat";
 import log from "../../log";
 import arrayIncludes from "../../utils/array_includes";
 import castToObservable from "../../utils/cast_to_observable";
@@ -142,8 +148,19 @@ export default function createSession(
         }));
     };
 
-    return loadPersistentSession(storedEntry.sessionId, session).pipe(
+    log.info("EME: Binding keyStatuseschange event...");
+    return observableRace(
+      events.onKeyStatusesChange$(session).pipe(
+        tap((evt) => {
+          log.info("EME: keystatuseschange event received!",
+                   evt,
+                   session.keyStatuses.size);
+        }),
+        ignoreElements()),
+      loadPersistentSession(storedEntry.sessionId, session)
+    ).pipe(
       mergeMap((hasLoadedSession) : Observable<ICreateSessionEvent> => {
+        log.info("EME: Unbinded keyStatuseschange event");
         if (!hasLoadedSession) {
           log.warn("EME: No data stored for the loaded session");
           persistentSessionsStore.delete(initData, initDataType);
