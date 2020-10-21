@@ -104,19 +104,13 @@
           });
         };
 
-        const oldAddSourceBuffer = MediaSource.prototype.addSourceBuffer;
-        MediaSource.prototype.addSourceBuffer = function (type) {
-          console.log("/!\ Monkey patching - Calling addSourceBuffer.");
-          return oldAddSourceBuffer.call(this, type + ";esvm=true");
-        }
-
         // Load and play
         function load() {
           player.loadVideo({ url: window.url,
                              transport: "dash",
                              autoPlay: true,
                              enableFastSwitching: window.enableFastSwitching,
-                             keySystems: [{ type: "com.microsoft.playready.recommendation.esvm",
+                             keySystems: [{ type: "com.microsoft.playready",
                                             audioTrackSwitchingMode: "reload",
                                             persistentStateRequired: true,
                                             fallbackOn: {
