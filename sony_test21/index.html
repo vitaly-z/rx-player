@@ -89,7 +89,7 @@
             xhr.onload = (evt) => {
               if (xhr.status >= 200 && xhr.status < 300) {
                 const license = evt.target.response;
-                resolve(license);
+                resolve(new Uint8Array(license));
               } else {
                 const error = new Error("getLicense's request finished with a " +
                                         `${xhr.status} HTTP error`);
