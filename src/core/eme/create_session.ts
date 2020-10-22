@@ -168,7 +168,8 @@ export default function createSession(
                                 value: { mediaKeySession: session, sessionType } });
         }
 
-        if (hasLoadedSession && isSessionUsable(session)) {
+        if (hasLoadedSession) { // [G9Mini] - removed isSessionUsable
+                                // to use persistent session
           persistentSessionsStore.add(initData, initDataType, session);
           log.info("EME: Succeeded to load persistent session.");
           return observableOf({ type: "loaded-persistent-session" as const,
