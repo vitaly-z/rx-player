@@ -27,7 +27,8 @@ import arrayIncludes from "../../../utils/array_includes";
  * @returns {MediaKeySession}
  */
 export default function isSessionUsable(
-  loadedSession : MediaKeySession | ICustomMediaKeySession
+  loadedSession : MediaKeySession | ICustomMediaKeySession,
+  acceptEmptyKeyStatuses : boolean = false
 ) : boolean {
   if (loadedSession.sessionId === "") {
     return false;
@@ -39,7 +40,7 @@ export default function isSessionUsable(
     keyStatuses.push(keyStatus);
   });
 
-  if (keyStatuses.length <= 0) {
+  if (!acceptEmptyKeyStatuses && keyStatuses.length <= 0) {
     log.debug("EME: isSessionUsable: MediaKeySession given has an empty keyStatuses",
               loadedSession);
     return false;
