@@ -167,13 +167,14 @@ function buildKeySystemConfigurations(ksName, keySystem) {
  */
 export default function getMediaKeySystemAccess(mediaElement, keySystemsConfigs) {
     return observableDefer(function () {
+        log.info("EME: Searching for compatible MediaKeySystemAccess");
         var currentState = MediaKeysInfosStore.getState(mediaElement);
         if (currentState != null) {
             // Fast way to find a compatible keySystem if the currently loaded
             // one as exactly the same compatibility options.
             var cachedKeySystemAccess = checkCachedMediaKeySystemAccess(keySystemsConfigs, currentState.mediaKeySystemAccess, currentState.keySystemOptions);
             if (cachedKeySystemAccess !== null) {
-                log.debug("EME: Found cached compatible keySystem", cachedKeySystemAccess);
+                log.info("EME: Found cached compatible keySystem", cachedKeySystemAccess);
                 return observableOf({
                     type: "reuse-media-key-system-access",
                     value: { mediaKeySystemAccess: cachedKeySystemAccess.keySystemAccess,

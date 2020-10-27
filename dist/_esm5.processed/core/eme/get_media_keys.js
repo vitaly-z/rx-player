@@ -36,7 +36,7 @@ function createPersistentSessionsStorage(keySystemOptions) {
     if (licenseStorage == null) {
         throw new EncryptedMediaError("INVALID_KEY_SYSTEM", "No license storage found for persistent license.");
     }
-    log.info("EME: Set the given license storage");
+    log.debug("EME: Set the given license storage");
     return new PersistentSessionsStore(licenseStorage);
 }
 /**
@@ -55,12 +55,15 @@ export default function getMediaKeysInfos(mediaElement, keySystemsConfigs) {
                 loadedSessionsStore: loadedSessionsStore,
                 mediaKeySystemAccess: mediaKeySystemAccess, keySystemOptions: options, persistentSessionsStore: persistentSessionsStore });
         }
-        log.debug("EME: Calling createMediaKeys on the MediaKeySystemAccess");
+        log.info("EME: Calling createMediaKeys on the MediaKeySystemAccess");
         return tryCatch(function () { return castToObservable(mediaKeySystemAccess.createMediaKeys()); }, undefined).pipe(catchError(function (error) {
             var message = error instanceof Error ?
                 error.message :
                 "Unknown error when creating MediaKeys.";
             throw new EncryptedMediaError("CREATE_MEDIA_KEYS_ERROR", message);
-        }), map(function (mediaKeys) { return ({ mediaKeys: mediaKeys, loadedSessionsStore: new LoadedSessionsStore(mediaKeys), mediaKeySystemAccess: mediaKeySystemAccess, keySystemOptions: options, persistentSessionsStore: persistentSessionsStore }); }));
+        }), map(function (mediaKeys) {
+            log.info("EME: MediaKeys created with success", mediaKeys);
+            return { mediaKeys: mediaKeys, loadedSessionsStore: new LoadedSessionsStore(mediaKeys), mediaKeySystemAccess: mediaKeySystemAccess, keySystemOptions: options, persistentSessionsStore: persistentSessionsStore };
+        }));
     }));
 }

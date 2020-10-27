@@ -22,4 +22,4 @@ import { ICustomMediaKeySession } from "../../../compat";
  * @param {MediaKeySession} loadedSession
  * @returns {MediaKeySession}
  */
-export default function isSessionUsable(loadedSession: MediaKeySession | ICustomMediaKeySession): boolean;
+export default function isSessionUsable(loadedSession: MediaKeySession | ICustomMediaKeySession, acceptEmptyKeyStatuses?: boolean): boolean;

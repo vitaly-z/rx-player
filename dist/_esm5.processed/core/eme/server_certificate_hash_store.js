@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import noop from "../../utils/noop";
-import disposeMediaKeys from "./dispose_media_keys";
-import ServerCertificateHashStore from "./server_certificate_hash_store";
 /**
- * Free up all ressources taken by the EME management.
+ * Keep track of server certificate which have been set for a MediaKeys.
  */
-export default function disposeEME(mediaElement) {
-    ServerCertificateHashStore.clear();
-    disposeMediaKeys(mediaElement).subscribe(noop);
-}
+var serverCertificateForMediaKeys = new WeakMap();
+export default {
+    add: function (mediaKeys, hash) {
+        serverCertificateForMediaKeys.set(mediaKeys, hash);
+    },
+    get: function (mediaKeys) {
+        return serverCertificateForMediaKeys.get(mediaKeys);
+    },
+    clear: function () {
+        serverCertificateForMediaKeys = new WeakMap();
+    },
+};

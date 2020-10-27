@@ -27,20 +27,20 @@ import MediaKeysInfosStore from "./media_keys_infos_store";
  */
 export default function clearEMESession(mediaElement) {
     return observableDefer(function () {
-        log.debug("EME: Clearing-up EME session.");
+        log.info("EME: Clearing-up EME session.");
         if (shouldUnsetMediaKeys()) {
-            log.debug("EME: disposing current MediaKeys.");
+            log.info("EME: disposing current MediaKeys.");
             return disposeMediaKeys(mediaElement)
                 .pipe(ignoreElements());
         }
         var currentState = MediaKeysInfosStore.getState(mediaElement);
         if (currentState !== null &&
             currentState.keySystemOptions.closeSessionsOnStop === true) {
-            log.debug("EME: closing all current sessions.");
+            log.info("EME: closing all current sessions.");
             return currentState.loadedSessionsStore.closeAllSessions()
                 .pipe(ignoreElements());
         }
-        log.debug("EME: Nothing to clear. Returning right away. No state =", currentState === null);
+        log.info("EME: Nothing to clear. Returning right away. No state =", currentState === null);
         return EMPTY;
     });
 }

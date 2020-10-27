@@ -48,7 +48,7 @@ export default function getSession(initializationDataInfo, mediaKeysInfos) {
         if (entry !== null) {
             previousLoadedSession = entry.mediaKeySession;
             if (isSessionUsable(previousLoadedSession)) {
-                log.debug("EME: Reuse loaded session", previousLoadedSession.sessionId);
+                log.info("EME: Reuse loaded session", previousLoadedSession.sessionId);
                 return observableOf({ type: "loaded-open-session",
                     value: { mediaKeySession: previousLoadedSession,
                         sessionType: entry.sessionType, initData: initData,

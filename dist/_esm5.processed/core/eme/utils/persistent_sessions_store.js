@@ -176,7 +176,7 @@ var PersistentSessionsStore = /** @class */ (function () {
         this._save();
     };
     PersistentSessionsStore.prototype.deleteOldSessions = function (sessionsToDelete) {
-        log.debug("EME-PSS: Deleting last " + sessionsToDelete + " sessions.");
+        log.info("EME-PSS: Deleting last " + sessionsToDelete + " sessions.");
         if (sessionsToDelete <= 0) {
             return;
         }

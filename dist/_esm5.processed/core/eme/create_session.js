@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { defer as observableDefer, of as observableOf, } from "rxjs";
-import { catchError, map, mergeMap, } from "rxjs/operators";
+import { defer as observableDefer, of as observableOf, race as observableRace, } from "rxjs";
+import { catchError, ignoreElements, map, mergeMap, tap, } from "rxjs/operators";
+import { events, } from "../../compat";
 import log from "../../log";
 import arrayIncludes from "../../utils/array_includes";
 import castToObservable from "../../utils/cast_to_observable";
@@ -29,7 +30,7 @@ import isSessionUsable from "./utils/is_session_usable";
  */
 function loadPersistentSession(sessionId, session) {
     return observableDefer(function () {
-        log.debug("EME: Load persisted session", sessionId);
+        log.info("EME: Load persisted session", sessionId);
         return castToObservable(session.load(sessionId));
     });
 }
@@ -58,7 +59,7 @@ export default function createSession(initData, initDataType, mediaKeysInfos) {
             persistentSessionsStore != null &&
             keySystemOptions.persistentLicense === true ? "persistent-license" :
             "temporary";
-        log.debug("EME: Create a new " + sessionType + " session");
+        log.info("EME: Create a new " + sessionType + " session");
         var session = loadedSessionsStore
             .createSession(initData, initDataType, sessionType);
         // Re-check for Dumb typescript. Equivalent to `sessionType === "temporary"`.
@@ -90,14 +91,18 @@ export default function createSession(initData, initDataType, mediaKeysInfos) {
                     value: { mediaKeySession: newSession, sessionType: sessionType } };
             }));
         };
-        return loadPersistentSession(storedEntry.sessionId, session).pipe(mergeMap(function (hasLoadedSession) {
+        log.info("EME: Binding keyStatuseschange event...");
+        return observableRace(events.onKeyStatusesChange$(session).pipe(tap(function (evt) {
+            log.info("EME: keystatuseschange event received!", evt, session.keyStatuses.size);
+        }), ignoreElements()), loadPersistentSession(storedEntry.sessionId, session)).pipe(mergeMap(function (hasLoadedSession) {
+            log.info("EME: Unbinded keyStatuseschange event");
             if (!hasLoadedSession) {
                 log.warn("EME: No data stored for the loaded session");
                 persistentSessionsStore.delete(initData, initDataType);
                 return observableOf({ type: "created-session",
                     value: { mediaKeySession: session, sessionType: sessionType } });
             }
-            if (hasLoadedSession && isSessionUsable(session)) {
+            if (hasLoadedSession && isSessionUsable(session, true)) {
                 persistentSessionsStore.add(initData, initDataType, session);
                 log.info("EME: Succeeded to load persistent session.");
                 return observableOf({ type: "loaded-persistent-session",

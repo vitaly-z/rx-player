@@ -23,7 +23,8 @@ import arrayIncludes from "../../../utils/array_includes";
  * @param {MediaKeySession} loadedSession
  * @returns {MediaKeySession}
  */
-export default function isSessionUsable(loadedSession) {
+export default function isSessionUsable(loadedSession, acceptEmptyKeyStatuses) {
+    if (acceptEmptyKeyStatuses === void 0) { acceptEmptyKeyStatuses = false; }
     if (loadedSession.sessionId === "") {
         return false;
     }
@@ -32,11 +33,19 @@ export default function isSessionUsable(loadedSession) {
     keyStatusesMap.forEach(function (keyStatus) {
         keyStatuses.push(keyStatus);
     });
-    if (keyStatuses.length > 0 &&
-        (!arrayIncludes(keyStatuses, "expired") &&
-            !arrayIncludes(keyStatuses, "internal-error"))) {
-        log.debug("EME: Reuse loaded session", loadedSession.sessionId);
-        return true;
+    if (!acceptEmptyKeyStatuses && keyStatuses.length <= 0) {
+        log.debug("EME: isSessionUsable: MediaKeySession given has an empty keyStatuses", loadedSession);
+        return false;
     }
-    return false;
+    if (arrayIncludes(keyStatuses, "expired")) {
+        log.debug("EME: isSessionUsable: MediaKeySession given has an expired key", loadedSession.sessionId);
+        return false;
+    }
+    if (arrayIncludes(keyStatuses, "internal-error")) {
+        log.debug("EME: isSessionUsable: MediaKeySession given has a key with an " +
+            "internal-error", loadedSession.sessionId);
+        return false;
+    }
+    log.debug("EME: isSessionUsable: MediaKeySession is usable", loadedSession.sessionId);
+    return true;
 }

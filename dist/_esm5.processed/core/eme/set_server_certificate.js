@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 import { defer as observableDefer, EMPTY, of as observableOf, } from "rxjs";
-import { catchError, ignoreElements, } from "rxjs/operators";
+import { catchError, ignoreElements, tap, } from "rxjs/operators";
 import { EncryptedMediaError } from "../../errors";
 import log from "../../log";
 import castToObservable from "../../utils/cast_to_observable";
+import hashBuffer from "../../utils/hash_buffer";
 import tryCatch from "../../utils/rx-try_catch";
+import ServerCertificateHashStore from "./server_certificate_hash_store";
 /**
  * Call the setServerCertificate API with the given certificate.
  * Complete observable on success, throw when failed.
@@ -59,8 +61,20 @@ export default function trySettingServerCertificate(mediaKeys, serverCertificate
                 " mediaKeys.setServerCertificate is not a function");
             return EMPTY;
         }
-        log.debug("EME: Setting server certificate on the MediaKeys");
-        return setServerCertificate(mediaKeys, serverCertificate).pipe(ignoreElements(), catchError(function (error) { return observableOf({ type: "warning", value: error }); }));
+        var formattedServerCertificate = serverCertificate instanceof Uint8Array ?
+            serverCertificate :
+            new Uint8Array(serverCertificate instanceof ArrayBuffer ? serverCertificate :
+                serverCertificate.buffer);
+        var currentServerCertificateHash = hashBuffer(formattedServerCertificate);
+        var oldServerCertificateHash = ServerCertificateHashStore.get(mediaKeys);
+        if (currentServerCertificateHash === oldServerCertificateHash) {
+            log.info("EME: Server certificate already set on the MediaKeys");
+            return EMPTY;
+        }
+        log.info("EME: Setting server certificate on the MediaKeys");
+        return setServerCertificate(mediaKeys, serverCertificate).pipe(tap(function () {
+            ServerCertificateHashStore.add(mediaKeys, currentServerCertificateHash);
+        }), ignoreElements(), catchError(function (error) { return observableOf({ type: "warning", value: error }); }));
     });
 }
 export { trySettingServerCertificate, setServerCertificate, };

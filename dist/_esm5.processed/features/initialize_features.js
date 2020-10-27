@@ -45,10 +45,10 @@ export default function initializeFeaturesObject() {
         features.transports.dash = require("../transports/dash/index.js").default;
     }
     if (false) {
-        features.transports.local = require("../transports/local/index.js").default;
+        features.transports.local = require(__RELATIVE_PATH__.LOCAL_MANIFEST).default;
     }
     if (false) {
-        features.transports.metaplaylist = require("../transports/dash/index.js").default;
+        features.transports.metaplaylist = require("../transports/metaplaylist/index.js").default;
     }
     /* tslint:enable no-var-requires */
     /* tslint:disable no-var-requires */

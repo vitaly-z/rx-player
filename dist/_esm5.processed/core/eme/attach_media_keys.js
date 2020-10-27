@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { defer as observableDefer, of as observableOf, } from "rxjs";
-import { mergeMap } from "rxjs/operators";
+import { mergeMap, tap } from "rxjs/operators";
 import { setMediaKeys } from "../../compat";
 import log from "../../log";
 import MediaKeysInfosStore from "./media_keys_infos_store";
@@ -54,8 +54,9 @@ export default function attachMediaKeys(mediaKeysInfos, mediaElement) {
             if (mediaElement.mediaKeys === mediaKeys) {
                 return observableOf(null);
             }
-            log.debug("EME: Setting MediaKeys");
-            return setMediaKeys(mediaElement, mediaKeys);
+            log.info("EME: Attaching MediaKeys to the media element");
+            return setMediaKeys(mediaElement, mediaKeys)
+                .pipe(tap(function () { log.info("EME: MediaKeys attached with success"); }));
         }));
     });
 }

@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import noop from "../../utils/noop";
-import disposeMediaKeys from "./dispose_media_keys";
-import ServerCertificateHashStore from "./server_certificate_hash_store";
-/**
- * Free up all ressources taken by the EME management.
- */
-export default function disposeEME(mediaElement) {
-    ServerCertificateHashStore.clear();
-    disposeMediaKeys(mediaElement).subscribe(noop);
-}
+import { ICustomMediaKeys } from "../../compat";
+declare const _default: {
+    add(mediaKeys: MediaKeys | ICustomMediaKeys, hash: number): void;
+    get(mediaKeys: MediaKeys | ICustomMediaKeys): number | undefined;
+    clear(): void;
+};
+export default _default;

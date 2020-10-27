@@ -27,7 +27,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 import { concat as observableConcat, defer as observableDefer, EMPTY, identity, merge as observableMerge, of as observableOf, Subject, TimeoutError, } from "rxjs";
-import { catchError, concatMap, map, mapTo, mergeMap, startWith, takeUntil, timeout, } from "rxjs/operators";
+import { catchError, concatMap, map, mapTo, mergeMap, startWith, takeUntil, tap, timeout, } from "rxjs/operators";
 import { events, } from "../../compat";
 import { EncryptedMediaError, } from "../../errors";
 import log from "../../log";
@@ -68,7 +68,7 @@ export { BlacklistedSessionError };
  */
 export default function SessionEventsListener(session, keySystemOptions, keySystem, _a) {
     var initData = _a.initData, initDataType = _a.initDataType;
-    log.debug("EME: Binding session events", session);
+    log.info("EME: Binding session events", session);
     var sessionWarningSubject$ = new Subject();
     var _b = keySystemOptions.getLicenseConfig, getLicenseConfig = _b === void 0 ? {} : _b;
     var keyErrors = onKeyError$(session)
@@ -82,7 +82,7 @@ export default function SessionEventsListener(session, keySystemOptions, keySyst
         var messageType = isNonEmptyString(messageEvent.messageType) ?
             messageEvent.messageType :
             "license-request";
-        log.debug("EME: Event message type " + messageType, session, messageEvent);
+        log.info("EME: Received message event, type " + messageType, session, messageEvent);
         var getLicense$ = observableDefer(function () {
             var getLicense = keySystemOptions.getLicense(message, messageType);
             var getLicenseTimeout = isNullOrUndefined(getLicenseConfig.timeout) ?
@@ -180,12 +180,12 @@ function updateSessionWithMessage(session, message, initData, initDataType) {
         return observableOf({ type: "no-update",
             value: { initData: initData, initDataType: initDataType } });
     }
-    log.debug("EME: Updating session");
+    log.info("EME: Updating MediaKeySession with message");
     return castToObservable(session.update(message)).pipe(catchError(function (error) {
         var reason = error instanceof Error ? error.toString() :
             "`session.update` failed";
         throw new EncryptedMediaError("KEY_UPDATE_ERROR", reason);
-    }), mapTo({ type: "session-updated",
+    }), tap(function () { log.info("EME: MediaKeySession update succeeded."); }), mapTo({ type: "session-updated",
         value: { session: session, license: message, initData: initData, initDataType: initDataType } }));
 }
 /**
@@ -195,7 +195,7 @@ function updateSessionWithMessage(session, message, initData, initDataType) {
  * @returns {Observable}
  */
 function handleKeyStatusesChangeEvent(session, keySystemOptions, keySystem, keyStatusesEvent) {
-    log.debug("EME: handling keystatuseschange event", session, keyStatusesEvent);
+    log.info("EME: keystatuseschange event received", session, keyStatusesEvent);
     var callback$ = observableDefer(function () {
         if (typeof keySystemOptions.onKeyStatusesChange !== "function") {
             return EMPTY;
