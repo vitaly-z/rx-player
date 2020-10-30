@@ -611,7 +611,9 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     const options = parseLoadVideoOptions(opts);
     log.info("API: Calling loadvideo", options);
 
-    const { autoPlay,
+    const { initialVideoBitrate,
+            initialAudioBitrate,
+            autoPlay,
             defaultAudioTrack,
             defaultTextTrack,
             enableFastSwitching,
@@ -647,6 +649,13 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                                 activeRepresentations: null,
                                 initialAudioTrack: defaultAudioTrack,
                                 initialTextTrack: defaultTextTrack };
+
+    if (initialVideoBitrate !== undefined) {
+      this._priv_bitrateInfos.lastBitrates.video = initialVideoBitrate;
+    }
+    if (initialAudioBitrate !== undefined) {
+      this._priv_bitrateInfos.lastBitrates.audio = initialAudioBitrate;
+    }
 
     // inilialize `_priv_playing$` to false (meaning the content is not playing yet)
     this._priv_playing$.next(false);

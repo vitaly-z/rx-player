@@ -249,6 +249,9 @@ export interface ILoadVideoOptions {
   defaultAudioTrack? : IDefaultAudioTrackOption|null|undefined;
   defaultTextTrack? : IDefaultTextTrackOption|null|undefined;
   /* tslint:enable deprecation */
+
+  initialVideoBitrate? : number;
+  initialAudioBitrate? : number;
 }
 
 /**
@@ -270,6 +273,8 @@ interface IParsedLoadVideoOptionsBase {
   startAt : IParsedStartAtOption|undefined;
   manualBitrateSwitchingMode : "seamless"|"direct";
   enableFastSwitching : boolean;
+  initialVideoBitrate? : number;
+  initialAudioBitrate? : number;
 }
 
 /**
@@ -505,6 +510,9 @@ function parseLoadVideoOptions(
   let textTrackElement : HTMLElement|undefined;
   let startAt : IParsedStartAtOption|undefined;
 
+  let initialVideoBitrate;
+  let initialAudioBitrate;
+
   if (isNullOrUndefined(options)) {
     throw new Error("No option set on loadVideo");
   }
@@ -663,6 +671,16 @@ function parseLoadVideoOptions(
     }
   }
 
+  if (!isNullOrUndefined(options.initialAudioBitrate) &&
+      typeof options.initialAudioBitrate === "number") {
+    initialAudioBitrate = options.initialAudioBitrate;
+  }
+
+  if (!isNullOrUndefined(options.initialVideoBitrate) &&
+      typeof options.initialVideoBitrate === "number") {
+    initialVideoBitrate = options.initialVideoBitrate;
+  }
+
   const networkConfig = isNullOrUndefined(options.networkConfig) ?
     {} :
     { manifestRetry: options.networkConfig.manifestRetry,
@@ -687,6 +705,8 @@ function parseLoadVideoOptions(
            textTrackMode,
            transport,
            transportOptions,
+           initialAudioBitrate,
+           initialVideoBitrate,
            url } as IParsedLoadVideoOptions;
   /* tslint:enable no-object-literal-type-assertion */
 }
