@@ -35644,6 +35644,8 @@ function parseLoadVideoOptions(options) {
   var textTrackMode;
   var textTrackElement;
   var startAt;
+  var initialVideoBitrate;
+  var initialAudioBitrate;
 
   if (Object(is_null_or_undefined["a" /* default */])(options)) {
     throw new Error("No option set on loadVideo");
@@ -35779,6 +35781,14 @@ function parseLoadVideoOptions(options) {
     }
   }
 
+  if (!Object(is_null_or_undefined["a" /* default */])(options.initialAudioBitrate) && typeof options.initialAudioBitrate === "number") {
+    initialAudioBitrate = options.initialAudioBitrate;
+  }
+
+  if (!Object(is_null_or_undefined["a" /* default */])(options.initialVideoBitrate) && typeof options.initialVideoBitrate === "number") {
+    initialVideoBitrate = options.initialVideoBitrate;
+  }
+
   var networkConfig = Object(is_null_or_undefined["a" /* default */])(options.networkConfig) ? {} : {
     manifestRetry: options.networkConfig.manifestRetry,
     offlineRetry: options.networkConfig.offlineRetry,
@@ -35804,6 +35814,8 @@ function parseLoadVideoOptions(options) {
     textTrackMode: textTrackMode,
     transport: transport,
     transportOptions: transportOptions,
+    initialAudioBitrate: initialAudioBitrate,
+    initialVideoBitrate: initialVideoBitrate,
     url: url
   };
   /* tslint:enable no-object-literal-type-assertion */
@@ -37260,7 +37272,9 @@ var public_api_Player = /*#__PURE__*/function (_EventEmitter) {
 
     var options = parseLoadVideoOptions(opts);
     log["a" /* default */].info("API: Calling loadvideo", options);
-    var autoPlay = options.autoPlay,
+    var initialVideoBitrate = options.initialVideoBitrate,
+        initialAudioBitrate = options.initialAudioBitrate,
+        autoPlay = options.autoPlay,
         defaultAudioTrack = options.defaultAudioTrack,
         defaultTextTrack = options.defaultTextTrack,
         enableFastSwitching = options.enableFastSwitching,
@@ -37294,7 +37308,16 @@ var public_api_Player = /*#__PURE__*/function (_EventEmitter) {
       activeRepresentations: null,
       initialAudioTrack: defaultAudioTrack,
       initialTextTrack: defaultTextTrack
-    }; // inilialize `_priv_playing$` to false (meaning the content is not playing yet)
+    };
+
+    if (initialVideoBitrate !== undefined) {
+      this._priv_bitrateInfos.lastBitrates.video = initialVideoBitrate;
+    }
+
+    if (initialAudioBitrate !== undefined) {
+      this._priv_bitrateInfos.lastBitrates.audio = initialAudioBitrate;
+    } // inilialize `_priv_playing$` to false (meaning the content is not playing yet)
+
 
     this._priv_playing$.next(false);
 

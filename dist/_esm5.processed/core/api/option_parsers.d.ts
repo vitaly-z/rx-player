@@ -202,6 +202,8 @@ export interface ILoadVideoOptions {
     supplementaryImageTracks?: ISupplementaryImageTrackOption[];
     defaultAudioTrack?: IDefaultAudioTrackOption | null | undefined;
     defaultTextTrack?: IDefaultTextTrackOption | null | undefined;
+    initialVideoBitrate?: number;
+    initialAudioBitrate?: number;
 }
 /**
  * Base type which the types for the parsed options of the RxPlayer's
@@ -222,6 +224,8 @@ interface IParsedLoadVideoOptionsBase {
     startAt: IParsedStartAtOption | undefined;
     manualBitrateSwitchingMode: "seamless" | "direct";
     enableFastSwitching: boolean;
+    initialVideoBitrate?: number;
+    initialAudioBitrate?: number;
 }
 /**
  * Options of the RxPlayer's `loadVideo` method once parsed when a "native"

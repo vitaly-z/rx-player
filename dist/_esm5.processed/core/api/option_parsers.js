@@ -225,6 +225,8 @@ function parseLoadVideoOptions(options) {
     var textTrackMode;
     var textTrackElement;
     var startAt;
+    var initialVideoBitrate;
+    var initialAudioBitrate;
     if (isNullOrUndefined(options)) {
         throw new Error("No option set on loadVideo");
     }
@@ -366,6 +368,14 @@ function parseLoadVideoOptions(options) {
             startAt = options.startAt;
         }
     }
+    if (!isNullOrUndefined(options.initialAudioBitrate) &&
+        typeof options.initialAudioBitrate === "number") {
+        initialAudioBitrate = options.initialAudioBitrate;
+    }
+    if (!isNullOrUndefined(options.initialVideoBitrate) &&
+        typeof options.initialVideoBitrate === "number") {
+        initialVideoBitrate = options.initialVideoBitrate;
+    }
     var networkConfig = isNullOrUndefined(options.networkConfig) ?
         {} :
         { manifestRetry: options.networkConfig.manifestRetry,
@@ -389,6 +399,8 @@ function parseLoadVideoOptions(options) {
         textTrackMode: textTrackMode,
         transport: transport,
         transportOptions: transportOptions,
+        initialAudioBitrate: initialAudioBitrate,
+        initialVideoBitrate: initialVideoBitrate,
         url: url };
     /* tslint:enable no-object-literal-type-assertion */
 }

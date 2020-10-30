@@ -232,7 +232,7 @@ var Player = /** @class */ (function (_super) {
         var _a, _b, _c;
         var options = parseLoadVideoOptions(opts);
         log.info("API: Calling loadvideo", options);
-        var autoPlay = options.autoPlay, defaultAudioTrack = options.defaultAudioTrack, defaultTextTrack = options.defaultTextTrack, enableFastSwitching = options.enableFastSwitching, keySystems = options.keySystems, lowLatencyMode = options.lowLatencyMode, manualBitrateSwitchingMode = options.manualBitrateSwitchingMode, manifestUpdateUrl = options.manifestUpdateUrl, minimumManifestUpdateInterval = options.minimumManifestUpdateInterval, networkConfig = options.networkConfig, startAt = options.startAt, transport = options.transport, transportOptions = options.transportOptions, url = options.url;
+        var initialVideoBitrate = options.initialVideoBitrate, initialAudioBitrate = options.initialAudioBitrate, autoPlay = options.autoPlay, defaultAudioTrack = options.defaultAudioTrack, defaultTextTrack = options.defaultTextTrack, enableFastSwitching = options.enableFastSwitching, keySystems = options.keySystems, lowLatencyMode = options.lowLatencyMode, manualBitrateSwitchingMode = options.manualBitrateSwitchingMode, manifestUpdateUrl = options.manifestUpdateUrl, minimumManifestUpdateInterval = options.minimumManifestUpdateInterval, networkConfig = options.networkConfig, startAt = options.startAt, transport = options.transport, transportOptions = options.transportOptions, url = options.url;
         // Perform multiple checks on the given options
         if (this.videoElement === null) {
             throw new Error("the attached video element is disposed");
@@ -250,6 +250,12 @@ var Player = /** @class */ (function (_super) {
             activeRepresentations: null,
             initialAudioTrack: defaultAudioTrack,
             initialTextTrack: defaultTextTrack };
+        if (initialVideoBitrate !== undefined) {
+            this._priv_bitrateInfos.lastBitrates.video = initialVideoBitrate;
+        }
+        if (initialAudioBitrate !== undefined) {
+            this._priv_bitrateInfos.lastBitrates.audio = initialAudioBitrate;
+        }
         // inilialize `_priv_playing$` to false (meaning the content is not playing yet)
         this._priv_playing$.next(false);
         var videoElement = this.videoElement;
