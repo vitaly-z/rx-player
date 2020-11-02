@@ -83,7 +83,8 @@ function loadPersistentSession(
 export default function createSession(
   initData: Uint8Array,
   initDataType: string|undefined,
-  mediaKeysInfos: IMediaKeysInfos
+  mediaKeysInfos: IMediaKeysInfos,
+  forceNonPersistence : boolean
 ) : Observable<ICreateSessionEvent> {
   return observableDefer(() => {
     const { keySystemOptions,
@@ -98,6 +99,7 @@ export default function createSession(
 
     const sessionType : MediaKeySessionType =
       hasPersistence &&
+      !forceNonPersistence &&
       persistentSessionsStore != null &&
       keySystemOptions.persistentLicense === true ? "persistent-license" :
                                                     "temporary";
@@ -109,6 +111,7 @@ export default function createSession(
 
     // Re-check for Dumb typescript. Equivalent to `sessionType === "temporary"`.
     if (!hasPersistence ||
+        forceNonPersistence ||
         persistentSessionsStore == null ||
         keySystemOptions.persistentLicense !== true)
     {
