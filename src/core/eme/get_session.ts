@@ -90,7 +90,8 @@ export type IGetSessionEvent = ICreatedSession |
  */
 export default function getSession(
   initializationDataInfo : IInitializationDataInfo,
-  mediaKeysInfos : IMediaKeysInfos
+  mediaKeysInfos : IMediaKeysInfos,
+  forceNonPersistence : boolean
 ) : Observable<IGetSessionEvent> {
   return observableDefer(() : Observable<IGetSessionEvent> => {
     const { type: initDataType, data: initData } = initializationDataInfo;
@@ -129,7 +130,7 @@ export default function getSession(
       return observableConcat(
         cleanOldLoadedSessions(loadedSessionsStore,
                                EME_MAX_SIMULTANEOUS_MEDIA_KEY_SESSIONS - 1),
-        createSession(initData, initDataType, mediaKeysInfos)
+        createSession(initData, initDataType, mediaKeysInfos, forceNonPersistence)
           .pipe(map((evt) => ({ type: evt.type,
                                 value: {
                                   mediaKeySession: evt.value.mediaKeySession,

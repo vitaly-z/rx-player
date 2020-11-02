@@ -38,7 +38,7 @@ import {
   getInitData,
 } from "../../compat/";
 import config from "../../config";
-import { EncryptedMediaError } from "../../errors";
+import { EncryptedMediaError, isKnownError } from "../../errors";
 import log from "../../log";
 import assertUnreachable from "../../utils/assert_unreachable";
 import filterMap from "../../utils/filter_map";
@@ -168,7 +168,7 @@ export default function EMEManager(
                               value: { type: initDataType, data: initData } });
       }
 
-      const session$ = getSession(encryptedEvent, mediaKeysInfos)
+      const session$ = getSession(encryptedEvent, mediaKeysInfos, false)
         .pipe(map((evt) => {
           if (evt.type === "cleaning-old-session") {
             handledInitData.remove(evt.value.initData, evt.value.initDataType);
@@ -179,6 +179,9 @@ export default function EMEManager(
               keySystemOptions: mediaKeysInfos.keySystemOptions,
               persistentSessionsStore: mediaKeysInfos.persistentSessionsStore,
               keySystem: mediaKeysInfos.mediaKeySystemAccess.keySystem,
+              mediaKeySystemAccess: mediaKeysInfos.mediaKeySystemAccess,
+              mediaKeys : mediaKeysInfos.mediaKeys,
+              loadedSessionsStore : mediaKeysInfos.loadedSessionsStore,
             }, evt.value),
           };
         }));
@@ -222,6 +225,9 @@ export default function EMEManager(
               sessionType,
               keySystemOptions,
               persistentSessionsStore,
+              mediaKeySystemAccess,
+              mediaKeys,
+              loadedSessionsStore,
               keySystem } = sessionInfosEvt.value;
 
       const generateRequest$ = sessionInfosEvt.type !== "created-session" ?
@@ -247,7 +253,83 @@ export default function EMEManager(
       return observableMerge(SessionEventsListener(mediaKeySession,
                                                    keySystemOptions,
                                                    keySystem,
-                                                   { initData, initDataType }),
+                                                   { initData, initDataType })
+        .pipe(catchError(err => {
+          /* tslint:disable no-console */
+          console.warn("!!!!! ERROR RECEIVED", err);
+          if (!isKnownError(err) ||
+              err.code !== "KEY_UPDATE_ERROR" ||
+              sessionType !== "persistent-license")
+          {
+            console.warn("!!!!! ERROR Unknown, really throwing", err);
+            throw err;
+          }
+
+          console.warn("!!!!! Bonne erreur, re-faire en mode temporary");
+          return observableConcat(
+            loadedSessionsStore.closeSession(initData, initDataType)
+              .pipe(ignoreElements()),
+            getSession(
+              { type: initDataType, data: initData },
+              { mediaKeySystemAccess,
+                mediaKeys,
+                loadedSessionsStore,
+                persistentSessionsStore,
+                keySystemOptions },
+              true).pipe(tap((evt) => {
+                if (evt.type === "cleaning-old-session") {
+                  handledInitData.remove(evt.value.initData, evt.value.initDataType);
+                }
+              }), mergeMap(evt2 => {
+                switch (evt2.type) {
+                  case "cleaned-old-session":
+                  case "cleaning-old-session":
+                    return EMPTY;
+
+                  case "created-session":
+                  case "loaded-open-session":
+                  case "loaded-persistent-session":
+                    // Do nothing, just to check every possibility is taken
+                    break;
+
+                  default:
+                    assertUnreachable(evt2);
+                }
+
+                console.warn("!!!!!!!!!!! Behavior 4 TEST");
+                console.warn("!!!!!!! Session re-créé, en mode temporary");
+                const generateRequest2$ = evt2.type !== "created-session" ?
+                    EMPTY :
+                    generateKeyRequest(evt2.value.mediaKeySession,
+                                       initData,
+                                       initDataType).pipe(
+                      tap(() => {
+                        if (sessionType === "persistent-license" &&
+                            persistentSessionsStore !== null)
+                        {
+                          cleanOldStoredPersistentInfo(
+                            persistentSessionsStore,
+                            EME_MAX_STORED_PERSISTENT_SESSION_INFORMATION - 1);
+                          persistentSessionsStore.add(initData,
+                                                      initDataType,
+                                                      evt2.value.mediaKeySession);
+                        }
+                      }),
+                      catchError((error: unknown) => {
+                        throw new EncryptedMediaError("KEY_GENERATE_REQUEST_ERROR",
+                          error instanceof Error ? error.toString() :
+                                                   "Unknown error");
+                      }),
+                      ignoreElements());
+
+                console.warn("!!!!!!! Generate Request & events");
+                return observableMerge(SessionEventsListener(evt2.value.mediaKeySession,
+                                                             keySystemOptions,
+                                                             keySystem,
+                                                             { initData, initDataType }),
+                                       generateRequest2$);
+              })));
+        })),
                              generateRequest$)
         .pipe(catchError(err => {
           if (!(err instanceof BlacklistedSessionError)) {
