@@ -137,6 +137,8 @@ export default function parseRepresentationIndex(
       extractMinimumAvailabilityTimeOffset(representation.children.baseURLs) +
       (segmentTemplate.availabilityTimeOffset ?? 0);
     const { timelineParser } = segmentTemplate;
+    segmentTemplate.presentationTimeOffset =
+      (segmentTemplate.timescale ?? 1) * 184000000;
     representationIndex = timelineParser !== undefined ?
       new TimelineRepresentationIndex(segmentTemplate, timelineParser, context) :
       new TemplateRepresentationIndex(segmentTemplate, context);
