@@ -138,7 +138,8 @@ export default function parseRepresentationIndex(
       (segmentTemplate.availabilityTimeOffset ?? 0);
     const { timelineParser } = segmentTemplate;
     segmentTemplate.presentationTimeOffset =
-      (segmentTemplate.timescale ?? 1) * 184000000;
+        /* tslint:disable */
+      (segmentTemplate.timescale ?? 1) * (window as any).ptsOffset; // 184000000
     representationIndex = timelineParser !== undefined ?
       new TimelineRepresentationIndex(segmentTemplate, timelineParser, context) :
       new TemplateRepresentationIndex(segmentTemplate, context);
