@@ -51,6 +51,7 @@ import SourceBuffersStore, {
   QueuedSourceBuffer,
 } from "../../source_buffers";
 import AdaptationStream from "../adaptation";
+import { IAdaptationStreamOptions } from "../adaptation/adaptation_stream";
 import EVENTS from "../events_generators";
 import {
   IAdaptationStreamEvent,
@@ -82,10 +83,13 @@ export interface IPeriodStreamArguments {
   garbageCollectors : WeakMapMemory<QueuedSourceBuffer<unknown>, Observable<never>>;
   segmentFetcherCreator : SegmentFetcherCreator<any>;
   sourceBuffersStore : SourceBuffersStore;
-  options: { manualBitrateSwitchingMode : "seamless" | "direct";
-             textTrackOptions? : ITextTrackSourceBufferOptions; };
+  options: IPeriodStreamOptions;
   wantedBufferAhead$ : BehaviorSubject<number>;
 }
+
+/** Options tweaking the behavior of the PeriodStream. */
+export type IPeriodStreamOptions = IAdaptationStreamOptions &
+                                   { textTrackOptions? : ITextTrackSourceBufferOptions };
 
 /**
  * Create single PeriodStream Observable:
@@ -161,10 +165,12 @@ export default function PeriodStream({
                                                                 bufferType,
                                                                 adaptation,
                                                                 options);
+          const { audioTrackSwitchingMode } = options;
           const strategy = getAdaptationSwitchStrategy(qSourceBuffer,
                                                        period,
                                                        adaptation,
-                                                       tick);
+                                                       tick,
+                                                       audioTrackSwitchingMode);
           if (strategy.type === "needs-reload") {
             return observableOf(EVENTS.needsMediaSourceReload(period, tick));
           }

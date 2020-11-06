@@ -126,6 +126,33 @@ export interface IAdaptationStreamArguments<T> {
 }
 
 /**
+ * Various specific stream "options" which tweak the behavior of the
+ * AdaptationStream.
+ */
+export interface IAdaptationStreamOptions {
+  /**
+   * Strategy taken when the user switch manually the current Representation:
+   *   - "seamless": the switch will happen smoothly, with the Representation
+   *     with the new bitrate progressively being pushed alongside the old
+   *     Representation.
+   *   - "direct": hard switch. The Representation switch will be directly
+   *     visible but may necessitate the current MediaSource to be reloaded.
+   */
+  manualBitrateSwitchingMode : "seamless" | "direct";
+  /**
+   * Strategy to adopt when manually switching of audio adaptation.
+   * Can be either:
+   *    - "seamless": transitions are smooth but could be not immediate.
+   *    - "direct": strategy will be "smart", if the mimetype and the codec,
+   *    change, we will perform a hard reload of the media source, however, if it
+   *    doesn't change, we will just perform a small flush by removing buffered range
+   *    and performing, a small seek on the media element.
+   *    Transitions are faster, but, we could see appear a reloading or seeking state.
+   */
+  audioTrackSwitchingMode : "seamless" | "direct";
+}
+
+/**
  * Create new AdaptationStream Observable, which task will be to download the
  * media data for a given Adaptation (i.e. "track").
  *

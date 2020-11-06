@@ -373,10 +373,12 @@ export type IPeriodStreamEvent = IPeriodStreamReadyEvent |
 /** Event coming from function(s) managing multiple PeriodStreams. */
 export type IMultiplePeriodStreamsEvent = IPeriodStreamEvent |
                                           IPeriodStreamClearedEvent |
+                                          INeedsMediaSourceReload |
                                           ICompletedStreamEvent;
 
 /** Every event sent by the `StreamOrchestrator`. */
 export type IStreamOrchestratorEvent = IActivePeriodChangedEvent |
                                        IMultiplePeriodStreamsEvent |
                                        IEndOfStreamEvent |
+                                       INeedsMediaSourceReload |
                                        IResumeStreamEvent;

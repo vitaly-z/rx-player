@@ -51,13 +51,13 @@ import { SegmentFetcherCreator } from "../../fetchers";
 import SourceBuffersStore, {
   BufferGarbageCollector,
   IBufferType,
-  ITextTrackSourceBufferOptions,
   QueuedSourceBuffer,
 } from "../../source_buffers";
 import EVENTS from "../events_generators";
 import PeriodStream, {
   IPeriodStreamClockTick,
 } from "../period";
+import { IPeriodStreamOptions } from "../period/period_stream";
 import {
   IMultiplePeriodStreamsEvent,
   IPeriodStreamEvent,
@@ -109,9 +109,8 @@ export default function StreamOrchestrator(
   segmentFetcherCreator : SegmentFetcherCreator<any>,
   options: { wantedBufferAhead$ : BehaviorSubject<number>;
              maxBufferAhead$ : Observable<number>;
-             maxBufferBehind$ : Observable<number>;
-             textTrackOptions? : ITextTrackSourceBufferOptions;
-             manualBitrateSwitchingMode : "seamless" | "direct"; }
+             maxBufferBehind$ : Observable<number>; } &
+             IPeriodStreamOptions
 ) : Observable<IStreamOrchestratorEvent> {
   const { manifest, initialPeriod } = content;
   const { maxBufferAhead$, maxBufferBehind$, wantedBufferAhead$ } = options;
