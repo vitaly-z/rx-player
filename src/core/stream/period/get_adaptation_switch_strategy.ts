@@ -37,6 +37,7 @@ const { ADAPTATION_SWITCH_BUFFER_PADDINGS } = config;
 export type IAdaptationSwitchStrategy =
   { type: "continue"; value: undefined } |
   { type: "clean-buffer"; value: Array<{ start: number; end: number }> } |
+  { type: "needs-buffer-flush"; value:  Array<{ start: number; end: number }> } |
   { type: "needs-reload"; value: undefined };
 
 /**
@@ -52,7 +53,8 @@ export default function getAdaptationSwitchStrategy(
   segmentBuffer : SegmentBuffer<unknown>,
   period : Period,
   adaptation : Adaptation,
-  playbackInfo : { currentTime : number; readyState : number }
+  playbackInfo : { currentTime : number; readyState : number },
+  audioTrackSwitchingMode: "seamless" | "direct"
 ) : IAdaptationSwitchStrategy {
   const buffered = segmentBuffer.getBufferedRanges();
   if (buffered.length === 0) {
@@ -153,8 +155,11 @@ export default function getAdaptationSwitchStrategy(
   }
 
   const toRemove = excludeFromRanges(unwantedRange, rangesToExclude);
+  const strategyName = adaptation.type === "audio" && audioTrackSwitchingMode === "direct"
+                   ? "needs-buffer-flush"
+                   : "clean-buffer";
 
-  return toRemove.length > 0 ? { type: "clean-buffer", value: toRemove } :
+  return toRemove.length > 0 ? { type: strategyName, value: toRemove } :
                                { type: "continue", value: undefined };
 }
 

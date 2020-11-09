@@ -245,6 +245,7 @@ export interface ILoadVideoOptions {
   textTrackElement? : HTMLElement;
   manualBitrateSwitchingMode? : "seamless"|"direct";
   enableFastSwitching? : boolean;
+  audioTrackSwitchingMode? : "seamless"|"direct";
 
   /* tslint:disable deprecation */
   supplementaryTextTracks? : ISupplementaryTextTrackOption[];
@@ -274,6 +275,7 @@ interface IParsedLoadVideoOptionsBase {
   startAt : IParsedStartAtOption|undefined;
   manualBitrateSwitchingMode : "seamless"|"direct";
   enableFastSwitching : boolean;
+  audioTrackSwitchingMode : "seamless"|"direct";
 }
 
 /**
@@ -562,6 +564,16 @@ function parseLoadVideoOptions(
   const manifestUpdateUrl = options.transportOptions?.manifestUpdateUrl;
   const minimumManifestUpdateInterval =
     options.transportOptions?.minimumManifestUpdateInterval ?? 0;
+  let audioTrackSwitchingMode = isNullOrUndefined(options.audioTrackSwitchingMode)
+                                  ? DEFAULT_AUDIO_TRACK_SWITCHING_MODE
+                                  : options.audioTrackSwitchingMode;
+  if (!arrayIncludes(["seamless", "direct"], audioTrackSwitchingMode)) {
+    log.warn("The `audioTrackSwitchingMode` loadVideo option must match one of the following strategy name:\n" +
+             "- `seamless`\n" +
+             "- `direct`\n" +
+             "If badly set, " + DEFAULT_AUDIO_TRACK_SWITCHING_MODE + " strategy will be used as default");
+    audioTrackSwitchingMode = DEFAULT_AUDIO_TRACK_SWITCHING_MODE;
+  }
 
   const transportOptions = objectAssign({}, transportOptsArg, {
     /* tslint:disable deprecation */
