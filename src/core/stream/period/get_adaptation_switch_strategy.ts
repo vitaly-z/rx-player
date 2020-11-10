@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import config from "../../../config";
+// import config from "../../../config";
 import {
   Adaptation,
   Period,
 } from "../../../manifest";
 import {
   convertToRanges,
-  excludeFromRanges,
+  // excludeFromRanges,
   IRange,
   isTimeInRange,
   isTimeInRanges,
@@ -29,7 +29,7 @@ import {
 } from "../../../utils/ranges";
 import { QueuedSourceBuffer } from "../../source_buffers";
 
-const { ADAPTATION_SWITCH_BUFFER_PADDINGS } = config;
+// const { ADAPTATION_SWITCH_BUFFER_PADDINGS } = config;
 
 export type IAdaptationSwitchStrategy =
   { type: "continue"; value: undefined } |
@@ -78,23 +78,22 @@ export default function getAdaptationSwitchStrategy(
     return { type: "needs-reload", value: undefined };
   }
 
-  const unwantedData = excludeFromRanges(intersection, adaptationInBuffer);
-  const bufferType = adaptation.type;
-  let paddingBefore = ADAPTATION_SWITCH_BUFFER_PADDINGS[bufferType].before;
-  if (paddingBefore == null) {
-    paddingBefore = 0;
-  }
-  let paddingAfter = ADAPTATION_SWITCH_BUFFER_PADDINGS[bufferType].after;
-  if (paddingAfter == null) {
-    paddingAfter = 0;
-  }
-  const toRemove = excludeFromRanges(unwantedData, [{
-    start: Math.max(currentTime - paddingBefore, start),
-    end: Math.min(currentTime + paddingAfter, end),
-  }]);
+  // const unwantedData = excludeFromRanges(intersection, adaptationInBuffer);
+  // const bufferType = adaptation.type;
+  // let paddingBefore = ADAPTATION_SWITCH_BUFFER_PADDINGS[bufferType].before;
+  // if (paddingBefore == null) {
+  //   paddingBefore = 0;
+  // }
+  // let paddingAfter = ADAPTATION_SWITCH_BUFFER_PADDINGS[bufferType].after;
+  // if (paddingAfter == null) {
+  //   paddingAfter = 0;
+  // }
+  // const toRemove = excludeFromRanges(unwantedData, [{
+  //   start: Math.max(currentTime - paddingBefore, start),
+  //   end: Math.min(currentTime + paddingAfter, end),
+  // }]);
 
-  return toRemove.length > 0 ?  { type: "clean-buffer", value: toRemove } :
-                                { type: "continue", value: undefined };
+  return { type: "continue", value: undefined };
 }
 
 /**
