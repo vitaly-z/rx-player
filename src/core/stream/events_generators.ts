@@ -31,6 +31,7 @@ import {
   IEndOfStreamEvent,
   INeedsDecipherabilityFlush,
   INeedsMediaSourceReload,
+  INeedSourceBufferFlush,
   IPeriodStreamClearedEvent,
   IPeriodStreamReadyEvent,
   IProtectedSegmentEvent,
@@ -132,6 +133,11 @@ const EVENTS = {
   ) : INeedsMediaSourceReload {
     return { type: "needs-media-source-reload",
              value: { position, isPaused, period } };
+  },
+
+  needsSourceBufferFlush(type: IBufferType): INeedSourceBufferFlush {
+    return { type: "needs-source-buffer-flush",
+             value: { type } };
   },
 
   needsDecipherabilityFlush(

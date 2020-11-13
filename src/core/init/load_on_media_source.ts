@@ -166,6 +166,16 @@ export default function createMediaSourceLoader({
               handleDiscontinuity(gap[1], mediaElement);
             }
             return EMPTY;
+          case "needs-source-buffer-flush":
+            if (mediaElement.currentTime + 0.001 < mediaElement.duration) {
+              log.info("Init: Flushing buffers by performing a small seek.");
+              mediaElement.currentTime += 0.001;
+            } else {
+              log.info("Init: Flushing buffers by performing a very small" +
+                       "seek at the end of the current content.");
+              mediaElement.currentTime = mediaElement.duration;
+            }
+            return EMPTY;
           default:
             return observableOf(evt);
         }

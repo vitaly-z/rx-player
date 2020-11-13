@@ -28,6 +28,7 @@ import {
   ILoadedManifest,
   ITransportOptions as IParsedTransportOptions,
 } from "../../transports";
+import arrayIncludes from "../../utils/array_includes";
 import isNullOrUndefined from "../../utils/is_null_or_undefined";
 import {
   normalizeAudioTrack,
@@ -47,6 +48,7 @@ const { DEFAULT_AUTO_PLAY,
         DEFAULT_INITIAL_BITRATES,
         DEFAULT_LIMIT_VIDEO_WIDTH,
         DEFAULT_MANUAL_BITRATE_SWITCHING_MODE,
+        DEFAULT_AUDIO_TRACK_SWITCHING_MODE,
         DEFAULT_MAX_BITRATES,
         DEFAULT_MAX_BUFFER_AHEAD,
         DEFAULT_MAX_BUFFER_BEHIND,
@@ -705,6 +707,7 @@ function parseLoadVideoOptions(
            initialManifest,
            lowLatencyMode,
            manualBitrateSwitchingMode,
+           audioTrackSwitchingMode,
            manifestUpdateUrl,
            minimumManifestUpdateInterval,
            networkConfig,

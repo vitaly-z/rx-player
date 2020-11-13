@@ -163,6 +163,7 @@ export default function PeriodStream({
       const newStream$ = clock$.pipe(
         take(1),
         mergeMap((tick) => {
+          const { audioTrackSwitchingMode } = options
           const segmentBuffer = createOrReuseSegmentBuffer(segmentBuffersStore,
                                                            bufferType,
                                                            adaptation,
@@ -172,22 +173,26 @@ export default function PeriodStream({
           const strategy = getAdaptationSwitchStrategy(segmentBuffer,
                                                        period,
                                                        adaptation,
-                                                       playbackInfos);
+                                                       playbackInfos,
+                                                       audioTrackSwitchingMode);
           if (strategy.type === "needs-reload") {
             return observableOf(EVENTS.needsMediaSourceReload(period, tick));
           }
 
-          const cleanBuffer$ = strategy.type === "clean-buffer" ?
+          const cleanBuffer$ = strategy.type === "clean-buffer" ||
+                               strategy.type === "needs-buffer-flush" ?
             observableConcat(...strategy.value.map(({ start, end }) =>
                                segmentBuffer.removeBuffer(start, end))
-                            ).pipe(ignoreElements()) :
-            EMPTY;
+                            ).pipe(ignoreElements()) : EMPTY;
+          const emitNeedsSourceBufferFlushEvt$ = strategy.type === "needs-buffer-flush" ?
+            observableOf(EVENTS.needsSourceBufferFlush(bufferType)) : EMPTY;
 
           const bufferGarbageCollector$ = garbageCollectors.get(segmentBuffer);
           const adaptationStream$ = createAdaptationStream(adaptation, segmentBuffer);
 
           return segmentBuffersStore.waitForUsableBuffers().pipe(mergeMap(() => {
             return observableConcat(cleanBuffer$,
+                                    emitNeedsSourceBufferFlushEvt$,
                                     observableMerge(adaptationStream$,
                                                     bufferGarbageCollector$));
           }));

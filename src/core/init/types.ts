@@ -40,6 +40,7 @@ import {
   ICompletedStreamEvent,
   INeedsDecipherabilityFlush,
   INeedsMediaSourceReload,
+  INeedSourceBufferFlush,
   IPeriodStreamClearedEvent,
   IPeriodStreamReadyEvent,
   IProtectedSegmentEvent,
@@ -139,6 +140,7 @@ export type IMediaSourceLoaderEvent = IStalledEvent |
                                       ICompletedStreamEvent |
                                       IPeriodStreamReadyEvent |
                                       INeedsMediaSourceReload |
+                                      INeedSourceBufferFlush |
                                       IAdaptationChangeEvent |
                                       IBitrateEstimationChangeEvent |
                                       INeedsDecipherabilityFlush |
@@ -156,6 +158,7 @@ export type IInitEvent = IManifestReadyEvent |
                          IDecipherabilityUpdateEvent |
                          IWarningEvent |
                          IEMEDisabledEvent |
+                         INeedSourceBufferFlush |
 
                          // Coming from the `EMEManager`
 

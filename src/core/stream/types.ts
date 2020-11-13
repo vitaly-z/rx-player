@@ -193,6 +193,14 @@ export interface IAdaptationChangeEvent {
   };
 }
 
+export interface INeedSourceBufferFlush {
+  type : "needs-source-buffer-flush";
+  value : {
+    /** The type of buffer for which the Representation is changing. */
+    type: IBufferType;
+  };
+}
+
 /** Emitted when a new `Period` is currently playing. */
 export interface IActivePeriodChangedEvent {
   type: "activePeriodChanged";
@@ -385,13 +393,14 @@ export type IAdaptationStreamEvent<T> = IBitrateEstimationChangeEvent |
 export type IPeriodStreamEvent = IPeriodStreamReadyEvent |
                                  INeedsMediaSourceReload |
                                  IAdaptationChangeEvent |
+                                 INeedSourceBufferFlush |
 
                                  // From an AdaptationStream
 
                                  IBitrateEstimationChangeEvent |
+                                 INeedsMediaSourceReload |
                                  INeedsDecipherabilityFlush |
                                  IRepresentationChangeEvent |
-                                 INeedSourceBufferFlush |
 
                                  // From a RepresentationStream
 
@@ -413,13 +422,14 @@ export type IMultiplePeriodStreamsEvent = IPeriodStreamClearedEvent |
                                           IPeriodStreamReadyEvent |
                                           INeedsMediaSourceReload |
                                           IAdaptationChangeEvent |
-                                          INeedSourceBufferFlush |
 
                                           // From an AdaptationStream
 
                                           IBitrateEstimationChangeEvent |
+                                          INeedsMediaSourceReload |
                                           INeedsDecipherabilityFlush |
                                           IRepresentationChangeEvent |
+                                          INeedSourceBufferFlush |
 
                                           // From a RepresentationStream
 
@@ -444,13 +454,14 @@ export type IStreamOrchestratorEvent = IActivePeriodChangedEvent |
                                        IPeriodStreamReadyEvent |
                                        INeedsMediaSourceReload |
                                        IAdaptationChangeEvent |
-                                       INeedSourceBufferFlush |
 
                                        // From an AdaptationStream
 
                                        IBitrateEstimationChangeEvent |
+                                       INeedsMediaSourceReload |
                                        INeedsDecipherabilityFlush |
                                        IRepresentationChangeEvent |
+                                       INeedSourceBufferFlush |
 
                                        // From a RepresentationStream
 
