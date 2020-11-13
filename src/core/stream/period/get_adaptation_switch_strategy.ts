@@ -19,6 +19,8 @@ import {
   Adaptation,
   Period,
 } from "../../../manifest";
+import arrayFind from "../../../utils/array_find";
+import arrayIncludes from "../../../utils/array_includes";
 import {
   convertToRanges,
   excludeFromRanges,
@@ -77,6 +79,33 @@ export default function getAdaptationSwitchStrategy(
                              buf.infos.adaptation.id !== adaptation.id))
   {
     return { type: "continue", value: undefined };
+  }
+
+  if (adaptation.type === "audio" && audioTrackSwitchingMode === "direct") {
+    const playingBufferedChunk = arrayFind(inventory, (buf) =>
+      playbackInfo.currentTime >= buf.start && playbackInfo.currentTime <= buf.end);
+    if (playingBufferedChunk === undefined) {
+      return { type: "continue", value: undefined };
+    }
+
+    const playableRepresentation = adaptation.getPlayableRepresentations();
+    const playableCodecsMimeTypes =
+      playableRepresentation.reduce<string[]>((acc, representation) => {
+        const mimeTypes = representation.getMimeTypeString();
+        if (!arrayIncludes(acc, mimeTypes)) {
+          acc.push(mimeTypes);
+        }
+        return acc;
+      }, []);
+    const playingCodeMimeType =
+      playingBufferedChunk.infos.representation.getMimeTypeString();
+
+    // Check, if the codec+mimetype is different, in this case,
+    // we will reload the mediasource in direct mode, otherwise,
+    // go for a simple flush.
+    if (!arrayIncludes(playableCodecsMimeTypes, playingCodeMimeType)) {
+      return { type: "needs-reload", value: undefined };
+    }
   }
 
   /** Data already in the right Adaptation */
