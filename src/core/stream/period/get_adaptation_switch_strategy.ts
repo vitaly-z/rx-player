@@ -81,6 +81,7 @@ export default function getAdaptationSwitchStrategy(
 
   if (adaptation.type === "audio" && audioTrackSwitchingMode === "direct") {
     const [bufferedMimeType, bufferedCodec] = segmentBuffer.codec?.split(";") ?? [];
+    const codec = bufferedCodec?.split("\"")[1];
     const representations = adaptation.getPlayableRepresentations();
 
     for (let i = 0, len = representations.length; i < len; i += 1) {
@@ -89,7 +90,7 @@ export default function getAdaptationSwitchStrategy(
         return { type: "needs-reload", value: undefined };
       }
 
-      if (bufferedCodec?.split(".")[0] !== representation.codec?.split(".")[0]) {
+      if (codec?.split(".")[0] !== representation.codec?.split(".")[0]) {
         return { type: "needs-reload", value: undefined };
       }
     }
@@ -173,9 +174,11 @@ export default function getAdaptationSwitchStrategy(
   const toRemove = excludeFromRanges(unwantedRange, rangesToExclude);
   const strategyName = adaptation.type === "audio" &&
                        audioTrackSwitchingMode === "direct" &&
-                       inventory.some(buf => buf.infos.period.id === period.id)
-                   ? "needs-buffer-flush"
-                   : "clean-buffer";
+                       inventory.some(buf => buf.infos.period.id === period.id &&
+                                      playbackInfo.currentTime >= buf.start &&
+                                      playbackInfo.currentTime <= buf.end)
+                        ? "needs-buffer-flush"
+                        : "clean-buffer";
 
   return toRemove.length > 0 ? { type: strategyName, value: toRemove } :
                                { type: "continue", value: undefined };
