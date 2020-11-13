@@ -163,7 +163,7 @@ export default function PeriodStream({
       const newStream$ = clock$.pipe(
         take(1),
         mergeMap((tick) => {
-          const { audioTrackSwitchingMode } = options
+          const { audioTrackSwitchingMode } = options;
           const segmentBuffer = createOrReuseSegmentBuffer(segmentBuffersStore,
                                                            bufferType,
                                                            adaptation,

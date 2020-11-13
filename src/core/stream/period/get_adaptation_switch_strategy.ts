@@ -80,16 +80,16 @@ export default function getAdaptationSwitchStrategy(
   }
 
   if (adaptation.type === "audio" && audioTrackSwitchingMode === "direct") {
-    const [bufferedMimeType, bufferedCodec] = segmentBuffer.codec?.split(';') ?? []
+    const [bufferedMimeType, bufferedCodec] = segmentBuffer.codec?.split(";") ?? [];
     const representations = adaptation.getPlayableRepresentations();
 
-    for (let i=0, len = representations.length; i < len; i+=1) {
+    for (let i = 0, len = representations.length; i < len; i += 1) {
       const representation = representations[i];
       if (bufferedMimeType !== representation.mimeType) {
         return { type: "needs-reload", value: undefined };
       }
 
-      if (bufferedCodec?.split('.')[0] !== representation.codec?.split('.')[0]) {
+      if (bufferedCodec?.split(".")[0] !== representation.codec?.split(".")[0]) {
         return { type: "needs-reload", value: undefined };
       }
     }
@@ -171,7 +171,9 @@ export default function getAdaptationSwitchStrategy(
   }
 
   const toRemove = excludeFromRanges(unwantedRange, rangesToExclude);
-  const strategyName = adaptation.type === "audio" && audioTrackSwitchingMode === "direct"
+  const strategyName = adaptation.type === "audio" &&
+                       audioTrackSwitchingMode === "direct" &&
+                       inventory.some(buf => buf.infos.period.id === period.id)
                    ? "needs-buffer-flush"
                    : "clean-buffer";
 
