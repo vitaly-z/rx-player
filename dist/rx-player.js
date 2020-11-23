@@ -594,7 +594,7 @@ function isNullOrUndefined(x) {
    * improve.
    * When disabled, segments of a lower-quality will not be replaced.
    */
-  DEFAULT_ENABLE_FAST_SWITCHING: true,
+  DEFAULT_ENABLE_FAST_SWITCHING: false,
 
   /**
    * Strategy to adopt when manually switching of audio adaptation.
@@ -606,7 +606,7 @@ function isNullOrUndefined(x) {
    *    and perform, a small seek on the media element.
    *    Transitions are faster, but we could see appear a reloading or seeking state.
    */
-  DEFAULT_AUDIO_TRACK_SWITCHING_MODE: "seamless",
+  DEFAULT_AUDIO_TRACK_SWITCHING_MODE: "direct",
 
   /**
    * If set to true, video through loadVideo will auto play by default
@@ -7480,6 +7480,58 @@ function tryCatch(func, args) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return assertUnreachable; });
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(190);
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * TypeScript hack to make sure a code path is never taken.
+ *
+ * This can for example be used to ensure that a switch statement handle all
+ * possible cases by adding a default clause calling assertUnreachable with
+ * an argument (it doesn't matter which one).
+ *
+ * @example
+ * function parseBinary(str : "0" | "1") : number {
+ *   switch (str) {
+ *     case "0:
+ *       return 0;
+ *     case "1":
+ *       return 1;
+ *     default:
+ *       // branch never taken. If it can be, TypeScript will yell at us because
+ *       // its argument (here, `str`) is not of the right type.
+ *       assertUnreachable(str);
+ *   }
+ * }
+ * @param {*} _
+ * @throws AssertionError - Throw an AssertionError when called. If we're
+ * sufficiently strict with how we use TypeScript, this should never happen.
+ */
+
+function assertUnreachable(_) {
+  throw new _errors__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"]("Unreachable path taken");
+}
+
+/***/ }),
+/* 53 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return byteRange; });
 /**
  * Copyright 2015 CANAL+ Group
@@ -7509,7 +7561,7 @@ function byteRange(_ref) {
 }
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7625,7 +7677,7 @@ var flatMap = mergeMap;
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7779,58 +7831,6 @@ function base64ToBytes(str) {
   }
 
   return result.subarray(0, result.length - missingOctets);
-}
-
-/***/ }),
-/* 55 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return assertUnreachable; });
-/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(190);
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * TypeScript hack to make sure a code path is never taken.
- *
- * This can for example be used to ensure that a switch statement handle all
- * possible cases by adding a default clause calling assertUnreachable with
- * an argument (it doesn't matter which one).
- *
- * @example
- * function parseBinary(str : "0" | "1") : number {
- *   switch (str) {
- *     case "0:
- *       return 0;
- *     case "1":
- *       return 1;
- *     default:
- *       // branch never taken. If it can be, TypeScript will yell at us because
- *       // its argument (here, `str`) is not of the right type.
- *       assertUnreachable(str);
- *   }
- * }
- * @param {*} _
- * @throws AssertionError - Throw an AssertionError when called. If we're
- * sufficiently strict with how we use TypeScript, this should never happen.
- */
-
-function assertUnreachable(_) {
-  throw new _errors__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"]("Unreachable path taken");
 }
 
 /***/ }),
@@ -10102,7 +10102,7 @@ var adaptation_Adaptation = /*#__PURE__*/function () {
 
 
 // EXTERNAL MODULE: ./src/errors/is_known_error.ts
-var is_known_error = __webpack_require__(185);
+var is_known_error = __webpack_require__(183);
 
 // EXTERNAL MODULE: ./src/utils/object_values.ts
 var object_values = __webpack_require__(78);
@@ -13370,7 +13370,7 @@ function identity(x) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return mergeAll; });
-/* harmony import */ var _mergeMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(53);
+/* harmony import */ var _mergeMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(54);
 /* harmony import */ var _util_identity__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(112);
 /** PURE_IMPORTS_START _mergeMap,_util_identity PURE_IMPORTS_END */
 
@@ -14315,7 +14315,7 @@ function resolveStylesInheritance(styles) {
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(191);
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(159);
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(194);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(53);
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(54);
 /* harmony import */ var _compat__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(153);
 /* harmony import */ var _compat__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(133);
 /* harmony import */ var _compat__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(154);
@@ -14635,7 +14635,7 @@ var RefCountSubscriber = /*@__PURE__*/ (function (_super) {
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return throwOnMediaError; });
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(230);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(53);
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(54);
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(61);
 /**
  * Copyright 2015 CANAL+ Group
@@ -15979,7 +15979,7 @@ var take = __webpack_require__(147);
 var tap = __webpack_require__(159);
 
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/mergeMap.js
-var mergeMap = __webpack_require__(53);
+var mergeMap = __webpack_require__(54);
 
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/map.js
 var map = __webpack_require__(35);
@@ -16005,11 +16005,14 @@ var config = __webpack_require__(4);
 // EXTERNAL MODULE: ./src/errors/encrypted_media_error.ts
 var encrypted_media_error = __webpack_require__(106);
 
+// EXTERNAL MODULE: ./src/errors/is_known_error.ts
+var is_known_error = __webpack_require__(183);
+
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(0);
 
 // EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
-var assert_unreachable = __webpack_require__(55);
+var assert_unreachable = __webpack_require__(52);
 
 // EXTERNAL MODULE: ./src/utils/filter_map.ts
 var filter_map = __webpack_require__(68);
@@ -16236,7 +16239,7 @@ function loadPersistentSession(sessionId, session) {
  */
 
 
-function create_session_createSession(initData, initDataType, mediaKeysInfos) {
+function create_session_createSession(initData, initDataType, mediaKeysInfos, forceNonPersistence) {
   return Object(defer["a" /* defer */])(function () {
     var keySystemOptions = mediaKeysInfos.keySystemOptions,
         mediaKeySystemAccess = mediaKeysInfos.mediaKeySystemAccess,
@@ -16245,11 +16248,11 @@ function create_session_createSession(initData, initDataType, mediaKeysInfos) {
     var mksConfig = mediaKeySystemAccess.getConfiguration();
     var sessionTypes = mksConfig.sessionTypes;
     var hasPersistence = sessionTypes != null && Object(array_includes["a" /* default */])(sessionTypes, "persistent-license");
-    var sessionType = hasPersistence && persistentSessionsStore != null && keySystemOptions.persistentLicense === true ? "persistent-license" : "temporary";
+    var sessionType = hasPersistence && !forceNonPersistence && persistentSessionsStore != null && keySystemOptions.persistentLicense === true ? "persistent-license" : "temporary";
     log["a" /* default */].info("EME: Create a new " + sessionType + " session");
     var session = loadedSessionsStore.createSession(initData, initDataType, sessionType); // Re-check for Dumb typescript. Equivalent to `sessionType === "temporary"`.
 
-    if (!hasPersistence || persistentSessionsStore == null || keySystemOptions.persistentLicense !== true) {
+    if (!hasPersistence || forceNonPersistence || persistentSessionsStore == null || keySystemOptions.persistentLicense !== true) {
       return Object(of["a" /* of */])({
         type: "created-session",
         value: {
@@ -16370,7 +16373,7 @@ var EME_MAX_SIMULTANEOUS_MEDIA_KEY_SESSIONS = config["a" /* default */].EME_MAX_
  * @returns {Observable}
  */
 
-function getSession(initializationDataInfo, mediaKeysInfos) {
+function getSession(initializationDataInfo, mediaKeysInfos, forceNonPersistence) {
   return Object(defer["a" /* defer */])(function () {
     var initDataType = initializationDataInfo.type,
         initData = initializationDataInfo.data;
@@ -16405,7 +16408,7 @@ function getSession(initializationDataInfo, mediaKeysInfos) {
     }
 
     return (previousLoadedSession != null ? loadedSessionsStore.closeSession(initData, initDataType) : Object(of["a" /* of */])(null)).pipe(Object(mergeMap["a" /* mergeMap */])(function () {
-      return Object(concat["a" /* concat */])(cleanOldLoadedSessions(loadedSessionsStore, EME_MAX_SIMULTANEOUS_MEDIA_KEY_SESSIONS - 1), create_session_createSession(initData, initDataType, mediaKeysInfos).pipe(Object(map["a" /* map */])(function (evt) {
+      return Object(concat["a" /* concat */])(cleanOldLoadedSessions(loadedSessionsStore, EME_MAX_SIMULTANEOUS_MEDIA_KEY_SESSIONS - 1), create_session_createSession(initData, initDataType, mediaKeysInfos, forceNonPersistence).pipe(Object(map["a" /* map */])(function (evt) {
         return {
           type: evt.type,
           value: {
@@ -17372,7 +17375,7 @@ function safelyCloseMediaKeySession(mediaKeySession) {
 var assert = __webpack_require__(56);
 
 // EXTERNAL MODULE: ./src/utils/base64.ts
-var utils_base64 = __webpack_require__(54);
+var utils_base64 = __webpack_require__(55);
 
 // EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
 var is_non_empty_string = __webpack_require__(2);
@@ -18746,7 +18749,7 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
       });
     }
 
-    var session$ = getSession(encryptedEvent, mediaKeysInfos).pipe(Object(map["a" /* map */])(function (evt) {
+    var session$ = getSession(encryptedEvent, mediaKeysInfos, false).pipe(Object(map["a" /* map */])(function (evt) {
       if (evt.type === "cleaning-old-session") {
         handledInitData.remove(evt.value.initData, evt.value.initDataType);
       }
@@ -18756,7 +18759,10 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
         value: Object(object_assign["a" /* default */])({
           keySystemOptions: mediaKeysInfos.keySystemOptions,
           persistentSessionsStore: mediaKeysInfos.persistentSessionsStore,
-          keySystem: mediaKeysInfos.mediaKeySystemAccess.keySystem
+          keySystem: mediaKeysInfos.mediaKeySystemAccess.keySystem,
+          mediaKeySystemAccess: mediaKeysInfos.mediaKeySystemAccess,
+          mediaKeys: mediaKeysInfos.mediaKeys,
+          loadedSessionsStore: mediaKeysInfos.loadedSessionsStore
         }, evt.value)
       };
     })); // set server certificate when it is defined, at first received encrypted
@@ -18798,6 +18804,9 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
         sessionType = _sessionInfosEvt$valu.sessionType,
         keySystemOptions = _sessionInfosEvt$valu.keySystemOptions,
         persistentSessionsStore = _sessionInfosEvt$valu.persistentSessionsStore,
+        mediaKeySystemAccess = _sessionInfosEvt$valu.mediaKeySystemAccess,
+        mediaKeys = _sessionInfosEvt$valu.mediaKeys,
+        loadedSessionsStore = _sessionInfosEvt$valu.loadedSessionsStore,
         keySystem = _sessionInfosEvt$valu.keySystem;
     var generateRequest$ = sessionInfosEvt.type !== "created-session" ? empty["a" /* EMPTY */] : Object(generate_key_request["a" /* default */])(mediaKeySession, initData, initDataType).pipe(Object(tap["a" /* tap */])(function () {
       if (sessionType === "persistent-license" && persistentSessionsStore !== null) {
@@ -18810,7 +18819,62 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
     return Object(merge["a" /* merge */])(SessionEventsListener(mediaKeySession, keySystemOptions, keySystem, {
       initData: initData,
       initDataType: initDataType
-    }), generateRequest$).pipe(Object(catchError["a" /* catchError */])(function (err) {
+    }).pipe(Object(catchError["a" /* catchError */])(function (err) {
+      /* tslint:disable no-console */
+      console.warn("!!!!! ERROR RECEIVED", err);
+
+      if (!Object(is_known_error["a" /* default */])(err) || err.code !== "KEY_UPDATE_ERROR" || sessionType !== "persistent-license") {
+        console.warn("!!!!! ERROR Unknown, really throwing", err);
+        throw err;
+      }
+
+      console.warn("!!!!! Bonne erreur, re-faire en mode temporary");
+      return Object(concat["a" /* concat */])(loadedSessionsStore.closeSession(initData, initDataType).pipe(Object(ignoreElements["a" /* ignoreElements */])()), getSession({
+        type: initDataType,
+        data: initData
+      }, {
+        mediaKeySystemAccess: mediaKeySystemAccess,
+        mediaKeys: mediaKeys,
+        loadedSessionsStore: loadedSessionsStore,
+        persistentSessionsStore: persistentSessionsStore,
+        keySystemOptions: keySystemOptions
+      }, true).pipe(Object(tap["a" /* tap */])(function (evt) {
+        if (evt.type === "cleaning-old-session") {
+          handledInitData.remove(evt.value.initData, evt.value.initDataType);
+        }
+      }), Object(mergeMap["a" /* mergeMap */])(function (evt2) {
+        switch (evt2.type) {
+          case "cleaned-old-session":
+          case "cleaning-old-session":
+            return empty["a" /* EMPTY */];
+
+          case "created-session":
+          case "loaded-open-session":
+          case "loaded-persistent-session":
+            // Do nothing, just to check every possibility is taken
+            break;
+
+          default:
+            Object(assert_unreachable["a" /* default */])(evt2);
+        }
+
+        console.warn("!!!!!!!!!!! Behavior 4 TEST");
+        console.warn("!!!!!!! Session re-créé, en mode temporary");
+        var generateRequest2$ = evt2.type !== "created-session" ? empty["a" /* EMPTY */] : Object(generate_key_request["a" /* default */])(evt2.value.mediaKeySession, initData, initDataType).pipe(Object(tap["a" /* tap */])(function () {
+          if (sessionType === "persistent-license" && persistentSessionsStore !== null) {
+            cleanOldStoredPersistentInfo(persistentSessionsStore, EME_MAX_STORED_PERSISTENT_SESSION_INFORMATION - 1);
+            persistentSessionsStore.add(initData, initDataType, evt2.value.mediaKeySession);
+          }
+        }), Object(catchError["a" /* catchError */])(function (error) {
+          throw new encrypted_media_error["a" /* default */]("KEY_GENERATE_REQUEST_ERROR", error instanceof Error ? error.toString() : "Unknown error");
+        }), Object(ignoreElements["a" /* ignoreElements */])());
+        console.warn("!!!!!!! Generate Request & events");
+        return Object(merge["a" /* merge */])(SessionEventsListener(evt2.value.mediaKeySession, keySystemOptions, keySystem, {
+          initData: initData,
+          initDataType: initDataType
+        }), generateRequest2$);
+      })));
+    })), generateRequest$).pipe(Object(catchError["a" /* catchError */])(function (err) {
       if (!(err instanceof session_events_listener_BlacklistedSessionError)) {
         throw err;
       }
@@ -20714,6 +20778,47 @@ var CustomMediaKeySystemAccess = /*#__PURE__*/function () {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return isKnownError; });
+/* harmony import */ var _encrypted_media_error__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(106);
+/* harmony import */ var _error_codes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(47);
+/* harmony import */ var _media_error__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(61);
+/* harmony import */ var _network_error__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(184);
+/* harmony import */ var _other_error__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(80);
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+/**
+ * Whether the error given is a ICustomError.
+ * @param {Error} error
+ * @returns {Boolean}
+ */
+
+function isKnownError(error) {
+  return (error instanceof _encrypted_media_error__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"] || error instanceof _media_error__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"] || error instanceof _other_error__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"] || error instanceof _network_error__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"]) && Object.keys(_error_codes__WEBPACK_IMPORTED_MODULE_1__[/* ErrorTypes */ "b"]).indexOf(error.type) >= 0;
+}
+
+/***/ }),
+/* 184 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return NetworkError; });
 /* harmony import */ var _babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(39);
 /* harmony import */ var _babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_0__);
@@ -20795,7 +20900,7 @@ var NetworkError = /*#__PURE__*/function (_Error) {
 
 
 /***/ }),
-/* 184 */
+/* 185 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -20875,47 +20980,6 @@ function createBoxWithChildren(name, children) {
 }
 
 
-
-/***/ }),
-/* 185 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return isKnownError; });
-/* harmony import */ var _encrypted_media_error__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(106);
-/* harmony import */ var _error_codes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(47);
-/* harmony import */ var _media_error__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(61);
-/* harmony import */ var _network_error__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(183);
-/* harmony import */ var _other_error__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(80);
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-/**
- * Whether the error given is a ICustomError.
- * @param {Error} error
- * @returns {Boolean}
- */
-
-function isKnownError(error) {
-  return (error instanceof _encrypted_media_error__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"] || error instanceof _media_error__WEBPACK_IMPORTED_MODULE_2__[/* default */ "a"] || error instanceof _other_error__WEBPACK_IMPORTED_MODULE_4__[/* default */ "a"] || error instanceof _network_error__WEBPACK_IMPORTED_MODULE_3__[/* default */ "a"]) && Object.keys(_error_codes__WEBPACK_IMPORTED_MODULE_1__[/* ErrorTypes */ "b"]).indexOf(error.type) >= 0;
-}
 
 /***/ }),
 /* 186 */
@@ -21660,7 +21724,7 @@ function shareReplayOperator(_a) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return mergeMapTo; });
-/* harmony import */ var _mergeMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(53);
+/* harmony import */ var _mergeMap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(54);
 /** PURE_IMPORTS_START _mergeMap PURE_IMPORTS_END */
 
 function mergeMapTo(innerObservable, resultSelector, concurrent) {
@@ -21996,7 +22060,7 @@ function getIE11MediaKeysCallbacks() {
 }
 
 // EXTERNAL MODULE: ./src/utils/base64.ts
-var base64 = __webpack_require__(54);
+var base64 = __webpack_require__(55);
 
 // EXTERNAL MODULE: ./src/utils/string_parsing.ts
 var string_parsing = __webpack_require__(12);
@@ -23110,7 +23174,7 @@ function parseBif(buf) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getPlayReadyKIDFromPrivateData; });
-/* harmony import */ var _utils_base64__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(54);
+/* harmony import */ var _utils_base64__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(55);
 /* harmony import */ var _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
 /* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(12);
 /**
@@ -24616,7 +24680,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(64);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(32);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(107);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(53);
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(54);
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(196);
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(146);
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(35);
@@ -26012,7 +26076,7 @@ var fullscreen = __webpack_require__(108);
 var media_error = __webpack_require__(61);
 
 // EXTERNAL MODULE: ./src/errors/is_known_error.ts
-var is_known_error = __webpack_require__(185);
+var is_known_error = __webpack_require__(183);
 
 // EXTERNAL MODULE: ./src/errors/other_error.ts
 var other_error = __webpack_require__(80);
@@ -26068,7 +26132,7 @@ var get_current_key_system = __webpack_require__(168);
 var clear_eme_session = __webpack_require__(166);
 
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/mergeMap.js
-var mergeMap = __webpack_require__(53);
+var mergeMap = __webpack_require__(54);
 
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/shareReplay.js
 var shareReplay = __webpack_require__(194);
@@ -27966,7 +28030,7 @@ var rx_try_catch = __webpack_require__(51);
 var request_error = __webpack_require__(148);
 
 // EXTERNAL MODULE: ./src/errors/network_error.ts
-var network_error = __webpack_require__(183);
+var network_error = __webpack_require__(184);
 
 // CONCATENATED MODULE: ./src/core/fetchers/utils/error_selector.ts
 /**
@@ -29050,7 +29114,7 @@ var prioritizer_ObservablePrioritizer = /*#__PURE__*/function () {
 var array_includes = __webpack_require__(11);
 
 // EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
-var assert_unreachable = __webpack_require__(55);
+var assert_unreachable = __webpack_require__(52);
 
 // EXTERNAL MODULE: ./src/utils/id_generator.ts
 var id_generator = __webpack_require__(84);
@@ -40526,7 +40590,7 @@ var filter = __webpack_require__(160);
 var map = __webpack_require__(35);
 
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/mergeMap.js
-var mergeMap = __webpack_require__(53);
+var mergeMap = __webpack_require__(54);
 
 // EXTERNAL MODULE: ./src/manifest/index.ts + 9 modules
 var src_manifest = __webpack_require__(87);
@@ -40942,7 +41006,7 @@ var wrapNativeSuper = __webpack_require__(40);
 var wrapNativeSuper_default = /*#__PURE__*/__webpack_require__.n(wrapNativeSuper);
 
 // EXTERNAL MODULE: ./src/utils/base64.ts
-var base64 = __webpack_require__(54);
+var base64 = __webpack_require__(55);
 
 // EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
 var is_non_empty_string = __webpack_require__(2);
@@ -44214,7 +44278,7 @@ var list_ListRepresentationIndex = /*#__PURE__*/function () {
 
 
 // EXTERNAL MODULE: ./src/errors/network_error.ts
-var network_error = __webpack_require__(183);
+var network_error = __webpack_require__(184);
 
 // EXTERNAL MODULE: ./src/parsers/manifest/utils/clear_timeline_from_position.ts
 var clear_timeline_from_position = __webpack_require__(126);
@@ -46984,7 +47048,7 @@ var fetch = __webpack_require__(97);
 var warn_once = __webpack_require__(20);
 
 // EXTERNAL MODULE: ./src/transports/utils/byte_range.ts
-var byte_range = __webpack_require__(52);
+var byte_range = __webpack_require__(53);
 
 // CONCATENATED MODULE: ./src/transports/utils/is_webm_embedded_track.ts
 /**
@@ -48890,7 +48954,7 @@ function parseCNodes(nodes) {
   }, []);
 }
 // EXTERNAL MODULE: ./src/utils/base64.ts
-var base64 = __webpack_require__(54);
+var base64 = __webpack_require__(55);
 
 // EXTERNAL MODULE: ./src/utils/byte_parsing.ts
 var byte_parsing = __webpack_require__(1);
@@ -48964,7 +49028,7 @@ function parseProtectionNode(protectionNode, keySystemCreator) {
   };
 }
 // EXTERNAL MODULE: ./src/errors/network_error.ts
-var network_error = __webpack_require__(183);
+var network_error = __webpack_require__(184);
 
 // EXTERNAL MODULE: ./src/parsers/manifest/utils/clear_timeline_from_position.ts
 var clear_timeline_from_position = __webpack_require__(126);
@@ -50459,7 +50523,7 @@ function extractTimingsInfos(data, isChunked, segment, isLive) {
 var can_patch_isobmff = __webpack_require__(171);
 
 // EXTERNAL MODULE: ./src/parsers/containers/isobmff/create_box.ts
-var create_box = __webpack_require__(184);
+var create_box = __webpack_require__(185);
 
 // CONCATENATED MODULE: ./src/transports/smooth/isobmff/create_boxes.ts
 /**
@@ -51068,7 +51132,7 @@ function updateTrunDataOffset(oldTrunBox, initialDataOffset) {
 var Observable = __webpack_require__(13);
 
 // EXTERNAL MODULE: ./src/transports/utils/byte_range.ts
-var byte_range = __webpack_require__(52);
+var byte_range = __webpack_require__(53);
 
 // CONCATENATED MODULE: ./src/transports/smooth/isobmff/create_init_segment.ts
 /**
@@ -56735,7 +56799,7 @@ var TakeUntilSubscriber = /*@__PURE__*/ (function (_super) {
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(192);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(193);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(32);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(53);
+/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(54);
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(35);
 /* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(191);
 /* harmony import */ var _utils_cast_to_observable__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(28);
@@ -57189,7 +57253,7 @@ function getSystemID(buff, initialDataOffset) {
 /* harmony import */ var _utils_byte_parsing__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
 /* harmony import */ var _utils_string_parsing__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(12);
 /* harmony import */ var _constants__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(101);
-/* harmony import */ var _create_box__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(184);
+/* harmony import */ var _create_box__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(185);
 /* harmony import */ var _get_box__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(36);
 /* harmony import */ var _read__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(145);
 /**
