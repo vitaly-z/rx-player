@@ -35849,9 +35849,9 @@ function createClock(mediaElement, options) {
 
     function getCurrentClockTick(state) {
       var mediaTimings = getMediaInfos(mediaElement, state);
-      var stalledState = getStalledStatus(lastTimings, mediaTimings, options); // /!\ Mutate mediaTimings
-
-      return Object(object_assign["a" /* default */])(mediaTimings, {
+      log["a" /* default */].debug("API: current media element state", mediaTimings);
+      var stalledState = getStalledStatus(lastTimings, mediaTimings, options);
+      return Object(object_assign["a" /* default */])({}, mediaTimings, {
         stalled: stalledState,
         getCurrentTime: function getCurrentTime() {
           return mediaElement.currentTime;
