@@ -115,6 +115,11 @@ export default function initializeFeaturesObject() : void {
     /* tslint:enable no-var-requires */
   }
 
+  if (true) {
+    features.textTracksParser.ttml =
+      require(__RELATIVE_PATH__.TTML);
+  }
+
   /* tslint:disable no-var-requires */
   if (__FEATURES__.DIRECTFILE) {
     const initDirectFile = require(__RELATIVE_PATH__.DIRECTFILE).default;

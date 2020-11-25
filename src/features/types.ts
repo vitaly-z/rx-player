@@ -28,6 +28,7 @@ import { SegmentBuffer } from "../core/segment_buffers";
 import {
   IHTMLTextTracksParserFn,
   INativeTextTracksParserFn,
+  ITextTracksParserFn,
 } from "../parsers/texttracks";
 import { ITransportFunction } from "../transports";
 
@@ -91,6 +92,7 @@ export interface IFeaturesObject {
   emeManager : IEMEManager|null;
   htmlTextTracksBuffer : IHTMLTextTracksBuffer|null;
   htmlTextTracksParsers : Partial<Record<string, IHTMLTextTracksParserFn>>;
+  textTracksParser : Partial<Record<string, ITextTracksParserFn>>;
   imageBuffer : IImageBuffer|null;
   imageParser : IImageParser|null;
   transports : Partial<Record<string, ITransportFunction>>;

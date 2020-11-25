@@ -34,6 +34,7 @@ declare const __FEATURES__ : {
   NATIVE_SRT : boolean;
   NATIVE_TTML : boolean;
   NATIVE_VTT : boolean;
+  TTML: boolean;
   SMOOTH : boolean;
 };
 declare const __RELATIVE_PATH__ : {
@@ -55,5 +56,6 @@ declare const __RELATIVE_PATH__ : {
   NATIVE_TEXT_BUFFER: string;
   NATIVE_TTML: string;
   NATIVE_VTT: string;
+  TTML: string;
   SMOOTH: string;
 };

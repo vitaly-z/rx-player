@@ -96,6 +96,7 @@ module.exports = {
         NATIVE_SRT: true,
         NATIVE_TTML: true,
         NATIVE_VTT: true,
+        TTML: true,
         SMOOTH: true,
       },
 
@@ -119,6 +120,7 @@ module.exports = {
         NATIVE_TEXT_BUFFER: JSON.stringify("../core/segment_buffers/implementations/text/native/index.ts"),
         NATIVE_TTML: JSON.stringify("../parsers/texttracks/ttml/native/index.ts"),
         NATIVE_VTT: JSON.stringify("../parsers/texttracks/webvtt/native/index.ts"),
+        TTML: JSON.stringify("../parsers/texttracks/ttml/index.ts"),
         SMOOTH: JSON.stringify("../transports/smooth/index.ts"),
       },
     }),

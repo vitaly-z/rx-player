@@ -15,12 +15,19 @@
  */
 
 import { ICompatVTTCue } from "../../compat";
+import { IIntermediateCueElement } from "./ttml/unified/types";
 
 // Item returned by an HMTL text track parser
 export interface IHTMLCue {
   start : number;
   end: number;
   element : HTMLElement;
+}
+
+export interface ITTMLCue {
+  start: number;
+  end: number;
+  element: IIntermediateCueElement;
 }
 
 // Function to parse texttracks into native VTT cues
@@ -32,3 +39,8 @@ export type INativeTextTracksParserFn =
 export type IHTMLTextTracksParserFn =
   (texttrack : string, timeOffset : number, language? : string) =>
     IHTMLCue[];
+
+// Function to parse texttracks into cues
+export type ITextTracksParserFn =
+  (textTrack : string, timeOffset : number, language? : string) =>
+    ITTMLCue[];

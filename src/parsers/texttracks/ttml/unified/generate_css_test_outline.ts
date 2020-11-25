@@ -14,9 +14,22 @@
  * limitations under the License.
  */
 
-export {
-  IHTMLCue,
-  INativeTextTracksParserFn,
-  IHTMLTextTracksParserFn,
-  ITextTracksParserFn,
-} from "./types";
+/**
+ * Try to replicate the textOutline TTML style property into CSS.
+ *
+ * We mock it throught the text-shadow property, translating the TTML thickness
+ * into blur radius and the blur-radius into... nothing.
+ *
+ * @param {string} color
+ * @param {string|number} thickness
+ * @returns {string}
+ */
+export default function generateCSSTextOutline(
+  color : string,
+  thickness : string|number
+) : string {
+  return `-1px -1px ${thickness} ${color},` +
+         `1px -1px ${thickness} ${color},` +
+         `-1px 1px ${thickness} ${color},` +
+         `1px 1px ${thickness} ${color}`;
+}

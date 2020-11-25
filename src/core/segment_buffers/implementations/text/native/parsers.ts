@@ -34,7 +34,20 @@ export default function parseTextTrackToCues(
   language? : string
 ) : Array<ICompatVTTCue|TextTrackCue> {
   log.debug("NTSB: Finding parser for native text tracks:", type);
-  const parser = features.nativeTextTracksParsers[type];
+  if (type !== "ttml") {
+    const parser = features.nativeTextTracksParsers[type];
+
+    if (typeof parser !== "function") {
+      throw new Error("no parser found for the given text track");
+    }
+
+    log.debug("NTSB: Parser found, parsing...");
+    const parsed = parser(data, timestampOffset, language);
+    log.debug("NTSB: Parsed successfully!", parsed);
+    return parsed;
+  }
+
+  const parser = features.textTracksParser[type];
 
   if (typeof parser !== "function") {
     throw new Error("no parser found for the given text track");
@@ -43,5 +56,5 @@ export default function parseTextTrackToCues(
   log.debug("NTSB: Parser found, parsing...");
   const parsed = parser(data, timestampOffset, language);
   log.debug("NTSB: Parsed successfully!", parsed);
-  return parsed;
+  return turnToVTT(parsed);
 }

@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-export {
-  IHTMLCue,
-  INativeTextTracksParserFn,
-  IHTMLTextTracksParserFn,
-  ITextTracksParserFn,
-} from "./types";
+import ttmlParser from "../../parsers/texttracks/ttml/unified";
+import { IFeaturesObject } from "../types";
+
+/**
+ * Add ability to parse TTML text tracks in an HTML textrack mode.
+ * @param {Object} features
+ */
+function addTTMLFeature(features : IFeaturesObject) {
+  features.textTracksParser.ttml = ttmlParser;
+}
+
+export { addTTMLFeature as HTML_TTML_PARSER };
+export default addTTMLFeature;

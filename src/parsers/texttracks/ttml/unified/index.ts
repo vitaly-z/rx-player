@@ -14,9 +14,5 @@
  * limitations under the License.
  */
 
-export {
-  IHTMLCue,
-  INativeTextTracksParserFn,
-  IHTMLTextTracksParserFn,
-  ITextTracksParserFn,
-} from "./types";
+import parseTtml from "./parse_ttml";
+export default parseTtml;
