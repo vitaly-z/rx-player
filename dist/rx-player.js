@@ -10798,7 +10798,7 @@ var manifest_Manifest = /*#__PURE__*/function (_EventEmitter) {
    * Returns the Period coming chronologically just after another given Period.
    * Returns `undefined` if not found.
    * @param {Object} period
-   * @returns {Object|null}
+   * @returns {Object|undefined}
    */
   ;
 
@@ -10806,13 +10806,12 @@ var manifest_Manifest = /*#__PURE__*/function (_EventEmitter) {
     var endOfPeriod = period.end;
 
     if (endOfPeriod === undefined) {
-      return null;
+      return undefined;
     }
 
-    var nextPeriod = Object(array_find["a" /* default */])(this.periods, function (_period) {
+    return Object(array_find["a" /* default */])(this.periods, function (_period) {
       return _period.end === undefined || endOfPeriod < _period.end;
     });
-    return nextPeriod === undefined ? null : nextPeriod;
   }
   /**
    * Returns the most important URL from which the Manifest can be refreshed.
@@ -34504,7 +34503,7 @@ function maintainEndOfStream(mediaSource) {
 // EXTERNAL MODULE: ./src/compat/is_playback_stuck.ts
 var is_playback_stuck = __webpack_require__(178);
 
-// CONCATENATED MODULE: ./src/core/init/get_discontinuities.ts
+// CONCATENATED MODULE: ./src/core/init/get_current_discontinuity_end.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -34528,12 +34527,14 @@ var is_playback_stuck = __webpack_require__(178);
 var BUFFER_DISCONTINUITY_THRESHOLD = config["a" /* default */].BUFFER_DISCONTINUITY_THRESHOLD;
 /**
  * Perform various checks about discontinuities during playback.
+ * If a discontinuity is encountered, return the theorical end of
+ * discontinuity.
  * @param {Observable} clock$
  * @param {Object} manifest
  * @returns {Observable}
  */
 
-function getDiscontinuities(clock$, manifest) {
+function getCurrentDiscontinuityEnd(clock$, manifest) {
   return clock$.pipe(Object(filter["a" /* filter */])(function (_ref) {
     var stalled = _ref.stalled;
     return stalled !== null;
@@ -34547,7 +34548,7 @@ function getDiscontinuities(clock$, manifest) {
 
     if (Object(is_playback_stuck["a" /* default */])(position, currentRange, state, stalled !== null)) {
       log["a" /* default */].warn("Init: After freeze seek", position, currentRange);
-      return [position, position]; // 2. Is it a short discontinuity in buffer ? -> Seek at the beginning of the
+      return position; // 2. Is it a short discontinuity in buffer ? -> Seek at the beginning of the
       //                                               next range
       //
       // Discontinuity check in case we are close a buffered range but still
@@ -34556,18 +34557,18 @@ function getDiscontinuities(clock$, manifest) {
       // case of small discontinuity in the content.
     } else if (nextBufferRangeGap < BUFFER_DISCONTINUITY_THRESHOLD) {
       var seekTo = position + nextBufferRangeGap + 1 / 60;
-      return [position, seekTo];
+      return seekTo;
     } // 3. Is it a discontinuity between periods ? -> Seek at the beginning of the
     //                                               next period
 
 
     var currentPeriod = manifest.getPeriodForTime(position);
 
-    if (currentPeriod != null) {
+    if (currentPeriod !== undefined) {
       var nextPeriod = manifest.getPeriodAfter(currentPeriod);
 
-      if (currentPeriod != null && currentPeriod.end != null && nextPeriod != null && position > currentPeriod.end - 1 && position <= nextPeriod.start && nextPeriod.start - currentPeriod.end === 0) {
-        return [currentPeriod.end, nextPeriod.start];
+      if (currentPeriod.end !== undefined && nextPeriod !== undefined && position > currentPeriod.end - 1 && position <= nextPeriod.start && nextPeriod.start - currentPeriod.end < 0.5) {
+        return nextPeriod.start;
       }
     }
   }), Object(filter["a" /* filter */])(function (x) {
@@ -35059,9 +35060,8 @@ function createMediaSourceLoader(_ref) {
     // various infinite stalling issues
 
     var stalled$ = Object(get_stalled_events["a" /* default */])(clock$).pipe(Object(map["a" /* map */])(events_generators["a" /* default */].stalled));
-    var handledDiscontinuities$ = getDiscontinuities(clock$, manifest).pipe(Object(tap["a" /* tap */])(function (gap) {
-      var seekTo = gap[1];
-      handleDiscontinuity(seekTo, mediaElement);
+    var handledDiscontinuities$ = getCurrentDiscontinuityEnd(clock$, manifest).pipe(Object(tap["a" /* tap */])(function (seekTo) {
+      return handleDiscontinuity(seekTo, mediaElement);
     }), Object(ignoreElements["a" /* ignoreElements */])());
     var loadedEvent$ = load$.pipe(Object(mergeMap["a" /* mergeMap */])(function (evt) {
       if (evt === "autoplay-blocked") {
