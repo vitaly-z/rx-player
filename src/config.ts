@@ -72,8 +72,8 @@ export default {
    *    and perform, a small seek on the media element.
    *    Transitions are faster, but we could see appear a reloading or seeking state.
    */
-  DEFAULT_AUDIO_TRACK_SWITCHING_MODE: "seamless" as "seamless" |
-                                                    "direct",
+  DEFAULT_AUDIO_TRACK_SWITCHING_MODE: "direct" as "seamless" |
+                                                  "direct",
 
   /**
    * If set to true, video through loadVideo will auto play by default
