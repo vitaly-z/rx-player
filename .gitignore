@@ -17,9 +17,3 @@
 /coverage
 
 /dist/_esm5.raw
-
-/features
-/logger
-/minimal
-/experimental
-/types
