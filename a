@@ -1,0 +1,15 @@
+singleLicensePer: "period" | "init-data" | "content"
+
+HandledSessionsStore
+
+const sessionStatus = handledSessionsStore.getStatus(content, initData, initDataType);
+if (sessionStatus === null) {
+  // go on
+} else if (sessionStatus.isBlacklisted) {
+  // blacklist?
+} else {
+  // do nothing
+}
+
+
+const sessionStatus = handledSessionsStore.getStatus(period, initData, initDataType);
