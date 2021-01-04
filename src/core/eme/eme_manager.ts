@@ -38,12 +38,15 @@ import {
   getInitData,
 } from "../../compat/";
 import config from "../../config";
-import { EncryptedMediaError } from "../../errors";
+import { EncryptedMediaError, isKnownError } from "../../errors";
 import log from "../../log";
 import assertUnreachable from "../../utils/assert_unreachable";
 import filterMap from "../../utils/filter_map";
 import isNullOrUndefined from "../../utils/is_null_or_undefined";
-import objectAssign from "../../utils/object_assign";
+import {
+  ICleanedOldSessionEvent,
+  ICleaningOldSessionEvent,
+} from "./clean_old_loaded_sessions";
 import cleanOldStoredPersistentInfo from "./clean_old_stored_persistent_info";
 import getSession from "./get_session";
 import initMediaKeys from "./init_media_keys";
@@ -53,10 +56,16 @@ import SessionEventsListener, {
 import setServerCertificate from "./set_server_certificate";
 import {
   IAttachedMediaKeysEvent,
+  IBlacklistKeysEvent,
   IContentProtection,
   IEMEManagerEvent,
+  IEMEWarningEvent,
   IInitializationDataInfo,
   IKeySystemOption,
+  IMediaKeySessionStores,
+  INoUpdateEvent,
+  ISessionMessageEvent,
+  ISessionUpdatedEvent,
 } from "./types";
 import InitDataStore from "./utils/init_data_store";
 
@@ -166,48 +175,94 @@ export default function EMEManager(
                               value: { initializationData: encryptedEvent } });
       }
 
+      const serverCertificate$ = i === 0 && !isNullOrUndefined(serverCertificate) ?
+        setServerCertificate(instances.mediaKeys, serverCertificate) :
+        EMPTY;
+
       const wantedSessionType = options.persistentLicense === true ?
         "persistent-license" :
         "temporary";
-      const session$ = getSession(encryptedEvent, stores, wantedSessionType)
-        .pipe(map((evt) => {
-          if (evt.type === "cleaning-old-session") {
-            handledInitData.remove(encryptedEvent);
+      const keySystem = instances.mediaKeySystemAccess.keySystem;
+      return observableConcat(serverCertificate$,
+                              handleNewSession(encryptedEvent,
+                                               stores,
+                                               keySystem,
+                                               options,
+                                               wantedSessionType)).pipe(
+        /* Trigger license request and manage MediaKeySession events */
+        mergeMap((sessionInfosEvt) =>  {
+          switch (sessionInfosEvt.type) {
+            case "cleaning-old-session":
+              handledInitData.remove(encryptedEvent);
+              return EMPTY;
+
+            case "cleaned-old-session":
+              return EMPTY;
+
+            default:
+              return observableOf(sessionInfosEvt);
           }
-          return {
-            type: evt.type,
-            value: objectAssign({
-              initializationData: encryptedEvent,
-              keySystemOptions: options,
-              stores,
-              keySystem: instances.mediaKeySystemAccess.keySystem,
-              mediaKeySystemAccess: instances.mediaKeySystemAccess,
-              mediaKeys : instances.mediaKeys,
-            }, evt.value),
-          };
+        }),
+
+        catchError(err => {
+          if (!(err instanceof BlacklistedSessionError)) {
+            throw err;
+          }
+          blacklistedInitData.store(encryptedEvent, err);
+          const { sessionError } = err;
+          if (encryptedEvent.type === undefined) {
+            log.error("EME: Current session blacklisted and content not known. " +
+                      "Throwing.");
+            sessionError.fatal = true;
+            throw sessionError;
+          }
+
+          log.warn("EME: Current session blacklisted. Blacklisting content.");
+          return observableOf({ type: "warning" as const,
+                                value: sessionError },
+                              { type: "blacklist-protection-data" as const,
+                                value: encryptedEvent });
         }));
+    }));
 
-      // set server certificate when it is defined, at first received encrypted
-      // event
-      if (i === 0 && !isNullOrUndefined(serverCertificate)) {
-        return observableConcat(setServerCertificate(instances.mediaKeys,
-                                                     serverCertificate),
-                                session$);
-      }
-      return session$;
-    }),
+  return observableMerge(mediaKeysInfos$,
+                         mediaEncryptedEvents$.pipe(
+                           map(evt => ({ type: "encrypted-event-received" as const,
+                                         value: evt }))),
+                         bindSession$);
+}
 
+/**
+ * Create or load an already existing MediaKeySession linked to the
+ * given initialization data, generate a license request if necessary, and bind
+ * its events to the right callbacks.
+ * @param {Object} initializationData
+ * @param {string} keySystem
+ * @param {Object} keySystemOptions
+ * @param {string} wantedSessionType
+ * @returns {Observable}
+ */
+function handleNewSession(
+  initializationData : IInitializationDataInfo,
+  stores : IMediaKeySessionStores,
+  keySystem : string,
+  keySystemOptions : IKeySystemOption,
+  wantedSessionType : MediaKeySessionType
+) : Observable<IEMEWarningEvent |
+               ICleaningOldSessionEvent |
+               ICleanedOldSessionEvent |
+               INoUpdateEvent |
+               ISessionMessageEvent |
+               ISessionUpdatedEvent |
+               IBlacklistKeysEvent>
+{
+  return getSession(initializationData, stores, wantedSessionType).pipe(
     /* Trigger license request and manage MediaKeySession events */
     mergeMap((sessionInfosEvt) =>  {
       switch (sessionInfosEvt.type) {
-        case "warning":
-        case "blacklist-protection-data":
-        case "init-data-ignored":
-          return observableOf(sessionInfosEvt);
-
         case "cleaned-old-session":
         case "cleaning-old-session":
-          return EMPTY;
+          return observableOf(sessionInfosEvt);
 
         case "created-session":
         case "loaded-open-session":
@@ -218,19 +273,15 @@ export default function EMEManager(
         default: // Use TypeScript to check if all possibilities have been checked
           assertUnreachable(sessionInfosEvt);
       }
-      const { initializationData,
-              mediaKeySession,
-              sessionType,
-              keySystemOptions,
-              stores,
-              keySystem } = sessionInfosEvt.value;
+      const { mediaKeySession } = sessionInfosEvt.value;
 
       const generateRequest$ = sessionInfosEvt.type !== "created-session" ?
           EMPTY :
           generateKeyRequest(mediaKeySession, initializationData).pipe(
+            /** Add to PersistentSessionsStore if persistent */
             tap(() => {
               const { persistentSessionsStore } = stores;
-              if (sessionType === "persistent-license" &&
+              if (wantedSessionType === "persistent-license" &&
                   persistentSessionsStore !== null)
               {
                 cleanOldStoredPersistentInfo(
@@ -252,31 +303,18 @@ export default function EMEManager(
                                                    initializationData),
                              generateRequest$)
         .pipe(catchError(err => {
-          if (!(err instanceof BlacklistedSessionError)) {
+          if (!isKnownError(err) ||
+              err.code !== "KEY_UPDATE_ERROR" ||
+              wantedSessionType !== "persistent-license")
+          {
             throw err;
           }
-
-          blacklistedInitData.store(initializationData, err);
-
-          const { sessionError } = err;
-          if (initializationData.type === undefined) {
-            log.error("EME: Current session blacklisted and content not known. " +
-                      "Throwing.");
-            sessionError.fatal = true;
-            throw sessionError;
-          }
-
-          log.warn("EME: Current session blacklisted. Blacklisting content.");
-          return observableOf({ type: "warning" as const,
-                                value: sessionError },
-                              { type: "blacklist-protection-data" as const,
-                                value: initializationData });
+          // Retry, now creating a "temporary" MediaKeySession
+          return handleNewSession(initializationData,
+                                  stores,
+                                  keySystem,
+                                  keySystemOptions,
+                                   "temporary");
         }));
     }));
-
-  return observableMerge(mediaKeysInfos$,
-                         mediaEncryptedEvents$
-                           .pipe(map(evt => ({ type: "encrypted-event-received" as const,
-                                               value: evt }))),
-                         bindSession$);
 }
