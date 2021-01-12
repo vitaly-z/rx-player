@@ -132,6 +132,7 @@ export default function EMEManager(
 
   /** Create MediaKeySessions and handle the corresponding events. */
   const bindSession$ = initializationData$.pipe(
+    take(1),
     // Add attached MediaKeys info once available
     mergeMap((initializationData) => attachedMediaKeys$.pipe(
       map((mediaKeysEvt) : [IInitializationDataInfo, IAttachedMediaKeysEvent] =>
