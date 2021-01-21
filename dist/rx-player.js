@@ -19177,7 +19177,9 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
     var serverCertificate$ = i === 0 && !Object(is_null_or_undefined["a" /* default */])(serverCertificate) ? trySettingServerCertificate(mediaKeys, serverCertificate) : empty["a" /* EMPTY */];
     var wantedSessionType;
 
-    if (!canCreatePersistentSession(mediaKeySystemAccess)) {
+    if (options.persistentLicense !== true) {
+      wantedSessionType = "temporary";
+    } else if (!canCreatePersistentSession(mediaKeySystemAccess)) {
       log["a" /* default */].warn("EME: Cannot create \"persistent-license\" session: not supported");
       wantedSessionType = "temporary";
     } else {
