@@ -19192,7 +19192,7 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
           return Object(of["a" /* of */])(sessionEvt);
 
         case "cleaning-old-session":
-          handledInitData.remove(initializationData);
+          handledInitData.remove(sessionEvt.value.initializationData);
           return empty["a" /* EMPTY */];
 
         case "cleaned-old-session":
