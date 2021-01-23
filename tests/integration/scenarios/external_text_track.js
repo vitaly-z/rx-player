@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import RxPlayer from "../../../src";
 import { manifestInfos } from "../../contents/DASH_static_SegmentTimeline";
 import textTrackInfos from "../../contents/texttracks";
@@ -35,13 +34,13 @@ describe("external text track", function () {
     await waitForLoadedStateAfterLoadVideo(player);
 
     const textTracks = player.getAvailableTextTracks();
-    expect(textTracks.length).to.equal(1);
-    expect(textTracks[0].language).to.equal("en");
-    expect(textTracks[0].normalized).to.equal("eng");
-    expect(textTracks[0].closedCaption).to.equal(false);
-    expect(typeof textTracks[0].id).to.equal("string");
-    expect(textTracks[0].id).to.not.equal("");
-    expect(textTracks[0].active).to.equal(false);
+    expect(textTracks.length).toEqual(1);
+    expect(textTracks[0].language).toEqual("en");
+    expect(textTracks[0].normalized).toEqual("eng");
+    expect(textTracks[0].closedCaption).toEqual(false);
+    expect(typeof textTracks[0].id).toEqual("string");
+    expect(textTracks[0].id).not.toEqual("");
+    expect(textTracks[0].active).toEqual(false);
   });
 
   it("should be able to add a closed caption text track", async function () {
@@ -60,13 +59,13 @@ describe("external text track", function () {
     await waitForLoadedStateAfterLoadVideo(player);
 
     const textTracks = player.getAvailableTextTracks();
-    expect(textTracks.length).to.equal(1);
-    expect(textTracks[0].language).to.equal("arm");
-    expect(textTracks[0].normalized).to.equal("hye");
-    expect(textTracks[0].closedCaption).to.equal(true);
-    expect(typeof textTracks[0].id).to.equal("string");
-    expect(textTracks[0].id).to.not.equal("");
-    expect(textTracks[0].active).to.equal(false);
+    expect(textTracks.length).toEqual(1);
+    expect(textTracks[0].language).toEqual("arm");
+    expect(textTracks[0].normalized).toEqual("hye");
+    expect(textTracks[0].closedCaption).toEqual(true);
+    expect(typeof textTracks[0].id).toEqual("string");
+    expect(textTracks[0].id).not.toEqual("");
+    expect(textTracks[0].active).toEqual(false);
 
   });
 
@@ -100,28 +99,28 @@ describe("external text track", function () {
     await waitForLoadedStateAfterLoadVideo(player);
 
     const textTracks = player.getAvailableTextTracks();
-    expect(textTracks.length).to.equal(3);
+    expect(textTracks.length).toEqual(3);
 
-    expect(textTracks[0].language).to.equal("en");
-    expect(textTracks[0].normalized).to.equal("eng");
-    expect(textTracks[0].closedCaption).to.equal(false);
-    expect(typeof textTracks[0].id).to.equal("string");
-    expect(textTracks[0].id).to.not.equal("");
-    expect(textTracks[0].active).to.equal(false);
+    expect(textTracks[0].language).toEqual("en");
+    expect(textTracks[0].normalized).toEqual("eng");
+    expect(textTracks[0].closedCaption).toEqual(false);
+    expect(typeof textTracks[0].id).toEqual("string");
+    expect(textTracks[0].id).not.toEqual("");
+    expect(textTracks[0].active).toEqual(false);
 
-    expect(textTracks[1].language).to.equal("fr");
-    expect(textTracks[1].normalized).to.equal("fra");
-    expect(textTracks[1].closedCaption).to.equal(false);
-    expect(typeof textTracks[1].id).to.equal("string");
-    expect(textTracks[1].id).to.not.equal("");
-    expect(textTracks[1].active).to.equal(false);
+    expect(textTracks[1].language).toEqual("fr");
+    expect(textTracks[1].normalized).toEqual("fra");
+    expect(textTracks[1].closedCaption).toEqual(false);
+    expect(typeof textTracks[1].id).toEqual("string");
+    expect(textTracks[1].id).not.toEqual("");
+    expect(textTracks[1].active).toEqual(false);
 
-    expect(textTracks[2].language).to.equal("ger");
-    expect(textTracks[2].normalized).to.equal("deu");
-    expect(textTracks[2].closedCaption).to.equal(true);
-    expect(typeof textTracks[2].id).to.equal("string");
-    expect(textTracks[2].id).to.not.equal("");
-    expect(textTracks[2].active).to.equal(false);
+    expect(textTracks[2].language).toEqual("ger");
+    expect(textTracks[2].normalized).toEqual("deu");
+    expect(textTracks[2].closedCaption).toEqual(true);
+    expect(typeof textTracks[2].id).toEqual("string");
+    expect(textTracks[2].id).not.toEqual("");
+    expect(textTracks[2].active).toEqual(false);
   });
 
   it("should switch initially to external text track if set as default language", async function () {
@@ -151,7 +150,7 @@ describe("external text track", function () {
       await waitForLoadedStateAfterLoadVideo(player);
 
       const textTracks1 = player.getAvailableTextTracks();
-      expect(textTracks1[0].active).to.equal(true);
+      expect(textTracks1[0].active).toEqual(true);
 
       player.loadVideo({
         transport: manifestInfos.transport,
@@ -182,7 +181,7 @@ describe("external text track", function () {
       await waitForLoadedStateAfterLoadVideo(player);
 
       const textTracks2 = player.getAvailableTextTracks();
-      expect(textTracks2[0].active).to.equal(true);
+      expect(textTracks2[0].active).toEqual(true);
     }
   });
 
@@ -209,7 +208,7 @@ describe("external text track", function () {
       await waitForLoadedStateAfterLoadVideo(player);
 
       const textTracks1 = player.getAvailableTextTracks();
-      expect(textTracks1[0].active).to.equal(true);
+      expect(textTracks1[0].active).toEqual(true);
 
       player.loadVideo({
         transport: manifestInfos.transport,
@@ -241,7 +240,7 @@ describe("external text track", function () {
       await waitForLoadedStateAfterLoadVideo(player);
 
       const textTracks2 = player.getAvailableTextTracks();
-      expect(textTracks2[0].active).to.equal(true);
+      expect(textTracks2[0].active).toEqual(true);
     }
   });
 
@@ -272,7 +271,7 @@ describe("external text track", function () {
       await waitForLoadedStateAfterLoadVideo(player);
 
       const textTracks1 = player.getAvailableTextTracks();
-      expect(textTracks1[0].active).to.equal(false);
+      expect(textTracks1[0].active).toEqual(false);
 
       player.loadVideo({
         transport: manifestInfos.transport,
@@ -303,7 +302,7 @@ describe("external text track", function () {
       await waitForLoadedStateAfterLoadVideo(player);
 
       const textTracks2 = player.getAvailableTextTracks();
-      expect(textTracks2[0].active).to.equal(false);
+      expect(textTracks2[0].active).toEqual(false);
     }
   });
 });

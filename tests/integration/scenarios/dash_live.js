@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import RxPlayer from "../../../src";
 import {
   manifestInfos,
@@ -29,174 +28,174 @@ describe("DASH live content (SegmentTimeline)", function () {
     });
 
     await sleep(1);
-    expect(xhrMock.getLockedXHR().length).to.equal(1); // Manifest request
+    expect(xhrMock.getLockedXHR().length).toEqual(1); // Manifest request
     await xhrMock.flush();
     await sleep(1);
 
-    expect(player.getPlayerState()).to.equal("LOADING");
+    expect(player.getPlayerState()).toEqual("LOADING");
 
     const manifest = player.getManifest();
-    expect(manifest).not.to.equal(null);
-    expect(typeof manifest).to.equal("object");
+    expect(manifest).not.toEqual(null);
+    expect(typeof manifest).toEqual("object");
     expect(manifest.transport)
-      .to.equal(manifestInfos.transport);
-    expect(typeof manifest.id).to.equal("string");
-    expect(manifest.isDynamic).to.equal(true);
-    expect(manifest.isLive).to.equal(true);
-    expect(manifest.getUrl()).to.equal(manifestInfos.url);
+      .toEqual(manifestInfos.transport);
+    expect(typeof manifest.id).toEqual("string");
+    expect(manifest.isDynamic).toEqual(true);
+    expect(manifest.isLive).toEqual(true);
+    expect(manifest.getUrl()).toEqual(manifestInfos.url);
 
     const adaptations = manifest.periods[0].adaptations;
     const firstPeriodAdaptationsInfos = manifestInfos.periods[0].adaptations;
 
     expect(adaptations.audio.length)
-      .to.equal(firstPeriodAdaptationsInfos.audio.length);
+      .toEqual(firstPeriodAdaptationsInfos.audio.length);
     expect(adaptations.video.length)
-      .to.equal(firstPeriodAdaptationsInfos.video.length);
+      .toEqual(firstPeriodAdaptationsInfos.video.length);
 
     const firstAudioAdaptationInfos = firstPeriodAdaptationsInfos.audio[0];
     expect(!!adaptations.audio[0].isAudioDescription)
-      .to.equal(firstAudioAdaptationInfos.isAudioDescription);
+      .toEqual(firstAudioAdaptationInfos.isAudioDescription);
     expect(adaptations.audio[0].language)
-      .to.equal(firstAudioAdaptationInfos.language);
+      .toEqual(firstAudioAdaptationInfos.language);
     expect(adaptations.audio[0].normalizedLanguage)
-      .to.equal(firstAudioAdaptationInfos.normalizedLanguage);
-    expect(adaptations.audio[0].type).to.equal("audio");
-    expect(typeof adaptations.audio[0].id).to.equal("string");
-    expect(adaptations.audio[0].id).to.not.equal(adaptations.video[0].id);
+      .toEqual(firstAudioAdaptationInfos.normalizedLanguage);
+    expect(adaptations.audio[0].type).toEqual("audio");
+    expect(typeof adaptations.audio[0].id).toEqual("string");
+    expect(adaptations.audio[0].id).not.toEqual(adaptations.video[0].id);
     expect(adaptations.audio[0].representations.length)
-      .to.equal(firstAudioAdaptationInfos.representations.length);
+      .toEqual(firstAudioAdaptationInfos.representations.length);
     expect(adaptations.audio[0].getAvailableBitrates())
-      .to.eql(firstAudioAdaptationInfos.representations
+      .toEqual(firstAudioAdaptationInfos.representations
         .map(representation => representation.bitrate));
 
     const firstVideoAdaptationInfos = firstPeriodAdaptationsInfos.video[0];
-    expect(adaptations.video[0].type).to.equal("video");
+    expect(adaptations.video[0].type).toEqual("video");
     expect(adaptations.video[0].getAvailableBitrates())
-      .to.eql(firstVideoAdaptationInfos.representations
+      .toEqual(firstVideoAdaptationInfos.representations
         .map(representation => representation.bitrate));
 
     const audioRepresentation = adaptations.audio[0].representations[0];
     const audioRepresentationInfos = firstAudioAdaptationInfos
       .representations[0];
     expect(audioRepresentation.bitrate)
-      .to.equal(audioRepresentationInfos.bitrate);
+      .toEqual(audioRepresentationInfos.bitrate);
     expect(audioRepresentation.codec)
-      .to.equal(audioRepresentationInfos.codec);
-    expect(typeof audioRepresentation.id).to.equal("string");
+      .toEqual(audioRepresentationInfos.codec);
+    expect(typeof audioRepresentation.id).toEqual("string");
     expect(audioRepresentation.mimeType)
-      .to.equal(audioRepresentationInfos.mimeType);
-    expect(typeof audioRepresentation.index).to.equal("object");
+      .toEqual(audioRepresentationInfos.mimeType);
+    expect(typeof audioRepresentation.index).toEqual("object");
 
     const audioRepresentationIndex = audioRepresentation.index;
     const audioRepresentationIndexInfos = audioRepresentationInfos.index;
     const initAudioSegment = audioRepresentationIndex.getInitSegment();
-    expect(typeof initAudioSegment.id).to.equal("string");
-    expect(initAudioSegment.mediaURLs).to
-      .deep.equal(audioRepresentationIndexInfos.init.mediaURLs);
+    expect(typeof initAudioSegment.id).toEqual("string");
+    expect(initAudioSegment.mediaURLs)
+      .toEqual(audioRepresentationIndexInfos.init.mediaURLs);
 
     const nextAudioSegment1 = audioRepresentationIndex
       .getSegments(1527507769, 4);
-    expect(nextAudioSegment1.length).to.equal(1);
+    expect(nextAudioSegment1.length).toEqual(1);
     expect(nextAudioSegment1[0].duration)
-      .to.equal(audioRepresentationIndexInfos.segments[0].duration);
-    expect(typeof nextAudioSegment1[0].id).to.equal("string");
-    expect(nextAudioSegment1[0].isInit).to.equal(false);
+      .toEqual(audioRepresentationIndexInfos.segments[0].duration);
+    expect(typeof nextAudioSegment1[0].id).toEqual("string");
+    expect(nextAudioSegment1[0].isInit).toEqual(false);
     expect(nextAudioSegment1[0].time)
-      .to.equal(audioRepresentationIndexInfos.segments[0].time);
+      .toEqual(audioRepresentationIndexInfos.segments[0].time);
     expect(nextAudioSegment1[0].timescale)
-      .to.equal(audioRepresentationIndexInfos.segments[0].timescale);
+      .toEqual(audioRepresentationIndexInfos.segments[0].timescale);
     expect(nextAudioSegment1[0].mediaURLs)
-      .to.deep.equal(audioRepresentationIndexInfos.segments[0].mediaURLs);
+      .toEqual(audioRepresentationIndexInfos.segments[0].mediaURLs);
 
     const nextAudioSegment2 = audioRepresentationIndex
       .getSegments(1527507769, 10);
-    expect(nextAudioSegment2.length).to.equal(2);
+    expect(nextAudioSegment2.length).toEqual(2);
     expect(nextAudioSegment2[1].duration)
-      .to.equal(audioRepresentationIndexInfos.segments[1].duration);
-    expect(typeof nextAudioSegment2[1].id).to.equal("string");
-    expect(nextAudioSegment2[1].isInit).to.equal(false);
+      .toEqual(audioRepresentationIndexInfos.segments[1].duration);
+    expect(typeof nextAudioSegment2[1].id).toEqual("string");
+    expect(nextAudioSegment2[1].isInit).toEqual(false);
     expect(nextAudioSegment2[1].time)
-      .to.equal(audioRepresentationIndexInfos.segments[1].time);
+      .toEqual(audioRepresentationIndexInfos.segments[1].time);
     expect(nextAudioSegment2[1].timescale)
-      .to.equal(audioRepresentationIndexInfos.segments[1].timescale);
+      .toEqual(audioRepresentationIndexInfos.segments[1].timescale);
     expect(nextAudioSegment2[1].mediaURLs)
-      .to.deep.equal(audioRepresentationIndexInfos.segments[1].mediaURLs);
+      .toEqual(audioRepresentationIndexInfos.segments[1].mediaURLs);
 
     expect(audioRepresentationIndex.getSegments(1527507769, 287).length)
-      .to.equal(48);
+      .toEqual(48);
     expect(audioRepresentationIndex.getSegments(1527507769, 288).length)
-      .to.equal(49);
+      .toEqual(49);
     expect(audioRepresentationIndex
-      .getSegments(1527507769, 300000000000).length).to.equal(49);
+      .getSegments(1527507769, 300000000000).length).toEqual(49);
 
     const videoRepresentation = adaptations.video[0].representations[0];
     const videoRepresentationInfos = firstVideoAdaptationInfos
       .representations[0];
 
     expect(videoRepresentation.bitrate)
-      .to.equal(videoRepresentationInfos.bitrate);
+      .toEqual(videoRepresentationInfos.bitrate);
     expect(videoRepresentation.codec)
-      .to.equal(videoRepresentationInfos.codec);
-    expect(typeof videoRepresentation.id).to.equal("string");
+      .toEqual(videoRepresentationInfos.codec);
+    expect(typeof videoRepresentation.id).toEqual("string");
     expect(videoRepresentation.height)
-      .to.equal(videoRepresentationInfos.height);
+      .toEqual(videoRepresentationInfos.height);
     expect(videoRepresentation.width)
-      .to.equal(videoRepresentationInfos.width);
+      .toEqual(videoRepresentationInfos.width);
     expect(videoRepresentation.mimeType)
-      .to.equal(videoRepresentationInfos.mimeType);
+      .toEqual(videoRepresentationInfos.mimeType);
     expect(typeof videoRepresentation.index)
-      .to.equal("object");
+      .toEqual("object");
 
     const videoRepresentationIndex = videoRepresentation.index;
     const videoRepresentationIndexInfos = videoRepresentationInfos.index;
 
     const initVideoSegment = videoRepresentationIndex.getInitSegment();
-    expect(typeof initVideoSegment.id).to.equal("string");
+    expect(typeof initVideoSegment.id).toEqual("string");
     expect(initVideoSegment.mediaURLs)
-      .to.deep.equal(videoRepresentationIndexInfos.init.mediaURLs);
+      .toEqual(videoRepresentationIndexInfos.init.mediaURLs);
 
     const nextVideoSegment1 = videoRepresentationIndex
       .getSegments(1527507769, 4);
-    expect(nextVideoSegment1.length).to.equal(1);
+    expect(nextVideoSegment1.length).toEqual(1);
     expect(nextVideoSegment1[0].duration)
-      .to.equal(videoRepresentationIndexInfos.segments[0].duration);
-    expect(typeof nextVideoSegment1[0].id).to.equal("string");
-    expect(nextVideoSegment1[0].isInit).to.equal(false);
+      .toEqual(videoRepresentationIndexInfos.segments[0].duration);
+    expect(typeof nextVideoSegment1[0].id).toEqual("string");
+    expect(nextVideoSegment1[0].isInit).toEqual(false);
     expect(nextVideoSegment1[0].time)
-      .to.equal(videoRepresentationIndexInfos.segments[0].time);
+      .toEqual(videoRepresentationIndexInfos.segments[0].time);
     expect(nextVideoSegment1[0].timescale)
-      .to.equal(videoRepresentationIndexInfos.segments[0].timescale);
+      .toEqual(videoRepresentationIndexInfos.segments[0].timescale);
     expect(nextVideoSegment1[0].mediaURLs)
-      .to.deep.equal(videoRepresentationIndexInfos.segments[0].mediaURLs);
+      .toEqual(videoRepresentationIndexInfos.segments[0].mediaURLs);
 
     const nextVideoSegment2 = videoRepresentationIndex
       .getSegments(1527507769, 10);
-    expect(nextVideoSegment2.length).to.equal(2);
+    expect(nextVideoSegment2.length).toEqual(2);
     expect(nextVideoSegment2[1].duration)
-      .to.equal(videoRepresentationIndexInfos.segments[1].duration);
-    expect(typeof nextVideoSegment2[1].id).to.equal("string");
-    expect(nextVideoSegment2[1].isInit).to.equal(false);
+      .toEqual(videoRepresentationIndexInfos.segments[1].duration);
+    expect(typeof nextVideoSegment2[1].id).toEqual("string");
+    expect(nextVideoSegment2[1].isInit).toEqual(false);
     expect(nextVideoSegment2[1].time)
-      .to.equal(videoRepresentationIndexInfos.segments[1].time);
+      .toEqual(videoRepresentationIndexInfos.segments[1].time);
     expect(nextVideoSegment2[1].timescale)
-      .to.equal(videoRepresentationIndexInfos.segments[1].timescale);
+      .toEqual(videoRepresentationIndexInfos.segments[1].timescale);
     expect(nextVideoSegment2[1].mediaURLs)
-      .to.deep.equal(videoRepresentationIndexInfos.segments[1].mediaURLs);
+      .toEqual(videoRepresentationIndexInfos.segments[1].mediaURLs);
 
     expect(videoRepresentationIndex.getSegments(1527507769, 287).length)
-      .to.equal(48);
+      .toEqual(48);
     expect(videoRepresentationIndex.getSegments(1527507769, 288).length)
-      .to.equal(49);
+      .toEqual(49);
     expect(
       videoRepresentationIndex.getSegments(1527507769, 300000000000).length
-    ).to.equal(49);
+    ).toEqual(49);
 
-    expect(xhrMock.getLockedXHR().length).to.be.at.least(2);
+    expect(xhrMock.getLockedXHR().length).toBeGreaterThanOrEqual(2);
     const requestsDone = xhrMock.getLockedXHR().map(r => r.url);
     expect(requestsDone)
-      .to.include(videoRepresentationIndexInfos.init.mediaURLs[0]);
+      .toContain(videoRepresentationIndexInfos.init.mediaURLs[0]);
     expect(requestsDone)
-      .to.include(audioRepresentationIndexInfos.init.mediaURLs[0]);
+      .toContain(audioRepresentationIndexInfos.init.mediaURLs[0]);
   });
 
   it("should list the right bitrates", async function () {
@@ -210,8 +209,8 @@ describe("DASH live content (SegmentTimeline)", function () {
     await xhrMock.flush();
     await sleep(1);
 
-    expect(player.getAvailableAudioBitrates()).to.eql([48000]);
-    expect(player.getAvailableVideoBitrates()).to.eql([300000]);
+    expect(player.getAvailableAudioBitrates()).toEqual([48000]);
+    expect(player.getAvailableVideoBitrates()).toEqual([300000]);
   });
 
   describe("getAvailableAudioTracks", () => {
@@ -222,10 +221,10 @@ describe("DASH live content (SegmentTimeline)", function () {
         url: manifestInfos.url,
         transport: manifestInfos.transport,
       });
-      expect(player.getAvailableAudioTracks()).to.eql([]);
+      expect(player.getAvailableAudioTracks()).toEqual([]);
 
       await sleep(1);
-      expect(player.getAvailableAudioTracks()).to.eql([]);
+      expect(player.getAvailableAudioTracks()).toEqual([]);
       await xhrMock.flush();
       await sleep(1);
 
@@ -233,8 +232,8 @@ describe("DASH live content (SegmentTimeline)", function () {
 
       const currentPeriod = player.getManifest().periods[0];
       const audioAdaptations = currentPeriod.adaptations.audio;
-      expect(audioTracks.length).to
-        .equal(audioAdaptations ? audioAdaptations.length : 0);
+      expect(audioTracks.length)
+        .toEqual(audioAdaptations ? audioAdaptations.length : 0);
 
       if (audioAdaptations) {
         for (let i = 0; i < audioAdaptations.length; i++) {
@@ -245,18 +244,18 @@ describe("DASH live content (SegmentTimeline)", function () {
             const audioTrack = audioTracks[j];
             if (audioTrack.id === adaptation.id) {
               found = true;
-              expect(audioTrack.language).to.equal(adaptation.language || "");
-              expect(audioTrack.normalized).to
-                .equal(adaptation.normalizedLanguage || "");
+              expect(audioTrack.language).toEqual(adaptation.language || "");
+              expect(audioTrack.normalized)
+                .toEqual(adaptation.normalizedLanguage || "");
               expect(audioTrack.audioDescription)
-                .to.equal(!!adaptation.isAudioDescription);
+                .toEqual(!!adaptation.isAudioDescription);
 
               const activeAudioTrack = player.getAudioTrack();
-              expect(audioTrack.active).to
-                .equal(activeAudioTrack ?
+              expect(audioTrack.active)
+                .toEqual(activeAudioTrack ?
                   activeAudioTrack.id === audioTrack.id : false);
             }
-            expect(found).to.equal(true);
+            expect(found).toEqual(true);
           }
         }
       }
@@ -270,10 +269,10 @@ describe("DASH live content (SegmentTimeline)", function () {
         url: manifestInfos.url,
         transport: manifestInfos.transport,
       });
-      expect(player.getAvailableTextTracks()).to.eql([]);
+      expect(player.getAvailableTextTracks()).toEqual([]);
 
       await sleep(1);
-      expect(player.getAvailableTextTracks()).to.eql([]);
+      expect(player.getAvailableTextTracks()).toEqual([]);
       await xhrMock.flush();
       await sleep(1);
 
@@ -281,8 +280,8 @@ describe("DASH live content (SegmentTimeline)", function () {
 
       const currentPeriod = player.getManifest().periods[0];
       const textAdaptations = currentPeriod.adaptations.text;
-      expect(textTracks.length).to
-        .equal(textAdaptations ? textAdaptations.length : 0);
+      expect(textTracks.length)
+        .toEqual(textAdaptations ? textAdaptations.length : 0);
 
       if (textAdaptations) {
         for (let i = 0; i < textAdaptations.length; i++) {
@@ -293,18 +292,18 @@ describe("DASH live content (SegmentTimeline)", function () {
             const textTrack = textTracks[j];
             if (textTrack.id === adaptation.id) {
               found = true;
-              expect(textTrack.language).to.equal(adaptation.language || "");
-              expect(textTrack.normalized).to
-                .equal(adaptation.normalizedLanguage || "");
+              expect(textTrack.language).toEqual(adaptation.language || "");
+              expect(textTrack.normalized)
+                .toEqual(adaptation.normalizedLanguage || "");
               expect(textTrack.closedCaption)
-                .to.equal(!!adaptation.isClosedCaption);
+                .toEqual(!!adaptation.isClosedCaption);
 
               const activeTextTrack = player.getTextTrack();
-              expect(textTrack.active).to
-                .equal(activeTextTrack ?
+              expect(textTrack.active)
+                .toEqual(activeTextTrack ?
                   activeTextTrack.id === textTrack.id : false);
             }
-            expect(found).to.equal(true);
+            expect(found).toEqual(true);
           }
         }
       }
@@ -319,10 +318,10 @@ describe("DASH live content (SegmentTimeline)", function () {
         url: manifestInfos.url,
         transport:manifestInfos.transport,
       });
-      expect(player.getAvailableVideoTracks()).to.eql([]);
+      expect(player.getAvailableVideoTracks()).toEqual([]);
 
       await sleep(1);
-      expect(player.getAvailableVideoTracks()).to.eql([]);
+      expect(player.getAvailableVideoTracks()).toEqual([]);
       await xhrMock.flush();
       await sleep(1);
 
@@ -330,8 +329,8 @@ describe("DASH live content (SegmentTimeline)", function () {
 
       const currentPeriod = player.getManifest().periods[0];
       const videoAdaptations = currentPeriod.adaptations.video;
-      expect(videoTracks.length).to
-        .equal(videoAdaptations ? videoAdaptations.length : 0);
+      expect(videoTracks.length)
+        .toEqual(videoAdaptations ? videoAdaptations.length : 0);
 
       if (videoAdaptations) {
         for (let i = 0; i < videoAdaptations.length; i++) {
@@ -352,19 +351,19 @@ describe("DASH live content (SegmentTimeline)", function () {
                   .representations[representationIndex];
                 const representation =
                   adaptation.getRepresentation(reprTrack.id);
-                expect(reprTrack.bitrate).to.equal(representation.bitrate);
-                expect(reprTrack.frameRate).to
-                  .equal(representation.frameRate);
-                expect(reprTrack.width).to.equal(representation.width);
-                expect(reprTrack.height).to.equal(representation.height);
+                expect(reprTrack.bitrate).toEqual(representation.bitrate);
+                expect(reprTrack.frameRate)
+                  .toEqual(representation.frameRate);
+                expect(reprTrack.width).toEqual(representation.width);
+                expect(reprTrack.height).toEqual(representation.height);
               }
 
               const activeVideoTrack = player.getVideoTrack();
-              expect(videoTrack.active).to
-                .equal(activeVideoTrack ?
+              expect(videoTrack.active)
+                .toEqual(activeVideoTrack ?
                   activeVideoTrack.id === videoTrack.id : false);
             }
-            expect(found).to.equal(true);
+            expect(found).toEqual(true);
           }
         }
       }
@@ -381,8 +380,8 @@ describe("DASH live content (SegmentTimeline)", function () {
       await sleep(1);
       await xhrMock.flush();
       await sleep(1);
-      expect(player.getMinimumPosition()).to.be
-        .closeTo(1527507768, 1);
+      expect(player.getMinimumPosition())
+        .toBeCloseTo(1527507768, 1);
     });
   });
 
@@ -398,8 +397,8 @@ describe("DASH live content (SegmentTimeline)", function () {
       await sleep(1);
       await xhrMock.flush();
       await sleep(1);
-      expect(player.getMaximumPosition()).to.be
-        .closeTo(1527508062, 1);
+      expect(player.getMaximumPosition())
+        .toBeCloseTo(1527508062, 1);
     });
   });
 });
@@ -426,51 +425,51 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
     });
 
     await sleep(1);
-    expect(xhrMock.getLockedXHR().length).to.equal(1); // Manifest request
+    expect(xhrMock.getLockedXHR().length).toEqual(1); // Manifest request
     await xhrMock.flush();
     await sleep(1);
 
-    expect(player.getPlayerState()).to.equal("LOADING");
+    expect(player.getPlayerState()).toEqual("LOADING");
 
     const manifest = player.getManifest();
-    expect(manifest).not.to.equal(null);
-    expect(typeof manifest).to.equal("object");
+    expect(manifest).not.toEqual(null);
+    expect(typeof manifest).toEqual("object");
     expect(manifest.transport)
-      .to.equal(noTimeShiftBufferDepthManifestInfos.transport);
-    expect(typeof manifest.id).to.equal("string");
-    expect(manifest.isLive).to.equal(true);
-    expect(manifest.getUrl()).to.equal(noTimeShiftBufferDepthManifestInfos.url);
+      .toEqual(noTimeShiftBufferDepthManifestInfos.transport);
+    expect(typeof manifest.id).toEqual("string");
+    expect(manifest.isLive).toEqual(true);
+    expect(manifest.getUrl()).toEqual(noTimeShiftBufferDepthManifestInfos.url);
 
     const adaptations = manifest.periods[0].adaptations;
     const firstPeriodAdaptationsInfos =
       noTimeShiftBufferDepthManifestInfos.periods[0].adaptations;
 
     expect(adaptations.audio.length)
-      .to.equal(firstPeriodAdaptationsInfos.audio.length);
+      .toEqual(firstPeriodAdaptationsInfos.audio.length);
     expect(adaptations.video.length)
-      .to.equal(firstPeriodAdaptationsInfos.video.length);
+      .toEqual(firstPeriodAdaptationsInfos.video.length);
 
     const firstAudioAdaptationInfos = firstPeriodAdaptationsInfos.audio[0];
     expect(!!adaptations.audio[0].isAudioDescription)
-      .to.equal(firstAudioAdaptationInfos.isAudioDescription);
+      .toEqual(firstAudioAdaptationInfos.isAudioDescription);
     expect(adaptations.audio[0].language)
-      .to.equal(firstAudioAdaptationInfos.language);
+      .toEqual(firstAudioAdaptationInfos.language);
     expect(adaptations.audio[0].normalizedLanguage)
-      .to.equal(firstAudioAdaptationInfos.normalizedLanguage);
-    expect(adaptations.audio[0].type).to.equal("audio");
-    expect(typeof adaptations.audio[0].id).to.equal("string");
-    expect(adaptations.audio[0].id).to.not.equal(adaptations.video[0].id);
+      .toEqual(firstAudioAdaptationInfos.normalizedLanguage);
+    expect(adaptations.audio[0].type).toEqual("audio");
+    expect(typeof adaptations.audio[0].id).toEqual("string");
+    expect(adaptations.audio[0].id).not.toEqual(adaptations.video[0].id);
     expect(adaptations.audio[0].representations.length)
-      .to.equal(firstAudioAdaptationInfos.representations.length);
+      .toEqual(firstAudioAdaptationInfos.representations.length);
     expect(adaptations.audio[0].getAvailableBitrates())
-      .to.eql(firstAudioAdaptationInfos.representations
+      .toEqual(firstAudioAdaptationInfos.representations
         .map(representation => representation.bitrate)
       );
 
     const firstVideoAdaptationInfos = firstPeriodAdaptationsInfos.video[0];
-    expect(adaptations.video[0].type).to.equal("video");
+    expect(adaptations.video[0].type).toEqual("video");
     expect(adaptations.video[0].getAvailableBitrates())
-      .to.eql(firstVideoAdaptationInfos.representations
+      .toEqual(firstVideoAdaptationInfos.representations
         .map(representation => representation.bitrate)
       );
 
@@ -478,125 +477,125 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
     const audioRepresentationInfos = firstAudioAdaptationInfos
       .representations[0];
     expect(audioRepresentation.bitrate)
-      .to.equal(audioRepresentationInfos.bitrate);
+      .toEqual(audioRepresentationInfos.bitrate);
     expect(audioRepresentation.codec)
-      .to.equal(audioRepresentationInfos.codec);
-    expect(typeof audioRepresentation.id).to.equal("string");
+      .toEqual(audioRepresentationInfos.codec);
+    expect(typeof audioRepresentation.id).toEqual("string");
     expect(audioRepresentation.mimeType)
-      .to.equal(audioRepresentationInfos.mimeType);
-    expect(typeof audioRepresentation.index).to.equal("object");
+      .toEqual(audioRepresentationInfos.mimeType);
+    expect(typeof audioRepresentation.index).toEqual("object");
 
     const audioRepresentationIndex = audioRepresentation.index;
     const audioRepresentationIndexInfos = audioRepresentationInfos.index;
     const initAudioSegment = audioRepresentationIndex.getInitSegment();
-    expect(typeof initAudioSegment.id).to.equal("string");
-    expect(initAudioSegment.mediaURLs).to
-      .deep.equal(audioRepresentationIndexInfos.init.mediaURLs);
+    expect(typeof initAudioSegment.id).toEqual("string");
+    expect(initAudioSegment.mediaURLs)
+      .toEqual(audioRepresentationIndexInfos.init.mediaURLs);
 
     const nextAudioSegment1 = audioRepresentationIndex
       .getSegments(1527507762, 5);
-    expect(nextAudioSegment1.length).to.equal(1);
+    expect(nextAudioSegment1.length).toEqual(1);
     expect(nextAudioSegment1[0].duration)
-      .to.equal(audioRepresentationIndexInfos.segments[0].duration);
-    expect(typeof nextAudioSegment1[0].id).to.equal("string");
-    expect(nextAudioSegment1[0].isInit).to.equal(false);
+      .toEqual(audioRepresentationIndexInfos.segments[0].duration);
+    expect(typeof nextAudioSegment1[0].id).toEqual("string");
+    expect(nextAudioSegment1[0].isInit).toEqual(false);
     expect(nextAudioSegment1[0].time)
-      .to.equal(audioRepresentationIndexInfos.segments[0].time);
+      .toEqual(audioRepresentationIndexInfos.segments[0].time);
     expect(nextAudioSegment1[0].timescale)
-      .to.equal(audioRepresentationIndexInfos.segments[0].timescale);
+      .toEqual(audioRepresentationIndexInfos.segments[0].timescale);
     expect(nextAudioSegment1[0].mediaURLs)
-      .to.deep.equal(audioRepresentationIndexInfos.segments[0].mediaURLs);
+      .toEqual(audioRepresentationIndexInfos.segments[0].mediaURLs);
 
     const nextAudioSegment2 = audioRepresentationIndex
       .getSegments(1527507762, 11);
-    expect(nextAudioSegment2.length).to.equal(2);
+    expect(nextAudioSegment2.length).toEqual(2);
     expect(nextAudioSegment2[1].duration)
-      .to.equal(audioRepresentationIndexInfos.segments[1].duration);
-    expect(typeof nextAudioSegment2[1].id).to.equal("string");
-    expect(nextAudioSegment2[1].isInit).to.equal(false);
+      .toEqual(audioRepresentationIndexInfos.segments[1].duration);
+    expect(typeof nextAudioSegment2[1].id).toEqual("string");
+    expect(nextAudioSegment2[1].isInit).toEqual(false);
     expect(nextAudioSegment2[1].time)
-      .to.equal(audioRepresentationIndexInfos.segments[1].time);
+      .toEqual(audioRepresentationIndexInfos.segments[1].time);
     expect(nextAudioSegment2[1].timescale)
-      .to.equal(audioRepresentationIndexInfos.segments[1].timescale);
+      .toEqual(audioRepresentationIndexInfos.segments[1].timescale);
     expect(nextAudioSegment2[1].mediaURLs)
-      .to.deep.equal(audioRepresentationIndexInfos.segments[1].mediaURLs);
+      .toEqual(audioRepresentationIndexInfos.segments[1].mediaURLs);
 
     expect(audioRepresentationIndex.getSegments(1527507762, 294).length)
-      .to.equal(49);
+      .toEqual(49);
     expect(audioRepresentationIndex.getSegments(1527507762, 295).length)
-      .to.equal(50);
+      .toEqual(50);
     expect(
       audioRepresentationIndex.getSegments(1527507762, 300000000000).length
-    ).to.equal(50);
+    ).toEqual(50);
 
     const videoRepresentation = adaptations.video[0].representations[0];
     const videoRepresentationInfos = firstVideoAdaptationInfos
       .representations[0];
 
     expect(videoRepresentation.bitrate)
-      .to.equal(videoRepresentationInfos.bitrate);
+      .toEqual(videoRepresentationInfos.bitrate);
     expect(videoRepresentation.codec)
-      .to.equal(videoRepresentationInfos.codec);
-    expect(typeof videoRepresentation.id).to.equal("string");
+      .toEqual(videoRepresentationInfos.codec);
+    expect(typeof videoRepresentation.id).toEqual("string");
     expect(videoRepresentation.height)
-      .to.equal(videoRepresentationInfos.height);
+      .toEqual(videoRepresentationInfos.height);
     expect(videoRepresentation.width)
-      .to.equal(videoRepresentationInfos.width);
+      .toEqual(videoRepresentationInfos.width);
     expect(videoRepresentation.mimeType)
-      .to.equal(videoRepresentationInfos.mimeType);
+      .toEqual(videoRepresentationInfos.mimeType);
     expect(typeof videoRepresentation.index)
-      .to.equal("object");
+      .toEqual("object");
 
     const videoRepresentationIndex = videoRepresentation.index;
     const videoRepresentationIndexInfos = videoRepresentationInfos.index;
 
     const initVideoSegment = videoRepresentationIndex.getInitSegment();
-    expect(typeof initVideoSegment.id).to.equal("string");
+    expect(typeof initVideoSegment.id).toEqual("string");
     expect(initVideoSegment.mediaURLs)
-      .to.deep.equal(videoRepresentationIndexInfos.init.mediaURLs);
+      .toEqual(videoRepresentationIndexInfos.init.mediaURLs);
 
     const nextVideoSegment1 = videoRepresentationIndex
       .getSegments(1527507762, 5);
-    expect(nextVideoSegment1.length).to.equal(1);
+    expect(nextVideoSegment1.length).toEqual(1);
     expect(nextVideoSegment1[0].duration)
-      .to.equal(videoRepresentationIndexInfos.segments[0].duration);
-    expect(typeof nextVideoSegment1[0].id).to.equal("string");
-    expect(nextVideoSegment1[0].isInit).to.equal(false);
+      .toEqual(videoRepresentationIndexInfos.segments[0].duration);
+    expect(typeof nextVideoSegment1[0].id).toEqual("string");
+    expect(nextVideoSegment1[0].isInit).toEqual(false);
     expect(nextVideoSegment1[0].time)
-      .to.equal(videoRepresentationIndexInfos.segments[0].time);
+      .toEqual(videoRepresentationIndexInfos.segments[0].time);
     expect(nextVideoSegment1[0].timescale)
-      .to.equal(videoRepresentationIndexInfos.segments[0].timescale);
+      .toEqual(videoRepresentationIndexInfos.segments[0].timescale);
     expect(nextVideoSegment1[0].mediaURLs)
-      .to.deep.equal(videoRepresentationIndexInfos.segments[0].mediaURLs);
+      .toEqual(videoRepresentationIndexInfos.segments[0].mediaURLs);
 
     const nextVideoSegment2 = videoRepresentationIndex
       .getSegments(1527507762, 11);
-    expect(nextVideoSegment2.length).to.equal(2);
+    expect(nextVideoSegment2.length).toEqual(2);
     expect(nextVideoSegment2[1].duration)
-      .to.equal(videoRepresentationIndexInfos.segments[1].duration);
-    expect(typeof nextVideoSegment2[1].id).to.equal("string");
-    expect(nextVideoSegment2[1].isInit).to.equal(false);
+      .toEqual(videoRepresentationIndexInfos.segments[1].duration);
+    expect(typeof nextVideoSegment2[1].id).toEqual("string");
+    expect(nextVideoSegment2[1].isInit).toEqual(false);
     expect(nextVideoSegment2[1].time)
-      .to.equal(videoRepresentationIndexInfos.segments[1].time);
+      .toEqual(videoRepresentationIndexInfos.segments[1].time);
     expect(nextVideoSegment2[1].timescale)
-      .to.equal(videoRepresentationIndexInfos.segments[1].timescale);
+      .toEqual(videoRepresentationIndexInfos.segments[1].timescale);
     expect(nextVideoSegment2[1].mediaURLs)
-      .to.deep.equal(videoRepresentationIndexInfos.segments[1].mediaURLs);
+      .toEqual(videoRepresentationIndexInfos.segments[1].mediaURLs);
 
     expect(videoRepresentationIndex.getSegments(1527507762, 294).length)
-      .to.equal(49);
+      .toEqual(49);
     expect(videoRepresentationIndex.getSegments(1527507762, 295).length)
-      .to.equal(50);
+      .toEqual(50);
     expect(
       videoRepresentationIndex.getSegments(1527507762, 300000000000).length
-    ).to.equal(50);
+    ).toEqual(50);
 
-    expect(xhrMock.getLockedXHR().length).to.be.at.least(2);
+    expect(xhrMock.getLockedXHR().length).toBeGreaterThanOrEqual(2);
     const requestsDone = xhrMock.getLockedXHR().map(r => r.url);
     expect(requestsDone)
-      .to.include(videoRepresentationIndexInfos.init.mediaURLs[0]);
+      .toContain(videoRepresentationIndexInfos.init.mediaURLs[0]);
     expect(requestsDone)
-      .to.include(audioRepresentationIndexInfos.init.mediaURLs[0]);
+      .toContain(audioRepresentationIndexInfos.init.mediaURLs[0]);
   });
 
   it("should list the right bitrates", async function () {
@@ -610,8 +609,8 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
     await xhrMock.flush();
     await sleep(1);
 
-    expect(player.getAvailableAudioBitrates()).to.eql([48000]);
-    expect(player.getAvailableVideoBitrates()).to.eql([300000]);
+    expect(player.getAvailableAudioBitrates()).toEqual([48000]);
+    expect(player.getAvailableVideoBitrates()).toEqual([300000]);
   });
 
   describe("getAvailableAudioTracks", () => {
@@ -622,10 +621,10 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
         url: noTimeShiftBufferDepthManifestInfos.url,
         transport: noTimeShiftBufferDepthManifestInfos.transport,
       });
-      expect(player.getAvailableAudioTracks()).to.eql([]);
+      expect(player.getAvailableAudioTracks()).toEqual([]);
 
       await sleep(1);
-      expect(player.getAvailableAudioTracks()).to.eql([]);
+      expect(player.getAvailableAudioTracks()).toEqual([]);
       await xhrMock.flush();
       await sleep(1);
 
@@ -633,8 +632,8 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
 
       const currentPeriod = player.getManifest().periods[0];
       const audioAdaptations = currentPeriod.adaptations.audio;
-      expect(audioTracks.length).to
-        .equal(audioAdaptations ? audioAdaptations.length : 0);
+      expect(audioTracks.length)
+        .toEqual(audioAdaptations ? audioAdaptations.length : 0);
 
       if (audioAdaptations) {
         for (let i = 0; i < audioAdaptations.length; i++) {
@@ -645,18 +644,18 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
             const audioTrack = audioTracks[j];
             if (audioTrack.id === adaptation.id) {
               found = true;
-              expect(audioTrack.language).to.equal(adaptation.language || "");
-              expect(audioTrack.normalized).to
-                .equal(adaptation.normalizedLanguage || "");
+              expect(audioTrack.language).toEqual(adaptation.language || "");
+              expect(audioTrack.normalized)
+                .toEqual(adaptation.normalizedLanguage || "");
               expect(audioTrack.audioDescription)
-                .to.equal(!!adaptation.isAudioDescription);
+                .toEqual(!!adaptation.isAudioDescription);
 
               const activeAudioTrack = player.getAudioTrack();
-              expect(audioTrack.active).to
-                .equal(activeAudioTrack ?
+              expect(audioTrack.active)
+                .toEqual(activeAudioTrack ?
                   activeAudioTrack.id === audioTrack.id : false);
             }
-            expect(found).to.equal(true);
+            expect(found).toEqual(true);
           }
         }
       }
@@ -670,10 +669,10 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
         url: noTimeShiftBufferDepthManifestInfos.url,
         transport: noTimeShiftBufferDepthManifestInfos.transport,
       });
-      expect(player.getAvailableTextTracks()).to.eql([]);
+      expect(player.getAvailableTextTracks()).toEqual([]);
 
       await sleep(1);
-      expect(player.getAvailableTextTracks()).to.eql([]);
+      expect(player.getAvailableTextTracks()).toEqual([]);
       await xhrMock.flush();
       await sleep(1);
 
@@ -681,8 +680,8 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
 
       const currentPeriod = player.getManifest().periods[0];
       const textAdaptations = currentPeriod.adaptations.text;
-      expect(textTracks.length).to
-        .equal(textAdaptations ? textAdaptations.length : 0);
+      expect(textTracks.length)
+        .toEqual(textAdaptations ? textAdaptations.length : 0);
 
       if (textAdaptations) {
         for (let i = 0; i < textAdaptations.length; i++) {
@@ -693,18 +692,18 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
             const textTrack = textTracks[j];
             if (textTrack.id === adaptation.id) {
               found = true;
-              expect(textTrack.language).to.equal(adaptation.language || "");
-              expect(textTrack.normalized).to
-                .equal(adaptation.normalizedLanguage || "");
+              expect(textTrack.language).toEqual(adaptation.language || "");
+              expect(textTrack.normalized)
+                .toEqual(adaptation.normalizedLanguage || "");
               expect(textTrack.closedCaption)
-                .to.equal(!!adaptation.isClosedCaption);
+                .toEqual(!!adaptation.isClosedCaption);
 
               const activeTextTrack = player.getTextTrack();
-              expect(textTrack.active).to
-                .equal(activeTextTrack ?
+              expect(textTrack.active)
+                .toEqual(activeTextTrack ?
                   activeTextTrack.id === textTrack.id : false);
             }
-            expect(found).to.equal(true);
+            expect(found).toEqual(true);
           }
         }
       }
@@ -719,10 +718,10 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
         url: noTimeShiftBufferDepthManifestInfos.url,
         transport:noTimeShiftBufferDepthManifestInfos.transport,
       });
-      expect(player.getAvailableVideoTracks()).to.eql([]);
+      expect(player.getAvailableVideoTracks()).toEqual([]);
 
       await sleep(1);
-      expect(player.getAvailableVideoTracks()).to.eql([]);
+      expect(player.getAvailableVideoTracks()).toEqual([]);
       await xhrMock.flush();
       await sleep(1);
 
@@ -730,8 +729,8 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
 
       const currentPeriod = player.getManifest().periods[0];
       const videoAdaptations = currentPeriod.adaptations.video;
-      expect(videoTracks.length).to
-        .equal(videoAdaptations ? videoAdaptations.length : 0);
+      expect(videoTracks.length)
+        .toEqual(videoAdaptations ? videoAdaptations.length : 0);
 
       if (videoAdaptations) {
         for (let i = 0; i < videoAdaptations.length; i++) {
@@ -752,19 +751,19 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
                   .representations[representationIndex];
                 const representation =
                   adaptation.getRepresentation(reprTrack.id);
-                expect(reprTrack.bitrate).to.equal(representation.bitrate);
-                expect(reprTrack.frameRate).to
-                  .equal(representation.frameRate);
-                expect(reprTrack.width).to.equal(representation.width);
-                expect(reprTrack.height).to.equal(representation.height);
+                expect(reprTrack.bitrate).toEqual(representation.bitrate);
+                expect(reprTrack.frameRate)
+                  .toEqual(representation.frameRate);
+                expect(reprTrack.width).toEqual(representation.width);
+                expect(reprTrack.height).toEqual(representation.height);
               }
 
               const activeVideoTrack = player.getVideoTrack();
-              expect(videoTrack.active).to
-                .equal(activeVideoTrack ?
+              expect(videoTrack.active)
+                .toEqual(activeVideoTrack ?
                   activeVideoTrack.id === videoTrack.id : false);
             }
-            expect(found).to.equal(true);
+            expect(found).toEqual(true);
           }
         }
       }
@@ -783,7 +782,7 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
       await sleep(1);
       await xhrMock.flush();
       await sleep(1);
-      expect(player.getMinimumPosition()).to.equal(6);
+      expect(player.getMinimumPosition()).toEqual(6);
     });
   });
 
@@ -799,8 +798,8 @@ describe("DASH live content with no timeShiftBufferDepth (SegmentTimeline)", fun
       await sleep(1);
       await xhrMock.flush();
       await sleep(1);
-      expect(player.getMaximumPosition()).to.be
-        .closeTo(1527508062, 1);
+      expect(player.getMaximumPosition())
+        .toBeCloseTo(1527508062, 1);
     });
   });
 });

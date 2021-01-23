@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import { mediaCapabilitiesProber } from "../../../../src/experimental/tools";
 
 /**
@@ -87,11 +86,11 @@ describe("mediaCapabilitiesProber - getCompatibleDRMConfigurations", () => {
     const results = await mediaCapabilitiesProber
       .getCompatibleDRMConfigurations(keySystems);
 
-    expect(results.length).to.be.equal(2);
+    expect(results.length).toEqual(2);
     for (let i = 0; i < results.length; i++) {
-      expect(results[i].configuration).not.to.be.undefined;
-      expect(results[i].type).not.to.be.undefined;
-      expect(results[i].compatibleConfiguration).not.to.be.undefined;
+      expect(results[i].configuration).not.toBeUndefined();
+      expect(results[i].type).not.toBeUndefined();
+      expect(results[i].compatibleConfiguration).not.toBeUndefined();
     }
     resetRMKSA();
   });
@@ -101,13 +100,13 @@ describe("mediaCapabilitiesProber - getCompatibleDRMConfigurations", () => {
     const results = await mediaCapabilitiesProber
       .getCompatibleDRMConfigurations(keySystems);
 
-    expect(results.length).to.be.equal(2);
-    expect(results[0].configuration).not.to.be.undefined;
-    expect(results[0].type).not.to.be.undefined;
-    expect(results[0].compatibleConfiguration).to.be.undefined;
-    expect(results[1].configuration).not.to.be.undefined;
-    expect(results[1].type).not.to.be.undefined;
-    expect(results[1].compatibleConfiguration).not.to.be.undefined;
+    expect(results.length).toEqual(2);
+    expect(results[0].configuration).not.toBeUndefined();
+    expect(results[0].type).not.toBeUndefined();
+    expect(results[0].compatibleConfiguration).toBeUndefined();
+    expect(results[1].configuration).not.toBeUndefined();
+    expect(results[1].type).not.toBeUndefined();
+    expect(results[1].compatibleConfiguration).not.toBeUndefined();
     resetRMKSA();
   });
 
@@ -116,13 +115,13 @@ describe("mediaCapabilitiesProber - getCompatibleDRMConfigurations", () => {
     const results = await mediaCapabilitiesProber
       .getCompatibleDRMConfigurations(keySystems);
 
-    expect(results.length).to.be.equal(2);
-    expect(results[0].configuration).not.to.be.undefined;
-    expect(results[0].type).not.to.be.undefined;
-    expect(results[0].compatibleConfiguration).to.be.undefined;
-    expect(results[1].configuration).not.to.be.undefined;
-    expect(results[1].type).not.to.be.undefined;
-    expect(results[1].compatibleConfiguration).to.be.undefined;
+    expect(results.length).toEqual(2);
+    expect(results[0].configuration).not.toBeUndefined();
+    expect(results[0].type).not.toBeUndefined();
+    expect(results[0].compatibleConfiguration).toBeUndefined();
+    expect(results[1].configuration).not.toBeUndefined();
+    expect(results[1].type).not.toBeUndefined();
+    expect(results[1].compatibleConfiguration).toBeUndefined();
     resetRMKSA();
   });
 });

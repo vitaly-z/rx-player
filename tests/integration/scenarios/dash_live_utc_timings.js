@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import RxPlayer from "../../../src";
 import {
   WithDirect,
@@ -36,10 +35,8 @@ describe("DASH live - UTCTimings", () => {
       await sleep(10);
       await xhrMock.flush();
       await sleep(10);
-      expect(player.getMinimumPosition()).to.be
-        .closeTo(1553521448, 3);
-      expect(player.getMaximumPosition()).to.be
-        .closeTo(1553521748, 3);
+      expect(player.getMinimumPosition()).toBeCloseTo(1553521448, 3);
+      expect(player.getMaximumPosition()).toBeCloseTo(1553521748, 3);
     });
 
     it("should consider `serverSyncInfos` if provided", async () => {
@@ -58,10 +55,8 @@ describe("DASH live - UTCTimings", () => {
       await sleep(10);
       await xhrMock.flush();
       await sleep(10);
-      expect(player.getMinimumPosition()).to.be
-        .closeTo(1553521748, 1);
-      expect(player.getMaximumPosition()).to.be
-        .closeTo(1553522048, 1);
+      expect(player.getMinimumPosition()).toBeCloseTo(1553521748, 1);
+      expect(player.getMaximumPosition()).toBeCloseTo(1553522048, 1);
     });
   });
 
@@ -100,8 +95,7 @@ describe("DASH live - UTCTimings", () => {
       await sleep(10);
       await xhrMock.flush(); // Once for the init segment
       await sleep(10);
-      expect(player.getMinimumPosition()).to.be
-        .closeTo(1553521448, 3);
+      expect(player.getMinimumPosition()).toBeCloseTo(1553521448, 3);
     });
 
     it("should consider `serverSyncInfos` if provided", async () => {
@@ -122,10 +116,8 @@ describe("DASH live - UTCTimings", () => {
       await sleep(10);
       await xhrMock.flush();
       await sleep(10);
-      expect(player.getMinimumPosition()).to.be
-        .closeTo(1553521748, 1);
-      expect(player.getMaximumPosition()).to.be
-        .closeTo(1553522048, 1);
+      expect(player.getMinimumPosition()).toBeCloseTo(1553521748, 1);
+      expect(player.getMaximumPosition()).toBeCloseTo(1553522048, 1);
     });
   });
 
@@ -162,10 +154,8 @@ describe("DASH live - UTCTimings", () => {
         availabilityStartTime;
       const minimumPosition = maximumPosition - timeShiftBufferDepth;
 
-      expect(player.getMinimumPosition()).to.be
-        .closeTo(minimumPosition, 3);
-      expect(player.getMaximumPosition()).to.be
-        .closeTo(maximumPosition, 3);
+      expect(player.getMinimumPosition()).toBeCloseTo(minimumPosition, 3);
+      expect(player.getMaximumPosition()).toBeCloseTo(maximumPosition, 3);
     });
 
     it("should consider `serverSyncInfos` if provided", async () => {
@@ -186,10 +176,8 @@ describe("DASH live - UTCTimings", () => {
       await sleep(10);
       await xhrMock.flush();
       await sleep(10);
-      expect(player.getMinimumPosition()).to.be
-        .closeTo(1553521748, 1);
-      expect(player.getMaximumPosition()).to.be
-        .closeTo(1553522048, 1);
+      expect(player.getMinimumPosition()).toBeCloseTo(1553521748, 1);
+      expect(player.getMaximumPosition()).toBeCloseTo(1553522048, 1);
     });
   });
 
@@ -219,12 +207,11 @@ describe("DASH live - UTCTimings", () => {
       await sleep(10);
       await xhrMock.flush();
       await sleep(10);
-      expect(player.getMinimumPosition()).to.be
-        .closeTo(1553521448, 3);
+      expect(player.getMinimumPosition()).toBeCloseTo(1553521448, 3);
 
       const requestsDone = xhrMock.getLockedXHR().map(r => r.url);
       expect(requestsDone)
-        .not.to.include("https://time.akamai.com/?iso");
+        .not.toContain("https://time.akamai.com/?iso");
     });
 
     it("should consider `serverSyncInfos` if provided", async () => {
@@ -245,10 +232,8 @@ describe("DASH live - UTCTimings", () => {
       await sleep(10);
       await xhrMock.flush();
       await sleep(10);
-      expect(player.getMinimumPosition()).to.be
-        .closeTo(1553521748, 1);
-      expect(player.getMaximumPosition()).to.be
-        .closeTo(1553522048, 1);
+      expect(player.getMinimumPosition()).toBeCloseTo(1553521748, 1);
+      expect(player.getMaximumPosition()).toBeCloseTo(1553522048, 1);
     });
   });
 });

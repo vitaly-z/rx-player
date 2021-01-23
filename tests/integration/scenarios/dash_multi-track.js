@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import RxPlayer from "../../../src";
 import {
   multiAdaptationSetsInfos,
@@ -25,7 +24,9 @@ describe("DASH multi-track content (SegmentTimeline)", function () {
     if (player.getPlayerState() !== "PAUSED") {
       await waitForPlayerState(player, "PAUSED", ["SEEKING", "BUFFERING"]);
     }
-    expect(player.getPosition()).to.be.within(118, 122);
+    const position = player.getPosition();
+    expect(position).toBeGreaterThanOrEqual(118);
+    expect(position).toBeLessThanOrEqual(122);
   }
 
   async function goToFirstPeriod() {
@@ -34,7 +35,9 @@ describe("DASH multi-track content (SegmentTimeline)", function () {
     if (player.getPlayerState() !== "PAUSED") {
       await waitForPlayerState(player, "PAUSED", ["SEEKING", "BUFFERING"]);
     }
-    expect(player.getPosition()).to.be.within(0, 10);
+    const position = player.getPosition();
+    expect(position).toBeGreaterThanOrEqual(0);
+    expect(position).toBeLessThanOrEqual(10);
   }
 
   function setAudioTrack(language, isAudioDescription) {
@@ -90,53 +93,55 @@ describe("DASH multi-track content (SegmentTimeline)", function () {
 
   function checkAudioTrack(language, normalizedLanguage, isAudioDescription) {
     const currentAudioTrack = player.getAudioTrack();
-    expect(currentAudioTrack).to.not.equal(null);
-    expect(currentAudioTrack.language).to.equal(language);
-    expect(currentAudioTrack.normalized).to.equal(normalizedLanguage);
-    expect(currentAudioTrack.audioDescription).to.equal(isAudioDescription);
+    expect(currentAudioTrack).not.toEqual(null);
+    expect(currentAudioTrack.language).toEqual(language);
+    expect(currentAudioTrack.normalized).toEqual(normalizedLanguage);
+    expect(currentAudioTrack.audioDescription).toEqual(isAudioDescription);
   }
 
   function checkNoTextTrack() {
     const currentTextTrack = player.getTextTrack();
-    expect(currentTextTrack).to.equal(null);
+    expect(currentTextTrack).toEqual(null);
   }
 
   function checkTextTrack(language, normalizedLanguage, isClosedCaption) {
     const currentTextTrack = player.getTextTrack();
-    expect(currentTextTrack).to.not.equal(null);
-    expect(currentTextTrack.language).to.equal(language);
-    expect(currentTextTrack.normalized).to.equal(normalizedLanguage);
-    expect(currentTextTrack.closedCaption).to.equal(isClosedCaption);
+    expect(currentTextTrack).not.toEqual(null);
+    expect(currentTextTrack.language).toEqual(language);
+    expect(currentTextTrack.normalized).toEqual(normalizedLanguage);
+    expect(currentTextTrack.closedCaption).toEqual(isClosedCaption);
   }
 
   function checkNoVideoTrack() {
     const currentVideoTrack = player.getVideoTrack();
-    expect(currentVideoTrack).to.equal(null);
+    expect(currentVideoTrack).toEqual(null);
   }
 
   function checkVideoTrack(codecRules, isSignInterpreted) {
     const currentVideoTrack = player.getVideoTrack();
-    expect(currentVideoTrack).to.not.equal(null);
+    expect(currentVideoTrack).not.toEqual(null);
 
     if (isSignInterpreted === undefined) {
       expect(Object.prototype.hasOwnProperty.call(currentVideoTrack,
                                                   "signInterpreted"))
-        .to.equal(false);
+        .toEqual(false);
     } else {
-      expect(currentVideoTrack.signInterpreted).to.equal(isSignInterpreted);
+      expect(currentVideoTrack.signInterpreted).toEqual(isSignInterpreted);
     }
 
     if (codecRules !== null) {
       const representations = currentVideoTrack.representations;
-      expect(representations.length).to.not.equal(0);
+      expect(representations.length).not.toEqual(0);
       const { all, test } = codecRules;
       if (all) {
-        expect(representations.every(r => test.test(r.codec))).to.equal(true);
+        expect(representations.every(r => test.test(r.codec))).toEqual(true);
       } else {
-        expect(representations.some(r => test.test(r.codec))).to.equal(true);
+        expect(representations.some(r => test.test(r.codec))).toEqual(true);
       }
     }
   }
+
+  const originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
 
   beforeEach(() => {
     player = new RxPlayer();
@@ -147,6 +152,7 @@ describe("DASH multi-track content (SegmentTimeline)", function () {
   afterEach(() => {
     player.dispose();
     xhrMock.restore();
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
   it("should properly load the content with the right default tracks", async function () {
@@ -156,15 +162,15 @@ describe("DASH multi-track content (SegmentTimeline)", function () {
 
     await sleep(10);
 
-    expect(xhrMock.getLockedXHR().length).to.equal(1); // Manifest request
+    expect(xhrMock.getLockedXHR().length).toEqual(1); // Manifest request
     await xhrMock.flush();
     await sleep(10);
 
-    expect(player.getPlayerState()).to.equal("LOADING");
+    expect(player.getPlayerState()).toEqual("LOADING");
     await xhrMock.unlock();
     await sleep(500);
 
-    expect(player.getPlayerState()).to.equal("LOADED");
+    expect(player.getPlayerState()).toEqual("LOADED");
 
     // TODO AUDIO codec
     checkAudioTrack("de", "deu", false);
@@ -541,7 +547,7 @@ describe("DASH multi-track content (SegmentTimeline)", function () {
   });
 
   it("preferences should be persisted if already set for a given Period", async function() {
-    this.timeout(5000);
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
 
     player.setPreferredAudioTracks([ { language: "fr",
                                        audioDescription: true } ]);

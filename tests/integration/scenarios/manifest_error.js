@@ -1,6 +1,5 @@
-import { expect } from "chai";
+import XHRMock from "../../utils/request_mock";
 import sleep from "../../utils/sleep.js";
-import sinon from "sinon";
 
 import RxPlayer from "../../../src";
 
@@ -10,14 +9,14 @@ const MANIFEST_URL_INFOS = manifestInfos.url;
 
 /**
  *  Workaround to provide a "real" sleep function, which does not depend on
- *  sinon fakeTimers.
+ *  jasmine fakeTimers.
  *  Here, the environment's setTimeout function is stored before being stubed
- *  by sinon, allowing to sleep the wanted time without waiting sinon's clock
- *  to tick.
+ *  by jasmine, allowing to sleep the wanted time without waiting jasmine's
+ *  clock to tick.
  *  @param {Number} [ms=0]
  *  @returns {Promise}
  */
-const sleepWithoutSinonStub = (function() {
+const sleepWithoutJasmineStub = (function() {
   const timeoutFn = window.setTimeout;
   return function _nextTick(ms = 0) {
     return new Promise((res) => {
@@ -32,215 +31,222 @@ const sleepWithoutSinonStub = (function() {
 
 describe("manifest error management", function () {
   let player;
-  let fakeServer;
+  let xhrMock;
 
   beforeEach(() => {
     player = new RxPlayer();
-    fakeServer = sinon.fakeServer.create();
+    xhrMock = new XHRMock();
   });
 
   afterEach(() => {
     player.dispose();
-    fakeServer.restore();
+    jasmine.clock().uninstall();
+    xhrMock.restore();
   });
 
   it("should retry to download the manifest 5 times", async () => {
-    const clock = sinon.useFakeTimers();
-    fakeServer.respondWith("GET", MANIFEST_URL_INFOS.url, res =>
-      res.respond(500));
+    const clock = jasmine.clock().install();
+    xhrMock.respondTo(MANIFEST_URL_INFOS.url, [ 500, {
+      "Content-Type": "text/plain"
+    }, ""]);
+    xhrMock.lock();
 
     player.loadVideo({
       url: manifestInfos.url,
       transport: manifestInfos.transport,
     });
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
     clock.tick(5000);
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
     clock.tick(5000);
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
     clock.tick(5000);
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
     clock.tick(5000);
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
 
-    clock.restore();
+    clock.uninstall();
 
     await sleep(5);
-    expect(player.getManifest()).to.equal(null);
+    expect(player.getManifest()).toEqual(null);
     const error = player.getError();
-    expect(error).not.to.equal(null);
-    expect(error.type).to.equal(RxPlayer.ErrorTypes.NETWORK_ERROR);
-    expect(error.code).to.equal(RxPlayer.ErrorCodes.PIPELINE_LOAD_ERROR);
+    expect(error).not.toEqual(null);
+    expect(error.type).toEqual(RxPlayer.ErrorTypes.NETWORK_ERROR);
+    expect(error.code).toEqual(RxPlayer.ErrorCodes.PIPELINE_LOAD_ERROR);
   });
 
   it("should parse the manifest if it works the second time", async () => {
-    const clock = sinon.useFakeTimers();
+    const clock = jasmine.clock().install();
 
-    fakeServer.respondWith("GET", MANIFEST_URL_INFOS.url, (xhr) => {
-      return xhr.respond(500);
-    });
+    xhrMock.respondTo(MANIFEST_URL_INFOS.url, [ 500, {
+      "Content-Type": "text/plain"
+    }, ""]);
+    xhrMock.lock();
 
     player.loadVideo({
       url: manifestInfos.url,
       transport: manifestInfos.transport,
     });
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
-    fakeServer.restore();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
+    xhrMock.restore();
     clock.tick(5000);
 
-    expect(player.getError()).to.equal(null);
-    await sleepWithoutSinonStub(50);
+    expect(player.getError()).toEqual(null);
+    await sleepWithoutJasmineStub(50);
 
-    clock.restore();
+    clock.uninstall();
 
     await sleep(50);
-    expect(player.getManifest()).not.to.equal(null);
-    expect(typeof player.getManifest()).to.equal("object");
-    expect(player.getError()).to.equal(null);
+    expect(player.getManifest()).not.toEqual(null);
+    expect(typeof player.getManifest()).toEqual("object");
+    expect(player.getError()).toEqual(null);
   });
 
   it("should parse the manifest if it works the third time", async () => {
-    const clock = sinon.useFakeTimers();
-    fakeServer.respondWith("GET", MANIFEST_URL_INFOS.url, (xhr) => {
-      return xhr.respond(500);
-    });
+    const clock = jasmine.clock().install();
+    xhrMock.respondTo(MANIFEST_URL_INFOS.url, [ 500, {
+      "Content-Type": "text/plain"
+    }, ""]);
+    xhrMock.lock();
 
     player.loadVideo({
       url: manifestInfos.url,
       transport: manifestInfos.transport,
     });
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
     clock.tick(5000);
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
-    fakeServer.restore();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
+    xhrMock.restore();
     clock.tick(5000);
 
-    expect(player.getError()).to.equal(null);
-    await sleepWithoutSinonStub(50);
+    expect(player.getError()).toEqual(null);
+    await sleepWithoutJasmineStub(50);
 
-    clock.restore();
+    clock.uninstall();
 
     await sleep(5);
-    expect(player.getManifest()).not.to.equal(null);
-    expect(typeof player.getManifest()).to.equal("object");
-    expect(player.getError()).to.equal(null);
+    expect(player.getManifest()).not.toEqual(null);
+    expect(typeof player.getManifest()).toEqual("object");
+    expect(player.getError()).toEqual(null);
   });
 
   it("should parse the manifest if it works the fourth time", async () => {
-    const clock = sinon.useFakeTimers();
-    fakeServer.respondWith("GET", MANIFEST_URL_INFOS.url, (xhr) => {
-      return xhr.respond(500);
-    });
+    const clock = jasmine.clock().install();
+    xhrMock.respondTo(MANIFEST_URL_INFOS.url, [ 500, {
+      "Content-Type": "text/plain"
+    }, ""]);
+    xhrMock.lock();
 
     player.loadVideo({
       url: manifestInfos.url,
       transport: manifestInfos.transport,
     });
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
     clock.tick(5000);
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
     clock.tick(5000);
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
-    fakeServer.restore();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
+    xhrMock.restore();
     clock.tick(5000);
 
-    expect(player.getError()).to.equal(null);
-    await sleepWithoutSinonStub(50);
+    expect(player.getError()).toEqual(null);
+    await sleepWithoutJasmineStub(50);
 
-    clock.restore();
+    clock.uninstall();
 
     await sleep(5);
-    expect(player.getManifest()).not.to.equal(null);
-    expect(typeof player.getManifest()).to.equal("object");
-    expect(player.getError()).to.equal(null);
+    expect(player.getManifest()).not.toEqual(null);
+    expect(typeof player.getManifest()).toEqual("object");
+    expect(player.getError()).toEqual(null);
   });
 
   it("should parse the manifest if it works the fifth time", async () => {
-    const clock = sinon.useFakeTimers();
-    fakeServer.respondWith("GET", MANIFEST_URL_INFOS.url, (xhr) => {
-      return xhr.respond(500);
-    });
+    const clock = jasmine.clock().install();
+    xhrMock.respondTo(MANIFEST_URL_INFOS.url, [ 500, {
+      "Content-Type": "text/plain"
+    }, ""]);
+    xhrMock.lock();
 
     player.loadVideo({
       url: manifestInfos.url,
       transport: manifestInfos.transport,
     });
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
     clock.tick(5000);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
     clock.tick(5000);
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
     clock.tick(5000);
 
-    expect(player.getError()).to.equal(null);
+    expect(player.getError()).toEqual(null);
 
-    await sleepWithoutSinonStub(50);
-    fakeServer.respond();
-    fakeServer.restore();
+    await sleepWithoutJasmineStub(50);
+    xhrMock.flush();
+    xhrMock.restore();
     clock.tick(5000);
 
-    expect(player.getError()).to.equal(null);
-    await sleepWithoutSinonStub(50);
+    expect(player.getError()).toEqual(null);
+    await sleepWithoutJasmineStub(50);
 
-    clock.restore();
+    clock.uninstall();
 
     await sleep(5);
-    expect(player.getManifest()).not.to.equal(null);
-    expect(typeof player.getManifest()).to.equal("object");
-    expect(player.getError()).to.equal(null);
+    expect(player.getManifest()).not.toEqual(null);
+    expect(typeof player.getManifest()).toEqual("object");
+    expect(player.getError()).toEqual(null);
   });
 });

@@ -5,6 +5,8 @@ const Server = require("karma").Server;
 const TestContentServer = require("../contents/server");
 const webpackConfig = require("../../webpack-tests.config.js");
 
+delete webpackConfig.entry;
+
 const argv = process.argv;
 if (argv.includes("-h") || argv.includes("--help")) {
   displayHelp();
@@ -61,18 +63,28 @@ const karmaConf = {
   },
   singleRun,
   reporters: ["dots"],
-  frameworks: ["mocha"],
+  frameworks: ["webpack", "jasmine"],
+  plugins: [
+    "karma-chrome-launcher",
+    "karma-coverage-istanbul-reporter",
+    "karma-firefox-launcher",
+    "karma-jasmine",
+    "karma-webpack"
+  ],
   webpack: webpackConfig,
   webpackMiddleware: { stats: { colors: true, chunks: false } },
   preprocessors: {
-    [path.resolve(__dirname, "./index.js")]: "webpack",
+    [path.resolve(__dirname, "./scenarios/**/*.js")]: ["webpack"],
   },
   files: [
-    path.resolve(__dirname, "./index.js"),
+    {
+      pattern: path.resolve(__dirname, "./scenarios/**/*.js"),
+      watched: false,
+    }
   ],
   client: {
     captureConsole: true,
-    mocha: { reporter: "html" },
+    useIframe: true,
   },
 };
 

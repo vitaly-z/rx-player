@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import {
   manifestURL1,
   manifestURL2,
@@ -20,20 +19,20 @@ describe("createMetaplaylist", () => {
                              duration: 100 } ];
 
     const metaplaylist = await createMetaplaylist(contentsInfos);
-    expect(metaplaylist.type).to.equal("MPL");
-    expect(metaplaylist.version).to.equal("0.1");
-    expect(metaplaylist.dynamic).to.equal(false);
+    expect(metaplaylist.type).toEqual("MPL");
+    expect(metaplaylist.version).toEqual("0.1");
+    expect(metaplaylist.dynamic).toEqual(false);
 
     const { contents } = metaplaylist;
-    expect(contents[0].startTime).to.equal(0);
-    expect(contents[0].endTime).to.equal(193.68);
-    expect(contents[1].startTime).to.equal(193.68);
-    expect(contents[1].endTime).to.equal(927.6800000000001);
-    expect(contents[2].startTime).to.equal(927.6800000000001);
-    expect(contents[2].endTime).to.equal(1071.8506666);
-    expect(contents[3].url).to.equal("test-URL");
-    expect(contents[3].startTime).to.equal(1071.8506666);
-    expect(contents[3].endTime).to.equal(1071.8506666 + 100);
+    expect(contents[0].startTime).toEqual(0);
+    expect(contents[0].endTime).toEqual(193.68);
+    expect(contents[1].startTime).toEqual(193.68);
+    expect(contents[1].endTime).toEqual(927.6800000000001);
+    expect(contents[2].startTime).toEqual(927.6800000000001);
+    expect(contents[2].endTime).toEqual(1071.8506666);
+    expect(contents[3].url).toEqual("test-URL");
+    expect(contents[3].startTime).toEqual(1071.8506666);
+    expect(contents[3].endTime).toEqual(1071.8506666 + 100);
   });
 
 
@@ -49,20 +48,20 @@ describe("createMetaplaylist", () => {
                              duration: 100 } ];
 
     const metaplaylist = await createMetaplaylist(contentsInfos, 10);
-    expect(metaplaylist.type).to.equal("MPL");
-    expect(metaplaylist.version).to.equal("0.1");
-    expect(metaplaylist.dynamic).to.equal(false);
+    expect(metaplaylist.type).toEqual("MPL");
+    expect(metaplaylist.version).toEqual("0.1");
+    expect(metaplaylist.dynamic).toEqual(false);
 
     const { contents } = metaplaylist;
-    expect(contents[0].startTime).to.equal(0 + 10);
-    expect(contents[0].endTime).to.equal(193.68 + 10);
-    expect(contents[1].startTime).to.equal(193.68 + 10);
-    expect(contents[1].endTime).to.equal(927.6800000000001 + 10);
-    expect(contents[2].startTime).to.equal(927.6800000000001 + 10);
-    expect(contents[2].endTime).to.equal(1071.8506666 + 10);
-    expect(contents[3].url).to.equal("test-URL");
-    expect(contents[3].startTime).to.equal(1071.8506666 + 10);
-    expect(contents[3].endTime).to.equal(1071.8506666 + 100 + 10);
+    expect(contents[0].startTime).toEqual(0 + 10);
+    expect(contents[0].endTime).toEqual(193.68 + 10);
+    expect(contents[1].startTime).toEqual(193.68 + 10);
+    expect(contents[1].endTime).toEqual(927.6800000000001 + 10);
+    expect(contents[2].startTime).toEqual(927.6800000000001 + 10);
+    expect(contents[2].endTime).toEqual(1071.8506666 + 10);
+    expect(contents[3].url).toEqual("test-URL");
+    expect(contents[3].startTime).toEqual(1071.8506666 + 10);
+    expect(contents[3].endTime).toEqual(1071.8506666 + 100 + 10);
   });
 
   it("Should throw if there is an unsupported transport", async () => {
@@ -82,8 +81,8 @@ describe("createMetaplaylist", () => {
       error = err;
     }
 
-    expect(typeof error).to.equal("object");
-    expect(error.message).to.equal("createMetaplaylist: Unknown transport type.");
+    expect(typeof error).toEqual("object");
+    expect(error.message).toEqual("createMetaplaylist: Unknown transport type.");
   });
 
   it("Should throw if there is a dynamic manifest", async () => {
@@ -103,7 +102,7 @@ describe("createMetaplaylist", () => {
       error = err;
     }
 
-    expect(typeof error).to.equal("object");
-    expect(error.message).to.equal("createMetaplaylist: No duration on DASH content.");
+    expect(typeof error).toEqual("object");
+    expect(error.message).toEqual("createMetaplaylist: No duration on DASH content.");
   });
 });

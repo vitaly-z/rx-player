@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import { manifestInfos } from "../../contents/DASH_static_SegmentTimeline";
 import RxPlayer from "../../../src";
 import XHRMock from "../../utils/request_mock";
@@ -9,6 +8,7 @@ let player;
 let xhrMock;
 
 describe("Fast-switching", function () {
+  const originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
   beforeEach(() => {
     player = new RxPlayer();
     xhrMock = new XHRMock();
@@ -17,12 +17,13 @@ describe("Fast-switching", function () {
   afterEach(() => {
     player.dispose();
     xhrMock.restore();
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
   });
 
   const { url, transport } = manifestInfos;
 
   it("should enable fast-switching by default", async function () {
-    this.timeout(3000);
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 3000;
     player.setVideoBitrate(0);
     player.setWantedBufferAhead(15);
     player.loadVideo({ url,
@@ -38,13 +39,13 @@ describe("Fast-switching", function () {
                  time: infos.segment.time,
                  end: infos.segment.end };
       });
-    expect(videoSegmentBuffered.length).to.be.at.least(3);
-    expect(videoSegmentBuffered[1].bitrate).to.equal(1996000);
-    expect(videoSegmentBuffered[2].bitrate).to.equal(1996000);
+    expect(videoSegmentBuffered.length).toBeGreaterThanOrEqual(3);
+    expect(videoSegmentBuffered[1].bitrate).toEqual(1996000);
+    expect(videoSegmentBuffered[2].bitrate).toEqual(1996000);
   });
 
   it("should enable fast-switching if explicitely enabled", async function () {
-    this.timeout(3000);
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 3000;
     player.setVideoBitrate(0);
     player.setWantedBufferAhead(15);
     player.loadVideo({ url,
@@ -61,13 +62,13 @@ describe("Fast-switching", function () {
                  time: infos.segment.time,
                  end: infos.segment.end };
       });
-    expect(videoSegmentBuffered.length).to.be.at.least(3);
-    expect(videoSegmentBuffered[1].bitrate).to.equal(1996000);
-    expect(videoSegmentBuffered[2].bitrate).to.equal(1996000);
+    expect(videoSegmentBuffered.length).toBeGreaterThanOrEqual(3);
+    expect(videoSegmentBuffered[1].bitrate).toEqual(1996000);
+    expect(videoSegmentBuffered[2].bitrate).toEqual(1996000);
   });
 
   it("should disable fast-switching if explicitely disabled", async function () {
-    this.timeout(3000);
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 3000;
     player.setVideoBitrate(0);
     player.setWantedBufferAhead(15);
     player.loadVideo({ url,
@@ -84,9 +85,9 @@ describe("Fast-switching", function () {
                  time: infos.segment.time,
                  end: infos.segment.end };
       });
-    expect(videoSegmentBuffered.length).to.be.at.least(3);
-    expect(videoSegmentBuffered[0].bitrate).to.equal(400000);
-    expect(videoSegmentBuffered[1].bitrate).to.equal(400000);
-    expect(videoSegmentBuffered[2].bitrate).to.equal(400000);
+    expect(videoSegmentBuffered.length).toBeGreaterThanOrEqual(3);
+    expect(videoSegmentBuffered[0].bitrate).toEqual(400000);
+    expect(videoSegmentBuffered[1].bitrate).toEqual(400000);
+    expect(videoSegmentBuffered[2].bitrate).toEqual(400000);
   });
 });

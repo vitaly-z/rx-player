@@ -26,7 +26,7 @@ describe("Memory tests", () => {
       console.warn("API not available. Skipping test.");
       return;
     }
-    this.timeout(5 * 60 * 1000);
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 5 * 60 * 1000;
     player = new RxPlayer({ initialVideoBitrate: Infinity,
                             initialAudioBitrate: Infinity,
                             preferredTextTracks: [{ language: "fra",
@@ -72,7 +72,7 @@ describe("Memory tests", () => {
       console.warn("API not available. Skipping test.");
       return;
     }
-    this.timeout(5 * 60 * 1000);
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 5 * 60 * 1000;
     player = new RxPlayer({ initialVideoBitrate: Infinity,
                             initialaudiobitrate: Infinity,
                             preferredtexttracks: [{ language: "fra",

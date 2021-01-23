@@ -1,5 +1,3 @@
-import { expect } from "chai";
-import { stub } from "sinon";
 import RxPlayer from "../../../src";
 import XHRMock from "../../utils/request_mock";
 import launchTestsForContent from "../utils/launch_tests_for_content.js";
@@ -81,8 +79,9 @@ describe("DASH content CENC wrong version in MPD", function () {
     player = new RxPlayer();
     xhrMock = new XHRMock();
     xhrMock.lock();
-    const generateRequestStub = stub(window.MediaKeySession.prototype, "generateRequest")
-      .callsFake((_initDataType, initData) => {
+    const generateRequestStub = spyOn(window.MediaKeySession.prototype,
+                                      "generateRequest")
+      .and.callFake((_initDataType, initData) => {
         let offset = 0;
         while (offset < initData.length) {
           const size = be4toi(initData, offset);
@@ -146,19 +145,19 @@ describe("DASH content CENC wrong version in MPD", function () {
     await sleep(200);
     xhrMock.flush(); // init segment requests
     await sleep(50);
-    expect(generateRequestStub.called).to.equal(true,
-                                                "generateRequest was not called");
-    expect(foundCencV1).to.equal(true,
-                                 "should have found a CENC pssh v1");
-    expect(foundOtherCencVersion).to
-      .equal(false,
-             "should not have found a CENC pssh other than v1");
+    expect(generateRequestStub.called).toEqual(true);
+    expect(foundCencV1).toEqual(true);
+    expect(foundOtherCencVersion).toEqual(false);
   });
 });
 
 describe("DASH non-linear content with a \"broken\" sidx", function() {
+  const originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+  afterEach(() => {
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+  });
   it("should fix the broken byte-range of the last segment with the right option", async function() {
-    this.timeout(20 * 1000);
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 20 * 1000;
 
     function isBrokenVideoSegment(url) {
       const segmentExpectedUrlEnd = "v-0144p-0100k-libx264_broken_sidx.mp4";
@@ -187,7 +186,7 @@ describe("DASH non-linear content with a \"broken\" sidx", function() {
     await sleep(50);
 
     let lockedXhrs = xhrMock.getLockedXHR();
-    expect(lockedXhrs.length).to.equal(2);
+    expect(lockedXhrs.length).toEqual(2);
     const foundTruncatedVideoSegment = lockedXhrs
       .some(seg => {
         return isBrokenVideoSegment(seg.url) &&
@@ -195,9 +194,7 @@ describe("DASH non-linear content with a \"broken\" sidx", function() {
                  requestHeaderSet[0].toLowerCase() === "range" &&
                  requestHeaderSet[1].toLowerCase() === "bytes=696053-746228");
       });
-    expect(foundTruncatedVideoSegment)
-      .to.equal(true,
-                "should have requested the video segment with a bad range initially");
+    expect(foundTruncatedVideoSegment).toEqual(true);
     xhrMock.unlock();
 
     // Play a second time with the option
@@ -215,7 +212,7 @@ describe("DASH non-linear content with a \"broken\" sidx", function() {
     await sleep(50);
 
     lockedXhrs = xhrMock.getLockedXHR();
-    expect(lockedXhrs.length).to.equal(2);
+    expect(lockedXhrs.length).toEqual(2);
     const foundFixedVideoSegment = lockedXhrs
       .some(seg => {
         return isBrokenVideoSegment(seg.url) &&
@@ -224,9 +221,7 @@ describe("DASH non-linear content with a \"broken\" sidx", function() {
                  requestHeaderSet[1].toLowerCase() === "bytes=696053-");
       });
 
-    expect(foundFixedVideoSegment)
-      .to.equal(true,
-                "should have fixed the video segment with a bad range");
+    expect(foundFixedVideoSegment).toEqual(true);
     xhrMock.restore();
     player.dispose();
   });

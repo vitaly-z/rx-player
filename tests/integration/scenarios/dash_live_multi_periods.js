@@ -1,19 +1,17 @@
-import { expect } from "chai";
 import XHRMock from "../../utils/request_mock";
 import RxPlayer from "../../../src";
 import { manifestInfos } from "../../contents/DASH_dynamic_SegmentTemplate_Multi_Periods";
-import sinon from "sinon";
 
 /**
  *  Workaround to provide a "real" sleep function, which does not depend on
- *  sinon fakeTimers.
+ *  jasmine fakeTimers.
  *  Here, the environment's setTimeout function is stored before being stubed
- *  by sinon, allowing to sleep the wanted time without waiting sinon's clock
- *  to tick.
+ *  by jasmine, allowing to sleep the wanted time without waiting jasmine's
+ *  clock to tick.
  *  @param {Number} [ms=0]
  *  @returns {Promise}
  */
-const sleepWithoutSinonStub = (function() {
+const sleepWithoutjasmineStub = (function() {
   const timeoutFn = window.setTimeout;
   return function _nextTick(ms = 0) {
     return new Promise((res) => {
@@ -30,7 +28,7 @@ describe("DASH live content multi-periods (SegmentTemplate)", function() {
   beforeEach(() => {
     player = new RxPlayer();
     xhrMock = new XHRMock();
-    clock = sinon.useFakeTimers((1567781280 + 500) * 1000);
+    clock = jasmine.useFakeTimers((1567781280 + 500) * 1000);
   });
 
   afterEach(() => {
@@ -47,19 +45,19 @@ describe("DASH live content multi-periods (SegmentTemplate)", function() {
       transport: manifestInfos.transport,
     });
 
-    await sleepWithoutSinonStub(1);
-    expect(xhrMock.getLockedXHR().length).to.equal(1);
+    await sleepWithoutjasmineStub(1);
+    expect(xhrMock.getLockedXHR().length).toEqual(1);
     await xhrMock.flush();
-    await sleepWithoutSinonStub(1);
+    await sleepWithoutjasmineStub(1);
 
     const manifest = player.getManifest();
-    expect(manifest).not.to.equal(null);
+    expect(manifest).not.toEqual(null);
     const { periods } = manifest;
 
-    expect(periods.length).to.equal(3);
+    expect(periods.length).toEqual(3);
     const now = 1567781280 + 500;
     const maxPos = player.getMaximumPosition();
-    expect(maxPos).to.be.closeTo(now, 2);
+    expect(maxPos).toBeCloseTo(now, 2);
   });
 
   it("should return correct minimum position", async () => {
@@ -70,19 +68,19 @@ describe("DASH live content multi-periods (SegmentTemplate)", function() {
       transport: manifestInfos.transport,
     });
 
-    await sleepWithoutSinonStub(1);
-    expect(xhrMock.getLockedXHR().length).to.equal(1);
+    await sleepWithoutjasmineStub(1);
+    expect(xhrMock.getLockedXHR().length).toEqual(1);
     await xhrMock.flush();
-    await sleepWithoutSinonStub(1);
+    await sleepWithoutjasmineStub(1);
 
     const manifest = player.getManifest();
-    expect(manifest).not.to.equal(null);
+    expect(manifest).not.toEqual(null);
     const { periods } = manifest;
 
-    expect(periods.length).to.equal(3);
+    expect(periods.length).toEqual(3);
     const now = 1567781280 + 500;
     const minPos = player.getMinimumPosition();
-    expect(minPos).to.be.closeTo(now - manifestInfos.tsbd, 2);
+    expect(minPos).toBeCloseTo(now - manifestInfos.tsbd, 2);
   });
 
   it("should correclty parse manifest and periods boundaries", async () => {
@@ -93,20 +91,20 @@ describe("DASH live content multi-periods (SegmentTemplate)", function() {
       transport: manifestInfos.transport,
     });
 
-    await sleepWithoutSinonStub(1);
-    expect(xhrMock.getLockedXHR().length).to.equal(1);
+    await sleepWithoutjasmineStub(1);
+    expect(xhrMock.getLockedXHR().length).toEqual(1);
     await xhrMock.flush();
-    await sleepWithoutSinonStub(1);
+    await sleepWithoutjasmineStub(1);
 
     const manifest = player.getManifest();
-    expect(manifest).not.to.equal(null);
+    expect(manifest).not.toEqual(null);
     const { periods } = manifest;
 
-    expect(periods[0].start).to.equal(1567780920);
-    expect(periods[0].end).to.equal(1567781100);
-    expect(periods[1].start).to.equal(1567781100);
-    expect(periods[1].end).to.equal(1567781280);
-    expect(periods[2].start).to.equal(1567781280);
-    expect(periods[2].end).to.equal(undefined);
+    expect(periods[0].start).toEqual(1567780920);
+    expect(periods[0].end).toEqual(1567781100);
+    expect(periods[1].start).toEqual(1567781100);
+    expect(periods[1].end).toEqual(1567781280);
+    expect(periods[2].start).toEqual(1567781280);
+    expect(periods[2].end).toEqual(undefined);
   });
 });

@@ -4,7 +4,7 @@ module.exports = {
     "es6": true,
     "browser": true,
     "commonjs": true,
-    "mocha": true
+    "jasmine": true
   },
 
   "globals": {
@@ -21,9 +21,6 @@ module.exports = {
 
   "parserOptions": {
     "ecmaVersion": 2017,
-    "ecmaFeatures": {
-      "jsx": true
-    },
     "sourceType": "module"
   },
 

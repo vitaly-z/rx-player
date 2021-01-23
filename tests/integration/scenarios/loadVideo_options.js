@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { expect } from "chai";
 import RxPlayer from "../../../src";
 import { manifestInfos } from "../../contents/DASH_static_SegmentTimeline";
 import sleep from "../../utils/sleep.js";
@@ -41,10 +40,10 @@ describe("loadVideo Options", () => {
     it("should throw if no url is given", () => {
       expect(() => {
         player.loadVideo();
-      }).to.throw();
+      }).toThrow();
       expect(() => {
         player.loadVideo({ transport: "dash", autoPlay: true });
-      }).to.throw();
+      }).toThrow();
     });
 
     it("should request the URL if one is given", async () => {
@@ -57,8 +56,8 @@ describe("loadVideo Options", () => {
 
       await sleep(0);
 
-      expect(xhrMock.getLockedXHR().length).to.equal(1);
-      expect(xhrMock.getLockedXHR()[0].url).to.equal(manifestInfos.url);
+      expect(xhrMock.getLockedXHR().length).toEqual(1);
+      expect(xhrMock.getLockedXHR()[0].url).toEqual(manifestInfos.url);
     });
   });
 
@@ -66,13 +65,13 @@ describe("loadVideo Options", () => {
     it("should throw if no transport is given", () => {
       expect(() => {
         player.loadVideo();
-      }).to.throw();
+      }).toThrow();
       expect(() => {
         player.loadVideo({ url: manifestInfos.url });
-      }).to.throw();
+      }).toThrow();
       expect(() => {
         player.loadVideo({ url: manifestInfos.url, autoPlay: true });
-      }).to.throw();
+      }).toThrow();
     });
   });
 
@@ -83,11 +82,11 @@ describe("loadVideo Options", () => {
         url: manifestInfos.url,
       });
       await waitForLoadedStateAfterLoadVideo(player);
-      expect(player.getPlayerState()).to.equal("LOADED");
-      expect(player.getPosition()).to.be.below(0.1);
+      expect(player.getPlayerState()).toEqual("LOADED");
+      expect(player.getPosition()).toBeLessThan(0.1);
       await sleep(200);
-      expect(player.getPlayerState()).to.equal("LOADED");
-      expect(player.getPosition()).to.be.below(0.1);
+      expect(player.getPlayerState()).toEqual("LOADED");
+      expect(player.getPosition()).toBeLessThan(0.1);
     });
 
     it("should keep state as LOADED (and not play) if autoPlay is false", async () => {
@@ -97,11 +96,11 @@ describe("loadVideo Options", () => {
         autoPlay: false,
       });
       await waitForLoadedStateAfterLoadVideo(player);
-      expect(player.getPlayerState()).to.equal("LOADED");
-      expect(player.getPosition()).to.be.below(0.1);
+      expect(player.getPlayerState()).toEqual("LOADED");
+      expect(player.getPosition()).toBeLessThan(0.1);
       await sleep(200);
-      expect(player.getPlayerState()).to.equal("LOADED");
-      expect(player.getPosition()).to.be.below(0.1);
+      expect(player.getPlayerState()).toEqual("LOADED");
+      expect(player.getPosition()).toBeLessThan(0.1);
     });
 
     it("should set state as LOADED then to PLAYING (and play) if autoPlay is true", async () => {
@@ -111,10 +110,10 @@ describe("loadVideo Options", () => {
         autoPlay: true,
       });
       await waitForLoadedStateAfterLoadVideo(player);
-      expect(player.getPlayerState()).to.equal("PLAYING");
-      expect(player.getPosition()).to.be.below(0.1);
+      expect(player.getPlayerState()).toEqual("PLAYING");
+      expect(player.getPosition()).toBeLessThan(0.1);
       await sleep(500);
-      expect(player.getPosition()).to.be.above(0.2);
+      expect(player.getPosition()).toBeGreaterThan(0.2);
     });
   });
 
@@ -129,11 +128,11 @@ describe("loadVideo Options", () => {
           startAt: { position: startAt },
         });
         await waitForLoadedStateAfterLoadVideo(player);
-        expect(player.getPlayerState()).to.equal("LOADED");
+        expect(player.getPlayerState()).toEqual("LOADED");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be.closeTo(startAt, 0.5);
+        expect(initialPosition).toBeCloseTo(startAt, 0.5);
         await sleep(500);
-        expect(player.getPosition()).to.equal(initialPosition);
+        expect(player.getPosition()).toEqual(initialPosition);
       });
 
       it("should seek at the right position if startAt.wallClockTime is set", async function () {
@@ -145,11 +144,11 @@ describe("loadVideo Options", () => {
           startAt: { wallClockTime: startAt },
         });
         await waitForLoadedStateAfterLoadVideo(player);
-        expect(player.getPlayerState()).to.equal("LOADED");
+        expect(player.getPlayerState()).toEqual("LOADED");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be.closeTo(startAt, 0.5);
+        expect(initialPosition).toBeCloseTo(startAt, 0.5);
         await sleep(500);
-        expect(player.getPosition()).to.equal(initialPosition);
+        expect(player.getPosition()).toEqual(initialPosition);
       });
 
       it("should seek at the right position if startAt.fromFirstPosition is set", async function () {
@@ -161,12 +160,12 @@ describe("loadVideo Options", () => {
           startAt: { fromFirstPosition: startAt },
         });
         await waitForLoadedStateAfterLoadVideo(player);
-        expect(player.getPlayerState()).to.equal("LOADED");
+        expect(player.getPlayerState()).toEqual("LOADED");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be
-          .closeTo(player.getMinimumPosition() + startAt, 0.5);
+        expect(initialPosition)
+          .toBeCloseTo(player.getMinimumPosition() + startAt, 0.5);
         await sleep(500);
-        expect(player.getPosition()).to.equal(initialPosition);
+        expect(player.getPosition()).toEqual(initialPosition);
       });
 
       it("should seek at the right position if startAt.fromLastPosition is set", async function () {
@@ -178,12 +177,12 @@ describe("loadVideo Options", () => {
           startAt: { fromLastPosition: - startAt },
         });
         await waitForLoadedStateAfterLoadVideo(player);
-        expect(player.getPlayerState()).to.equal("LOADED");
+        expect(player.getPlayerState()).toEqual("LOADED");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be
-          .closeTo(player.getMaximumPosition() - startAt, 0.5);
+        expect(initialPosition)
+          .toBeCloseTo(player.getMaximumPosition() - startAt, 0.5);
         await sleep(500);
-        expect(player.getPosition()).to.equal(initialPosition);
+        expect(player.getPosition()).toEqual(initialPosition);
       });
 
       it("should seek at the right position if startAt.percentage is set", async function () {
@@ -194,12 +193,12 @@ describe("loadVideo Options", () => {
           startAt: { percentage: 30 },
         });
         await waitForLoadedStateAfterLoadVideo(player);
-        expect(player.getPlayerState()).to.equal("LOADED");
+        expect(player.getPlayerState()).toEqual("LOADED");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be
-          .closeTo(player.getMaximumPosition() * 0.3, 0.5);
+        expect(initialPosition)
+          .toBeCloseTo(player.getMaximumPosition() * 0.3, 0.5);
         await sleep(500);
-        expect(player.getPosition()).to.equal(initialPosition);
+        expect(player.getPosition()).toEqual(initialPosition);
       });
 
       it("should seek at the right position then play if startAt.position and autoPlay is set", async function () {
@@ -211,11 +210,11 @@ describe("loadVideo Options", () => {
           startAt: { position: startAt },
         });
         await waitForLoadedStateAfterLoadVideo(player);
-        expect(player.getPlayerState()).to.equal("PLAYING");
+        expect(player.getPlayerState()).toEqual("PLAYING");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be.closeTo(startAt, 0.5);
+        expect(initialPosition).toBeCloseTo(startAt, 0.5);
         await sleep(500);
-        expect(player.getPosition()).to.be.above(initialPosition);
+        expect(player.getPosition()).toBeGreaterThan(initialPosition);
       });
 
       it("should seek at the right position then play if startAt.wallClockTime and autoPlay is set", async function () {
@@ -227,11 +226,11 @@ describe("loadVideo Options", () => {
           startAt: { wallClockTime: startAt },
         });
         await waitForLoadedStateAfterLoadVideo(player);
-        expect(player.getPlayerState()).to.equal("PLAYING");
+        expect(player.getPlayerState()).toEqual("PLAYING");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be.closeTo(startAt, 0.5);
+        expect(initialPosition).toBeCloseTo(startAt, 0.5);
         await sleep(500);
-        expect(player.getPosition()).to.be.above(initialPosition);
+        expect(player.getPosition()).toBeGreaterThan(initialPosition);
       });
 
       it("should seek at the right position then play if startAt.fromFirstPosition and autoPlay is set", async function () {
@@ -243,12 +242,12 @@ describe("loadVideo Options", () => {
           startAt: { fromFirstPosition: startAt },
         });
         await waitForLoadedStateAfterLoadVideo(player);
-        expect(player.getPlayerState()).to.equal("PLAYING");
+        expect(player.getPlayerState()).toEqual("PLAYING");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be
-          .closeTo(player.getMinimumPosition() + startAt, 0.5);
+        expect(initialPosition)
+          .toBeCloseTo(player.getMinimumPosition() + startAt, 0.5);
         await sleep(500);
-        expect(player.getPosition()).to.be.above(initialPosition);
+        expect(player.getPosition()).toBeGreaterThan(initialPosition);
       });
 
       it("should seek at the right position then play if startAt.fromLastPosition and autoPlay is set", async function () {
@@ -260,12 +259,12 @@ describe("loadVideo Options", () => {
           startAt: { fromLastPosition: - startAt },
         });
         await waitForLoadedStateAfterLoadVideo(player);
-        expect(player.getPlayerState()).to.equal("PLAYING");
+        expect(player.getPlayerState()).toEqual("PLAYING");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be
-          .closeTo(player.getMaximumPosition() - startAt, 0.5);
+        expect(initialPosition)
+          .toBeCloseTo(player.getMaximumPosition() - startAt, 0.5);
         await sleep(500);
-        expect(player.getPosition()).to.be.above(initialPosition);
+        expect(player.getPosition()).toBeGreaterThan(initialPosition);
       });
 
       it("should seek at the right position then play if startAt.percentage and autoPlay is set", async function () {
@@ -276,12 +275,12 @@ describe("loadVideo Options", () => {
           startAt: { percentage: 30 },
         });
         await waitForLoadedStateAfterLoadVideo(player);
-        expect(player.getPlayerState()).to.equal("PLAYING");
+        expect(player.getPlayerState()).toEqual("PLAYING");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be
-          .closeTo(player.getMaximumPosition() * 0.3, 0.5);
+        expect(initialPosition)
+          .toBeCloseTo(player.getMaximumPosition() * 0.3, 0.5);
         await sleep(500);
-        expect(player.getPosition()).to.be.above(initialPosition);
+        expect(player.getPosition()).toBeGreaterThan(initialPosition);
       });
     });
   });
@@ -292,7 +291,7 @@ describe("loadVideo Options", () => {
         const videoRepresentations = manifestInfos
           .periods[0].adaptations.video[0].representations;
         const initialNumberOfRepresentations = videoRepresentations.length;
-        expect(initialNumberOfRepresentations).to.be.above(1);
+        expect(initialNumberOfRepresentations).toBeGreaterThan(1);
         const representationInTheMiddle = videoRepresentations[
           Math.floor(initialNumberOfRepresentations / 2)
         ];
@@ -315,11 +314,11 @@ describe("loadVideo Options", () => {
         await waitForLoadedStateAfterLoadVideo(player);
 
         expect(numberOfTimeRepresentationFilterIsCalledForVideo)
-          .to.equal(initialNumberOfRepresentations);
+          .toEqual(initialNumberOfRepresentations);
 
         const currentVideoRepresentations =
           player.getCurrentAdaptations().video.representations;
-        expect(currentVideoRepresentations.length).to.equal(
+        expect(currentVideoRepresentations.length).toEqual(
           Math.floor(initialNumberOfRepresentations / 2)
         );
       });
@@ -398,27 +397,27 @@ describe("loadVideo Options", () => {
         await xhrMock.flush(); // Manifest request
         await sleep(1);
         expect(numberOfTimeCustomSegmentLoaderWasCalled)
-          .to.equal(2); // Segment requests
+          .toEqual(2); // Segment requests
         nbVideoSegmentRequests += xhrMock.getLockedXHR()
           .filter(r => r.url && r.url.includes("ateam-video"))
           .length;
         await xhrMock.flush();
         await sleep(1);
         expect(numberOfTimeCustomSegmentLoaderWasCalled)
-          .to.equal(4); // Segment requests
+          .toEqual(4); // Segment requests
         nbVideoSegmentRequests += xhrMock.getLockedXHR()
           .filter(r => r.url && r.url.includes("ateam-video"))
           .length;
         await xhrMock.flush();
         await sleep(1);
         expect(numberOfTimeCustomSegmentLoaderWasCalled)
-          .to.equal(6); // Segment requests
+          .toEqual(6); // Segment requests
         nbVideoSegmentRequests += xhrMock.getLockedXHR()
           .filter(r => r.url && r.url.includes("ateam-video"))
           .length;
         expect(numberOfTimeCustomSegmentLoaderWentThrough)
-          .to.equal(nbVideoSegmentRequests);
-        expect(nbVideoSegmentRequests).to.be.above(0);
+          .toEqual(nbVideoSegmentRequests);
+        expect(nbVideoSegmentRequests).toBeGreaterThan(0);
       });
     });
 
@@ -472,7 +471,7 @@ describe("loadVideo Options", () => {
         await waitForLoadedStateAfterLoadVideo(player);
 
         expect(numberOfTimeCustomManifestLoaderWasCalled)
-          .to.equal(1);
+          .toEqual(1);
       });
     });
   });

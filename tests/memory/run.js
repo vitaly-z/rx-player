@@ -29,7 +29,7 @@ if (browsers.length === 0) {
 }
 
 const karmaConf = {
-  basePath: ".",
+  basePath: "",
   browserNoActivityTimeout: 10 * 60 * 1000,
   browsers,
   customLaunchers: {
@@ -51,8 +51,8 @@ const karmaConf = {
     },
   },
   singleRun,
-  reporters: ["mocha"],
-  frameworks: ["mocha"],
+  reporters: ["progress"],
+  frameworks: ["mocha", "webpack"],
   webpack: webpackConfig,
   webpackMiddleware: { stats: { colors: true, chunks: false } },
   preprocessors: {

@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import RxPlayer from "../../../src";
 
 /**
@@ -13,7 +12,8 @@ describe("initial idle state", () => {
     it("should create a video element if no videoElement option is given", () => {
       const player = new RxPlayer();
       const videoElement = player.getVideoElement();
-      expect(videoElement).to.exist;
+      expect(videoElement).not.toBeNull();
+      expect(videoElement).not.toBeUndefined();
       player.dispose();
     });
 
@@ -23,7 +23,7 @@ describe("initial idle state", () => {
       const player = new RxPlayer({
         videoElement,
       });
-      expect(videoElement instanceof HTMLMediaElement).to.equal(true);
+      expect(videoElement instanceof HTMLMediaElement).toEqual(true);
       player.dispose();
     });
   });
@@ -31,13 +31,13 @@ describe("initial idle state", () => {
   describe("static members", () => {
     describe("ErrorTypes", () => {
       it("should expose static ErrorTypes property", () => {
-        expect(typeof RxPlayer.ErrorTypes).to.equal("object");
+        expect(typeof RxPlayer.ErrorTypes).toEqual("object");
       });
     });
 
     describe("ErrorCodes", () => {
       it("should expose static ErrorCodes property", () => {
-        expect(typeof RxPlayer.ErrorTypes).to.equal("object");
+        expect(typeof RxPlayer.ErrorTypes).toEqual("object");
       });
     });
   });
@@ -45,53 +45,53 @@ describe("initial idle state", () => {
   describe("initial state", () => {
     const player = new RxPlayer();
 
-    after(() => player.dispose());
+    afterAll(() => player.dispose());
 
     describe("getError", () => {
       it("should have no error by default", () => {
-        expect(player.getError()).to.equal(null);
+        expect(player.getError()).toEqual(null);
       });
     });
 
     describe("getManifest", () => {
       it("should return null in getManifest by default", () => {
-        expect(player.getManifest()).to.equal(null);
+        expect(player.getManifest()).toEqual(null);
       });
     });
 
     describe("getCurrentAdaptations", () => {
       it("should return null in getCurrentAdaptations by default", () => {
-        expect(player.getCurrentAdaptations()).to.equal(null);
+        expect(player.getCurrentAdaptations()).toEqual(null);
       });
     });
 
     describe("getCurrentRepresentations", () => {
       it("should return null in getCurrentRepresentations by default", () => {
-        expect(player.getCurrentRepresentations()).to.equal(null);
+        expect(player.getCurrentRepresentations()).toEqual(null);
       });
     });
 
     describe("getNativeTextTrack", () => {
       it("should return null in getNativeTextTrack by default", () => {
-        expect(player.getNativeTextTrack()).to.equal(null);
+        expect(player.getNativeTextTrack()).toEqual(null);
       });
     });
 
     describe("getPlayerState", () => {
       it("should return \"STOPPED\" in getPlayerState by default", () => {
-        expect(player.getPlayerState()).to.equal("STOPPED");
+        expect(player.getPlayerState()).toEqual("STOPPED");
       });
     });
 
     describe("isLive", () => {
       it("should return false in isLive by default", () => {
-        expect(player.isLive()).to.equal(false);
+        expect(player.isLive()).toEqual(false);
       });
     });
 
     describe("getUrl", () => {
       it("should return undefined in getUrl by default", () => {
-        expect(player.getUrl()).to.equal(undefined);
+        expect(player.getUrl()).toEqual(undefined);
       });
     });
 
@@ -99,7 +99,7 @@ describe("initial idle state", () => {
       it("should return the video element initial duration in getVideoDuration by default", () => {
 
         // ! HAHA ! NaN is not === to NaN
-        expect(player.getVideoDuration()).to.eql(
+        expect(player.getVideoDuration()).toEqual(
           player.getVideoElement().duration
         );
       });
@@ -107,167 +107,167 @@ describe("initial idle state", () => {
 
     describe("getVideoBufferGap", () => {
       it("should return Infinity in getVideoBufferGap by default", () => {
-        expect(player.getVideoBufferGap()).to.equal(Infinity);
+        expect(player.getVideoBufferGap()).toEqual(Infinity);
       });
     });
 
     describe("getVideoLoadedTime", () => {
       it("should return 0 in getVideoLoadedTime by default", () => {
-        expect(player.getVideoLoadedTime()).to.equal(0);
+        expect(player.getVideoLoadedTime()).toEqual(0);
       });
     });
 
     describe("getVideoPlayedTime", () => {
       it("should return 0 in getVideoPlayedTime by default", () => {
-        expect(player.getVideoPlayedTime()).to.equal(0);
+        expect(player.getVideoPlayedTime()).toEqual(0);
       });
     });
 
     describe("getWallClockTime", () => {
       it("should return 0 in getWallClockTime by default", () => {
-        expect(player.getWallClockTime()).to.equal(0);
+        expect(player.getWallClockTime()).toEqual(0);
       });
     });
 
     describe("getPosition", () => {
       it("should return 0 in getPosition by default", () => {
-        expect(player.getPosition()).to.equal(0);
+        expect(player.getPosition()).toEqual(0);
       });
     });
 
     describe("getPlaybackRate", () => {
       it("should return 1 in getPlaybackRate by default", () => {
-        expect(player.getPlaybackRate()).to.equal(1);
+        expect(player.getPlaybackRate()).toEqual(1);
       });
     });
 
     describe("getVolume", () => {
       it("should return 1 in getVolume by default", () => {
-        expect(player.getVolume()).to.equal(1);
+        expect(player.getVolume()).toEqual(1);
       });
     });
 
     describe("isFullscreen", () => {
       it("should return false in isFullscreen by default", () => {
-        expect(player.isFullscreen()).to.equal(false);
+        expect(player.isFullscreen()).toEqual(false);
       });
     });
 
     describe("getAvailableVideoBitrates", () => {
       it("should return [] in getAvailableVideoBitrates by default", () => {
-        expect(player.getAvailableVideoBitrates()).to.eql([]);
+        expect(player.getAvailableVideoBitrates()).toEqual([]);
       });
     });
 
     describe("getAvailableAudioBitrates", () => {
       it("should return [] in getAvailableAudioBitrates by default", () => {
-        expect(player.getAvailableAudioBitrates()).to.eql([]);
+        expect(player.getAvailableAudioBitrates()).toEqual([]);
       });
     });
 
     describe("getVideoBitrate", () => {
       it("should return undefined in getVideoBitrate by default", () => {
-        expect(player.getVideoBitrate()).to.equal(undefined);
+        expect(player.getVideoBitrate()).toEqual(undefined);
       });
     });
 
     describe("getAudioBitrate", () => {
       it("should return undefined in getAudioBitrate by default", () => {
-        expect(player.getVideoBitrate()).to.equal(undefined);
+        expect(player.getVideoBitrate()).toEqual(undefined);
       });
     });
 
     describe("getMaxVideoBitrate", () => {
       it("should return Infinity in getMaxVideoBitrate by default", () => {
-        expect(player.getMaxVideoBitrate()).to.equal(Infinity);
+        expect(player.getMaxVideoBitrate()).toEqual(Infinity);
       });
     });
 
     describe("getMaxAudioBitrate", () => {
       it("should return Infinity in getMaxAudioBitrate by default", () => {
-        expect(player.getMaxAudioBitrate()).to.equal(Infinity);
+        expect(player.getMaxAudioBitrate()).toEqual(Infinity);
       });
     });
 
     describe("getWantedBufferAhead", () => {
       it("should return 30 in getWantedBufferAhead by default", () => {
-        expect(player.getWantedBufferAhead()).to.equal(30);
+        expect(player.getWantedBufferAhead()).toEqual(30);
       });
     });
 
     describe("getMaxBufferBehind", () => {
       it("should return Infinity in getMaxBufferBehind by default", () => {
-        expect(player.getMaxBufferBehind()).to.equal(Infinity);
+        expect(player.getMaxBufferBehind()).toEqual(Infinity);
       });
     });
 
     describe("getMaxBufferAhead", () => {
       it("should return Infinity in getMaxBufferAhead by default", () => {
-        expect(player.getMaxBufferAhead()).to.equal(Infinity);
+        expect(player.getMaxBufferAhead()).toEqual(Infinity);
       });
     });
 
     describe("getPlaybackRate/setPlaybackRate", () => {
       it("should allow to change the playback rate through setPlaybackRate", () => {
-        expect(player.setPlaybackRate(4)).to.equal(undefined);
-        expect(player.getPlaybackRate()).to.equal(4);
+        expect(player.setPlaybackRate(4)).toEqual(undefined);
+        expect(player.getPlaybackRate()).toEqual(4);
 
-        expect(player.setPlaybackRate(3)).to.equal(undefined);
-        expect(player.getPlaybackRate()).to.equal(3);
+        expect(player.setPlaybackRate(3)).toEqual(undefined);
+        expect(player.getPlaybackRate()).toEqual(3);
 
-        expect(player.setPlaybackRate(2)).to.equal(undefined);
-        expect(player.getPlaybackRate()).to.equal(2);
+        expect(player.setPlaybackRate(2)).toEqual(undefined);
+        expect(player.getPlaybackRate()).toEqual(2);
 
-        expect(player.setPlaybackRate(1.5)).to.equal(undefined);
-        expect(player.getPlaybackRate()).to.equal(1.5);
+        expect(player.setPlaybackRate(1.5)).toEqual(undefined);
+        expect(player.getPlaybackRate()).toEqual(1.5);
 
-        expect(player.setPlaybackRate(0.7)).to.equal(undefined);
-        expect(player.getPlaybackRate()).to.equal(0.7);
+        expect(player.setPlaybackRate(0.7)).toEqual(undefined);
+        expect(player.getPlaybackRate()).toEqual(0.7);
 
-        expect(player.setPlaybackRate(1)).to.equal(undefined);
-        expect(player.getPlaybackRate()).to.equal(1);
+        expect(player.setPlaybackRate(1)).toEqual(undefined);
+        expect(player.getPlaybackRate()).toEqual(1);
       });
     });
 
     describe("seekTo", () => {
       it("should throw in seekTo by default", () => {
-        expect(() => player.seekTo()).to.throw();
-        expect(() => player.seekTo(54)).to.throw();
-        expect(() => player.seekTo({ relative: 5 })).to.throw();
-        expect(() => player.seekTo({ position: 5 })).to.throw();
-        expect(() => player.seekTo({ wallClockTime: 5 })).to.throw();
+        expect(() => player.seekTo()).toThrow();
+        expect(() => player.seekTo(54)).toThrow();
+        expect(() => player.seekTo({ relative: 5 })).toThrow();
+        expect(() => player.seekTo({ position: 5 })).toThrow();
+        expect(() => player.seekTo({ wallClockTime: 5 })).toThrow();
       });
     });
 
     describe("exitFullscreen", () => {
       it("should allow exitFullscreen by default", () => {
-        expect(player.exitFullscreen()).to.equal(undefined);
+        expect(player.exitFullscreen()).toEqual(undefined);
       });
     });
 
     describe("setFullscreen", () => {
       it("should allow setFullscreen by default", () => {
-        expect(player.setFullscreen()).to.equal(undefined);
+        expect(player.setFullscreen()).toEqual(undefined);
 
         // TODO remove for v3.0.0
-        expect(player.setFullscreen(false)).to.equal(undefined);
+        expect(player.setFullscreen(false)).toEqual(undefined);
       });
     });
 
     describe("getVolume/setVolume", () => {
       it("should throw in setVolume by default if no volume has been given", () => {
-        expect(() => player.setVolume()).to.throw();
+        expect(() => player.setVolume()).toThrow();
       });
 
       it("should set the volume in setVolume by default if a volume has been given", () => {
-        expect(player.setVolume(1)).to.equal(undefined);
-        expect(player.setVolume(0.5)).to.equal(undefined);
-        expect(player.getVolume()).to.equal(0.5);
-        expect(player.getVideoElement().volume).to.equal(0.5);
+        expect(player.setVolume(1)).toEqual(undefined);
+        expect(player.setVolume(0.5)).toEqual(undefined);
+        expect(player.getVolume()).toEqual(0.5);
+        expect(player.getVideoElement().volume).toEqual(0.5);
 
-        expect(player.setVolume(1)).to.equal(undefined);
-        expect(player.getVolume()).to.equal(1);
-        expect(player.getVideoElement().volume).to.equal(1);
+        expect(player.setVolume(1)).toEqual(undefined);
+        expect(player.getVolume()).toEqual(1);
+        expect(player.getVideoElement().volume).toEqual(1);
       });
     });
 
@@ -279,13 +279,13 @@ describe("initial idle state", () => {
         }
         player.setVolume(1);
 
-        expect(player.mute()).to.equal(undefined);
-        expect(player.getVolume()).to.equal(0);
-        expect(videoElement.volume).to.equal(0);
-        expect(videoElement.muted).to.equal(false);
-        expect(player.isMute()).to.equal(true);
+        expect(player.mute()).toEqual(undefined);
+        expect(player.getVolume()).toEqual(0);
+        expect(videoElement.volume).toEqual(0);
+        expect(videoElement.muted).toEqual(false);
+        expect(player.isMute()).toEqual(true);
         player.unMute();
-        expect(player.isMute()).to.equal(false);
+        expect(player.isMute()).toEqual(false);
       });
 
       it("should unmute the volume at the previous value in unMute by default", () => {
@@ -295,49 +295,49 @@ describe("initial idle state", () => {
         if (videoElement.muted) {
           videoElement.muted = false;
         }
-        expect(player.isMute()).to.equal(false);
+        expect(player.isMute()).toEqual(false);
         player.setVolume(1);
 
         player.setVolume(0.8);
-        expect(player.getVolume()).to.equal(0.8);
-        expect(videoElement.volume).to.equal(0.8);
+        expect(player.getVolume()).toEqual(0.8);
+        expect(videoElement.volume).toEqual(0.8);
 
         player.mute();
-        expect(player.isMute()).to.equal(true);
-        expect(player.getVolume()).to.equal(0);
-        expect(videoElement.volume).to.equal(0);
+        expect(player.isMute()).toEqual(true);
+        expect(player.getVolume()).toEqual(0);
+        expect(videoElement.volume).toEqual(0);
 
         player.unMute();
-        expect(player.isMute()).to.equal(false);
-        expect(player.getVolume()).to.equal(0.8);
-        expect(videoElement.volume).to.equal(0.8);
+        expect(player.isMute()).toEqual(false);
+        expect(player.getVolume()).toEqual(0.8);
+        expect(videoElement.volume).toEqual(0.8);
       });
 
       it("should return false in isMute by default", () => {
-        expect(player.isMute()).to.equal(false);
+        expect(player.isMute()).toEqual(false);
       });
 
       it("should return true in isMute if the volume is equal to 0", () => {
         const oldVolume = player.getVolume();
 
-        expect(player.isMute()).to.equal(false);
+        expect(player.isMute()).toEqual(false);
 
         player.setVolume(0);
-        expect(player.isMute()).to.equal(true);
+        expect(player.isMute()).toEqual(true);
         player.setVolume(oldVolume);
-        expect(player.isMute()).to.equal(false);
+        expect(player.isMute()).toEqual(false);
 
         player.mute();
-        expect(player.isMute()).to.equal(true);
+        expect(player.isMute()).toEqual(true);
         player.unMute();
-        expect(player.isMute()).to.equal(false);
+        expect(player.isMute()).toEqual(false);
 
         player.mute();
-        expect(player.isMute()).to.equal(true);
+        expect(player.isMute()).toEqual(true);
         player.setVolume(oldVolume);
-        expect(player.isMute()).to.equal(false);
+        expect(player.isMute()).toEqual(false);
         player.unMute();
-        expect(player.isMute()).to.equal(false);
+        expect(player.isMute()).toEqual(false);
 
         player.setVolume(oldVolume);
       });
@@ -345,43 +345,43 @@ describe("initial idle state", () => {
 
     describe("setAudioBitrate/getManualAudioBitrate", () => {
       it("should have a -1 manual audio bitrate by default", () => {
-        expect(player.getManualAudioBitrate()).to.equal(-1);
+        expect(player.getManualAudioBitrate()).toEqual(-1);
       });
 
       it("should update manual audio bitrate when calling setAudioBitrate", () => {
         const oldManual = player.getManualAudioBitrate();
 
         player.setAudioBitrate(84);
-        expect(player.getManualAudioBitrate()).to.equal(84);
+        expect(player.getManualAudioBitrate()).toEqual(84);
         player.setAudioBitrate(-1);
-        expect(player.getManualAudioBitrate()).to.equal(-1);
+        expect(player.getManualAudioBitrate()).toEqual(-1);
         player.setAudioBitrate(0);
-        expect(player.getManualAudioBitrate()).to.equal(0);
+        expect(player.getManualAudioBitrate()).toEqual(0);
 
         player.setAudioBitrate(oldManual);
-        expect(player.getManualAudioBitrate()).to.equal(oldManual);
+        expect(player.getManualAudioBitrate()).toEqual(oldManual);
       });
     });
 
     describe("setVideoBitrate/getManualVideoBitrate", () => {
       it("should have a -1 manual video bitrate by default", () => {
-        expect(player.getManualVideoBitrate()).to.equal(-1);
+        expect(player.getManualVideoBitrate()).toEqual(-1);
       });
 
       it("should update manual video bitrate when calling setVideoBitrate", () => {
         const oldManual = player.getManualVideoBitrate();
 
         player.setVideoBitrate(84);
-        expect(player.getManualVideoBitrate()).to.equal(84);
+        expect(player.getManualVideoBitrate()).toEqual(84);
 
         player.setVideoBitrate(-1);
-        expect(player.getManualVideoBitrate()).to.equal(-1);
+        expect(player.getManualVideoBitrate()).toEqual(-1);
 
         player.setVideoBitrate(0);
-        expect(player.getManualVideoBitrate()).to.equal(0);
+        expect(player.getManualVideoBitrate()).toEqual(0);
 
         player.setVideoBitrate(oldManual);
-        expect(player.getManualVideoBitrate()).to.equal(oldManual);
+        expect(player.getManualVideoBitrate()).toEqual(oldManual);
       });
     });
 
@@ -389,20 +389,20 @@ describe("initial idle state", () => {
       it("should update the maximum video bitrate when calling setMaxVideoBitrate by default", () => {
         const oldMax = player.getManualVideoBitrate();
 
-        expect(player.setMaxVideoBitrate(Infinity)).to.equal(undefined);
-        expect(player.getMaxVideoBitrate()).to.equal(Infinity);
+        expect(player.setMaxVideoBitrate(Infinity)).toEqual(undefined);
+        expect(player.getMaxVideoBitrate()).toEqual(Infinity);
 
-        expect(player.setMaxVideoBitrate(500)).to.equal(undefined);
-        expect(player.getMaxVideoBitrate()).to.equal(500);
+        expect(player.setMaxVideoBitrate(500)).toEqual(undefined);
+        expect(player.getMaxVideoBitrate()).toEqual(500);
 
-        expect(player.setMaxVideoBitrate(3)).to.equal(undefined);
-        expect(player.getMaxVideoBitrate()).to.equal(3);
+        expect(player.setMaxVideoBitrate(3)).toEqual(undefined);
+        expect(player.getMaxVideoBitrate()).toEqual(3);
 
-        expect(player.setMaxVideoBitrate(Infinity)).to.equal(undefined);
-        expect(player.getMaxVideoBitrate()).to.equal(Infinity);
+        expect(player.setMaxVideoBitrate(Infinity)).toEqual(undefined);
+        expect(player.getMaxVideoBitrate()).toEqual(Infinity);
 
-        expect(player.setMaxVideoBitrate(oldMax)).to.equal(undefined);
-        expect(player.getMaxVideoBitrate()).to.equal(oldMax);
+        expect(player.setMaxVideoBitrate(oldMax)).toEqual(undefined);
+        expect(player.getMaxVideoBitrate()).toEqual(oldMax);
       });
     });
 
@@ -410,140 +410,140 @@ describe("initial idle state", () => {
       it("should update the maximum audio bitrate when calling setMaxAudioBitrate by default", () => {
         const oldMax = player.getManualAudioBitrate();
 
-        expect(player.setMaxAudioBitrate(Infinity)).to.equal(undefined);
-        expect(player.getMaxAudioBitrate()).to.equal(Infinity);
+        expect(player.setMaxAudioBitrate(Infinity)).toEqual(undefined);
+        expect(player.getMaxAudioBitrate()).toEqual(Infinity);
 
-        expect(player.setMaxAudioBitrate(500)).to.equal(undefined);
-        expect(player.getMaxAudioBitrate()).to.equal(500);
+        expect(player.setMaxAudioBitrate(500)).toEqual(undefined);
+        expect(player.getMaxAudioBitrate()).toEqual(500);
 
-        expect(player.setMaxAudioBitrate(3)).to.equal(undefined);
-        expect(player.getMaxAudioBitrate()).to.equal(3);
+        expect(player.setMaxAudioBitrate(3)).toEqual(undefined);
+        expect(player.getMaxAudioBitrate()).toEqual(3);
 
-        expect(player.setMaxAudioBitrate(Infinity)).to.equal(undefined);
-        expect(player.getMaxAudioBitrate()).to.equal(Infinity);
+        expect(player.setMaxAudioBitrate(Infinity)).toEqual(undefined);
+        expect(player.getMaxAudioBitrate()).toEqual(Infinity);
 
-        expect(player.setMaxAudioBitrate(oldMax)).to.equal(undefined);
-        expect(player.getMaxAudioBitrate()).to.equal(oldMax);
+        expect(player.setMaxAudioBitrate(oldMax)).toEqual(undefined);
+        expect(player.getMaxAudioBitrate()).toEqual(oldMax);
       });
     });
 
     describe("getMaxBufferBehind/setMaxBufferBehind", () => {
       it("should update the max buffer behind through setMaxBufferBehind by default", () => {
-        expect(player.setMaxBufferBehind(50)).to.equal(undefined);
-        expect(player.getMaxBufferBehind()).to.equal(50);
+        expect(player.setMaxBufferBehind(50)).toEqual(undefined);
+        expect(player.getMaxBufferBehind()).toEqual(50);
 
-        expect(player.setMaxBufferBehind(Infinity)).to.equal(undefined);
-        expect(player.getMaxBufferBehind()).to.equal(Infinity);
+        expect(player.setMaxBufferBehind(Infinity)).toEqual(undefined);
+        expect(player.getMaxBufferBehind()).toEqual(Infinity);
       });
     });
 
     describe("getMaxBufferAhead/setMaxBufferAhead", () => {
       it("should update the max buffer behind through setMaxBufferAhead by default", () => {
-        expect(player.setMaxBufferAhead(50)).to.equal(undefined);
-        expect(player.getMaxBufferAhead()).to.equal(50);
+        expect(player.setMaxBufferAhead(50)).toEqual(undefined);
+        expect(player.getMaxBufferAhead()).toEqual(50);
 
-        expect(player.setMaxBufferAhead(Infinity)).to.equal(undefined);
-        expect(player.getMaxBufferAhead()).to.equal(Infinity);
+        expect(player.setMaxBufferAhead(Infinity)).toEqual(undefined);
+        expect(player.getMaxBufferAhead()).toEqual(Infinity);
       });
     });
 
     describe("getWantedBufferAhead/setWantedBufferAhead", () => {
       it("should update the buffer goal through setWantedBufferAhead by default", () => {
-        expect(player.setWantedBufferAhead(50)).to.equal(undefined);
-        expect(player.getWantedBufferAhead()).to.equal(50);
+        expect(player.setWantedBufferAhead(50)).toEqual(undefined);
+        expect(player.getWantedBufferAhead()).toEqual(50);
 
-        expect(player.setWantedBufferAhead(Infinity)).to.equal(undefined);
-        expect(player.getWantedBufferAhead()).to.equal(Infinity);
+        expect(player.setWantedBufferAhead(Infinity)).toEqual(undefined);
+        expect(player.getWantedBufferAhead()).toEqual(Infinity);
       });
     });
 
     describe("getAvailableAudioTracks", () => {
       it("should return an empty array through getAvailableAudioTracks by default", () => {
-        expect(player.getAvailableAudioTracks()).to.eql([]);
+        expect(player.getAvailableAudioTracks()).toEqual([]);
       });
     });
 
     describe("getAvailableTextTracks", () => {
       it("should return an empty array through getAvailableTextTracks by default", () => {
-        expect(player.getAvailableTextTracks()).to.eql([]);
+        expect(player.getAvailableTextTracks()).toEqual([]);
       });
     });
 
     describe("getAvailableVideoTracks", () => {
       it("should return an empty array through getAvailableVideoTracks by default", () => {
-        expect(player.getAvailableVideoTracks()).to.eql([]);
+        expect(player.getAvailableVideoTracks()).toEqual([]);
       });
     });
 
     describe("getAudioTrack", () => {
       it("should return undefined through getAudioTrack by default", () => {
-        expect(player.getAudioTrack()).to.equal(undefined);
+        expect(player.getAudioTrack()).toEqual(undefined);
       });
     });
 
     describe("getTextTrack", () => {
       it("should return undefined through getTextTrack by default", () => {
-        expect(player.getTextTrack()).to.equal(undefined);
+        expect(player.getTextTrack()).toEqual(undefined);
       });
     });
 
     describe("getVideoTrack", () => {
       it("should return undefined through getVideoTrack by default", () => {
-        expect(player.getVideoTrack()).to.equal(undefined);
+        expect(player.getVideoTrack()).toEqual(undefined);
       });
     });
 
     describe("setAudioTrack", () => {
       it("should throw in setAudioTrack by default", () => {
-        expect(() => player.setAudioTrack()).to.throw();
-        expect(() => player.setAudioTrack("test")).to.throw();
+        expect(() => player.setAudioTrack()).toThrow();
+        expect(() => player.setAudioTrack("test")).toThrow();
       });
     });
 
     describe("setTextTrack", () => {
       it("should throw in setTextTrack by default", () => {
-        expect(() => player.setTextTrack()).to.throw();
-        expect(() => player.setTextTrack("test")).to.throw();
+        expect(() => player.setTextTrack()).toThrow();
+        expect(() => player.setTextTrack("test")).toThrow();
       });
     });
 
     describe("setVideoTrack", () => {
       it("should throw in setVideoTrack by default", () => {
-        expect(() => player.setVideoTrack()).to.throw();
-        expect(() => player.setVideoTrack("test")).to.throw();
+        expect(() => player.setVideoTrack()).toThrow();
+        expect(() => player.setVideoTrack("test")).toThrow();
       });
     });
 
     describe("disableTextTrack", () => {
       it("should disable text tracks in disableTextTrack by default", () => {
-        expect(player.disableTextTrack()).to.equal(undefined);
-        expect(player.getTextTrack()).to.equal(undefined);
+        expect(player.disableTextTrack()).toEqual(undefined);
+        expect(player.getTextTrack()).toEqual(undefined);
       });
     });
 
     describe("getPreferredAudioTracks", () => {
       it("should return an empty array through getPreferredAudioTracks by default", () => {
-        expect(player.getPreferredAudioTracks()).to.eql([]);
+        expect(player.getPreferredAudioTracks()).toEqual([]);
       });
     });
 
     describe("getPreferredTextTracks", () => {
       it("should return an empty array through getPreferredTextTracks by default", () => {
-        expect(player.getPreferredTextTracks()).to.eql([]);
+        expect(player.getPreferredTextTracks()).toEqual([]);
       });
     });
 
     describe("setPreferredAudioTracks", () => {
       it("should allow setting preferred audio tracks by default", () => {
-        expect(player.getPreferredAudioTracks()).to.eql([]);
+        expect(player.getPreferredAudioTracks()).toEqual([]);
         player.setPreferredAudioTracks(["fr", "en"]);
-        expect(player.getPreferredAudioTracks()).to.eql(["fr", "en"]);
+        expect(player.getPreferredAudioTracks()).toEqual(["fr", "en"]);
         player.setPreferredAudioTracks([
           { language: "it", audioDescription: true },
           { language: "pt", audioDescription: false },
           { language: "pt", audioDescription: true },
         ]);
-        expect(player.getPreferredAudioTracks()).to.eql([
+        expect(player.getPreferredAudioTracks()).toEqual([
           { language: "it", audioDescription: true },
           { language: "pt", audioDescription: false },
           { language: "pt", audioDescription: true },
@@ -553,15 +553,15 @@ describe("initial idle state", () => {
 
     describe("setPreferredTextTracks", () => {
       it("should return an empty array through getPreferredTextTracks by default", () => {
-        expect(player.getPreferredTextTracks()).to.eql([]);
+        expect(player.getPreferredTextTracks()).toEqual([]);
         player.setPreferredTextTracks(["fr", "en"]);
-        expect(player.getPreferredTextTracks()).to.eql(["fr", "en"]);
+        expect(player.getPreferredTextTracks()).toEqual(["fr", "en"]);
         player.setPreferredTextTracks([
           { language: "it", closedCaption: true },
           { language: "pt", closedCaption: false },
           { language: "pt", closedCaption: true },
         ]);
-        expect(player.getPreferredTextTracks()).to.eql([
+        expect(player.getPreferredTextTracks()).toEqual([
           { language: "it", closedCaption: true },
           { language: "pt", closedCaption: false },
           { language: "pt", closedCaption: true },
@@ -571,19 +571,19 @@ describe("initial idle state", () => {
 
     describe("getImageTrackData", () => {
       it("should return null in getImageTrackData by default", () => {
-        expect(player.getImageTrackData()).to.equal(null);
+        expect(player.getImageTrackData()).toEqual(null);
       });
     });
 
     describe("getMinimumPosition", () => {
       it("should return null in getMinimumPosition by default", () => {
-        expect(player.getMinimumPosition()).to.equal(null);
+        expect(player.getMinimumPosition()).toEqual(null);
       });
     });
 
     describe("getMaximumPosition", () => {
       it("should return null in getMaximumPosition by default", () => {
-        expect(player.getMinimumPosition()).to.equal(null);
+        expect(player.getMinimumPosition()).toEqual(null);
       });
     });
   });
