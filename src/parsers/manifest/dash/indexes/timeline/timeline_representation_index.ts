@@ -45,6 +45,8 @@ import constructTimelineFromPreviousTimeline from "./construct_timeline_from_pre
 
 const { MIN_DASH_S_ELEMENTS_TO_PARSE_UNSAFELY } = config;
 
+const PERIOD_END_MISSING_TOLERANCE = 0.5;
+
 /**
  * Index property defined for a SegmentTimeline RepresentationIndex
  * This object contains every property needed to generate an ISegment for a
@@ -143,6 +145,8 @@ export interface ITimelineIndexContextArgument {
   periodEnd : number|undefined;
   /** Whether the corresponding Manifest can be updated and changed. */
   isDynamic : boolean;
+  /** Whether this Representation is from the last Period anounced in the Manifest */
+  isLastPeriod : boolean;
   /**
    * Time (in terms of `performance.now`) at which the XML file containing this
    * index was received
@@ -189,6 +193,9 @@ export default class TimelineRepresentationIndex implements IRepresentationIndex
   /** Whether this RepresentationIndex can change over time. */
   private _isDynamic : boolean;
 
+  /** Whether this Representation is from the last Period anounced in the Manifest */
+  private _isLastPeriod : boolean;
+
   /** Retrieve the maximum and minimum position of the whole content. */
   private _manifestBoundsCalculator : ManifestBoundsCalculator;
 
@@ -219,6 +226,7 @@ export default class TimelineRepresentationIndex implements IRepresentationIndex
   ) {
     const { manifestBoundsCalculator,
             isDynamic,
+            isLastPeriod,
             representationBaseURLs,
             representationId,
             representationBitrate,
@@ -274,6 +282,7 @@ export default class TimelineRepresentationIndex implements IRepresentationIndex
     this._scaledPeriodStart = toIndexTime(periodStart, this._index);
     this._scaledPeriodEnd = periodEnd == null ? undefined :
                                                 toIndexTime(periodEnd, this._index);
+    this._isLastPeriod = isLastPeriod;
   }
 
   /**
@@ -473,9 +482,24 @@ export default class TimelineRepresentationIndex implements IRepresentationIndex
                                         null,
                                         this._scaledPeriodEnd);
 
-    // We can never be truly sure if a SegmentTimeline-based index is finished
-    // or not (1 / 60 for possible rounding errors)
-    return (lastTime + 1 / 60) >= this._scaledPeriodEnd;
+    const diffToPeriodEnd = this._scaledPeriodEnd - lastTime;
+
+    // (1 / 60 for possible rounding errors)
+    if ((diffToPeriodEnd - 1 / 60) <= 0) {
+      return true;
+    } else if (
+      !this._isLastPeriod &&
+      fromIndexTime(diffToPeriodEnd, this._index) <= PERIOD_END_MISSING_TOLERANCE
+    ) {
+      const maximumBound = this._manifestBoundsCalculator.estimateMaximumBound();
+      if (maximumBound !== undefined &&
+          (maximumBound - 5) > fromIndexTime(this._scaledPeriodEnd, this._index))
+      {
+        return true;
+      }
+
+    }
+    return false;
   }
 
   /**

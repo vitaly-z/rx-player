@@ -53,6 +53,8 @@ export interface IRepresentationInfos {
   end? : number;
   /** Whether the Manifest can evolve with time. */
   isDynamic : boolean;
+  /** Whether this Representation is from the last Period anounced in the Manifest */
+  isLastPeriod : boolean;
   /**
    * Parent parsed SegmentTemplate elements.
    * Sorted by provenance from higher level (e.g. Period) to lower-lever (e.g.
@@ -94,6 +96,7 @@ export default function parseRepresentationIndex(
           availabilityTimeOffset,
           manifestBoundsCalculator,
           isDynamic,
+          isLastPeriod,
           end: periodEnd,
           start: periodStart,
           receivedTime,
@@ -104,6 +107,7 @@ export default function parseRepresentationIndex(
                     unsafelyBaseOnPreviousRepresentation,
                     manifestBoundsCalculator,
                     isDynamic,
+                    isLastPeriod,
                     periodEnd,
                     periodStart,
                     receivedTime,

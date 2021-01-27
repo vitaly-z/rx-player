@@ -140,6 +140,7 @@ export default function parsePeriods(
                           manifestBoundsCalculator,
                           end: periodEnd,
                           isDynamic,
+                          isLastPeriod: i === periodsIR.length - 1,
                           receivedTime,
                           segmentTemplate: periodIR.children.segmentTemplate,
                           start: periodStart,

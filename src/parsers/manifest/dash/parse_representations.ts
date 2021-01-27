@@ -45,6 +45,8 @@ export interface IAdaptationInfos {
   end? : number;
   /** Whether the Manifest can evolve with time. */
   isDynamic : boolean;
+  /** Whether this Representation is from the last Period anounced in the Manifest */
+  isLastPeriod : boolean;
   /**
    * Parent parsed SegmentTemplate elements.
    * Sorted by provenance from higher level (e.g. Period) to lower-lever (e.g.

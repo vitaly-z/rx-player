@@ -51,6 +51,8 @@ export interface IAdaptationSetsContextInfos {
   end? : number;
   /** Whether the Manifest can evolve with time. */
   isDynamic : boolean;
+  /** Whether this Representation is from the last Period anounced in the Manifest */
+  isLastPeriod : boolean;
   /**
    * Time (in terms of `performance.now`) at which the XML file containing
    * this AdaptationSet was received.
@@ -301,6 +303,7 @@ export default function parseAdaptationSets(
       manifestBoundsCalculator: periodInfos.manifestBoundsCalculator,
       end: periodInfos.end,
       isDynamic: periodInfos.isDynamic,
+      isLastPeriod: periodInfos.isLastPeriod,
       parentSegmentTemplates,
       receivedTime: periodInfos.receivedTime,
       start: periodInfos.start,
