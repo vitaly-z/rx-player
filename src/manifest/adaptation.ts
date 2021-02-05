@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { getVideoDecodingInfos } from "../compat/media_capabilities";
 import {
   ICustomError,
   MediaError,
@@ -174,6 +175,10 @@ export default class Adaptation {
     for (let i = 0; i < argsRepresentations.length; i++) {
       const representation = new Representation(argsRepresentations[i],
                                                 { type: this.type });
+      if (this.type === "video") {
+        const test = getVideoDecodingInfos(representation);
+        console.log("!!! test video", test);
+      }
       const shouldAdd =
         isNullOrUndefined(representationFilter) ||
         representationFilter(representation,

@@ -95,6 +95,9 @@ class Representation {
   /** `true` if the Representation is in a supported codec, false otherwise. */
   public isSupported : boolean;
 
+  /** `true` if the Representation is considered as power efficient. */
+  public powerEfficient : undefined | boolean;
+
   /**
    * @param {Object} args
    */
