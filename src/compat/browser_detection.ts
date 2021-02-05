@@ -39,6 +39,9 @@ const isEdgeChromium: boolean = !isNode &&
 const isFirefox : boolean = !isNode &&
                             navigator.userAgent.toLowerCase().indexOf("firefox") !== -1;
 
+const isTizen : boolean = !isNode &&
+                          navigator.userAgent.toLowerCase().indexOf("tizen") !== -1;
+
 const isSamsungBrowser : boolean = !isNode &&
                                    /SamsungBrowser/.test(navigator.userAgent);
 
@@ -65,4 +68,5 @@ export {
   isSafari,
   isSafariMobile,
   isSamsungBrowser,
+  isTizen,
 };
