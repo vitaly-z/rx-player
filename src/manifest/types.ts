@@ -15,7 +15,7 @@
  */
 
 /** Enumerate the different ways a Manifest update can be done. */
-export enum MANIFEST_UPDATE_TYPE {
+export const enum MANIFEST_UPDATE_TYPE {
   /** The full version of the Manifest has been re-downloaded. */
   Full,
   /** Only a shortened version of the Manifest has been downloaded. */

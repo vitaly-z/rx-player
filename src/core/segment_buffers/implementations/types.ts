@@ -287,7 +287,7 @@ export type ISBOperation<T> = IPushOperation<T> |
  * Enum used by a SegmentBuffer as a discriminant in its queue of
  * "operations".
  */
-export enum SegmentBufferOperation { Push,
+export const enum SegmentBufferOperation { Push,
                                      Remove,
                                      EndOfSegment }
 

@@ -56,7 +56,7 @@ import createSegmentLoader, {
   SegmentLoaderEventType,
 } from "./create_segment_loader";
 
-export enum SegmentFetcherEventType {
+export const enum SegmentFetcherEventType {
   Chunk = 600,
   ChunkComplete,
   Warning,

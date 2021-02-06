@@ -50,7 +50,7 @@ import tryURLsWithBackoff, {
   IBackoffOptions,
 } from "../utils/try_urls_with_backoff";
 
-export enum SegmentLoaderEventType {
+export const enum SegmentLoaderEventType {
   Cached = 500,
   Warning,
   Request,

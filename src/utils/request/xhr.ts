@@ -24,7 +24,7 @@ const { DEFAULT_REQUEST_TIMEOUT } = config;
 
 const DEFAULT_RESPONSE_TYPE : XMLHttpRequestResponseType = "json";
 
-export enum XHREventType {
+export const enum XHREventType {
   Progress = 800,
   DataLoaded
 }

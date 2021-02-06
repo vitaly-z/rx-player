@@ -71,7 +71,7 @@ export interface IInitClockTick { position : number;
                                             null;
                                   seeking : boolean; }
 
-export enum InitEventType {
+export const enum InitEventType {
   Warning = 200,
   ManifestReady,
   ManifestUpdate,

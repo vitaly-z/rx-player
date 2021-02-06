@@ -49,7 +49,7 @@ import {
 } from "../utils/try_urls_with_backoff";
 import getManifestBackoffOptions from "./get_manifest_backoff_options";
 
-export enum ManifestFetcherEventType {
+export const enum ManifestFetcherEventType {
   Warning,
   Parsed,
   Response,

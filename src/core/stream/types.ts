@@ -59,7 +59,7 @@ export interface IBufferDiscontinuity {
  * More information on the meaning of them can be found on the type defining
  * those events.
  */
-export enum StreamEventType {
+export const enum StreamEventType {
   Warning = 100,
   StreamStatus,
   AddedSegment,

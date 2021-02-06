@@ -66,7 +66,7 @@ export interface ICompatibleKeySystem {
   compatibleConfiguration?: MediaKeySystemConfiguration;
 }
 
-export enum ProberStatus {
+export const enum ProberStatus {
   NotSupported,
   Unknown,
   Supported,

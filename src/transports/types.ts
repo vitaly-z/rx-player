@@ -96,7 +96,7 @@ export interface ILoaderDataLoadedValue<T> {
   size : number | undefined;
 }
 
-export enum TransportEventType {
+export const enum TransportEventType {
   DataCreated = 300,
   Warning,
   DataChunk,
