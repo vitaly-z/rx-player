@@ -24,12 +24,13 @@ import { IStalledStatus } from "../api";
 import SegmentBuffersStore, {
   IBufferType,
 } from "../segment_buffers";
-import { IRepresentationChangeEvent } from "../stream";
+import { IRepresentationChangeEvent, StreamEventType } from "../stream";
 import {
   IDecipherabilityUpdateEvent,
   ILoadedEvent,
   IManifestReadyEvent,
   IManifestUpdateEvent,
+  InitEventType,
   IReloadingMediaSourceEvent,
   IStalledEvent,
   IUnstalledEvent,
@@ -41,7 +42,7 @@ import {
  * @returns {Object}
  */
 function loaded(segmentBuffersStore : SegmentBuffersStore | null) : ILoadedEvent {
-  return { type: "loaded", value: { segmentBuffersStore } };
+  return { type: InitEventType.Loaded, value: { segmentBuffersStore } };
 }
 
 /**
@@ -50,7 +51,7 @@ function loaded(segmentBuffersStore : SegmentBuffersStore | null) : ILoadedEvent
  * @returns {Object}
  */
 function stalled(stalling : IStalledStatus) : IStalledEvent {
-  return { type: "stalled", value: stalling };
+  return { type: InitEventType.Stalled, value: stalling };
 }
 
 /**
@@ -59,7 +60,7 @@ function stalled(stalling : IStalledStatus) : IStalledEvent {
  * @returns {Object}
  */
 function unstalled() : IUnstalledEvent {
-  return { type: "unstalled", value: null };
+  return { type: InitEventType.Unstalled, value: null };
 }
 
 /**
@@ -73,7 +74,7 @@ function decipherabilityUpdate(
                 adaptation : Adaptation;
                 representation : Representation; }>
 ) : IDecipherabilityUpdateEvent {
-  return { type: "decipherabilityUpdate", value: arg };
+  return { type: InitEventType.DecipherabilityUpdate, value: arg };
 }
 
 /**
@@ -84,7 +85,7 @@ function decipherabilityUpdate(
 function manifestReady(
   manifest : Manifest
 ) : IManifestReadyEvent {
-  return { type: "manifestReady", value: { manifest } };
+  return { type: InitEventType.ManifestReady, value: { manifest } };
 }
 
 /**
@@ -92,7 +93,7 @@ function manifestReady(
  * @returns {Object}
  */
 function manifestUpdate() : IManifestUpdateEvent {
-  return { type: "manifestUpdate", value: null };
+  return { type: InitEventType.ManifestUpdate, value: null };
 }
 
 /**
@@ -105,7 +106,7 @@ function nullRepresentation(
   type : IBufferType,
   period : Period
 ) : IRepresentationChangeEvent {
-  return { type: "representationChange",
+  return { type: StreamEventType.RepresentationChange,
            value: { type,
                     representation: null,
                     period } };
@@ -117,7 +118,7 @@ function nullRepresentation(
  * @returns {object}
  */
 function warning(value : ICustomError) : IWarningEvent {
-  return { type: "warning", value };
+  return { type: InitEventType.Warning, value };
 }
 
 /**
@@ -125,7 +126,7 @@ function warning(value : ICustomError) : IWarningEvent {
  * @returns {object}
  */
 function reloadingMediaSource() : IReloadingMediaSourceEvent {
-  return { type: "reloading-media-source", value: undefined };
+  return { type: InitEventType.ReloadingMediaSource, value: undefined };
 }
 
 const INIT_EVENTS = { loaded,

@@ -18,6 +18,7 @@ import {
   Observable,
   Observer,
 } from "rxjs";
+import { XHREventType } from "../../utils/request/xhr";
 import {
   CustomManifestLoader,
   ILoadedManifest,
@@ -59,7 +60,7 @@ export default function callCustomManifestLoader(
             _args.sendingTime !== undefined ? _args.sendingTime - timeAPIsDelta :
                                               undefined;
 
-          obs.next({ type: "data-loaded",
+          obs.next({ type: XHREventType.DataLoaded,
                      value: { responseData: _args.data,
                               size: _args.size,
                               duration: _args.duration,

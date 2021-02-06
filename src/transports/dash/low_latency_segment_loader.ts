@@ -28,11 +28,13 @@ import fetchRequest, {
   IDataChunk,
   IDataComplete,
 } from "../../utils/request/fetch";
+import { XHREventType } from "../../utils/request/xhr";
 import {
   ILoaderProgressEvent,
   ISegmentLoaderArguments,
   ISegmentLoaderChunkEvent,
   ISegmentLoaderEvent,
+  TransportEventType,
 } from "../types";
 import byteRange from "../utils/byte_range";
 import extractCompleteChunks from "./extract_complete_chunks";
@@ -75,19 +77,19 @@ export default function lowLatencySegmentLoader(
         const emitted : Array<ISegmentLoaderChunkEvent |
                               ILoaderProgressEvent> = [];
         for (let i = 0; i < evt.completeChunks.length; i++) {
-          emitted.push({ type: "data-chunk",
+          emitted.push({ type: TransportEventType.DataChunk,
                          value: { responseData: evt.completeChunks[i] } });
         }
         const { event } = evt;
         if (event !== null && event.type === "data-chunk") {
           const { value } = event;
-          emitted.push({ type: "progress",
+          emitted.push({ type: XHREventType.Progress,
                          value: { duration: value.duration,
                                   size: value.size,
                                   totalSize: value.totalSize } });
         } else if (event !== null && event.type === "data-complete") {
           const { value } = event;
-          emitted.push({ type: "data-chunk-complete",
+          emitted.push({ type: TransportEventType.DataChunkComplete,
                          value: { duration: value.duration,
                                   receivedTime: value.receivedTime,
                                   sendingTime: value.sendingTime,

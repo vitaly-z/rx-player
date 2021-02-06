@@ -33,10 +33,11 @@ import config from "../../config";
 import log from "../../log";
 import Manifest from "../../manifest";
 import {
+  ManifestFetcherEventType,
   IManifestFetcherParsedResult,
   IManifestFetcherParserOptions,
 } from "../fetchers";
-import { IWarningEvent } from "./types";
+import { InitEventType, IWarningEvent } from "./types";
 
 const { FAILED_PARTIAL_UPDATE_MANIFEST_REFRESH_DELAY,
         MAX_CONSECUTIVE_MANIFEST_PARSING_IN_UNSAFE_MODE,
@@ -186,7 +187,7 @@ export default function manifestUpdateScheduler({
                   unsafeMode }) => refreshManifest({ completeRefresh,
                                                      unsafeMode })),
       mergeMap(evt => {
-        if (evt.type === "warning") {
+        if (evt.type === InitEventType.Warning) {
           return observableOf(evt);
         }
         return handleManifestRefresh$(evt);
@@ -224,7 +225,7 @@ export default function manifestUpdateScheduler({
                                        previousManifest: manifest,
                                        unsafeMode })
       .pipe(mergeMap((value) => {
-        if (value.type === "warning") {
+        if (value.type === InitEventType.Warning) {
           return observableOf(value);
         }
         const { manifest: newManifest,
@@ -250,7 +251,7 @@ export default function manifestUpdateScheduler({
                 refreshManifest({ completeRefresh: true, unsafeMode: false })));
           }
         }
-        return observableOf({ type: "parsed" as const,
+        return observableOf({ type: ManifestFetcherEventType.Parsed as const,
                               manifest,
                               sendingTime: newSendingTime,
                               receivedTime,

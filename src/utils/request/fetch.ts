@@ -25,6 +25,7 @@ import {
 import log from "../../log";
 import isNullOrUndefined from "../is_null_or_undefined";
 
+// XXX TODO
 export interface IDataChunk {
   type : "data-chunk";
   value : {
@@ -39,6 +40,7 @@ export interface IDataChunk {
   };
 }
 
+// XXX TODO
 export interface IDataComplete {
   type : "data-complete";
   value : {

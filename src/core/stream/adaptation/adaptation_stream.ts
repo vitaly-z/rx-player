@@ -67,6 +67,7 @@ import {
   IAdaptationStreamEvent,
   IRepresentationStreamEvent,
   IStreamEventAddedSegment,
+  StreamEventType,
 } from "../types";
 import reloadAfterSwitch from "../utils";
 import createRepresentationEstimator from "./create_representation_estimator";
@@ -310,14 +311,14 @@ export default function AdaptationStream<T>({
                                                        terminateCurrentStream$,
                                                        fastSwitchThreshold$)).pipe(
       tap((evt) : void => {
-        if (evt.type === "representationChange" ||
-            evt.type === "added-segment")
+        if (evt.type === StreamEventType.RepresentationChange ||
+            evt.type === StreamEventType.AddedSegment)
         {
           return streamFeedback$.next(evt);
         }
       }),
       mergeMap((evt) => {
-        if (evt.type === "stream-terminating") {
+        if (evt.type === StreamEventType.StreamTerminating) {
           const lastEstimate = lastEstimate$.getValue();
           if (lastEstimate === null) {
             return EMPTY;

@@ -36,7 +36,7 @@ import ABRManager from "../abr";
 import { SegmentFetcherCreator } from "../fetchers";
 import SegmentBuffersStore from "../segment_buffers";
 import StreamOrchestrator, {
-  IStreamOrchestratorOptions,
+  IStreamOrchestratorOptions, StreamEventType,
 } from "../stream";
 import { setDurationToMediaSource } from "./create_media_source";
 import createStreamClock from "./create_stream_clock";
@@ -152,22 +152,24 @@ export default function createMediaSourceLoader(
     ).pipe(
       mergeMap((evt) : Observable<IMediaSourceLoaderEvent> => {
         switch (evt.type) {
-          case "end-of-stream":
+          case StreamEventType.EndOfStream:
             log.debug("Init: end-of-stream order received.");
             return maintainEndOfStream(mediaSource).pipe(
               ignoreElements(),
               takeUntil(cancelEndOfStream$));
-          case "resume-stream":
+          case StreamEventType.ResumeStream:
             log.debug("Init: resume-stream order received.");
             cancelEndOfStream$.next(null);
             return EMPTY;
-          case "stream-status":
+          case StreamEventType.StreamStatus:
             const { period, bufferType, imminentDiscontinuity, position } = evt.value;
             discontinuityUpdate$.next({ period,
                                         bufferType,
                                         discontinuity: imminentDiscontinuity,
                                         position });
             return EMPTY;
+          case StreamEventType.Warning:
+            return observableOf(EVENTS.warning(evt.value));
           default:
             return observableOf(evt);
         }

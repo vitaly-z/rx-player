@@ -22,6 +22,7 @@ import {
 import xhr, {
   fetchIsSupported,
 } from "../../utils/request";
+import { XHREventType } from "../../utils/request/xhr";
 import warnOnce from "../../utils/warn_once";
 import {
   CustomSegmentLoader,
@@ -30,6 +31,7 @@ import {
   ISegmentLoaderDataLoadedEvent,
   ISegmentLoaderEvent,
   ITransportAudioVideoSegmentLoader,
+  TransportEventType,
 } from "../types";
 import byteRange from "../utils/byte_range";
 import isWEBMEmbeddedTrack from "../utils/is_webm_embedded_track";
@@ -98,7 +100,7 @@ export default function generateSegmentLoader(
   ) : Observable< ISegmentLoaderEvent< Uint8Array | ArrayBuffer | null > > {
     const { url } = content;
     if (url == null) {
-      return observableOf({ type: "data-created" as const,
+      return observableOf({ type: TransportEventType.DataCreated as const,
                             value: { responseData: null } });
     }
 
@@ -129,7 +131,7 @@ export default function generateSegmentLoader(
       ) => {
         if (!hasFallbacked) {
           hasFinished = true;
-          obs.next({ type: "data-loaded" as const,
+          obs.next({ type: XHREventType.DataLoaded as const,
                      value: { responseData: _args.data,
                               size: _args.size,
                               duration: _args.duration } });
@@ -154,9 +156,10 @@ export default function generateSegmentLoader(
                   totalSize? : number; }
       ) => {
         if (!hasFallbacked) {
-          obs.next({ type: "progress", value: { duration: _args.duration,
-                                                size: _args.size,
-                                                totalSize: _args.totalSize } });
+          obs.next({ type: XHREventType.Progress,
+                     value: { duration: _args.duration,
+                              size: _args.size,
+                              totalSize: _args.totalSize } });
         }
       };
 

@@ -38,6 +38,7 @@ import {
   IManifestResolverFunction,
   ITransportManifestPipeline,
   ITransportPipelines,
+  TransportEventType,
 } from "../../../transports";
 import tryCatch$ from "../../../utils/rx-try_catch";
 import createRequestScheduler from "../utils/create_request_scheduler";
@@ -48,10 +49,15 @@ import {
 } from "../utils/try_urls_with_backoff";
 import getManifestBackoffOptions from "./get_manifest_backoff_options";
 
+export enum ManifestFetcherEventType {
+  Warning,
+  Parsed,
+  Response,
+}
+
 /** What will be sent once parsed. */
 export interface IManifestFetcherParsedResult {
-  /** To differentiate it from a "warning" event. */
-  type : "parsed";
+  type : ManifestFetcherEventType.Parsed;
 
   /** The resulting Manifest */
   manifest : Manifest;
@@ -69,7 +75,7 @@ export interface IManifestFetcherParsedResult {
 /** Emitted when a fetching or parsing minor error happened. */
 export interface IManifestFetcherWarningEvent {
   /** To differentiate it from other events. */
-  type : "warning";
+  type : ManifestFetcherEventType.Warning;
 
   /** The error in question. */
   value : ICustomError;
@@ -78,7 +84,7 @@ export interface IManifestFetcherWarningEvent {
 /** Response emitted by a Manifest fetcher. */
 export interface IManifestFetcherResponse {
   /** To differentiate it from a "warning" event. */
-  type : "response";
+  type : ManifestFetcherEventType.Response;
 
   /** Allows to parse a fetched Manifest into a `Manifest` structure. */
   parse(parserOptions : IManifestFetcherParserOptions) :
@@ -187,9 +193,10 @@ export default class ManifestFetcher {
           }),
           map((evt) => {
             return evt.type === "retry" ?
-              ({ type: "warning" as const, value: errorSelector(evt.value) }) :
+              ({ type: ManifestFetcherEventType.Warning as const,
+                 value: errorSelector(evt.value) }) :
               ({
-                type: "response" as const,
+                type: ManifestFetcherEventType.Response as const,
                 parse: (parserOptions : IManifestFetcherParserOptions) => {
                   return this._parseLoadedManifest(evt.value.value, parserOptions);
                 },
@@ -247,7 +254,8 @@ export default class ManifestFetcher {
 
     return observableMerge(
       schedulerWarnings$
-        .pipe(map(err => ({ type: "warning" as const, value: err }))),
+        .pipe(map(err => ({ type: ManifestFetcherEventType.Warning as const,
+                            value: err }))),
       this._pipelines.parser({ response: loaded,
                                url: this._manifestUrl,
                                externalClockOffset: parserOptions.externalClockOffset,
@@ -262,18 +270,18 @@ export default class ManifestFetcher {
           });
         }),
         map((parsingEvt) => {
-          if (parsingEvt.type === "warning") {
+          if (parsingEvt.type === TransportEventType.Warning) {
             const formatted = formatError(parsingEvt.value, {
               defaultCode: "PIPELINE_PARSE_ERROR",
               defaultReason: "Unknown error when parsing the Manifest",
             });
-            return { type: "warning" as const,
+            return { type: ManifestFetcherEventType.Warning as const,
                      value: formatted };
           }
 
           // 2 - send response
           const parsingTime = performance.now() - parsingTimeStart;
-          return { type: "parsed" as const,
+          return { type: ManifestFetcherEventType.Parsed as const,
                    manifest: parsingEvt.value.manifest,
                    sendingTime,
                    receivedTime,

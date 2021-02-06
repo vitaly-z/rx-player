@@ -24,7 +24,10 @@ import {
   map,
   startWith,
 } from "rxjs/operators";
-import { IMultiplePeriodStreamsEvent } from "../types";
+import {
+  IMultiplePeriodStreamsEvent,
+  StreamEventType,
+} from "../types";
 
 /**
  * Returns an Observable which emits ``true`` when all PeriodStreams given are
@@ -56,10 +59,11 @@ export default function areStreamsComplete(
     .map((stream) => {
       return stream.pipe(
         filter((evt) => {
-          return evt.type === "complete-stream" ||
-                 (evt.type === "stream-status" && !evt.value.hasFinishedLoading);
+          return evt.type === StreamEventType.CompleteStream ||
+                 (evt.type === StreamEventType.StreamStatus &&
+                  !evt.value.hasFinishedLoading);
         }),
-        map((evt) => evt.type === "complete-stream"),
+        map((evt) => evt.type === StreamEventType.CompleteStream),
         startWith(false),
         distinctUntilChanged()
       );

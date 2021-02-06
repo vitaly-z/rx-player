@@ -41,11 +41,12 @@ import {
   IStreamNeedsManifestRefresh,
   IStreamTerminatingEvent,
   IStreamWarningEvent,
+  StreamEventType,
 } from "./types";
 
 const EVENTS = {
   activePeriodChanged(period : Period) : IActivePeriodChangedEvent {
-    return { type : "activePeriodChanged",
+    return { type : StreamEventType.ActivePeriodChanged,
              value : { period } };
   },
 
@@ -54,7 +55,7 @@ const EVENTS = {
     adaptation : Adaptation|null,
     period : Period
   ) : IAdaptationChangeEvent {
-    return { type: "adaptationChange",
+    return { type: StreamEventType.AdaptationChanged,
              value : { type: bufferType,
                        adaptation,
                        period } };
@@ -68,7 +69,7 @@ const EVENTS = {
     buffered : TimeRanges,
     segmentData : T
   ) : IStreamEventAddedSegment<T> {
-    return { type : "added-segment",
+    return { type : StreamEventType.AddedSegment,
              value : { content,
                        segment,
                        segmentData,
@@ -79,27 +80,27 @@ const EVENTS = {
     type : IBufferType,
     bitrate : number|undefined
   ) : IBitrateEstimationChangeEvent {
-    return { type: "bitrateEstimationChange",
+    return { type: StreamEventType.BitrateEstimateUpdate,
              value: { type, bitrate } };
   },
 
   streamComplete(bufferType: IBufferType) : ICompletedStreamEvent {
-    return { type: "complete-stream",
+    return { type: StreamEventType.CompleteStream,
              value: { type: bufferType } };
   },
 
   endOfStream() : IEndOfStreamEvent {
-    return { type: "end-of-stream",
+    return { type: StreamEventType.EndOfStream,
              value: undefined };
   },
 
   needsManifestRefresh() : IStreamNeedsManifestRefresh {
-    return { type : "needs-manifest-refresh",
+    return { type : StreamEventType.NeedsManifestRefresh,
              value :  undefined };
   },
 
   manifestMightBeOufOfSync() : IStreamManifestMightBeOutOfSync {
-    return { type : "manifest-might-be-out-of-sync",
+    return { type : StreamEventType.ManifestMaybeOutOfSync,
              value : undefined };
   },
 
@@ -116,7 +117,7 @@ const EVENTS = {
     reloadAt : number,
     reloadOnPause : boolean
   ) : INeedsMediaSourceReload {
-    return { type: "needs-media-source-reload",
+    return { type: StreamEventType.NeedsMediaSourceReload,
              value: { position : reloadAt,
                       autoPlay : reloadOnPause,
                       period } };
@@ -127,7 +128,7 @@ const EVENTS = {
     autoPlay : boolean,
     duration : number
   ) : INeedsDecipherabilityFlush {
-    return { type: "needs-decipherability-flush",
+    return { type: StreamEventType.NeedsDecipherabilityFlush,
              value: { position, autoPlay, duration } };
   },
 
@@ -136,7 +137,7 @@ const EVENTS = {
     period : Period,
     adaptation$ : Subject<Adaptation|null>
   ) : IPeriodStreamReadyEvent {
-    return { type: "periodStreamReady",
+    return { type: StreamEventType.PeriodStreamReady,
              value: { type, period, adaptation$ } };
   },
 
@@ -144,14 +145,14 @@ const EVENTS = {
     type : IBufferType,
     period : Period
   ) : IPeriodStreamClearedEvent {
-    return { type: "periodStreamCleared",
+    return { type: StreamEventType.PeriodStreamCleared,
              value: { type, period } };
   },
 
   protectedSegment(initDataInfo : { type : string;
                                     data : Uint8Array; }
   ) : IProtectedSegmentEvent {
-    return { type: "protected-segment",
+    return { type: StreamEventType.ProtectedSegment,
              value: initDataInfo };
   },
 
@@ -160,22 +161,22 @@ const EVENTS = {
     period : Period,
     representation : Representation
   ) : IRepresentationChangeEvent {
-    return { type: "representationChange",
+    return { type: StreamEventType.RepresentationChange,
              value: { type, period, representation } };
   },
 
   streamTerminating() : IStreamTerminatingEvent {
-    return { type: "stream-terminating",
+    return { type: StreamEventType.StreamTerminating,
              value: undefined };
   },
 
   resumeStream() : IResumeStreamEvent {
-    return { type: "resume-stream",
+    return { type: StreamEventType.ResumeStream,
              value: undefined };
   },
 
   warning(value : ICustomError) : IStreamWarningEvent {
-    return { type: "warning", value };
+    return { type: StreamEventType.Warning, value };
   },
 };
 

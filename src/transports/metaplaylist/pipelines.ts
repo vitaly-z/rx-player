@@ -41,6 +41,7 @@ import { IParsedManifest } from "../../parsers/manifest/types";
 import deferSubscriptions from "../../utils/defer_subscriptions";
 import isNullOrUndefined from "../../utils/is_null_or_undefined";
 import objectAssign from "../../utils/object_assign";
+import { XHREventType } from "../../utils/request/xhr";
 import {
   IAudioVideoParserObservable,
   IChunkTimeInfo,
@@ -56,6 +57,7 @@ import {
   ITextParserObservable,
   ITransportOptions,
   ITransportPipelines,
+  TransportEventType,
 } from "../types";
 import generateManifestLoader from "./manifest_loader";
 
@@ -192,7 +194,7 @@ export default function(options : ITransportOptions): ITransportPipelines {
       ) : IManifestParserObservable {
         if (parsedResult.type === "done") {
           const manifest = new Manifest(parsedResult.value, options);
-          return observableOf({ type: "parsed",
+          return observableOf({ type: TransportEventType.ParsedManifest,
                                 value: { manifest } });
         }
 
@@ -204,9 +206,9 @@ export default function(options : ITransportOptions): ITransportPipelines {
             const request$ = scheduleRequest(() =>
               transport.manifest.loader({ url : ressource.url }).pipe(
                 filter(
-                  (e): e is { type : "data-loaded";
+                  (e): e is { type : XHREventType.DataLoaded;
                               value : ILoaderDataLoadedValue<Document | string>; } =>
-                    e.type === "data-loaded"
+                    e.type === XHREventType.DataLoaded
                 ),
                 map((e) : ILoaderDataLoadedValue< Document | string > => e.value)
               ));
@@ -224,12 +226,12 @@ export default function(options : ITransportOptions): ITransportPipelines {
         const warnings$ : Array<Observable<IManifestParserWarningEvent>> =
           loaders$.map(loader =>
             loader.pipe(filter((evt) : evt is IManifestParserWarningEvent =>
-              evt.type === "warning")));
+              evt.type === TransportEventType.Warning)));
 
         const responses$ : Array<Observable<IManifestParserResponseEvent>> =
           loaders$.map(loader =>
             loader.pipe(filter((evt) : evt is IManifestParserResponseEvent =>
-              evt.type === "parsed")));
+              evt.type === TransportEventType.Warning)));
 
         return observableMerge(
           combineLatest(responses$).pipe(mergeMap((evt) => {
@@ -315,7 +317,7 @@ export default function(options : ITransportOptions): ITransportPipelines {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return audio.parser(getParserArguments(args, segment))
         .pipe(map(res => {
-          if (res.type === "parsed-init-segment") {
+          if (res.type === TransportEventType.ParsedInitSegment) {
             return res;
           }
           const timeInfos = offsetTimeInfos(contentStart, contentEnd, res.value);
@@ -342,7 +344,7 @@ export default function(options : ITransportOptions): ITransportPipelines {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return video.parser(getParserArguments(args, segment))
         .pipe(map(res => {
-          if (res.type === "parsed-init-segment") {
+          if (res.type === TransportEventType.ParsedInitSegment) {
             return res;
           }
           const timeInfos = offsetTimeInfos(contentStart, contentEnd, res.value);
@@ -369,12 +371,12 @@ export default function(options : ITransportOptions): ITransportPipelines {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return text.parser(getParserArguments(args, segment))
         .pipe(map(res => {
-          if (res.type === "parsed-init-segment") {
+          if (res.type === TransportEventType.ParsedInitSegment) {
             return res;
           }
           const timeInfos = offsetTimeInfos(contentStart, contentEnd, res.value);
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return objectAssign({ type: "parsed-segment",
+          return objectAssign({ type: TransportEventType.ParsedMediaSegment,
                                 value: objectAssign({}, res.value, timeInfos) });
         }));
     },
@@ -396,12 +398,12 @@ export default function(options : ITransportOptions): ITransportPipelines {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return image.parser(getParserArguments(args, segment))
         .pipe(map(res => {
-          if (res.type === "parsed-init-segment") {
+          if (res.type === TransportEventType.ParsedInitSegment) {
             return res;
           }
           const timeInfos = offsetTimeInfos(contentStart, contentEnd, res.value);
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return objectAssign({ type: "parsed-segment",
+          return objectAssign({ type: TransportEventType.ParsedMediaSegment,
                                 value: objectAssign({}, res.value, timeInfos) });
         }));
     },

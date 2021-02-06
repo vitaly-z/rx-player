@@ -23,7 +23,10 @@ import { mergeMap } from "rxjs/operators";
 import log from "../../../log";
 import { Period } from "../../../manifest";
 import { IBufferType } from "../../segment_buffers";
-import { IStreamStatusEvent } from "../types";
+import {
+  IStreamStatusEvent,
+  StreamEventType,
+} from "../types";
 
 /**
  * Create empty AdaptationStream Observable, linked to a Period.
@@ -51,7 +54,7 @@ export default function createEmptyAdaptationStream(
         log.debug("Stream: full \"empty\" AdaptationStream", bufferType);
         hasFinishedLoading = true;
       }
-      return observableOf({ type: "stream-status" as const,
+      return observableOf({ type: StreamEventType.StreamStatus as const,
                             value: { period,
                                      bufferType,
                                      position: clockTick.position,

@@ -23,6 +23,7 @@ import Manifest from "../../manifest";
 import {
   IManifestParserEvent,
 } from "../../transports";
+import { TransportEventType } from "../types";
 
 /**
  * As a Manifest instance is obtained, emit the right `warning` events
@@ -37,10 +38,10 @@ export default function returnParsedManifest(
   url? : string
 ) : Observable<IManifestParserEvent> {
   const warningEvts$ = observableOf(...manifest.parsingErrors.map(error => ({
-    type: "warning" as const,
+    type: TransportEventType.Warning as const,
     value: error,
   })));
   return observableConcat(warningEvts$,
-                          observableOf({ type: "parsed" as const,
+                          observableOf({ type: TransportEventType.ParsedManifest as const,
                                          value: { manifest, url } }));
 }

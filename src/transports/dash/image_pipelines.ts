@@ -26,6 +26,7 @@ import {
   ISegmentLoaderArguments,
   ISegmentLoaderEvent,
   ISegmentParserArguments,
+  TransportEventType,
 } from "../types";
 
 /**
@@ -37,7 +38,7 @@ export function imageLoader(
     url } : ISegmentLoaderArguments
 ) : Observable< ISegmentLoaderEvent< ArrayBuffer | null > > {
   if (segment.isInit || url === null) {
-    return observableOf({ type: "data-created" as const,
+    return observableOf({ type: TransportEventType.DataCreated as const,
                           value: { responseData: null } });
   }
   return request({ url,
@@ -57,7 +58,7 @@ export function imageParser(
   const { data, isChunked } = response;
 
   if (content.segment.isInit) { // image init segment has no use
-    return observableOf({ type: "parsed-init-segment",
+    return observableOf({ type: TransportEventType.ParsedInitSegment,
                           value: { initializationData: null,
                                    segmentProtections: [],
                                    initTimescale: undefined } });
@@ -71,7 +72,7 @@ export function imageParser(
 
   // TODO image Parsing should be more on the buffer side, no?
   if (data === null || features.imageParser === null) {
-    return observableOf({ type: "parsed-segment",
+    return observableOf({ type: TransportEventType.ParsedMediaSegment,
                           value: { chunkData: null,
                                    chunkInfos: { duration: segment.duration,
                                                  time: segment.time },
@@ -81,7 +82,7 @@ export function imageParser(
 
   const bifObject = features.imageParser(new Uint8Array(data));
   const thumbsData = bifObject.thumbs;
-  return observableOf({ type: "parsed-segment",
+  return observableOf({ type: TransportEventType.ParsedMediaSegment,
                         value: { chunkData: { data: thumbsData,
                                               start: 0,
                                               end: Number.MAX_VALUE,

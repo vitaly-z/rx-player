@@ -62,6 +62,7 @@ import {
   IMultiplePeriodStreamsEvent,
   IPeriodStreamEvent,
   IStreamOrchestratorEvent,
+  StreamEventType,
 } from "../types";
 import ActivePeriodEmitter from "./active_period_emitter";
 import areStreamsComplete from "./are_streams_complete";
@@ -223,7 +224,7 @@ export default function StreamOrchestrator(
           null
         >((message) => {
           switch (message.type) {
-            case "needs-media-source-reload":
+            case StreamEventType.NeedsMediaSourceReload:
               // Only reload the MediaSource when the more immediately required
               // Period is the one asking for it
               const firstPeriod = periodList.head();
@@ -233,11 +234,11 @@ export default function StreamOrchestrator(
                 return null;
               }
               break;
-            case "periodStreamReady":
+            case StreamEventType.PeriodStreamReady:
               enableOutOfBoundsCheck = true;
               periodList.add(message.value.period);
               break;
-            case "periodStreamCleared":
+            case StreamEventType.PeriodStreamCleared:
               periodList.removeElement(message.value.period);
               break;
           }
@@ -420,7 +421,7 @@ export default function StreamOrchestrator(
                                          wantedBufferAhead$ }
     ).pipe(
       mergeMap((evt : IPeriodStreamEvent) : Observable<IMultiplePeriodStreamsEvent> => {
-        if (evt.type === "stream-status") {
+        if (evt.type === StreamEventType.StreamStatus) {
           if (evt.value.hasFinishedLoading) {
             const nextPeriod = manifest.getPeriodAfter(basePeriod);
             if (nextPeriod === null) {

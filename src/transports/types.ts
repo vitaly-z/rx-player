@@ -29,6 +29,7 @@ import Manifest, {
 import { IBifThumbnail } from "../parsers/images/bif";
 import { ILocalManifest } from "../parsers/manifest/local";
 import { IMetaPlaylist } from "../parsers/manifest/metaplaylist";
+import {  XHREventType } from "../utils/request/xhr";
 
 // ---- Loader arguments ----
 
@@ -95,6 +96,16 @@ export interface ILoaderDataLoadedValue<T> {
   size : number | undefined;
 }
 
+export enum TransportEventType {
+  DataCreated = 300,
+  Warning,
+  DataChunk,
+  DataChunkComplete,
+  ParsedInitSegment,
+  ParsedMediaSegment,
+  ParsedManifest,
+}
+
 /** Form that can take a loaded Manifest once loaded. */
 export type ILoadedManifest = Document |
                               string |
@@ -104,12 +115,12 @@ export type ILoadedManifest = Document |
 
 /** Event emitted by a Manifest loader when the Manifest is fully available. */
 export interface IManifestLoaderDataLoadedEvent {
-  type : "data-loaded";
+  type : XHREventType.DataLoaded;
   value : ILoaderDataLoadedValue<ILoadedManifest>;
 }
 
 /** Event emitted by a segment loader when the data has been fully loaded. */
-export interface ISegmentLoaderDataLoadedEvent<T> { type : "data-loaded";
+export interface ISegmentLoaderDataLoadedEvent<T> { type : XHREventType.DataLoaded;
                                                     value : ILoaderDataLoadedValue<T>; }
 
 /**
@@ -119,8 +130,10 @@ export interface ISegmentLoaderDataLoadedEvent<T> { type : "data-loaded";
  * Such data are for example directly generated from already-available data,
  * such as properties of a Manifest.
  */
-export interface ISegmentLoaderDataCreatedEvent<T> { type : "data-created";
-                                                     value : { responseData : T }; }
+export interface ISegmentLoaderDataCreatedEvent<T> {
+  type : TransportEventType.DataCreated;
+  value : { responseData : T };
+}
 
 /**
  * Event emitted by a segment loader when new information on a pending request
@@ -132,7 +145,7 @@ export interface ISegmentLoaderDataCreatedEvent<T> { type : "data-created";
  * bandwidth.
  */
 export interface ILoaderProgressEvent {
-  type : "progress";
+  type : XHREventType.Progress;
   value : {
     /** Time since the beginning of the request so far, in seconds. */
     duration : number;
@@ -145,7 +158,7 @@ export interface ILoaderProgressEvent {
 
 /** Event emitted by a segment loader when a chunk of the response is available. */
 export interface ISegmentLoaderDataChunkEvent {
-  type : "data-chunk";
+  type : TransportEventType.DataChunk;
   value : {
     /** Loaded chunk, as raw data. */
     responseData: ArrayBuffer |
@@ -158,7 +171,7 @@ export interface ISegmentLoaderDataChunkEvent {
  * communicated through `ISegmentLoaderDataChunkEvent` events.
  */
 export interface ISegmentLoaderDataChunkCompleteEvent {
-  type : "data-chunk-complete";
+  type : TransportEventType.DataChunkComplete;
   value : {
     /** Duration the request took to be performed, in seconds. */
     duration : number | undefined;
@@ -278,7 +291,7 @@ export interface ISegmentParserArguments<T> {
 
 /** Event emitted when a Manifest object has been parsed. */
 export interface IManifestParserResponseEvent {
-  type : "parsed";
+  type : TransportEventType.ParsedManifest;
   value: {
     /** The parsed Manifest Object itself. */
     manifest : Manifest;
@@ -296,7 +309,7 @@ export interface IManifestParserResponseEvent {
 
 /** Event emitted when a minor error was encountered when parsing the Manifest. */
 export interface IManifestParserWarningEvent {
-  type : "warning";
+  type : TransportEventType.Warning;
   /** Error describing the minor parsing error encountered. */
   value : Error;
 }
@@ -375,13 +388,13 @@ export interface ISegmentParserParsedSegment<T> {
 
 // What a segment parser returns when parsing an init segment
 export interface ISegmentParserInitSegment<T> {
-  type : "parsed-init-segment";
+  type : TransportEventType.ParsedInitSegment;
   value : ISegmentParserParsedInitSegment<T>;
 }
 
 // What a segment parser returns when parsing a regular (non-init) segment
 export interface ISegmentParserSegment<T> {
-  type : "parsed-segment";
+  type : TransportEventType.ParsedMediaSegment;
   value : ISegmentParserParsedSegment<T>;
 }
 

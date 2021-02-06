@@ -26,7 +26,10 @@ import {
 } from "rxjs/operators";
 import { Period } from "../../../manifest";
 import { IBufferType } from "../../segment_buffers";
-import { IMultiplePeriodStreamsEvent } from "../types";
+import {
+  IMultiplePeriodStreamsEvent,
+  StreamEventType,
+} from "../types";
 
 interface IPeriodObject { period : Period;
                           buffers: Set<IBufferType>; }
@@ -77,12 +80,12 @@ export default function ActivePeriodEmitter(
   const numberOfStreams = buffers$.length;
   return observableMerge(...buffers$).pipe(
     // not needed to filter, this is an optim
-    filter(({ type }) => type === "periodStreamCleared" ||
-                         type === "adaptationChange" ||
-                         type === "representationChange"),
+    filter(({ type }) => type === StreamEventType.PeriodStreamCleared ||
+                         type === StreamEventType.AdaptationChanged ||
+                         type === StreamEventType.RepresentationChange),
     scan<IMultiplePeriodStreamsEvent, IPeriodsList>((acc, evt) => {
       switch (evt.type) {
-        case "periodStreamCleared": {
+        case StreamEventType.PeriodStreamCleared: {
           const { period, type } = evt.value;
           const currentInfos = acc[period.id];
           if (currentInfos !== undefined && currentInfos.buffers.has(type)) {
@@ -94,7 +97,7 @@ export default function ActivePeriodEmitter(
         }
           break;
 
-        case "adaptationChange": {
+        case StreamEventType.AdaptationChanged: {
           // For Adaptations that are not null, we will receive a
           // `representationChange` event. We can thus skip this event and only
           // listen to the latter.
@@ -108,7 +111,7 @@ export default function ActivePeriodEmitter(
         // we won't receive any "representationChange" event. We however still
         // need to register that Period as active for the current type.
         // eslint-disable-next-line no-fallthrough
-        case "representationChange": {
+        case StreamEventType.RepresentationChange: {
           const { period, type } = evt.value;
           const currentInfos = acc[period.id];
           if (currentInfos !== undefined && !currentInfos.buffers.has(type)) {

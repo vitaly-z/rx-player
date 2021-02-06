@@ -31,11 +31,13 @@ import dashManifestParser, {
 } from "../../parsers/manifest/dash";
 import objectAssign from "../../utils/object_assign";
 import request from "../../utils/request";
+import { XHREventType } from "../../utils/request/xhr";
 import {
   ILoaderDataLoadedValue,
   IManifestParserArguments,
   IManifestParserObservable,
   ITransportOptions,
+  TransportEventType,
 } from "../types";
 import returnParsedManifest from "../utils/return_parsed_manifest";
 
@@ -49,7 +51,7 @@ function requestStringResource(
 ) : Observable< ILoaderDataLoadedValue< string > > {
   return request({ url,
                    responseType: "text" })
-    .pipe(filter((e) => e.type === "data-loaded"),
+    .pipe(filter((e) => e.type === XHREventType.DataLoaded),
           map((e) => e.value));
 }
 
@@ -94,8 +96,9 @@ export default function generateManifestParser(
     ) : IManifestParserObservable {
       if (parserResponse.type === "done") {
         const { warnings, parsed } = parserResponse.value;
-        const warningEvents = warnings.map(warning => ({ type: "warning" as const,
-                                                         value: warning }));
+        const warningEvents = warnings.map(warning =>
+          ({ type: TransportEventType.Warning as const,
+             value: warning }));
         const manifest = new Manifest(parsed, options);
         return observableConcat(observableOf(...warningEvents),
                                 returnParsedManifest(manifest, url));

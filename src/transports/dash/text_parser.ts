@@ -29,6 +29,7 @@ import {
   ISegmentParserArguments,
   ITextParserObservable,
   ITransportTextSegmentParser,
+  TransportEventType,
 } from "../types";
 import getISOBMFFTimingInfos from "../utils/get_isobmff_timing_infos";
 import isMP4EmbeddedTextTrack from "../utils/is_mp4_embedded_text_track";
@@ -86,7 +87,7 @@ function parseISOBMFFEmbeddedTextTrack(
     {
       representation.index._addSegments(sidxSegments);
     }
-    return observableOf({ type: "parsed-init-segment",
+    return observableOf({ type: TransportEventType.ParsedInitSegment,
                           value: { initializationData: null,
                                    segmentProtections: [],
                                    initTimescale: mdhdTimescale } });
@@ -100,7 +101,7 @@ function parseISOBMFFEmbeddedTextTrack(
                                                     chunkInfos,
                                                     isChunked);
   const chunkOffset = takeFirstSet<number>(segment.timestampOffset, 0);
-  return observableOf({ type: "parsed-segment",
+  return observableOf({ type: TransportEventType.ParsedMediaSegment,
                         value: { chunkData,
                                  chunkInfos,
                                  chunkOffset,
@@ -121,7 +122,7 @@ function parsePlainTextTrack(
   const { period, segment } = content;
   const { timestampOffset = 0 } = segment;
   if (segment.isInit) {
-    return observableOf({ type: "parsed-init-segment",
+    return observableOf({ type: TransportEventType.ParsedInitSegment,
                           value: { initializationData: null,
                                    segmentProtections: [],
                                    initTimescale: undefined } });
@@ -137,7 +138,7 @@ function parsePlainTextTrack(
     textTrackData = data;
   }
   const chunkData = getPlainTextTrackData(content, textTrackData, isChunked);
-  return observableOf({ type: "parsed-segment",
+  return observableOf({ type: TransportEventType.ParsedMediaSegment,
                         value: { chunkData,
                                  chunkInfos: null,
                                  chunkOffset: timestampOffset,
@@ -169,12 +170,12 @@ export default function generateTextTrackParser(
     const { data, isChunked } = response;
     if (data === null) { // No data, just return empty infos
       if (segment.isInit) {
-        return observableOf({ type: "parsed-init-segment",
+        return observableOf({ type: TransportEventType.ParsedInitSegment,
                               value: { initializationData: null,
                                        segmentProtections: [],
                                        initTimescale: undefined } });
       }
-      return observableOf({ type: "parsed-segment",
+      return observableOf({ type: TransportEventType.ParsedMediaSegment,
                             value: { chunkData: null,
                                      chunkInfos: null,
                                      chunkOffset: timestampOffset,

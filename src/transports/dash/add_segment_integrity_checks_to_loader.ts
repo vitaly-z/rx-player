@@ -15,10 +15,12 @@
  */
 
 import { tap } from "rxjs/operators";
+import { XHREventType } from "../../utils/request/xhr";
 import {
   ITransportAudioVideoSegmentLoader,
   ITransportImageSegmentLoader,
   ITransportTextSegmentLoader,
+  TransportEventType,
 } from "../types";
 import checkISOBMFFIntegrity from "../utils/check_isobmff_integrity";
 import isWEBMEmbeddedTrack from "../utils/is_webm_embedded_track";
@@ -48,7 +50,8 @@ export default function addSegmentIntegrityChecks(
     ITransportImageSegmentLoader
 {
   return (content) => segmentLoader(content).pipe(tap((res) => {
-    if ((res.type === "data-loaded" || res.type === "data-chunk") &&
+    if ((res.type === XHREventType.DataLoaded ||
+         res.type === TransportEventType.DataChunk) &&
         res.value.responseData !== null &&
         typeof res.value.responseData !== "string" &&
         !isWEBMEmbeddedTrack(content.representation))

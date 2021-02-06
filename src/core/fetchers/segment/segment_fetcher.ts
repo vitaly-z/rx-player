@@ -28,7 +28,7 @@ import {
   share,
   tap,
 } from "rxjs/operators";
-import { formatError } from "../../../errors";
+import { formatError, ICustomError } from "../../../errors";
 import { ISegment } from "../../../manifest";
 import {
   ISegmentParserResponse,
@@ -38,6 +38,7 @@ import arrayIncludes from "../../../utils/array_includes";
 import assertUnreachable from "../../../utils/assert_unreachable";
 import idGenerator from "../../../utils/id_generator";
 import InitializationSegmentCache from "../../../utils/initialization_segment_cache";
+import { XHREventType } from "../../../utils/request/xhr";
 import {
   IABRMetricsEvent,
   IABRRequestBeginEvent,
@@ -52,20 +53,28 @@ import createSegmentLoader, {
   ISegmentLoaderContent,
   ISegmentLoaderData,
   ISegmentLoaderWarning,
+  SegmentLoaderEventType,
 } from "./create_segment_loader";
+
+export enum SegmentFetcherEventType {
+  Chunk = 600,
+  ChunkComplete,
+  Warning,
+}
 
 /**
  * Event sent when the segment request needs to be renewed (e.g. due to an HTTP
  * error).
  */
-export type ISegmentFetcherWarning = ISegmentLoaderWarning;
+export interface ISegmentFetcherWarning { type : SegmentFetcherEventType.Warning;
+                                          value : ICustomError; }
 
 /**
  * Event sent when a new "chunk" of the segment is available.
  * A segment can contain n chunk(s) for n >= 0.
  */
 export interface ISegmentFetcherChunkEvent<T> {
-  type : "chunk";
+  type : SegmentFetcherEventType.Chunk;
   /** Parse the downloaded chunk. */
   parse : (initTimescale? : number) => Observable<ISegmentParserResponse<T>>;
 }
@@ -74,7 +83,9 @@ export interface ISegmentFetcherChunkEvent<T> {
  * Event sent when all "chunk" of the segments have been communicated through
  * `ISegmentFetcherChunkEvent` events.
  */
-export interface ISegmentFetcherChunkCompleteEvent { type: "chunk-complete" }
+export interface ISegmentFetcherChunkCompleteEvent {
+  type: SegmentFetcherEventType.ChunkComplete;
+}
 
 /** Event sent by the SegmentFetcher when fetching a segment. */
 export type ISegmentFetcherEvent<T> = ISegmentFetcherChunkCompleteEvent |
@@ -134,7 +145,7 @@ export default function createSegmentFetcher<T>(
             break;
           }
 
-          case "request": {
+          case SegmentLoaderEventType.Request: {
             const { value } = arg;
 
             // format it for ABR Handling
@@ -151,10 +162,10 @@ export default function createSegmentFetcher<T>(
             break;
           }
 
-          case "progress": {
+          case XHREventType.Progress: {
             const { value } = arg;
             if (value.totalSize != null && value.size < value.totalSize) {
-              requests$.next({ type: "progress",
+              requests$.next({ type: XHREventType.Progress,
                                value: { duration: value.duration,
                                         size: value.size,
                                         totalSize: value.totalSize,
@@ -175,32 +186,33 @@ export default function createSegmentFetcher<T>(
       filter((e) : e is ISegmentLoaderChunk |
                         ISegmentLoaderChunkComplete |
                         ISegmentLoaderData<T> |
-                        ISegmentFetcherWarning => {
+                        ISegmentLoaderWarning => {
         switch (e.type) {
-          case "warning":
-          case "chunk":
-          case "chunk-complete":
-          case "data":
+          case SegmentLoaderEventType.Warning:
+          case SegmentLoaderEventType.Chunk:
+          case SegmentLoaderEventType.ChunkComplete:
+          case SegmentLoaderEventType.Data:
             return true;
-          case "progress":
+          case XHREventType.Progress:
           case "metrics":
-          case "request":
+          case SegmentLoaderEventType.Request:
             return false;
           default:
             assertUnreachable(e);
         }
       }),
       mergeMap((evt) => {
-        if (evt.type === "warning") {
-          return observableOf(evt);
+        if (evt.type === SegmentLoaderEventType.Warning) {
+          return observableOf({ type: SegmentFetcherEventType.Warning as const,
+                                value: evt.value });
         }
-        if (evt.type === "chunk-complete") {
-          return observableOf({ type: "chunk-complete" as const });
+        if (evt.type === SegmentLoaderEventType.ChunkComplete) {
+          return observableOf({ type: SegmentFetcherEventType.ChunkComplete as const });
         }
 
-        const isChunked = evt.type === "chunk";
+        const isChunked = evt.type === SegmentLoaderEventType.Chunk;
         const data = {
-          type: "chunk" as const,
+          type: SegmentFetcherEventType.Chunk as const,
           /**
            * Parse the loaded data.
            * @param {Object} [initTimescale]
@@ -226,7 +238,9 @@ export default function createSegmentFetcher<T>(
           return observableOf(data);
         }
         return observableConcat(observableOf(data),
-                                observableOf({ type: "chunk-complete" as const }));
+                                observableOf({
+                                  type: SegmentFetcherEventType.ChunkComplete as const,
+                                }));
       }),
       share() // avoid multiple side effects if multiple subs
     );

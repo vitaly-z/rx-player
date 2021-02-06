@@ -29,9 +29,10 @@ import Manifest, {
 } from "../../manifest";
 import { getNextRangeGap } from "../../utils/ranges";
 import { IBufferType } from "../segment_buffers";
-import EVENTS from "../stream/events_generators";
+import EVENTS from "./events_generators";
 import {
   IInitClockTick,
+  InitEventType,
   IStalledEvent,
   IUnstalledEvent,
   IWarningEvent,
@@ -139,7 +140,7 @@ export default function StallAvoider(
     map(([tick, discontinuitiesStore]) => {
       const { buffered, currentRange, position, state, stalled } = tick;
       if (stalled === null) {
-        return { type: "unstalled" as const,
+        return { type: InitEventType.Unstalled as const,
                  value: null };
       }
 
@@ -216,7 +217,7 @@ export default function StallAvoider(
         }
       }
 
-      return { type: "stalled" as const,
+      return { type: InitEventType.Stalled as const,
                value: stalled };
     }));
 }

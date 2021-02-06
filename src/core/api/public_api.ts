@@ -94,6 +94,7 @@ import {
 import initializeMediaSourcePlayback, {
   IInitEvent,
   ILoadedEvent,
+  InitEventType,
   IReloadingMediaSourceEvent,
   IStalledEvent,
 } from "../init";
@@ -102,6 +103,7 @@ import SegmentBuffersStore, {
   IBufferedChunk,
   IBufferType,
 } from "../segment_buffers";
+import { StreamEventType } from "../stream";
 import createClock, {
   IClockTick,
 } from "./clock";
@@ -916,8 +918,8 @@ class Player extends EventEmitter<IPublicAPIEvent> {
 
     /** Emit an object when the player "stalls" and null when it un-stalls */
     const stalled$ = playback$.pipe(
-      filter((evt) : evt is IStalledEvent => evt.type === "stalled" ||
-                                             evt.type === "unstalled"),
+      filter((evt) : evt is IStalledEvent => evt.type === InitEventType.Stalled ||
+                                             evt.type === InitEventType.Unstalled),
       map(x => x.value),
       distinctUntilChanged((wasStalled, isStalled) => {
         return wasStalled === null && isStalled === null ||
@@ -927,14 +929,14 @@ class Player extends EventEmitter<IPublicAPIEvent> {
 
     /** Emit when the content is considered "loaded". */
     const loaded$ = playback$.pipe(
-      filter((evt) : evt is ILoadedEvent => evt.type === "loaded"),
+      filter((evt) : evt is ILoadedEvent => evt.type === InitEventType.Loaded),
       share()
     );
 
     /** Emit when we will "reload" the MediaSource. */
     const reloading$ = playback$
       .pipe(filter((evt) : evt is IReloadingMediaSourceEvent =>
-        evt.type === "reloading-media-source"
+        evt.type === InitEventType.ReloadingMediaSource
       ),
             share());
 
@@ -2209,44 +2211,44 @@ class Player extends EventEmitter<IPublicAPIEvent> {
       case "stream-event-skip":
         this.trigger("streamEventSkip", event.value);
         break;
-      case "activePeriodChanged":
+      case StreamEventType.ActivePeriodChanged:
         this._priv_onActivePeriodChanged(event.value);
         break;
-      case "periodStreamReady":
+      case StreamEventType.PeriodStreamReady:
         this._priv_onPeriodStreamReady(event.value);
         break;
-      case "periodStreamCleared":
+      case StreamEventType.PeriodStreamCleared:
         this._priv_onPeriodStreamCleared(event.value);
         break;
-      case "reloading-media-source":
+      case InitEventType.ReloadingMediaSource:
         this._priv_onReloadingMediaSource();
         break;
-      case "representationChange":
+      case StreamEventType.RepresentationChange:
         this._priv_onRepresentationChange(event.value);
         break;
-      case "adaptationChange":
+      case StreamEventType.AdaptationChanged:
         this._priv_onAdaptationChange(event.value);
         break;
-      case "bitrateEstimationChange":
+      case StreamEventType.BitrateEstimateUpdate:
         this._priv_onBitrateEstimationChange(event.value);
         break;
-      case "manifestReady":
+      case InitEventType.ManifestReady:
         this._priv_onManifestReady(event.value);
         break;
-      case "warning":
+      case InitEventType.Warning:
         this._priv_onPlaybackWarning(event.value);
         break;
-      case "loaded":
+      case InitEventType.Loaded:
         if (this._priv_contentInfos === null) {
           log.error("API: Loaded event while no content is loaded");
           return;
         }
         this._priv_contentInfos.segmentBuffersStore = event.value.segmentBuffersStore;
         break;
-      case "decipherabilityUpdate":
+      case InitEventType.DecipherabilityUpdate:
         this.trigger("decipherabilityUpdate", event.value);
         break;
-      case "added-segment":
+      case StreamEventType.AddedSegment:
         if (this._priv_contentInfos === null) {
           log.error("API: Added segment while no content is loaded");
           return;

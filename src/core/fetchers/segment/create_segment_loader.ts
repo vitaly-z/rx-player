@@ -37,10 +37,12 @@ import {
   ILoaderProgressEvent,
   ISegmentLoaderArguments,
   ISegmentLoaderEvent as ITransportSegmentLoaderEvent,
+  TransportEventType,
 } from "../../../transports";
 import assertUnreachable from "../../../utils/assert_unreachable";
 import castToObservable from "../../../utils/cast_to_observable";
 import objectAssign from "../../../utils/object_assign";
+import { XHREventType } from "../../../utils/request/xhr";
 import tryCatch from "../../../utils/rx-try_catch";
 import { IABRMetricsEvent } from "../../abr";
 import errorSelector from "../utils/error_selector";
@@ -48,20 +50,29 @@ import tryURLsWithBackoff, {
   IBackoffOptions,
 } from "../utils/try_urls_with_backoff";
 
+export enum SegmentLoaderEventType {
+  Cached = 500,
+  Warning,
+  Request,
+  Data,
+  Chunk,
+  ChunkComplete,
+}
+
 /** Data comes from a local JS cache maintained here, no request was done. */
-interface ISegmentLoaderCachedSegmentEvent<T> { type : "cache";
+interface ISegmentLoaderCachedSegmentEvent<T> { type : SegmentLoaderEventType.Cached;
                                                 value : ILoaderDataLoadedValue<T>; }
 
 /** An Error happened while loading (usually a request error). */
-export interface ISegmentLoaderWarning { type : "warning";
+export interface ISegmentLoaderWarning { type : SegmentLoaderEventType.Warning;
                                          value : ICustomError; }
 
 /** The request begins to be done. */
-export interface ISegmentLoaderRequest { type : "request";
+export interface ISegmentLoaderRequest { type : SegmentLoaderEventType.Request;
                                          value : ISegmentLoaderArguments; }
 
 /** The whole segment's data (not only a chunk) is available. */
-export interface ISegmentLoaderData<T> { type : "data";
+export interface ISegmentLoaderData<T> { type : SegmentLoaderEventType.Data;
                                          value : { responseData : T }; }
 
 /**
@@ -69,14 +80,16 @@ export interface ISegmentLoaderData<T> { type : "data";
  * You will receive every chunk through such events until a
  * ISegmentLoaderChunkComplete event is received.
  */
-export interface ISegmentLoaderChunk { type : "chunk";
+export interface ISegmentLoaderChunk { type : SegmentLoaderEventType.Chunk;
                                        value : { responseData : null |
                                                                 ArrayBuffer |
                                                                 Uint8Array; }; }
 
-/** The data has been entirely sent through "chunk" events. */
-export interface ISegmentLoaderChunkComplete { type : "chunk-complete";
-                                               value : null; }
+/** The data has been entirely sent through `ISegmentLoaderChunk` events. */
+export interface ISegmentLoaderChunkComplete {
+  type : SegmentLoaderEventType.ChunkComplete;
+  value : null;
+}
 
 /**
  * Every events the segment loader emits.
@@ -161,7 +174,8 @@ export default function createSegmentLoader<T>(
       const request$ = (url : string | null) => {
         const loaderArgument = objectAssign({ url }, wantedContent);
         return observableConcat(
-          observableOf({ type: "request" as const, value: loaderArgument }),
+          observableOf({ type: SegmentLoaderEventType.Request as const,
+                         value: loaderArgument }),
           tryCatch(loader, loaderArgument));
       };
       return tryURLsWithBackoff(wantedContent.segment.mediaURLs ?? [null],
@@ -175,14 +189,14 @@ export default function createSegmentLoader<T>(
                     ISegmentLoaderWarning |
                     ISegmentLoaderRequest => {
           if (evt.type === "retry") {
-            return { type: "warning" as const,
+            return { type: SegmentLoaderEventType.Warning as const,
                      value: errorSelector(evt.value) };
-          } else if (evt.value.type === "request") {
+          } else if (evt.value.type === SegmentLoaderEventType.Request) {
             return evt.value;
           }
 
           const response = evt.value;
-          if (response.type === "data-loaded" && cache != null) {
+          if (response.type === XHREventType.DataLoaded && cache != null) {
             cache.add(wantedContent, response.value);
           }
           return evt.value;
@@ -194,7 +208,8 @@ export default function createSegmentLoader<T>(
 
     if (dataFromCache != null) {
       return castToObservable(dataFromCache).pipe(
-        map(response => ({ type: "cache" as const, value: response })),
+        map(response => ({ type: SegmentLoaderEventType.Cached as const,
+                           value: response })),
         catchError(startLoaderWithBackoff)
       );
     }
@@ -213,7 +228,8 @@ export default function createSegmentLoader<T>(
     return loadData(content).pipe(
       mergeMap((arg) : Observable<ISegmentLoaderEvent<T>> => {
         let metrics$ : Observable<IABRMetricsEvent>;
-        if ((arg.type === "data-chunk-complete" || arg.type === "data-loaded") &&
+        if ((arg.type === TransportEventType.DataChunkComplete ||
+             arg.type === XHREventType.DataLoaded) &&
             arg.value.size !== undefined && arg.value.duration !== undefined)
         {
           metrics$ = observableOf({ type: "metrics",
@@ -225,23 +241,25 @@ export default function createSegmentLoader<T>(
         }
 
         switch (arg.type) {
-          case "warning":
-          case "request":
-          case "progress":
+          case SegmentLoaderEventType.Warning:
+          case SegmentLoaderEventType.Request:
+          case XHREventType.Progress:
             return observableOf(arg);
-          case "cache":
-          case "data-created":
-          case "data-loaded":
-            return observableConcat(observableOf({ type: "data" as const,
-                                                   value: arg.value }),
-                                    metrics$);
+          case SegmentLoaderEventType.Cached:
+          case TransportEventType.DataCreated:
+          case XHREventType.DataLoaded:
+            return observableConcat(
+              observableOf({ type: SegmentLoaderEventType.Data as const,
+                             value: arg.value }),
+              metrics$);
 
-          case "data-chunk":
-            return observableOf({ type: "chunk", value: arg.value });
-          case "data-chunk-complete":
-            return observableConcat(observableOf({ type: "chunk-complete" as const,
-                                                   value: null }),
-                                    metrics$);
+          case TransportEventType.DataChunk:
+            return observableOf({ type: SegmentLoaderEventType.Chunk, value: arg.value });
+          case TransportEventType.DataChunkComplete:
+            return observableConcat(
+              observableOf({ type: SegmentLoaderEventType.ChunkComplete as const,
+                             value: null }),
+              metrics$);
 
           default:
             assertUnreachable(arg);

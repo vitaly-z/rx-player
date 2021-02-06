@@ -25,6 +25,7 @@ import warnOnce from "../../utils/warn_once";
 import {
   ISegmentLoaderArguments,
   ISegmentLoaderEvent,
+  TransportEventType,
 } from "../types";
 import byteRange from "../utils/byte_range";
 import isMP4EmbeddedTextTrack from "../utils/is_mp4_embedded_text_track";
@@ -58,7 +59,7 @@ export default function generateTextTrackLoader(
     const { url } = args;
 
     if (url === null) {
-      return observableOf({ type: "data-created",
+      return observableOf({ type: TransportEventType.DataCreated,
                             value: { responseData: null } });
     }
 

@@ -24,8 +24,13 @@ const { DEFAULT_REQUEST_TIMEOUT } = config;
 
 const DEFAULT_RESPONSE_TYPE : XMLHttpRequestResponseType = "json";
 
+export enum XHREventType {
+  Progress = 800,
+  DataLoaded
+}
+
 // Interface for "progress" events
-export interface IRequestProgress { type : "progress";
+export interface IRequestProgress { type : XHREventType.Progress;
                                     value : { currentTime : number;
                                               duration : number;
                                               size : number;
@@ -35,7 +40,7 @@ export interface IRequestProgress { type : "progress";
 }
 
 // Interface for "response" events
-export interface IRequestResponse<T, U> { type : "data-loaded";
+export interface IRequestResponse<T, U> { type : XHREventType.DataLoaded;
                                           value : { duration : number;
                                                     receivedTime : number;
                                                     responseData : T;
@@ -252,7 +257,7 @@ function request<T>(
     if (options.sendProgressEvents === true) {
       xhr.onprogress = function onXHRProgress(event) {
         const currentTime = performance.now();
-        obs.next({ type: "progress",
+        obs.next({ type: XHREventType.Progress,
                    value: { url,
                             duration: currentTime - sendingTime,
                             sendingTime,
@@ -291,7 +296,7 @@ function request<T>(
             return;
           }
 
-          obs.next({ type: "data-loaded",
+          obs.next({ type: XHREventType.DataLoaded,
                      value: { status,
                               url: _url,
                               responseType: loadedResponseType,

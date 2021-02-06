@@ -195,7 +195,12 @@ export default function initializeDirectfileContent({
 
   return observableMerge(loadedEvent$,
                          initialSeek$,
-                         emeManager$,
+                         emeManager$.pipe(map(evt => {
+                           if (evt.type === "warning") {
+                             return EVENTS.warning(evt.value);
+                           }
+                           return evt;
+                         })),
                          mediaError$,
                          playbackRate$,
                          stalled$);

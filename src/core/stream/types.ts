@@ -53,6 +53,34 @@ export interface IBufferDiscontinuity {
 }
 
 /**
+ * All stream events have a discriminant, called "type".
+ * This is an enumeration of all of them.
+ *
+ * More information on the meaning of them can be found on the type defining
+ * those events.
+ */
+export enum StreamEventType {
+  Warning = 100,
+  StreamStatus,
+  AddedSegment,
+  NeedsManifestRefresh,
+  ManifestMaybeOutOfSync,
+  ProtectedSegment,
+  StreamTerminating,
+  BitrateEstimateUpdate,
+  RepresentationChange,
+  AdaptationChanged,
+  ActivePeriodChanged,
+  PeriodStreamReady,
+  PeriodStreamCleared,
+  EndOfStream,
+  ResumeStream,
+  CompleteStream,
+  NeedsMediaSourceReload,
+  NeedsDecipherabilityFlush,
+}
+
+/**
  * Event sent by a `RepresentationStream` to announce the current status
  * regarding the buffer for its associated Period and type (e.g. "audio",
  * "video", "text" etc.).
@@ -61,7 +89,7 @@ export interface IBufferDiscontinuity {
  * same Period and type.
  */
 export interface IStreamStatusEvent {
-  type : "stream-status";
+  type : StreamEventType.StreamStatus;
   value : {
     /** Period concerned. */
     period : Period;
@@ -107,14 +135,14 @@ export interface IStreamStatusEvent {
 
 /** Event sent when a minor error happened, which doesn't stop playback. */
 export interface IStreamWarningEvent {
-  type : "warning";
+  type : StreamEventType.Warning;
   /** The error corresponding to the warning given. */
   value : ICustomError;
 }
 
 /** Emitted after a new segment has been succesfully added to the SegmentBuffer */
 export interface IStreamEventAddedSegment<T> {
-  type : "added-segment";
+  type : StreamEventType.AddedSegment;
   value : {
     /** Context about the content that has been added. */
     content: { period : Period;
@@ -136,7 +164,7 @@ export interface IStreamEventAddedSegment<T> {
  * It might download and push segments, send any other event etc.
  */
 export interface IStreamNeedsManifestRefresh {
-  type : "needs-manifest-refresh";
+  type : StreamEventType.NeedsManifestRefresh;
   value : undefined;
 }
 
@@ -147,7 +175,7 @@ export interface IStreamNeedsManifestRefresh {
  * is not and because it suspects this is due to a synchronization problem.
  */
 export interface IStreamManifestMightBeOutOfSync {
-  type : "manifest-might-be-out-of-sync";
+  type : StreamEventType.ManifestMaybeOutOfSync;
   value : undefined;
 }
 
@@ -164,7 +192,7 @@ export interface ISegmentProtection {
 
 /** Emitted when a segment with protection information has been encountered. */
 export interface IProtectedSegmentEvent {
-  type : "protected-segment";
+  type : StreamEventType.ProtectedSegment;
   value : ISegmentProtection;
 }
 
@@ -182,13 +210,13 @@ export interface IProtectedSegmentEvent {
  * created.
  */
 export interface IStreamTerminatingEvent {
-  type : "stream-terminating";
+  type : StreamEventType.StreamTerminating;
   value : undefined;
 }
 
 /** Emitted as new bitrate estimates are done. */
 export interface IBitrateEstimationChangeEvent {
-  type : "bitrateEstimationChange";
+  type : StreamEventType.BitrateEstimateUpdate;
   value : {
     /** The type of buffer for which the estimation is done. */
     type : IBufferType;
@@ -205,7 +233,7 @@ export interface IBitrateEstimationChangeEvent {
  * `Representation`.
  */
 export interface IRepresentationChangeEvent {
-  type : "representationChange";
+  type : StreamEventType.RepresentationChange;
   value : {
     /** The type of buffer linked to that `RepresentationStream`. */
     type : IBufferType;
@@ -224,7 +252,7 @@ export interface IRepresentationChangeEvent {
  * `Adaptation`.
  */
 export interface IAdaptationChangeEvent {
-  type : "adaptationChange";
+  type : StreamEventType.AdaptationChanged;
   value : {
     /** The type of buffer for which the Representation is changing. */
     type : IBufferType;
@@ -241,7 +269,7 @@ export interface IAdaptationChangeEvent {
 
 /** Emitted when a new `Period` is currently playing. */
 export interface IActivePeriodChangedEvent {
-  type: "activePeriodChanged";
+  type: StreamEventType.ActivePeriodChanged;
   value : {
     /** The Period we're now playing. */
     period: Period;
@@ -253,7 +281,7 @@ export interface IActivePeriodChangedEvent {
  * to be chosen first.
  */
 export interface IPeriodStreamReadyEvent {
-  type : "periodStreamReady";
+  type : StreamEventType.PeriodStreamReady;
   value : {
     /** The type of buffer linked to the `PeriodStream` we want to create. */
     type : IBufferType;
@@ -279,7 +307,7 @@ export interface IPeriodStreamReadyEvent {
  * `PeriodStream`.
  */
 export interface IPeriodStreamClearedEvent {
-  type : "periodStreamCleared";
+  type : StreamEventType.PeriodStreamCleared;
   value : {
     /**
      * The type of buffer linked to the `PeriodStream` we just removed.
@@ -303,7 +331,7 @@ export interface IPeriodStreamClearedEvent {
  * This means usually that segments for the whole content have been pushed to
  * the end.
  */
-export interface IEndOfStreamEvent { type: "end-of-stream";
+export interface IEndOfStreamEvent { type: StreamEventType.EndOfStream;
                                      value: undefined; }
 
 /**
@@ -312,14 +340,14 @@ export interface IEndOfStreamEvent { type: "end-of-stream";
  *
  * Note that it also can be send if no `IEndOfStreamEvent` has been sent before.
  */
-export interface IResumeStreamEvent { type: "resume-stream";
+export interface IResumeStreamEvent { type: StreamEventType.ResumeStream;
                                       value: undefined; }
 
 /**
  * The last (chronologically) `PeriodStream` for a given type has pushed all
  * the segments it needs until the end.
  */
-export interface ICompletedStreamEvent { type: "complete-stream";
+export interface ICompletedStreamEvent { type: StreamEventType.CompleteStream;
                                          value : { type: IBufferType }; }
 
 /**
@@ -329,7 +357,7 @@ export interface ICompletedStreamEvent { type: "complete-stream";
  * scratch.
  */
 export interface INeedsMediaSourceReload {
-  type: "needs-media-source-reload";
+  type: StreamEventType.NeedsMediaSourceReload;
   value: {
     /**
      * The position in seconds and the time at which the MediaSource should be
@@ -369,7 +397,7 @@ export interface INeedsMediaSourceReload {
  * to be "flushed" to continue (e.g. through a little seek operation).
  */
 export interface INeedsDecipherabilityFlush {
-  type: "needs-decipherability-flush";
+  type: StreamEventType.NeedsDecipherabilityFlush;
   value: {
     /**
      * Indicated in the case where the MediaSource has to be reloaded,

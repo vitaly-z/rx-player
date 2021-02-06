@@ -37,6 +37,7 @@ import createSmoothManifestParser, {
   SmoothRepresentationIndex,
 } from "../../parsers/manifest/smooth";
 import request from "../../utils/request";
+import { XHREventType } from "../../utils/request/xhr";
 import {
   strToUtf8,
   utf8ToStr,
@@ -55,6 +56,7 @@ import {
   ITextParserObservable,
   ITransportOptions,
   ITransportPipelines,
+  TransportEventType,
 } from "../types";
 import checkISOBMFFIntegrity from "../utils/check_isobmff_integrity";
 import returnParsedManifest from "../utils/return_parsed_manifest";
@@ -166,7 +168,8 @@ export default function(options : ITransportOptions) : ITransportPipelines {
         return segmentLoader(content);
       }
       return segmentLoader(content).pipe(tap(res => {
-        if ((res.type === "data-loaded" || res.type === "data-chunk") &&
+        if ((res.type === XHREventType.DataLoaded ||
+             res.type === TransportEventType.DataChunk) &&
             res.value.responseData !== null)
         {
           checkISOBMFFIntegrity(new Uint8Array(res.value.responseData),
@@ -186,12 +189,12 @@ export default function(options : ITransportOptions) : ITransportPipelines {
       if (data === null) {
         if (segment.isInit) {
           const segmentProtections = representation.getProtectionsInitializationData();
-          return observableOf({ type: "parsed-init-segment",
+          return observableOf({ type: TransportEventType.ParsedInitSegment,
                                 value: { initializationData: null,
                                          segmentProtections,
                                          initTimescale: undefined } });
         }
-        return observableOf({ type: "parsed-segment",
+        return observableOf({ type: TransportEventType.ParsedMediaSegment,
                               value: { chunkData: null,
                                        chunkInfos: null,
                                        chunkOffset: 0,
@@ -211,7 +214,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
         }
         const segmentProtections = representation.getProtectionsInitializationData();
         const timescale = segment.privateInfos?.smoothInitSegment?.timescale;
-        return observableOf({ type: "parsed-init-segment",
+        return observableOf({ type: TransportEventType.ParsedInitSegment,
                               value: { initializationData: data,
                                        // smooth init segments are crafted by hand.
                                        // Their timescale is the one from the manifest.
@@ -237,7 +240,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
       if (nextSegments.length > 0) {
         addNextSegments(adaptation, nextSegments, segment);
       }
-      return observableOf({ type: "parsed-segment",
+      return observableOf({ type: TransportEventType.ParsedMediaSegment,
                             value: { chunkData,
                                      chunkInfos,
                                      chunkOffset: 0,
@@ -252,7 +255,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
         url } : ISegmentLoaderArguments
     ) : Observable< ISegmentLoaderEvent<string|ArrayBuffer|null> > {
       if (segment.isInit || url === null) {
-        return observableOf({ type: "data-created" as const,
+        return observableOf({ type: TransportEventType.DataCreated as const,
                               value: { responseData: null } });
       }
       const isMP4 = isMP4EmbeddedTrack(representation);
@@ -265,7 +268,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
                        responseType: "arraybuffer",
                        sendProgressEvents: true })
         .pipe(tap(res => {
-          if (res.type === "data-loaded") {
+          if (res.type === XHREventType.DataLoaded) {
             checkISOBMFFIntegrity(new Uint8Array(res.value.responseData),
                                   segment.isInit);
           }
@@ -284,13 +287,13 @@ export default function(options : ITransportOptions) : ITransportPipelines {
       const { mimeType = "", codec = "" } = representation;
       const { data, isChunked } = response;
       if (segment.isInit) { // text init segment has no use in HSS
-        return observableOf({ type: "parsed-init-segment",
+        return observableOf({ type: TransportEventType.ParsedInitSegment,
                               value: { initializationData: null,
                                        segmentProtections: [],
                                        initTimescale: undefined } });
       }
       if (data === null) {
-        return observableOf({ type: "parsed-segment",
+        return observableOf({ type: TransportEventType.ParsedMediaSegment,
                               value: { chunkData: null,
                                        chunkInfos: null,
                                        chunkOffset: 0,
@@ -397,7 +400,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
       }
 
       const chunkOffset = segmentStart ?? 0;
-      return observableOf({ type: "parsed-segment",
+      return observableOf({ type: TransportEventType.ParsedMediaSegment,
                             value: { chunkData: { type: _sdType,
                                                   data: _sdData,
                                                   start: segmentStart,
@@ -416,7 +419,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
     ) : Observable< ISegmentLoaderEvent<ArrayBuffer|null> > {
       if (segment.isInit || url === null) {
         // image do not need an init segment. Passthrough directly to the parser
-        return observableOf({ type: "data-created" as const,
+        return observableOf({ type: TransportEventType.DataCreated as const,
                               value: { responseData: null } });
       }
 
@@ -431,7 +434,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
       const { data, isChunked } = response;
 
       if (content.segment.isInit) { // image init segment has no use
-        return observableOf({ type: "parsed-init-segment",
+        return observableOf({ type: TransportEventType.ParsedInitSegment,
                               value: { initializationData: null,
                                        segmentProtections: [],
                                        initTimescale: undefined } });
@@ -443,7 +446,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
 
       // TODO image Parsing should be more on the buffer side, no?
       if (data === null || features.imageParser === null) {
-        return observableOf({ type: "parsed-segment",
+        return observableOf({ type: TransportEventType.ParsedMediaSegment,
                               value: { chunkData: null,
                                        chunkInfos: null,
                                        chunkOffset: 0,
@@ -452,7 +455,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
 
       const bifObject = features.imageParser(new Uint8Array(data));
       const thumbsData = bifObject.thumbs;
-      return observableOf({ type: "parsed-segment",
+      return observableOf({ type: TransportEventType.ParsedMediaSegment,
                             value: { chunkData: { data: thumbsData,
                                                   start: 0,
                                                   end: Number.MAX_VALUE,

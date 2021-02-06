@@ -15,6 +15,7 @@
  */
 
 import ManifestFetcher, {
+  ManifestFetcherEventType,
   IManifestFetcherParsedResult,
   IManifestFetcherParserOptions,
   IManifestFetcherWarningEvent,
@@ -22,6 +23,7 @@ import ManifestFetcher, {
 
 export default ManifestFetcher;
 export {
+  ManifestFetcherEventType,
   IManifestFetcherParsedResult,
   IManifestFetcherParserOptions,
   IManifestFetcherWarningEvent,

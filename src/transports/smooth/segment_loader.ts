@@ -21,12 +21,14 @@ import {
 } from "rxjs";
 import assert from "../../utils/assert";
 import request from "../../utils/request";
+import { XHREventType } from "../../utils/request/xhr";
 import {
   CustomSegmentLoader,
   ILoaderProgressEvent,
   ISegmentLoaderArguments,
   ISegmentLoaderDataLoadedEvent,
   ISegmentLoaderEvent,
+  TransportEventType,
 } from "../types";
 import byteRange from "../utils/byte_range";
 import {
@@ -127,10 +129,10 @@ const generateSegmentLoader = (
         responseData = new Uint8Array(0);
     }
 
-    return observableOf({ type: "data-created" as const,
+    return observableOf({ type: TransportEventType.DataCreated as const,
                           value: { responseData } });
   } else if (url === null) {
-    return observableOf({ type: "data-created" as const,
+    return observableOf({ type: TransportEventType.DataCreated as const,
                           value: { responseData: null } });
   } else {
     const args = { adaptation,
@@ -160,7 +162,7 @@ const generateSegmentLoader = (
       }) => {
         if (!hasFallbacked) {
           hasFinished = true;
-          obs.next({ type: "data-loaded",
+          obs.next({ type: XHREventType.DataLoaded,
                      value: { responseData: _args.data,
                               size: _args.size,
                               duration: _args.duration } });
@@ -185,9 +187,10 @@ const generateSegmentLoader = (
                   totalSize? : number; }
       ) => {
         if (!hasFallbacked) {
-          obs.next({ type: "progress", value: { duration: _args.duration,
-                                                size: _args.size,
-                                                totalSize: _args.totalSize } });
+          obs.next({ type: XHREventType.Progress,
+                     value: { duration: _args.duration,
+                              size: _args.size,
+                              totalSize: _args.totalSize } });
         }
       };
 

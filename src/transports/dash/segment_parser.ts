@@ -31,6 +31,7 @@ import {
   IAudioVideoParserObservable,
   ISegmentParserArguments,
   ITransportAudioVideoSegmentParser,
+  TransportEventType,
 } from "../types";
 import getISOBMFFTimingInfos from "../utils/get_isobmff_timing_infos";
 import isWEBMEmbeddedTrack from "../utils/is_webm_embedded_track";
@@ -56,12 +57,12 @@ export default function generateAudioVideoSegmentParser(
     if (data === null) {
       if (segment.isInit) {
         const _segmentProtections = representation.getProtectionsInitializationData();
-        return observableOf({ type: "parsed-init-segment" as const,
+        return observableOf({ type: TransportEventType.ParsedInitSegment as const,
                               value: { initializationData: null,
                                        segmentProtections: _segmentProtections,
                                        initTimescale: undefined } });
       }
-      return observableOf({ type: "parsed-segment" as const,
+      return observableOf({ type: TransportEventType.ParsedMediaSegment as const,
                             value: { chunkData: null,
                                      chunkInfos: null,
                                      chunkOffset: 0,
@@ -79,7 +80,7 @@ export default function generateAudioVideoSegmentParser(
                                                         segment,
                                                         initTimescale);
       const chunkOffset = takeFirstSet<number>(segment.timestampOffset, 0);
-      return observableOf({ type: "parsed-segment",
+      return observableOf({ type: TransportEventType.ParsedMediaSegment,
                             value: { chunkData,
                                      chunkInfos,
                                      chunkOffset,
@@ -134,7 +135,7 @@ export default function generateAudioVideoSegmentParser(
     }
 
     const segmentProtections = representation.getProtectionsInitializationData();
-    return observableOf({ type: "parsed-init-segment",
+    return observableOf({ type: TransportEventType.ParsedInitSegment,
                           value: { initializationData: chunkData,
                                    segmentProtections,
                                    initTimescale: parsedTimescale } });

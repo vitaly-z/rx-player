@@ -59,6 +59,7 @@ import {
   ISegmentParserInitSegment,
   ISegmentParserParsedInitSegment,
   ISegmentParserSegment,
+  TransportEventType,
 } from "../../../transports";
 import assertUnreachable from "../../../utils/assert_unreachable";
 import objectAssign from "../../../utils/object_assign";
@@ -66,8 +67,8 @@ import { IStalledStatus } from "../../api";
 import {
   IPrioritizedSegmentFetcher,
   IPrioritizedSegmentFetcherEvent,
-  ISegmentFetcherWarning,
 } from "../../fetchers";
+import { SegmentFetcherEventType } from "../../fetchers/segment/segment_fetcher";
 import { SegmentBuffer } from "../../segment_buffers";
 import EVENTS from "../events_generators";
 import {
@@ -79,6 +80,8 @@ import {
   IStreamManifestMightBeOutOfSync,
   IStreamNeedsManifestRefresh,
   IStreamTerminatingEvent,
+  StreamEventType,
+  IStreamWarningEvent,
 } from "../types";
 import getBufferStatus from "./get_buffer_status";
 import getSegmentPriority from "./get_segment_priority";
@@ -350,7 +353,7 @@ export default function RepresentationStream<T>({
       }
 
       const bufferStatusEvt : Observable<IStreamStatusEvent> =
-        observableOf({ type: "stream-status" as const,
+        observableOf({ type: StreamEventType.StreamStatus,
                        value: { period,
                                 position: tick.position,
                                 bufferType,
@@ -363,7 +366,7 @@ export default function RepresentationStream<T>({
                          bufferStatusEvt) :
         bufferStatusEvt;
     }),
-    takeWhile((e) => e.type !== "stream-terminating", true)
+    takeWhile((e) => e.type !== StreamEventType.StreamTerminating, true)
   );
 
   /**
@@ -408,10 +411,10 @@ export default function RepresentationStream<T>({
         return request$
           .pipe(mergeMap((evt) : Observable<ISegmentLoadingEvent<T>> => {
             switch (evt.type) {
-              case "warning":
+              case SegmentFetcherEventType.Warning:
                 return observableOf({ type: "retry" as const,
                                       value: { segment, error: evt.value } });
-              case "chunk-complete":
+              case SegmentFetcherEventType.ChunkComplete:
                 currentSegmentRequest = null;
                 return observableOf({ type: "end-of-segment" as const,
                                       value: { segment } });
@@ -420,7 +423,7 @@ export default function RepresentationStream<T>({
                 log.info("Stream: segment request interrupted temporarly.", segment);
                 return EMPTY;
 
-              case "chunk":
+              case SegmentFetcherEventType.Chunk:
                 const initTimescale = initSegmentObject?.initTimescale;
                 return evt.parse(initTimescale).pipe(map(parserResponse => {
                   return objectAssign({ segment }, parserResponse);
@@ -447,14 +450,14 @@ export default function RepresentationStream<T>({
   function onLoaderEvent(
     evt : ISegmentLoadingEvent<T>
   ) : Observable<IStreamEventAddedSegment<T> |
-                 ISegmentFetcherWarning |
+                 IStreamWarningEvent |
                  IProtectedSegmentEvent |
                  IStreamManifestMightBeOutOfSync>
   {
     switch (evt.type) {
       case "retry":
         return observableConcat(
-          observableOf({ type: "warning" as const, value: evt.value.error }),
+          observableOf(EVENTS.warning(evt.value.error)),
           observableDefer(() => { // better if done after warning is emitted
             const retriedSegment = evt.value.segment;
             const { index } = representation;
@@ -466,7 +469,7 @@ export default function RepresentationStream<T>({
             return EMPTY; // else, ignore.
           }));
 
-      case "parsed-init-segment":
+      case TransportEventType.ParsedInitSegment:
         initSegmentObject = evt.value;
         const protectedEvents$ = observableOf(
           ...evt.value.segmentProtections.map(segmentProt => {
@@ -479,7 +482,7 @@ export default function RepresentationStream<T>({
                                              segmentBuffer });
         return observableMerge(protectedEvents$, pushEvent$);
 
-      case "parsed-segment":
+      case TransportEventType.ParsedMediaSegment:
         const initSegmentData = initSegmentObject?.initializationData ?? null;
         return pushMediaSegment({ clock$,
                                   content,

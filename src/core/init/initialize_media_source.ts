@@ -64,9 +64,11 @@ import {
   IManifestFetcherParserOptions,
   IManifestFetcherWarningEvent,
   ManifestFetcher,
+  ManifestFetcherEventType,
   SegmentFetcherCreator,
 } from "../fetchers";
 import { ITextTrackSegmentBufferOptions } from "../segment_buffers";
+import { StreamEventType } from "../stream";
 import createEMEManager from "./create_eme_manager";
 import openMediaSource from "./create_media_source";
 import EVENTS from "./events_generators";
@@ -82,6 +84,7 @@ import {
   IInitClockTick,
   IInitEvent,
   IMediaSourceLoaderEvent,
+  InitEventType,
   IWarningEvent,
 } from "./types";
 
@@ -218,9 +221,12 @@ export default function InitializeOnMediaSource(
     (manifestURL : string | undefined, options : IManifestFetcherParserOptions)
     : Observable<IWarningEvent | IManifestFetcherParsedResult> =>
       manifestFetcher.fetch(manifestURL).pipe(
-        mergeMap((response) => response.type === "warning" ?
-          observableOf(response) : // bubble-up warnings
-          response.parse(options)),
+        mergeMap((response) => response.type === ManifestFetcherEventType.Warning ?
+          observableOf(EVENTS.warning(response.value)) :
+          response.parse(options)
+            .pipe(map(evt => evt.type === ManifestFetcherEventType.Warning ?
+                               EVENTS.warning(evt.value) :
+                               evt))),
         share()));
 
   /** Interface used to download segments. */
@@ -273,15 +279,19 @@ export default function InitializeOnMediaSource(
   let initialManifestRequest$: Observable<IManifestFetcherParsedResult |
                                           IManifestFetcherWarningEvent>;
   if (initialManifest instanceof Manifest) {
-    initialManifestRequest$ = observableOf({ type: "parsed",
+    initialManifestRequest$ = observableOf({ type: ManifestFetcherEventType.Parsed,
                                              manifest: initialManifest });
   } else if (initialManifest !== undefined) {
     initialManifestRequest$ =
       manifestFetcher.parse(initialManifest, { previousManifest: null,
                                                unsafeMode: false });
   } else {
+    // XXX TODO
     initialManifestRequest$ =
-      fetchManifest(url, { previousManifest: null, unsafeMode: false });
+      fetchManifest(url, { previousManifest: null, unsafeMode: false }).pipe(
+        map(evt => evt.type === InitEventType.Warning ?
+          { type: ManifestFetcherEventType.Warning, value: evt.value } :
+          evt));
   }
 
   /**
@@ -318,8 +328,8 @@ export default function InitializeOnMediaSource(
   const loadContent$ = observableCombineLatest([initialManifestRequest$,
                                                 prepareMediaSource$]).pipe(
     mergeMap(([manifestEvt, initialMediaSource]) => {
-      if (manifestEvt.type === "warning") {
-        return observableOf(manifestEvt);
+      if (manifestEvt.type === ManifestFetcherEventType.Warning) {
+        return observableOf(EVENTS.warning(manifestEvt.value));
       }
 
       const { manifest } = manifestEvt;
@@ -400,21 +410,21 @@ export default function InitializeOnMediaSource(
         const mediaSourceLoader$ = mediaSourceLoader(mediaSource, startingPos, shouldPlay)
           .pipe(filterMap<IMediaSourceLoaderEvent, IInitEvent, null>((evt) => {
             switch (evt.type) {
-              case "needs-manifest-refresh":
+              case StreamEventType.NeedsManifestRefresh:
                 scheduleRefresh$.next({ completeRefresh: false,
                                         canUseUnsafeMode: true });
                 return null;
-              case "manifest-might-be-out-of-sync":
+              case StreamEventType.ManifestMaybeOutOfSync:
                 scheduleRefresh$.next({
                   completeRefresh: true,
                   canUseUnsafeMode: false,
                   delay: OUT_OF_SYNC_MANIFEST_REFRESH_DELAY,
                 });
                 return null;
-              case "needs-media-source-reload":
+              case StreamEventType.NeedsMediaSourceReload:
                 reloadMediaSource$.next(evt.value);
                 return null;
-              case "needs-decipherability-flush":
+              case StreamEventType.NeedsDecipherabilityFlush:
                 const keySystem = getCurrentKeySystem(mediaElement);
                 if (shouldReloadMediaSourceOnDecipherabilityUpdate(keySystem)) {
                   reloadMediaSource$.next(evt.value);
@@ -430,7 +440,7 @@ export default function InitializeOnMediaSource(
                   mediaElement.currentTime = position;
                 }
                 return null;
-              case "protected-segment":
+              case StreamEventType.ProtectedSegment:
                 protectedSegments$.next(evt.value);
                 return null;
             }
@@ -454,5 +464,13 @@ export default function InitializeOnMediaSource(
       }
     }));
 
-  return observableMerge(loadContent$, mediaError$, emeManager$);
+  // XXX TODO
+  return observableMerge(loadContent$,
+                         mediaError$,
+                         emeManager$.pipe(map(evt => {
+                           if (evt.type === "warning") {
+                             return EVENTS.warning(evt.value);
+                           }
+                           return evt;
+                         })));
 }

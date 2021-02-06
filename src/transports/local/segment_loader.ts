@@ -23,6 +23,7 @@ import {
   ILocalManifestSegmentLoader,
 } from "../../parsers/manifest/local";
 import isNullOrUndefined from "../../utils/is_null_or_undefined";
+import { XHREventType } from "../../utils/request/xhr";
 import {
   ISegmentLoaderArguments,
   ISegmentLoaderDataLoadedEvent,
@@ -51,7 +52,7 @@ function loadInitSegment(
       duration? : number;
     }) => {
       hasFinished = true;
-      obs.next({ type: "data-loaded",
+      obs.next({ type: XHREventType.DataLoaded,
                  value: { responseData: _args.data,
                           size: _args.size,
                           duration: _args.duration } });
@@ -101,7 +102,7 @@ function loadSegment(
       duration? : number;
     }) => {
       hasFinished = true;
-      obs.next({ type: "data-loaded",
+      obs.next({ type: XHREventType.DataLoaded,
                  value: { responseData: _args.data,
                           size: _args.size,
                           duration: _args.duration } });

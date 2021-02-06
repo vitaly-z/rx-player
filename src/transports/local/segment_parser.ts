@@ -25,6 +25,7 @@ import takeFirstSet from "../../utils/take_first_set";
 import {
   IAudioVideoParserObservable,
   ISegmentParserArguments,
+  TransportEventType,
 } from "../types";
 import getISOBMFFTimingInfos from "../utils/get_isobmff_timing_infos";
 import isWEBMEmbeddedTrack from "../utils/is_webm_embedded_track";
@@ -42,12 +43,12 @@ export default function segmentParser({
   if (data === null) {
     if (segment.isInit) {
       const _segmentProtections = representation.getProtectionsInitializationData();
-      return observableOf({ type: "parsed-init-segment",
+      return observableOf({ type: TransportEventType.ParsedInitSegment,
                             value: { initializationData: null,
                                      segmentProtections: _segmentProtections,
                                      initTimescale: undefined } });
     }
-    return observableOf({ type: "parsed-segment",
+    return observableOf({ type: TransportEventType.ParsedMediaSegment,
                           value: { chunkData: null,
                                    chunkInfos: null,
                                    chunkOffset: 0,
@@ -71,7 +72,7 @@ export default function segmentParser({
     const timescale = isWEBM ? getTimeCodeScale(chunkData, 0) :
                                getMDHDTimescale(chunkData);
     const segmentProtections = representation.getProtectionsInitializationData();
-    return observableOf({ type: "parsed-init-segment",
+    return observableOf({ type: TransportEventType.ParsedInitSegment,
                           value: { initializationData: chunkData,
                                    initTimescale: isNullOrUndefined(timescale) ?
                                      undefined :
@@ -85,7 +86,7 @@ export default function segmentParser({
                                                     segment,
                                                     initTimescale);
   const chunkOffset = takeFirstSet<number>(segment.timestampOffset, 0);
-  return observableOf({ type: "parsed-segment",
+  return observableOf({ type: TransportEventType.ParsedMediaSegment,
                         value: { chunkData,
                                  chunkInfos,
                                  chunkOffset,

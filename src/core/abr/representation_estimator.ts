@@ -37,6 +37,8 @@ import {
   Representation,
 } from "../../manifest";
 import { getLeftSizeOfRange } from "../../utils/ranges";
+import { XHREventType } from "../../utils/request/xhr";
+import { StreamEventType } from "../stream";
 import BandwidthEstimator from "./bandwidth_estimator";
 import BufferBasedChooser from "./buffer_based_chooser";
 import generateCachedSegmentDetector from "./cached_segment_detector";
@@ -158,7 +160,7 @@ export interface IABRMetricsEvent { type : "metrics";
  * the current type (e.g. "audio", "video" etc.) and Period.
  */
 export interface IABRRepresentationChangeEvent {
-  type: "representationChange";
+  type: StreamEventType.RepresentationChange;
   value: {
     /** The new loaded `Representation`. `null` if no Representation is chosen. */
     representation : Representation |
@@ -201,7 +203,7 @@ export interface IABRRequestBeginEvent {
  * "audio", "video" etc.) and Period.
  */
 export interface IABRRequestProgressEvent {
-  type: "progress";
+  type: XHREventType.Progress;
   value: {
     /** Amount of time since the request has started, in seconds. */
     duration : number;
@@ -268,7 +270,7 @@ export interface IABRFiltersObject {
  * Period has been correctly added to the underlying media buffer.
  */
 export interface IABRAddedSegmentEvent {
-  type : "added-segment";
+  type : StreamEventType.AddedSegment;
   value : {
     /**
      * The buffered ranges of the related media buffer after that segment has
@@ -456,7 +458,7 @@ export default function RepresentationEstimator({
         case "requestEnd":
           requestsStore.remove(evt.value.id);
           break;
-        case "progress":
+        case XHREventType.Progress:
           requestsStore.addProgress(evt.value);
           break;
       }
@@ -464,7 +466,8 @@ export default function RepresentationEstimator({
     ignoreElements());
 
   const currentRepresentation$ = streamEvents$.pipe(
-    filter((e) : e is IABRRepresentationChangeEvent => e.type === "representationChange"),
+    filter((e) : e is IABRRepresentationChangeEvent =>
+      e.type === StreamEventType.RepresentationChange),
     map((e) => e.value.representation),
     startWith(null));
 
@@ -504,7 +507,8 @@ export default function RepresentationEstimator({
       // Emit each time a buffer-based estimation should be actualized (each
       // time a segment is added).
       const bufferBasedClock$ = streamEvents$.pipe(
-        filter((e) : e is IABRAddedSegmentEvent => e.type === "added-segment"),
+        filter((e) : e is IABRAddedSegmentEvent =>
+          e.type === StreamEventType.AddedSegment),
         withLatestFrom(clock$),
         map(([{ value: evtValue }, { speed, position } ]) => {
           const timeRanges = evtValue.buffered;

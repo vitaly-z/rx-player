@@ -71,9 +71,20 @@ export interface IInitClockTick { position : number;
                                             null;
                                   seeking : boolean; }
 
+export enum InitEventType {
+  Warning = 200,
+  ManifestReady,
+  ManifestUpdate,
+  DecipherabilityUpdate,
+  ReloadingMediaSource,
+  Stalled,
+  Unstalled,
+  Loaded,
+}
+
 /** Event sent after the Manifest has been loaded and parsed for the first time. */
 export interface IManifestReadyEvent {
-  type : "manifestReady";
+  type : InitEventType.ManifestReady;
   value : {
     /** The Manifest we just parsed. */
     manifest : Manifest;
@@ -81,7 +92,7 @@ export interface IManifestReadyEvent {
 }
 
 /** Event sent after the Manifest has been updated. */
-export interface IManifestUpdateEvent { type: "manifestUpdate";
+export interface IManifestUpdateEvent { type: InitEventType.ManifestUpdate;
                                         value: null; }
 
 /**
@@ -91,36 +102,36 @@ export interface IManifestUpdateEvent { type: "manifestUpdate";
  * undecipherable on the current device.
  */
 export interface IDecipherabilityUpdateEvent {
-  type: "decipherabilityUpdate";
+  type: InitEventType.DecipherabilityUpdate;
   value: Array<{ manifest : Manifest;
                  period : Period;
                  adaptation : Adaptation;
                  representation : Representation; }>; }
 
 /** Event sent when a minor happened. */
-export interface IWarningEvent { type : "warning";
+export interface IWarningEvent { type : InitEventType.Warning;
                                  value : ICustomError; }
 
 /**
  * Event sent when we're starting attach a new MediaSource to the media element
  * (after removing the previous one).
  */
-export interface IReloadingMediaSourceEvent { type: "reloading-media-source";
+export interface IReloadingMediaSourceEvent { type: InitEventType.ReloadingMediaSource;
                                               value: undefined; }
 
 /** Event sent after the player stalled, leading to buffering. */
-export interface IStalledEvent { type : "stalled";
+export interface IStalledEvent { type : InitEventType.Stalled;
                                  value : IStalledStatus; }
 
 /** Event sent when the player goes out of a stalling situation. */
-export interface IUnstalledEvent { type : "unstalled";
+export interface IUnstalledEvent { type : InitEventType.Unstalled;
                                    value : null; }
 
 /**
  * Event sent just as the content is considered as "loaded".
  * From this point on, the user can reliably play/pause/resume the stream.
  */
-export interface ILoadedEvent { type : "loaded";
+export interface ILoadedEvent { type : InitEventType.Loaded;
                                 value : {
                                   segmentBuffersStore: SegmentBuffersStore | null;
                                 }; }

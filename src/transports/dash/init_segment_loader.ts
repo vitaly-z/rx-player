@@ -21,6 +21,7 @@ import {
 import { map } from "rxjs/operators";
 import { concat } from "../../utils/byte_parsing";
 import xhr from "../../utils/request";
+import { XHREventType } from "../../utils/request/xhr";
 import {
   ISegmentLoaderArguments,
   ISegmentLoaderEvent,
@@ -73,7 +74,7 @@ export default function initSegmentLoader(
                                    indexData.value.sendingTime);
       const receivedTime = Math.max(initData.value.receivedTime,
                                     indexData.value.receivedTime);
-      return { type: "data-loaded",
+      return { type: XHREventType.DataLoaded,
                value: { url,
                         responseData: data,
                         size: initData.value.size + indexData.value.size,
