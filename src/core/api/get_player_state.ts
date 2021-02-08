@@ -67,7 +67,7 @@ export default function getLoadedContentState(
     // reached the end by comparing the current position and the
     // duration instead.
     const gapBetweenDurationAndCurrentTime = Math.abs(mediaElement.duration -
-                                                      mediaElement.currentTime);
+                                                      (mediaElement.currentTime + window.offset));
     if (FORCED_ENDED_THRESHOLD != null &&
         gapBetweenDurationAndCurrentTime < FORCED_ENDED_THRESHOLD
     ) {

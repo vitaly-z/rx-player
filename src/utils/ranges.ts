@@ -184,9 +184,9 @@ function convertToRanges(timeRanges : TimeRanges) : IRange[] {
  */
 function getRange(timeRanges : TimeRanges, time : number) : IRange|null {
   for (let i = timeRanges.length - 1; i >= 0; i--) {
-    const start = timeRanges.start(i);
+    const start = timeRanges.start(i) + window.offset;
     if (time >= start) {
-      const end = timeRanges.end(i);
+      const end = timeRanges.end(i) + window.offset;
       if (time < end) {
         return { start,
                  end };
@@ -205,7 +205,7 @@ function getRange(timeRanges : TimeRanges, time : number) : IRange|null {
 function getNextRangeGap(timeRanges : TimeRanges, time : number) : number {
   const len = timeRanges.length;
   for (let i = 0; i < len; i++) {
-    const start = timeRanges.start(i);
+    const start = timeRanges.start(i) + window.offset;
     if (time < start) {
       return start - time;
     }

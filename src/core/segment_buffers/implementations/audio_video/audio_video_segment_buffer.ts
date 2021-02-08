@@ -458,6 +458,7 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer<BufferSource>
             this._flush();
             return;
           }
+          debugger;
           this._sourceBuffer.appendBuffer(segmentData);
           break;
 
@@ -511,8 +512,10 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer<BufferSource>
       }
     }
 
-    if (this._sourceBuffer.timestampOffset !== timestampOffset) {
-      const newTimestampOffset = timestampOffset;
+    const _timestampOffset = (timestampOffset ?? 0) - window.offset;
+
+    if (this._sourceBuffer.timestampOffset !== _timestampOffset) {
+      const newTimestampOffset = _timestampOffset;
       log.debug("AVSB: updating timestampOffset",
                 this.bufferType,
                 this._sourceBuffer.timestampOffset,
@@ -526,9 +529,9 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer<BufferSource>
       }
     } else if (appendWindow[0] !== this._sourceBuffer.appendWindowStart) {
       if (appendWindow[0] >= this._sourceBuffer.appendWindowEnd) {
-        this._sourceBuffer.appendWindowEnd = appendWindow[0] + 1;
+        this._sourceBuffer.appendWindowEnd = appendWindow[0] + 1 - window.offset;
       }
-      this._sourceBuffer.appendWindowStart = appendWindow[0];
+      this._sourceBuffer.appendWindowStart = appendWindow[0] - window.offset;
     }
 
     if (appendWindow[1] === undefined) {
@@ -536,7 +539,7 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer<BufferSource>
         this._sourceBuffer.appendWindowEnd = Infinity;
       }
     } else if (appendWindow[1] !== this._sourceBuffer.appendWindowEnd) {
-      this._sourceBuffer.appendWindowEnd = appendWindow[1];
+      this._sourceBuffer.appendWindowEnd = appendWindow[1] - window.offset;
     }
 
     if (data.initSegment !== null &&

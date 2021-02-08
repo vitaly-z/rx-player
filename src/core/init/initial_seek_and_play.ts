@@ -140,8 +140,8 @@ export default function seekAndLoadOnMediaEvents(
     take(1),
     tap(() => {
       log.info("Init: Set initial time", startTime);
-      mediaElement.currentTime = typeof startTime === "function" ? startTime() :
-                                                                   startTime;
+      mediaElement.currentTime = typeof startTime === "function" ? (startTime()  - window.offset) :
+                                                                   (startTime - window.offset);
     }),
     shareReplay({ refCount: true })
   );

@@ -427,7 +427,7 @@ export default function InitializeOnMediaSource(
                 if (position + 0.001 < evt.value.duration) {
                   mediaElement.currentTime += 0.001;
                 } else {
-                  mediaElement.currentTime = position;
+                  mediaElement.currentTime = position - window.offset;
                 }
                 return null;
               case "protected-segment":

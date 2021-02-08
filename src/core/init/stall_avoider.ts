@@ -152,13 +152,13 @@ export default function StallAvoider(
                                                                  stalledPosition);
         if (skippableDiscontinuity !== null) {
           const realSeekTime = skippableDiscontinuity + 0.001;
-          if (realSeekTime <= mediaElement.currentTime) {
+          if (realSeekTime <= (mediaElement.currentTime + window.offset)) {
             log.info("Init: position to seek already reached, no seeking",
-                     mediaElement.currentTime, realSeekTime);
+                     mediaElement.currentTime + window.offset, realSeekTime);
           } else {
             log.warn("SA: skippable discontinuity found in the stream",
                      position, realSeekTime);
-            mediaElement.currentTime = realSeekTime;
+            mediaElement.currentTime = realSeekTime - window.offset;
             return EVENTS.warning(generateDiscontinuityError(stalledPosition,
                                                              realSeekTime));
           }
@@ -172,7 +172,7 @@ export default function StallAvoider(
                           stalled !== null)
       ) {
         log.warn("Init: After freeze seek", position, currentRange);
-        mediaElement.currentTime = position;
+        mediaElement.currentTime = position - window.offset;
         return EVENTS.warning(generateDiscontinuityError(position,
                                                          position));
 
@@ -190,10 +190,10 @@ export default function StallAvoider(
       const nextBufferRangeGap = getNextRangeGap(buffered, freezePosition);
       if (nextBufferRangeGap < BUFFER_DISCONTINUITY_THRESHOLD) {
         const seekTo = (freezePosition + nextBufferRangeGap + EPSILON);
-        if (mediaElement.currentTime < seekTo) {
+        if ((mediaElement.currentTime + window.offset) < seekTo) {
           log.warn("Init: discontinuity encountered inferior to the threshold",
                    freezePosition, seekTo, BUFFER_DISCONTINUITY_THRESHOLD);
-          mediaElement.currentTime = seekTo;
+          mediaElement.currentTime = seekTo - window.offset;
           return EVENTS.warning(generateDiscontinuityError(freezePosition, seekTo));
         }
       }
@@ -204,10 +204,10 @@ export default function StallAvoider(
         const period = manifest.periods[i];
         if (period.end !== undefined && period.end <= freezePosition) {
           if (manifest.periods[i + 1].start > freezePosition &&
-              manifest.periods[i + 1].start > mediaElement.currentTime)
+              manifest.periods[i + 1].start > (mediaElement.currentTime + window.offset))
           {
             const nextPeriod = manifest.periods[i + 1];
-            mediaElement.currentTime = nextPeriod.start;
+            mediaElement.currentTime = nextPeriod.start  - window.offset;
             return EVENTS.warning(generateDiscontinuityError(freezePosition,
                                                              nextPeriod.start));
 

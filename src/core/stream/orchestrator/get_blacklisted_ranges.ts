@@ -56,7 +56,8 @@ export default function getBlacklistedRanges(
         if (len === 0) {
           return [];
         }
-        return [{ start: buffered.start(0), end: buffered.end(len - 1) }];
+        return [{ start: buffered.start(0) + window.offset,
+                  end: buffered.end(len - 1) + window.offset }];
       }
 
       const previousLastElement = accumulator[accumulator.length - 1];

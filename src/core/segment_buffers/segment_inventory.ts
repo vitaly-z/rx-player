@@ -199,8 +199,8 @@ export default class SegmentInventory {
       }
 
       // take the i'nth contiguous buffered TimeRange
-      const rangeStart = buffered.start(i);
-      const rangeEnd = buffered.end(i);
+      const rangeStart = buffered.start(i) + window.offset;
+      const rangeEnd = buffered.end(i) + window.offset;
       if (rangeEnd - rangeStart < MINIMUM_SEGMENT_SIZE) {
         log.warn("SI: skipped TimeRange when synchronizing because it was too small",
                  bufferType, rangeStart, rangeEnd);
@@ -270,8 +270,9 @@ export default class SegmentInventory {
                                                     thisSegment.start);
         let thisSegmentEnd =  takeFirstSet<number>(thisSegment.bufferedEnd,
                                                    thisSegment.end);
-        const nextRangeStart = i < rangesLength - 1 ? buffered.start(i + 1) :
-                                                      undefined;
+        const nextRangeStart = i < rangesLength - 1 ?
+          (buffered.start(i + 1) + window.offset) :
+          undefined;
         while (thisSegment !== undefined &&
                (rangeEnd - thisSegmentStart) >= MINIMUM_SEGMENT_SIZE &&
                (nextRangeStart === undefined ||

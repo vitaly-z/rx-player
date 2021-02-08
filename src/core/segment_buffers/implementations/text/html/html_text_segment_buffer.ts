@@ -188,7 +188,7 @@ export default class HTMLTextSegmentBuffer
         }
 
         // to spread the time error, we divide the regular chosen interval.
-        const time = Math.max(this._videoElement.currentTime +
+        const time = Math.max((this._videoElement.currentTime + window.offset) +
                               (MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL / 1000) / 2,
                               0);
         const cues = this._buffer.get(time);
