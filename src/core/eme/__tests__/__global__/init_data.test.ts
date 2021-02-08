@@ -85,7 +85,7 @@ describe("core - eme - global tests - init data", () => {
     let eventsReceived = 0;
     const initDataSubject = new Subject<IContentProtection>();
     const initData = new Uint8Array([54, 55, 75]);
-    const kill$ = new Subject();
+    const kill$ = new Subject<void>();
 
     // == test ==
     const EMEManager = require("../../eme_manager").default;
@@ -133,7 +133,7 @@ describe("core - eme - global tests - init data", () => {
     const initDataSubject = new Subject<IContentProtection>();
     let eventsReceived = 0;
     const initData = new Uint8Array([54, 55, 75]);
-    const kill$ = new Subject();
+    const kill$ = new Subject<void>();
 
     // == test ==
     const EMEManager = require("../../eme_manager").default;
@@ -198,7 +198,7 @@ describe("core - eme - global tests - init data", () => {
     let eventsReceived = 0;
     const initData1 = new Uint8Array([54, 55, 75]);
     const initData2 = new Uint8Array([87, 32]);
-    const kill$ = new Subject();
+    const kill$ = new Subject<void>();
 
     // == test ==
     const EMEManager = require("../../eme_manager").default;
@@ -274,7 +274,7 @@ describe("core - eme - global tests - init data", () => {
     let eventsReceived = 0;
     const initData1 = new Uint8Array([54, 55, 75]);
     const initData2 = new Uint8Array([87, 32]);
-    const kill$ = new Subject();
+    const kill$ = new Subject<void>();
 
     // == test ==
     const EMEManager = require("../../eme_manager").default;
@@ -348,7 +348,7 @@ describe("core - eme - global tests - init data", () => {
     let eventsReceived = 0;
     const initData = new Uint8Array([54, 55, 75]);
     const initDataEvent = generateEncryptedEvent("cenc", initData);
-    const kill$ = new Subject();
+    const kill$ = new Subject<void>();
 
     // == test ==
     const EMEManager = require("../../eme_manager").default;
@@ -403,7 +403,7 @@ describe("core - eme - global tests - init data", () => {
     let eventsReceived = 0;
     const initData = new Uint8Array([54, 55, 75]);
     const initDataEvent = generateEncryptedEvent("cenc", initData);
-    const kill$ = new Subject();
+    const kill$ = new Subject<void>();
 
     // == test ==
     const EMEManager = require("../../eme_manager").default;
@@ -478,7 +478,7 @@ describe("core - eme - global tests - init data", () => {
     const initData2 = new Uint8Array([87, 32]);
     const initDataEvent1 = generateEncryptedEvent("cenc", initData1);
     const initDataEvent2 = generateEncryptedEvent("cenc", initData2);
-    const kill$ = new Subject();
+    const kill$ = new Subject<void>();
 
     function checkEncryptedEventReceived(
       evt : any,
@@ -569,7 +569,7 @@ describe("core - eme - global tests - init data", () => {
     const initDataEvent2 = generateEncryptedEvent("cenc2", initData1);
     const initDataEvent3 = generateEncryptedEvent("cenc", initData2);
     const initDataEvent4 = generateEncryptedEvent("cenc2", initData2);
-    const kill$ = new Subject();
+    const kill$ = new Subject<void>();
 
     function checkEncryptedEventReceived(
       evt : any,
@@ -662,7 +662,7 @@ describe("core - eme - global tests - init data", () => {
     const initDataEvent2 = generateEncryptedEvent("cenc2", initData1);
     const initDataEvent3 = generateEncryptedEvent("cenc", initData2);
     const initDataEvent4 = generateEncryptedEvent("cenc2", initData2);
-    const kill$ = new Subject();
+    const kill$ = new Subject<void>();
 
     function checkEncryptedEventReceived(
       evt : any,
