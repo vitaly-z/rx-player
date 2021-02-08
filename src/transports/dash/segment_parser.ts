@@ -55,10 +55,9 @@ export default function generateAudioVideoSegmentParser(
 
     if (data === null) {
       if (segment.isInit) {
-        const _segmentProtections = representation.getProtectionsInitializationData();
         return observableOf({ type: "parsed-init-segment" as const,
                               value: { initializationData: null,
-                                       segmentProtections: _segmentProtections,
+                                       segmentProtections: [],
                                        initTimescale: undefined } });
       }
       return observableOf({ type: "parsed-segment" as const,
@@ -125,11 +124,18 @@ export default function generateAudioVideoSegmentParser(
                                getMDHDTimescale(chunkData);
     const parsedTimescale = isNullOrUndefined(timescale) ? undefined :
                                                            timescale;
-    if (!isWEBM) { // TODO extract webm protection information
+
+    // TODO also extract webm protection information
+    if (!isWEBM) {
       const psshInfo = takePSSHOut(chunkData);
-      for (let i = 0; i < psshInfo.length; i++) {
-        const { systemID, data: psshData } = psshInfo[i];
-        representation._addProtectionData("cenc", systemID, psshData);
+
+      // we only want to add the protection data if we didn't have any before,
+      // as data in the Manifest should generally be sufficient
+      if (representation.getProtectionsInitializationData().length === 0) {
+        for (let i = 0; i < psshInfo.length; i++) {
+          const { systemID, data: psshData } = psshInfo[i];
+          representation._addProtectionData("cenc", systemID, psshData);
+        }
       }
     }
 

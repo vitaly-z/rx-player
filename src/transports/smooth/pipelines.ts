@@ -185,10 +185,9 @@ export default function(options : ITransportOptions) : ITransportPipelines {
       const { data, isChunked } = response;
       if (data === null) {
         if (segment.isInit) {
-          const segmentProtections = representation.getProtectionsInitializationData();
           return observableOf({ type: "parsed-init-segment",
                                 value: { initializationData: null,
-                                         segmentProtections,
+                                         segmentProtections: [],
                                          initTimescale: undefined } });
         }
         return observableOf({ type: "parsed-segment",
