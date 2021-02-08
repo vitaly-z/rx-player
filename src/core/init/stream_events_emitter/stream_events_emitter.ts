@@ -47,6 +47,13 @@ import {
 
 const { STREAM_EVENT_EMITTER_POLL_INTERVAL } = config;
 
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  /* eslint-disable @typescript-eslint/restrict-plus-operands */
+  /* eslint-disable @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/no-unsafe-call */
+  /* eslint-disable @typescript-eslint/restrict-template-expressions */
+
 /**
  * Tells if a stream event has a duration
  * @param {Object} evt
@@ -165,7 +172,8 @@ function streamEventsEmitter(manifest: Manifest,
         map(([_, clockTick]) => {
           const { seeking } = clockTick;
           return { isSeeking: seeking,
-                   currentTime: (mediaElement.currentTime + window.offset) };
+                   currentTime: (mediaElement.currentTime +
+                                (window as any).offset) };
         }),
         pairwise(),
         mergeMap(([oldTick, newTick]) =>

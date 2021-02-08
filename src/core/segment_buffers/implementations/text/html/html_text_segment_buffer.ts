@@ -46,6 +46,13 @@ import parseTextTrackToElements from "./parsers";
 import TextTrackCuesStore from "./text_track_cues_store";
 import updateProportionalElements from "./update_proportional_elements";
 
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  /* eslint-disable @typescript-eslint/restrict-plus-operands */
+  /* eslint-disable @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/no-unsafe-call */
+  /* eslint-disable @typescript-eslint/restrict-template-expressions */
+
 const { onEnded$,
         onSeeked$,
         onSeeking$ } = events;
@@ -188,7 +195,7 @@ export default class HTMLTextSegmentBuffer
         }
 
         // to spread the time error, we divide the regular chosen interval.
-        const time = Math.max((this._videoElement.currentTime + window.offset) +
+        const time = Math.max((this._videoElement.currentTime + (window as any).offset) +
                               (MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL / 1000) / 2,
                               0);
         const cues = this._buffer.get(time);

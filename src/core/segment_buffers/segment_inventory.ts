@@ -29,6 +29,13 @@ const { MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE,
         MAX_MANIFEST_BUFFERED_DURATION_DIFFERENCE,
         MINIMUM_SEGMENT_SIZE } = config;
 
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  /* eslint-disable @typescript-eslint/restrict-plus-operands */
+  /* eslint-disable @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/no-unsafe-call */
+  /* eslint-disable @typescript-eslint/restrict-template-expressions */
+
 /** Content information for a single buffered chunk */
 interface IBufferedChunkInfos {
   /** Adaptation this chunk is related to. */
@@ -199,8 +206,8 @@ export default class SegmentInventory {
       }
 
       // take the i'nth contiguous buffered TimeRange
-      const rangeStart = buffered.start(i) + window.offset;
-      const rangeEnd = buffered.end(i) + window.offset;
+      const rangeStart = buffered.start(i) + (window as any).offset;
+      const rangeEnd = buffered.end(i) + (window as any).offset;
       if (rangeEnd - rangeStart < MINIMUM_SEGMENT_SIZE) {
         log.warn("SI: skipped TimeRange when synchronizing because it was too small",
                  bufferType, rangeStart, rangeEnd);
@@ -271,7 +278,7 @@ export default class SegmentInventory {
         let thisSegmentEnd =  takeFirstSet<number>(thisSegment.bufferedEnd,
                                                    thisSegment.end);
         const nextRangeStart = i < rangesLength - 1 ?
-          (buffered.start(i + 1) + window.offset) :
+          (buffered.start(i + 1) + (window as any).offset) :
           undefined;
         while (thisSegment !== undefined &&
                (rangeEnd - thisSegmentStart) >= MINIMUM_SEGMENT_SIZE &&

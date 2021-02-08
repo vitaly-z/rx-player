@@ -37,6 +37,13 @@ import {
   IWarningEvent,
 } from "./types";
 
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  /* eslint-disable @typescript-eslint/restrict-plus-operands */
+  /* eslint-disable @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/no-unsafe-call */
+  /* eslint-disable @typescript-eslint/restrict-template-expressions */
+
 const { BUFFER_DISCONTINUITY_THRESHOLD } = config;
 
 /**
@@ -152,13 +159,13 @@ export default function StallAvoider(
                                                                  stalledPosition);
         if (skippableDiscontinuity !== null) {
           const realSeekTime = skippableDiscontinuity + 0.001;
-          if (realSeekTime <= (mediaElement.currentTime + window.offset)) {
+          if (realSeekTime <= (mediaElement.currentTime + (window as any).offset)) {
             log.info("Init: position to seek already reached, no seeking",
-                     mediaElement.currentTime + window.offset, realSeekTime);
+                     mediaElement.currentTime + (window as any).offset, realSeekTime);
           } else {
             log.warn("SA: skippable discontinuity found in the stream",
                      position, realSeekTime);
-            mediaElement.currentTime = realSeekTime - window.offset;
+            mediaElement.currentTime = realSeekTime - (window as any).offset;
             return EVENTS.warning(generateDiscontinuityError(stalledPosition,
                                                              realSeekTime));
           }
@@ -172,7 +179,7 @@ export default function StallAvoider(
                           stalled !== null)
       ) {
         log.warn("Init: After freeze seek", position, currentRange);
-        mediaElement.currentTime = position - window.offset;
+        mediaElement.currentTime = position - (window as any).offset;
         return EVENTS.warning(generateDiscontinuityError(position,
                                                          position));
 
@@ -190,10 +197,10 @@ export default function StallAvoider(
       const nextBufferRangeGap = getNextRangeGap(buffered, freezePosition);
       if (nextBufferRangeGap < BUFFER_DISCONTINUITY_THRESHOLD) {
         const seekTo = (freezePosition + nextBufferRangeGap + EPSILON);
-        if ((mediaElement.currentTime + window.offset) < seekTo) {
+        if ((mediaElement.currentTime + (window as any).offset) < seekTo) {
           log.warn("Init: discontinuity encountered inferior to the threshold",
                    freezePosition, seekTo, BUFFER_DISCONTINUITY_THRESHOLD);
-          mediaElement.currentTime = seekTo - window.offset;
+          mediaElement.currentTime = seekTo - (window as any).offset;
           return EVENTS.warning(generateDiscontinuityError(freezePosition, seekTo));
         }
       }
@@ -204,10 +211,11 @@ export default function StallAvoider(
         const period = manifest.periods[i];
         if (period.end !== undefined && period.end <= freezePosition) {
           if (manifest.periods[i + 1].start > freezePosition &&
-              manifest.periods[i + 1].start > (mediaElement.currentTime + window.offset))
+              manifest.periods[i + 1].start >
+                (mediaElement.currentTime + (window as any).offset))
           {
             const nextPeriod = manifest.periods[i + 1];
-            mediaElement.currentTime = nextPeriod.start  - window.offset;
+            mediaElement.currentTime = nextPeriod.start  - (window as any).offset;
             return EVENTS.warning(generateDiscontinuityError(freezePosition,
                                                              nextPeriod.start));
 

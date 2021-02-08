@@ -35,6 +35,13 @@ const EPSILON = 1 / 60;
 interface IRange { start : number;
                    end : number; }
 
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  /* eslint-disable @typescript-eslint/restrict-plus-operands */
+  /* eslint-disable @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/no-unsafe-call */
+  /* eslint-disable @typescript-eslint/restrict-template-expressions */
+
 /**
  * Check equality with a tolerance of EPSILON.
  * Used for various functions with this sort of tolerance regarding the
@@ -184,9 +191,9 @@ function convertToRanges(timeRanges : TimeRanges) : IRange[] {
  */
 function getRange(timeRanges : TimeRanges, time : number) : IRange|null {
   for (let i = timeRanges.length - 1; i >= 0; i--) {
-    const start = timeRanges.start(i) + window.offset;
+    const start = timeRanges.start(i) + (window as any).offset;
     if (time >= start) {
-      const end = timeRanges.end(i) + window.offset;
+      const end = timeRanges.end(i) + (window as any).offset;
       if (time < end) {
         return { start,
                  end };
@@ -205,7 +212,7 @@ function getRange(timeRanges : TimeRanges, time : number) : IRange|null {
 function getNextRangeGap(timeRanges : TimeRanges, time : number) : number {
   const len = timeRanges.length;
   for (let i = 0; i < len; i++) {
-    const start = timeRanges.start(i) + window.offset;
+    const start = timeRanges.start(i) + (window as any).offset;
     if (time < start) {
       return start - time;
     }

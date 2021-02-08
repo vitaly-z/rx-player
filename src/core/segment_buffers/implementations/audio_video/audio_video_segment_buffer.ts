@@ -51,6 +51,13 @@ import {
 
 const { SOURCE_BUFFER_FLUSHING_INTERVAL } = config;
 
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  /* eslint-disable @typescript-eslint/restrict-plus-operands */
+  /* eslint-disable @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/no-unsafe-call */
+  /* eslint-disable @typescript-eslint/restrict-template-expressions */
+
 /**
  * Item added to the AudioVideoSegmentBuffer's queue before being processed into
  * a task (see `IAVSBPendingTask`).
@@ -458,7 +465,6 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer<BufferSource>
             this._flush();
             return;
           }
-          debugger;
           this._sourceBuffer.appendBuffer(segmentData);
           break;
 
@@ -512,7 +518,7 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer<BufferSource>
       }
     }
 
-    const _timestampOffset = (timestampOffset ?? 0) - window.offset;
+    const _timestampOffset = (timestampOffset ?? 0) - (window as any).offset;
 
     if (this._sourceBuffer.timestampOffset !== _timestampOffset) {
       const newTimestampOffset = _timestampOffset;
@@ -529,9 +535,9 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer<BufferSource>
       }
     } else if (appendWindow[0] !== this._sourceBuffer.appendWindowStart) {
       if (appendWindow[0] >= this._sourceBuffer.appendWindowEnd) {
-        this._sourceBuffer.appendWindowEnd = appendWindow[0] + 1 - window.offset;
+        this._sourceBuffer.appendWindowEnd = appendWindow[0] + 1 - (window as any).offset;
       }
-      this._sourceBuffer.appendWindowStart = appendWindow[0] - window.offset;
+      this._sourceBuffer.appendWindowStart = appendWindow[0] - (window as any).offset;
     }
 
     if (appendWindow[1] === undefined) {
@@ -539,7 +545,7 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer<BufferSource>
         this._sourceBuffer.appendWindowEnd = Infinity;
       }
     } else if (appendWindow[1] !== this._sourceBuffer.appendWindowEnd) {
-      this._sourceBuffer.appendWindowEnd = appendWindow[1] - window.offset;
+      this._sourceBuffer.appendWindowEnd = appendWindow[1] - (window as any).offset;
     }
 
     if (data.initSegment !== null &&

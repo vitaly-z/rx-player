@@ -66,8 +66,15 @@ export default function getLoadedContentState(
     // emit an 'ended' event in some conditions. Detect if we
     // reached the end by comparing the current position and the
     // duration instead.
-    const gapBetweenDurationAndCurrentTime = Math.abs(mediaElement.duration -
-                                                      (mediaElement.currentTime + window.offset));
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  /* eslint-disable @typescript-eslint/restrict-plus-operands */
+  /* eslint-disable @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/no-unsafe-call */
+  /* eslint-disable @typescript-eslint/restrict-template-expressions */
+    const gapBetweenDurationAndCurrentTime =
+      Math.abs(mediaElement.duration -
+        (mediaElement.currentTime + (window as any).offset));
     if (FORCED_ENDED_THRESHOLD != null &&
         gapBetweenDurationAndCurrentTime < FORCED_ENDED_THRESHOLD
     ) {

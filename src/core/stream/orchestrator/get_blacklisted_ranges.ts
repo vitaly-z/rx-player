@@ -23,6 +23,13 @@ import {
 import { IRange } from "../../../utils/ranges";
 import { SegmentBuffer } from "../../segment_buffers";
 
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  /* eslint-disable @typescript-eslint/restrict-plus-operands */
+  /* eslint-disable @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/no-unsafe-call */
+  /* eslint-disable @typescript-eslint/restrict-template-expressions */
+
 /**
  * Returns the buffered ranges which hold the given content.
  * Returns the whole buffered ranges if some of it is unknown.
@@ -56,8 +63,8 @@ export default function getBlacklistedRanges(
         if (len === 0) {
           return [];
         }
-        return [{ start: buffered.start(0) + window.offset,
-                  end: buffered.end(len - 1) + window.offset }];
+        return [{ start: buffered.start(0) + (window as any).offset,
+                  end: buffered.end(len - 1) + (window as any).offset }];
       }
 
       const previousLastElement = accumulator[accumulator.length - 1];

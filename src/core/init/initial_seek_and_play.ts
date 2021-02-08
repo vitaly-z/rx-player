@@ -139,9 +139,16 @@ export default function seekAndLoadOnMediaEvents(
   const seek$ = whenLoadedMetadata$(mediaElement).pipe(
     take(1),
     tap(() => {
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  /* eslint-disable @typescript-eslint/restrict-plus-operands */
+  /* eslint-disable @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/no-unsafe-call */
+  /* eslint-disable @typescript-eslint/restrict-template-expressions */
       log.info("Init: Set initial time", startTime);
-      mediaElement.currentTime = typeof startTime === "function" ? (startTime()  - window.offset) :
-                                                                   (startTime - window.offset);
+      mediaElement.currentTime =
+        typeof startTime === "function" ? (startTime()  - (window as any).offset) :
+          (startTime - (window as any).offset);
     }),
     shareReplay({ refCount: true })
   );

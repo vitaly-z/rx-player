@@ -182,8 +182,13 @@ function getMediaInfos(
           playbackRate,
           readyState,
           seeking } = mediaElement;
-
-  const newCurrentTime = currentTime + window.offset;
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  /* eslint-disable @typescript-eslint/restrict-plus-operands */
+  /* eslint-disable @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/no-unsafe-call */
+  /* eslint-disable @typescript-eslint/restrict-template-expressions */
+  const newCurrentTime = currentTime + (window as any).offset;
   const currentRange = getRange(buffered, newCurrentTime);
   return { bufferGap: currentRange !== null ? currentRange.end - newCurrentTime :
                                               // TODO null/0 would probably be
@@ -350,14 +355,17 @@ function createClock(
   return observableDefer(() : Observable<IClockTick> => {
     let lastTimings : IClockTick = objectAssign(
       getMediaInfos(mediaElement, "init"),
-      { stalled: null, getCurrentTime: () => mediaElement.currentTime + window.offset });
+      { stalled: null, getCurrentTime: () =>
+        mediaElement.currentTime + (window as any).offset });
 
     function getCurrentClockTick(state : IMediaInfosState) : IClockTick {
       const mediaTimings = getMediaInfos(mediaElement, state);
       const stalledState = getStalledStatus(lastTimings, mediaTimings, options);
       const timings = objectAssign({},
                                    { stalled: stalledState,
-                                     getCurrentTime: () => mediaElement.currentTime + window.offset },
+                                     getCurrentTime: () =>
+                                       mediaElement.currentTime +
+                                         (window as any).offset },
                                    mediaTimings);
       log.debug("API: current media element state", timings);
       return timings;
@@ -431,8 +439,8 @@ function prettyPrintBuffered(
   let currentTimeStr = "";
 
   for (let i = 0; i < buffered.length; i++) {
-    const start = buffered.start(i) + window.offset;
-    const end = buffered.end(i) + window.offset;
+    const start = buffered.start(i) + (window as any).offset;
+    const end = buffered.end(i) + (window as any).offset;
     const fixedStart = start.toFixed(2);
     const fixedEnd = end.toFixed(2);
     const fixedDuration = (end - start).toFixed(2);
@@ -443,7 +451,7 @@ function prettyPrintBuffered(
       currentTimeStr = " ".repeat(padBefore) + `^${currentTime}`;
     }
     if (i < buffered.length - 1) {
-      const nextStart = buffered.start(i + 1) + window.offset;
+      const nextStart = buffered.start(i + 1) + (window as any).offset;
       const fixedDiff = (nextStart - end).toFixed(2);
       const holeStr = ` ~${fixedDiff}~ `;
       str += holeStr;

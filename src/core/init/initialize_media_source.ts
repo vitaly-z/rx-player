@@ -427,7 +427,13 @@ export default function InitializeOnMediaSource(
                 if (position + 0.001 < evt.value.duration) {
                   mediaElement.currentTime += 0.001;
                 } else {
-                  mediaElement.currentTime = position - window.offset;
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  /* eslint-disable @typescript-eslint/restrict-plus-operands */
+  /* eslint-disable @typescript-eslint/no-unsafe-return */
+  /* eslint-disable @typescript-eslint/no-unsafe-call */
+  /* eslint-disable @typescript-eslint/restrict-template-expressions */
+                  mediaElement.currentTime = position - (window as any).offset;
                 }
                 return null;
               case "protected-segment":
