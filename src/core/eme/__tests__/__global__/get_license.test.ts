@@ -334,7 +334,7 @@ function checkGetLicense(
   let licenseReceived = false;
   const initDataSubject = new Subject<IContentProtection>();
   const initData = new Uint8Array([54, 55, 75]);
-  const kill$ = new Subject();
+  const kill$ = new Subject<void>();
   const challenge = formatFakeChallengeFromInitData(initData, "cenc");
   function checkKeyLoadError(error : any) {
     expect(error.name).toEqual("EncryptedMediaError");

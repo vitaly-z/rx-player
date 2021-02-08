@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { lastValueFrom } from "rxjs";
 import { requestMediaKeySystemAccess } from "../../../../compat";
 import PPromise from "../../../../utils/promise";
 import {
@@ -60,8 +61,12 @@ export default function probeHDCPPolicy(
     }],
   };
 
-  return requestMediaKeySystemAccess(keySystem, [drmConfig]).toPromise(PPromise)
+  return lastValueFrom(requestMediaKeySystemAccess(keySystem, [drmConfig]))
     .then((mediaKeysSystemAccess) => {
+      if (mediaKeysSystemAccess === undefined) {
+        // Observable completed before emitting anything
+        throw new Error("Impossible to request a MediaKeySystemAccess");
+      }
       return mediaKeysSystemAccess.createMediaKeys().then((mediaKeys) => {
         if (!("getStatusForPolicy" in mediaKeys)) {
           // do the check here, as mediaKeys can be either be native MediaKeys or
