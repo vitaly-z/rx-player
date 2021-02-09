@@ -173,7 +173,7 @@ function streamEventsEmitter(manifest: Manifest,
           const { seeking } = clockTick;
           return { isSeeking: seeking,
                    currentTime: (mediaElement.currentTime +
-                                (window as any).offset) };
+                                ((window as any).offset ?? 0)) };
         }),
         pairwise(),
         mergeMap(([oldTick, newTick]) =>

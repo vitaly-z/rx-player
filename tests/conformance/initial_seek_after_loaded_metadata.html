@@ -124,7 +124,7 @@ function onSourceOpen() {
 
 function setInitialPositionAndCheck() {
   console.info("Setting initial position", initialPosition);
-  videoElement.currentTime = initialPosition - (window as any).offset;
+  videoElement.currentTime = initialPosition - ((window as any).offset ?? 0);
   checkCurrentTime();
   setInterval(checkCurrentTime, 1000);
 }
@@ -135,7 +135,7 @@ function setInitialPositionAndCheck() {
  * Print an error log when that's not the case and a regular log when it is.
  */
 function checkCurrentTime() {
-  var currentTime = videoElement.currentTime + (window as any).offset;
+  var currentTime = videoElement.currentTime + ((window as any).offset ?? 0);
   if (Math.abs(currentTime  - initialPosition) > 1 / 60) {
     console.error(
       "Test failed: current time should be equal to", initialPosition,

@@ -433,7 +433,7 @@ export default function InitializeOnMediaSource(
   /* eslint-disable @typescript-eslint/no-unsafe-return */
   /* eslint-disable @typescript-eslint/no-unsafe-call */
   /* eslint-disable @typescript-eslint/restrict-template-expressions */
-                  mediaElement.currentTime = position - (window as any).offset;
+                  mediaElement.currentTime = position - ((window as any).offset ?? 0);
                 }
                 return null;
               case "protected-segment":

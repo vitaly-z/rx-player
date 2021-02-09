@@ -147,8 +147,8 @@ export default function seekAndLoadOnMediaEvents(
   /* eslint-disable @typescript-eslint/restrict-template-expressions */
       log.info("Init: Set initial time", startTime);
       mediaElement.currentTime =
-        typeof startTime === "function" ? (startTime()  - (window as any).offset) :
-          (startTime - (window as any).offset);
+        typeof startTime === "function" ? (startTime()  - ((window as any).offset ?? 0)) :
+          (startTime - ((window as any).offset ?? 0));
     }),
     shareReplay({ refCount: true })
   );

@@ -674,7 +674,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
   /* eslint-disable @typescript-eslint/no-unsafe-call */
   /* eslint-disable @typescript-eslint/restrict-template-expressions */
         playbackPosition =
-          this.videoElement.currentTime + (window as any).offset;
+          this.videoElement.currentTime + ((window as any).offset ?? 0);
       }
       if (reloadOpts !== undefined &&
           reloadOpts.reloadAt !== undefined &&
@@ -1206,7 +1206,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     }
     const videoElement = this.videoElement;
     return getLeftSizeOfRange(
-      videoElement.buffered, videoElement.currentTime + (window as any).offset);
+      videoElement.buffered, videoElement.currentTime + ((window as any).offset ?? 0));
   }
 
   /**
@@ -1221,7 +1221,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     }
     const videoElement = this.videoElement;
     return getSizeOfRange(
-      videoElement.buffered, videoElement.currentTime + (window as any).offset);
+      videoElement.buffered, videoElement.currentTime + ((window as any).offset ?? 0));
   }
 
   /**
@@ -1236,7 +1236,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     }
     const videoElement = this.videoElement;
     return getPlayedSizeOfRange(
-      videoElement.buffered, videoElement.currentTime + (window as any).offset);
+      videoElement.buffered, videoElement.currentTime + ((window as any).offset ?? 0));
   }
 
   /**
@@ -1258,15 +1258,15 @@ class Player extends EventEmitter<IPublicAPIEvent> {
       throw new Error("Disposed player");
     }
     if (this._priv_contentInfos === null) {
-      return this.videoElement.currentTime + (window as any).offset;
+      return this.videoElement.currentTime + ((window as any).offset ?? 0);
     }
 
     const { isDirectFile, manifest } = this._priv_contentInfos;
     if (isDirectFile) {
-      return this.videoElement.currentTime + (window as any).offset;
+      return this.videoElement.currentTime + ((window as any).offset ?? 0);
     }
     if (manifest !== null) {
-      const currentTime = this.videoElement.currentTime + (window as any).offset;
+      const currentTime = this.videoElement.currentTime + ((window as any).offset ?? 0);
       const ast = manifest.availabilityStartTime !== undefined ?
         manifest.availabilityStartTime :
         0;
@@ -1290,7 +1290,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     if (this.videoElement === null) {
       throw new Error("Disposed player");
     }
-    return this.videoElement.currentTime + (window as any).offset;
+    return this.videoElement.currentTime + ((window as any).offset ?? 0);
   }
 
   /**
@@ -1486,7 +1486,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                         relative? : number;
                         position? : number;
                         wallClockTime? : number; } = time;
-      const currentTs = this.videoElement.currentTime + (window as any).offset;
+      const currentTs = this.videoElement.currentTime + ((window as any).offset ?? 0);
       if (!isNullOrUndefined(timeObj.relative)) {
         positionWanted = currentTs + timeObj.relative;
       } else if (!isNullOrUndefined(timeObj.position)) {
@@ -1508,7 +1508,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     if (positionWanted === undefined) {
       throw new Error("invalid time given");
     }
-    this.videoElement.currentTime = positionWanted - (window as any).offset;
+    this.videoElement.currentTime = positionWanted - ((window as any).offset ?? 0);
     return positionWanted;
   }
 

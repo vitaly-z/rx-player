@@ -518,7 +518,7 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer<BufferSource>
       }
     }
 
-    const _timestampOffset = (timestampOffset ?? 0) - (window as any).offset;
+    const _timestampOffset = (timestampOffset ?? 0) - ((window as any).offset ?? 0);
 
     if (this._sourceBuffer.timestampOffset !== _timestampOffset) {
       const newTimestampOffset = _timestampOffset;
@@ -535,9 +535,9 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer<BufferSource>
       }
     } else if (appendWindow[0] !== this._sourceBuffer.appendWindowStart) {
       if (appendWindow[0] >= this._sourceBuffer.appendWindowEnd) {
-        this._sourceBuffer.appendWindowEnd = appendWindow[0] + 1 - (window as any).offset;
+        this._sourceBuffer.appendWindowEnd = appendWindow[0] + 1 - ((window as any).offset ?? 0);
       }
-      this._sourceBuffer.appendWindowStart = appendWindow[0] - (window as any).offset;
+      this._sourceBuffer.appendWindowStart = appendWindow[0] - ((window as any).offset ?? 0);
     }
 
     if (appendWindow[1] === undefined) {
@@ -545,7 +545,7 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer<BufferSource>
         this._sourceBuffer.appendWindowEnd = Infinity;
       }
     } else if (appendWindow[1] !== this._sourceBuffer.appendWindowEnd) {
-      this._sourceBuffer.appendWindowEnd = appendWindow[1] - (window as any).offset;
+      this._sourceBuffer.appendWindowEnd = appendWindow[1] - ((window as any).offset ?? 0);
     }
 
     if (data.initSegment !== null &&

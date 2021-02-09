@@ -74,7 +74,7 @@ export default function getLoadedContentState(
   /* eslint-disable @typescript-eslint/restrict-template-expressions */
     const gapBetweenDurationAndCurrentTime =
       Math.abs(mediaElement.duration -
-        (mediaElement.currentTime + (window as any).offset));
+        (mediaElement.currentTime + ((window as any).offset ?? 0)));
     if (FORCED_ENDED_THRESHOLD != null &&
         gapBetweenDurationAndCurrentTime < FORCED_ENDED_THRESHOLD
     ) {
