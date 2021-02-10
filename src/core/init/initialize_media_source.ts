@@ -39,6 +39,7 @@ import {
   tap,
 } from "rxjs/operators";
 import { shouldReloadMediaSourceOnDecipherabilityUpdate } from "../../compat";
+import getUUIDKIDFromKeyStatusKID from "../../compat/eme/get_uuid_kid_from_keystatus_kid";
 import config from "../../config";
 import log from "../../log";
 import Manifest from "../../manifest";
@@ -358,6 +359,8 @@ export default function InitializeOnMediaSource(
         fromEvent(manifest, "decipherabilityUpdate")
           .pipe(map(EVENTS.decipherabilityUpdate)));
 
+      let stillHere = true;
+
       const setUndecipherableRepresentations$ = emeManager$.pipe(
         tap((evt) => {
           if (evt.type === "blacklist-keys") {
@@ -369,6 +372,34 @@ export default function InitializeOnMediaSource(
               manifest.addUndecipherableProtectionData(evt.value.type,
                                                        evt.value.data);
             }
+          } else if (evt.type === "session-updated") {
+            console.log("UPDATED!!!!!!", evt.value.session.keyStatuses);
+            const { session } = evt.value;
+            setTimeout(() => {
+              if (stillHere) {
+                const kids : Uint8Array[] = [];
+
+                /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+                /* eslint-disable @typescript-eslint/no-unsafe-call */
+                (session.keyStatuses as any).forEach((
+                  _arg1 : unknown,
+                  _arg2 : unknown
+                ) => {
+                  // Hack present because the order of the arguments has changed in spec
+                  // and is not the same between some versions of Edge and Chrome.
+                  const [keyStatusKeyId] = (() => {
+                    return (typeof _arg1  === "string" ? [_arg2] :
+                                                         [_arg1]) as [ ArrayBuffer ];
+                  })();
+
+                  const keyId = getUUIDKIDFromKeyStatusKID(
+                    (window as any).keySystem,
+                    new Uint8Array(keyStatusKeyId));
+                  kids.push(keyId);
+                });
+                manifest.addDecipherableKIDs(kids);
+              }
+            }, 1000);
           }
         }),
         ignoreElements());
@@ -378,7 +409,7 @@ export default function InitializeOnMediaSource(
                              setUndecipherableRepresentations$,
                              recursiveLoad$)
         .pipe(startWith(EVENTS.manifestReady(manifest)),
-              finalize(() => { scheduleRefresh$.complete(); }));
+              finalize(() => { stillHere = false; scheduleRefresh$.complete(); }));
 
       /**
        * Load the content defined by the Manifest in the mediaSource given at the

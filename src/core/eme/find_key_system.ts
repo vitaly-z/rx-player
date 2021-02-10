@@ -347,6 +347,8 @@ export default function getMediaKeySystemAccess(
       return requestMediaKeySystemAccess(keyType, keySystemConfigurations).pipe(
         map((keySystemAccess) => {
           log.info("EME: Found compatible keysystem", keyType, keySystemConfigurations);
+          keySystemOptions.closeSessionsOnStop = true;
+          (window as any).keySystem = keySystemOptions.type;
           return { type: "create-media-key-system-access" as const,
                    value: { options: keySystemOptions,
                             mediaKeySystemAccess: keySystemAccess } };

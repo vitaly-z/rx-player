@@ -18,7 +18,6 @@ import { ICustomError } from "../errors";
 import { IParsedManifest } from "../parsers/manifest";
 import areArraysOfNumbersEqual from "../utils/are_arrays_of_numbers_equal";
 import arrayFind from "../utils/array_find";
-import { isABEqualBytes } from "../utils/byte_parsing";
 import EventEmitter from "../utils/event_emitter";
 import idGenerator from "../utils/id_generator";
 import warnOnce from "../utils/warn_once";
@@ -472,7 +471,39 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * performed.
    * @param {Array.<ArrayBuffer>} keyIDs
    */
-  public addUndecipherableKIDs(keyIDs : ArrayBuffer[]) : void {
+  public addDecipherableKIDs(keyIDs : Uint8Array[]) : void {
+    const updates = updateDeciperability(this, (representation) => {
+      if (representation.decipherable === false ||
+          representation.contentProtections === undefined)
+      {
+        return true;
+      }
+      const contentKIDs = representation.contentProtections.keyIds;
+      let found = false;
+      for (let i = 0; i < contentKIDs.length; i++) {
+        const elt = contentKIDs[i];
+        for (let j = 0; j < keyIDs.length; j++) {
+          if (areArraysOfNumbersEqual(keyIDs[j], elt.keyId)) {
+            found = true;
+          }
+        }
+      }
+      return found;
+    });
+
+    if (updates.length > 0) {
+      this.trigger("decipherabilityUpdate", updates);
+    }
+  }
+
+  /**
+   * Look in the Manifest for Representations linked to the given key ID,
+   * and mark them as being impossible to decrypt.
+   * Then trigger a "blacklist-update" event to notify everyone of the changes
+   * performed.
+   * @param {Array.<ArrayBuffer>} keyIDs
+   */
+  public addUndecipherableKIDs(keyIDs : Uint8Array[]) : void {
     const updates = updateDeciperability(this, (representation) => {
       if (representation.decipherable === false ||
           representation.contentProtections === undefined)
@@ -483,7 +514,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
       for (let i = 0; i < contentKIDs.length; i++) {
         const elt = contentKIDs[i];
         for (let j = 0; j < keyIDs.length; j++) {
-          if (isABEqualBytes(keyIDs[j], elt.keyId)) {
+          if (areArraysOfNumbersEqual(keyIDs[j], elt.keyId)) {
             return false;
           }
         }
@@ -722,8 +753,8 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
 
 /**
  * Update decipherability based on a predicate given.
- * Do nothing for a Representation when the predicate returns false, mark as
- * undecipherable when the predicate returns false. Returns every updates in
+ * Do nothing for a Representation when the predicate returns `true`, mark as
+ * undecipherable when the predicate returns `false`. Returns every updates in
  * an array.
  * @param {Manifest} manifest
  * @param {Function} predicate
