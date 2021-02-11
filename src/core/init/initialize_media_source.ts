@@ -39,6 +39,7 @@ import {
   tap,
 } from "rxjs/operators";
 import { shouldReloadMediaSourceOnDecipherabilityUpdate } from "../../compat";
+import seek from "../../compat/seek";
 import config from "../../config";
 import log from "../../log";
 import Manifest from "../../manifest";
@@ -425,9 +426,9 @@ export default function InitializeOnMediaSource(
                 // to flush the buffers
                 const { position } = evt.value;
                 if (position + 0.001 < evt.value.duration) {
-                  mediaElement.currentTime += 0.001;
+                  seek(mediaElement, mediaElement.currentTime + 0.001);
                 } else {
-                  mediaElement.currentTime = position;
+                  seek(mediaElement, position);
                 }
                 return null;
               case "protected-segment":

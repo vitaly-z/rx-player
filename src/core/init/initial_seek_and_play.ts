@@ -34,6 +34,7 @@ import {
   shouldWaitForDataBeforeLoaded,
   whenLoadedMetadata$,
 } from "../../compat";
+import seek from "../../compat/seek";
 import log from "../../log";
 import { IInitClockTick } from "./types";
 
@@ -140,8 +141,9 @@ export default function seekAndLoadOnMediaEvents(
     take(1),
     tap(() => {
       log.info("Init: Set initial time", startTime);
-      mediaElement.currentTime = typeof startTime === "function" ? startTime() :
-                                                                   startTime;
+      const wantedPosition = typeof startTime === "function" ? startTime() :
+                                                               startTime;
+      seek(mediaElement, wantedPosition);
     }),
     shareReplay({ refCount: true })
   );

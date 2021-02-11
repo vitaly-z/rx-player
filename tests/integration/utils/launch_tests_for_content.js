@@ -560,6 +560,7 @@ export default function launchTestsForContent(manifestInfos) {
           autoPlay: true,
         });
         await waitForLoadedStateAfterLoadVideo(player);
+        await sleep(0);
         expect(player.getPlayerState()).to.equal("PLAYING");
       });
     });

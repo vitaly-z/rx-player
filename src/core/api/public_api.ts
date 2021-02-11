@@ -27,20 +27,24 @@ import {
   EMPTY,
   merge as observableMerge,
   of as observableOf,
+  of,
   ReplaySubject,
   Subject,
   Subscription,
 } from "rxjs";
 import {
+  delay,
   distinctUntilChanged,
   filter,
   map,
   mapTo,
+  mergeMap,
   mergeMapTo,
   publish,
   share,
   skipWhile,
   startWith,
+  switchMap,
   switchMapTo,
   take,
   takeUntil,
@@ -53,6 +57,7 @@ import {
 } from "../../compat";
 /* eslint-disable-next-line max-len */
 import canRelyOnVideoVisibilityAndSize from "../../compat/can_rely_on_video_visibility_and_size";
+import seek, { isSeekingWithPausePlay$ } from "../../compat/seek";
 import config from "../../config";
 import {
   ErrorCodes,
@@ -996,7 +1001,22 @@ class Player extends EventEmitter<IPublicAPIEvent> {
 
     // Link `_priv_onPlayPauseNext` Observable to "play"/"pause" events
     onPlayPause$(videoElement)
-      .pipe(takeUntil(this._priv_stopCurrentContent$))
+      .pipe(
+        delay(0),
+        switchMap((event) => {
+          // Here, we want to filter and buffer the last emitted event.
+          // if the content is seeking with pause and play, then wait for
+          // the seeking to be done and return last state.
+          return isSeekingWithPausePlay$.pipe(
+            mergeMap((isSeekingWithPausePlay) => {
+              return isSeekingWithPausePlay ? EMPTY :
+                                              of(event);
+            }),
+            take(1)
+          );
+        }),
+        takeUntil(this._priv_stopCurrentContent$)
+      )
       .subscribe(e => this._priv_onPlayPauseNext(e.type === "play"), noop);
 
     // Link "positionUpdate" events to the clock
@@ -1419,20 +1439,27 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     if (this.videoElement === null) {
       throw new Error("Disposed player");
     }
-
-    const playPromise = this.videoElement.play();
-    /* eslint-disable @typescript-eslint/unbound-method */
-    if (isNullOrUndefined(playPromise) || typeof playPromise.catch !== "function") {
-    /* eslint-enable @typescript-eslint/unbound-method */
-      return PPromise.resolve();
-    }
-    return playPromise.catch((error: Error) => {
-      if (error.name === "NotAllowedError") {
-        const warning = new MediaError("MEDIA_ERR_PLAY_NOT_ALLOWED",
-                                       error.toString());
-        this.trigger("warning", warning);
+    return isSeekingWithPausePlay$.pipe(
+      filter((isSeekingWithPausePlay) => !isSeekingWithPausePlay),
+      take(1)
+    ).toPromise().then(() => {
+      if (this.videoElement === null) {
+        throw new Error("Disposed player");
       }
-      throw error;
+      const playPromise = this.videoElement.play();
+      /* eslint-disable @typescript-eslint/unbound-method */
+      if (isNullOrUndefined(playPromise) || typeof playPromise.catch !== "function") {
+      /* eslint-enable @typescript-eslint/unbound-method */
+        return PPromise.resolve();
+      }
+      return playPromise.catch((error: Error) => {
+        if (error.name === "NotAllowedError") {
+          const warning = new MediaError("MEDIA_ERR_PLAY_NOT_ALLOWED",
+                                         error.toString());
+          this.trigger("warning", warning);
+        }
+        throw error;
+      });
     });
   }
 
@@ -1443,7 +1470,17 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     if (this.videoElement === null) {
       throw new Error("Disposed player");
     }
-    this.videoElement.pause();
+    /* eslint-disable @typescript-eslint/no-floating-promises */
+    isSeekingWithPausePlay$.pipe(
+      filter((isSeekingWithPausePlay) => !isSeekingWithPausePlay),
+      take(1)
+    ).toPromise().then(() => {
+      if (this.videoElement === null) {
+        throw new Error("Disposed player");
+      }
+      this.videoElement.pause();
+    });
+    /* eslint-enable @typescript-eslint/no-floating-promises */
   }
 
   /**
@@ -1498,7 +1535,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     if (positionWanted === undefined) {
       throw new Error("invalid time given");
     }
-    this.videoElement.currentTime = positionWanted;
+    seek(this.videoElement, positionWanted);
     return positionWanted;
   }
 
