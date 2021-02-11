@@ -7872,7 +7872,7 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
   var initializationData$ = (0,merge/* merge */.T)(externalEvents$, mediaEncryptedEvents$);
   /** Create MediaKeySessions and handle the corresponding events. */
 
-  var bindSession$ = initializationData$.pipe( // Add attached MediaKeys info once available
+  var bindSession$ = initializationData$.pipe((0,take/* take */.q)(1), // Add attached MediaKeys info once available
   (0,mergeMap/* mergeMap */.zg)(function (initializationData) {
     return attachedMediaKeys$.pipe((0,map/* map */.U)(function (mediaKeysEvt) {
       return [initializationData, mediaKeysEvt];
