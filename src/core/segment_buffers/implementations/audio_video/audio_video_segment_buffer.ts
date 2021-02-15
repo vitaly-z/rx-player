@@ -458,6 +458,16 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer<BufferSource>
             this._flush();
             return;
           }
+          if (this.bufferType === "video" &&
+              this._pendingTask.value.inventoryInfos?.segment.isInit === false)
+          {
+            (window as any).VIDEO_PUSHING = true;
+          }
+          if (this.bufferType === "audio" &&
+              this._pendingTask.value.inventoryInfos?.segment.isInit === false)
+          {
+            (window as any).AUDIO_PUSHING = true;
+          }
           this._sourceBuffer.appendBuffer(segmentData);
           break;
 

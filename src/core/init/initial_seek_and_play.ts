@@ -137,12 +137,26 @@ export default function seekAndLoadOnMediaEvents(
                        mustAutoPlay : boolean;
                        startTime : number|(() => number); }
 ) : { seek$ : Observable<unknown>; load$ : Observable<ILoadEvents> } {
+  (window as any).VIDEO_PUSHING = false;
+  (window as any).AUDIO_PUSHING = false;
   const seek$ = whenLoadedMetadata$(mediaElement).pipe(
+    mergeMap(() => {
+      return clock$;
+    }),
+    filter((tick) => {
+      if (tick.buffered.length > 0
+          && (window as any).VIDEO_PUSHING
+          && (window as any).AUDIO_PUSHING)
+      {
+        return true;
+      }
+      return false;
+    }),
     take(1),
-    tap(() => {
+    tap((tick) => {
+      console.warn("!!!!!!!!!!! IN IT 8");
       log.info("Init: Set initial time", startTime);
-      const wantedPosition = typeof startTime === "function" ? startTime() :
-                                                               startTime;
+      const wantedPosition = tick.buffered.start(0) + 0.01;
       seek(mediaElement, wantedPosition);
     }),
     shareReplay({ refCount: true })
