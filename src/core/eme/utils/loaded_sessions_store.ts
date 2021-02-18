@@ -86,8 +86,7 @@ export default class LoadedSessionsStore {
    * Returns the stored MediaKeySession information related to the
    * given initDataType and initData if found.
    * Returns `null` if no such MediaKeySession is stored.
-   * @param {Uint8Array} initData
-   * @param {string|undefined} initDataType
+   * @param {Object} initializationData
    * @returns {Object|null}
    */
   public get(initializationData : IInitializationDataInfo) : IStoredSessionData | null {
@@ -105,8 +104,7 @@ export default class LoadedSessionsStore {
    * initialization data is re-used to then be able to implement a caching
    * replacement algorithm based on the least-recently-used values by just
    * evicting the first values returned by `getAll`.
-   * @param {Uint8Array} initData
-   * @param {string|undefined} initDataType
+   * @param {Object} initializationData
    * @returns {Object|null}
    */
   public getAndReuse(
@@ -126,6 +124,11 @@ export default class LoadedSessionsStore {
    * re-used to then be able to implement a caching replacement algorithm based
    * on the least-recently-used values by just evicting the first values
    * returned by `getAll`.
+   *
+   * Returns `true` if the corresponding session was found in the store, `false`
+   * otherwise.
+   * @param {Object} initializationData
+   * @returns {boolean}
    */
   public reuse(
     initializationData : IInitializationDataInfo
@@ -136,8 +139,7 @@ export default class LoadedSessionsStore {
   /**
    * Create a new MediaKeySession and store it in this store.
    * @throws {EncryptedMediaError}
-   * @param {Uint8Array} initData
-   * @param {string|undefined} initDataType
+   * @param {Object} initializationData
    * @param {string} sessionType
    * @returns {MediaKeySession}
    */
@@ -177,8 +179,7 @@ export default class LoadedSessionsStore {
    * Close a MediaKeySession corresponding to an initialization data and remove
    * its related stored information from the LoadedSessionsStore.
    * Emit when done.
-   * @param {Uint8Array} initData
-   * @param {string|undefined} initDataType
+   * @param {Object} initializationData
    * @returns {Observable}
    */
   public closeSession(
