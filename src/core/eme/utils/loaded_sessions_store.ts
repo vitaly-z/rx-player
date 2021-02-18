@@ -127,7 +127,7 @@ export default class LoadedSessionsStore {
    * on the least-recently-used values by just evicting the first values
    * returned by `getAll`.
    */
-  public moveOnTop(
+  public reuse(
     initializationData : IInitializationDataInfo
   ) : boolean {
     return this._storage.getAndReuse(initializationData) !== undefined;
