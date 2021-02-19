@@ -21,7 +21,6 @@ import {
   withLatestFrom,
 } from "rxjs/operators";
 import { isPlaybackStuck } from "../../compat";
-import seek from "../../compat/seek";
 import config from "../../config";
 import { MediaError } from "../../errors";
 import log from "../../log";
@@ -159,7 +158,6 @@ export default function StallAvoider(
           } else {
             log.warn("SA: skippable discontinuity found in the stream",
                      position, realSeekTime);
-            seek(mediaElement, realSeekTime);
             return EVENTS.warning(generateDiscontinuityError(stalledPosition,
                                                              realSeekTime));
           }
@@ -173,7 +171,6 @@ export default function StallAvoider(
                           stalled !== null)
       ) {
         log.warn("Init: After freeze seek", position, currentRange);
-        seek(mediaElement, position);
         return EVENTS.warning(generateDiscontinuityError(position,
                                                          position));
 
@@ -194,7 +191,6 @@ export default function StallAvoider(
         if (mediaElement.currentTime < seekTo) {
           log.warn("Init: discontinuity encountered inferior to the threshold",
                    freezePosition, seekTo, BUFFER_DISCONTINUITY_THRESHOLD);
-          seek(mediaElement, seekTo);
           return EVENTS.warning(generateDiscontinuityError(freezePosition, seekTo));
         }
       }
@@ -208,7 +204,6 @@ export default function StallAvoider(
               manifest.periods[i + 1].start > mediaElement.currentTime)
           {
             const nextPeriod = manifest.periods[i + 1];
-            seek(mediaElement, nextPeriod.start);
             return EVENTS.warning(generateDiscontinuityError(freezePosition,
                                                              nextPeriod.start));
 
