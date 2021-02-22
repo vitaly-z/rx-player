@@ -1,0 +1,12 @@
+/home/oscar/prog/repos/rx-player/src/parsers/manifest/dash/wasm-parser/target/debug/deps/quick_xml-4a2fcb25ad7faa0b.rmeta: /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/lib.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/errors.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/escapei.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/events/mod.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/events/attributes.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/reader.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/utils.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/writer.rs
+
+/home/oscar/prog/repos/rx-player/src/parsers/manifest/dash/wasm-parser/target/debug/deps/quick_xml-4a2fcb25ad7faa0b.d: /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/lib.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/errors.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/escapei.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/events/mod.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/events/attributes.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/reader.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/utils.rs /home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/writer.rs
+
+/home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/lib.rs:
+/home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/errors.rs:
+/home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/escapei.rs:
+/home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/events/mod.rs:
+/home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/events/attributes.rs:
+/home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/reader.rs:
+/home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/utils.rs:
+/home/oscar/.cargo/registry/src/github.com-1ecc6299db9ec823/quick-xml-0.21.0/src/writer.rs:

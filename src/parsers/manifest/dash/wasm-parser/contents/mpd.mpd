@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MPD xmlns:cenc="urn:mpeg:cenc:2013" xsi:schemalocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd" xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011" type="static" mediaPresentationDuration="PT54M16S" minBufferTime="PT4S">
+    <Period id="__forged_0" start="PT0S" duration="PT54M18.64S" bitstreamSwitching="false">
+        <AdaptationSet id="3" contentType="video" par="16:9" maxWidth="1920" maxHeight="1080" maxFrameRate="25" segmentAlignment="false" subsegmentAlignment="true" subsegmentStartsWithSAP="2" width="1920" height="1080" sar="1:1" frameRate="25" mimeType="video/mp4" codecs="avc1.640029" scanType="progressive">
+            <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+            <Representation id="Video7.1.1.1" bandwidth="4502584">
+                <BaseURL>testcanal.fr_MKPC_VM_002_ATM_OTT_FHD_1_EAC3-AAC_20_VM_video_4500_avc.mp4</BaseURL>
+                <SegmentBase timescale="90000" indexRange="2025-11836" indexRangeExact="false">
+                    <Initialization range="0-2024"/>
+                </SegmentBase>
+            </Representation>
+            <ContentProtection cenc:default_KID="271acc7f-bf74-4318-8c1d-9ad3891773ee" schemeIdUri="urn:mpeg:dash:mp4protection:2011" value="cenc"/>
+            <ContentProtection schemeIdUri="urn:uuid:1077EFEC-C0B2-4D02-ACE3-3C1E52E2FB4B" value="cenc">
+                <cenc:pssh>AAAANHBzc2gAAAAAEHfv7MCyTQKs4zweUuL7SwAAAAEnGsx/v3RDGIwdmtOJF3PuAAAAAA==</cenc:pssh>
+            </ContentProtection>
+            <ContentProtection schemeIdUri="urn:uuid:9A04F079-9840-4286-AB92-E65BE0885F95" value="PLAYREADY">
+                <cenc:pssh>AAAD0nBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAA7KyAwAAAQABAKgDPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9ACIAaAB0AHQAcAA6AC8ALwBzAGMAaABlAG0AYQBzAC4AbQBpAGMAcgBvAHMAbwBmAHQALgBjAG8AbQAvAEQAUgBNAC8AMgAwADAANwAvADAAMwAvAFAAbABhAHkAUgBlAGEAZAB5AEgAZQBhAGQAZQByACIAIAB2AGUAcgBzAGkAbwBuAD0AIgA0AC4AMAAuADAALgAwACIAPgA8AEQAQQBUAEEAPgA8AFAAUgBPAFQARQBDAFQASQBOAEYATwA+ADwASwBFAFkATABFAE4APgAxADYAPAAvAEsARQBZAEwARQBOAD4APABBAEwARwBJAEQAPgBBAEUAUwBDAFQAUgA8AC8AQQBMAEcASQBEAD4APAAvAFAAUgBPAFQARQBDAFQASQBOAEYATwA+ADwASwBJAEQAPgBmADgAdwBhAEoAMwBTAC8ARwBFAE8ATQBIAFoAcgBUAGkAUgBkAHoANwBnAD0APQA8AC8ASwBJAEQAPgA8AEwAQQBfAFUAUgBMAD4AaAB0AHQAcAA6AC8ALwBkAHIAbQAuAGMAYQBuAGEAbAAtAHAAbAB1AHMALgBjAG8AbQAvADwALwBMAEEAXwBVAFIATAA+ADwATABVAEkAXwBVAFIATAA+AGgAdAB0AHAAOgAvAC8AZAByAG0ALgBjAGEAbgBhAGwALQBwAGwAdQBzAC4AYwBvAG0ALwA8AC8ATABVAEkAXwBVAFIATAA+ADwARABTAF8ASQBEAD4AeQBZAEkAUABEAEIAYwBhADEAawBtAE0AZgBMADYAMABJAHMAZgBnAEEAUQA9AD0APAAvAEQAUwBfAEkARAA+ADwAQwBVAFMAVABPAE0AQQBUAFQAUgBJAEIAVQBUAEUAUwAgAHgAbQBsAG4AcwA9ACIAIgA+ADwAZQBuAGMAcgB5AHAAdABpAG8AbgByAGUAZgA+ADEAMgAxADMAMQAxADgANQA5ADkAPAAvAGUAbgBjAHIAeQBwAHQAaQBvAG4AcgBlAGYAPgA8AC8AQwBVAFMAVABPAE0AQQBUAFQAUgBJAEIAVQBUAEUAUwA+ADwAQwBIAEUAQwBLAFMAVQBNAD4AcwBqADcAKwBuAHoAUQAwAEcAbgBFAD0APAAvAEMASABFAEMASwBTAFUATQA+ADwALwBEAEEAVABBAD4APAAvAFcAUgBNAEgARQBBAEQARQBSAD4A</cenc:pssh>
+            </ContentProtection>
+            <ContentProtection schemeIdUri="urn:uuid:EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED" value="WIDEVINE">
+                <cenc:pssh>AAAAUHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAADAIARIQJxrMf790QxiMHZrTiRdz7hoIV2lkZXZpbmUiCjEyMTMxMTg1OTlI49yVmwY=</cenc:pssh>
+            </ContentProtection>
+            <ContentProtection schemeIdUri="urn:uuid:ADB41C24-2DBF-4A6D-958B-4457C0D27B95" value="NAGRA">
+                <cenc:pssh>AAAAjHBzc2gAAAAArbQcJC2/Sm2Vi0RXwNJ7lQAAAGxleUpqYjI1MFpXNTBTV1FpT2lJeE1qRXpNVEU0TlRrNVh6RTJOREl3SWl3aWEyVjVTV1FpT2lJeU56RmhZMk0zWmkxaVpqYzBMVFF6TVRndE9HTXhaQzA1WVdRek9Ea3hOemN6WldVaWZRPT0=</cenc:pssh>
+            </ContentProtection>
+            <SupplementalProperty schemeIdUri="urn:mpeg:dash:adaptation-set-switching:2016" value="1,2"/>
+        </AdaptationSet>
+        <AdaptationSet lang="qaa" contentType="audio" segmentAlignment="false" subsegmentAlignment="true" subsegmentStartsWithSAP="1" audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2">
+            <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+            <Representation id="Audio1.1.1" bandwidth="68700">
+                <BaseURL>testcanal.fr_MKPC_VM_002_ATM_OTT_SD_4_AACLC_20_VM_audio_65_aaclc_qaa.mp4</BaseURL>
+                <SegmentBase timescale="90000" indexRange="616-10427" indexRangeExact="false">
+                    <Initialization range="0-615"/>
+                </SegmentBase>
+            </Representation>
+            <AudioChannelConfiguration schemeIdUri="urn:mpeg:mpegB:cicp:ChannelConfiguration" value="2"/>
+        </AdaptationSet>
+        <AdaptationSet lang="fr" contentType="audio" segmentAlignment="false" subsegmentAlignment="true" subsegmentStartsWithSAP="1" audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2">
+            <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+            <Representation id="Audio2.1.1" bandwidth="68700">
+                <BaseURL>testcanal.fr_MKPC_VM_002_ATM_OTT_SD_4_AACLC_20_VM_audio_64_aaclc_fre.mp4</BaseURL>
+                <SegmentBase timescale="90000" indexRange="616-10427" indexRangeExact="false">
+                    <Initialization range="0-615"/>
+                </SegmentBase>
+            </Representation>
+            <AudioChannelConfiguration schemeIdUri="urn:mpeg:mpegB:cicp:ChannelConfiguration" value="2"/>
+        </AdaptationSet>
+        <AdaptationSet lang="fr" contentType="audio" segmentAlignment="false" subsegmentAlignment="true" subsegmentStartsWithSAP="1" audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2">
+            <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+            <Representation id="Audio3.1.1" bandwidth="132700">
+                <BaseURL>testcanal.fr_MKPC_VM_002_ATM_OTT_HD_2_AACLC_20_VM_audio_128_aaclc_fre.mp4</BaseURL>
+                <SegmentBase timescale="90000" indexRange="616-10427" indexRangeExact="false">
+                    <Initialization range="0-615"/>
+                </SegmentBase>
+            </Representation>
+            <AudioChannelConfiguration schemeIdUri="urn:mpeg:mpegB:cicp:ChannelConfiguration" value="2"/>
+        </AdaptationSet>
+        <AdaptationSet lang="qaa" contentType="audio" segmentAlignment="false" subsegmentAlignment="true" subsegmentStartsWithSAP="1" audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2">
+            <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+            <Representation id="Audio4.1.1" bandwidth="132700">
+                <BaseURL>testcanal.fr_MKPC_VM_002_ATM_OTT_HD_2_AACLC_20_VM_audio_129_aaclc_qaa.mp4</BaseURL>
+                <SegmentBase timescale="90000" indexRange="616-10427" indexRangeExact="false">
+                    <Initialization range="0-615"/>
+                </SegmentBase>
+            </Representation>
+            <AudioChannelConfiguration schemeIdUri="urn:mpeg:mpegB:cicp:ChannelConfiguration" value="2"/>
+        </AdaptationSet>
+        <AdaptationSet lang="fr" contentType="text" segmentAlignment="false" subsegmentAlignment="true" subsegmentStartsWithSAP="1" mimeType="application/mp4" codecs="stpp">
+            <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+            <Representation id="Data1.1.1" bandwidth="920">
+                <BaseURL>pivot_stl_2.mp4</BaseURL>
+                <SegmentBase timescale="90000" indexRange="626-1305" indexRangeExact="false">
+                    <Initialization range="0-625"/>
+                </SegmentBase>
+            </Representation>
+        </AdaptationSet>
+    </Period>
+</MPD>
+

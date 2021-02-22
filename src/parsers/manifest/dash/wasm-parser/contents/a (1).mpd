@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MPD xsi:schemalocation="urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd" xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" profiles="urn:mpeg:dash:profile:isoff-on-demand:2011" type="dynamic" availabilityStartTime="1970-01-01T00:00:00Z" publishTime="2020-10-05T09:51:08Z" mediaPresentationDuration="PT1M20S" minimumUpdatePeriod="PT2S" minBufferTime="PT4S">
+    <Period id="__forged_0" start="PT0S" duration="PT15M" bitstreamSwitching="false">
+        <AdaptationSet contentType="video" par="16:9" maxWidth="1920" maxHeight="1080" maxFrameRate="25" segmentAlignment="false" subsegmentAlignment="true" subsegmentStartsWithSAP="2" sar="1:1" frameRate="25" mimeType="video/mp4" scanType="progressive">
+            <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+            <Representation id="Video1.1.1.1" bandwidth="192568" width="416" height="234" codecs="avc1.4D401E">
+                <BaseURL>HDVFQAD_416_234_190k.mp4</BaseURL>
+                <SegmentBase timescale="90000" indexRange="686-3417" indexRangeExact="false">
+                    <Initialization range="0-685"/>
+                </SegmentBase>
+            </Representation>
+        </AdaptationSet>
+        <AdaptationSet lang="fra" contentType="audio" segmentAlignment="false" subsegmentAlignment="true" subsegmentStartsWithSAP="1" audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2">
+            <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+            <Representation id="Audio2.1.1" bandwidth="132700">
+                <BaseURL>HDVFQAD_VF_fre_128k.mp4</BaseURL>
+                <SegmentBase timescale="90000" indexRange="616-3347" indexRangeExact="false">
+                    <Initialization range="0-615"/>
+                </SegmentBase>
+            </Representation>
+            <Representation id="Audio1.1.1" bandwidth="68700">
+                <BaseURL>HDVFQAD_VF_fre_64k.mp4</BaseURL>
+                <SegmentBase timescale="90000" indexRange="616-3347" indexRangeExact="false">
+                    <Initialization range="0-615"/>
+                </SegmentBase>
+            </Representation>
+            <AudioChannelConfiguration schemeIdUri="urn:mpeg:mpegB:cicp:ChannelConfiguration" value="2"/>
+        </AdaptationSet>
+        <AdaptationSet lang="qad" contentType="audio" segmentAlignment="false" subsegmentAlignment="true" subsegmentStartsWithSAP="1" audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2">
+            <Accessibility schemeIdUri="urn:tva:metadata:cs:AudioPurposeCS:2007" value="1"/>
+            <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+            <Representation id="Audio4.1.1" bandwidth="132700">
+                <BaseURL>HDVFQAD_VF_qad_128k.mp4</BaseURL>
+                <SegmentBase timescale="90000" indexRange="616-3347" indexRangeExact="false">
+                    <Initialization range="0-615"/>
+                </SegmentBase>
+            </Representation>
+            <Representation id="Audio3.1.1" bandwidth="68700">
+                <BaseURL>HDVFQAD_VF_qad_64k.mp4</BaseURL>
+                <SegmentBase timescale="90000" indexRange="616-3347" indexRangeExact="false">
+                    <Initialization range="0-615"/>
+                </SegmentBase>
+            </Representation>
+            <AudioChannelConfiguration schemeIdUri="urn:mpeg:mpegB:cicp:ChannelConfiguration" value="2"/>
+        </AdaptationSet>
+        <AdaptationSet lang="fra" contentType="text" segmentAlignment="false" subsegmentAlignment="true" subsegmentStartsWithSAP="1" mimeType="application/mp4" codecs="stpp">
+            <Accessibility schemeIdUri="urn:tva:metadata:cs:AudioPurposeCS:2007" value="2"/>
+            <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+            <Representation id="Data1.1.1" bandwidth="1127">
+                <BaseURL>HDVFQAD_text_SRD.mp4</BaseURL>
+                <SegmentBase timescale="90000" indexRange="626-1713" indexRangeExact="false">
+                    <Initialization range="0-625"/>
+                </SegmentBase>
+            </Representation>
+        </AdaptationSet>
+    </Period>
+</MPD>

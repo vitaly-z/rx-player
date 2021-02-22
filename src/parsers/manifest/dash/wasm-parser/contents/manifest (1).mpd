@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" XMLSchema-instance:schemaLocation="urn:mpeg:dash:schema:mpd:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd" profiles="urn:mpeg:dash:profile:isoff-live:2011" type="dynamic" availabilityStartTime="2015-01-01T00:00:00Z" publishTime="2020-09-07T13:09:02.122140316Z" minimumUpdatePeriod="PT2S" minBufferTime="PT2S" timeShiftBufferDepth="PT1M40S" maxSegmentDuration="PT3S">
+  <BaseURL>https://dsh-m002.live-lv3.canalplus-cdn.net/live/disk/cnews-clair-hd/dash-fhd-clair/</BaseURL>
+  <Location>https://dai.google.com/linear/dash/pa/event/g93EI-JjQK-c9SGmZrY7tg/stream/354f9aee-c8cb-42c0-b6e5-b46859299ec7:BRU/manifest.mpd</Location>
+  <Period id="period_1794130784862778_2_in" start="PT49836H57M58.486277S">
+    <BaseURL>../_shared_40c098925908feef6d534b1c7a6af155/</BaseURL>
+    <EventStream schemeIdUri="urn:scte:scte35:2014:xml+bin" timescale="10000000">
+      <Event duration="0" id="2">
+        <Signal xmlns="urn:scte:scte35:2014:xml+bin">
+          <Binary xmlns="urn:scte:scte35:2014:xml+bin">/DAgAAAAAAAAAP/wDwUAAAACf0//MDPZzgAAAAAAAP9HH74=</Binary>
+        </Signal>
+      </Event>
+    </EventStream>
+    <AdaptationSet mimeType="video/mp4" startWithSAP="1" id="3" group="2" contentType="video" par="16:9" minBandwidth="190000" maxBandwidth="4500000" minWidth="416" maxWidth="1920" minHeight="234" maxHeight="1080" minFrameRate="25" maxFrameRate="50" segmentAlignment="true">
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+      <SegmentTemplate timescale="10000000" presentationTimeOffset="1794130784862778" media="cnews-clair-hd-$RepresentationID$-$Time$.mp4" initialization="cnews-clair-hd-$RepresentationID$-init.mp4">
+        <SegmentTimeline>
+          <S t="1794136368462778" d="20000000" r="49"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation width="640" height="360" sar="1:1" frameRate="25" codecs="avc1.4d401e" id="avc1_1100000=5" bandwidth="1100000"/>
+      <Representation width="960" height="540" sar="1:1" frameRate="25" codecs="avc1.4d401f" id="avc1_1500000=6" bandwidth="1500000"/>
+      <Representation width="416" height="234" sar="1:1" frameRate="25" codecs="avc1.4d401e" id="avc1_190000=1" bandwidth="190000"/>
+      <Representation width="960" height="540" sar="1:1" frameRate="25" codecs="avc1.4d401f" id="avc1_2100000=7" bandwidth="2100000"/>
+      <Representation width="1280" height="720" sar="1:1" frameRate="25" codecs="avc1.64001f" id="avc1_3400000=8" bandwidth="3400000"/>
+      <Representation width="1920" height="1080" sar="1:1" frameRate="50" codecs="avc1.64002a" id="avc1_4500000=9" bandwidth="4500000"/>
+      <Representation width="480" height="270" sar="1:1" frameRate="25" codecs="avc1.4d401e" id="avc1_750000=2" bandwidth="750000"/>
+    </AdaptationSet>
+    <AdaptationSet mimeType="audio/mp4" id="1" group="1" lang="fr" contentType="audio" segmentAlignment="true">
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+      <SegmentTemplate timescale="10000000" presentationTimeOffset="1794130784862778" media="cnews-clair-hd-$RepresentationID$-$Time$.mp4" initialization="cnews-clair-hd-$RepresentationID$-init.mp4">
+        <SegmentTimeline>
+          <S t="1794136348622778" d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+          <S d="19840000"/>
+          <S d="20160000"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation audioSamplingRate="48000" codecs="ec-3" id="ec3_192000_fra=4" bandwidth="192000">
+        <AudioChannelConfiguration schemeIdUri="tag:dolby.com,2014:dash:audio_channel_configuration:2011" value="F801"/>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet mimeType="audio/mp4" id="2" group="1" lang="fr" contentType="audio" segmentAlignment="true">
+      <Role schemeIdUri="urn:mpeg:dash:role:2011" value="main"/>
+      <SegmentTemplate timescale="10000000" presentationTimeOffset="1794130784862778" media="cnews-clair-hd-$RepresentationID$-$Time$.mp4" initialization="cnews-clair-hd-$RepresentationID$-init.mp4">
+        <SegmentTimeline>
+          <S t="1794136348516110" d="20053334"/>
+          <S d="20053332"/>
+          <S d="20053334"/>
+          <S d="19840001"/>
+          <S d="20053332"/>
+          <S d="20053334" r="1"/>
+          <S d="19839999"/>
+          <S d="20053334"/>
+          <S d="20053332"/>
+          <S d="20053334"/>
+          <S d="19840001"/>
+          <S d="20053332"/>
+          <S d="20053334" r="1"/>
+          <S d="19839999"/>
+          <S d="20053334"/>
+          <S d="20053332"/>
+          <S d="20053334"/>
+          <S d="19840001"/>
+          <S d="20053332"/>
+          <S d="20053334" r="1"/>
+          <S d="19839999"/>
+          <S d="20053334"/>
+          <S d="20053332"/>
+          <S d="20053334"/>
+          <S d="19840001"/>
+          <S d="20053332"/>
+          <S d="20053334" r="1"/>
+          <S d="19839999"/>
+          <S d="20053334"/>
+          <S d="20053332"/>
+          <S d="20053334"/>
+          <S d="19840001"/>
+          <S d="20053332"/>
+          <S d="20053334" r="1"/>
+          <S d="19839999"/>
+          <S d="20053334"/>
+          <S d="20053332"/>
+          <S d="20053334"/>
+          <S d="19840001"/>
+          <S d="20053332"/>
+          <S d="20053334" r="1"/>
+          <S d="19839999"/>
+          <S d="20053334"/>
+          <S d="20053332"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation audioSamplingRate="48000" codecs="mp4a.40.2" id="mp4a_96000_fra=3" bandwidth="96000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+    </AdaptationSet>
+  </Period>
+</MPD>

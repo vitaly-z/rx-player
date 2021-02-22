@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MPD xmlns="urn:mpeg:dash:schema:mpd:2011" xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:schemaLocation="urn:mpeg:dash:schema:mpd:2011 http://standards.iso.org/ittf/PubliclyAvailableStandards/MPEG-DASH_schema_files/DASH-MPD.xsd" profiles="urn:mpeg:dash:profile:isoff-live:2011" type="dynamic" availabilityStartTime="2015-01-01T00:00:03Z" publishTime="2021-01-19T17:39:21.467591208Z" minimumUpdatePeriod="PT2S" minBufferTime="PT2S" timeShiftBufferDepth="PT1M40S" maxSegmentDuration="PT3S">
+  <BaseURL>https://hls-s001.live-lv3.canalplus-cdn.net/live/disk/c8-hd/dash-fhd/</BaseURL>
+  <Location>https://dai.google.com/linear/dash/pa/event/luhNWlvmRvq6nrH6P00Bpw/stream/f7f61abb-3aba-4fae-8ced-4a59f5ea36bd:BRU/manifest.mpd</Location>
+  <Period id="dai_pod-0000006540-slate-1-6" start="PT53057H37M16.88S" duration="PT29.96S">
+    <BaseURL>https://dai.google.com/linear/pods/v1/p/luhNWlvmRvq6nrH6P00Bpw/f7f61abb-3aba-4fae-8ced-4a59f5ea36bd:BRU/6540/slate/0/</BaseURL>
+    <SegmentTemplate startNumber="0" media="$RepresentationID$/$Number$.mp4" initialization="$RepresentationID$/init.mp4"/>
+    <EventStream schemeIdUri="urn:google:dai:2018" timescale="1000">
+      <Event presentationTime="900" duration="0" id="0" messageData="google_8811442700777042480"/>
+      <Event presentationTime="1900" duration="0" id="1" messageData="google_8811442700777042480"/>
+      <Event presentationTime="2900" duration="0" id="2" messageData="google_8811442700777042480"/>
+      <Event presentationTime="3900" duration="0" id="3" messageData="google_8811442700777042480"/>
+      <Event presentationTime="4900" duration="0" id="4" messageData="google_8811442700777042480"/>
+      <Event presentationTime="5900" duration="0" id="5" messageData="google_8811442700777042480"/>
+      <Event presentationTime="6900" duration="0" id="6" messageData="google_8811442700777042480"/>
+      <Event presentationTime="7900" duration="0" id="7" messageData="google_8811442700777042480"/>
+      <Event presentationTime="8900" duration="0" id="8" messageData="google_8811442700777042480"/>
+      <Event presentationTime="9900" duration="0" id="9" messageData="google_8811442700777042480"/>
+      <Event presentationTime="10900" duration="0" id="10" messageData="google_8811442700777042480"/>
+      <Event presentationTime="11900" duration="0" id="11" messageData="google_8811442700777042480"/>
+      <Event presentationTime="12900" duration="0" id="12" messageData="google_8811442700777042480"/>
+      <Event presentationTime="13900" duration="0" id="13" messageData="google_8811442700777042480"/>
+      <Event presentationTime="14900" duration="0" id="14" messageData="google_8811442700777042480"/>
+      <Event presentationTime="15900" duration="0" id="15" messageData="google_8811442700777042480"/>
+      <Event presentationTime="16900" duration="0" id="16" messageData="google_8811442700777042480"/>
+      <Event presentationTime="17900" duration="0" id="17" messageData="google_8811442700777042480"/>
+      <Event presentationTime="18900" duration="0" id="18" messageData="google_8811442700777042480"/>
+      <Event presentationTime="19900" duration="0" id="19" messageData="google_8811442700777042480"/>
+      <Event presentationTime="20900" duration="0" id="20" messageData="google_8811442700777042480"/>
+      <Event presentationTime="21900" duration="0" id="21" messageData="google_8811442700777042480"/>
+      <Event presentationTime="22900" duration="0" id="22" messageData="google_8811442700777042480"/>
+      <Event presentationTime="23900" duration="0" id="23" messageData="google_8811442700777042480"/>
+      <Event presentationTime="24900" duration="0" id="24" messageData="google_8811442700777042480"/>
+      <Event presentationTime="25900" duration="0" id="25" messageData="google_8811442700777042480"/>
+      <Event presentationTime="26900" duration="0" id="26" messageData="google_8811442700777042480"/>
+      <Event presentationTime="27900" duration="0" id="27" messageData="google_8811442700777042480"/>
+      <Event presentationTime="28900" duration="0" id="28" messageData="google_8811442700777042480"/>
+      <Event presentationTime="29900" duration="0" id="29" messageData="google_8811442700777042480"/>
+    </EventStream>
+    <AdaptationSet id="0" contentType="audio">
+      <SegmentTemplate timescale="48000">
+        <SegmentTimeline>
+          <S t="577536" d="144384" r="4"/>
+          <S d="138624"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="ec-3" id="141eec0b121568b8af6af34e0127ba42" bandwidth="384000">
+        <AudioChannelConfiguration schemeIdUri="tag:dolby.com,2014:dash:audio_channel_configuration:2011" value="F801"/>
+      </Representation>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="ec-3" id="eb057a2cd83ce61504fac0d630dc36e8" bandwidth="384000">
+        <AudioChannelConfiguration schemeIdUri="tag:dolby.com,2014:dash:audio_channel_configuration:2011" value="F801"/>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="1" contentType="audio">
+      <SegmentTemplate timescale="48000">
+        <SegmentTimeline>
+          <S t="577344" d="144336" r="4"/>
+          <S d="138624"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2" id="0c25e0479f488bf5b2ef947141ab32ca" bandwidth="93000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2" id="131e72407f95e9084b89adcaa5f2a433" bandwidth="93000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2" id="6b92886cc5943d8e2b31a7117f1c9485" bandwidth="93000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet startWithSAP="1" id="2" contentType="video" segmentAlignment="true">
+      <SegmentTemplate timescale="90000">
+        <SegmentTimeline>
+          <S t="1080000" d="270000" r="4"/>
+          <S d="266400"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation width="1920" height="1080" frameRate="25" mimeType="video/mp4" codecs="avc1.4d4028" id="5372a786a15ca728a76c654a6fd6bdd6" bandwidth="4560000"/>
+      <Representation width="416" height="234" frameRate="25" mimeType="video/mp4" codecs="avc1.4d400d" id="62bf6ab5bfeaa2454c676b4d58433930" bandwidth="143000"/>
+      <Representation width="960" height="540" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401f" id="735fd92ebaa9f3387e7e72c6cb992b7c" bandwidth="1208000"/>
+      <Representation width="960" height="540" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401f" id="875da64094155e179ab8383ba62dc010" bandwidth="2028000"/>
+      <Representation width="480" height="270" frameRate="25" mimeType="video/mp4" codecs="avc1.4d4015" id="93d5e2993e88b80c1ec7ae020a31c9cd" bandwidth="357000"/>
+      <Representation width="1280" height="720" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401f" id="cd2dd7d7c9149454fb2822a671d62f60" bandwidth="3084000"/>
+      <Representation width="640" height="360" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401e" id="f82e3805120318206d52520ffd6b74db" bandwidth="696000"/>
+    </AdaptationSet>
+  </Period>
+  <Period id="dai_pod-0000006540-slate-1-7" start="PT53057H37M46.84S" duration="PT29.96S">
+    <BaseURL>https://dai.google.com/linear/pods/v1/p/luhNWlvmRvq6nrH6P00Bpw/f7f61abb-3aba-4fae-8ced-4a59f5ea36bd:BRU/6540/slate/0/</BaseURL>
+    <SegmentTemplate startNumber="0" media="$RepresentationID$/$Number$.mp4" initialization="$RepresentationID$/init.mp4"/>
+    <EventStream schemeIdUri="urn:google:dai:2018" timescale="1000">
+      <Event presentationTime="900" duration="0" id="0" messageData="google_8811442700777042480"/>
+      <Event presentationTime="1900" duration="0" id="1" messageData="google_8811442700777042480"/>
+      <Event presentationTime="2900" duration="0" id="2" messageData="google_8811442700777042480"/>
+      <Event presentationTime="3900" duration="0" id="3" messageData="google_8811442700777042480"/>
+      <Event presentationTime="4900" duration="0" id="4" messageData="google_8811442700777042480"/>
+      <Event presentationTime="5900" duration="0" id="5" messageData="google_8811442700777042480"/>
+      <Event presentationTime="6900" duration="0" id="6" messageData="google_8811442700777042480"/>
+      <Event presentationTime="7900" duration="0" id="7" messageData="google_8811442700777042480"/>
+      <Event presentationTime="8900" duration="0" id="8" messageData="google_8811442700777042480"/>
+      <Event presentationTime="9900" duration="0" id="9" messageData="google_8811442700777042480"/>
+      <Event presentationTime="10900" duration="0" id="10" messageData="google_8811442700777042480"/>
+      <Event presentationTime="11900" duration="0" id="11" messageData="google_8811442700777042480"/>
+      <Event presentationTime="12900" duration="0" id="12" messageData="google_8811442700777042480"/>
+      <Event presentationTime="13900" duration="0" id="13" messageData="google_8811442700777042480"/>
+      <Event presentationTime="14900" duration="0" id="14" messageData="google_8811442700777042480"/>
+      <Event presentationTime="15900" duration="0" id="15" messageData="google_8811442700777042480"/>
+      <Event presentationTime="16900" duration="0" id="16" messageData="google_8811442700777042480"/>
+      <Event presentationTime="17900" duration="0" id="17" messageData="google_8811442700777042480"/>
+      <Event presentationTime="18900" duration="0" id="18" messageData="google_8811442700777042480"/>
+      <Event presentationTime="19900" duration="0" id="19" messageData="google_8811442700777042480"/>
+      <Event presentationTime="20900" duration="0" id="20" messageData="google_8811442700777042480"/>
+      <Event presentationTime="21900" duration="0" id="21" messageData="google_8811442700777042480"/>
+      <Event presentationTime="22900" duration="0" id="22" messageData="google_8811442700777042480"/>
+      <Event presentationTime="23900" duration="0" id="23" messageData="google_8811442700777042480"/>
+      <Event presentationTime="24900" duration="0" id="24" messageData="google_8811442700777042480"/>
+      <Event presentationTime="25900" duration="0" id="25" messageData="google_8811442700777042480"/>
+      <Event presentationTime="26900" duration="0" id="26" messageData="google_8811442700777042480"/>
+      <Event presentationTime="27900" duration="0" id="27" messageData="google_8811442700777042480"/>
+      <Event presentationTime="28900" duration="0" id="28" messageData="google_8811442700777042480"/>
+      <Event presentationTime="29900" duration="0" id="29" messageData="google_8811442700777042480"/>
+    </EventStream>
+    <AdaptationSet id="0" contentType="audio">
+      <SegmentTemplate timescale="48000">
+        <SegmentTimeline>
+          <S d="144384" r="8"/>
+          <S d="138624"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="ec-3" id="141eec0b121568b8af6af34e0127ba42" bandwidth="384000">
+        <AudioChannelConfiguration schemeIdUri="tag:dolby.com,2014:dash:audio_channel_configuration:2011" value="F801"/>
+      </Representation>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="ec-3" id="eb057a2cd83ce61504fac0d630dc36e8" bandwidth="384000">
+        <AudioChannelConfiguration schemeIdUri="tag:dolby.com,2014:dash:audio_channel_configuration:2011" value="F801"/>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="1" contentType="audio">
+      <SegmentTemplate timescale="48000">
+        <SegmentTimeline>
+          <S d="144336" r="8"/>
+          <S d="138624"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2" id="0c25e0479f488bf5b2ef947141ab32ca" bandwidth="93000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2" id="131e72407f95e9084b89adcaa5f2a433" bandwidth="93000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2" id="6b92886cc5943d8e2b31a7117f1c9485" bandwidth="93000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet startWithSAP="1" id="2" contentType="video" segmentAlignment="true">
+      <SegmentTemplate timescale="90000">
+        <SegmentTimeline>
+          <S d="270000" r="8"/>
+          <S d="266400"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation width="1920" height="1080" frameRate="25" mimeType="video/mp4" codecs="avc1.4d4028" id="5372a786a15ca728a76c654a6fd6bdd6" bandwidth="4560000"/>
+      <Representation width="416" height="234" frameRate="25" mimeType="video/mp4" codecs="avc1.4d400d" id="62bf6ab5bfeaa2454c676b4d58433930" bandwidth="143000"/>
+      <Representation width="960" height="540" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401f" id="735fd92ebaa9f3387e7e72c6cb992b7c" bandwidth="1208000"/>
+      <Representation width="960" height="540" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401f" id="875da64094155e179ab8383ba62dc010" bandwidth="2028000"/>
+      <Representation width="480" height="270" frameRate="25" mimeType="video/mp4" codecs="avc1.4d4015" id="93d5e2993e88b80c1ec7ae020a31c9cd" bandwidth="357000"/>
+      <Representation width="1280" height="720" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401f" id="cd2dd7d7c9149454fb2822a671d62f60" bandwidth="3084000"/>
+      <Representation width="640" height="360" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401e" id="f82e3805120318206d52520ffd6b74db" bandwidth="696000"/>
+    </AdaptationSet>
+  </Period>
+  <Period id="dai_pod-0000006540-slate-1-8" start="PT53057H38M16.8S" duration="PT29.96S">
+    <BaseURL>https://dai.google.com/linear/pods/v1/p/luhNWlvmRvq6nrH6P00Bpw/f7f61abb-3aba-4fae-8ced-4a59f5ea36bd:BRU/6540/slate/0/</BaseURL>
+    <SegmentTemplate startNumber="0" media="$RepresentationID$/$Number$.mp4" initialization="$RepresentationID$/init.mp4"/>
+    <EventStream schemeIdUri="urn:google:dai:2018" timescale="1000">
+      <Event presentationTime="900" duration="0" id="0" messageData="google_8811442700777042480"/>
+      <Event presentationTime="1900" duration="0" id="1" messageData="google_8811442700777042480"/>
+      <Event presentationTime="2900" duration="0" id="2" messageData="google_8811442700777042480"/>
+      <Event presentationTime="3900" duration="0" id="3" messageData="google_8811442700777042480"/>
+      <Event presentationTime="4900" duration="0" id="4" messageData="google_8811442700777042480"/>
+      <Event presentationTime="5900" duration="0" id="5" messageData="google_8811442700777042480"/>
+      <Event presentationTime="6900" duration="0" id="6" messageData="google_8811442700777042480"/>
+      <Event presentationTime="7900" duration="0" id="7" messageData="google_8811442700777042480"/>
+      <Event presentationTime="8900" duration="0" id="8" messageData="google_8811442700777042480"/>
+      <Event presentationTime="9900" duration="0" id="9" messageData="google_8811442700777042480"/>
+      <Event presentationTime="10900" duration="0" id="10" messageData="google_8811442700777042480"/>
+      <Event presentationTime="11900" duration="0" id="11" messageData="google_8811442700777042480"/>
+      <Event presentationTime="12900" duration="0" id="12" messageData="google_8811442700777042480"/>
+      <Event presentationTime="13900" duration="0" id="13" messageData="google_8811442700777042480"/>
+      <Event presentationTime="14900" duration="0" id="14" messageData="google_8811442700777042480"/>
+      <Event presentationTime="15900" duration="0" id="15" messageData="google_8811442700777042480"/>
+      <Event presentationTime="16900" duration="0" id="16" messageData="google_8811442700777042480"/>
+      <Event presentationTime="17900" duration="0" id="17" messageData="google_8811442700777042480"/>
+      <Event presentationTime="18900" duration="0" id="18" messageData="google_8811442700777042480"/>
+      <Event presentationTime="19900" duration="0" id="19" messageData="google_8811442700777042480"/>
+      <Event presentationTime="20900" duration="0" id="20" messageData="google_8811442700777042480"/>
+      <Event presentationTime="21900" duration="0" id="21" messageData="google_8811442700777042480"/>
+      <Event presentationTime="22900" duration="0" id="22" messageData="google_8811442700777042480"/>
+      <Event presentationTime="23900" duration="0" id="23" messageData="google_8811442700777042480"/>
+      <Event presentationTime="24900" duration="0" id="24" messageData="google_8811442700777042480"/>
+      <Event presentationTime="25900" duration="0" id="25" messageData="google_8811442700777042480"/>
+      <Event presentationTime="26900" duration="0" id="26" messageData="google_8811442700777042480"/>
+      <Event presentationTime="27900" duration="0" id="27" messageData="google_8811442700777042480"/>
+      <Event presentationTime="28900" duration="0" id="28" messageData="google_8811442700777042480"/>
+      <Event presentationTime="29900" duration="0" id="29" messageData="google_8811442700777042480"/>
+    </EventStream>
+    <AdaptationSet id="0" contentType="audio">
+      <SegmentTemplate timescale="48000">
+        <SegmentTimeline>
+          <S d="144384" r="8"/>
+          <S d="138624"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="ec-3" id="141eec0b121568b8af6af34e0127ba42" bandwidth="384000">
+        <AudioChannelConfiguration schemeIdUri="tag:dolby.com,2014:dash:audio_channel_configuration:2011" value="F801"/>
+      </Representation>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="ec-3" id="eb057a2cd83ce61504fac0d630dc36e8" bandwidth="384000">
+        <AudioChannelConfiguration schemeIdUri="tag:dolby.com,2014:dash:audio_channel_configuration:2011" value="F801"/>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="1" contentType="audio">
+      <SegmentTemplate timescale="48000">
+        <SegmentTimeline>
+          <S d="144336" r="8"/>
+          <S d="138624"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2" id="0c25e0479f488bf5b2ef947141ab32ca" bandwidth="93000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2" id="131e72407f95e9084b89adcaa5f2a433" bandwidth="93000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2" id="6b92886cc5943d8e2b31a7117f1c9485" bandwidth="93000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet startWithSAP="1" id="2" contentType="video" segmentAlignment="true">
+      <SegmentTemplate timescale="90000">
+        <SegmentTimeline>
+          <S d="270000" r="8"/>
+          <S d="266400"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation width="1920" height="1080" frameRate="25" mimeType="video/mp4" codecs="avc1.4d4028" id="5372a786a15ca728a76c654a6fd6bdd6" bandwidth="4560000"/>
+      <Representation width="416" height="234" frameRate="25" mimeType="video/mp4" codecs="avc1.4d400d" id="62bf6ab5bfeaa2454c676b4d58433930" bandwidth="143000"/>
+      <Representation width="960" height="540" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401f" id="735fd92ebaa9f3387e7e72c6cb992b7c" bandwidth="1208000"/>
+      <Representation width="960" height="540" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401f" id="875da64094155e179ab8383ba62dc010" bandwidth="2028000"/>
+      <Representation width="480" height="270" frameRate="25" mimeType="video/mp4" codecs="avc1.4d4015" id="93d5e2993e88b80c1ec7ae020a31c9cd" bandwidth="357000"/>
+      <Representation width="1280" height="720" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401f" id="cd2dd7d7c9149454fb2822a671d62f60" bandwidth="3084000"/>
+      <Representation width="640" height="360" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401e" id="f82e3805120318206d52520ffd6b74db" bandwidth="696000"/>
+    </AdaptationSet>
+  </Period>
+  <Period id="dai_pod-0000006540-slate-1-9" start="PT53057H38M46.76S">
+    <BaseURL>https://dai.google.com/linear/pods/v1/p/luhNWlvmRvq6nrH6P00Bpw/f7f61abb-3aba-4fae-8ced-4a59f5ea36bd:BRU/6540/slate/0/</BaseURL>
+    <SegmentTemplate startNumber="0" media="$RepresentationID$/$Number$.mp4" initialization="$RepresentationID$/init.mp4"/>
+    <EventStream schemeIdUri="urn:google:dai:2018" timescale="1000">
+      <Event presentationTime="900" duration="0" id="0" messageData="google_8811442700777042480"/>
+      <Event presentationTime="1900" duration="0" id="1" messageData="google_8811442700777042480"/>
+      <Event presentationTime="2900" duration="0" id="2" messageData="google_8811442700777042480"/>
+      <Event presentationTime="3900" duration="0" id="3" messageData="google_8811442700777042480"/>
+      <Event presentationTime="4900" duration="0" id="4" messageData="google_8811442700777042480"/>
+      <Event presentationTime="5900" duration="0" id="5" messageData="google_8811442700777042480"/>
+      <Event presentationTime="6900" duration="0" id="6" messageData="google_8811442700777042480"/>
+      <Event presentationTime="7900" duration="0" id="7" messageData="google_8811442700777042480"/>
+      <Event presentationTime="8900" duration="0" id="8" messageData="google_8811442700777042480"/>
+      <Event presentationTime="9900" duration="0" id="9" messageData="google_8811442700777042480"/>
+      <Event presentationTime="10900" duration="0" id="10" messageData="google_8811442700777042480"/>
+      <Event presentationTime="11900" duration="0" id="11" messageData="google_8811442700777042480"/>
+      <Event presentationTime="12900" duration="0" id="12" messageData="google_8811442700777042480"/>
+      <Event presentationTime="13900" duration="0" id="13" messageData="google_8811442700777042480"/>
+      <Event presentationTime="14900" duration="0" id="14" messageData="google_8811442700777042480"/>
+      <Event presentationTime="15900" duration="0" id="15" messageData="google_8811442700777042480"/>
+      <Event presentationTime="16900" duration="0" id="16" messageData="google_8811442700777042480"/>
+      <Event presentationTime="17900" duration="0" id="17" messageData="google_8811442700777042480"/>
+      <Event presentationTime="18900" duration="0" id="18" messageData="google_8811442700777042480"/>
+      <Event presentationTime="19900" duration="0" id="19" messageData="google_8811442700777042480"/>
+      <Event presentationTime="20900" duration="0" id="20" messageData="google_8811442700777042480"/>
+      <Event presentationTime="21900" duration="0" id="21" messageData="google_8811442700777042480"/>
+      <Event presentationTime="22900" duration="0" id="22" messageData="google_8811442700777042480"/>
+      <Event presentationTime="23900" duration="0" id="23" messageData="google_8811442700777042480"/>
+      <Event presentationTime="24900" duration="0" id="24" messageData="google_8811442700777042480"/>
+      <Event presentationTime="25900" duration="0" id="25" messageData="google_8811442700777042480"/>
+    </EventStream>
+    <AdaptationSet id="0" contentType="audio">
+      <SegmentTemplate timescale="48000">
+        <SegmentTimeline>
+          <S d="144384" r="7"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="ec-3" id="141eec0b121568b8af6af34e0127ba42" bandwidth="384000">
+        <AudioChannelConfiguration schemeIdUri="tag:dolby.com,2014:dash:audio_channel_configuration:2011" value="F801"/>
+      </Representation>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="ec-3" id="eb057a2cd83ce61504fac0d630dc36e8" bandwidth="384000">
+        <AudioChannelConfiguration schemeIdUri="tag:dolby.com,2014:dash:audio_channel_configuration:2011" value="F801"/>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet id="1" contentType="audio">
+      <SegmentTemplate timescale="48000">
+        <SegmentTimeline>
+          <S d="144336" r="7"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2" id="0c25e0479f488bf5b2ef947141ab32ca" bandwidth="93000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2" id="131e72407f95e9084b89adcaa5f2a433" bandwidth="93000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+      <Representation audioSamplingRate="48000" mimeType="audio/mp4" codecs="mp4a.40.2" id="6b92886cc5943d8e2b31a7117f1c9485" bandwidth="93000">
+        <AudioChannelConfiguration schemeIdUri="urn:mpeg:dash:23003:3:audio_channel_configuration:2011" value="2"/>
+      </Representation>
+    </AdaptationSet>
+    <AdaptationSet startWithSAP="1" id="2" contentType="video" segmentAlignment="true">
+      <SegmentTemplate timescale="90000">
+        <SegmentTimeline>
+          <S d="270000" r="7"/>
+        </SegmentTimeline>
+      </SegmentTemplate>
+      <Representation width="1920" height="1080" frameRate="25" mimeType="video/mp4" codecs="avc1.4d4028" id="5372a786a15ca728a76c654a6fd6bdd6" bandwidth="4560000"/>
+      <Representation width="416" height="234" frameRate="25" mimeType="video/mp4" codecs="avc1.4d400d" id="62bf6ab5bfeaa2454c676b4d58433930" bandwidth="143000"/>
+      <Representation width="960" height="540" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401f" id="735fd92ebaa9f3387e7e72c6cb992b7c" bandwidth="1208000"/>
+      <Representation width="960" height="540" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401f" id="875da64094155e179ab8383ba62dc010" bandwidth="2028000"/>
+      <Representation width="480" height="270" frameRate="25" mimeType="video/mp4" codecs="avc1.4d4015" id="93d5e2993e88b80c1ec7ae020a31c9cd" bandwidth="357000"/>
+      <Representation width="1280" height="720" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401f" id="cd2dd7d7c9149454fb2822a671d62f60" bandwidth="3084000"/>
+      <Representation width="640" height="360" frameRate="25" mimeType="video/mp4" codecs="avc1.4d401e" id="f82e3805120318206d52520ffd6b74db" bandwidth="696000"/>
+    </AdaptationSet>
+  </Period>
+</MPD>

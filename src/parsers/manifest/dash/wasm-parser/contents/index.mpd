@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<MPD type='static' profiles='urn:mpeg:dash:profile:isoff-on-demand:2011' mediaPresentationDuration='PT0H15M0.000S' minBufferTime='PT0H0M4.000S' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='urn:mpeg:dash:schema:mpd:2011' xsi:schemalocation='urn:mpeg:dash:schema:mpd:2011 DASH-MPD.xsd' xmlns:cenc='urn:mpeg:cenc:2013'>
+   <Period start='PT0S' duration='PT0H15M0.000S'>
+      <AdaptationSet subsegmentAlignment='true' mimeType='video/mp4' contentType='video' maxWidth='3840' maxHeight='2160' maxFrameRate='25' frameRate='25' scanType='progressive' sar='1:1' par='16:9' subsegmentStartsWithSAP='2'>
+         <Role schemeIdUri='urn:mpeg:dash:role:2011' value='main' />
+         <ContentProtection schemeIdUri='urn:mpeg:dash:mp4protection:2011' value='cenc' cenc:default_KID='c83c035f-8906-45f8-8c65-5d7248924f8b' />
+         <ContentProtection schemeIdUri='urn:uuid:1077EFEC-C0B2-4D02-ACE3-3C1E52E2FB4B' value='cenc'>
+            <cenc:pssh>AAAANHBzc2gAAAAAEHfv7MCyTQKs4zweUuL7SwAAAAHIPANfiQZF+IxlXXJIkk+LAAAAAA==</cenc:pssh>
+         </ContentProtection>
+         <ContentProtection schemeIdUri='urn:uuid:9A04F079-9840-4286-AB92-E65BE0885F95' value='PLAYREADY'>
+            <cenc:pssh>AAAD0nBzc2gAAAAAmgTweZhAQoarkuZb4IhflQAAA7KyAwAAAQABAKgDPABXAFIATQBIAEUAQQBEAEUAUgAgAHgAbQBsAG4AcwA9ACIAaAB0AHQAcAA6AC8ALwBzAGMAaABlAG0AYQBzAC4AbQBpAGMAcgBvAHMAbwBmAHQALgBjAG8AbQAvAEQAUgBNAC8AMgAwADAANwAvADAAMwAvAFAAbABhAHkAUgBlAGEAZAB5AEgAZQBhAGQAZQByACIAIAB2AGUAcgBzAGkAbwBuAD0AIgA0AC4AMAAuADAALgAwACIAPgA8AEQAQQBUAEEAPgA8AFAAUgBPAFQARQBDAFQASQBOAEYATwA+ADwASwBFAFkATABFAE4APgAxADYAPAAvAEsARQBZAEwARQBOAD4APABBAEwARwBJAEQAPgBBAEUAUwBDAFQAUgA8AC8AQQBMAEcASQBEAD4APAAvAFAAUgBPAFQARQBDAFQASQBOAEYATwA+ADwASwBJAEQAPgBYAHcATQA4AHkAQQBhAEoAKwBFAFcATQBaAFYAMQB5AFMASgBKAFAAaQB3AD0APQA8AC8ASwBJAEQAPgA8AEwAQQBfAFUAUgBMAD4AaAB0AHQAcAA6AC8ALwBkAHIAbQAuAGMAYQBuAGEAbAAtAHAAbAB1AHMALgBjAG8AbQAvADwALwBMAEEAXwBVAFIATAA+ADwATABVAEkAXwBVAFIATAA+AGgAdAB0AHAAOgAvAC8AZAByAG0ALgBjAGEAbgBhAGwALQBwAGwAdQBzAC4AYwBvAG0ALwA8AC8ATABVAEkAXwBVAFIATAA+ADwARABTAF8ASQBEAD4AZQBmAEEARQBtAGsAQwBZAGgAawBLAHIAawB1AFoAYgA0AEkAaABmAGwAUQA9AD0APAAvAEQAUwBfAEkARAA+ADwAQwBVAFMAVABPAE0AQQBUAFQAUgBJAEIAVQBUAEUAUwAgAHgAbQBsAG4AcwA9ACIAIgA+ADwAZQBuAGMAcgB5AHAAdABpAG8AbgByAGUAZgA+ADAAMAAwADAAMAAwADAAMQAwADAAPAAvAGUAbgBjAHIAeQBwAHQAaQBvAG4AcgBlAGYAPgA8AC8AQwBVAFMAVABPAE0AQQBUAFQAUgBJAEIAVQBUAEUAUwA+ADwAQwBIAEUAQwBLAFMAVQBNAD4ARwBrAHQAQQA0AEMATgAxADcATAAwAD0APAAvAEMASABFAEMASwBTAFUATQA+ADwALwBEAEEAVABBAD4APAAvAFcAUgBNAEgARQBBAEQARQBSAD4A</cenc:pssh>
+         </ContentProtection>
+         <ContentProtection schemeIdUri='urn:uuid:EDEF8BA9-79D6-4ACE-A3C8-27DCD51D21ED' value='WIDEVINE'>
+            <cenc:pssh>AAAAUHBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAADAIARIQyDwDX4kGRfiMZV1ySJJPixoIV2lkZXZpbmUiCjAwMDAwMDAxMDBI49yVmwY=</cenc:pssh>
+         </ContentProtection>
+         <ContentProtection schemeIdUri='urn:uuid:ADB41C24-2DBF-4A6D-958B-4457C0D27B95' value='NAGRA'>
+            <cenc:pssh>AAAAhHBzc2gAAAAArbQcJC2/Sm2Vi0RXwNJ7lQAAAGRleUpqYjI1MFpXNTBTV1FpT2lJd01EQXdNREF3TVRBd0lpd2lhMlY1U1dRaU9pSmpPRE5qTURNMVppMDRPVEEyTFRRMVpqZ3RPR00yTlMwMVpEY3lORGc1TWpSbU9HSWlmUT09</cenc:pssh>
+         </ContentProtection>
+         <Representation id='Video1.1.7.2' codecs='hvc1.2.4.L150.B0' bandwidth='25002552' width='3840' height='2160'>
+            <BaseURL>MKPC_PADD_HDR_15min_51_TRD_SRD_video2_25000kbps.mp4</BaseURL>
+            <SegmentBase timescale='90000' indexRange='2104-4835'>
+               <Initialization range='0-2103' />
+            </SegmentBase>
+         </Representation>
+         <Representation id='Video1.1.7.1' codecs='hvc1.2.4.L150.B0' bandwidth='15002552' width='3840' height='2160'>
+            <BaseURL>MKPC_PADD_HDR_15min_51_TRD_SRD_video2_15000kbps.mp4</BaseURL>
+            <SegmentBase timescale='90000' indexRange='2106-4837'>
+               <Initialization range='0-2105' />
+            </SegmentBase>
+         </Representation>
+         <Representation id='Video1.1.6.1' codecs='hvc1.2.4.L150.B0' bandwidth='7002616' width='2560' height='1440'>
+            <BaseURL>MKPC_PADD_HDR_15min_51_TRD_SRD_video2_7000kbps.mp4</BaseURL>
+            <SegmentBase timescale='90000' indexRange='2106-4837'>
+               <Initialization range='0-2105' />
+            </SegmentBase>
+         </Representation>
+         <Representation id='Video1.1.5.1' codecs='hvc1.2.4.L120.B0' bandwidth='3502584' width='1920' height='1080'>
+            <BaseURL>MKPC_PADD_HDR_15min_51_TRD_SRD_video2_3500kbps.mp4</BaseURL>
+            <SegmentBase timescale='90000' indexRange='2105-4836'>
+               <Initialization range='0-2104' />
+            </SegmentBase>
+         </Representation>
+         <Representation id='Video1.1.4.1' codecs='hvc1.2.4.L93.B0' bandwidth='2502584' width='1280' height='720'>
+            <BaseURL>MKPC_PADD_HDR_15min_51_TRD_SRD_video2_2500kbps.mp4</BaseURL>
+            <SegmentBase timescale='90000' indexRange='2103-4834'>
+               <Initialization range='0-2102' />
+            </SegmentBase>
+         </Representation>
+         <Representation id='Video1.1.3.1' codecs='hvc1.2.4.L90.B0' bandwidth='1502584' width='960' height='540'>
+            <BaseURL>MKPC_PADD_HDR_15min_51_TRD_SRD_video2_1500kbps.mp4</BaseURL>
+            <SegmentBase timescale='90000' indexRange='2103-4834'>
+               <Initialization range='0-2102' />
+            </SegmentBase>
+         </Representation>
+         <Representation id='Video1.1.2.1' codecs='hvc1.2.4.L63.B0' bandwidth='702584' width='640' height='360'>
+            <BaseURL>MKPC_PADD_HDR_15min_51_TRD_SRD_video2_700kbps.mp4</BaseURL>
+            <SegmentBase timescale='90000' indexRange='2102-4833'>
+               <Initialization range='0-2101' />
+            </SegmentBase>
+         </Representation>
+         <Representation id='Video1.1.1.1' codecs='hvc1.2.4.L63.B0' bandwidth='302584' width='480' height='270'>
+            <BaseURL>MKPC_PADD_HDR_15min_51_TRD_SRD_video2_300kbps.mp4</BaseURL>
+            <SegmentBase timescale='90000' indexRange='2101-4832'>
+               <Initialization range='0-2100' />
+            </SegmentBase>
+         </Representation>
+      </AdaptationSet>
+      <AdaptationSet subsegmentAlignment='true' mimeType='audio/mp4' contentType='audio' codecs='ec-3' audioSamplingRate='48000' lang='fre' subsegmentStartsWithSAP='1'>
+         <AudioChannelConfiguration schemeIdUri='tag:dolby.com,2014:dash:audio_channel_configuration:2011' value='f801' />
+         <Role schemeIdUri='urn:mpeg:dash:role:2011' value='main' />
+         <Representation id='Audio1.1.1' bandwidth='387200'>
+            <BaseURL>MKPC_PADD_HDR_15min_51_TRD_SRD_audio_384kbps_fre.mp4</BaseURL>
+            <SegmentBase timescale='90000' indexRange='590-3321'>
+               <Initialization range='0-589' />
+            </SegmentBase>
+         </Representation>
+      </AdaptationSet>
+      <AdaptationSet subsegmentAlignment='true' mimeType='audio/mp4' contentType='audio' codecs='ec-3' audioSamplingRate='48000' lang='eng' subsegmentStartsWithSAP='1'>
+         <AudioChannelConfiguration schemeIdUri='tag:dolby.com,2014:dash:audio_channel_configuration:2011' value='f801' />
+         <Role schemeIdUri='urn:mpeg:dash:role:2011' value='alternate' />
+         <Representation id='Audio2.1.1' bandwidth='387200'>
+            <BaseURL>MKPC_PADD_HDR_15min_51_TRD_SRD_audio_384kbps_eng.mp4</BaseURL>
+            <SegmentBase timescale='90000' indexRange='590-3321'>
+               <Initialization range='0-589' />
+            </SegmentBase>
+         </Representation>
+      </AdaptationSet>
+      <AdaptationSet subsegmentAlignment='true' mimeType='application/mp4' contentType='text' codecs='stpp' lang='fre' subsegmentStartsWithSAP='1'>
+         <Role schemeIdUri='urn:mpeg:dash:role:2011' value='subtitle' />
+         <Representation id='Data1.1' bandwidth='844'>
+            <BaseURL>MKPC_PADD_HDR_15min_51_TRD_SRD_text_TRD_fre.mp4</BaseURL>
+            <SegmentBase timescale='90000' indexRange='626-837'>
+               <Initialization range='0-625' />
+            </SegmentBase>
+         </Representation>
+      </AdaptationSet>
+      <AdaptationSet subsegmentAlignment='true' mimeType='application/mp4' contentType='text' codecs='stpp' lang='fre' subsegmentStartsWithSAP='1'>
+         <Role schemeIdUri='urn:mpeg:dash:role:2011' value='subtitle' />
+         <Accessibility schemeIdUri='urn:tva:metadata:cs:AudioPurposeCS:2007' value='2' />
+         <Representation id='Data2.1' bandwidth='1067'>
+            <BaseURL>MKPC_PADD_HDR_15min_51_TRD_SRD_text_SRD_fre.mp4</BaseURL>
+            <SegmentBase timescale='90000' indexRange='626-837'>
+               <Initialization range='0-625' />
+            </SegmentBase>
+         </Representation>
+      </AdaptationSet>
+   </Period>
+</MPD>
