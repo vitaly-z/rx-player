@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import nextTick from "next-tick";
 import {
   defer as observableDefer,
   Observable,
@@ -150,8 +151,26 @@ export default function generateKeyRequest(
     } catch (_e) {
       patchedInit = initData;
     }
-    return castToObservable(session.generateRequest(initDataType == null ? "" :
+    if ((window as any).MEDIA_SOURCE) {
+      console.warn("before generateRequest",
+        (window as any).MEDIA_SOURCE.readyState,
+        (window as any).MEDIA_SOURCE.sourceBuffers.length);
+    }
+    const obs = castToObservable(session.generateRequest(initDataType == null ? "" :
                                                                            initDataType,
                                                     patchedInit));
+    if ((window as any).MEDIA_SOURCE) {
+      console.warn("after generateRequest",
+        (window as any).MEDIA_SOURCE.readyState,
+        (window as any).MEDIA_SOURCE.sourceBuffers.length);
+    }
+    nextTick(() => {
+      if ((window as any).MEDIA_SOURCE) {
+        console.warn("nexttick after generateRequest",
+          (window as any).MEDIA_SOURCE.readyState,
+          (window as any).MEDIA_SOURCE.sourceBuffers.length);
+      }
+    });
+    return obs;
   });
 }

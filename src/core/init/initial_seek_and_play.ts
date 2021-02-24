@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import nextTick from "next-tick";
 import {
   concat as observableConcat,
   Observable,
@@ -140,8 +141,19 @@ export default function seekAndLoadOnMediaEvents(
     take(1),
     tap(() => {
       log.info("Init: Set initial time", startTime);
+      console.warn("before initial seek",
+        (window as any).MEDIA_SOURCE.readyState,
+        (window as any).MEDIA_SOURCE.sourceBuffers.length);
       mediaElement.currentTime = typeof startTime === "function" ? startTime() :
                                                                    startTime;
+      console.warn("after initial seek",
+        (window as any).MEDIA_SOURCE.readyState,
+        (window as any).MEDIA_SOURCE.sourceBuffers.length);
+      nextTick(() => {
+        console.warn("nextTick after initial seek",
+          (window as any).MEDIA_SOURCE.readyState,
+          (window as any).MEDIA_SOURCE.sourceBuffers.length);
+      });
     }),
     shareReplay({ refCount: true })
   );

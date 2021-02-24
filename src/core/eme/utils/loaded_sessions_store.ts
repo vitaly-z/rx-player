@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import nextTick from "next-tick";
 import {
   concat as observableConcat,
   defer as observableDefer,
@@ -144,7 +145,24 @@ export default class LoadedSessionsStore {
                                     "This initialization data was already stored.");
     }
 
+    if ((window as any).MEDIA_SOURCE) {
+      console.warn("before createSession",
+        (window as any).MEDIA_SOURCE.readyState,
+        (window as any).MEDIA_SOURCE.sourceBuffers.length);
+    }
     const mediaKeySession = this._mediaKeys.createSession(sessionType);
+    if ((window as any).MEDIA_SOURCE) {
+      console.warn("after createSession",
+        (window as any).MEDIA_SOURCE.readyState,
+        (window as any).MEDIA_SOURCE.sourceBuffers.length);
+    }
+    nextTick(() => {
+      if ((window as any).MEDIA_SOURCE) {
+        console.warn("nexttick after createSession",
+          (window as any).MEDIA_SOURCE.readyState,
+          (window as any).MEDIA_SOURCE.sourceBuffers.length);
+      }
+    });
     const entry = { mediaKeySession,
                     sessionType,
                     initData,

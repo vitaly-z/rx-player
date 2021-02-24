@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import nextTick from "next-tick";
 import {
   Observable,
   of as observableOf,
@@ -393,7 +394,18 @@ function createNativeQueuedSourceBuffer(
   mediaSource : MediaSource,
   codec : string
 ) : QueuedSourceBuffer<BufferSource | null> {
+  console.warn("calling mediaSource.addSourceBuffer", codec,
+                   (window as any).MEDIA_SOURCE.readyState,
+                   (window as any).MEDIA_SOURCE.sourceBuffers.length);
   const sourceBuffer = mediaSource.addSourceBuffer(codec);
+  console.warn("called mediaSource.addSourceBuffer", codec,
+                   (window as any).MEDIA_SOURCE.readyState,
+                   (window as any).MEDIA_SOURCE.sourceBuffers.length);
+  nextTick(() => {
+    console.warn("nextTick called mediaSource.addSourceBuffer", codec,
+                   (window as any).MEDIA_SOURCE.readyState,
+                   (window as any).MEDIA_SOURCE.sourceBuffers.length);
+  });
   return new QueuedSourceBuffer(bufferType, codec, sourceBuffer);
 }
 

@@ -128,6 +128,17 @@ function createMediaSource(
 
     log.info("Init: Creating MediaSource");
     const mediaSource = new MediaSource_();
+    console.warn("CREATING MediaSource");
+    (window as any).MEDIA_SOURCE = mediaSource;
+    mediaSource.onsourceclose = function() {
+      console.warn("CLOSING MediaSource");
+    };
+    mediaSource.sourceBuffers.onaddsourcebuffer = function () {
+      console.warn("ADDING SourceBuffer");
+    };
+    mediaSource.sourceBuffers.onremovesourcebuffer = function () {
+      console.warn("REMOVING SourceBuffer");
+    };
     const objectURL = URL.createObjectURL(mediaSource);
 
     log.info("Init: Attaching MediaSource URL to the media element", objectURL);

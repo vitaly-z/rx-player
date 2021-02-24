@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import nextTick from "next-tick";
 import {
   concat as observableConcat,
   defer as observableDefer,
@@ -33,6 +34,7 @@ import {
   mergeMap,
   startWith,
   takeUntil,
+  tap,
   timeout,
 } from "rxjs/operators";
 import {
@@ -276,11 +278,36 @@ function updateSessionWithMessage(
   }
 
   log.debug("EME: Updating session");
-  return castToObservable(session.update(message)).pipe(
+  if ((window as any).MEDIA_SOURCE) {
+    console.warn("before MediaKeySession.update",
+      (window as any).MEDIA_SOURCE.readyState,
+      (window as any).MEDIA_SOURCE.sourceBuffers.length);
+  }
+  const obs = castToObservable(session.update(message));
+  if ((window as any).MEDIA_SOURCE) {
+    console.warn("after MediaKeySession.update",
+      (window as any).MEDIA_SOURCE.readyState,
+      (window as any).MEDIA_SOURCE.sourceBuffers.length);
+  }
+  nextTick(() => {
+    if ((window as any).MEDIA_SOURCE) {
+      console.warn("nexttick after MediaKeySession.update",
+        (window as any).MEDIA_SOURCE.readyState,
+        (window as any).MEDIA_SOURCE.sourceBuffers.length);
+    }
+  });
+  return obs.pipe(
     catchError((error: unknown) => {
       const reason = error instanceof Error ? error.toString() :
                                               "`session.update` failed";
       throw new EncryptedMediaError("KEY_UPDATE_ERROR", reason);
+    }),
+    tap(() => {
+      if ((window as any).MEDIA_SOURCE) {
+        console.warn("on response MediaKeySession.update",
+          (window as any).MEDIA_SOURCE.readyState,
+          (window as any).MEDIA_SOURCE.sourceBuffers.length);
+      }
     }),
     mapTo({ type: "session-updated" as const,
             value: { session, license: message, initData, initDataType } })

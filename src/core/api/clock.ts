@@ -363,6 +363,11 @@ function createClock(
                                           lastTimings.currentTime),
                       `\n${state}`);
           }
+          if ((window as any).MEDIA_SOURCE) {
+            console.warn("on clock tick",
+              (window as any).MEDIA_SOURCE.readyState,
+              (window as any).MEDIA_SOURCE.sourceBuffers.length);
+          }
           return lastTimings;
         }),
 

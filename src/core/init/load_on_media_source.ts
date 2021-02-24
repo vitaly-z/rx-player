@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import nextTick from "next-tick";
 import {
   BehaviorSubject,
   EMPTY,
@@ -125,7 +126,13 @@ export default function createMediaSourceLoader({
     // TODO Update the duration if it evolves?
     const duration = manifest.isLive ? Infinity :
                                        manifest.getMaximumPosition();
+    console.warn("SETTING Duration", mediaSource.readyState);
     setDurationToMediaSource(mediaSource, duration);
+    console.warn("SET Duration", mediaSource.readyState);
+
+    nextTick(() => {
+      console.warn("SET Duration nextTick", mediaSource.readyState);
+    });
 
     const initialPeriod = manifest.getPeriodForTime(initialTime);
     if (initialPeriod == null) {

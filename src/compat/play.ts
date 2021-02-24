@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import nextTick from "next-tick";
 import {
   defer as observableDefer,
   Observable,
@@ -32,6 +33,22 @@ export default function play$(mediaElement : HTMLMediaElement) : Observable<unkn
     // mediaElement.play is not always a Promise. In the improbable case it
     // throws, I prefer still to catch to return the error wrapped in an
     // Observable
-    tryCatch(() => castToObservable(mediaElement.play()), undefined)
+    tryCatch(() => {
+      console.warn("calling play",
+        (window as any).MEDIA_SOURCE.readyState,
+        (window as any).MEDIA_SOURCE.sourceBuffers.length);
+
+      const obs = castToObservable(mediaElement.play());
+      console.warn("called play",
+        (window as any).MEDIA_SOURCE.readyState,
+        (window as any).MEDIA_SOURCE.sourceBuffers.length);
+      nextTick(() => {
+        console.warn("nexttick called play",
+          (window as any).MEDIA_SOURCE.readyState,
+          (window as any).MEDIA_SOURCE.sourceBuffers.length);
+      });
+      return obs;
+
+    }, undefined)
   );
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import nextTick from "next-tick";
 import {
   fromEvent,
   interval,
@@ -584,12 +585,15 @@ export default class QueuedSourceBuffer<T> {
     if (this._sourceBuffer.updating) {
       return; // still processing `this._pendingTask`
     }
-
     // handle end of previous task if needed
     if (this._pendingTask !== null) {
       if (this._pendingTask.type !== SourceBufferOperation.Push ||
           this._pendingTask.steps.length === 0)
       {
+        console.warn("flush SourceBuffer end task", this.bufferType,
+                     (window as any).MEDIA_SOURCE.readyState,
+                     (window as any).MEDIA_SOURCE.sourceBuffers.length);
+
         switch (this._pendingTask.type) {
           case SourceBufferOperation.Push:
             this._segmentInventory.insertChunk(this._pendingTask.inventoryData);
@@ -615,6 +619,9 @@ export default class QueuedSourceBuffer<T> {
     } else if (this._queue.length === 0) {
       return; // we have nothing left to do
     } else {
+      console.warn("flush SourceBuffer next task", this.bufferType,
+                   (window as any).MEDIA_SOURCE.readyState,
+                   (window as any).MEDIA_SOURCE.sourceBuffers.length);
       const newQueueItem = this._queue.shift();
       if (newQueueItem === undefined) {
         // TODO TypeScrypt do not get the previous length check. Find solution /
@@ -722,7 +729,35 @@ export default class QueuedSourceBuffer<T> {
     if (isInit) {
       this._lastInitSegment = segmentData;
     }
+    if (isInit) {
+      console.warn("before appendBuffer init Segment", codec,
+                   (window as any).MEDIA_SOURCE.readyState,
+                   (window as any).MEDIA_SOURCE.sourceBuffers.length);
+    } else {
+      console.warn("before appendBuffer media Segment", codec,
+                   (window as any).MEDIA_SOURCE.readyState,
+                   (window as any).MEDIA_SOURCE.sourceBuffers.length);
+    }
     this._sourceBuffer.appendBuffer(segmentData);
+    if (isInit) {
+      console.warn("after appendBuffer init Segment", codec,
+                   (window as any).MEDIA_SOURCE.readyState,
+                   (window as any).MEDIA_SOURCE.sourceBuffers.length);
+      nextTick(() => {
+        console.warn("nextTick after appendBuffer init Segment", codec,
+                   (window as any).MEDIA_SOURCE.readyState,
+                   (window as any).MEDIA_SOURCE.sourceBuffers.length);
+      });
+    } else {
+      console.warn("after appendBuffer media Segment", codec,
+                   (window as any).MEDIA_SOURCE.readyState,
+                   (window as any).MEDIA_SOURCE.sourceBuffers.length);
+      nextTick(() => {
+        console.warn("nextTick after appendBuffer media Segment", codec,
+                   (window as any).MEDIA_SOURCE.readyState,
+                   (window as any).MEDIA_SOURCE.sourceBuffers.length);
+      });
+    }
   }
 }
 
