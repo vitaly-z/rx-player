@@ -57,7 +57,7 @@ export default function generateAudioVideoSegmentParser(
       if (segment.isInit) {
         return observableOf({ type: "parsed-init-segment" as const,
                               value: { initializationData: null,
-                                       segmentProtections: [],
+                                       protectionDataUpdate: false,
                                        initTimescale: undefined } });
       }
       return observableOf({ type: "parsed-segment" as const,
@@ -125,24 +125,15 @@ export default function generateAudioVideoSegmentParser(
     const parsedTimescale = isNullOrUndefined(timescale) ? undefined :
                                                            timescale;
 
-    // TODO also extract webm protection information
+    let protectionDataUpdate = false;
     if (!isWEBM) {
       const psshInfo = takePSSHOut(chunkData);
-
-      // we only want to add segment protection data if we didn't have any
-      // associated to the Representation before,
-      if (representation.getProtectionsInitializationData().length === 0) {
-        for (let i = 0; i < psshInfo.length; i++) {
-          const { systemID, data: psshData } = psshInfo[i];
-          representation._addProtectionData("cenc", systemID, psshData);
-        }
-      }
+      protectionDataUpdate = representation._addProtectionData("cenc", psshInfo);
     }
 
-    const segmentProtections = representation.getProtectionsInitializationData();
     return observableOf({ type: "parsed-init-segment",
                           value: { initializationData: chunkData,
-                                   segmentProtections,
+                                   protectionDataUpdate,
                                    initTimescale: parsedTimescale } });
   };
 }

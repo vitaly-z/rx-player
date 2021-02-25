@@ -27,10 +27,49 @@ export default class InitDataStore<T> {
    * Contains every stored elements alongside the corresponding initialization
    * data, in storage chronological order (from first stored to last stored).
    */
-  private _storage : Array<{ initDataType : string | undefined;
-                             initDataHash : number;
-                             initData: Uint8Array;
-                             value : T; }>;
+  private _storage : Array<{
+    /**
+     * Initialization data type.
+     * String describing the format of the initialization data sent through this
+     * event.
+     * https://www.w3.org/TR/eme-initdata-registry/
+     *
+     * `undefined` if not known.
+     */
+    type : string | undefined;
+    /**
+     * Every initialization data for that type.
+     *
+     * /!\ It is very important to always sort them the same way, if two events
+     * contain the same data.
+     * Failure to do so might result in multiple licenses fetched for the same
+     * content.
+     */
+    values: Array<{
+      /**
+       * Hex encoded system id, which identifies the key system.
+       * https://dashif.org/identifiers/content_protection/
+       *
+       * If `undefined`, we don't know the system id for that initialization data.
+       * In that case, the initialization data might even be a concatenation of
+       * the initialization data from multiple system ids.
+       */
+      systemId : string | undefined;
+      /**
+       * The initialization data itself for that type and systemId.
+       * For example, with ISOBMFF "cenc" initialization data, this will be the
+       * whole PSSH box.
+       */
+      data: Uint8Array;
+
+      /**
+       * A hash of the `data` property, done with the `hashBuffer` util, for
+       * faster comparison.
+       */
+      hash : number;
+    }>;
+    payload : T;
+  }>;
 
   /** Construct a new InitDataStore.  */
   constructor() {
@@ -44,7 +83,7 @@ export default class InitDataStore<T> {
    * @returns {Array}
    */
   public getAll() : T[] {
-    return this._storage.map(item => item.value);
+    return this._storage.map(item => item.payload);
   }
 
   /**
@@ -63,9 +102,8 @@ export default class InitDataStore<T> {
    * @returns {*}
    */
   public get(initializationData : IInitializationDataInfo) : T | undefined {
-    const initDataHash = hashBuffer(initializationData.data);
-    const index = this._findIndex(initializationData, initDataHash);
-    return index >= 0 ? this._storage[index].value :
+    const index = this._findIndex(initializationData);
+    return index >= 0 ? this._storage[index].payload :
                         undefined;
   }
 
@@ -83,40 +121,40 @@ export default class InitDataStore<T> {
   public getAndReuse(
     initializationData : IInitializationDataInfo
   ) : T | undefined {
-    const initDataHash = hashBuffer(initializationData.data);
-    const index = this._findIndex(initializationData, initDataHash);
+    const index = this._findIndex(initializationData);
     if (index === -1) {
       return undefined;
     }
     const item = this._storage.splice(index, 1)[0];
     this._storage.push(item);
-    return item.value;
+    return item.payload;
   }
 
   /**
    * Add to the store a value linked to the corresponding initData and
    * initDataType.
    * If a value was already stored linked to those, replace it.
-   * @param {Uint8Array} initData
-   * @param {string|undefined} initDataType
-   * @returns {boolean}
+   * @param {Object} initializationData
+   * @param {*} payload
    */
   public store(
     initializationData : IInitializationDataInfo,
-    value : T
+    payload : T
   ) : void {
-    const initDataHash = hashBuffer(initializationData.data);
-    const indexOf = this._findIndex(initializationData, initDataHash);
+    const indexOf = this._findIndex(initializationData);
     if (indexOf >= 0) {
       // this._storage contains the stored value in the same order they have
       // been put. So here we want to remove the previous element and re-push
       // it to the end.
       this._storage.splice(indexOf, 1);
     }
-    this._storage.push({ initData: initializationData.data,
-                         initDataType: initializationData.type,
-                         initDataHash,
-                         value });
+    this._storage.push({ type: initializationData.type,
+                         values: initializationData.values.map(v => {
+                           return { systemId: v.systemId,
+                                    data: v.data,
+                                    hash: hashBuffer(v.data) };
+                         }),
+                         payload });
   }
 
   /**
@@ -130,23 +168,25 @@ export default class InitDataStore<T> {
    * to see if a value is stored linked to that data - and then if not doing a
    * store. `storeIfNone` is more performant as it will only perform hashing
    * and a look-up a single time.
-   * @param {Uint8Array} initData
-   * @param {string|undefined} initDataType
+   * @param {Object} initializationData
+   * @param {*} payload
    * @returns {boolean}
    */
   public storeIfNone(
     initializationData : IInitializationDataInfo,
-    value : T
+    payload : T
   ) : boolean {
-    const initDataHash = hashBuffer(initializationData.data);
-    const indexOf = this._findIndex(initializationData, initDataHash);
+    const indexOf = this._findIndex(initializationData);
     if (indexOf >= 0) {
       return false;
     }
-    this._storage.push({ initData: initializationData.data,
-                         initDataType: initializationData.type,
-                         initDataHash,
-                         value });
+    this._storage.push({ type: initializationData.type,
+                         values: initializationData.values.map(v => {
+                           return { systemId: v.systemId,
+                                    data: v.data,
+                                    hash: hashBuffer(v.data) };
+                         }),
+                         payload });
     return true;
   }
 
@@ -158,37 +198,54 @@ export default class InitDataStore<T> {
    * @returns {*}
    */
   public remove(initializationData : IInitializationDataInfo) : T | undefined {
-    const initDataHash = hashBuffer(initializationData.data);
-    const indexOf = this._findIndex(initializationData, initDataHash);
+    const indexOf = this._findIndex(initializationData);
     if (indexOf === -1) {
       return undefined;
     }
-    return this._storage.splice(indexOf, 1)[0].value;
+    return this._storage.splice(indexOf, 1)[0].payload;
   }
 
   /**
-   * Find the index of the corresponding initData and initDataType in
-   * `this._storage`. Returns `-1` if not found.
-   * @param {Uint8Array} initData
-   * @param {string|undefined} initDataType
-   * @param {number} initDataHash
+   * Find the index of the corresponding initialization data in `this._storage`.
+   * Returns `-1` if not found.
+   * @param {Object} initializationData
    * @returns {boolean}
    */
   private _findIndex(
-    initializationData : IInitializationDataInfo,
-    initDataHash : number
+    initializationData : IInitializationDataInfo
   ) : number {
-    const { type: initDataType, data: initData } = initializationData;
     // Begin by the last element as we usually re-encounter the last stored
     // initData sooner than the first one.
     for (let i = this._storage.length - 1; i >= 0; i--) {
       const stored = this._storage[i];
-      if (initDataHash === stored.initDataHash && initDataType === stored.initDataType) {
-        if (areArraysOfNumbersEqual(initData, stored.initData)) {
+      if (stored.type === initializationData.type) {
+        if (containValues(stored.values, initializationData.values)) {
           return i;
         }
       }
     }
     return -1;
   }
+}
+
+/**
+ * Returns `true` if `subset` data is completely contained in `stored`.
+ * @param {Array.<Object>} stored
+ * @param {Array.<Object>} subset
+ * @returns {boolean}
+ */
+function containValues(
+  stored : Array<{ systemId : string | undefined;
+                   hash : number;
+                   data : Uint8Array; }>,
+  subset : Array<{ systemId : string | undefined;
+                   data : Uint8Array; }>
+) : boolean {
+  return subset.every(subElt => {
+    const hash = hashBuffer(subElt.data);
+    return stored.some(storedElt => subElt.systemId === storedElt.systemId &&
+                                    hash            === storedElt.hash &&
+                                    areArraysOfNumbersEqual(subElt.data,
+                                                            storedElt.data));
+  });
 }

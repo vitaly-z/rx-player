@@ -43,6 +43,7 @@ import { EncryptedMediaError } from "../../errors";
 import log from "../../log";
 import arrayIncludes from "../../utils/array_includes";
 import assertUnreachable from "../../utils/assert_unreachable";
+import { concat } from "../../utils/byte_parsing";
 import filterMap from "../../utils/filter_map";
 import isNullOrUndefined from "../../utils/is_null_or_undefined";
 import cleanOldStoredPersistentInfo from "./clean_old_stored_persistent_info";
@@ -128,11 +129,8 @@ export default function EMEManager(
     tap((evt) => {
       log.debug("EME: Encrypted event received from media element.", evt);
     }),
-    filterMap<MediaEncryptedEvent, IInitializationDataInfo, null>((evt) => {
-      const { initData, initDataType } = getInitData(evt);
-      return initData === null ? null :
-                                 { type: initDataType, data: initData };
-    }, null),
+    filterMap<MediaEncryptedEvent, IInitializationDataInfo, null>(
+      (evt) => getInitData(evt), null),
     shareReplay({ refCount: true })); // multiple Observables listen to that one
                                       // as soon as the EMEManager is subscribed
 
@@ -141,7 +139,17 @@ export default function EMEManager(
     tap((evt) => { log.debug("EME: Encrypted event received from Player", evt); }));
 
   /** Emit events signaling that an encryption initialization data is encountered. */
-  const initializationData$ = observableMerge(externalEvents$, mediaEncryptedEvents$);
+  const initializationData$ = observableMerge(externalEvents$, mediaEncryptedEvents$)
+    .pipe(tap(evt => {
+      const { values } = evt;
+      // sort per systemId to be sure we don't consider twice initialization data
+      // that is structurally the same.
+      values.sort((a, b) => a.systemId === b.systemId ? 0 :
+                            a.systemId === undefined  ? 1 :
+                            b.systemId === undefined  ? -1 :
+                            a.systemId < b.systemId   ? -1 :
+                                                        1);
+    }));
 
   /** Create MediaKeySessions and handle the corresponding events. */
   const bindSession$ = initializationData$.pipe(
@@ -209,9 +217,15 @@ export default function EMEManager(
           const { mediaKeySession,
                   sessionType } = sessionEvt.value;
 
+          // The generateKeyRequest API awaits a single Uint8Array containing
+          // all initialization data.
+          const concatInitData = concat(...initializationData.values.map(i => i.data));
+
           const generateRequest$ = sessionEvt.type !== "created-session" ?
               EMPTY :
-              generateKeyRequest(mediaKeySession, initializationData).pipe(
+              generateKeyRequest(mediaKeySession,
+                                 initializationData.type,
+                                 concatInitData).pipe(
                 tap(() => {
                   const { persistentSessionsStore } = stores;
                   if (sessionType === "persistent-license" &&

@@ -45,6 +45,7 @@ import deferSubscriptions from "../../utils/defer_subscriptions";
 import { fromEvent } from "../../utils/event_emitter";
 import filterMap from "../../utils/filter_map";
 import objectAssign from "../../utils/object_assign";
+import startsWith from "../../utils/starts_with";
 import ABRManager, {
   IABRManagerArguments,
 } from "../abr";
@@ -224,37 +225,46 @@ export default function InitializeOnMediaSource(
   /**
    * Wait for the MediaKeys to have been created before
    * opening MediaSource, and ask EME to attach MediaKeys.
+   * Emit selected DRM options susceptible to be in interest here.
    */
   const prepareMediaSource$ = emeManager$.pipe(
     mergeMap((evt) => {
       switch (evt.type) {
         case "eme-disabled":
-        case "attached-media-keys":
-          return observableOf(undefined);
-        case "created-media-keys":
+          return observableOf({ drmSystemId: undefined });
+        case "attached-media-keys": {
+          const { mediaKeySystemAccess } = evt.value;
+          const drmSystemId = getDrmSystemId(mediaKeySystemAccess.keySystem);
+          return observableOf({ drmSystemId });
+        }
+        case "created-media-keys": {
           return openMediaSource$.pipe(mergeMap(() => {
             evt.value.attachMediaKeys$.next();
 
-            const shouldDisableLock = evt.value.options
-              .disableMediaKeysAttachmentLock === true;
+            const shouldDisableLock =
+              evt.value.options.disableMediaKeysAttachmentLock === true;
             if (shouldDisableLock) {
-              return observableOf(undefined);
+              const { mediaKeySystemAccess } = evt.value;
+              const drmSystemId = getDrmSystemId(mediaKeySystemAccess.keySystem);
+              return observableOf({ drmSystemId });
             }
             // wait for "attached-media-keys"
             return EMPTY;
           }));
+        }
         default:
           return EMPTY;
       }
     }),
     take(1),
-    exhaustMap(() => openMediaSource$)
-  );
+    exhaustMap((encryptionOptions) => openMediaSource$
+      .pipe(map((mediaSource) => ({ mediaSource,
+                                    encryptionOptions })))));
 
   /** Load and play the content asked. */
   const loadContent$ = observableCombineLatest([manifest$,
                                                 prepareMediaSource$]).pipe(
-    mergeMap(([manifestEvt, initialMediaSource]) => {
+    mergeMap(([manifestEvt, { mediaSource: initialMediaSource, encryptionOptions }]) => {
       if (manifestEvt.type === "warning") {
         return observableOf(manifestEvt);
       }
@@ -267,7 +277,9 @@ export default function InitializeOnMediaSource(
 
       const mediaSourceLoader = createMediaSourceLoader({
         abrManager,
-        bufferOptions: objectAssign({ textTrackOptions }, bufferOptions),
+        bufferOptions: objectAssign({ textTrackOptions },
+                                    encryptionOptions,
+                                    bufferOptions),
         clock$,
         manifest,
         mediaElement,
@@ -302,10 +314,7 @@ export default function InitializeOnMediaSource(
             manifest.addUndecipherableKIDs(evt.value);
           } else if (evt.type === "blacklist-protection-data") {
             log.info("Init: blacklisting Representations based on protection data.");
-            if (evt.value.type !== undefined) {
-              manifest.addUndecipherableProtectionData(evt.value.type,
-                                                       evt.value.data);
-            }
+            manifest.addUndecipherableProtectionData(evt.value);
           }
         }),
         ignoreElements());
@@ -367,7 +376,7 @@ export default function InitializeOnMediaSource(
                   mediaElement.currentTime = position;
                 }
                 return null;
-              case "protected-segment":
+              case "encryption-data-encountered":
                 protectedSegments$.next(evt.value);
                 return null;
             }
@@ -392,4 +401,25 @@ export default function InitializeOnMediaSource(
     }));
 
   return observableMerge(loadContent$, mediaError$, emeManager$);
+}
+
+function getDrmSystemId(
+  keySystem : string
+) : string | undefined {
+  if (startsWith(keySystem, "com.microsoft.playready") ||
+      keySystem === "com.chromecast.playready" ||
+      keySystem === "com.youtube.playready")
+  {
+    return "9a04f07998404286ab92e65be0885f95";
+  }
+  if (keySystem === "com.widevine.alpha") {
+    return "edef8ba979d64acea3c827dcd51d21ed";
+  }
+  if (startsWith(keySystem, "com.apple.fps")) {
+    return "94ce86fb07ff4f43adb893d2fa968ca2";
+  }
+  if (startsWith(keySystem, "com.nagra.")) {
+    return "adb41c242dbf4a6d958b4457c0d27b95";
+  }
+  return undefined;
 }

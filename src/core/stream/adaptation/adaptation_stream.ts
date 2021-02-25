@@ -66,7 +66,6 @@ import RepresentationStream, {
 import {
   IAdaptationStreamEvent,
   IRepresentationStreamEvent,
-  IStreamEventAddedSegment,
 } from "../types";
 import reloadAfterSwitch from "../utils";
 import createRepresentationEstimator from "./create_representation_estimator";
@@ -106,14 +105,6 @@ export interface IAdaptationStreamArguments<T> {
   content : { manifest : Manifest;
               period : Period;
               adaptation : Adaptation; };
-  /**
-   * Strategy taken when the user switch manually the current Representation:
-   *   - "seamless": the switch will happen smoothly, with the Representation
-   *     with the new bitrate progressively being pushed alongside the old
-   *     Representation.
-   *   - "direct": hard switch. The Representation switch will be directly
-   *     visible but may necessitate the current MediaSource to be reloaded.
-   */
   options: IAdaptationStreamOptions;
   /** SourceBuffer wrapper - needed to push media segments. */
   segmentBuffer : SegmentBuffer<T>;
@@ -132,6 +123,18 @@ export interface IAdaptationStreamArguments<T> {
  * AdaptationStream.
  */
 export interface IAdaptationStreamOptions {
+  /**
+   * Hex-encoded DRM "system ID" as found in:
+   * https://dashif.org/identifiers/content_protection/
+   *
+   * Allows to identify which DRM system is currently used, to allow potential
+   * optimizations.
+   *
+   * Set to `undefined` in two cases:
+   *   - no DRM system is used (e.g. the content is unencrypted).
+   *   - We don't know which DRM system is currently used.
+   */
+  drmSystemId : string | undefined;
   /**
    * Strategy taken when the user switch manually the current Representation:
    *   - "seamless": the switch will happen smoothly, with the Representation
@@ -304,12 +307,8 @@ export default function AdaptationStream<T>({
       observableOf(EVENTS.representationChange(adaptation.type,
                                                period,
                                                representation));
-    const protectedEvents$ = observableOf(
-      ...representation.getProtectionsInitializationData().map(segmentProt => {
-        return EVENTS.protectedSegment(segmentProt);
-      }));
+
     return observableConcat(representationChange$,
-                            protectedEvents$,
                             createRepresentationStream(representation,
                                                        terminateCurrentStream$,
                                                        fastSwitchThreshold$)).pipe(
@@ -362,8 +361,9 @@ export default function AdaptationStream<T>({
                                     segmentBuffer,
                                     segmentFetcher,
                                     terminate$: terminateCurrentStream$,
-                                    bufferGoal$,
-                                    fastSwitchThreshold$ })
+                                    options: { bufferGoal$,
+                                               drmSystemId: options.drmSystemId,
+                                               fastSwitchThreshold$ } })
         .pipe(catchError((err : unknown) => {
           const formattedError = formatError(err, {
             defaultCode: "NONE",
@@ -387,6 +387,3 @@ export default function AdaptationStream<T>({
     });
   }
 }
-
-// Re-export RepresentationStream events used by the AdaptationStream
-export { IStreamEventAddedSegment };

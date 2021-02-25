@@ -19,8 +19,7 @@ import {
   of as observableOf,
 } from "rxjs";
 import {
-  map,
-  tap,
+  map, tap,
 } from "rxjs/operators";
 import features from "../../features";
 import log from "../../log";
@@ -184,7 +183,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
         if (segment.isInit) {
           return observableOf({ type: "parsed-init-segment",
                                 value: { initializationData: null,
-                                         segmentProtections: [],
+                                         protectionDataUpdate: false,
                                          initTimescale: undefined } });
         }
         return observableOf({ type: "parsed-segment",
@@ -204,7 +203,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
                                        // smooth init segments are crafted by hand.
                                        // Their timescale is the one from the manifest.
                                        initTimescale: timescale,
-                                       segmentProtections: [] } });
+                                       protectionDataUpdate: false } });
       }
 
       const timingInfos = initTimescale !== undefined ?
@@ -274,7 +273,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
       if (segment.isInit) { // text init segment has no use in HSS
         return observableOf({ type: "parsed-init-segment",
                               value: { initializationData: null,
-                                       segmentProtections: [],
+                                       protectionDataUpdate: false,
                                        initTimescale: undefined } });
       }
       if (data === null) {
@@ -421,7 +420,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
       if (content.segment.isInit) { // image init segment has no use
         return observableOf({ type: "parsed-init-segment",
                               value: { initializationData: null,
-                                       segmentProtections: [],
+                                       protectionDataUpdate: false,
                                        initTimescale: undefined } });
       }
 
@@ -450,7 +449,7 @@ export default function(options : ITransportOptions) : ITransportPipelines {
                                                    duration: Number.MAX_VALUE,
                                                    timescale: bifObject.timescale },
                                      chunkOffset: 0,
-                                     segmentProtections: [],
+                                     protectionDataUpdate: false,
                                      appendWindow: [undefined, undefined] } });
     },
   };

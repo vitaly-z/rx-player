@@ -16,12 +16,15 @@
 
 import { ICustomMediaKeySession } from "../../../compat";
 import log from "../../../log";
+// import { getPsshSystemID } from "../../../parsers/containers/isobmff";
+// import { strToUtf8 } from "../../../tools/string_utils";
 import areArraysOfNumbersEqual from "../../../utils/are_arrays_of_numbers_equal";
 import { assertInterface } from "../../../utils/assert";
 import {
   base64ToBytes,
   bytesToBase64,
 } from "../../../utils/base64";
+// import { be4toi } from "../../../utils/byte_parsing";
 import hashBuffer from "../../../utils/hash_buffer";
 import isNonEmptyString from "../../../utils/is_non_empty_string";
 import isNullOrUndefined from "../../../utils/is_null_or_undefined";
@@ -103,6 +106,7 @@ export default class PersistentSessionsStore {
       if (!Array.isArray(this._entries)) {
         this._entries = [];
       }
+      // this._updateOlderVersions();
     } catch (e) {
       log.warn("EME-PSS: Could not get entries from license storage", e);
       this.dispose();
@@ -181,13 +185,15 @@ export default class PersistentSessionsStore {
       this.delete(initData);
     }
 
-    const hash = hashBuffer(initData.data);
     log.info("EME-PSS: Add new session", sessionId, session);
 
-    this._entries.push({ version: 2,
+    this._entries.push({ version: 3,
                          sessionId,
-                         initData: new InitDataContainer(initData.data),
-                         initDataHash: hash,
+                         values: initData.values.map(v => {
+                           return { systemId: v.systemId,
+                                    initData: new InitDataContainer(v.data),
+                                    initDataHash: hashBuffer(v.data) };
+                         }),
                          initDataType: initData.type });
     this._save();
   }
@@ -241,40 +247,39 @@ export default class PersistentSessionsStore {
    * @param {string|undefined} initDataType
    * @returns {number}
    */
+  // XXX TODO add keySystem?
   private _getIndex(initData : IInitializationDataInfo) : number {
-    const hash = hashBuffer(initData.data);
+    const hashedValues = initData.values.map((v) => ({ systemId: v.systemId,
+                                                       hash: hashBuffer(v.data),
+                                                       data: v.data }));
     for (let i = 0; i < this._entries.length; i++) {
       const entry = this._entries[i];
       if (entry.initDataType === initData.type) {
-        if (entry.version === 2) {
-          if (entry.initDataHash === hash) {
-            try {
-              const decodedInitData : Uint8Array = typeof entry.initData === "string" ?
-                InitDataContainer.decode(entry.initData) :
-                entry.initData.initData;
-              if (areArraysOfNumbersEqual(decodedInitData, initData.data)) {
-                return i;
-              }
-            } catch (e) {
-              log.warn("EME-PSS: Could not decode initialization data.", e);
-            }
-          }
-        } else if (entry.version === 1) {
-          if (entry.initDataHash === hash) {
-            if (typeof entry.initData.length === "undefined") {
-              // If length is undefined, it has been linearized. We could still
-              // convert it back to an Uint8Array but this would necessitate some
-              // ugly unreadable logic for a very very minor possibility.
-              // Just consider that it is a match based on the hash.
-              return i;
-            } else if (areArraysOfNumbersEqual(entry.initData, initData.data)) {
+        switch (entry.version) {
+          case 3: {
+            const isContainedInEntry = hashedValues.every(subElt => {
+              return entry.values.some(storedVal => {
+                if (subElt.systemId !== storedVal.systemId ||
+                    subElt.hash     !== storedVal.initDataHash)
+                {
+                  return false;
+                }
+                const decodedInitData = typeof storedVal.initData === "string" ?
+                  InitDataContainer.decode(storedVal.initData) :
+                  storedVal.initData.initData;
+                return areArraysOfNumbersEqual(subElt.data, decodedInitData);
+              });
+            });
+            if (isContainedInEntry) {
               return i;
             }
+            break;
           }
-        } else {
-          if (entry.initData === hash) {
-            return i;
-          }
+
+          default:
+            log.warn("EME-PSS: MediaKeySession persisted with an older format " +
+                     "version. Those cannot be used anymore.");
+            break;
         }
       }
     }
@@ -291,4 +296,83 @@ export default class PersistentSessionsStore {
       log.warn("EME-PSS: Could not save licenses in localStorage");
     }
   }
+
+  // /**
+  //  * Try to update the data stored in an older format version to the newer
+  //  * version.
+  //  * Note that this function can block the main thread for a long time depending
+  //  * on the device and on the number of persisted sessions.
+  //  */
+  // private _updateOlderVersions() {
+  //   let hasUpdated = false;
+  //   for (let i = 0; i < this._entries.length; i++) {
+  //     const entry = this._entries[i];
+  //     if (entry.version === 2) {
+  //       const decodedInitData : Uint8Array = typeof entry.initData === "string" ?
+  //         InitDataContainer.decode(entry.initData) :
+  //         entry.initData.initData;
+  //       const parsed = parseOldPersistedData(decodedInitData);
+  //       this._entries.splice(i, 1, { version: 3,
+  //                                    sessionId: entry.sessionId,
+  //                                    initDataType: entry.initDataType,
+  //                                    values: parsed });
+  //       hasUpdated = true;
+  //     }
+  //   }
+  //   if (hasUpdated) {
+  //     this._save();
+  //   }
+  // }
 }
+
+// /**
+//  * Format initialization data as stored in v1 or v2 format of the persisted data
+//  * into the object format used today.
+//  * @param {Uint8Array} initData
+//  * @returns {Array.<Object>}
+//  */
+// function parseOldPersistedData(
+//   initData : Uint8Array
+// ) : Array<{ systemId : string | undefined;
+//             initDataHash : number;
+//             initData : InitDataContainer; }> {
+//   const result : Array<{ systemId : string | undefined;
+//                          initDataHash : number;
+//                          initData : InitDataContainer; }> = [];
+//   let offset = 0;
+
+//   while (offset < initData.length) {
+//     if (initData.length < offset + 8 ||
+//         be4toi(initData, offset + 4) !== 0x70737368 /* pssh */
+//     ) {
+//       const initDataHash = hashBuffer(initData);
+//       return [ { systemId: undefined,
+//                  initDataHash,
+//                  initData: new InitDataContainer(initData) } ];
+//     }
+
+//     const len = be4toi(new Uint8Array(initData), offset);
+//     if (offset + len > initData.length) {
+//       const initDataHash = hashBuffer(initData);
+//       return [ { systemId: undefined,
+//                  initDataHash,
+//                  initData: new InitDataContainer(initData) } ];
+//     }
+//     const currentPSSH = initData.subarray(offset, offset + len);
+//     const systemId = getPsshSystemID(currentPSSH, 8) ?? undefined;
+//     const initDataHash = hashBuffer(currentPSSH);
+//     const currentItem = { systemId,
+//                           initDataHash,
+//                           initData: new InitDataContainer(currentPSSH) };
+//     result.push(currentItem);
+//     offset += len;
+//   }
+
+//   if (offset !== initData.length) {
+//     const initDataHash = hashBuffer(initData);
+//     return [ { systemId: undefined,
+//                initDataHash,
+//                initData: new InitDataContainer(initData) } ];
+//   }
+//   return result;
+// }

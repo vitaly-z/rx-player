@@ -62,13 +62,13 @@ import {
 import { SegmentBuffer } from "../../segment_buffers";
 import EVENTS from "../events_generators";
 import {
-  IProtectedSegmentEvent,
+  IEncryptionDataEncounteredEvent,
   IQueuedSegment,
   IRepresentationStreamEvent,
-  IStreamStatusEvent,
   IStreamEventAddedSegment,
   IStreamManifestMightBeOutOfSync,
   IStreamNeedsManifestRefresh,
+  IStreamStatusEvent,
   IStreamTerminatingEvent,
 } from "../types";
 import DownloadingQueue, {
@@ -138,12 +138,33 @@ export interface IRepresentationStreamArguments<T> {
    * Observable once the corresponding segments have been pushed).
    */
   terminate$ : Observable<ITerminationOrder>;
+  /** Supplementary arguments which configure the RepresentationStream's behavior. */
+  options: IRepresentationStreamOptions;
+}
+
+/**
+ * Various specific stream "options" which tweak the behavior of the
+ * RepresentationStream.
+ */
+export interface IRepresentationStreamOptions {
   /**
    * The buffer size we have to reach in seconds (compared to the current
    * position. When that size is reached, no segments will be loaded until it
    * goes below that size again.
    */
   bufferGoal$ : Observable<number>;
+  /**
+   * Hex-encoded DRM "system ID" as found in:
+   * https://dashif.org/identifiers/content_protection/
+   *
+   * Allows to identify which DRM system is currently used, to allow potential
+   * optimizations.
+   *
+   * Set to `undefined` in two cases:
+   *   - no DRM system is used (e.g. the content is unencrypted).
+   *   - We don't know which DRM system is currently used.
+   */
+  drmSystemId : string | undefined;
   /**
    * Bitrate threshold from which no "fast-switching" should occur on a segment.
    *
@@ -195,15 +216,15 @@ interface IInitSegmentState<T> {
  * @returns {Observable}
  */
 export default function RepresentationStream<T>({
-  bufferGoal$,
   clock$,
   content,
-  fastSwitchThreshold$,
   segmentBuffer,
   segmentFetcher,
   terminate$,
+  options,
 } : IRepresentationStreamArguments<T>) : Observable<IRepresentationStreamEvent<T>> {
   const { period, adaptation, representation } = content;
+  const { bufferGoal$, drmSystemId, fastSwitchThreshold$ } = options;
   const bufferType = adaptation.type;
 
   /** Current initialization segment state for this representation. */
@@ -329,7 +350,25 @@ export default function RepresentationStream<T>({
     takeWhile((e) => e.type !== "stream-terminating", true)
   );
 
-  return observableMerge(status$, queue$).pipe(share());
+  /**
+   * `true` if the event notifying about encryption data has already been
+   * constructed.
+   * Allows to avoid sending multiple times protection events.
+   */
+  let hasSentEncryptionData = false;
+  let encryptionEvent$ : Observable<IEncryptionDataEncounteredEvent> = EMPTY;
+  if (drmSystemId !== undefined) {
+    const encryptionData = representation.getEncryptionData(drmSystemId);
+    if (encryptionData.length > 0) {
+      encryptionEvent$ = observableOf(...encryptionData.map(d =>
+        EVENTS.encryptionDataEncountered(d)));
+      hasSentEncryptionData = true;
+    }
+  }
+
+  return observableConcat(encryptionEvent$,
+                          observableMerge(status$, queue$))
+    .pipe(share());
 
   /**
    * React to event from the `DownloadingQueue`.
@@ -340,7 +379,7 @@ export default function RepresentationStream<T>({
     evt : IDownloadingQueueEvent<T>
   ) : Observable<IStreamEventAddedSegment<T> |
                  ISegmentFetcherWarning |
-                 IProtectedSegmentEvent |
+                 IEncryptionDataEncounteredEvent |
                  IStreamManifestMightBeOutOfSync>
   {
     switch (evt.type) {
@@ -364,16 +403,25 @@ export default function RepresentationStream<T>({
         });
         initSegmentState.segmentData$.next(evt.value.initializationData);
         initSegmentState.isParsed = true;
-        const protectedEvents$ = observableOf(
-          ...evt.value.segmentProtections.map(segmentProt => {
-            return EVENTS.protectedSegment(segmentProt);
-          }));
+
+        // Now that the initialization segment has been parsed - which may have
+        // included encryption information - take care of the encryption event
+        // if not already done.
+        const allEncryptionData = representation.getAllEncryptionData();
+        let initEncEvt$;
+        if (!hasSentEncryptionData && allEncryptionData.length > 0) {
+          initEncEvt$ = observableOf(...allEncryptionData.map(p =>
+            EVENTS.encryptionDataEncountered(p)));
+        } else {
+          initEncEvt$ = EMPTY;
+        }
+
         const pushEvent$ = pushInitSegment({ clock$,
                                              content,
                                              segment: evt.segment,
                                              segmentData: evt.value.initializationData,
                                              segmentBuffer });
-        return observableMerge(protectedEvents$, pushEvent$);
+        return observableMerge(initEncEvt$, pushEvent$);
 
       case "parsed-segment":
         return initSegmentState.segmentData$
@@ -403,3 +451,6 @@ export default function RepresentationStream<T>({
     }
   }
 }
+
+// Re-export RepresentationStream events used by the AdaptationStream
+export { IStreamEventAddedSegment };
