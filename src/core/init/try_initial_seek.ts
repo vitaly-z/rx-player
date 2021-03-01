@@ -47,7 +47,22 @@ export default function tryInitialSeek(
     if (mediaElement.currentTime === 0 && initialTime !== 0) {
       // Perform initial seek if necessary
       log.info("Init: Set initial time", initialTime);
+      console.error("SETTING INITIAL TIME",
+                    tick.event,
+                    mediaElement.currentTime, initialTime);
       mediaElement.currentTime = initialTime;
+      console.error("SET INITIAL TIME", mediaElement.currentTime);
+      nextTick(() => {
+        console.error("nextTick SET INITIAL TIME", mediaElement.currentTime);
+      });
+      setTimeout(() => {
+        console.error("setTimeout 0 SET INITIAL TIME", mediaElement.currentTime);
+      }, 0);
+      setTimeout(() => {
+        console.error("setTimeout 100 SET INITIAL TIME", mediaElement.currentTime);
+      }, 100);
+    } else {
+      console.error("WE'RE GOOD", tick.event);
     }
     return !shouldWaitForSeekValidation() ||
            (tick.readyState >= 3 &&

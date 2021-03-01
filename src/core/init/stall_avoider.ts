@@ -152,6 +152,7 @@ export default function StallAvoider(
                                                                  manifest,
                                                                  stalledPosition);
         if (skippableDiscontinuity !== null) {
+          console.error("IN STREAM-DETECTED DISCONTINUITY", tick.event);
           const realSeekTime = skippableDiscontinuity + 0.001;
           if (realSeekTime <= mediaElement.currentTime) {
             log.info("Init: position to seek already reached, no seeking",
@@ -172,6 +173,7 @@ export default function StallAvoider(
                           event,
                           stalled !== null)
       ) {
+        console.error("IN BROWSER SEEK DISCONTINUITY", tick.event);
         log.warn("Init: After freeze seek", position, currentRange);
         mediaElement.currentTime = position;
         return EVENTS.warning(generateDiscontinuityError(position,
@@ -190,6 +192,7 @@ export default function StallAvoider(
       // case of small discontinuity in the content.
       const nextBufferRangeGap = getNextRangeGap(buffered, freezePosition);
       if (nextBufferRangeGap < BUFFER_DISCONTINUITY_THRESHOLD) {
+        console.error("IN MINI-HOLE DISCONTINUITY", tick.event);
         const seekTo = (freezePosition + nextBufferRangeGap + EPSILON);
         if (mediaElement.currentTime < seekTo) {
           log.warn("Init: discontinuity encountered inferior to the threshold",

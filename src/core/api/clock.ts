@@ -247,8 +247,6 @@ function getStalledStatus(
 
   const canStall = (readyState >= 1 &&
                     currentEvt !== "loadedmetadata" &&
-                    currentEvt !== "canplay" &&
-                    currentEvt !== "canplaythrough" &&
                     prevStalled === null &&
                     !(fullyLoaded || ended));
 
@@ -296,8 +294,6 @@ function getStalledStatus(
       shouldStall = true;
     } else if (prevStalled !== null &&
                ((currentEvt !== "seeking" && currentTime !== prevTime) ||
-                currentEvt === "canplay" ||
-                currentEvt === "canplaythrough" ||
                 bufferGap < Infinity &&
                 (bufferGap > getResumeGap(prevStalled, lowLatencyMode) ||
                  fullyLoaded || ended))
