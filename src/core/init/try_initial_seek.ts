@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import nextTick from "next-tick";
 import { shouldWaitForSeekValidation } from "../../compat";
 import log from "../../log";
 import { IInitClockTick } from "./types";
