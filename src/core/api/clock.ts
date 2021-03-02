@@ -371,7 +371,7 @@ function createClock(
                                    { stalled: stalledState,
                                      getCurrentTime: () => mediaElement.currentTime },
                                    mediaTimings);
-      log.debug("API: current media element state", timings);
+      log.debug("API: current media element state", timings.readyState, timings);
       return timings;
     }
 
