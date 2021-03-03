@@ -24,6 +24,117 @@ const PLAYER = ({ $destroy, state }, { videoElement, textTrackElement }) => {
   window.RxPlayer = RxPlayer;
   window.player = window.rxPlayer = player;
 
+  const _cache = {};
+  /* eslint-disable no-console */
+  if (player) {
+    setInterval(() => {
+      const now = Date.now();
+      console.log(">>> Searching for discontinuities...", now);
+      const manifest = player.getManifest();
+      if (manifest) {
+        const { periods } = manifest;
+        const nbrPeriods = periods.length;
+        for (let i = 0; i < nbrPeriods; i++) {
+          const period = periods[i];
+          const nextPeriod = periods[i + 1];
+          if (nextPeriod) {
+            const { adaptations: nextAdaptations } = nextPeriod;
+            const { video: nextVideo, audio: nextAudio } = nextAdaptations;
+            const nextPeriodHasVideoContent =
+              nextVideo.reduce((A, videoAdaptation) => {
+                const { representations } = videoAdaptation;
+                const representationsHasVideoContent =
+                  representations.reduce((R, videoRep) => {
+                    const hasContent = !!videoRep.index.getFirstPosition();
+                    return hasContent || R;
+                  }, false);
+                return A || representationsHasVideoContent;
+              }, false);
+
+            const nextPeriodHasAudioContent =
+              nextAudio.reduce((A, audioAdaptation) => {
+                const { representations } = audioAdaptation;
+                const representationsHasAudioContent =
+                  representations.reduce((R, audioRep) => {
+                    const hasContent = !!audioRep.index.getFirstPosition();
+                    return hasContent || R;
+                  }, false);
+                return A || representationsHasAudioContent;
+              }, false);
+
+            const { adaptations } = period;
+            const { video, audio } = adaptations;
+            const videoLen = video.length;
+            const audioLen = audio.length;
+            if (nextPeriodHasVideoContent) {
+              for (let v = 0; v < videoLen; v++) {
+                const videoAdaptation = video[v];
+                const { representations } = videoAdaptation;
+                for (let vr = 0; vr < representations.length; vr++) {
+                  const representation = representations[vr];
+                  const lastPosition = representation.index.getLastPosition();
+                  const ids = period.id +
+                              videoAdaptation.id +
+                              representation.id +
+                              lastPosition +
+                              period.end;
+                  if (!_cache[ids]) {
+                    if (period.end != null &&
+                        lastPosition != null &&
+                        period.end > lastPosition) {
+                      _cache[ids] = true;
+                      console.warn(">>>\n",
+                                   "Gap at end of video period\n",
+                                   "period id:", period.id, "\n",
+                                   "adaptation id:", videoAdaptation.id, "\n",
+                                   "representation id:", representation.id, "\n",
+                                   "last index pos:", lastPosition, "\n",
+                                   "period end:", period.end, "\n",
+                                   "now:", now);
+                    }
+                  }
+                }
+              }
+            }
+            if (nextPeriodHasAudioContent) {
+              for (let a = 0; a < audioLen; a++) {
+                const audioAdaptation = audio[a];
+                const { representations } = audioAdaptation;
+                for (let ar = 0; ar < representations.length; ar++) {
+                  const representation = representations[ar];
+                  const lastPosition = representation.index.getLastPosition();
+                  const ids = period.id +
+                              audioAdaptation.id +
+                              representation.id +
+                              lastPosition +
+                              period.end;
+                  if (!_cache[ids]) {
+                    if (period.end != null &&
+                        lastPosition != null &&
+                        period.end > lastPosition) {
+                      _cache[ids] = true;
+                      console.warn(">>>\n",
+                                   "Gap at end of audio period\n",
+                                   "period id:", period.id, "\n",
+                                   "adaptation id:", audioAdaptation.id, "\n",
+                                   "representation id:", representation.id, "\n",
+                                   "last index pos:", lastPosition, "\n",
+                                   "period end:", period.end, "\n",
+                                   "now:", now);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      } else {
+        console.log(">>> No manifest on player");
+      }
+    }, 5 * 1000);
+  }
+  /* eslint-enable no-console */
+
   // initial state. Written here to easily showcase it exhaustively
   state.set({
     audioBitrate: undefined,
