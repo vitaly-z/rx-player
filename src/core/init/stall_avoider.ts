@@ -158,7 +158,6 @@ export default function StallAvoider(
           } else {
             log.warn("SA: skippable discontinuity found in the stream",
                      position, realSeekTime);
-            mediaElement.currentTime = realSeekTime;
             return EVENTS.warning(generateDiscontinuityError(stalledPosition,
                                                              realSeekTime));
           }
@@ -172,7 +171,6 @@ export default function StallAvoider(
                           stalled !== null)
       ) {
         log.warn("Init: After freeze seek", position, currentRange);
-        mediaElement.currentTime = position;
         return EVENTS.warning(generateDiscontinuityError(position,
                                                          position));
 
@@ -193,7 +191,6 @@ export default function StallAvoider(
         if (mediaElement.currentTime < seekTo) {
           log.warn("Init: discontinuity encountered inferior to the threshold",
                    freezePosition, seekTo, BUFFER_DISCONTINUITY_THRESHOLD);
-          mediaElement.currentTime = seekTo;
           return EVENTS.warning(generateDiscontinuityError(freezePosition, seekTo));
         }
       }
@@ -207,7 +204,6 @@ export default function StallAvoider(
               manifest.periods[i + 1].start > mediaElement.currentTime)
           {
             const nextPeriod = manifest.periods[i + 1];
-            mediaElement.currentTime = nextPeriod.start;
             return EVENTS.warning(generateDiscontinuityError(freezePosition,
                                                              nextPeriod.start));
 
