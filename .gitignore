@@ -22,6 +22,9 @@
 
 /doc/generated
 
+/docs/.docusaurus
+/docs/build
+
 /features
 /logger
 /minimal
