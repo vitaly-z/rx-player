@@ -18,6 +18,7 @@ import {
   BehaviorSubject,
   concat as observableConcat,
   EMPTY,
+  from as observableFrom,
   merge as observableMerge,
   Observable,
   of as observableOf,
@@ -166,10 +167,10 @@ export default function PeriodStream({
           if (SegmentBuffersStore.isNative(bufferType)) {
             return reloadAfterSwitch(period, clock$, relativePosAfterSwitch);
           }
-          cleanBuffer$ = segmentBufferStatus.value
-            .removeBuffer(period.start,
-                          period.end == null ? Infinity :
-                                               period.end);
+          cleanBuffer$ = observableFrom(
+            segmentBufferStatus.value.removeBuffer(period.start,
+                                                   period.end == null ? Infinity :
+                                                                        period.end));
         } else {
           if (segmentBufferStatus.type === "uninitialized") {
             segmentBuffersStore.disableSegmentBuffer(bufferType);
@@ -209,10 +210,11 @@ export default function PeriodStream({
             return reloadAfterSwitch(period, clock$, relativePosAfterSwitch);
           }
 
-          const cleanBuffer$ = strategy.type === "clean-buffer" ?
-            observableConcat(...strategy.value.map(({ start, end }) =>
-              segmentBuffer.removeBuffer(start, end))
-            ).pipe(ignoreElements()) : EMPTY;
+          const cleanBuffer$ = strategy.type !== "clean-buffer" ?
+            EMPTY :
+            observableConcat(...strategy.value.map(({ start, end }) => {
+              return observableFrom(segmentBuffer.removeBuffer(start, end));
+            })).pipe(ignoreElements());
 
           const bufferGarbageCollector$ = garbageCollectors.get(segmentBuffer);
           const adaptationStream$ = createAdaptationStream(adaptation, segmentBuffer);
