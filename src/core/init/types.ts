@@ -60,7 +60,7 @@ export interface IInitClockTick { position : number;
                                   buffered : TimeRanges;
                                   duration : number;
                                   bufferGap : number;
-                                  state : string;
+                                  currentMediaEvent : string;
                                   playbackRate : number;
                                   currentRange : { start : number;
                                                    end : number; } |

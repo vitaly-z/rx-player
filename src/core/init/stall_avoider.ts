@@ -17,7 +17,9 @@
 import { Observable } from "rxjs";
 import {
   map,
+  pairwise,
   scan,
+  startWith,
   withLatestFrom,
 } from "rxjs/operators";
 import { isPlaybackStuck } from "../../compat";
@@ -103,6 +105,22 @@ interface IDiscontinuityStoredInfo {
 }
 
 /**
+ * We should wait under some conditions before trying to avoid a stall.
+ * Here, if the media element is seeking, but the seeking event has not
+ * been emitted, we should wait.
+ * @param {Object} lastClockTick
+ * @param {Object} clockTick
+ */
+function shouldWaitBeforeJumpingStall(
+  lastClockTick: IInitClockTick,
+  clockTick: IInitClockTick
+): boolean {
+  return lastClockTick.stalled?.reason !== "seeking" &&
+         clockTick.stalled?.reason === "seeking" &&
+         clockTick.currentMediaEvent !== "seeking";
+}
+
+/**
  * Monitor situations where playback is stalled and try to get out of those.
  * Emit "stalled" then "unstalled" respectably when an unavoidable stall is
  * encountered and exited.
@@ -135,12 +153,18 @@ export default function StallAvoider(
       initialDiscontinuitiesStore));
 
   return clock$.pipe(
+    pairwise(),
     withLatestFrom(discontinuitiesStore$),
-    map(([tick, discontinuitiesStore]) => {
-      const { buffered, currentRange, position, state, stalled } = tick;
+    map(([[previousTick, tick], discontinuitiesStore]) => {
+      const { buffered, currentRange, position, currentMediaEvent, stalled } = tick;
       if (stalled === null) {
         return { type: "unstalled" as const,
                  value: null };
+      }
+
+      if (shouldWaitBeforeJumpingStall(previousTick, tick)) {
+        return { type: "stalled" as const,
+                 value: stalled };
       }
 
       /** Position at which data is awaited. */
@@ -168,7 +192,7 @@ export default function StallAvoider(
       // Is it a browser bug? -> force seek at the same current time
       if (isPlaybackStuck(position,
                           currentRange,
-                          state,
+                          currentMediaEvent,
                           stalled !== null)
       ) {
         log.warn("Init: After freeze seek", position, currentRange);
