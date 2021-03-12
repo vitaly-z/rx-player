@@ -17,7 +17,6 @@
 import { Observable } from "rxjs";
 import {
   map,
-  pairwise,
   scan,
   withLatestFrom,
 } from "rxjs/operators";
@@ -135,39 +134,32 @@ export default function StallAvoider(
         updateDiscontinuitiesStore(discontinuitiesStore, evt, tick),
       initialDiscontinuitiesStore));
 
-  let needToWaitForSeekingEvent = false;
+  let lastSeekingPosition : number | null = null;
   return clock$.pipe(
-    pairwise(),
     withLatestFrom(discontinuitiesStore$),
-    map(([[previousTick, tick], discontinuitiesStore]) => {
+    map(([tick, discontinuitiesStore]) => {
       const { buffered, currentRange, position, currentMediaEvent, stalled } = tick;
       if (stalled === null) {
         return { type: "unstalled" as const,
                  value: null };
       }
 
-
-      if (!previousTick.seeking && tick.seeking) {
-        needToWaitForSeekingEvent = true;
+      if (tick.seeking) {
+        lastSeekingPosition = tick.position;
+      } else if (lastSeekingPosition !== null) {
+        if (tick.position < lastSeekingPosition &&
+            performance.now() - stalled.timestamp < 2000)
+        {
+          console.error("Before after seek, ignoring",
+                        lastSeekingPosition,
+                        tick.position,
+                        performance.now() - stalled.timestamp);
+          return { type: "stalled" as const,
+                   value: stalled };
+        } else {
+          lastSeekingPosition = null;
+        }
       }
-
-      if (tick.currentMediaEvent === "seeking") {
-        needToWaitForSeekingEvent = false;
-      }
-
-      console.error("!!!! SEEKING:", tick.seeking,
-                    "WAIT:", needToWaitForSeekingEvent,
-                    "EVENT:", tick.currentMediaEvent);
-
-      if (needToWaitForSeekingEvent) {
-        return { type: "stalled" as const,
-                 value: stalled };
-      }
-
-      // if (shouldWaitBeforeJumpingStall(previousTick, tick)) {
-      //   return { type: "stalled" as const,
-      //            value: stalled };
-      // }
 
       /** Position at which data is awaited. */
       const { position: stalledPosition } = stalled;
