@@ -427,6 +427,8 @@ export interface IKeySystemOption {
 
   singleLicensePer? : "content" |
                       "init-data";
+
+  maxSessionCacheSize? : number;
   /** Callback called when one of the key's status change. */
   onKeyStatusesChange? : (evt : Event, session : MediaKeySession |
                                                  ICustomMediaKeySession)

@@ -64,7 +64,8 @@ import {
 } from "./types";
 import InitDataStore from "./utils/init_data_store";
 
-const { EME_MAX_STORED_PERSISTENT_SESSION_INFORMATION } = config;
+const { EME_MAX_SIMULTANEOUS_MEDIA_KEY_SESSIONS,
+        EME_MAX_STORED_PERSISTENT_SESSION_INFORMATION } = config;
 const { onEncrypted$ } = events;
 
 /**
@@ -224,7 +225,13 @@ export default function EMEManager(
         wantedSessionType = "persistent-license";
       }
 
-      return getSession(initializationData, stores, wantedSessionType)
+      const maxSessionCacheSize = typeof options.maxSessionCacheSize === "number" ?
+        options.maxSessionCacheSize :
+        EME_MAX_SIMULTANEOUS_MEDIA_KEY_SESSIONS;
+      return getSession(initializationData,
+                        stores,
+                        wantedSessionType,
+                        maxSessionCacheSize)
         .pipe(mergeMap((sessionEvt) =>  {
           switch (sessionEvt.type) {
             case "cleaning-old-session":
