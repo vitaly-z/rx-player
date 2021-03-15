@@ -4,21 +4,39 @@
 ## Table of Contents ###########################################################
 
   - [Overview](#overview)
-  - [Properties](#prop)
+  - [Basic options](#prop-basic)
     - [transport](#prop-transport)
     - [url](#prop-url)
-    - [keySystems](#prop-keySystems)
     - [autoPlay](#prop-autoPlay)
     - [startAt](#prop-startAt)
-    - [transportOptions](#prop-transportOptions)
+    - [networkConfig](#prop-networkConfig)
+  - [Content encryption options](#prop-encryption)
+    - [keySystems](#prop-keySystems)
+    - [keySystems\[\].type](#prop-keySystems-type)
+    - [keySystems\[\].getLicense](#prop-keySystems-getLicense)
+    - [keySystems\[\].getLicenseConfig](#prop-keySystems-getLicenseConfig)
+    - [keySystems\[\].serverCertificate](#prop-keySystems-serverCertificate)
+    - [keySystems\[\].persistentLicense](#prop-keySystems-persistentLicense)
+    - [keySystems\[\].licenseStorage](#prop-keySystems-licenseStorage)
+    - [keySystems\[\].fallbackOn](#prop-keySystems-fallbackOn)
+    - [keySystems\[\].closeSessionsOnStop](#prop-keySystems-closeSessionsOnStop)
+    - [keySystems\[\].disableMediaKeysAttachmentLock](#prop-keySystems-disableMediaKeysAttachmentLock)
+    - [keySystems\[\].persistentStateRequired](#prop-keySystems-persistentStateRequired)
+    - [keySystems\[\].distinctiveIdentifierRequired](#prop-keySystems-distinctiveIdentifierRequired)
+    - [keySystems\[\].throwOnLicenseExpiration](#prop-keySystems-throwOnLicenseExpiration)
+    - [keySystems\[\].onKeyStatusesChange](#prop-keySystems-onKeyStatusesChange)
+  - [transport options](#prop-transportOptions)
+  - [Subtitles options](#prop-subtitles)
     - [textTrackMode](#prop-textTrackMode)
     - [textTrackElement](#prop-textTrackElement)
+  - [Track / Quality switching behavior](#prop-switch)
     - [audioTrackSwitchingMode](#prop-audioTrackSwitchingMode)
     - [manualBitrateSwitchingMode](#prop-manualBitrateSwitchingMode)
     - [onCodecSwitch](#prop-onCodecSwitch)
-    - [lowLatencyMode](#prop-lowLatencyMode)
-    - [networkConfig](#prop-networkConfig)
     - [enableFastSwitching](#prop-enableFastSwitching)
+  - [Low latency](#prop-low-latency)
+    - [lowLatencyMode](#prop-lowLatencyMode)
+  - [Deprecated](#prop-deprecated)
     - [hideNativeSubtitle (deprecated)](#prop-hideNativeSubtitle)
     - [supplementaryImageTracks (deprecated)](#prop-supplementaryImageTracks)
     - [supplementaryTextTracks (deprecated)](#prop-supplementaryTextTracks)
@@ -45,8 +63,8 @@ player.loadVideo(options);
 
 
 
-<a name="prop"></a>
-## Properties ##################################################################
+<a name="prop-basic"></a>
+## Basic options ###############################################################
 
 
 <a name="prop-transport"></a>
@@ -122,283 +140,6 @@ rxPlayer.loadVideo({
 ```
 
 
-<a name="prop-keySystems"></a>
-### keySystems #################################################################
-
-_type_: ``Array.<Object>|undefined``
-
-This property is mandatory if the content uses DRM.
-
-It is here that is defined every options relative to the encryption of your
-content. There's a lot of configuration possible here. In the case you find
-this documentation hard to grasp, we've written a [tutorial on DRM configuration
-here](../tutorials/contents_with_DRM.md).
-
-This property is an array of objects with the following properties (only
-``type`` and ``getLicense`` are mandatory here):
-
-  - __type__ (``string``): name of the DRM system used. Can be either
-    ``"widevine"``, ``"playready"`` or ``clearkey`` or the type (reversed domain
-    name) of the keySystem (e.g. ``"com.widevine.alpha"``,
-    ``"com.microsoft.playready"`` ...).
-
-  - __getLicense__ (``Function``): Callback which will be triggered everytime a
-    message is sent by the Content Decryption Module (CDM), usually to
-    fetch/renew the license.
-
-    Gets two arguments when called:
-      1. the message (``Uint8Array``): The message, formatted to an Array of
-         bytes.
-      2. the messageType (``string``): String describing the type of message
-         received.
-         There is only 4 possible message types, all defined in [the w3c
-         specification](https://www.w3.org/TR/encrypted-media/#dom-mediakeymessagetype).
-
-      This function should return either synchronously the license, `null` to
-      not set a license for this `message` event or a Promise which should
-      either:
-        - resolves if the license was fetched, with the licence in argument
-        - resolve with ``null`` if you do not want to set a license for this
-          `message` event
-        - reject if an error was encountered.
-
-      Note: We set a 10 seconds timeout by default on this request (configurable
-      through the `getLicenseConfig` object).
-      If the returned Promise do not resolve or reject under this limit, the
-      player will stop with an error.
-
-      In any case, the license provided by this function should be of a
-      ``BufferSource`` type (example: an ``Uint8Array`` or an ``ArrayBuffer``).
-
-      Even in case of an error, you can (this is not mandatory) set any of the
-      following properties on the rejected value which will be interpreted by
-      the RxPlayer:
-
-        - `noRetry` (`Boolean`): If set to `true`, we will throw directly a
-          `KEY_LOAD_ERROR` to call `getLicense`. If not set or set to `false`,
-          the current retry parameters will be applied (see `getLicenseConfig`)
-
-        - `message` (`string`): If the `message` property is set as a "string",
-          this message will be set as the `message` property of the
-          corresponding `EncryptedMediaError` (either communicated through an
-          `"error"` event if we're not retrying or through a `"warning"` event
-          if we're retrying).
-          As every other `getLicense`-related errors, this error will have the
-          `KEY_LOAD_ERROR` `code` property.
-
-        - `fallbackOnLastTry`: If this getLicense is the last retry (if the
-          `noRetry` property is set to `true`, this is always true), we will not
-          throw immediately but rather try to fallback on other Representations
-          (e.g. qualities) which might have a different decryption key. If no
-          Representation is left, we will throw a MediaError with a
-          `NO_PLAYABLE_REPRESENTATION` code, as documented [in the errors
-          documentation](./errors.md#types-media_error).
-
-          You will receive a `decipherabilityUpdate` event when we fallback from
-          a given Representation. You can find documentation on this event [in
-          the corresponding chapter of the events
-          documentation](./player_events.md#events-decipherabilityUpdate).
-
-          This option is thus only useful for contents depending on multiple
-          licenses.
-
-          When fallbacking, we might need to reload the current MediaSource,
-          leading to a black screen during a brief instant. When reloading, the
-          RxPlayer will have the `"reloading"` [player state](./states.md).
-          on most situations, we will however not reload the media source but
-          only perform a very little seek (of some milliseconds). you might see
-          the stream stutter for a very brief instant at that point.
-
-          On the Edge browser, we found an issue that can arise when this option
-          is set if PlayReady is used. This issue can make the player loads the
-          content indefinitely.
-          Sadly, no work-around has been found for now for this issue. We're
-          currently trying to create a reproducible scenario and document that
-          issue so it can hopefully be fixed in the future. In the meantime,
-          you're encouraged either to use Widevine (only on Chromium-based Edge)
-          or to not make use of the `fallBackOnLastTry` option on that browser.
-
-  - __getLicenseConfig__ (`Object|undefined`): Optional configuration for the
-    `getLicense` callback. Can contain the following properties:
-       - `retry` (`Number`|`undefined`) (default: `2`): number of time
-         `getLicense` is retried on error or on timeout before we fail on a
-         `KEY_LOAD_ERROR`
-       - `timeout` (`Number`|`undefined`) (default: `10000`): timeout, in ms,
-         after which we consider the `getLicense` callback to have failed.
-
-         Set it to `-1` to disable any timeout.
-
-  - __serverCertificate__ (``BufferSource|undefined``): Eventual certificate
-    used to encrypt messages to the license server.
-    If set, we will try to set this certificate on the CDM. If it fails, we will
-    still continue to try deciphering the content (albeit a
-    [warning](./errors.md) will be emitted in that case with the code
-    ``"LICENSE_SERVER_CERTIFICATE_ERROR"``).
-
-  - __persistentLicense__ (``Boolean|undefined``): Set it to ``true`` if you
-    want the ability to persist the license for later retrieval.
-    In that case, you will also need to set the ``licenseStorage`` attribute to
-    be able to persist the license through your preferred method. This is not
-    needed for most usecases.
-
-  - __licenseStorage__ (``Object|undefined``): Required only if
-    ``persistentLicense`` has been set to ``true``. It's an object containing
-    two functions ``load`` and ``save``:
-      - ``save``: take into argument an ``Array.<Object>`` which will be the set
-        of sessionId to save. No return value needed.
-      - ``load``: take no argument and returns the stored ``Array.<Object>``
-        (the last given to ``save``) synchronously.
-
-  - __persistentStateRequired__ (``Boolean|undefined``): Set it to ``true`` if
-    the chosen CDM should have the ability to persist a license, ``false`` if
-    you don't care. This is not needed for most usecases. ``false`` by default.
-    You do not have to set it to ``true`` if the ``persistentLicense`` option is
-    set.
-
-  - __distinctiveIdentifierRequired__ (``Boolean|undefined``): When set to
-    ``true``, the use of
-    [Distinctive Indentifier(s)](https://www.w3.org/TR/encrypted-media/#distinctive-identifier)
-    or
-    [Distinctive Permanent Identifier(s)](https://www.w3.org/TR/encrypted-media/#uses-distinctive-permanent-identifiers)
-    will be required. This is not needed for most usecases. ``false`` if you do
-    not care. ``false`` by default.
-
-  - __throwOnLicenseExpiration__ (``Boolean|undefined``): `true` by default.
-
-    If set to `true` or not set, the playback will be interrupted as soon as one
-    of the current licenses expires. In that situation, you will be warned with
-    an [``error`` event](./errors.md) with, as a payload, an error with the code
-    `KEY_STATUS_CHANGE_ERROR`.
-
-    If set to `false`, the playback of the current content will not be
-    interrupted even if one of the current licenses is expired. It might however
-    stop decoding in that situation.
-    It's then up to you to update the problematic license, usually through the
-    usual `getLicense` callback.
-
-    You may want to set this value to `false` if a session expiration leads to
-    a license renewal.
-    In that case, content may continue to play once the license has been
-    updated.
-
-  - __fallbackOn__ (`Object`): This advanced option allows to fallback on other
-      Representations (e.g. qualities) when one of them has its decription key
-      refused.
-
-      This option is thus only useful for contents depending on multiple
-      keys.
-
-      This object can have two properties:
-        - `keyInternalError`: fallback when the corresponding key has the
-          [status](https://www.w3.org/TR/encrypted-media/#dom-mediakeystatus)
-          `"internal-error"`. We found that most widevine implementation use
-          this error when a key is refused.
-        - `keyOutputRestricted`: fallback when the corresponding key has the
-          [status](https://www.w3.org/TR/encrypted-media/#dom-mediakeystatus)
-          `"output-restricted"`. This is the proper status for a key refused due
-          to output restrictions.
-
-      For most cases where you want to fallback in case of a refused key, we
-      recommend setting both properties to `true`.
-
-      You will receive a `decipherabilityUpdate` event when we fallback from
-      a given Representation. You can find documentation on this event
-      [in the corresponding chapter of the events
-      documentation](./player_events.md#events-decipherabilityUpdate).
-
-      When fallbacking, we might need to reload the current MediaSource, leading
-      to a black screen during a brief instant. When reloading, the RxPlayer
-      will have the `"reloading"` [player state](./states.md).
-      on most situations, we will however not reload the media source but only
-      perform a very little seek (of some milliseconds). you might see the
-      stream twitch for a very brief instant at that point.
-
-      If we have no Representation to fallback to anymore, we will throw a
-      MediaError with a `NO_PLAYABLE_REPRESENTATION` code, as documented [in
-      the errors documentation](./errors.md#types-media_error).
-
-  - __onKeyStatusesChange__ (``Function|undefined``): Not needed for most
-    usecases.
-
-    Triggered each time the key statuses of the current session
-    changes, except for the following statuses (which throws immediately):
-      - ``expired`` if (and only if) `throwOnLicenseExpiration` is not set to
-        `false`
-      - `internal-error`
-
-    Takes 2 arguments:
-    1. The keystatuseschange event ``{Event}``
-    2. The session associated with the event ``{MediaKeySession}``
-
-    Like ``getLicense``, this function should return a promise which emit a
-    license or `null` (for no license) when resolved. It can also return
-    directly the license or `null` if it can be done synchronously.
-
-    In case of an error, you can set the `message` property on the
-    rejected value as a "string". This message will be set as the `message`
-    property of the corresponding `EncryptedMediaError` communicated through
-    an `"error"` event.
-    As every other `onKeyStatusesChange`-related errors, this error will have
-    the `KEY_STATUS_CHANGE_ERROR` `code` property.
-
-  - __closeSessionsOnStop__ (``Boolean|undefined``): If set to ``true``, the
-    ``MediaKeySession`` created for a content will be immediately closed when
-    the content stops its playback. This might be required by your key system
-    implementation (most often, it is not).
-
-    If set to ``false`` or not set, the ``MediaKeySession`` can be reused if the
-    same content needs to be re-decrypted.
-
-  - __disableMediaKeysAttachmentLock__ (``Boolean|undefined``):
-    In regular conditions, we might want to wait for the media element to have
-    decryption capabilities (what we call here "MediaKeys attachment") before
-    beginning to load the actual content.
-
-    Waiting for that capability validation allows for example to play a content
-    which contains both encrypted and unencrypted data on the Chrome browser.
-
-    However, we found that in some peculiar devices (like some set-top boxes)
-    this can create a deadlock: the browser sometimes wait for some
-    content to be loaded before validating the media element's decryption
-    capabilities.
-
-    Because we didn't find a good enough compromise for now, we added the
-    `disableMediaKeysAttachmentLock` boolean.
-    By setting it to `true`, we won't wait for "MediaKeys attachment" before
-    pushing the first content. The downside being that content of mixed
-    unencrypted/encrypted data might not be playable with that configuration.
-
-    You can try that property if your encrypted contents seems to load
-    indefinitely on peculiar targets.
-
-
-#### Example
-
-Example of a simple DRM configuration for widevine and playready DRMs:
-```js
-player.loadVideo({
-  url: manifestURL,
-  transport: "dash",
-  keySystems: [{
-    type: "widevine",
-    getLicense(challenge) {
-      // ajaxPromise is here an AJAX implementation doing a POST request on the
-      // widevineLicenseServer with the challenge in its body.
-      return ajaxPromise(widevineLicenseServer, challenge);
-    }
-  }, {
-    type: "playready",
-    getLicense(challenge) {
-      // idem
-      // Note: you may need to format the challenge before doing the request
-      // depending on the server configuration.
-      return ajaxPromise(playreadyLicenseServer, challenge);
-    }
-  }]
-})
-```
-
-
 <a name="prop-autoPlay"></a>
 ### autoPlay ###################################################################
 
@@ -415,6 +156,16 @@ state) and you will receive a [warning event](./errors.md) containing a
 `MEDIA_ERROR` with the code: `MEDIA_ERR_BLOCKED_AUTOPLAY`.
 A solution in that case would be to propose to your users an UI element to
 trigger the play with an interaction.
+
+Example:
+```js
+// Loading then playing some DASH content automatically
+rxPlayer.loadVideo({
+  url: https://www.example.com/dash.mpd,
+  transport: "dash",
+  autoPlay: true
+})
+```
 
 
 <a name="prop-startAt"></a>
@@ -531,6 +282,438 @@ player.loadVideo({
   }
 })
 ```
+
+
+<a name="prop-networkConfig"></a>
+### networkConfig ##############################################################
+
+_type_: ``Object``
+
+_defaults_: ``{}``
+
+---
+
+:warning: This option has no effect in _DirectFile_ mode (see [transport
+option](#prop-transport)).
+
+---
+
+Configuration linked to [Manifest](../terms.md#manifest) and segment requests.
+This object can take the following properties (all are optional):
+
+  - ``segmentRetry`` (``Number``): Maximum number of times a segment request
+    will be retried when an error happen - only on some condition [1].
+
+    Those retry will be done with a progressive delay, to avoid overloading a
+    CDN. When this count is reached, the player will stop and throw a fatal
+    error.
+
+    Defaults to ``4``.
+
+  - ``manifestRetry`` (``Number``): Maximum number of times a Manifest request
+    will be retried when a request error happen - only on some condition [1].
+    Defaults to ``4``.
+
+    Those retry will be done with a progressive delay, to avoid overloading a
+    CDN. When this count is reached, the player will stop and throw a fatal
+    error.
+
+    Defaults to ``4``.
+
+  - ``offlineRetry`` (``Number``): Maximum number of times a request will be
+    retried when the request fails because the user is offline.
+
+    Those retry will be done with a progressive delay, to avoid overloading the
+    user's ressources. When this count is reached, the player will stop and
+    throw a fatal error.
+
+    Defaults to ``Infinity``.
+
+[1] To retry a request, one of the following condition should be met:
+
+  - The request failed because of a ``404`` HTTP code
+
+  - The request failed because of an HTTP code in the ``500`` family
+
+  - The request failed because of a timeout
+
+  - the request failed because of an unknown XHR error (might be a
+    parsing/interface error)
+
+
+<a name="prop-encryption"></a>
+## Content encryption options #################################################
+
+<a name="prop-keySystems"></a>
+### keySystems #################################################################
+
+_type_: ``Array.<Object>|undefined``
+
+This property is mandatory if the content uses DRM.
+
+It is here that is defined every options relative to the encryption of the
+wanted content.
+There's a lot of configuration possible here. In the case you find this
+documentation hard to grasp, we've written a [tutorial on DRM configuration
+here](../tutorials/contents_with_DRM.md).
+
+This property is an array of objects, each describing a wanted DRM
+configuration.
+
+The RxPlayer will then try each of those configuration in order (from the first
+element in that array to the last) and only consider the first one compatible
+with the current device.
+
+If none of those configurations are compatible with the current device, an
+[`INCOMPATIBLE_KEYSYSTEMS` error](./errors.md#types-encrypted_media_error) might
+be sent through an [`error` event](./player_events.md#events-error).
+
+Note that out of all possible options, only `type` and `getLicense` are
+required, others option might however also be very useful depending on your
+needs.
+
+#### Example
+
+Example of a simple DRM configuration for widevine and playready DRMs:
+```js
+player.loadVideo({
+  url: manifestURL,
+  transport: "dash",
+  keySystems: [{
+    type: "widevine",
+    getLicense(challenge) {
+      // ajaxPromise is here an AJAX implementation doing a POST request on the
+      // widevineLicenseServer with the challenge in its body.
+      return ajaxPromise(widevineLicenseServer, challenge);
+    }
+  }, {
+    type: "playready",
+    getLicense(challenge) {
+      // idem
+      // Note: you may need to format the challenge before doing the request
+      // depending on the server configuration.
+      return ajaxPromise(playreadyLicenseServer, challenge);
+    }
+  }]
+})
+```
+
+
+<a name="prop-keySystems-type"></a>
+#### keySystems\[\].type ########################################################
+
+_type_: ``string``
+
+Name of the DRM system used.
+Can be either one of:
+  - `"widevine"`
+  - `"playready"`
+  - `"clearkey"`
+
+Or for other key systems or more specific ones, the full reverse domain name
+of the key system, for example: `"com.widevine.alpha"`,
+`"com.microsoft.playready.hardware"` etc.
+
+
+<a name="prop-keySystems-getLicense"></a>
+#### keySystems\[\].getLicense ##################################################
+
+_type_: ``Function``
+
+Callback which will be triggered everytime a message is sent by the Content
+Decryption Module (CDM), usually to fetch/renew the license.
+
+Gets two arguments when called:
+  1. the message (``Uint8Array``): The message, formatted to an Array of
+     bytes.
+  2. the messageType (``string``): String describing the type of message
+     received.
+     There is only 4 possible message types, all defined in [the w3c
+     specification](https://www.w3.org/TR/encrypted-media/#dom-mediakeymessagetype).
+
+This function should return either synchronously the license, `null` to not set
+a license for this `message` event or a Promise which should either:
+  - resolve if the license was fetched, with the licence in argument
+  - resolve with ``null`` if you do not want to set a license for this `message`
+    event
+  - reject if an error was encountered.
+
+Note: We set a 10 seconds timeout by default on this request (configurable
+through the `keySystems[].getLicenseConfig` object).
+If the returned Promise do not resolve or reject under this limit, the RxPlayer
+will stop with an error.
+
+In any case, if a license is provided by this function it should be under a
+``BufferSource`` type (example: an ``Uint8Array`` or an ``ArrayBuffer``).
+
+Even in case of an error, you can (this is not mandatory) set any of the
+following properties on the rejected value which will be interpreted by the
+RxPlayer:
+  - `noRetry` (`Boolean`): If set to `true`, we will throw directly a
+    `KEY_LOAD_ERROR` to call `getLicense`. If not set or set to `false`,
+    the current retry parameters will be applied (see `getLicenseConfig`)
+
+  - `message` (`string`): If the `message` property is set as a "string",
+    this message will be set as the `message` property of the
+    corresponding `EncryptedMediaError` (either communicated through an
+    `"error"` event if we're not retrying or through a `"warning"` event
+    if we're retrying).
+    As every other `getLicense`-related errors, this error will have the
+    `KEY_LOAD_ERROR` `code` property.
+
+  - `fallbackOnLastTry`: If this getLicense is the last retry (if the
+    `noRetry` property is set to `true`, this is always true), we will not
+    throw immediately but rather try to fallback on other Representations
+    (e.g. qualities) which might have a different decryption key. If no
+    Representation is left, we will throw a MediaError with a
+    `NO_PLAYABLE_REPRESENTATION` code, as documented [in the errors
+    documentation](./errors.md#types-media_error).
+
+    You will receive a `decipherabilityUpdate` event when we fallback from
+    a given Representation. You can find documentation on this event [in
+    the corresponding chapter of the events
+    documentation](./player_events.md#events-decipherabilityUpdate).
+
+    This option is thus only useful for contents depending on multiple
+    licenses.
+
+    When fallbacking, we might need to reload the current MediaSource,
+    leading to a black screen during a brief instant. When reloading, the
+    RxPlayer will have the `"reloading"` [player state](./states.md).
+    on most situations, we will however not reload the media source but
+    only perform a very little seek (of some milliseconds). you might see
+    the stream stutter for a very brief instant at that point.
+
+    On the Edge browser, we found an issue that can arise when this option
+    is set if PlayReady is used. This issue can make the player loads the
+    content indefinitely.
+    Sadly, no work-around has been found for now for this issue. We're
+    currently trying to create a reproducible scenario and document that
+    issue so it can hopefully be fixed in the future. In the meantime,
+    you're encouraged either to use Widevine (only on Chromium-based Edge)
+    or to not make use of the `fallBackOnLastTry` option on that browser.
+
+
+<a name="prop-keySystems-getLicenseConfig"></a>
+#### keySystems\[\].getLicenseConfig ############################################
+
+_type_: ``Object|undefined``
+
+Optional configuration for the `keySystems[].getLicense` callback.
+Can contain the following properties:
+  - `retry` (`Number`|`undefined`) (default: `2`): number of time
+    `getLicense` is retried on error or on timeout before we fail on a
+    `KEY_LOAD_ERROR`
+  - `timeout` (`Number`|`undefined`) (default: `10000`): timeout, in ms,
+    after which we consider the `getLicense` callback to have failed.
+
+    Set it to `-1` to disable any timeout.
+
+
+<a name="prop-keySystems-serverCertificate"></a>
+#### keySystems\[\].serverCertificate ###########################################
+
+_type_: ``BufferSource|undefined``
+
+Eventual certificate used to encrypt messages to the license server.
+
+If set, we will try to set this certificate on the CDM. If it fails, we will
+still continue to try deciphering the content (albeit a [warning](./errors.md)
+will be emitted in that case with the code
+`"LICENSE_SERVER_CERTIFICATE_ERROR"`).
+
+
+<a name="prop-keySystems-persistentLicense"></a>
+#### keySystems\[\].persistentLicense ###########################################
+
+_type_: ``Boolean|undefined``
+
+_defaults_: ``false``
+
+Set it to ``true`` if you want the ability to persist the license for later
+retrieval.
+In that case, you will also need to set the ``keySystems[].licenseStorage``
+attribute to be able to persist the license through your preferred method.
+
+This is not needed for most usecases.
+
+
+<a name="prop-keySystems-licenseStorage"></a>
+#### keySystems\[\].licenseStorage ##############################################
+
+_type_: ``Object|undefined``
+
+Required only if ``keySystems[].persistentLicense`` has been set to ``true``.
+It's an object containing two functions ``load`` and ``save``:
+  - ``save``: take into argument an ``Array.<Object>`` which will be the set
+    of sessionId to save. No return value needed.
+  - ``load``: take no argument and returns the stored ``Array.<Object>``
+    (the last given to ``save``) synchronously.
+
+
+<a name="prop-keySystems-fallbackOn"></a>
+#### keySystems\[\].fallbackOn ##################################################
+
+_type_: ``Object|undefined``
+
+This advanced option allows to fallback on other Representations (e.g.
+qualities) when one of them has its decription key refused.
+
+This option is thus only useful for contents depending on multiple keys
+depending on the Representation.
+
+This object can have two properties:
+  - `keyInternalError`: fallback when the corresponding key has the
+    [status](https://www.w3.org/TR/encrypted-media/#dom-mediakeystatus)
+    `"internal-error"`. We found that most widevine implementation use
+    this error when a key is refused.
+  - `keyOutputRestricted`: fallback when the corresponding key has the
+    [status](https://www.w3.org/TR/encrypted-media/#dom-mediakeystatus)
+    `"output-restricted"`. This is the proper status for a key refused due
+    to output restrictions.
+
+For most cases where you want to fallback in case of a refused key, we
+recommend setting both properties to `true`.
+
+You will receive a `decipherabilityUpdate` event when we fallback from a
+given Representation. You can find documentation on this event [in the
+corresponding chapter of the events
+documentation](./player_events.md#events-decipherabilityUpdate).
+
+When fallbacking, we might need to reload the current MediaSource, leading
+to a black screen during a brief instant. When reloading, the RxPlayer will have
+the `"reloading"` [player state](./states.md).
+on most situations, we will however not reload the media source but only perform
+a very little seek (of some milliseconds). you might see the stream twitch for a
+very brief instant at that point.
+
+If we have no Representation to fallback to anymore, we will throw a MediaError
+with a `NO_PLAYABLE_REPRESENTATION` code, as documented [in the errors
+documentation](./errors.md#types-media_error).
+
+
+<a name="prop-keySystems-closeSessionsOnStop"></a>
+#### keySystems\[\].closeSessionsOnStop #########################################
+
+_type_: ``Boolean|undefined``
+
+If set to ``true``, the ``MediaKeySession``(s) created for a content will be
+immediately closed when the content stops its playback.
+
+This might be required by your key system implementation (most often, it is
+not).
+
+If set to ``false`` or not set, the ``MediaKeySession`` can be reused if the
+same content needs to be re-decrypted.
+
+
+<a name="prop-keySystems-disableMediaKeysAttachmentLock"></a>
+#### keySystems\[\].disableMediaKeysAttachmentLock ##############################
+
+_type_: ``Boolean|undefined``
+
+In regular conditions, we might want to wait for the media element to have
+decryption capabilities (what we call here "MediaKeys attachment") before
+beginning to load the actual content.
+
+Waiting for that capability validation allows for example to play a content
+which contains both encrypted and unencrypted data on the Chrome browser.
+
+However, we found that in some peculiar devices (like some set-top boxes) this
+can create a deadlock: the browser sometimes wait for some content to be loaded
+before validating the media element's decryption capabilities.
+
+Because we didn't find a good enough compromise for now, we added the
+`disableMediaKeysAttachmentLock` boolean.
+By setting it to `true`, we won't wait for "MediaKeys attachment" before
+pushing the first content. The downside being that content of mixed
+unencrypted/encrypted data might not be playable with that configuration.
+
+You can try that property if your encrypted contents seems to load indefinitely
+on peculiar targets.
+
+
+<a name="prop-keySystems-persistentStateRequired"></a>
+#### keySystems\[\].persistentStateRequired #####################################
+
+_type_: ``Boolean|undefined``
+
+_defaults_: ``false``
+
+Set it to ``true`` if the chosen CDM should have the ability to persist state in
+general, ``false`` if you don't care.
+
+This is not needed for most usecases.
+
+
+<a name="prop-keySystems-persistentStateRequired"></a>
+#### keySystems\[\].distinctiveIdentifierRequired ###############################
+
+_type_: ``Boolean|undefined``
+
+_defaults_: ``false``
+
+When set to ``true``, the use of [Distinctive
+Indentifier(s)](https://www.w3.org/TR/encrypted-media/#distinctive-identifier)
+or [Distinctive Permanent
+Identifier(s)](https://www.w3.org/TR/encrypted-media/#uses-distinctive-permanent-identifiers)
+will be required.
+This is not needed for most usecases, ``false`` if you do not care.
+
+
+<a name="prop-keySystems-throwOnLicenseExpiration"></a>
+#### keySystems\[\].throwOnLicenseExpiration ####################################
+
+_type_: ``Boolean|undefined``
+
+_defaults_: ``true``
+
+If set to `true` or not set, the playback will be interrupted as soon as one of
+the current licenses expires. In that situation, you will be warned with an
+[``error`` event](./errors.md) with, as a payload, an error with the code
+`KEY_STATUS_CHANGE_ERROR`.
+
+If set to `false`, the playback of the current content will not be interrupted
+even if one of the current licenses is expired. It might however stop decoding
+in that situation.
+
+It's then up to you to update the problematic license, usually through the
+usual `getLicense` callback.
+
+You may want to set this value to `false` if a session expiration leads to a
+license renewal.
+In that case, content may continue to play once the license has been updated.
+
+
+<a name="prop-keySystems-onKeyStatusesChange"></a>
+#### keySystems\[\].onKeyStatusesChange #########################################
+
+_type_: ``Function|undefined``
+
+Not needed for most usecases.
+
+Triggered each time the key statuses of the current session changes, except for
+the following statuses (which immediately result in an error):
+  - ``expired`` if (and only if) `keySystems[].throwOnLicenseExpiration` is
+    not set to `false`
+  - `internal-error` if (and only if)
+    `keySystems[].fallbackOn.keyInternalError` is not set set to `true`
+
+Takes 2 arguments:
+  1. The keystatuseschange event ``{Event}``
+  2. The session associated with the event ``{MediaKeySession}``
+
+Like ``getLicense``, this function should return a promise which emit a license
+or `null` (for no license) when resolved. It can also return directly the
+license or `null` if it can be done synchronously.
+
+In case of an error, you can reject the Promise with an `Error` having a
+specific `message` property.
+This message will be set as the `message` property of the corresponding
+`EncryptedMediaError` communicated through an `"error"` event.
+
+As every other `onKeyStatusesChange`-related errors, this error will have
+the `KEY_STATUS_CHANGE_ERROR` `code` property.
 
 
 <a name="prop-transportOptions"></a>
@@ -1039,63 +1222,6 @@ through the `startAt` option.
 
 More information on playing low-latency DASH contents can be found in the
 [corresponding documentation page](./low_latency.md).
-
-
-<a name="prop-networkConfig"></a>
-### networkConfig ##############################################################
-
-_type_: ``Object``
-
-_defaults_: ``{}``
-
----
-
-:warning: This option has no effect in _DirectFile_ mode (see [transport
-option](#prop-transport)).
-
----
-
-Configuration linked to [Manifest](../terms.md#manifest) and segment requests.
-This object can take the following properties (all are optional):
-
-  - ``segmentRetry`` (``Number``): Maximum number of times a segment request
-    will be retried when an error happen - only on some condition [1].
-
-    Those retry will be done with a progressive delay, to avoid overloading a
-    CDN. When this count is reached, the player will stop and throw a fatal
-    error.
-
-    Defaults to ``4``.
-
-  - ``manifestRetry`` (``Number``): Maximum number of times a Manifest request
-    will be retried when a request error happen - only on some condition [1].
-    Defaults to ``4``.
-
-    Those retry will be done with a progressive delay, to avoid overloading a
-    CDN. When this count is reached, the player will stop and throw a fatal
-    error.
-
-    Defaults to ``4``.
-
-  - ``offlineRetry`` (``Number``): Maximum number of times a request will be
-    retried when the request fails because the user is offline.
-
-    Those retry will be done with a progressive delay, to avoid overloading the
-    user's ressources. When this count is reached, the player will stop and
-    throw a fatal error.
-
-    Defaults to ``Infinity``.
-
-[1] To retry a request, one of the following condition should be met:
-
-  - The request failed because of a ``404`` HTTP code
-
-  - The request failed because of an HTTP code in the ``500`` family
-
-  - The request failed because of a timeout
-
-  - the request failed because of an unknown XHR error (might be a
-    parsing/interface error)
 
 
 
