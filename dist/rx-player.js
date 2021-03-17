@@ -3620,6 +3620,36 @@ function shouldFavourCustomSafariEME() {
   EME_MAX_STORED_PERSISTENT_SESSION_INFORMATION: 1000,
 
   /**
+   * Attempts to closing a MediaKeySession can fail, most likely because the
+   * MediaKeySession was not initialized yet.
+   * When we consider that we're in one of these case, we will retry to close it.
+   *
+   * To avoid going into an infinite loop of retry, this number indicates a
+   * maximum number of attemps we're going to make (`0` meaning no retry at all,
+   * `1` only one retry and so on).
+   */
+  EME_SESSION_CLOSING_MAX_RETRY: 5,
+
+  /**
+   * When closing a MediaKeySession failed due to the reasons explained for the
+   * `EME_SESSION_CLOSING_MAX_RETRY` config property, we may (among other
+   * triggers) choose to wait a delay raising exponentially at each retry before
+   * that new attempt.
+   * This value indicates the initial value for this delay, in milliseconds.
+   */
+  EME_SESSION_CLOSING_INITIAL_DELAY: 100,
+
+  /**
+   * When closing a MediaKeySession failed due to the reasons explained for the
+   * `EME_SESSION_CLOSING_MAX_RETRY` config property, we may (among other
+   * triggers) choose to wait a delay raising exponentially at each retry before
+   * that new attempt.
+   * This value indicates the maximum possible value for this delay, in
+   * milliseconds.
+   */
+  EME_SESSION_CLOSING_MAX_DELAY: 1000,
+
+  /**
    * The player relies on browser events and properties to update its status to
    * "ENDED".
    *
@@ -3701,7 +3731,25 @@ function shouldFavourCustomSafariEME() {
   },
 
   /** Interval we will use to poll for checking if an event shall be emitted */
-  STREAM_EVENT_EMITTER_POLL_INTERVAL: 250
+  STREAM_EVENT_EMITTER_POLL_INTERVAL: 250,
+
+  /**
+   * In Javascript, numbers are encoded in a way that a floating number may be
+   * represented internally with a rounding error. When multiplying times in
+   * seconds by the timescale, we've encoutered cases were the rounding error
+   * was amplified by a factor which is about the timescale.
+   * Example :
+   * (192797480.641122).toFixed(20) = 192797480.64112201333045959473
+   * (error is 0.0000000133...)
+   * 192797480.641122 * 10000000 = 1927974806411220.2 (error is 0.2)
+   * 192797480.641122 * 10000000 * 4 = 7711899225644881 (error is 1)
+   * The error is much more significant here, once the timescale has been
+   * applied.
+   * Thus, we consider that our max tolerable rounding error is 1ms.
+   * It is much more than max rounding errors when seen into practice,
+   * and not significant from the media loss perspective.
+   */
+  DEFAULT_MAXIMUM_TIME_ROUNDING_ERROR: 1 / 1000
 });
 
 /***/ }),
@@ -4707,7 +4755,7 @@ function disableVideoTracks(videoTracks) {
 
 /***/ }),
 
-/***/ 8745:
+/***/ 1603:
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -4719,16 +4767,18 @@ __webpack_require__.d(__webpack_exports__, {
 
 // UNUSED EXPORTS: clearEMESession, disposeEME, getCurrentKeySystem
 
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/of.js
+var of = __webpack_require__(8170);
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/concat.js
+var concat = __webpack_require__(9795);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/merge.js
 var merge = __webpack_require__(4370);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/throwError.js
 var throwError = __webpack_require__(4944);
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/of.js
-var of = __webpack_require__(8170);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/empty.js
 var empty = __webpack_require__(5631);
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/concat.js
-var concat = __webpack_require__(9795);
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/mergeMap.js
+var mergeMap = __webpack_require__(7746);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/shareReplay.js
 var shareReplay = __webpack_require__(7006);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/filter.js
@@ -4737,8 +4787,6 @@ var filter = __webpack_require__(6008);
 var take = __webpack_require__(1015);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/tap.js
 var tap = __webpack_require__(3068);
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/mergeMap.js
-var mergeMap = __webpack_require__(7746);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/map.js
 var map = __webpack_require__(5709);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/catchError.js
@@ -4749,6 +4797,8 @@ var ignoreElements = __webpack_require__(6738);
 var event_listeners = __webpack_require__(1473);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
+// EXTERNAL MODULE: ./src/parsers/containers/isobmff/take_pssh_out.ts + 1 modules
+var take_pssh_out = __webpack_require__(6490);
 // EXTERNAL MODULE: ./src/utils/are_arrays_of_numbers_equal.ts
 var are_arrays_of_numbers_equal = __webpack_require__(4791);
 // EXTERNAL MODULE: ./src/utils/byte_parsing.ts
@@ -4795,44 +4845,58 @@ var PSSH_TO_INTEGER = (0,byte_parsing/* be4toi */.pX)((0,string_parsing/* strToU
 
 
 
+
 /**
- * As we observed on some browsers (IE and Edge), the initialization data on
- * some segments have sometimes duplicated PSSH when sent through an encrypted
- * event (but not when pushed to the SourceBuffer).
+ * Take in input initialization data from an encrypted event and generate the
+ * corresponding array of initialization data values from it.
  *
- * This function tries to guess if the initialization data contains only PSSHs
- * concatenated (as it is usually the case).
- * If that's the case, it will filter duplicated PSSHs from it.
- *
+ * At the moment, this function only handles initialization data which have the
+ * "cenc" initialization data type.
+ * It will just return a single value with an `undefined` `systemId` for all
+ * other types of data.
  * @param {Uint8Array} initData - Raw initialization data
- * @returns {Uint8Array} - Initialization data, "cleaned"
+ * @returns {Array.<Object>}
  */
 
-function cleanEncryptedEvent(initData) {
-  var resInitData = new Uint8Array();
-  var encounteredPSSHs = [];
+function getInitializationDataValues(initData) {
+  var result = [];
   var offset = 0;
 
   while (offset < initData.length) {
     if (initData.length < offset + 8 || (0,byte_parsing/* be4toi */.pX)(initData, offset + 4) !== PSSH_TO_INTEGER) {
       log/* default.warn */.Z.warn("Compat: Unrecognized initialization data. Use as is.");
-      return initData;
+      return [{
+        systemId: undefined,
+        data: initData
+      }];
     }
 
     var len = (0,byte_parsing/* be4toi */.pX)(new Uint8Array(initData), offset);
 
     if (offset + len > initData.length) {
       log/* default.warn */.Z.warn("Compat: Unrecognized initialization data. Use as is.");
-      return initData;
+      return [{
+        systemId: undefined,
+        data: initData
+      }];
     }
 
     var currentPSSH = initData.subarray(offset, offset + len);
+    var systemId = (0,take_pssh_out/* getPsshSystemID */.Y)(currentPSSH, 8);
+    var currentItem = {
+      systemId: systemId,
+      data: currentPSSH
+    };
 
-    if (isPSSHAlreadyEncountered(encounteredPSSHs, currentPSSH)) {
+    if (isPSSHAlreadyEncountered(result, currentItem)) {
+      // As we observed on some browsers (IE and Edge), the initialization data on
+      // some segments have sometimes duplicated PSSH when sent through an encrypted
+      // event (but not when the corresponding segment has been pushed to the
+      // SourceBuffer).
+      // We prefer filtering them out, to avoid further issues.
       log/* default.warn */.Z.warn("Compat: Duplicated PSSH found in initialization data, removing it.");
     } else {
-      resInitData = (0,byte_parsing/* concat */.zo)(resInitData, currentPSSH);
-      encounteredPSSHs.push(initData);
+      result.push(currentItem);
     }
 
     offset += len;
@@ -4840,10 +4904,13 @@ function cleanEncryptedEvent(initData) {
 
   if (offset !== initData.length) {
     log/* default.warn */.Z.warn("Compat: Unrecognized initialization data. Use as is.");
-    return initData;
+    return [{
+      systemId: undefined,
+      data: initData
+    }];
   }
 
-  return resInitData;
+  return result;
 }
 /**
  * Returns `true` if the given PSSH has already been stored in the
@@ -4859,8 +4926,10 @@ function isPSSHAlreadyEncountered(encounteredPSSHs, pssh) {
   for (var i = 0; i < encounteredPSSHs.length; i++) {
     var item = encounteredPSSHs[i];
 
-    if ((0,are_arrays_of_numbers_equal/* default */.Z)(pssh, item)) {
-      return true;
+    if (pssh.systemId === undefined || item.systemId === undefined || pssh.systemId === item.systemId) {
+      if ((0,are_arrays_of_numbers_equal/* default */.Z)(pssh.data, item.data)) {
+        return true;
+      }
     }
   }
 
@@ -4885,16 +4954,14 @@ function getInitData(encryptedEvent) {
 
   if (initData == null) {
     log/* default.warn */.Z.warn("Compat: No init data found on media encrypted event.");
-    return {
-      initData: initData,
-      initDataType: initDataType
-    };
+    return null;
   }
 
   var initDataBytes = new Uint8Array(initData);
+  var values = getInitializationDataValues(initDataBytes);
   return {
-    initData: cleanEncryptedEvent(initDataBytes),
-    initDataType: encryptedEvent.initDataType
+    type: initDataType,
+    values: values
   };
 }
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/defer.js
@@ -5019,20 +5086,18 @@ function patchInitData(initData) {
  * @returns {Observable} - Emit when done. Errors if fails.
  */
 
-function generateKeyRequest(session, initializationData) {
+function generateKeyRequest(session, initializationDataType, initializationData) {
   return (0,defer/* defer */.P)(function () {
-    var _a;
-
     log/* default.debug */.Z.debug("Compat: Calling generateRequest on the MediaKeySession");
     var patchedInit;
 
     try {
-      patchedInit = patchInitData(initializationData.data);
+      patchedInit = patchInitData(initializationData);
     } catch (_e) {
-      patchedInit = initializationData.data;
+      patchedInit = initializationData;
     }
 
-    var initDataType = (_a = initializationData.type) !== null && _a !== void 0 ? _a : "";
+    var initDataType = initializationDataType !== null && initializationDataType !== void 0 ? initializationDataType : "";
     return (0,cast_to_observable/* default */.Z)(session.generateRequest(initDataType, patchedInit)).pipe((0,catchError/* catchError */.K)(function (error) {
       if (initDataType !== "" || !(error instanceof TypeError)) {
         throw error;
@@ -5608,6 +5673,49 @@ function attachMediaKeys(mediaElement, _ref) {
     }));
   });
 }
+// EXTERNAL MODULE: ./src/utils/starts_with.ts
+var starts_with = __webpack_require__(9252);
+;// CONCATENATED MODULE: ./src/core/eme/get_drm_system_id.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {string} keySystem
+ * @returns {string|undefined}
+ */
+
+function getDrmSystemId(keySystem) {
+  if ((0,starts_with/* default */.Z)(keySystem, "com.microsoft.playready") || keySystem === "com.chromecast.playready" || keySystem === "com.youtube.playready") {
+    return "9a04f07998404286ab92e65be0885f95";
+  }
+
+  if (keySystem === "com.widevine.alpha") {
+    return "edef8ba979d64acea3c827dcd51d21ed";
+  }
+
+  if ((0,starts_with/* default */.Z)(keySystem, "com.apple.fps")) {
+    return "94ce86fb07ff4f43adb893d2fa968ca2";
+  }
+
+  if ((0,starts_with/* default */.Z)(keySystem, "com.nagra.")) {
+    return "adb41c242dbf4a6d958b4457c0d27b95";
+  }
+
+  return undefined;
+}
 // EXTERNAL MODULE: ./src/compat/browser_detection.ts
 var browser_detection = __webpack_require__(3666);
 ;// CONCATENATED MODULE: ./src/compat/should_renew_media_keys.ts
@@ -6121,6 +6229,282 @@ function closeSession$(session) {
     }));
   })));
 }
+;// CONCATENATED MODULE: ./src/core/eme/utils/close_session.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+var EME_SESSION_CLOSING_MAX_RETRY = config/* default.EME_SESSION_CLOSING_MAX_RETRY */.Z.EME_SESSION_CLOSING_MAX_RETRY,
+    EME_SESSION_CLOSING_INITIAL_DELAY = config/* default.EME_SESSION_CLOSING_INITIAL_DELAY */.Z.EME_SESSION_CLOSING_INITIAL_DELAY,
+    EME_SESSION_CLOSING_MAX_DELAY = config/* default.EME_SESSION_CLOSING_MAX_DELAY */.Z.EME_SESSION_CLOSING_MAX_DELAY;
+/**
+ * Close a MediaKeySession with multiple attempts if needed and do not throw if
+ * this action throws an error.
+ * Emits then complete when done.
+ * @param {MediaKeySession} mediaKeySession
+ * @returns {Observable}
+ */
+
+function safelyCloseMediaKeySession(mediaKeySession) {
+  return recursivelyTryToCloseMediaKeySession(0);
+  /**
+   * Perform a new attempt at closing the MediaKeySession.
+   * If this operation fails due to a not-"callable" (an EME term)
+   * MediaKeySession, retry based on either a timer or on MediaKeySession
+   * events, whichever comes first.
+   * Emits then complete when done.
+   * @param {number} retryNb - The attempt number starting at 0.
+   * @returns {Observable}
+   */
+
+  function recursivelyTryToCloseMediaKeySession(retryNb) {
+    log/* default.debug */.Z.debug("EME: Trying to close a MediaKeySession", mediaKeySession, retryNb);
+    return closeSession$(mediaKeySession).pipe((0,tap/* tap */.b)(function () {
+      log/* default.debug */.Z.debug("EME: Succeeded to close MediaKeySession");
+    }), (0,catchError/* catchError */.K)(function (err) {
+      // Unitialized MediaKeySession may not close properly until their
+      // corresponding `generateRequest` or `load` call are handled by the
+      // browser.
+      // In that case the EME specification tells us that the browser is
+      // supposed to reject the `close` call with an InvalidStateError.
+      if (!(err instanceof Error) || err.name !== "InvalidStateError" || mediaKeySession.sessionId !== "") {
+        return failToCloseSession(err);
+      } // We will retry either:
+      //   - when an event indicates that the MediaKeySession is
+      //     initialized (`callable` is the proper EME term here)
+      //   - after a delay, raising exponentially
+
+
+      var nextRetryNb = retryNb + 1;
+
+      if (nextRetryNb > EME_SESSION_CLOSING_MAX_RETRY) {
+        return failToCloseSession(err);
+      }
+
+      var delay = Math.min(Math.pow(2, retryNb) * EME_SESSION_CLOSING_INITIAL_DELAY, EME_SESSION_CLOSING_MAX_DELAY);
+      log/* default.warn */.Z.warn("EME: attempt to close a mediaKeySession failed, " + "scheduling retry...", delay);
+      return (0,race/* race */.S3)([(0,timer/* timer */.H)(delay), (0,event_listeners/* onKeyStatusesChange$ */.eX)(mediaKeySession), (0,event_listeners/* onKeyMessage$ */.GJ)(mediaKeySession)]).pipe((0,take/* take */.q)(1), (0,mergeMap/* mergeMap */.zg)(function () {
+        return recursivelyTryToCloseMediaKeySession(nextRetryNb);
+      }));
+    }));
+  }
+  /**
+   * Log error anouncing that we could not close the MediaKeySession and emits
+   * then complete through Observable.
+   * TODO Emit warning?
+   * @returns {Observable}
+   */
+
+
+  function failToCloseSession(err) {
+    log/* default.error */.Z.error("EME: Could not close MediaKeySession: " + (err instanceof Error ? err.toString() : "Unknown error"));
+    return (0,of.of)(null);
+  }
+}
+// EXTERNAL MODULE: ./src/utils/base64.ts
+var utils_base64 = __webpack_require__(9689);
+;// CONCATENATED MODULE: ./src/core/eme/utils/init_data_container.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** Wrap initialization data and allow serialization of it into base64. */
+
+var InitDataContainer = /*#__PURE__*/function () {
+  /**
+   * Create a new container, wrapping the initialization data given and allowing
+   * linearization into base64.
+   * @param {Uint8Array}
+   */
+  function InitDataContainer(initData) {
+    this.initData = initData;
+  }
+  /**
+   * Convert it to base64.
+   * `toJSON` is specially interpreted by JavaScript engines to be able to rely
+   * on it when calling `JSON.stringify` on it or any of its parent objects:
+   * https://tc39.es/ecma262/#sec-serializejsonproperty
+   * @returns {string}
+   */
+
+
+  var _proto = InitDataContainer.prototype;
+
+  _proto.toJSON = function toJSON() {
+    return (0,utils_base64/* bytesToBase64 */.J)(this.initData);
+  }
+  /**
+   * Decode a base64 sequence representing an initialization data back to an
+   * Uint8Array.
+   * @param {string}
+   * @returns {Uint8Array}
+   */
+  ;
+
+  InitDataContainer.decode = function decode(base64) {
+    return (0,utils_base64/* base64ToBytes */.K)(base64);
+  };
+
+  return InitDataContainer;
+}();
+
+
+;// CONCATENATED MODULE: ./src/core/eme/utils/are_init_values_compatible.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Returns `true` if both values are compatible initialization data, which
+ * means that one is completely contained in the other.
+ *
+ * Both values given should be sorted by systemId the same way.
+ * @param {Array.<Object>} stored
+ * @param {Array.<Object>} newElts
+ * @returns {boolean}
+ */
+
+function areInitializationValuesCompatible(stored, newElts) {
+  var _a, _b;
+
+  return (_b = (_a = _isAInB(stored, newElts)) !== null && _a !== void 0 ? _a : _isAInB(newElts, stored)) !== null && _b !== void 0 ? _b : false;
+}
+/**
+ * Take two arrays of initialization data values, `a` and `b`, sorted by
+ * their `systemId` property in the same order.
+ *
+ * Returns `true` if `a` is not empty and is completely contained in the `b`
+ * array.
+ * This is equivalent to: "`a` is contained in `b`".
+ *
+ * Returns `false` either if `a` is empty or if `b` has different initialization
+ * data than it for equivalent system ids.
+ * This is equivalent to: "`a` represents different data than `b`".
+ *
+ * Returns `null` if `a` is not fully contained in `b` but can still be
+ * compatible with it.
+ * This is equivalent to: "`a` is not contained in `b`, but `b` could be
+ * contained in `a`".
+ * @param {Array.<Object>} a
+ * @param {Array.<Object>} b
+ * @returns {boolean}
+ */
+
+function _isAInB(a, b) {
+  if (a.length === 0) {
+    return false;
+  }
+
+  if (b.length < a.length) {
+    return null;
+  }
+
+  var firstAElt = a[0];
+  var aIdx = 0;
+  var bIdx = 0;
+
+  for (; bIdx < b.length; bIdx++) {
+    var bElt = b[bIdx];
+
+    if (bElt.systemId !== firstAElt.systemId) {
+      continue;
+    }
+
+    if (bElt.hash !== firstAElt.hash) {
+      return false;
+    }
+
+    var aData = firstAElt.data instanceof Uint8Array ? firstAElt.data : typeof firstAElt.data === "string" ? InitDataContainer.decode(firstAElt.data) : firstAElt.data.initData;
+    var bData = bElt.data instanceof Uint8Array ? bElt.data : typeof bElt.data === "string" ? InitDataContainer.decode(bElt.data) : bElt.data.initData;
+
+    if (!(0,are_arrays_of_numbers_equal/* default */.Z)(aData, bData)) {
+      return false;
+    }
+
+    if (b.length - bIdx < a.length) {
+      // not enough place to store `a`'s initialization data.
+      return null;
+    } // first `a` value was found. Check if all `a` values are found in `b`
+
+
+    for (aIdx = 1; aIdx < a.length; aIdx++) {
+      var aElt = a[aIdx];
+
+      for (bIdx += 1; bIdx < b.length; bIdx++) {
+        var bNewElt = b[bIdx];
+
+        if (aElt.systemId !== bNewElt.systemId) {
+          continue;
+        }
+
+        if (aElt.hash !== bNewElt.hash) {
+          return false;
+        }
+
+        var aNewData = aElt.data instanceof Uint8Array ? aElt.data : typeof aElt.data === "string" ? InitDataContainer.decode(aElt.data) : aElt.data.initData;
+        var bNewData = bNewElt.data instanceof Uint8Array ? bNewElt.data : typeof bNewElt.data === "string" ? InitDataContainer.decode(bNewElt.data) : bNewElt.data.initData;
+
+        if (!(0,are_arrays_of_numbers_equal/* default */.Z)(aNewData, bNewData)) {
+          return false;
+        }
+
+        break;
+      }
+
+      if (aIdx === b.length) {
+        // we didn't find `aElt`'s systemId in b
+        return null;
+      }
+    } // If we're here, then we've found all `a`'s systemId in `b` and they match
+
+
+    return true;
+  }
+
+  return null; // We didn't find the firstAElt`s systemId in `b`.
+}
 ;// CONCATENATED MODULE: ./src/core/eme/utils/init_data_store.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -6161,7 +6545,7 @@ var InitDataStore = /*#__PURE__*/function () {
 
   _proto.getAll = function getAll() {
     return this._storage.map(function (item) {
-      return item.value;
+      return item.payload;
     });
   }
   /**
@@ -6183,11 +6567,9 @@ var InitDataStore = /*#__PURE__*/function () {
   ;
 
   _proto.get = function get(initializationData) {
-    var initDataHash = (0,hash_buffer/* default */.Z)(initializationData.data);
+    var index = this._findIndex(initializationData);
 
-    var index = this._findIndex(initializationData, initDataHash);
-
-    return index >= 0 ? this._storage[index].value : undefined;
+    return index >= 0 ? this._storage[index].payload : undefined;
   }
   /**
    * Like `get`, but also move the corresponding value at the end of the store
@@ -6203,9 +6585,7 @@ var InitDataStore = /*#__PURE__*/function () {
   ;
 
   _proto.getAndReuse = function getAndReuse(initializationData) {
-    var initDataHash = (0,hash_buffer/* default */.Z)(initializationData.data);
-
-    var index = this._findIndex(initializationData, initDataHash);
+    var index = this._findIndex(initializationData);
 
     if (index === -1) {
       return undefined;
@@ -6215,22 +6595,19 @@ var InitDataStore = /*#__PURE__*/function () {
 
     this._storage.push(item);
 
-    return item.value;
+    return item.payload;
   }
   /**
    * Add to the store a value linked to the corresponding initData and
    * initDataType.
    * If a value was already stored linked to those, replace it.
-   * @param {Uint8Array} initData
-   * @param {string|undefined} initDataType
-   * @returns {boolean}
+   * @param {Object} initializationData
+   * @param {*} payload
    */
   ;
 
-  _proto.store = function store(initializationData, value) {
-    var initDataHash = (0,hash_buffer/* default */.Z)(initializationData.data);
-
-    var indexOf = this._findIndex(initializationData, initDataHash);
+  _proto.store = function store(initializationData, payload) {
+    var indexOf = this._findIndex(initializationData);
 
     if (indexOf >= 0) {
       // this._storage contains the stored value in the same order they have
@@ -6239,11 +6616,12 @@ var InitDataStore = /*#__PURE__*/function () {
       this._storage.splice(indexOf, 1);
     }
 
+    var values = this._formatValuesForStore(initializationData.values);
+
     this._storage.push({
-      initData: initializationData.data,
-      initDataType: initializationData.type,
-      initDataHash: initDataHash,
-      value: value
+      type: initializationData.type,
+      values: values,
+      payload: payload
     });
   }
   /**
@@ -6257,26 +6635,25 @@ var InitDataStore = /*#__PURE__*/function () {
    * to see if a value is stored linked to that data - and then if not doing a
    * store. `storeIfNone` is more performant as it will only perform hashing
    * and a look-up a single time.
-   * @param {Uint8Array} initData
-   * @param {string|undefined} initDataType
+   * @param {Object} initializationData
+   * @param {*} payload
    * @returns {boolean}
    */
   ;
 
-  _proto.storeIfNone = function storeIfNone(initializationData, value) {
-    var initDataHash = (0,hash_buffer/* default */.Z)(initializationData.data);
-
-    var indexOf = this._findIndex(initializationData, initDataHash);
+  _proto.storeIfNone = function storeIfNone(initializationData, payload) {
+    var indexOf = this._findIndex(initializationData);
 
     if (indexOf >= 0) {
       return false;
     }
 
+    var values = this._formatValuesForStore(initializationData.values);
+
     this._storage.push({
-      initData: initializationData.data,
-      initDataType: initializationData.type,
-      initDataHash: initDataHash,
-      value: value
+      type: initializationData.type,
+      values: values,
+      payload: payload
     });
 
     return true;
@@ -6291,42 +6668,60 @@ var InitDataStore = /*#__PURE__*/function () {
   ;
 
   _proto.remove = function remove(initializationData) {
-    var initDataHash = (0,hash_buffer/* default */.Z)(initializationData.data);
-
-    var indexOf = this._findIndex(initializationData, initDataHash);
+    var indexOf = this._findIndex(initializationData);
 
     if (indexOf === -1) {
       return undefined;
     }
 
-    return this._storage.splice(indexOf, 1)[0].value;
+    return this._storage.splice(indexOf, 1)[0].payload;
   }
   /**
-   * Find the index of the corresponding initData and initDataType in
-   * `this._storage`. Returns `-1` if not found.
-   * @param {Uint8Array} initData
-   * @param {string|undefined} initDataType
-   * @param {number} initDataHash
+   * Find the index of the corresponding initialization data in `this._storage`.
+   * Returns `-1` if not found.
+   * @param {Object} initializationData
    * @returns {boolean}
    */
   ;
 
-  _proto._findIndex = function _findIndex(initializationData, initDataHash) {
-    var initDataType = initializationData.type,
-        initData = initializationData.data; // Begin by the last element as we usually re-encounter the last stored
+  _proto._findIndex = function _findIndex(initializationData) {
+    var formattedVals = this._formatValuesForStore(initializationData.values); // Begin by the last element as we usually re-encounter the last stored
     // initData sooner than the first one.
+
 
     for (var i = this._storage.length - 1; i >= 0; i--) {
       var stored = this._storage[i];
 
-      if (initDataHash === stored.initDataHash && initDataType === stored.initDataType) {
-        if ((0,are_arrays_of_numbers_equal/* default */.Z)(initData, stored.initData)) {
+      if (stored.type === initializationData.type) {
+        if (areInitializationValuesCompatible(stored.values, formattedVals)) {
           return i;
         }
       }
     }
 
     return -1;
+  }
+  /**
+   * Format given initializationData's values so they are ready to be stored:
+   *   - sort them by systemId, so they are faster to compare
+   *   - add hash for each initialization data encountered.
+   * @param {Array.<Object>} initialValues
+   * @returns {Array.<Object>}
+   */
+  ;
+
+  _proto._formatValuesForStore = function _formatValuesForStore(initialValues) {
+    return initialValues.slice().sort(function (a, b) {
+      return a.systemId === b.systemId ? 0 : a.systemId === undefined ? 1 : b.systemId === undefined ? -1 : a.systemId < b.systemId ? -1 : 1;
+    }).map(function (_ref) {
+      var systemId = _ref.systemId,
+          data = _ref.data;
+      return {
+        systemId: systemId,
+        data: data,
+        hash: (0,hash_buffer/* default */.Z)(data)
+      };
+    });
   };
 
   return InitDataStore;
@@ -6530,26 +6925,10 @@ var LoadedSessionsStore = /*#__PURE__*/function () {
 
   return LoadedSessionsStore;
 }();
-/**
- * Close a MediaKeySession and do not throw if this action throws an error.
- * @param {MediaKeySession} mediaKeySession
- * @returns {Observable}
- */
 
 
-
-
-function safelyCloseMediaKeySession(mediaKeySession) {
-  log/* default.debug */.Z.debug("EME-LSS: Close MediaKeySession", mediaKeySession);
-  return closeSession$(mediaKeySession).pipe((0,catchError/* catchError */.K)(function (err) {
-    log/* default.error */.Z.error("EME-LSS: Could not close MediaKeySession: " + (err instanceof Error ? err.toString() : "Unknown error"));
-    return (0,of.of)(null);
-  }));
-}
 // EXTERNAL MODULE: ./src/utils/assert.ts
 var assert = __webpack_require__(811);
-// EXTERNAL MODULE: ./src/utils/base64.ts
-var utils_base64 = __webpack_require__(9689);
 // EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
 var is_non_empty_string = __webpack_require__(6923);
 ;// CONCATENATED MODULE: ./src/core/eme/utils/persistent_sessions_store.ts
@@ -6575,6 +6954,8 @@ var is_non_empty_string = __webpack_require__(6923);
 
 
 
+
+
 /**
  * Throw if the given storage does not respect the right interface.
  * @param {Object} storage
@@ -6586,10 +6967,10 @@ function checkStorage(storage) {
     load: "function"
   }, "licenseStorage");
 }
-/** Wrap initialization data and allow linearization of it into base64. */
+/** Wrap initialization data and allow serialization of it into base64. */
 
 
-var InitDataContainer = /*#__PURE__*/function () {
+var persistent_sessions_store_InitDataContainer = /*#__PURE__*/function () {
   /**
    * Create a new container, wrapping the initialization data given and allowing
    * linearization into base64.
@@ -6742,14 +7123,12 @@ var PersistentSessionsStore = /*#__PURE__*/function () {
       this["delete"](initData);
     }
 
-    var hash = (0,hash_buffer/* default */.Z)(initData.data);
     log/* default.info */.Z.info("EME-PSS: Add new session", sessionId, session);
 
     this._entries.push({
-      version: 2,
+      version: 3,
       sessionId: sessionId,
-      initData: new InitDataContainer(initData.data),
-      initDataHash: hash,
+      values: this._formatValuesForStore(initData.values),
       initDataType: initData.type
     });
 
@@ -6815,40 +7194,62 @@ var PersistentSessionsStore = /*#__PURE__*/function () {
   ;
 
   _proto2._getIndex = function _getIndex(initData) {
-    var hash = (0,hash_buffer/* default */.Z)(initData.data);
+    var formatted = this._formatValuesForStore(initData.values); // Older versions of the format include a concatenation of all
+    // initialization data and its hash.
+
+
+    var concatInitData = byte_parsing/* concat.apply */.zo.apply(void 0, initData.values.map(function (i) {
+      return i.data;
+    }));
+    var concatInitDataHash = (0,hash_buffer/* default */.Z)(concatInitData);
 
     for (var i = 0; i < this._entries.length; i++) {
       var entry = this._entries[i];
 
       if (entry.initDataType === initData.type) {
-        if (entry.version === 2) {
-          if (entry.initDataHash === hash) {
-            try {
-              var decodedInitData = typeof entry.initData === "string" ? InitDataContainer.decode(entry.initData) : entry.initData.initData;
+        switch (entry.version) {
+          case 3:
+            if (areInitializationValuesCompatible(formatted, entry.values)) {
+              return i;
+            }
 
-              if ((0,are_arrays_of_numbers_equal/* default */.Z)(decodedInitData, initData.data)) {
+            break;
+
+          case 2:
+            if (entry.initDataHash === concatInitDataHash) {
+              try {
+                var decodedInitData = typeof entry.initData === "string" ? persistent_sessions_store_InitDataContainer.decode(entry.initData) : entry.initData.initData;
+
+                if ((0,are_arrays_of_numbers_equal/* default */.Z)(decodedInitData, concatInitData)) {
+                  return i;
+                }
+              } catch (e) {
+                log/* default.warn */.Z.warn("EME-PSS: Could not decode initialization data.", e);
+              }
+            }
+
+            break;
+
+          case 1:
+            if (entry.initDataHash === concatInitDataHash) {
+              if (typeof entry.initData.length === "undefined") {
+                // If length is undefined, it has been linearized. We could still
+                // convert it back to an Uint8Array but this would necessitate some
+                // ugly unreadable logic for a very very minor possibility.
+                // Just consider that it is a match based on the hash.
+                return i;
+              } else if ((0,are_arrays_of_numbers_equal/* default */.Z)(entry.initData, concatInitData)) {
                 return i;
               }
-            } catch (e) {
-              log/* default.warn */.Z.warn("EME-PSS: Could not decode initialization data.", e);
             }
-          }
-        } else if (entry.version === 1) {
-          if (entry.initDataHash === hash) {
-            if (typeof entry.initData.length === "undefined") {
-              // If length is undefined, it has been linearized. We could still
-              // convert it back to an Uint8Array but this would necessitate some
-              // ugly unreadable logic for a very very minor possibility.
-              // Just consider that it is a match based on the hash.
-              return i;
-            } else if ((0,are_arrays_of_numbers_equal/* default */.Z)(entry.initData, initData.data)) {
+
+            break;
+
+          default:
+            if (entry.initData === concatInitDataHash) {
               return i;
             }
-          }
-        } else {
-          if (entry.initData === hash) {
-            return i;
-          }
+
         }
       }
     }
@@ -6866,6 +7267,28 @@ var PersistentSessionsStore = /*#__PURE__*/function () {
     } catch (e) {
       log/* default.warn */.Z.warn("EME-PSS: Could not save licenses in localStorage");
     }
+  }
+  /**
+   * Format given initializationData's values so they are ready to be stored:
+   *   - sort them by systemId, so they are faster to compare
+   *   - add hash for each initialization data encountered.
+   * @param {Array.<Object>} initialValues
+   * @returns {Array.<Object>}
+   */
+  ;
+
+  _proto2._formatValuesForStore = function _formatValuesForStore(initialValues) {
+    return initialValues.slice().sort(function (a, b) {
+      return a.systemId === b.systemId ? 0 : a.systemId === undefined ? 1 : b.systemId === undefined ? -1 : a.systemId < b.systemId ? -1 : 1;
+    }).map(function (_ref) {
+      var systemId = _ref.systemId,
+          data = _ref.data;
+      return {
+        systemId: systemId,
+        data: new persistent_sessions_store_InitDataContainer(data),
+        hash: (0,hash_buffer/* default */.Z)(data)
+      };
+    });
   };
 
   return PersistentSessionsStore;
@@ -7006,6 +7429,7 @@ function createMediaKeys(mediaKeySystemAccess) {
 
 
 
+
 /**
  * Get media keys infos from key system configs then attach media keys to media element.
  * @param {HTMLMediaElement} mediaElement
@@ -7019,6 +7443,17 @@ function initMediaKeys(mediaElement, keySystemsConfigs) {
         mediaKeySystemAccess = _ref.mediaKeySystemAccess,
         stores = _ref.stores,
         options = _ref.options;
+
+    /**
+     * String identifying the key system, allowing the rest of the code to
+     * only advertise the required initialization data for license requests.
+     *
+     * Note that we only set this value if retro-compatibility to older
+     * persistent logic in the RxPlayer is not important, as the optimizations
+     * this property unlocks can break the loading of MediaKeySessions
+     * persisted in older RxPlayer's versions.
+     */
+    var initializationDataSystemId = getDrmSystemId(mediaKeySystemAccess.keySystem);
     var attachMediaKeys$ = new ReplaySubject/* ReplaySubject */.t(1);
     var shouldDisableOldMediaKeys = mediaElement.mediaKeys !== null && mediaElement.mediaKeys !== undefined && mediaKeys !== mediaElement.mediaKeys;
     var disableOldMediaKeys$ = shouldDisableOldMediaKeys ? disableMediaKeys(mediaElement) : (0,of.of)(null);
@@ -7045,6 +7480,7 @@ function initMediaKeys(mediaElement, keySystemsConfigs) {
         type: "created-media-keys",
         value: {
           mediaKeySystemAccess: mediaKeySystemAccess,
+          initializationDataSystemId: initializationDataSystemId,
           mediaKeys: mediaKeys,
           stores: stores,
           options: options,
@@ -7802,6 +8238,7 @@ function trySettingServerCertificate(mediaKeys, serverCertificate) {
 
 
 
+
 var EME_MAX_STORED_PERSISTENT_SESSION_INFORMATION = config/* default.EME_MAX_STORED_PERSISTENT_SESSION_INFORMATION */.Z.EME_MAX_STORED_PERSISTENT_SESSION_INFORMATION;
 var onEncrypted$ = event_listeners/* onEncrypted$ */.Oh;
 /**
@@ -7837,7 +8274,22 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
   var blacklistedInitData = new InitDataStore();
   /** Emit the MediaKeys instance and its related information when ready. */
 
-  var mediaKeysInit$ = initMediaKeys(mediaElement, keySystemsConfigs).pipe((0,shareReplay/* shareReplay */.d)()); // Share side-effects and cache success
+  var mediaKeysInit$ = initMediaKeys(mediaElement, keySystemsConfigs).pipe((0,mergeMap/* mergeMap */.zg)(function (mediaKeysEvt) {
+    if (mediaKeysEvt.type !== "attached-media-keys") {
+      return (0,of.of)(mediaKeysEvt);
+    }
+
+    var _mediaKeysEvt$value = mediaKeysEvt.value,
+        mediaKeys = _mediaKeysEvt$value.mediaKeys,
+        options = _mediaKeysEvt$value.options;
+    var serverCertificate = options.serverCertificate;
+
+    if ((0,is_null_or_undefined/* default */.Z)(serverCertificate)) {
+      return (0,of.of)(mediaKeysEvt);
+    }
+
+    return (0,concat/* concat */.z)(trySettingServerCertificate(mediaKeys, serverCertificate), (0,of.of)(mediaKeysEvt));
+  }), (0,shareReplay/* shareReplay */.d)()); // Share side-effects and cache success
 
   /** Emit when the MediaKeys instance has been attached the HTMLMediaElement. */
 
@@ -7849,14 +8301,7 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
   var mediaEncryptedEvents$ = onEncrypted$(mediaElement).pipe((0,tap/* tap */.b)(function (evt) {
     log/* default.debug */.Z.debug("EME: Encrypted event received from media element.", evt);
   }), (0,filter_map/* default */.Z)(function (evt) {
-    var _getInitData = getInitData(evt),
-        initData = _getInitData.initData,
-        initDataType = _getInitData.initDataType;
-
-    return initData === null ? null : {
-      type: initDataType,
-      data: initData
-    };
+    return getInitData(evt);
   }, null), (0,shareReplay/* shareReplay */.d)({
     refCount: true
   })); // multiple Observables listen to that one
@@ -7879,11 +8324,10 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
     }));
   }),
   /* Attach server certificate and create/reuse MediaKeySession */
-  (0,mergeMap/* mergeMap */.zg)(function (_ref, i) {
+  (0,mergeMap/* mergeMap */.zg)(function (_ref) {
     var initializationData = _ref[0],
         mediaKeysEvent = _ref[1];
     var _mediaKeysEvent$value = mediaKeysEvent.value,
-        mediaKeys = _mediaKeysEvent$value.mediaKeys,
         mediaKeySystemAccess = _mediaKeysEvent$value.mediaKeySystemAccess,
         stores = _mediaKeysEvent$value.stores,
         options = _mediaKeysEvent$value.options;
@@ -7914,8 +8358,6 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
       });
     }
 
-    var serverCertificate = options.serverCertificate;
-    var serverCertificate$ = i === 0 && !(0,is_null_or_undefined/* default */.Z)(serverCertificate) ? trySettingServerCertificate(mediaKeys, serverCertificate) : empty/* EMPTY */.E;
     var wantedSessionType;
 
     if (options.persistentLicense !== true) {
@@ -7927,11 +8369,8 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
       wantedSessionType = "persistent-license";
     }
 
-    return (0,concat/* concat */.z)(serverCertificate$, getSession(initializationData, stores, wantedSessionType)).pipe((0,mergeMap/* mergeMap */.zg)(function (sessionEvt) {
+    return getSession(initializationData, stores, wantedSessionType).pipe((0,mergeMap/* mergeMap */.zg)(function (sessionEvt) {
       switch (sessionEvt.type) {
-        case "warning":
-          return (0,of.of)(sessionEvt);
-
         case "cleaning-old-session":
           handledInitData.remove(sessionEvt.value.initializationData);
           return empty/* EMPTY */.E;
@@ -7952,8 +8391,13 @@ function EMEManager(mediaElement, keySystemsConfigs, contentProtections$) {
 
       var _sessionEvt$value = sessionEvt.value,
           mediaKeySession = _sessionEvt$value.mediaKeySession,
-          sessionType = _sessionEvt$value.sessionType;
-      var generateRequest$ = sessionEvt.type !== "created-session" ? empty/* EMPTY */.E : generateKeyRequest(mediaKeySession, initializationData).pipe((0,tap/* tap */.b)(function () {
+          sessionType = _sessionEvt$value.sessionType; // `generateKeyRequest` awaits a single Uint8Array containing all
+      // initialization data.
+
+      var concatInitData = byte_parsing/* concat.apply */.zo.apply(void 0, initializationData.values.map(function (i) {
+        return i.data;
+      }));
+      var generateRequest$ = sessionEvt.type !== "created-session" ? empty/* EMPTY */.E : generateKeyRequest(mediaKeySession, initializationData.type, concatInitData).pipe((0,tap/* tap */.b)(function () {
         var persistentSessionsStore = stores.persistentSessionsStore;
 
         if (sessionType === "persistent-license" && persistentSessionsStore !== null) {
@@ -12673,7 +13117,7 @@ var features = {
 
 /***/ }),
 
-/***/ 1452:
+/***/ 4449:
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -12742,24 +13186,26 @@ var BehaviorSubject = /*@__PURE__*/ (function (_super) {
 
 //# sourceMappingURL=BehaviorSubject.js.map
 
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/merge.js
-var merge = __webpack_require__(4370);
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/empty.js
-var empty = __webpack_require__(5631);
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/of.js
+var of = __webpack_require__(8170);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/combineLatest.js
 var combineLatest = __webpack_require__(5142);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/concat.js
 var concat = __webpack_require__(9795);
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/of.js
-var of = __webpack_require__(8170);
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/merge.js
+var merge = __webpack_require__(4370);
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/empty.js
+var empty = __webpack_require__(5631);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/takeUntil.js
 var takeUntil = __webpack_require__(1558);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/map.js
 var map = __webpack_require__(5709);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/distinctUntilChanged.js
 var distinctUntilChanged = __webpack_require__(1931);
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/take.js
-var take = __webpack_require__(1015);
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/mergeMap.js
+var mergeMap = __webpack_require__(7746);
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/shareReplay.js
+var shareReplay = __webpack_require__(7006);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/multicast.js + 1 modules
 var multicast = __webpack_require__(1421);
 ;// CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/operators/publish.js
@@ -12779,6 +13225,8 @@ var filter = __webpack_require__(6008);
 var share = __webpack_require__(9095);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/startWith.js
 var startWith = __webpack_require__(3485);
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/take.js
+var take = __webpack_require__(1015);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/mapTo.js
 var mapTo = __webpack_require__(5602);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subscriber.js
@@ -13076,6 +13524,8 @@ function formatError(error, _ref) {
 var error_codes = __webpack_require__(5992);
 // EXTERNAL MODULE: ./src/features/index.ts
 var features = __webpack_require__(7874);
+// EXTERNAL MODULE: ./src/manifest/index.ts + 10 modules
+var manifest = __webpack_require__(1966);
 // EXTERNAL MODULE: ./src/utils/are_arrays_of_numbers_equal.ts
 var are_arrays_of_numbers_equal = __webpack_require__(4791);
 // EXTERNAL MODULE: ./src/utils/event_emitter.ts
@@ -13268,14 +13718,1891 @@ function clearEMESession(mediaElement) {
     return empty/* EMPTY */.E;
   });
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/mergeMap.js
-var mergeMap = __webpack_require__(7746);
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/shareReplay.js
-var shareReplay = __webpack_require__(7006);
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/from.js + 6 modules
-var from = __webpack_require__(4072);
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/catchError.js
+var catchError = __webpack_require__(486);
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subscription.js + 1 modules
+var Subscription = __webpack_require__(3884);
+;// CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/operators/finalize.js
+/** PURE_IMPORTS_START tslib,_Subscriber,_Subscription PURE_IMPORTS_END */
+
+
+
+function finalize(callback) {
+    return function (source) { return source.lift(new FinallyOperator(callback)); };
+}
+var FinallyOperator = /*@__PURE__*/ (function () {
+    function FinallyOperator(callback) {
+        this.callback = callback;
+    }
+    FinallyOperator.prototype.call = function (subscriber, source) {
+        return source.subscribe(new FinallySubscriber(subscriber, this.callback));
+    };
+    return FinallyOperator;
+}());
+var FinallySubscriber = /*@__PURE__*/ (function (_super) {
+    tslib_es6/* __extends */.ZT(FinallySubscriber, _super);
+    function FinallySubscriber(destination, callback) {
+        var _this = _super.call(this, destination) || this;
+        _this.add(new Subscription/* Subscription */.w(callback));
+        return _this;
+    }
+    return FinallySubscriber;
+}(Subscriber/* Subscriber */.L));
+//# sourceMappingURL=finalize.js.map
+
+// EXTERNAL MODULE: ./src/utils/rx-try_catch.ts
+var rx_try_catch = __webpack_require__(5561);
+// EXTERNAL MODULE: ./src/utils/filter_map.ts
+var filter_map = __webpack_require__(2793);
+// EXTERNAL MODULE: ./src/errors/request_error.ts
+var request_error = __webpack_require__(9105);
+// EXTERNAL MODULE: ./src/errors/network_error.ts
+var network_error = __webpack_require__(9362);
+;// CONCATENATED MODULE: ./src/core/fetchers/utils/error_selector.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Generate a new error from the infos given.
+ * @param {string} code
+ * @param {Error} error
+ * @returns {Error}
+ */
+
+function errorSelector(error) {
+  if (error instanceof request_error/* default */.Z) {
+    return new network_error/* default */.Z("PIPELINE_LOAD_ERROR", error);
+  }
+
+  return formatError(error, {
+    defaultCode: "PIPELINE_LOAD_ERROR",
+    defaultReason: "Unknown error when fetching the Manifest"
+  });
+}
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/timer.js
+var timer = __webpack_require__(9604);
+;// CONCATENATED MODULE: ./src/compat/is_offline.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Some browsers have a builtin API to know if it's connected at least to a
+ * LAN network, at most to the internet.
+ *
+ * /!\ This feature can be dangerous as you can both have false positives and
+ * false negatives.
+ *
+ * False positives:
+ *   - you can still play local contents (on localhost) if isOffline == true
+ *   - on some browsers isOffline might be true even if we're connected to a LAN
+ *     or a router (it would mean we're just not able to connect to the
+ *     Internet). So we can eventually play LAN contents if isOffline == true
+ *
+ * False negatives:
+ *   - in some cases, we even might have isOffline at false when we do not have
+ *     any connection:
+ *       - in browsers that do not support the feature
+ *       - in browsers running in some virtualization softwares where the
+ *         network adapters are always connected.
+ *
+ * Use with these cases in mind.
+ * @returns {Boolean}
+ */
+function isOffline() {
+  /* eslint-disable @typescript-eslint/no-unnecessary-boolean-literal-compare */
+  return navigator.onLine === false;
+  /* eslint-enable @typescript-eslint/no-unnecessary-boolean-literal-compare */
+}
+// EXTERNAL MODULE: ./src/utils/get_fuzzed_delay.ts
+var get_fuzzed_delay = __webpack_require__(2572);
+;// CONCATENATED MODULE: ./src/core/fetchers/utils/try_urls_with_backoff.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+/**
+ * Called on a loader error.
+ * Returns whether the loader request should be retried.
+ * @param {Error} error
+ * @returns {Boolean} - If true, the request can be retried.
+ */
+
+function shouldRetry(error) {
+  if (error instanceof request_error/* default */.Z) {
+    if (error.type === error_codes/* NetworkErrorTypes.ERROR_HTTP_CODE */.br.ERROR_HTTP_CODE) {
+      return error.status >= 500 || error.status === 404 || error.status === 415 || // some CDN seems to use that code when
+      // requesting low-latency segments too much
+      // in advance
+      error.status === 412;
+    }
+
+    return error.type === error_codes/* NetworkErrorTypes.TIMEOUT */.br.TIMEOUT || error.type === error_codes/* NetworkErrorTypes.ERROR_EVENT */.br.ERROR_EVENT;
+  }
+
+  return (0,is_known_error/* default */.Z)(error) && error.code === "INTEGRITY_ERROR";
+}
+/**
+ * Returns true if we're pretty sure that the current error is due to the
+ * user being offline.
+ * @param {Error} error
+ * @returns {Boolean}
+ */
+
+
+function isOfflineRequestError(error) {
+  return error.type === error_codes/* NetworkErrorTypes.ERROR_EVENT */.br.ERROR_EVENT && isOffline();
+}
+
+var REQUEST_ERROR_TYPES;
+
+(function (REQUEST_ERROR_TYPES) {
+  REQUEST_ERROR_TYPES[REQUEST_ERROR_TYPES["None"] = 0] = "None";
+  REQUEST_ERROR_TYPES[REQUEST_ERROR_TYPES["Regular"] = 1] = "Regular";
+  REQUEST_ERROR_TYPES[REQUEST_ERROR_TYPES["Offline"] = 2] = "Offline";
+})(REQUEST_ERROR_TYPES || (REQUEST_ERROR_TYPES = {}));
+/**
+ * Guess the type of error obtained.
+ * @param {*} error
+ * @returns {number}
+ */
+
+
+function getRequestErrorType(error) {
+  return error instanceof request_error/* default */.Z && isOfflineRequestError(error) ? REQUEST_ERROR_TYPES.Offline : REQUEST_ERROR_TYPES.Regular;
+}
+/**
+ * Specific algorithm used to perform segment and manifest requests.
+ *
+ * Here how it works:
+ *
+ *   1. we give it one or multiple URLs available for the element we want to
+ *      request, the request callback and some options
+ *
+ *   2. it tries to call the request callback with the first URL:
+ *        - if it works as expected, it wrap the response in a `response` event.
+ *        - if it fails, it emits a `retry` event and try with the next one.
+ *
+ *   3. When all URLs have been tested (and failed), it decides - according to
+ *      the error counters, configuration and errors received - if it can retry
+ *      at least one of them, in the same order:
+ *        - If it can, it increments the corresponding error counter, wait a
+ *          delay (based on an exponential backoff) and restart the same logic
+ *          for all retry-able URL.
+ *        - If it can't it just throws the error.
+ *
+ * Note that there are in fact two separate counters:
+ *   - one for "offline" errors
+ *   - one for other xhr errors
+ * Both counters are resetted if the error type changes from an error to the
+ * next.
+ * @param {Array.<string} obs$
+ * @param {Function} request$
+ * @param {Object} options - Configuration options.
+ * @returns {Observable}
+ */
+
+
+function tryURLsWithBackoff(urls, request$, options) {
+  var baseDelay = options.baseDelay,
+      maxDelay = options.maxDelay,
+      maxRetryRegular = options.maxRetryRegular,
+      maxRetryOffline = options.maxRetryOffline;
+  var retryCount = 0;
+  var lastError = REQUEST_ERROR_TYPES.None;
+  var urlsToTry = urls.slice();
+
+  if (urlsToTry.length === 0) {
+    log/* default.warn */.Z.warn("Fetchers: no URL given to `tryURLsWithBackoff`.");
+    return empty/* EMPTY */.E;
+  }
+
+  return tryURLsRecursively(urlsToTry[0], 0);
+  /**
+   * Try to do the request of a given `url` which corresponds to the `index`
+   * argument in the `urlsToTry` Array.
+   *
+   * If it fails try the next one.
+   *
+   * If all URLs fail, start a timer and retry the first element in that array
+   * by following the configuration.
+   *
+   * @param {string|null} url
+   * @param {number} index
+   * @returns {Observable}
+   */
+
+  function tryURLsRecursively(url, index) {
+    return request$(url).pipe((0,map/* map */.U)(function (res) {
+      return {
+        type: "response",
+        value: res
+      };
+    }), (0,catchError/* catchError */.K)(function (error) {
+      if (!shouldRetry(error)) {
+        // ban this URL
+        if (urlsToTry.length <= 1) {
+          // This was the last one, throw
+          throw error;
+        } // else, remove that element from the array and go the next URL
+
+
+        urlsToTry.splice(index, 1);
+        var newIndex = index >= urlsToTry.length - 1 ? 0 : index;
+        return tryURLsRecursively(urlsToTry[newIndex], newIndex).pipe((0,startWith/* startWith */.O)({
+          type: "retry",
+          value: error
+        }));
+      }
+
+      var currentError = getRequestErrorType(error);
+      var maxRetry = currentError === REQUEST_ERROR_TYPES.Offline ? maxRetryOffline : maxRetryRegular;
+
+      if (currentError !== lastError) {
+        retryCount = 0;
+        lastError = currentError;
+      }
+
+      if (index < urlsToTry.length - 1) {
+        // there is still URLs to test
+        var _newIndex = index + 1;
+
+        return tryURLsRecursively(urlsToTry[_newIndex], _newIndex).pipe((0,startWith/* startWith */.O)({
+          type: "retry",
+          value: error
+        }));
+      } // Here, we were using the last element of the `urlsToTry` array.
+      // Increment counter and restart with the first URL
+
+
+      retryCount++;
+
+      if (retryCount > maxRetry) {
+        throw error;
+      }
+
+      var delay = Math.min(baseDelay * Math.pow(2, retryCount - 1), maxDelay);
+      var fuzzedDelay = (0,get_fuzzed_delay/* default */.Z)(delay);
+      var nextURL = urlsToTry[0];
+      return (0,timer/* timer */.H)(fuzzedDelay).pipe((0,mergeMap/* mergeMap */.zg)(function () {
+        return tryURLsRecursively(nextURL, 0);
+      }), (0,startWith/* startWith */.O)({
+        type: "retry",
+        value: error
+      }));
+    }));
+  }
+}
+/**
+ * Lightweight version of the request algorithm, this time with only a simple
+ * Observable given.
+ * @param {Function} request$
+ * @param {Object} options
+ * @returns {Observable}
+ */
+
+function tryRequestObservableWithBackoff(request$, options) {
+  // same than for a single unknown URL
+  return tryURLsWithBackoff([null], function () {
+    return request$;
+  }, options);
+}
+;// CONCATENATED MODULE: ./src/core/fetchers/utils/create_request_scheduler.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+function createRequestScheduler(backoffOptions, warning$) {
+  /**
+   * Allow the parser to schedule a new request.
+   * @param {Function} request - Function performing the request.
+   * @returns {Function}
+   */
+  return function scheduleRequest(request) {
+    return tryRequestObservableWithBackoff((0,rx_try_catch/* default */.Z)(request, undefined), backoffOptions).pipe((0,filter_map/* default */.Z)(function (evt) {
+      if (evt.type === "retry") {
+        warning$.next(errorSelector(evt.value));
+        return null;
+      }
+
+      return evt.value;
+    }, null), (0,catchError/* catchError */.K)(function (error) {
+      throw errorSelector(error);
+    }));
+  };
+}
+;// CONCATENATED MODULE: ./src/core/fetchers/manifest/get_manifest_backoff_options.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var DEFAULT_MAX_MANIFEST_REQUEST_RETRY = config/* default.DEFAULT_MAX_MANIFEST_REQUEST_RETRY */.Z.DEFAULT_MAX_MANIFEST_REQUEST_RETRY,
+    DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
+    INITIAL_BACKOFF_DELAY_BASE = config/* default.INITIAL_BACKOFF_DELAY_BASE */.Z.INITIAL_BACKOFF_DELAY_BASE,
+    MAX_BACKOFF_DELAY_BASE = config/* default.MAX_BACKOFF_DELAY_BASE */.Z.MAX_BACKOFF_DELAY_BASE;
+/**
+ * Parse config to replace missing manifest backoff options.
+ * @param {Object} backoffOptions
+ * @returns {Object}
+ */
+
+function getManifestBackoffOptions(_ref) {
+  var maxRetryRegular = _ref.maxRetryRegular,
+      maxRetryOffline = _ref.maxRetryOffline,
+      lowLatencyMode = _ref.lowLatencyMode;
+  var baseDelay = lowLatencyMode ? INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : INITIAL_BACKOFF_DELAY_BASE.REGULAR;
+  var maxDelay = lowLatencyMode ? MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : MAX_BACKOFF_DELAY_BASE.REGULAR;
+  return {
+    baseDelay: baseDelay,
+    maxDelay: maxDelay,
+    maxRetryRegular: maxRetryRegular !== undefined ? maxRetryRegular : DEFAULT_MAX_MANIFEST_REQUEST_RETRY,
+    maxRetryOffline: maxRetryOffline !== undefined ? maxRetryOffline : DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE
+  };
+}
+;// CONCATENATED MODULE: ./src/core/fetchers/manifest/manifest_fetcher.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+
+
+/**
+ * Class allowing to facilitate the task of loading and parsing a Manifest.
+ * @class ManifestFetcher
+ * @example
+ * ```js
+ * const manifestFetcher = new ManifestFetcher(manifestUrl, pipelines, options);
+ * manifestFetcher.fetch().pipe(
+ *   // Filter only responses (might also receive warning events)
+ *   filter((evt) => evt.type === "response");
+ *   // Parse the Manifest
+ *   mergeMap(res => res.parse({ externalClockOffset }))
+ *   // (again)
+ *   filter((evt) => evt.type === "parsed");
+ * ).subscribe(({ value }) => {
+ *   console.log("Manifest:", value.manifest);
+ * });
+ * ```
+ */
+
+var ManifestFetcher = /*#__PURE__*/function () {
+  /**
+   * @param {string | undefined} url
+   * @param {Object} pipelines
+   * @param {Object} backoffOptions
+   */
+  function ManifestFetcher(url, pipelines, backoffOptions) {
+    this._manifestUrl = url;
+    this._pipelines = pipelines.manifest;
+    this._backoffOptions = getManifestBackoffOptions(backoffOptions);
+  }
+  /**
+   * (re-)Load the Manifest without yet parsing it.
+   *
+   * You can set an `url` on which that Manifest will be requested.
+   * If not set, the regular Manifest url - defined on the
+   * `ManifestFetcher` instanciation - will be used instead.
+   * @param {string} [url]
+   * @returns {Observable}
+   */
+
+
+  var _proto = ManifestFetcher.prototype;
+
+  _proto.fetch = function fetch(url) {
+    var _this = this;
+
+    var _a;
+
+    var requestUrl = url !== null && url !== void 0 ? url : this._manifestUrl; // TODO Remove the resolver completely in the next major version
+
+    var resolver = (_a = this._pipelines.resolver) !== null && _a !== void 0 ? _a : of.of;
+    var loader = this._pipelines.loader;
+    return (0,rx_try_catch/* default */.Z)(resolver, {
+      url: requestUrl
+    }).pipe((0,catchError/* catchError */.K)(function (error) {
+      throw errorSelector(error);
+    }), (0,mergeMap/* mergeMap */.zg)(function (loaderArgument) {
+      var loader$ = (0,rx_try_catch/* default */.Z)(loader, loaderArgument);
+      return tryRequestObservableWithBackoff(loader$, _this._backoffOptions).pipe((0,catchError/* catchError */.K)(function (error) {
+        throw errorSelector(error);
+      }), (0,map/* map */.U)(function (evt) {
+        return evt.type === "retry" ? {
+          type: "warning",
+          value: errorSelector(evt.value)
+        } : {
+          type: "response",
+          parse: function parse(parserOptions) {
+            return _this._parseLoadedManifest(evt.value.value, parserOptions);
+          }
+        };
+      }));
+    }));
+  }
+  /**
+   * Parse an already loaded Manifest.
+   *
+   * This method should be reserved for Manifests for which no request has been
+   * done.
+   * In other cases, it's preferable to go through the `fetch` method, so
+   * information on the request can be used by the parsing process.
+   * @param {*} manifest
+   * @param {Object} parserOptions
+   * @returns {Observable}
+   */
+  ;
+
+  _proto.parse = function parse(manifest, parserOptions) {
+    return this._parseLoadedManifest({
+      responseData: manifest,
+      size: undefined,
+      duration: undefined
+    }, parserOptions);
+  }
+  /**
+   * Parse a Manifest.
+   *
+   * @param {Object} loaded - Information about the loaded Manifest as well as
+   * about the corresponding request.
+   * @param {Object} parserOptions - Options used when parsing the Manifest.
+   * @returns {Observable}
+   */
+  ;
+
+  _proto._parseLoadedManifest = function _parseLoadedManifest(loaded, parserOptions) {
+    var sendingTime = loaded.sendingTime,
+        receivedTime = loaded.receivedTime;
+    var parsingTimeStart = performance.now();
+    var schedulerWarnings$ = new Subject/* Subject */.xQ();
+    var scheduleRequest = createRequestScheduler(this._backoffOptions, schedulerWarnings$);
+    return (0,merge/* merge */.T)(schedulerWarnings$.pipe((0,map/* map */.U)(function (err) {
+      return {
+        type: "warning",
+        value: err
+      };
+    })), this._pipelines.parser({
+      response: loaded,
+      url: this._manifestUrl,
+      externalClockOffset: parserOptions.externalClockOffset,
+      previousManifest: parserOptions.previousManifest,
+      scheduleRequest: scheduleRequest,
+      unsafeMode: parserOptions.unsafeMode
+    }).pipe((0,catchError/* catchError */.K)(function (error) {
+      throw formatError(error, {
+        defaultCode: "PIPELINE_PARSE_ERROR",
+        defaultReason: "Unknown error when parsing the Manifest"
+      });
+    }), (0,map/* map */.U)(function (parsingEvt) {
+      if (parsingEvt.type === "warning") {
+        var formatted = formatError(parsingEvt.value, {
+          defaultCode: "PIPELINE_PARSE_ERROR",
+          defaultReason: "Unknown error when parsing the Manifest"
+        });
+        return {
+          type: "warning",
+          value: formatted
+        };
+      } // 2 - send response
+
+
+      var parsingTime = performance.now() - parsingTimeStart;
+      return {
+        type: "parsed",
+        manifest: parsingEvt.value.manifest,
+        sendingTime: sendingTime,
+        receivedTime: receivedTime,
+        parsingTime: parsingTime
+      };
+    }), finalize(function () {
+      schedulerWarnings$.complete();
+    })));
+  };
+
+  return ManifestFetcher;
+}();
+
+
+;// CONCATENATED MODULE: ./src/core/fetchers/manifest/index.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* harmony default export */ const fetchers_manifest = (ManifestFetcher);
+;// CONCATENATED MODULE: ./src/core/fetchers/segment/get_segment_backoff_options.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
+    get_segment_backoff_options_DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
+    get_segment_backoff_options_INITIAL_BACKOFF_DELAY_BASE = config/* default.INITIAL_BACKOFF_DELAY_BASE */.Z.INITIAL_BACKOFF_DELAY_BASE,
+    get_segment_backoff_options_MAX_BACKOFF_DELAY_BASE = config/* default.MAX_BACKOFF_DELAY_BASE */.Z.MAX_BACKOFF_DELAY_BASE;
+/**
+ * @param {string} bufferType
+ * @param {Object}
+ * @returns {Object}
+ */
+
+function getSegmentBackoffOptions(bufferType, _ref) {
+  var maxRetryRegular = _ref.maxRetryRegular,
+      maxRetryOffline = _ref.maxRetryOffline,
+      lowLatencyMode = _ref.lowLatencyMode;
+  return {
+    maxRetryRegular: bufferType === "image" ? 0 : maxRetryRegular !== null && maxRetryRegular !== void 0 ? maxRetryRegular : DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
+    maxRetryOffline: maxRetryOffline !== null && maxRetryOffline !== void 0 ? maxRetryOffline : get_segment_backoff_options_DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
+    baseDelay: lowLatencyMode ? get_segment_backoff_options_INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : get_segment_backoff_options_INITIAL_BACKOFF_DELAY_BASE.REGULAR,
+    maxDelay: lowLatencyMode ? get_segment_backoff_options_MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : get_segment_backoff_options_MAX_BACKOFF_DELAY_BASE.REGULAR
+  };
+}
+;// CONCATENATED MODULE: ./src/core/fetchers/segment/prioritized_segment_fetcher.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * This function basically put in relation:
+ *   - a SegmentFetcher, which will be used to perform the segment request
+ *   - a prioritizer, which will handle the priority of a segment request
+ *
+ * and returns functions to fetch segments with a given priority.
+ * @param {Object} prioritizer
+ * @param {Object} fetcher
+ * @returns {Object}
+ */
+
+function applyPrioritizerToSegmentFetcher(prioritizer, fetcher) {
+  /**
+   * The Observables returned by `createRequest` are not exactly the same than
+   * the one created by the `ObservablePrioritizer`. Because we still have to
+   * keep a handle on that value.
+   */
+  var taskHandlers = new WeakMap();
+  return {
+    /**
+     * Create a Segment request with a given priority.
+     * @param {Object} content - content to request
+     * @param {Number} priority - priority at which the content should be requested.
+     * Lower number == higher priority.
+     * @returns {Observable}
+     */
+    createRequest: function createRequest(content, priority) {
+      if (priority === void 0) {
+        priority = 0;
+      }
+
+      var task = prioritizer.create(fetcher(content), priority);
+      var flattenTask = task.pipe((0,map/* map */.U)(function (evt) {
+        return evt.type === "data" ? evt.value : evt;
+      }));
+      taskHandlers.set(flattenTask, task);
+      return flattenTask;
+    },
+
+    /**
+     * Update the priority of a pending request, created through
+     * `createRequest`.
+     * @param {Observable} observable - The Observable returned by `createRequest`.
+     * @param {Number} priority - The new priority value.
+     */
+    updatePriority: function updatePriority(observable, priority) {
+      var correspondingTask = taskHandlers.get(observable);
+
+      if (correspondingTask === undefined) {
+        log/* default.warn */.Z.warn("Fetchers: Cannot update the priority of a request: task not found.");
+        return;
+      }
+
+      prioritizer.updatePriority(correspondingTask, priority);
+    }
+  };
+}
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Observable.js + 3 modules
+var Observable = __webpack_require__(4379);
+// EXTERNAL MODULE: ./src/utils/array_find_index.ts
+var array_find_index = __webpack_require__(5138);
+;// CONCATENATED MODULE: ./src/core/fetchers/segment/prioritizer.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+/**
+ * Create Observables which can be priorized between one another.
+ *
+ * With this class, you can link an Observables to a priority number.
+ * The lower this number is, the more priority the resulting Observable will
+ * have.
+ *
+ * Such returned Observables - called "tasks" - will then basically wait for
+ * pending task with more priority (i.e. a lower priority number) to finish
+ * before "starting".
+ *
+ * This only applies for non-pending tasks. For pending tasks, those are usually
+ * not interrupted except in the following case:
+ *
+ * When a task with a "high priority" (which is a configurable priority
+ * value) is created, pending tasks with a "low priority" (also configurable)
+ * will be interrupted. Those tasks will be restarted when all tasks with a
+ * higher priority are finished.
+ *
+ * You can also update the priority of an already-created task.
+ *
+ * ```js
+ * const observable1 = Observable.timer(100).pipe(mapTo(1));
+ * const observable2 = Observable.timer(100).pipe(mapTo(2));
+ * const observable3 = Observable.timer(100).pipe(mapTo(3));
+ * const observable4 = Observable.timer(100).pipe(mapTo(4));
+ * const observable5 = Observable.timer(100).pipe(mapTo(5));
+ *
+ * // Instanciate ObservablePrioritizer.
+ * // Also provide a `high` priority step - the maximum priority number a "high
+ * // priority task" has and a `low` priority step - the minimum priority number
+ * // a "low priority task" has.
+ * const prioritizer = new ObservablePrioritizer({
+ *   prioritySteps: { high: 0, low: 20 }
+ * });
+ *
+ * const pObservable1 = prioritizer.create(observable1, 4);
+ * const pObservable2 = prioritizer.create(observable2, 2);
+ * const pObservable3 = prioritizer.create(observable3, 1);
+ * const pObservable4 = prioritizer.create(observable4, 3);
+ * const pObservable5 = prioritizer.create(observable5, 2);
+ *
+ * // start every Observables at the same time
+ * observableMerge(
+ *   pObservable1,
+ *   pObservable2,
+ *   pObservable3,
+ *   pObservable4,
+ *   pObservable5
+ * ).subscribe((evt) => {
+ *   if (evt.type === "data") {
+ *     console.log(i);
+ *
+ *     // To spice things up, update pObservable1 priority to go before
+ *     // pObservable4
+ *     if (i === 5) { // if pObservable5 is currently emitting
+ *       prioritizer.updatePriority(pObservable1, 1);
+ *     }
+ *   }
+ * });
+ *
+ * // Result:
+ * // 3
+ * // 2
+ * // 5
+ * // 1
+ * // 4
+ *
+ * // Note: here "1" goes before "4" only because the former's priority has been
+ * // updated before the latter was started.
+ * // It would be the other way around if not.
+ * ```
+ *
+ * @class ObservablePrioritizer
+ */
+
+var ObservablePrioritizer = /*#__PURE__*/function () {
+  /**
+   * @param {Options} prioritizerOptions
+   */
+  function ObservablePrioritizer(_ref) {
+    var prioritySteps = _ref.prioritySteps;
+    this._minPendingPriority = null;
+    this._waitingQueue = [];
+    this._pendingTasks = [];
+    this._prioritySteps = prioritySteps;
+
+    if (this._prioritySteps.high >= this._prioritySteps.low) {
+      throw new Error("FP Error: the max high level priority should be given a lower" + "priority number than the min low priority.");
+    }
+  }
+  /**
+   * Create a priorized Observable from a base Observable.
+   *
+   * When subscribed to, this Observable will have its priority compared to
+   * all the already-running Observables created from this class.
+   *
+   * Only if this number is inferior or equal to the priority of the
+   * currently-running Observables will it be immediately started.
+   * In the opposite case, we will wait for higher-priority Observables to
+   * finish before starting it.
+   *
+   * Note that while this Observable is waiting for its turn, it is possible
+   * to update its property through the updatePriority method, by providing
+   * the Observable returned by this function and its new priority number.
+   *
+   * @param {Observable} obs
+   * @param {number} priority
+   * @returns {Observable}
+   */
+
+
+  var _proto = ObservablePrioritizer.prototype;
+
+  _proto.create = function create(obs, priority) {
+    var _this = this;
+
+    var pObs$ = new Observable/* Observable */.y(function (subscriber) {
+      var isStillSubscribed = true; // eslint-disable-next-line prefer-const
+
+      var newTask;
+      /**
+       * Function allowing to start / interrupt the underlying Observable.
+       * @param {Boolean} shouldRun - If `true`, the observable can run. If
+       * `false` it means that it just needs to be interrupted if already
+       * starte.
+       */
+
+      var trigger = function trigger(shouldRun) {
+        if (newTask.subscription !== null) {
+          newTask.subscription.unsubscribe();
+          newTask.subscription = null;
+
+          if (isStillSubscribed) {
+            subscriber.next({
+              type: "interrupted"
+            });
+          }
+        }
+
+        if (!shouldRun) {
+          return;
+        }
+
+        _this._minPendingPriority = _this._minPendingPriority === null ? newTask.priority : Math.min(_this._minPendingPriority, newTask.priority);
+
+        _this._pendingTasks.push(newTask);
+
+        newTask.subscription = obs.subscribe(function (evt) {
+          return subscriber.next({
+            type: "data",
+            value: evt
+          });
+        }, function (error) {
+          subscriber.error(error);
+          newTask.subscription = null;
+          newTask.finished = true;
+
+          _this._onTaskEnd(newTask);
+        }, function () {
+          subscriber.next({
+            type: "ended"
+          });
+
+          if (isStillSubscribed) {
+            subscriber.complete();
+          }
+
+          newTask.subscription = null;
+          newTask.finished = true;
+
+          _this._onTaskEnd(newTask);
+        });
+      };
+
+      newTask = {
+        observable: pObs$,
+        priority: priority,
+        trigger: trigger,
+        subscription: null,
+        finished: false
+      };
+
+      if (!_this._canBeStartedNow(newTask)) {
+        _this._waitingQueue.push(newTask);
+      } else {
+        newTask.trigger(true);
+
+        if (_this._isRunningHighPriorityTasks()) {
+          // Note: we want to begin interrupting low-priority tasks just
+          // after starting the current one because the interrupting
+          // logic can call external code.
+          // This would mean re-entrancy, itself meaning that some weird
+          // half-state could be reached unless we're very careful.
+          // To be sure no harm is done, we put that code at the last
+          // possible position (the previous Observable sould be
+          // performing all its initialization synchronously).
+          _this._interruptCancellableTasks();
+        }
+      }
+      /** Callback called when this Observable is unsubscribed to. */
+
+
+      return function () {
+        isStillSubscribed = false;
+
+        if (newTask.subscription !== null) {
+          newTask.subscription.unsubscribe();
+          newTask.subscription = null;
+        }
+
+        if (newTask.finished) {
+          // Task already finished, we're good
+          return;
+        } // remove it from waiting queue if in it
+
+
+        var waitingQueueIndex = (0,array_find_index/* default */.Z)(_this._waitingQueue, function (elt) {
+          return elt.observable === pObs$;
+        });
+
+        if (waitingQueueIndex >= 0) {
+          // If it was still waiting for its turn
+          _this._waitingQueue.splice(waitingQueueIndex, 1);
+        } else {
+          // remove it from pending queue if in it
+          var pendingTasksIndex = (0,array_find_index/* default */.Z)(_this._pendingTasks, function (elt) {
+            return elt.observable === pObs$;
+          });
+
+          if (pendingTasksIndex < 0) {
+            log/* default.warn */.Z.warn("FP: unsubscribing non-existent task");
+            return;
+          }
+
+          var pendingTask = _this._pendingTasks.splice(pendingTasksIndex, 1)[0];
+
+          if (_this._pendingTasks.length === 0) {
+            _this._minPendingPriority = null;
+
+            _this._loopThroughWaitingQueue();
+          } else if (_this._minPendingPriority === pendingTask.priority) {
+            _this._minPendingPriority = Math.min.apply(Math, _this._pendingTasks.map(function (t) {
+              return t.priority;
+            }));
+
+            _this._loopThroughWaitingQueue();
+          }
+        }
+      };
+    });
+    return pObs$;
+  }
+  /**
+   * Update the priority of an Observable created through the `create` method.
+   * @param {Observable} obs
+   * @param {number} priority
+   */
+  ;
+
+  _proto.updatePriority = function updatePriority(obs, priority) {
+    var waitingQueueIndex = (0,array_find_index/* default */.Z)(this._waitingQueue, function (elt) {
+      return elt.observable === obs;
+    });
+
+    if (waitingQueueIndex >= 0) {
+      // If it was still waiting for its turn
+      var waitingQueueElt = this._waitingQueue[waitingQueueIndex];
+
+      if (waitingQueueElt.priority === priority) {
+        return;
+      }
+
+      waitingQueueElt.priority = priority;
+
+      if (!this._canBeStartedNow(waitingQueueElt)) {
+        return;
+      }
+
+      this._startWaitingQueueTask(waitingQueueIndex);
+
+      if (this._isRunningHighPriorityTasks()) {
+        // Re-check to cancel every "cancellable" pending task
+        //
+        // Note: We start the task before interrupting cancellable tasks on
+        // purpose.
+        // Because both `_startWaitingQueueTask` and
+        // `_interruptCancellableTasks` can emit events and thus call external
+        // code, we could retrieve ourselves in a very weird state at this point
+        // (for example, the different Observable priorities could all be
+        // shuffled up, new Observables could have been started in the
+        // meantime, etc.).
+        //
+        // By starting the task first, we ensure that this is manageable:
+        // `_minPendingPriority` has already been updated to the right value at
+        // the time we reached external code, the priority of the current
+        // Observable has just been updated, and `_interruptCancellableTasks`
+        // will ensure that we're basing ourselves on the last `priority` value
+        // each time.
+        // Doing it in the reverse order is an order of magnitude more difficult
+        // to write and to reason about.
+        this._interruptCancellableTasks();
+      }
+
+      return;
+    }
+
+    var pendingTasksIndex = (0,array_find_index/* default */.Z)(this._pendingTasks, function (elt) {
+      return elt.observable === obs;
+    });
+
+    if (pendingTasksIndex < 0) {
+      log/* default.warn */.Z.warn("FP: request to update the priority of a non-existent task");
+      return;
+    }
+
+    var task = this._pendingTasks[pendingTasksIndex];
+
+    if (task.priority === priority) {
+      return;
+    }
+
+    var prevPriority = task.priority;
+    task.priority = priority;
+
+    if (this._minPendingPriority === null || priority < this._minPendingPriority) {
+      this._minPendingPriority = priority;
+    } else if (this._minPendingPriority === prevPriority) {
+      // was highest priority
+      if (this._pendingTasks.length === 1) {
+        this._minPendingPriority = priority;
+      } else {
+        this._minPendingPriority = Math.min.apply(Math, this._pendingTasks.map(function (t) {
+          return t.priority;
+        }));
+      }
+
+      this._loopThroughWaitingQueue();
+    } else {
+      // We updated a task which already had a priority value higher than the
+      // minimum to a value still superior to the minimum. Nothing can happen.
+      return;
+    }
+
+    if (this._isRunningHighPriorityTasks()) {
+      // Always interrupt cancellable tasks after all other side-effects, to
+      // avoid re-entrancy issues
+      this._interruptCancellableTasks();
+    }
+  }
+  /**
+   * Browse the current waiting queue and start all task in it that needs to be
+   * started: start the ones with the lowest priority value below
+   * `_minPendingPriority`.
+   *
+   * Private properties, such as `_minPendingPriority` are updated accordingly
+   * while this method is called.
+   */
+  ;
+
+  _proto._loopThroughWaitingQueue = function _loopThroughWaitingQueue() {
+    var minWaitingPriority = this._waitingQueue.reduce(function (acc, elt) {
+      return acc === null || acc > elt.priority ? elt.priority : acc;
+    }, null);
+
+    if (minWaitingPriority === null || this._minPendingPriority !== null && this._minPendingPriority < minWaitingPriority) {
+      return;
+    }
+
+    for (var i = 0; i < this._waitingQueue.length; i++) {
+      var priorityToCheck = this._minPendingPriority === null ? minWaitingPriority : Math.min(this._minPendingPriority, minWaitingPriority);
+      var elt = this._waitingQueue[i];
+
+      if (elt.priority <= priorityToCheck) {
+        this._startWaitingQueueTask(i);
+
+        i--; // previous operation should have removed that element from the
+        // the waiting queue
+      }
+    }
+  }
+  /**
+   * Interrupt and move back to the waiting queue all pending tasks that are
+   * low priority (having a higher priority number than
+   * `this._prioritySteps.low`).
+   */
+  ;
+
+  _proto._interruptCancellableTasks = function _interruptCancellableTasks() {
+    for (var i = 0; i < this._pendingTasks.length; i++) {
+      var pendingObj = this._pendingTasks[i];
+
+      if (pendingObj.priority >= this._prioritySteps.low) {
+        this._interruptPendingTask(pendingObj); // The previous call could have a lot of potential side-effects.
+        // It is safer to re-start the function to not miss any pending
+        // task that needs to be cancelled.
+
+
+        return this._interruptCancellableTasks();
+      }
+    }
+  }
+  /**
+   * Start task which is at the given index in the waiting queue.
+   * The task will be removed from the waiting queue in the process.
+   * @param {number} index
+   */
+  ;
+
+  _proto._startWaitingQueueTask = function _startWaitingQueueTask(index) {
+    var task = this._waitingQueue.splice(index, 1)[0];
+
+    task.trigger(true);
+  }
+  /**
+   * Move back pending task to the waiting queue and interrupt it.
+   * @param {object} task
+   */
+  ;
+
+  _proto._interruptPendingTask = function _interruptPendingTask(task) {
+    var pendingTasksIndex = (0,array_find_index/* default */.Z)(this._pendingTasks, function (elt) {
+      return elt.observable === task.observable;
+    });
+
+    if (pendingTasksIndex < 0) {
+      log/* default.warn */.Z.warn("FP: Interrupting a non-existent pending task. Aborting...");
+      return;
+    } // Stop task and put it back in the waiting queue
+
+
+    this._pendingTasks.splice(pendingTasksIndex, 1);
+
+    this._waitingQueue.push(task);
+
+    if (this._pendingTasks.length === 0) {
+      this._minPendingPriority = null;
+    } else if (this._minPendingPriority === task.priority) {
+      this._minPendingPriority = Math.min.apply(Math, this._pendingTasks.map(function (t) {
+        return t.priority;
+      }));
+    }
+
+    task.trigger(false); // Interrupt at last step because it calls external code
+  }
+  /**
+   * Logic ran when a task has ended (either errored or completed).
+   * @param {Object} task
+   */
+  ;
+
+  _proto._onTaskEnd = function _onTaskEnd(task) {
+    var pendingTasksIndex = (0,array_find_index/* default */.Z)(this._pendingTasks, function (elt) {
+      return elt.observable === task.observable;
+    });
+
+    if (pendingTasksIndex < 0) {
+      return; // Happen for example when the task has been interrupted
+    }
+
+    this._pendingTasks.splice(pendingTasksIndex, 1);
+
+    if (this._pendingTasks.length > 0) {
+      if (this._minPendingPriority === task.priority) {
+        this._minPendingPriority = Math.min.apply(Math, this._pendingTasks.map(function (t) {
+          return t.priority;
+        }));
+      }
+
+      return; // still waiting for Observables to finish
+    }
+
+    this._minPendingPriority = null;
+
+    this._loopThroughWaitingQueue();
+  }
+  /**
+   * Return `true` if the given task can be started immediately based on its
+   * priority.
+   * @param {Object} task
+   * @returns {boolean}
+   */
+  ;
+
+  _proto._canBeStartedNow = function _canBeStartedNow(task) {
+    return this._minPendingPriority === null || task.priority <= this._minPendingPriority;
+  }
+  /**
+   * Returns `true` if any running task is considered "high priority".
+   * returns `false` otherwise.
+   * @param {Object} task
+   * @returns {boolean}
+   */
+  ;
+
+  _proto._isRunningHighPriorityTasks = function _isRunningHighPriorityTasks() {
+    return this._minPendingPriority !== null && this._minPendingPriority <= this._prioritySteps.high;
+  };
+
+  return ObservablePrioritizer;
+}();
+
+
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/tap.js
+var tap = __webpack_require__(3068);
+// EXTERNAL MODULE: ./src/utils/array_includes.ts
+var array_includes = __webpack_require__(7714);
+// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
+var assert_unreachable = __webpack_require__(8418);
+// EXTERNAL MODULE: ./src/utils/id_generator.ts
+var id_generator = __webpack_require__(908);
+;// CONCATENATED MODULE: ./src/utils/initialization_segment_cache.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Caching object used to cache initialization segments.
+ * This allow to have a faster representation switch and faster seeking.
+ * @class InitializationSegmentCache
+ */
+var InitializationSegmentCache = /*#__PURE__*/function () {
+  function InitializationSegmentCache() {
+    this._cache = new WeakMap();
+  }
+  /**
+   * @param {Object} obj
+   * @param {*} response
+   */
+
+
+  var _proto = InitializationSegmentCache.prototype;
+
+  _proto.add = function add(_ref, response) {
+    var representation = _ref.representation,
+        segment = _ref.segment;
+
+    if (segment.isInit) {
+      this._cache.set(representation, response);
+    }
+  }
+  /**
+   * @param {Object} obj
+   * @returns {*} response
+   */
+  ;
+
+  _proto.get = function get(_ref2) {
+    var representation = _ref2.representation,
+        segment = _ref2.segment;
+
+    if (segment.isInit) {
+      var value = this._cache.get(representation);
+
+      if (value !== undefined) {
+        return value;
+      }
+    }
+
+    return null;
+  };
+
+  return InitializationSegmentCache;
+}();
+
+/* harmony default export */ const initialization_segment_cache = (InitializationSegmentCache);
+// EXTERNAL MODULE: ./src/utils/cast_to_observable.ts
+var cast_to_observable = __webpack_require__(8117);
+;// CONCATENATED MODULE: ./src/core/fetchers/segment/create_segment_loader.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+
+
+/**
+ * Returns a function allowing to load any wanted segment.
+ *
+ * The function returned takes in argument information about the wanted segment
+ * and returns an Observable which will emit various events related to the
+ * segment request (see ISegmentLoaderEvent).
+ *
+ * This observable will throw if, following the options given, the request and
+ * possible retry all failed.
+ *
+ * This observable will complete after emitting all the segment's data.
+ *
+ * Type parameters:
+ *   - T: type of the data emitted
+ *
+ * @param {Function} loader
+ * @param {Object | undefined} cache
+ * @param {Object} options
+ * @returns {Function}
+ */
+
+function createSegmentLoader(loader, cache, backoffOptions) {
+  /**
+   * Try to retrieve the segment from the cache and if not found call the
+   * pipeline's loader (with possible retries) to load it.
+   * @param {Object} loaderArgument - Context for the wanted segment.
+   * @returns {Observable}
+   */
+  function loadData(wantedContent) {
+    /**
+     * Call the Pipeline's loader with an exponential Backoff.
+     * @returns {Observable}
+     */
+    function startLoaderWithBackoff() {
+      var _a;
+
+      var request$ = function request$(url) {
+        var loaderArgument = (0,object_assign/* default */.Z)({
+          url: url
+        }, wantedContent);
+        return (0,concat/* concat */.z)((0,of.of)({
+          type: "request",
+          value: loaderArgument
+        }), (0,rx_try_catch/* default */.Z)(loader, loaderArgument));
+      };
+
+      return tryURLsWithBackoff((_a = wantedContent.segment.mediaURLs) !== null && _a !== void 0 ? _a : [null], request$, backoffOptions).pipe((0,catchError/* catchError */.K)(function (error) {
+        throw errorSelector(error);
+      }), (0,map/* map */.U)(function (evt) {
+        if (evt.type === "retry") {
+          return {
+            type: "warning",
+            value: errorSelector(evt.value)
+          };
+        } else if (evt.value.type === "request") {
+          return evt.value;
+        }
+
+        var response = evt.value;
+
+        if (response.type === "data-loaded" && cache != null) {
+          cache.add(wantedContent, response.value);
+        }
+
+        return evt.value;
+      }));
+    }
+
+    var dataFromCache = cache != null ? cache.get(wantedContent) : null;
+
+    if (dataFromCache != null) {
+      return (0,cast_to_observable/* default */.Z)(dataFromCache).pipe((0,map/* map */.U)(function (response) {
+        return {
+          type: "cache",
+          value: response
+        };
+      }), (0,catchError/* catchError */.K)(startLoaderWithBackoff));
+    }
+
+    return startLoaderWithBackoff();
+  }
+  /**
+   * Load the corresponding segment.
+   * @param {Object} content
+   * @returns {Observable}
+   */
+
+
+  return function loadSegment(content) {
+    return loadData(content).pipe((0,mergeMap/* mergeMap */.zg)(function (arg) {
+      var metrics$;
+
+      if ((arg.type === "data-chunk-complete" || arg.type === "data-loaded") && arg.value.size !== undefined && arg.value.duration !== undefined) {
+        metrics$ = (0,of.of)({
+          type: "metrics",
+          value: {
+            size: arg.value.size,
+            duration: arg.value.duration,
+            content: content
+          }
+        });
+      } else {
+        metrics$ = empty/* EMPTY */.E;
+      }
+
+      switch (arg.type) {
+        case "warning":
+        case "request":
+        case "progress":
+          return (0,of.of)(arg);
+
+        case "cache":
+        case "data-created":
+        case "data-loaded":
+          return (0,concat/* concat */.z)((0,of.of)({
+            type: "data",
+            value: arg.value
+          }), metrics$);
+
+        case "data-chunk":
+          return (0,of.of)({
+            type: "chunk",
+            value: arg.value
+          });
+
+        case "data-chunk-complete":
+          return (0,concat/* concat */.z)((0,of.of)({
+            type: "chunk-complete",
+            value: null
+          }), metrics$);
+
+        default:
+          (0,assert_unreachable/* default */.Z)(arg);
+      }
+    }));
+  };
+}
+;// CONCATENATED MODULE: ./src/core/fetchers/segment/segment_fetcher.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+
+
+var generateRequestID = (0,id_generator/* default */.Z)();
+/**
+ * Create a function which will fetch and parse segments.
+ * @param {string} bufferType
+ * @param {Object} transport
+ * @param {Subject} requests$
+ * @param {Object} options
+ * @returns {Function}
+ */
+
+function segment_fetcher_createSegmentFetcher(bufferType, transport, requests$, options) {
+  var cache = (0,array_includes/* default */.Z)(["audio", "video"], bufferType) ? new initialization_segment_cache() : undefined;
+  var segmentLoader = createSegmentLoader(transport[bufferType].loader, cache, options); // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
+  var segmentParser = transport[bufferType].parser; // deal with it
+
+  /**
+   * Process the segmentLoader observable to adapt it to the the rest of the
+   * code:
+   *   - use the requests subject for network requests and their progress
+   *   - use the warning$ subject for retries' error messages
+   *   - only emit the data
+   * @param {Object} content
+   * @returns {Observable}
+   */
+
+  return function fetchSegment(content) {
+    var id = generateRequestID();
+    var requestBeginSent = false;
+    return segmentLoader(content).pipe((0,tap/* tap */.b)(function (arg) {
+      switch (arg.type) {
+        case "metrics":
+          {
+            requests$.next(arg);
+            break;
+          }
+
+        case "request":
+          {
+            var value = arg.value; // format it for ABR Handling
+
+            var segment = value.segment;
+
+            if (segment === undefined) {
+              return;
+            }
+
+            requestBeginSent = true;
+            requests$.next({
+              type: "requestBegin",
+              value: {
+                duration: segment.duration,
+                time: segment.time,
+                requestTimestamp: performance.now(),
+                id: id
+              }
+            });
+            break;
+          }
+
+        case "progress":
+          {
+            var _value = arg.value;
+
+            if (_value.totalSize != null && _value.size < _value.totalSize) {
+              requests$.next({
+                type: "progress",
+                value: {
+                  duration: _value.duration,
+                  size: _value.size,
+                  totalSize: _value.totalSize,
+                  timestamp: performance.now(),
+                  id: id
+                }
+              });
+            }
+
+            break;
+          }
+      }
+    }), finalize(function () {
+      if (requestBeginSent) {
+        requests$.next({
+          type: "requestEnd",
+          value: {
+            id: id
+          }
+        });
+      }
+    }), (0,filter/* filter */.h)(function (e) {
+      switch (e.type) {
+        case "warning":
+        case "chunk":
+        case "chunk-complete":
+        case "data":
+          return true;
+
+        case "progress":
+        case "metrics":
+        case "request":
+          return false;
+
+        default:
+          (0,assert_unreachable/* default */.Z)(e);
+      }
+    }), (0,mergeMap/* mergeMap */.zg)(function (evt) {
+      if (evt.type === "warning") {
+        return (0,of.of)(evt);
+      }
+
+      if (evt.type === "chunk-complete") {
+        return (0,of.of)({
+          type: "chunk-complete"
+        });
+      }
+
+      var isChunked = evt.type === "chunk";
+      var data = {
+        type: "chunk",
+
+        /**
+         * Parse the loaded data.
+         * @param {Object} [initTimescale]
+         * @returns {Observable}
+         */
+        parse: function parse(initTimescale) {
+          var response = {
+            data: evt.value.responseData,
+            isChunked: isChunked
+          };
+          /* eslint-disable @typescript-eslint/no-unsafe-call */
+
+          /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+          /* eslint-disable @typescript-eslint/no-unsafe-return */
+
+          return segmentParser({
+            response: response,
+            initTimescale: initTimescale,
+            content: content
+          })
+          /* eslint-enable @typescript-eslint/no-unsafe-call */
+
+          /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+
+          /* eslint-enable @typescript-eslint/no-unsafe-return */
+          .pipe((0,catchError/* catchError */.K)(function (error) {
+            throw formatError(error, {
+              defaultCode: "PIPELINE_PARSE_ERROR",
+              defaultReason: "Unknown parsing error"
+            });
+          }));
+        }
+      };
+
+      if (isChunked) {
+        return (0,of.of)(data);
+      }
+
+      return (0,concat/* concat */.z)((0,of.of)(data), (0,of.of)({
+        type: "chunk-complete"
+      }));
+    }), (0,share/* share */.B)() // avoid multiple side effects if multiple subs
+    );
+  };
+}
+;// CONCATENATED MODULE: ./src/core/fetchers/segment/segment_fetcher_creator.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+var MIN_CANCELABLE_PRIORITY = config/* default.MIN_CANCELABLE_PRIORITY */.Z.MIN_CANCELABLE_PRIORITY,
+    MAX_HIGH_PRIORITY_LEVEL = config/* default.MAX_HIGH_PRIORITY_LEVEL */.Z.MAX_HIGH_PRIORITY_LEVEL;
+/**
+ * Interact with the transport pipelines to download segments with the right
+ * priority.
+ *
+ * @class SegmentFetcherCreator
+ *
+ * @example
+ * ```js
+ * const creator = new SegmentFetcherCreator(transport);
+ *
+ * // 2 - create a new fetcher with its backoff options
+ * const fetcher = creator.createSegmentFetcher("audio", {
+ *   maxRetryRegular: Infinity,
+ *   maxRetryOffline: Infinity,
+ * });
+ *
+ * // 3 - load a segment with a given priority
+ * fetcher.createRequest(myContent, 1)
+ *   // 4 - parse it
+ *   .pipe(
+ *     filter(evt => evt.type === "chunk"),
+ *     mergeMap(response => response.parse());
+ *   )
+ *   // 5 - use it
+ *   .subscribe((res) => console.log("audio chunk downloaded:", res));
+ * ```
+ */
+
+var SegmentFetcherCreator = /*#__PURE__*/function () {
+  /**
+   * @param {Object} transport
+   */
+  function SegmentFetcherCreator(transport, options) {
+    this._transport = transport;
+    this._prioritizer = new ObservablePrioritizer({
+      prioritySteps: {
+        high: MAX_HIGH_PRIORITY_LEVEL,
+        low: MIN_CANCELABLE_PRIORITY
+      }
+    });
+    this._backoffOptions = options;
+  }
+  /**
+   * Create a segment fetcher, allowing to easily perform segment requests.
+   * @param {string} bufferType - The type of buffer concerned (e.g. "audio",
+   * "video", etc.)
+   * @param {Subject} requests$ - Subject through which request-related events
+   * (such as those needed by the ABRManager) will be sent.
+   * @returns {Object}
+   */
+
+
+  var _proto = SegmentFetcherCreator.prototype;
+
+  _proto.createSegmentFetcher = function createSegmentFetcher(bufferType, requests$) {
+    var backoffOptions = getSegmentBackoffOptions(bufferType, this._backoffOptions);
+
+    var segmentFetcher = segment_fetcher_createSegmentFetcher(bufferType, this._transport, requests$, backoffOptions);
+
+    return applyPrioritizerToSegmentFetcher(this._prioritizer, segmentFetcher);
+  };
+
+  return SegmentFetcherCreator;
+}();
+
+
+;// CONCATENATED MODULE: ./src/core/fetchers/segment/index.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* harmony default export */ const segment = (SegmentFetcherCreator);
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/innerSubscribe.js
 var innerSubscribe = __webpack_require__(7604);
+;// CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/operators/mergeScan.js
+/** PURE_IMPORTS_START tslib,_innerSubscribe PURE_IMPORTS_END */
+
+
+function mergeScan(accumulator, seed, concurrent) {
+    if (concurrent === void 0) {
+        concurrent = Number.POSITIVE_INFINITY;
+    }
+    return function (source) { return source.lift(new MergeScanOperator(accumulator, seed, concurrent)); };
+}
+var MergeScanOperator = /*@__PURE__*/ (function () {
+    function MergeScanOperator(accumulator, seed, concurrent) {
+        this.accumulator = accumulator;
+        this.seed = seed;
+        this.concurrent = concurrent;
+    }
+    MergeScanOperator.prototype.call = function (subscriber, source) {
+        return source.subscribe(new MergeScanSubscriber(subscriber, this.accumulator, this.seed, this.concurrent));
+    };
+    return MergeScanOperator;
+}());
+
+var MergeScanSubscriber = /*@__PURE__*/ (function (_super) {
+    tslib_es6/* __extends */.ZT(MergeScanSubscriber, _super);
+    function MergeScanSubscriber(destination, accumulator, acc, concurrent) {
+        var _this = _super.call(this, destination) || this;
+        _this.accumulator = accumulator;
+        _this.acc = acc;
+        _this.concurrent = concurrent;
+        _this.hasValue = false;
+        _this.hasCompleted = false;
+        _this.buffer = [];
+        _this.active = 0;
+        _this.index = 0;
+        return _this;
+    }
+    MergeScanSubscriber.prototype._next = function (value) {
+        if (this.active < this.concurrent) {
+            var index = this.index++;
+            var destination = this.destination;
+            var ish = void 0;
+            try {
+                var accumulator = this.accumulator;
+                ish = accumulator(this.acc, value, index);
+            }
+            catch (e) {
+                return destination.error(e);
+            }
+            this.active++;
+            this._innerSub(ish);
+        }
+        else {
+            this.buffer.push(value);
+        }
+    };
+    MergeScanSubscriber.prototype._innerSub = function (ish) {
+        var innerSubscriber = new innerSubscribe/* SimpleInnerSubscriber */.IY(this);
+        var destination = this.destination;
+        destination.add(innerSubscriber);
+        var innerSubscription = (0,innerSubscribe/* innerSubscribe */.ft)(ish, innerSubscriber);
+        if (innerSubscription !== innerSubscriber) {
+            destination.add(innerSubscription);
+        }
+    };
+    MergeScanSubscriber.prototype._complete = function () {
+        this.hasCompleted = true;
+        if (this.active === 0 && this.buffer.length === 0) {
+            if (this.hasValue === false) {
+                this.destination.next(this.acc);
+            }
+            this.destination.complete();
+        }
+        this.unsubscribe();
+    };
+    MergeScanSubscriber.prototype.notifyNext = function (innerValue) {
+        var destination = this.destination;
+        this.acc = innerValue;
+        this.hasValue = true;
+        destination.next(innerValue);
+    };
+    MergeScanSubscriber.prototype.notifyComplete = function () {
+        var buffer = this.buffer;
+        this.active--;
+        if (buffer.length > 0) {
+            this._next(buffer.shift());
+        }
+        else if (this.active === 0 && this.hasCompleted) {
+            if (this.hasValue === false) {
+                this.destination.next(this.acc);
+            }
+            this.destination.complete();
+        }
+    };
+    return MergeScanSubscriber;
+}(innerSubscribe/* SimpleOuterSubscriber */.Ds));
+
+//# sourceMappingURL=mergeScan.js.map
+
+// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/from.js + 6 modules
+var from = __webpack_require__(4072);
 ;// CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/operators/exhaustMap.js
 /** PURE_IMPORTS_START tslib,_map,_observable_from,_innerSubscribe PURE_IMPORTS_END */
 
@@ -13359,38 +15686,6 @@ var ExhaustMapSubscriber = /*@__PURE__*/ (function (_super) {
 }(innerSubscribe/* SimpleOuterSubscriber */.Ds));
 //# sourceMappingURL=exhaustMap.js.map
 
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/tap.js
-var tap = __webpack_require__(3068);
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Subscription.js + 1 modules
-var Subscription = __webpack_require__(3884);
-;// CONCATENATED MODULE: ./node_modules/rxjs/_esm5/internal/operators/finalize.js
-/** PURE_IMPORTS_START tslib,_Subscriber,_Subscription PURE_IMPORTS_END */
-
-
-
-function finalize(callback) {
-    return function (source) { return source.lift(new FinallyOperator(callback)); };
-}
-var FinallyOperator = /*@__PURE__*/ (function () {
-    function FinallyOperator(callback) {
-        this.callback = callback;
-    }
-    FinallyOperator.prototype.call = function (subscriber, source) {
-        return source.subscribe(new FinallySubscriber(subscriber, this.callback));
-    };
-    return FinallyOperator;
-}());
-var FinallySubscriber = /*@__PURE__*/ (function (_super) {
-    tslib_es6/* __extends */.ZT(FinallySubscriber, _super);
-    function FinallySubscriber(destination, callback) {
-        var _this = _super.call(this, destination) || this;
-        _this.add(new Subscription/* Subscription */.w(callback));
-        return _this;
-    }
-    return FinallySubscriber;
-}(Subscriber/* Subscriber */.L));
-//# sourceMappingURL=finalize.js.map
-
 // EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/switchMap.js
 var switchMap = __webpack_require__(6381);
 ;// CONCATENATED MODULE: ./src/compat/should_reload_media_source_on_decipherability_update.ts
@@ -13423,61 +15718,8 @@ var switchMap = __webpack_require__(6381);
 function shouldReloadMediaSourceOnDecipherabilityUpdate(currentKeySystem) {
   return currentKeySystem === null || currentKeySystem.indexOf("widevine") < 0;
 }
-// EXTERNAL MODULE: ./src/manifest/index.ts + 10 modules
-var manifest = __webpack_require__(1966);
 // EXTERNAL MODULE: ./src/utils/defer_subscriptions.ts + 6 modules
 var defer_subscriptions = __webpack_require__(8025);
-// EXTERNAL MODULE: ./src/utils/filter_map.ts
-var filter_map = __webpack_require__(2793);
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/Observable.js + 3 modules
-var Observable = __webpack_require__(4379);
-;// CONCATENATED MODULE: ./src/utils/rx-throttle.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-function throttle(func) {
-  var isPending = false;
-  return function () {
-    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    return new Observable/* Observable */.y(function (obs) {
-      if (isPending) {
-        obs.complete();
-        return undefined;
-      }
-
-      isPending = true;
-      var funcSubscription = func.apply(void 0, args).subscribe(function (i) {
-        obs.next(i);
-      }, function (e) {
-        isPending = false;
-        obs.error(e);
-      }, function () {
-        isPending = false;
-        obs.complete();
-      });
-      return function () {
-        funcSubscription.unsubscribe();
-        isPending = false;
-      };
-    });
-  };
-}
 // EXTERNAL MODULE: ./src/utils/take_first_set.ts
 var take_first_set = __webpack_require__(5278);
 ;// CONCATENATED MODULE: ./src/core/abr/ewma.ts
@@ -13851,8 +16093,6 @@ function getBufferLevels(bitrates) {
     return Vp * (gp + (bitrates[boundedIndex] * utilities[boundedIndex - 1] - bitrates[boundedIndex - 1] * utilities[boundedIndex]) / (bitrates[boundedIndex] - bitrates[boundedIndex - 1])) + 4;
   }
 }
-// EXTERNAL MODULE: ./src/utils/array_find_index.ts
-var array_find_index = __webpack_require__(5138);
 ;// CONCATENATED MODULE: ./src/core/abr/get_estimate_from_buffer_levels.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -14192,7 +16432,7 @@ function getConcernedRequests(requests, neededPosition) {
     }
 
     var segmentEnd = request.time + request.duration;
-    return segmentEnd > neededPosition && Math.abs(neededPosition - request.time) < -0.3;
+    return segmentEnd > neededPosition && neededPosition - request.time > -1.2;
   });
 
   if (nextSegmentIndex < 0) {
@@ -14270,7 +16510,11 @@ function estimateRemainingTime(lastProgressEvent, bandwidthEstimate) {
 
 
 function estimateStarvationModeBitrate(pendingRequests, playbackInfo, currentRepresentation, lastEstimatedBitrate) {
-  var nextNeededPosition = playbackInfo.position + playbackInfo.bufferGap;
+  var bufferGap = playbackInfo.bufferGap,
+      speed = playbackInfo.speed,
+      position = playbackInfo.position;
+  var realBufferGap = isFinite(bufferGap) ? bufferGap : 0;
+  var nextNeededPosition = position + realBufferGap;
   var concernedRequests = getConcernedRequests(pendingRequests, nextNeededPosition);
 
   if (concernedRequests.length !== 1) {
@@ -14291,7 +16535,7 @@ function estimateStarvationModeBitrate(pendingRequests, playbackInfo, currentRep
 
     if ((now - lastProgressEvent.timestamp) / 1000 <= remainingTime) {
       // Calculate estimated time spent rebuffering if we continue doing that request.
-      var expectedRebufferingTime = remainingTime - playbackInfo.bufferGap / playbackInfo.speed;
+      var expectedRebufferingTime = remainingTime - realBufferGap / speed;
 
       if (expectedRebufferingTime > 2000) {
         return bandwidthEstimate;
@@ -14300,7 +16544,7 @@ function estimateStarvationModeBitrate(pendingRequests, playbackInfo, currentRep
   }
 
   var requestElapsedTime = (now - concernedRequest.requestTimestamp) / 1000;
-  var reasonableElapsedTime = requestElapsedTime <= (chunkDuration * 1.5 + 2) / playbackInfo.speed;
+  var reasonableElapsedTime = requestElapsedTime <= (chunkDuration * 1.5 + 2) / speed;
 
   if (currentRepresentation == null || reasonableElapsedTime) {
     return undefined;
@@ -14329,7 +16573,8 @@ function estimateStarvationModeBitrate(pendingRequests, playbackInfo, currentRep
 
 
 function shouldDirectlySwitchToLowBitrate(playbackInfo, requests) {
-  var nextNeededPosition = playbackInfo.position + playbackInfo.bufferGap;
+  var realBufferGap = isFinite(playbackInfo.bufferGap) ? playbackInfo.bufferGap : 0;
+  var nextNeededPosition = playbackInfo.position + realBufferGap;
   var nextRequest = (0,array_find/* default */.Z)(requests, function (r) {
     return r.duration > 0 && r.time + r.duration > nextNeededPosition;
   });
@@ -14353,7 +16598,7 @@ function shouldDirectlySwitchToLowBitrate(playbackInfo, requests) {
     return true;
   }
 
-  var expectedRebufferingTime = remainingTime - playbackInfo.bufferGap / playbackInfo.speed;
+  var expectedRebufferingTime = remainingTime - realBufferGap / playbackInfo.speed;
   return expectedRebufferingTime > -1.5;
 }
 /**
@@ -14406,13 +16651,14 @@ var NetworkAnalyzer = /*#__PURE__*/function () {
     var localConf = this._config;
     var bufferGap = playbackInfo.bufferGap,
         position = playbackInfo.position,
-        duration = playbackInfo.duration; // check if should get in/out of starvation mode
+        duration = playbackInfo.duration;
+    var realBufferGap = isFinite(bufferGap) ? bufferGap : 0; // check if should get in/out of starvation mode
 
-    if (isNaN(duration) || bufferGap + position < duration - ABR_STARVATION_DURATION_DELTA) {
-      if (!this._inStarvationMode && bufferGap <= localConf.starvationGap) {
+    if (isNaN(duration) || realBufferGap + position < duration - ABR_STARVATION_DURATION_DELTA) {
+      if (!this._inStarvationMode && realBufferGap <= localConf.starvationGap) {
         log/* default.info */.Z.info("ABR: enter starvation mode.");
         this._inStarvationMode = true;
-      } else if (this._inStarvationMode && bufferGap >= localConf.outOfStarvationGap) {
+      } else if (this._inStarvationMode && realBufferGap >= localConf.outOfStarvationGap) {
         log/* default.info */.Z.info("ABR: exit starvation mode.");
         this._inStarvationMode = false;
       }
@@ -15143,1751 +17389,6 @@ var ABRManager = /*#__PURE__*/function () {
  */
 
 /* harmony default export */ const abr = (ABRManager);
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/operators/catchError.js
-var catchError = __webpack_require__(486);
-// EXTERNAL MODULE: ./src/utils/rx-try_catch.ts
-var rx_try_catch = __webpack_require__(5561);
-// EXTERNAL MODULE: ./src/errors/request_error.ts
-var request_error = __webpack_require__(9105);
-// EXTERNAL MODULE: ./src/errors/network_error.ts
-var network_error = __webpack_require__(9362);
-;// CONCATENATED MODULE: ./src/core/fetchers/utils/error_selector.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Generate a new error from the infos given.
- * @param {string} code
- * @param {Error} error
- * @returns {Error}
- */
-
-function errorSelector(error) {
-  if (error instanceof request_error/* default */.Z) {
-    return new network_error/* default */.Z("PIPELINE_LOAD_ERROR", error);
-  }
-
-  return formatError(error, {
-    defaultCode: "PIPELINE_LOAD_ERROR",
-    defaultReason: "Unknown error when fetching the Manifest"
-  });
-}
-// EXTERNAL MODULE: ./node_modules/rxjs/_esm5/internal/observable/timer.js
-var timer = __webpack_require__(9604);
-;// CONCATENATED MODULE: ./src/compat/is_offline.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Some browsers have a builtin API to know if it's connected at least to a
- * LAN network, at most to the internet.
- *
- * /!\ This feature can be dangerous as you can both have false positives and
- * false negatives.
- *
- * False positives:
- *   - you can still play local contents (on localhost) if isOffline == true
- *   - on some browsers isOffline might be true even if we're connected to a LAN
- *     or a router (it would mean we're just not able to connect to the
- *     Internet). So we can eventually play LAN contents if isOffline == true
- *
- * False negatives:
- *   - in some cases, we even might have isOffline at false when we do not have
- *     any connection:
- *       - in browsers that do not support the feature
- *       - in browsers running in some virtualization softwares where the
- *         network adapters are always connected.
- *
- * Use with these cases in mind.
- * @returns {Boolean}
- */
-function isOffline() {
-  /* eslint-disable @typescript-eslint/no-unnecessary-boolean-literal-compare */
-  return navigator.onLine === false;
-  /* eslint-enable @typescript-eslint/no-unnecessary-boolean-literal-compare */
-}
-// EXTERNAL MODULE: ./src/utils/get_fuzzed_delay.ts
-var get_fuzzed_delay = __webpack_require__(2572);
-;// CONCATENATED MODULE: ./src/core/fetchers/utils/try_urls_with_backoff.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-/**
- * Called on a loader error.
- * Returns whether the loader request should be retried.
- * @param {Error} error
- * @returns {Boolean} - If true, the request can be retried.
- */
-
-function shouldRetry(error) {
-  if (error instanceof request_error/* default */.Z) {
-    if (error.type === error_codes/* NetworkErrorTypes.ERROR_HTTP_CODE */.br.ERROR_HTTP_CODE) {
-      return error.status >= 500 || error.status === 404 || error.status === 415 || // some CDN seems to use that code when
-      // requesting low-latency segments too much
-      // in advance
-      error.status === 412;
-    }
-
-    return error.type === error_codes/* NetworkErrorTypes.TIMEOUT */.br.TIMEOUT || error.type === error_codes/* NetworkErrorTypes.ERROR_EVENT */.br.ERROR_EVENT;
-  }
-
-  return (0,is_known_error/* default */.Z)(error) && error.code === "INTEGRITY_ERROR";
-}
-/**
- * Returns true if we're pretty sure that the current error is due to the
- * user being offline.
- * @param {Error} error
- * @returns {Boolean}
- */
-
-
-function isOfflineRequestError(error) {
-  return error.type === error_codes/* NetworkErrorTypes.ERROR_EVENT */.br.ERROR_EVENT && isOffline();
-}
-
-var REQUEST_ERROR_TYPES;
-
-(function (REQUEST_ERROR_TYPES) {
-  REQUEST_ERROR_TYPES[REQUEST_ERROR_TYPES["None"] = 0] = "None";
-  REQUEST_ERROR_TYPES[REQUEST_ERROR_TYPES["Regular"] = 1] = "Regular";
-  REQUEST_ERROR_TYPES[REQUEST_ERROR_TYPES["Offline"] = 2] = "Offline";
-})(REQUEST_ERROR_TYPES || (REQUEST_ERROR_TYPES = {}));
-/**
- * Guess the type of error obtained.
- * @param {*} error
- * @returns {number}
- */
-
-
-function getRequestErrorType(error) {
-  return error instanceof request_error/* default */.Z && isOfflineRequestError(error) ? REQUEST_ERROR_TYPES.Offline : REQUEST_ERROR_TYPES.Regular;
-}
-/**
- * Specific algorithm used to perform segment and manifest requests.
- *
- * Here how it works:
- *
- *   1. we give it one or multiple URLs available for the element we want to
- *      request, the request callback and some options
- *
- *   2. it tries to call the request callback with the first URL:
- *        - if it works as expected, it wrap the response in a `response` event.
- *        - if it fails, it emits a `retry` event and try with the next one.
- *
- *   3. When all URLs have been tested (and failed), it decides - according to
- *      the error counters, configuration and errors received - if it can retry
- *      at least one of them, in the same order:
- *        - If it can, it increments the corresponding error counter, wait a
- *          delay (based on an exponential backoff) and restart the same logic
- *          for all retry-able URL.
- *        - If it can't it just throws the error.
- *
- * Note that there are in fact two separate counters:
- *   - one for "offline" errors
- *   - one for other xhr errors
- * Both counters are resetted if the error type changes from an error to the
- * next.
- * @param {Array.<string} obs$
- * @param {Function} request$
- * @param {Object} options - Configuration options.
- * @returns {Observable}
- */
-
-
-function tryURLsWithBackoff(urls, request$, options) {
-  var baseDelay = options.baseDelay,
-      maxDelay = options.maxDelay,
-      maxRetryRegular = options.maxRetryRegular,
-      maxRetryOffline = options.maxRetryOffline;
-  var retryCount = 0;
-  var lastError = REQUEST_ERROR_TYPES.None;
-  var urlsToTry = urls.slice();
-
-  if (urlsToTry.length === 0) {
-    log/* default.warn */.Z.warn("Fetchers: no URL given to `tryURLsWithBackoff`.");
-    return empty/* EMPTY */.E;
-  }
-
-  return tryURLsRecursively(urlsToTry[0], 0);
-  /**
-   * Try to do the request of a given `url` which corresponds to the `index`
-   * argument in the `urlsToTry` Array.
-   *
-   * If it fails try the next one.
-   *
-   * If all URLs fail, start a timer and retry the first element in that array
-   * by following the configuration.
-   *
-   * @param {string|null} url
-   * @param {number} index
-   * @returns {Observable}
-   */
-
-  function tryURLsRecursively(url, index) {
-    return request$(url).pipe((0,map/* map */.U)(function (res) {
-      return {
-        type: "response",
-        value: res
-      };
-    }), (0,catchError/* catchError */.K)(function (error) {
-      if (!shouldRetry(error)) {
-        // ban this URL
-        if (urlsToTry.length <= 1) {
-          // This was the last one, throw
-          throw error;
-        } // else, remove that element from the array and go the next URL
-
-
-        urlsToTry.splice(index, 1);
-        var newIndex = index >= urlsToTry.length - 1 ? 0 : index;
-        return tryURLsRecursively(urlsToTry[newIndex], newIndex).pipe((0,startWith/* startWith */.O)({
-          type: "retry",
-          value: error
-        }));
-      }
-
-      var currentError = getRequestErrorType(error);
-      var maxRetry = currentError === REQUEST_ERROR_TYPES.Offline ? maxRetryOffline : maxRetryRegular;
-
-      if (currentError !== lastError) {
-        retryCount = 0;
-        lastError = currentError;
-      }
-
-      if (index < urlsToTry.length - 1) {
-        // there is still URLs to test
-        var _newIndex = index + 1;
-
-        return tryURLsRecursively(urlsToTry[_newIndex], _newIndex).pipe((0,startWith/* startWith */.O)({
-          type: "retry",
-          value: error
-        }));
-      } // Here, we were using the last element of the `urlsToTry` array.
-      // Increment counter and restart with the first URL
-
-
-      retryCount++;
-
-      if (retryCount > maxRetry) {
-        throw error;
-      }
-
-      var delay = Math.min(baseDelay * Math.pow(2, retryCount - 1), maxDelay);
-      var fuzzedDelay = (0,get_fuzzed_delay/* default */.Z)(delay);
-      var nextURL = urlsToTry[0];
-      return (0,timer/* timer */.H)(fuzzedDelay).pipe((0,mergeMap/* mergeMap */.zg)(function () {
-        return tryURLsRecursively(nextURL, 0);
-      }), (0,startWith/* startWith */.O)({
-        type: "retry",
-        value: error
-      }));
-    }));
-  }
-}
-/**
- * Lightweight version of the request algorithm, this time with only a simple
- * Observable given.
- * @param {Function} request$
- * @param {Object} options
- * @returns {Observable}
- */
-
-function tryRequestObservableWithBackoff(request$, options) {
-  // same than for a single unknown URL
-  return tryURLsWithBackoff([null], function () {
-    return request$;
-  }, options);
-}
-;// CONCATENATED MODULE: ./src/core/fetchers/utils/create_request_scheduler.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-function createRequestScheduler(backoffOptions, warning$) {
-  /**
-   * Allow the parser to schedule a new request.
-   * @param {Function} request - Function performing the request.
-   * @returns {Function}
-   */
-  return function scheduleRequest(request) {
-    return tryRequestObservableWithBackoff((0,rx_try_catch/* default */.Z)(request, undefined), backoffOptions).pipe((0,filter_map/* default */.Z)(function (evt) {
-      if (evt.type === "retry") {
-        warning$.next(errorSelector(evt.value));
-        return null;
-      }
-
-      return evt.value;
-    }, null), (0,catchError/* catchError */.K)(function (error) {
-      throw errorSelector(error);
-    }));
-  };
-}
-;// CONCATENATED MODULE: ./src/core/fetchers/manifest/get_manifest_backoff_options.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var DEFAULT_MAX_MANIFEST_REQUEST_RETRY = config/* default.DEFAULT_MAX_MANIFEST_REQUEST_RETRY */.Z.DEFAULT_MAX_MANIFEST_REQUEST_RETRY,
-    DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
-    INITIAL_BACKOFF_DELAY_BASE = config/* default.INITIAL_BACKOFF_DELAY_BASE */.Z.INITIAL_BACKOFF_DELAY_BASE,
-    MAX_BACKOFF_DELAY_BASE = config/* default.MAX_BACKOFF_DELAY_BASE */.Z.MAX_BACKOFF_DELAY_BASE;
-/**
- * Parse config to replace missing manifest backoff options.
- * @param {Object} backoffOptions
- * @returns {Object}
- */
-
-function getManifestBackoffOptions(_ref) {
-  var maxRetryRegular = _ref.maxRetryRegular,
-      maxRetryOffline = _ref.maxRetryOffline,
-      lowLatencyMode = _ref.lowLatencyMode;
-  var baseDelay = lowLatencyMode ? INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : INITIAL_BACKOFF_DELAY_BASE.REGULAR;
-  var maxDelay = lowLatencyMode ? MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : MAX_BACKOFF_DELAY_BASE.REGULAR;
-  return {
-    baseDelay: baseDelay,
-    maxDelay: maxDelay,
-    maxRetryRegular: maxRetryRegular !== undefined ? maxRetryRegular : DEFAULT_MAX_MANIFEST_REQUEST_RETRY,
-    maxRetryOffline: maxRetryOffline !== undefined ? maxRetryOffline : DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE
-  };
-}
-;// CONCATENATED MODULE: ./src/core/fetchers/manifest/manifest_fetcher.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-
-
-/**
- * Class allowing to facilitate the task of loading and parsing a Manifest.
- * @class ManifestFetcher
- * @example
- * ```js
- * const manifestFetcher = new ManifestFetcher(manifestUrl, pipelines, options);
- * manifestFetcher.fetch().pipe(
- *   // Filter only responses (might also receive warning events)
- *   filter((evt) => evt.type === "response");
- *   // Parse the Manifest
- *   mergeMap(res => res.parse({ externalClockOffset }))
- *   // (again)
- *   filter((evt) => evt.type === "parsed");
- * ).subscribe(({ value }) => {
- *   console.log("Manifest:", value.manifest);
- * });
- * ```
- */
-
-var ManifestFetcher = /*#__PURE__*/function () {
-  /**
-   * @param {string | undefined} url
-   * @param {Object} pipelines
-   * @param {Object} backoffOptions
-   */
-  function ManifestFetcher(url, pipelines, backoffOptions) {
-    this._manifestUrl = url;
-    this._pipelines = pipelines.manifest;
-    this._backoffOptions = getManifestBackoffOptions(backoffOptions);
-  }
-  /**
-   * (re-)Load the Manifest without yet parsing it.
-   *
-   * You can set an `url` on which that Manifest will be requested.
-   * If not set, the regular Manifest url - defined on the
-   * `ManifestFetcher` instanciation - will be used instead.
-   * @param {string} [url]
-   * @returns {Observable}
-   */
-
-
-  var _proto = ManifestFetcher.prototype;
-
-  _proto.fetch = function fetch(url) {
-    var _this = this;
-
-    var _a;
-
-    var requestUrl = url !== null && url !== void 0 ? url : this._manifestUrl; // TODO Remove the resolver completely in the next major version
-
-    var resolver = (_a = this._pipelines.resolver) !== null && _a !== void 0 ? _a : of.of;
-    var loader = this._pipelines.loader;
-    return (0,rx_try_catch/* default */.Z)(resolver, {
-      url: requestUrl
-    }).pipe((0,catchError/* catchError */.K)(function (error) {
-      throw errorSelector(error);
-    }), (0,mergeMap/* mergeMap */.zg)(function (loaderArgument) {
-      var loader$ = (0,rx_try_catch/* default */.Z)(loader, loaderArgument);
-      return tryRequestObservableWithBackoff(loader$, _this._backoffOptions).pipe((0,catchError/* catchError */.K)(function (error) {
-        throw errorSelector(error);
-      }), (0,map/* map */.U)(function (evt) {
-        return evt.type === "retry" ? {
-          type: "warning",
-          value: errorSelector(evt.value)
-        } : {
-          type: "response",
-          parse: function parse(parserOptions) {
-            return _this._parseLoadedManifest(evt.value.value, parserOptions);
-          }
-        };
-      }));
-    }));
-  }
-  /**
-   * Parse an already loaded Manifest.
-   *
-   * This method should be reserved for Manifests for which no request has been
-   * done.
-   * In other cases, it's preferable to go through the `fetch` method, so
-   * information on the request can be used by the parsing process.
-   * @param {*} manifest
-   * @param {Object} parserOptions
-   * @returns {Observable}
-   */
-  ;
-
-  _proto.parse = function parse(manifest, parserOptions) {
-    return this._parseLoadedManifest({
-      responseData: manifest,
-      size: undefined,
-      duration: undefined
-    }, parserOptions);
-  }
-  /**
-   * Parse a Manifest.
-   *
-   * @param {Object} loaded - Information about the loaded Manifest as well as
-   * about the corresponding request.
-   * @param {Object} parserOptions - Options used when parsing the Manifest.
-   * @returns {Observable}
-   */
-  ;
-
-  _proto._parseLoadedManifest = function _parseLoadedManifest(loaded, parserOptions) {
-    var sendingTime = loaded.sendingTime,
-        receivedTime = loaded.receivedTime;
-    var parsingTimeStart = performance.now();
-    var schedulerWarnings$ = new Subject/* Subject */.xQ();
-    var scheduleRequest = createRequestScheduler(this._backoffOptions, schedulerWarnings$);
-    return (0,merge/* merge */.T)(schedulerWarnings$.pipe((0,map/* map */.U)(function (err) {
-      return {
-        type: "warning",
-        value: err
-      };
-    })), this._pipelines.parser({
-      response: loaded,
-      url: this._manifestUrl,
-      externalClockOffset: parserOptions.externalClockOffset,
-      previousManifest: parserOptions.previousManifest,
-      scheduleRequest: scheduleRequest,
-      unsafeMode: parserOptions.unsafeMode
-    }).pipe((0,catchError/* catchError */.K)(function (error) {
-      throw formatError(error, {
-        defaultCode: "PIPELINE_PARSE_ERROR",
-        defaultReason: "Unknown error when parsing the Manifest"
-      });
-    }), (0,map/* map */.U)(function (parsingEvt) {
-      if (parsingEvt.type === "warning") {
-        var formatted = formatError(parsingEvt.value, {
-          defaultCode: "PIPELINE_PARSE_ERROR",
-          defaultReason: "Unknown error when parsing the Manifest"
-        });
-        return {
-          type: "warning",
-          value: formatted
-        };
-      } // 2 - send response
-
-
-      var parsingTime = performance.now() - parsingTimeStart;
-      return {
-        type: "parsed",
-        manifest: parsingEvt.value.manifest,
-        sendingTime: sendingTime,
-        receivedTime: receivedTime,
-        parsingTime: parsingTime
-      };
-    }), finalize(function () {
-      schedulerWarnings$.complete();
-    })));
-  };
-
-  return ManifestFetcher;
-}();
-
-
-;// CONCATENATED MODULE: ./src/core/fetchers/manifest/index.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/* harmony default export */ const fetchers_manifest = (ManifestFetcher);
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/get_segment_backoff_options.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
-    get_segment_backoff_options_DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
-    get_segment_backoff_options_INITIAL_BACKOFF_DELAY_BASE = config/* default.INITIAL_BACKOFF_DELAY_BASE */.Z.INITIAL_BACKOFF_DELAY_BASE,
-    get_segment_backoff_options_MAX_BACKOFF_DELAY_BASE = config/* default.MAX_BACKOFF_DELAY_BASE */.Z.MAX_BACKOFF_DELAY_BASE;
-/**
- * @param {string} bufferType
- * @param {Object}
- * @returns {Object}
- */
-
-function getSegmentBackoffOptions(bufferType, _ref) {
-  var maxRetryRegular = _ref.maxRetryRegular,
-      maxRetryOffline = _ref.maxRetryOffline,
-      lowLatencyMode = _ref.lowLatencyMode;
-  return {
-    maxRetryRegular: bufferType === "image" ? 0 : maxRetryRegular !== null && maxRetryRegular !== void 0 ? maxRetryRegular : DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
-    maxRetryOffline: maxRetryOffline !== null && maxRetryOffline !== void 0 ? maxRetryOffline : get_segment_backoff_options_DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
-    baseDelay: lowLatencyMode ? get_segment_backoff_options_INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : get_segment_backoff_options_INITIAL_BACKOFF_DELAY_BASE.REGULAR,
-    maxDelay: lowLatencyMode ? get_segment_backoff_options_MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : get_segment_backoff_options_MAX_BACKOFF_DELAY_BASE.REGULAR
-  };
-}
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/prioritized_segment_fetcher.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * This function basically put in relation:
- *   - a SegmentFetcher, which will be used to perform the segment request
- *   - a prioritizer, which will handle the priority of a segment request
- *
- * and returns functions to fetch segments with a given priority.
- * @param {Object} prioritizer
- * @param {Object} fetcher
- * @returns {Object}
- */
-
-function applyPrioritizerToSegmentFetcher(prioritizer, fetcher) {
-  /**
-   * The Observables returned by `createRequest` are not exactly the same than
-   * the one created by the `ObservablePrioritizer`. Because we still have to
-   * keep a handle on that value.
-   */
-  var taskHandlers = new WeakMap();
-  return {
-    /**
-     * Create a Segment request with a given priority.
-     * @param {Object} content - content to request
-     * @param {Number} priority - priority at which the content should be requested.
-     * Lower number == higher priority.
-     * @returns {Observable}
-     */
-    createRequest: function createRequest(content, priority) {
-      if (priority === void 0) {
-        priority = 0;
-      }
-
-      var task = prioritizer.create(fetcher(content), priority);
-      var flattenTask = task.pipe((0,map/* map */.U)(function (evt) {
-        return evt.type === "data" ? evt.value : evt;
-      }));
-      taskHandlers.set(flattenTask, task);
-      return flattenTask;
-    },
-
-    /**
-     * Update the priority of a pending request, created through
-     * `createRequest`.
-     * @param {Observable} observable - The Observable returned by `createRequest`.
-     * @param {Number} priority - The new priority value.
-     */
-    updatePriority: function updatePriority(observable, priority) {
-      var correspondingTask = taskHandlers.get(observable);
-
-      if (correspondingTask === undefined) {
-        log/* default.warn */.Z.warn("Fetchers: Cannot update the priority of a request: task not found.");
-        return;
-      }
-
-      prioritizer.updatePriority(correspondingTask, priority);
-    }
-  };
-}
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/prioritizer.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-/**
- * Create Observables which can be priorized between one another.
- *
- * With this class, you can link an Observables to a priority number.
- * The lower this number is, the more priority the resulting Observable will
- * have.
- *
- * Such returned Observables - called "tasks" - will then basically wait for
- * pending task with more priority (i.e. a lower priority number) to finish
- * before "starting".
- *
- * This only applies for non-pending tasks. For pending tasks, those are usually
- * not interrupted except in the following case:
- *
- * When a task with a "high priority" (which is a configurable priority
- * value) is created, pending tasks with a "low priority" (also configurable)
- * will be interrupted. Those tasks will be restarted when all tasks with a
- * higher priority are finished.
- *
- * You can also update the priority of an already-created task.
- *
- * ```js
- * const observable1 = Observable.timer(100).pipe(mapTo(1));
- * const observable2 = Observable.timer(100).pipe(mapTo(2));
- * const observable3 = Observable.timer(100).pipe(mapTo(3));
- * const observable4 = Observable.timer(100).pipe(mapTo(4));
- * const observable5 = Observable.timer(100).pipe(mapTo(5));
- *
- * // Instanciate ObservablePrioritizer.
- * // Also provide a `high` priority step - the maximum priority number a "high
- * // priority task" has and a `low` priority step - the minimum priority number
- * // a "low priority task" has.
- * const prioritizer = new ObservablePrioritizer({
- *   prioritySteps: { high: 0, low: 20 }
- * });
- *
- * const pObservable1 = prioritizer.create(observable1, 4);
- * const pObservable2 = prioritizer.create(observable2, 2);
- * const pObservable3 = prioritizer.create(observable3, 1);
- * const pObservable4 = prioritizer.create(observable4, 3);
- * const pObservable5 = prioritizer.create(observable5, 2);
- *
- * // start every Observables at the same time
- * observableMerge(
- *   pObservable1,
- *   pObservable2,
- *   pObservable3,
- *   pObservable4,
- *   pObservable5
- * ).subscribe((evt) => {
- *   if (evt.type === "data") {
- *     console.log(i);
- *
- *     // To spice things up, update pObservable1 priority to go before
- *     // pObservable4
- *     if (i === 5) { // if pObservable5 is currently emitting
- *       prioritizer.updatePriority(pObservable1, 1);
- *     }
- *   }
- * });
- *
- * // Result:
- * // 3
- * // 2
- * // 5
- * // 1
- * // 4
- *
- * // Note: here "1" goes before "4" only because the former's priority has been
- * // updated before the latter was started.
- * // It would be the other way around if not.
- * ```
- *
- * @class ObservablePrioritizer
- */
-
-var ObservablePrioritizer = /*#__PURE__*/function () {
-  /**
-   * @param {Options} prioritizerOptions
-   */
-  function ObservablePrioritizer(_ref) {
-    var prioritySteps = _ref.prioritySteps;
-    this._minPendingPriority = null;
-    this._waitingQueue = [];
-    this._pendingTasks = [];
-    this._prioritySteps = prioritySteps;
-
-    if (this._prioritySteps.high >= this._prioritySteps.low) {
-      throw new Error("FP Error: the max high level priority should be given a lower" + "priority number than the min low priority.");
-    }
-  }
-  /**
-   * Create a priorized Observable from a base Observable.
-   *
-   * When subscribed to, this Observable will have its priority compared to
-   * all the already-running Observables created from this class.
-   *
-   * Only if this number is inferior or equal to the priority of the
-   * currently-running Observables will it be immediately started.
-   * In the opposite case, we will wait for higher-priority Observables to
-   * finish before starting it.
-   *
-   * Note that while this Observable is waiting for its turn, it is possible
-   * to update its property through the updatePriority method, by providing
-   * the Observable returned by this function and its new priority number.
-   *
-   * @param {Observable} obs
-   * @param {number} priority
-   * @returns {Observable}
-   */
-
-
-  var _proto = ObservablePrioritizer.prototype;
-
-  _proto.create = function create(obs, priority) {
-    var _this = this;
-
-    var pObs$ = new Observable/* Observable */.y(function (subscriber) {
-      var isStillSubscribed = true; // eslint-disable-next-line prefer-const
-
-      var newTask;
-      /**
-       * Function allowing to start / interrupt the underlying Observable.
-       * @param {Boolean} shouldRun - If `true`, the observable can run. If
-       * `false` it means that it just needs to be interrupted if already
-       * starte.
-       */
-
-      var trigger = function trigger(shouldRun) {
-        if (newTask.subscription !== null) {
-          newTask.subscription.unsubscribe();
-          newTask.subscription = null;
-
-          if (isStillSubscribed) {
-            subscriber.next({
-              type: "interrupted"
-            });
-          }
-        }
-
-        if (!shouldRun) {
-          return;
-        }
-
-        _this._minPendingPriority = _this._minPendingPriority === null ? newTask.priority : Math.min(_this._minPendingPriority, newTask.priority);
-
-        _this._pendingTasks.push(newTask);
-
-        newTask.subscription = obs.subscribe(function (evt) {
-          return subscriber.next({
-            type: "data",
-            value: evt
-          });
-        }, function (error) {
-          subscriber.error(error);
-          newTask.subscription = null;
-          newTask.finished = true;
-
-          _this._onTaskEnd(newTask);
-        }, function () {
-          subscriber.next({
-            type: "ended"
-          });
-
-          if (isStillSubscribed) {
-            subscriber.complete();
-          }
-
-          newTask.subscription = null;
-          newTask.finished = true;
-
-          _this._onTaskEnd(newTask);
-        });
-      };
-
-      newTask = {
-        observable: pObs$,
-        priority: priority,
-        trigger: trigger,
-        subscription: null,
-        finished: false
-      };
-
-      if (!_this._canBeStartedNow(newTask)) {
-        _this._waitingQueue.push(newTask);
-      } else {
-        newTask.trigger(true);
-
-        if (_this._isRunningHighPriorityTasks()) {
-          // Note: we want to begin interrupting low-priority tasks just
-          // after starting the current one because the interrupting
-          // logic can call external code.
-          // This would mean re-entrancy, itself meaning that some weird
-          // half-state could be reached unless we're very careful.
-          // To be sure no harm is done, we put that code at the last
-          // possible position (the previous Observable sould be
-          // performing all its initialization synchronously).
-          _this._interruptCancellableTasks();
-        }
-      }
-      /** Callback called when this Observable is unsubscribed to. */
-
-
-      return function () {
-        isStillSubscribed = false;
-
-        if (newTask.subscription !== null) {
-          newTask.subscription.unsubscribe();
-          newTask.subscription = null;
-        }
-
-        if (newTask.finished) {
-          // Task already finished, we're good
-          return;
-        } // remove it from waiting queue if in it
-
-
-        var waitingQueueIndex = (0,array_find_index/* default */.Z)(_this._waitingQueue, function (elt) {
-          return elt.observable === pObs$;
-        });
-
-        if (waitingQueueIndex >= 0) {
-          // If it was still waiting for its turn
-          _this._waitingQueue.splice(waitingQueueIndex, 1);
-        } else {
-          // remove it from pending queue if in it
-          var pendingTasksIndex = (0,array_find_index/* default */.Z)(_this._pendingTasks, function (elt) {
-            return elt.observable === pObs$;
-          });
-
-          if (pendingTasksIndex < 0) {
-            log/* default.warn */.Z.warn("FP: unsubscribing non-existent task");
-            return;
-          }
-
-          var pendingTask = _this._pendingTasks.splice(pendingTasksIndex, 1)[0];
-
-          if (_this._pendingTasks.length === 0) {
-            _this._minPendingPriority = null;
-
-            _this._loopThroughWaitingQueue();
-          } else if (_this._minPendingPriority === pendingTask.priority) {
-            _this._minPendingPriority = Math.min.apply(Math, _this._pendingTasks.map(function (t) {
-              return t.priority;
-            }));
-
-            _this._loopThroughWaitingQueue();
-          }
-        }
-      };
-    });
-    return pObs$;
-  }
-  /**
-   * Update the priority of an Observable created through the `create` method.
-   * @param {Observable} obs
-   * @param {number} priority
-   */
-  ;
-
-  _proto.updatePriority = function updatePriority(obs, priority) {
-    var waitingQueueIndex = (0,array_find_index/* default */.Z)(this._waitingQueue, function (elt) {
-      return elt.observable === obs;
-    });
-
-    if (waitingQueueIndex >= 0) {
-      // If it was still waiting for its turn
-      var waitingQueueElt = this._waitingQueue[waitingQueueIndex];
-
-      if (waitingQueueElt.priority === priority) {
-        return;
-      }
-
-      waitingQueueElt.priority = priority;
-
-      if (!this._canBeStartedNow(waitingQueueElt)) {
-        return;
-      }
-
-      this._startWaitingQueueTask(waitingQueueIndex);
-
-      if (this._isRunningHighPriorityTasks()) {
-        // Re-check to cancel every "cancellable" pending task
-        //
-        // Note: We start the task before interrupting cancellable tasks on
-        // purpose.
-        // Because both `_startWaitingQueueTask` and
-        // `_interruptCancellableTasks` can emit events and thus call external
-        // code, we could retrieve ourselves in a very weird state at this point
-        // (for example, the different Observable priorities could all be
-        // shuffled up, new Observables could have been started in the
-        // meantime, etc.).
-        //
-        // By starting the task first, we ensure that this is manageable:
-        // `_minPendingPriority` has already been updated to the right value at
-        // the time we reached external code, the priority of the current
-        // Observable has just been updated, and `_interruptCancellableTasks`
-        // will ensure that we're basing ourselves on the last `priority` value
-        // each time.
-        // Doing it in the reverse order is an order of magnitude more difficult
-        // to write and to reason about.
-        this._interruptCancellableTasks();
-      }
-
-      return;
-    }
-
-    var pendingTasksIndex = (0,array_find_index/* default */.Z)(this._pendingTasks, function (elt) {
-      return elt.observable === obs;
-    });
-
-    if (pendingTasksIndex < 0) {
-      log/* default.warn */.Z.warn("FP: request to update the priority of a non-existent task");
-      return;
-    }
-
-    var task = this._pendingTasks[pendingTasksIndex];
-
-    if (task.priority === priority) {
-      return;
-    }
-
-    var prevPriority = task.priority;
-    task.priority = priority;
-
-    if (this._minPendingPriority === null || priority < this._minPendingPriority) {
-      this._minPendingPriority = priority;
-    } else if (this._minPendingPriority === prevPriority) {
-      // was highest priority
-      if (this._pendingTasks.length === 1) {
-        this._minPendingPriority = priority;
-      } else {
-        this._minPendingPriority = Math.min.apply(Math, this._pendingTasks.map(function (t) {
-          return t.priority;
-        }));
-      }
-
-      this._loopThroughWaitingQueue();
-    } else {
-      // We updated a task which already had a priority value higher than the
-      // minimum to a value still superior to the minimum. Nothing can happen.
-      return;
-    }
-
-    if (this._isRunningHighPriorityTasks()) {
-      // Always interrupt cancellable tasks after all other side-effects, to
-      // avoid re-entrancy issues
-      this._interruptCancellableTasks();
-    }
-  }
-  /**
-   * Browse the current waiting queue and start all task in it that needs to be
-   * started: start the ones with the lowest priority value below
-   * `_minPendingPriority`.
-   *
-   * Private properties, such as `_minPendingPriority` are updated accordingly
-   * while this method is called.
-   */
-  ;
-
-  _proto._loopThroughWaitingQueue = function _loopThroughWaitingQueue() {
-    var minWaitingPriority = this._waitingQueue.reduce(function (acc, elt) {
-      return acc === null || acc > elt.priority ? elt.priority : acc;
-    }, null);
-
-    if (minWaitingPriority === null || this._minPendingPriority !== null && this._minPendingPriority < minWaitingPriority) {
-      return;
-    }
-
-    for (var i = 0; i < this._waitingQueue.length; i++) {
-      var priorityToCheck = this._minPendingPriority === null ? minWaitingPriority : Math.min(this._minPendingPriority, minWaitingPriority);
-      var elt = this._waitingQueue[i];
-
-      if (elt.priority <= priorityToCheck) {
-        this._startWaitingQueueTask(i);
-
-        i--; // previous operation should have removed that element from the
-        // the waiting queue
-      }
-    }
-  }
-  /**
-   * Interrupt and move back to the waiting queue all pending tasks that are
-   * low priority (having a higher priority number than
-   * `this._prioritySteps.low`).
-   */
-  ;
-
-  _proto._interruptCancellableTasks = function _interruptCancellableTasks() {
-    for (var i = 0; i < this._pendingTasks.length; i++) {
-      var pendingObj = this._pendingTasks[i];
-
-      if (pendingObj.priority >= this._prioritySteps.low) {
-        this._interruptPendingTask(pendingObj); // The previous call could have a lot of potential side-effects.
-        // It is safer to re-start the function to not miss any pending
-        // task that needs to be cancelled.
-
-
-        return this._interruptCancellableTasks();
-      }
-    }
-  }
-  /**
-   * Start task which is at the given index in the waiting queue.
-   * The task will be removed from the waiting queue in the process.
-   * @param {number} index
-   */
-  ;
-
-  _proto._startWaitingQueueTask = function _startWaitingQueueTask(index) {
-    var task = this._waitingQueue.splice(index, 1)[0];
-
-    task.trigger(true);
-  }
-  /**
-   * Move back pending task to the waiting queue and interrupt it.
-   * @param {object} task
-   */
-  ;
-
-  _proto._interruptPendingTask = function _interruptPendingTask(task) {
-    var pendingTasksIndex = (0,array_find_index/* default */.Z)(this._pendingTasks, function (elt) {
-      return elt.observable === task.observable;
-    });
-
-    if (pendingTasksIndex < 0) {
-      log/* default.warn */.Z.warn("FP: Interrupting a non-existent pending task. Aborting...");
-      return;
-    } // Stop task and put it back in the waiting queue
-
-
-    this._pendingTasks.splice(pendingTasksIndex, 1);
-
-    this._waitingQueue.push(task);
-
-    if (this._pendingTasks.length === 0) {
-      this._minPendingPriority = null;
-    } else if (this._minPendingPriority === task.priority) {
-      this._minPendingPriority = Math.min.apply(Math, this._pendingTasks.map(function (t) {
-        return t.priority;
-      }));
-    }
-
-    task.trigger(false); // Interrupt at last step because it calls external code
-  }
-  /**
-   * Logic ran when a task has ended (either errored or completed).
-   * @param {Object} task
-   */
-  ;
-
-  _proto._onTaskEnd = function _onTaskEnd(task) {
-    var pendingTasksIndex = (0,array_find_index/* default */.Z)(this._pendingTasks, function (elt) {
-      return elt.observable === task.observable;
-    });
-
-    if (pendingTasksIndex < 0) {
-      return; // Happen for example when the task has been interrupted
-    }
-
-    this._pendingTasks.splice(pendingTasksIndex, 1);
-
-    if (this._pendingTasks.length > 0) {
-      if (this._minPendingPriority === task.priority) {
-        this._minPendingPriority = Math.min.apply(Math, this._pendingTasks.map(function (t) {
-          return t.priority;
-        }));
-      }
-
-      return; // still waiting for Observables to finish
-    }
-
-    this._minPendingPriority = null;
-
-    this._loopThroughWaitingQueue();
-  }
-  /**
-   * Return `true` if the given task can be started immediately based on its
-   * priority.
-   * @param {Object} task
-   * @returns {boolean}
-   */
-  ;
-
-  _proto._canBeStartedNow = function _canBeStartedNow(task) {
-    return this._minPendingPriority === null || task.priority <= this._minPendingPriority;
-  }
-  /**
-   * Returns `true` if any running task is considered "high priority".
-   * returns `false` otherwise.
-   * @param {Object} task
-   * @returns {boolean}
-   */
-  ;
-
-  _proto._isRunningHighPriorityTasks = function _isRunningHighPriorityTasks() {
-    return this._minPendingPriority !== null && this._minPendingPriority <= this._prioritySteps.high;
-  };
-
-  return ObservablePrioritizer;
-}();
-
-
-// EXTERNAL MODULE: ./src/utils/array_includes.ts
-var array_includes = __webpack_require__(7714);
-// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
-var assert_unreachable = __webpack_require__(8418);
-// EXTERNAL MODULE: ./src/utils/id_generator.ts
-var id_generator = __webpack_require__(908);
-;// CONCATENATED MODULE: ./src/utils/initialization_segment_cache.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Caching object used to cache initialization segments.
- * This allow to have a faster representation switch and faster seeking.
- * @class InitializationSegmentCache
- */
-var InitializationSegmentCache = /*#__PURE__*/function () {
-  function InitializationSegmentCache() {
-    this._cache = new WeakMap();
-  }
-  /**
-   * @param {Object} obj
-   * @param {*} response
-   */
-
-
-  var _proto = InitializationSegmentCache.prototype;
-
-  _proto.add = function add(_ref, response) {
-    var representation = _ref.representation,
-        segment = _ref.segment;
-
-    if (segment.isInit) {
-      this._cache.set(representation, response);
-    }
-  }
-  /**
-   * @param {Object} obj
-   * @returns {*} response
-   */
-  ;
-
-  _proto.get = function get(_ref2) {
-    var representation = _ref2.representation,
-        segment = _ref2.segment;
-
-    if (segment.isInit) {
-      var value = this._cache.get(representation);
-
-      if (value !== undefined) {
-        return value;
-      }
-    }
-
-    return null;
-  };
-
-  return InitializationSegmentCache;
-}();
-
-/* harmony default export */ const initialization_segment_cache = (InitializationSegmentCache);
-// EXTERNAL MODULE: ./src/utils/cast_to_observable.ts
-var cast_to_observable = __webpack_require__(8117);
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/create_segment_loader.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-
-
-/**
- * Returns a function allowing to load any wanted segment.
- *
- * The function returned takes in argument information about the wanted segment
- * and returns an Observable which will emit various events related to the
- * segment request (see ISegmentLoaderEvent).
- *
- * This observable will throw if, following the options given, the request and
- * possible retry all failed.
- *
- * This observable will complete after emitting all the segment's data.
- *
- * Type parameters:
- *   - T: type of the data emitted
- *
- * @param {Function} loader
- * @param {Object | undefined} cache
- * @param {Object} options
- * @returns {Function}
- */
-
-function createSegmentLoader(loader, cache, backoffOptions) {
-  /**
-   * Try to retrieve the segment from the cache and if not found call the
-   * pipeline's loader (with possible retries) to load it.
-   * @param {Object} loaderArgument - Context for the wanted segment.
-   * @returns {Observable}
-   */
-  function loadData(wantedContent) {
-    /**
-     * Call the Pipeline's loader with an exponential Backoff.
-     * @returns {Observable}
-     */
-    function startLoaderWithBackoff() {
-      var _a;
-
-      var request$ = function request$(url) {
-        var loaderArgument = (0,object_assign/* default */.Z)({
-          url: url
-        }, wantedContent);
-        return (0,concat/* concat */.z)((0,of.of)({
-          type: "request",
-          value: loaderArgument
-        }), (0,rx_try_catch/* default */.Z)(loader, loaderArgument));
-      };
-
-      return tryURLsWithBackoff((_a = wantedContent.segment.mediaURLs) !== null && _a !== void 0 ? _a : [null], request$, backoffOptions).pipe((0,catchError/* catchError */.K)(function (error) {
-        throw errorSelector(error);
-      }), (0,map/* map */.U)(function (evt) {
-        if (evt.type === "retry") {
-          return {
-            type: "warning",
-            value: errorSelector(evt.value)
-          };
-        } else if (evt.value.type === "request") {
-          return evt.value;
-        }
-
-        var response = evt.value;
-
-        if (response.type === "data-loaded" && cache != null) {
-          cache.add(wantedContent, response.value);
-        }
-
-        return evt.value;
-      }));
-    }
-
-    var dataFromCache = cache != null ? cache.get(wantedContent) : null;
-
-    if (dataFromCache != null) {
-      return (0,cast_to_observable/* default */.Z)(dataFromCache).pipe((0,map/* map */.U)(function (response) {
-        return {
-          type: "cache",
-          value: response
-        };
-      }), (0,catchError/* catchError */.K)(startLoaderWithBackoff));
-    }
-
-    return startLoaderWithBackoff();
-  }
-  /**
-   * Load the corresponding segment.
-   * @param {Object} content
-   * @returns {Observable}
-   */
-
-
-  return function loadSegment(content) {
-    return loadData(content).pipe((0,mergeMap/* mergeMap */.zg)(function (arg) {
-      var metrics$;
-
-      if ((arg.type === "data-chunk-complete" || arg.type === "data-loaded") && arg.value.size !== undefined && arg.value.duration !== undefined) {
-        metrics$ = (0,of.of)({
-          type: "metrics",
-          value: {
-            size: arg.value.size,
-            duration: arg.value.duration,
-            content: content
-          }
-        });
-      } else {
-        metrics$ = empty/* EMPTY */.E;
-      }
-
-      switch (arg.type) {
-        case "warning":
-        case "request":
-        case "progress":
-          return (0,of.of)(arg);
-
-        case "cache":
-        case "data-created":
-        case "data-loaded":
-          return (0,concat/* concat */.z)((0,of.of)({
-            type: "data",
-            value: arg.value
-          }), metrics$);
-
-        case "data-chunk":
-          return (0,of.of)({
-            type: "chunk",
-            value: arg.value
-          });
-
-        case "data-chunk-complete":
-          return (0,concat/* concat */.z)((0,of.of)({
-            type: "chunk-complete",
-            value: null
-          }), metrics$);
-
-        default:
-          (0,assert_unreachable/* default */.Z)(arg);
-      }
-    }));
-  };
-}
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/segment_fetcher.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-
-
-var generateRequestID = (0,id_generator/* default */.Z)();
-/**
- * Create a function which will fetch and parse segments.
- * @param {string} bufferType
- * @param {Object} transport
- * @param {Subject} requests$
- * @param {Object} options
- * @returns {Function}
- */
-
-function segment_fetcher_createSegmentFetcher(bufferType, transport, requests$, options) {
-  var cache = (0,array_includes/* default */.Z)(["audio", "video"], bufferType) ? new initialization_segment_cache() : undefined;
-  var segmentLoader = createSegmentLoader(transport[bufferType].loader, cache, options); // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-
-  var segmentParser = transport[bufferType].parser; // deal with it
-
-  /**
-   * Process the segmentLoader observable to adapt it to the the rest of the
-   * code:
-   *   - use the requests subject for network requests and their progress
-   *   - use the warning$ subject for retries' error messages
-   *   - only emit the data
-   * @param {Object} content
-   * @returns {Observable}
-   */
-
-  return function fetchSegment(content) {
-    var id = generateRequestID();
-    var requestBeginSent = false;
-    return segmentLoader(content).pipe((0,tap/* tap */.b)(function (arg) {
-      switch (arg.type) {
-        case "metrics":
-          {
-            requests$.next(arg);
-            break;
-          }
-
-        case "request":
-          {
-            var value = arg.value; // format it for ABR Handling
-
-            var segment = value.segment;
-
-            if (segment === undefined) {
-              return;
-            }
-
-            requestBeginSent = true;
-            requests$.next({
-              type: "requestBegin",
-              value: {
-                duration: segment.duration,
-                time: segment.time,
-                requestTimestamp: performance.now(),
-                id: id
-              }
-            });
-            break;
-          }
-
-        case "progress":
-          {
-            var _value = arg.value;
-
-            if (_value.totalSize != null && _value.size < _value.totalSize) {
-              requests$.next({
-                type: "progress",
-                value: {
-                  duration: _value.duration,
-                  size: _value.size,
-                  totalSize: _value.totalSize,
-                  timestamp: performance.now(),
-                  id: id
-                }
-              });
-            }
-
-            break;
-          }
-      }
-    }), finalize(function () {
-      if (requestBeginSent) {
-        requests$.next({
-          type: "requestEnd",
-          value: {
-            id: id
-          }
-        });
-      }
-    }), (0,filter/* filter */.h)(function (e) {
-      switch (e.type) {
-        case "warning":
-        case "chunk":
-        case "chunk-complete":
-        case "data":
-          return true;
-
-        case "progress":
-        case "metrics":
-        case "request":
-          return false;
-
-        default:
-          (0,assert_unreachable/* default */.Z)(e);
-      }
-    }), (0,mergeMap/* mergeMap */.zg)(function (evt) {
-      if (evt.type === "warning") {
-        return (0,of.of)(evt);
-      }
-
-      if (evt.type === "chunk-complete") {
-        return (0,of.of)({
-          type: "chunk-complete"
-        });
-      }
-
-      var isChunked = evt.type === "chunk";
-      var data = {
-        type: "chunk",
-
-        /**
-         * Parse the loaded data.
-         * @param {Object} [initTimescale]
-         * @returns {Observable}
-         */
-        parse: function parse(initTimescale) {
-          var response = {
-            data: evt.value.responseData,
-            isChunked: isChunked
-          };
-          /* eslint-disable @typescript-eslint/no-unsafe-call */
-
-          /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-          /* eslint-disable @typescript-eslint/no-unsafe-return */
-
-          return segmentParser({
-            response: response,
-            initTimescale: initTimescale,
-            content: content
-          })
-          /* eslint-enable @typescript-eslint/no-unsafe-call */
-
-          /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
-          /* eslint-enable @typescript-eslint/no-unsafe-return */
-          .pipe((0,catchError/* catchError */.K)(function (error) {
-            throw formatError(error, {
-              defaultCode: "PIPELINE_PARSE_ERROR",
-              defaultReason: "Unknown parsing error"
-            });
-          }));
-        }
-      };
-
-      if (isChunked) {
-        return (0,of.of)(data);
-      }
-
-      return (0,concat/* concat */.z)((0,of.of)(data), (0,of.of)({
-        type: "chunk-complete"
-      }));
-    }), (0,share/* share */.B)() // avoid multiple side effects if multiple subs
-    );
-  };
-}
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/segment_fetcher_creator.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-var MIN_CANCELABLE_PRIORITY = config/* default.MIN_CANCELABLE_PRIORITY */.Z.MIN_CANCELABLE_PRIORITY,
-    MAX_HIGH_PRIORITY_LEVEL = config/* default.MAX_HIGH_PRIORITY_LEVEL */.Z.MAX_HIGH_PRIORITY_LEVEL;
-/**
- * Interact with the transport pipelines to download segments with the right
- * priority.
- *
- * @class SegmentFetcherCreator
- *
- * @example
- * ```js
- * const creator = new SegmentFetcherCreator(transport);
- *
- * // 2 - create a new fetcher with its backoff options
- * const fetcher = creator.createSegmentFetcher("audio", {
- *   maxRetryRegular: Infinity,
- *   maxRetryOffline: Infinity,
- * });
- *
- * // 3 - load a segment with a given priority
- * fetcher.createRequest(myContent, 1)
- *   // 4 - parse it
- *   .pipe(
- *     filter(evt => evt.type === "chunk"),
- *     mergeMap(response => response.parse());
- *   )
- *   // 5 - use it
- *   .subscribe((res) => console.log("audio chunk downloaded:", res));
- * ```
- */
-
-var SegmentFetcherCreator = /*#__PURE__*/function () {
-  /**
-   * @param {Object} transport
-   */
-  function SegmentFetcherCreator(transport, options) {
-    this._transport = transport;
-    this._prioritizer = new ObservablePrioritizer({
-      prioritySteps: {
-        high: MAX_HIGH_PRIORITY_LEVEL,
-        low: MIN_CANCELABLE_PRIORITY
-      }
-    });
-    this._backoffOptions = options;
-  }
-  /**
-   * Create a segment fetcher, allowing to easily perform segment requests.
-   * @param {string} bufferType - The type of buffer concerned (e.g. "audio",
-   * "video", etc.)
-   * @param {Subject} requests$ - Subject through which request-related events
-   * (such as those needed by the ABRManager) will be sent.
-   * @returns {Object}
-   */
-
-
-  var _proto = SegmentFetcherCreator.prototype;
-
-  _proto.createSegmentFetcher = function createSegmentFetcher(bufferType, requests$) {
-    var backoffOptions = getSegmentBackoffOptions(bufferType, this._backoffOptions);
-
-    var segmentFetcher = segment_fetcher_createSegmentFetcher(bufferType, this._transport, requests$, backoffOptions);
-
-    return applyPrioritizerToSegmentFetcher(this._prioritizer, segmentFetcher);
-  };
-
-  return SegmentFetcherCreator;
-}();
-
-
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/index.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/* harmony default export */ const segment = (SegmentFetcherCreator);
 // EXTERNAL MODULE: ./src/core/init/create_eme_manager.ts + 1 modules
 var create_eme_manager = __webpack_require__(4507);
 // EXTERNAL MODULE: ./src/compat/clear_element_src.ts
@@ -18685,9 +19186,9 @@ var EVENTS = {
       }
     };
   },
-  protectedSegment: function protectedSegment(initDataInfo) {
+  encryptionDataEncountered: function encryptionDataEncountered(initDataInfo) {
     return {
-      type: "protected-segment",
+      type: "encryption-data-encountered",
       value: initDataInfo
     };
   },
@@ -19067,8 +19568,7 @@ function getIndexOfLastChunkInPeriod(bufferedChunks, periodEnd) {
  * segment if it may be pushed during playback time. We should not buffer
  * under a certain padding from the current time.
  */
-
-var shouldAppendBufferAfterPadding = browser_detection/* isSafari */.G6;
+var shouldAppendBufferAfterPadding = true;
 /* harmony default export */ const should_append_buffer_after_padding = (shouldAppendBufferAfterPadding);
 // EXTERNAL MODULE: ./src/manifest/are_same_content.ts
 var are_same_content = __webpack_require__(5952);
@@ -19921,17 +20421,19 @@ function pushMediaSegment(_ref) {
  */
 
 function RepresentationStream(_ref) {
-  var bufferGoal$ = _ref.bufferGoal$,
-      clock$ = _ref.clock$,
+  var clock$ = _ref.clock$,
       content = _ref.content,
-      fastSwitchThreshold$ = _ref.fastSwitchThreshold$,
       segmentBuffer = _ref.segmentBuffer,
       segmentFetcher = _ref.segmentFetcher,
-      terminate$ = _ref.terminate$;
+      terminate$ = _ref.terminate$,
+      options = _ref.options;
   var manifest = content.manifest,
       period = content.period,
       adaptation = content.adaptation,
       representation = content.representation;
+  var bufferGoal$ = options.bufferGoal$,
+      drmSystemId = options.drmSystemId,
+      fastSwitchThreshold$ = options.fastSwitchThreshold$;
   var bufferType = adaptation.type;
   var initSegment = representation.index.getInitSegment();
   /**
@@ -19941,7 +20443,7 @@ function RepresentationStream(_ref) {
 
   var initSegmentObject = initSegment === null ? {
     initializationData: null,
-    segmentProtections: [],
+    protectionDataUpdate: false,
     initTimescale: undefined
   } : null;
   /** Segments queued for download in this RepresentationStream. */
@@ -20062,15 +20564,35 @@ function RepresentationStream(_ref) {
     return e.type !== "stream-terminating";
   }, true));
   /**
+   * `true` if the event notifying about encryption data has already been
+   * constructed.
+   * Allows to avoid sending multiple times protection events.
+   */
+
+  var hasSentEncryptionData = false;
+  var encryptionEvent$ = empty/* EMPTY */.E;
+
+  if (drmSystemId !== undefined) {
+    var encryptionData = representation.getEncryptionData(drmSystemId);
+
+    if (encryptionData.length > 0) {
+      encryptionEvent$ = of.of.apply(void 0, encryptionData.map(function (d) {
+        return stream_events_generators.encryptionDataEncountered(d);
+      }));
+      hasSentEncryptionData = true;
+    }
+  }
+  /**
    * Stream Queue:
    *   - download every segments queued sequentially
    *   - when a segment is loaded, append it to the SegmentBuffer
    */
 
+
   var streamQueue$ = startDownloadingQueue$.pipe((0,switchMap/* switchMap */.w)(function () {
     return downloadQueue.length > 0 ? loadSegmentsFromQueue() : empty/* EMPTY */.E;
   }), (0,mergeMap/* mergeMap */.zg)(onLoaderEvent));
-  return (0,merge/* merge */.T)(status$, streamQueue$).pipe((0,share/* share */.B)());
+  return (0,concat/* concat */.z)(encryptionEvent$, (0,merge/* merge */.T)(status$, streamQueue$).pipe((0,share/* share */.B)()));
   /**
    * Request every Segment in the ``downloadQueue`` on subscription.
    * Emit the data of a segment when a request succeeded.
@@ -20185,10 +20707,14 @@ function RepresentationStream(_ref) {
         }));
 
       case "parsed-init-segment":
-        initSegmentObject = evt.value;
-        var protectedEvents$ = of.of.apply(void 0, evt.value.segmentProtections.map(function (segmentProt) {
-          return stream_events_generators.protectedSegment(segmentProt);
-        }));
+        initSegmentObject = evt.value; // Now that the initialization segment has been parsed - which may have
+        // included encryption information - take care of the encryption event
+        // if not already done.
+
+        var allEncryptionData = representation.getAllEncryptionData();
+        var initEncEvt$ = !hasSentEncryptionData && allEncryptionData.length > 0 ? of.of.apply(void 0, allEncryptionData.map(function (p) {
+          return stream_events_generators.encryptionDataEncountered(p);
+        })) : empty/* EMPTY */.E;
         var pushEvent$ = pushInitSegment({
           clock$: clock$,
           content: content,
@@ -20196,7 +20722,7 @@ function RepresentationStream(_ref) {
           segmentData: evt.value.initializationData,
           segmentBuffer: segmentBuffer
         });
-        return (0,merge/* merge */.T)(protectedEvents$, pushEvent$);
+        return (0,merge/* merge */.T)(initEncEvt$, pushEvent$);
 
       case "parsed-segment":
         var initSegmentData = (_a = initSegmentObject === null || initSegmentObject === void 0 ? void 0 : initSegmentObject.initializationData) !== null && _a !== void 0 ? _a : null;
@@ -20602,8 +21128,11 @@ function AdaptationStream(_ref) {
         segmentBuffer: segmentBuffer,
         segmentFetcher: segmentFetcher,
         terminate$: terminateCurrentStream$,
-        bufferGoal$: bufferGoal$,
-        fastSwitchThreshold$: fastSwitchThreshold$
+        options: {
+          bufferGoal$: bufferGoal$,
+          drmSystemId: options.drmSystemId,
+          fastSwitchThreshold$: fastSwitchThreshold$
+        }
       }).pipe((0,catchError/* catchError */.K)(function (err) {
         var formattedError = formatError(err, {
           defaultCode: "NONE",
@@ -21621,7 +22150,7 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
     return BufferGarbageCollector({
       segmentBuffer: segmentBuffer,
       clock$: clock$.pipe((0,map/* map */.U)(function (tick) {
-        return tick.position;
+        return tick.position + tick.wantedTimeOffset;
       })),
       maxBufferBehind$: maxBufferBehind$.pipe((0,map/* map */.U)(function (val) {
         return Math.min(val, defaultMaxBehind);
@@ -22958,6 +23487,53 @@ function createMediaSourceLoader(_ref) {
     }));
   };
 }
+;// CONCATENATED MODULE: ./src/utils/rx-throttle.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+function throttle(func) {
+  var isPending = false;
+  return function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return new Observable/* Observable */.y(function (obs) {
+      if (isPending) {
+        obs.complete();
+        return undefined;
+      }
+
+      isPending = true;
+      var funcSubscription = func.apply(void 0, args).subscribe(function (i) {
+        obs.next(i);
+      }, function (e) {
+        isPending = false;
+        obs.error(e);
+      }, function () {
+        isPending = false;
+        obs.complete();
+      });
+      return function () {
+        funcSubscription.unsubscribe();
+        isPending = false;
+      };
+    });
+  };
+}
 ;// CONCATENATED MODULE: ./src/core/init/manifest_update_scheduler.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -22978,6 +23554,7 @@ function createMediaSourceLoader(_ref) {
 
 
 
+
 var FAILED_PARTIAL_UPDATE_MANIFEST_REFRESH_DELAY = config/* default.FAILED_PARTIAL_UPDATE_MANIFEST_REFRESH_DELAY */.Z.FAILED_PARTIAL_UPDATE_MANIFEST_REFRESH_DELAY,
     MAX_CONSECUTIVE_MANIFEST_PARSING_IN_UNSAFE_MODE = config/* default.MAX_CONSECUTIVE_MANIFEST_PARSING_IN_UNSAFE_MODE */.Z.MAX_CONSECUTIVE_MANIFEST_PARSING_IN_UNSAFE_MODE,
     MIN_MANIFEST_PARSING_TIME_TO_ENTER_UNSAFE_MODE = config/* default.MIN_MANIFEST_PARSING_TIME_TO_ENTER_UNSAFE_MODE */.Z.MIN_MANIFEST_PARSING_TIME_TO_ENTER_UNSAFE_MODE;
@@ -22988,12 +23565,23 @@ var FAILED_PARTIAL_UPDATE_MANIFEST_REFRESH_DELAY = config/* default.FAILED_PARTI
  */
 
 function manifestUpdateScheduler(_ref) {
-  var fetchManifest = _ref.fetchManifest,
-      initialManifest = _ref.initialManifest,
+  var initialManifest = _ref.initialManifest,
+      manifestFetcher = _ref.manifestFetcher,
       manifestUpdateUrl = _ref.manifestUpdateUrl,
       minimumManifestUpdateInterval = _ref.minimumManifestUpdateInterval,
       scheduleRefresh$ = _ref.scheduleRefresh$;
-  // The Manifest always keeps the same Manifest
+
+  /**
+   * Fetch and parse the manifest from the URL given.
+   * Throttled to avoid doing multiple simultaneous requests.
+   */
+  var fetchManifest = throttle(function (manifestURL, options) {
+    return manifestFetcher.fetch(manifestURL).pipe((0,mergeMap/* mergeMap */.zg)(function (response) {
+      return response.type === "warning" ? (0,of.of)(response) : // bubble-up warnings
+      response.parse(options);
+    }), (0,share/* share */.B)());
+  }); // The Manifest always keeps the same Manifest
+
   var manifest = initialManifest.manifest;
   /** Number of consecutive times the parsing has been done in `unsafeMode`. */
 
@@ -23205,9 +23793,6 @@ var throw_on_media_error = __webpack_require__(2447);
 
 
 
-
-
-
 var OUT_OF_SYNC_MANIFEST_REFRESH_DELAY = config/* default.OUT_OF_SYNC_MANIFEST_REFRESH_DELAY */.Z.OUT_OF_SYNC_MANIFEST_REFRESH_DELAY;
 /**
  * Begin content playback.
@@ -23246,47 +23831,19 @@ function InitializeOnMediaSource(_ref) {
       autoPlay = _ref.autoPlay,
       bufferOptions = _ref.bufferOptions,
       clock$ = _ref.clock$,
-      content = _ref.content,
       keySystems = _ref.keySystems,
       lowLatencyMode = _ref.lowLatencyMode,
+      manifest$ = _ref.manifest$,
+      manifestFetcher = _ref.manifestFetcher,
+      manifestUpdateUrl = _ref.manifestUpdateUrl,
       mediaElement = _ref.mediaElement,
       minimumManifestUpdateInterval = _ref.minimumManifestUpdateInterval,
-      networkConfig = _ref.networkConfig,
+      segmentFetcherCreator = _ref.segmentFetcherCreator,
       speed$ = _ref.speed$,
       startAt = _ref.startAt,
-      textTrackOptions = _ref.textTrackOptions,
-      transportPipelines = _ref.transportPipelines;
-  var url = content.url,
-      initialManifest = content.initialManifest,
-      manifestUpdateUrl = content.manifestUpdateUrl;
-  var offlineRetry = networkConfig.offlineRetry,
-      segmentRetry = networkConfig.segmentRetry,
-      manifestRetry = networkConfig.manifestRetry;
-  var manifestFetcher = new fetchers_manifest(url, transportPipelines, {
-    lowLatencyMode: lowLatencyMode,
-    maxRetryRegular: manifestRetry,
-    maxRetryOffline: offlineRetry
-  });
-  /**
-   * Fetch and parse the manifest from the URL given.
-   * Throttled to avoid doing multiple simultaneous requests.
-   */
+      textTrackOptions = _ref.textTrackOptions;
 
-  var fetchManifest = throttle(function (manifestURL, options) {
-    return manifestFetcher.fetch(manifestURL).pipe((0,mergeMap/* mergeMap */.zg)(function (response) {
-      return response.type === "warning" ? (0,of.of)(response) : // bubble-up warnings
-      response.parse(options);
-    }), (0,share/* share */.B)());
-  });
-  /** Interface used to download segments. */
-
-  var segmentFetcherCreator = new segment(transportPipelines, {
-    lowLatencyMode: lowLatencyMode,
-    maxRetryOffline: offlineRetry,
-    maxRetryRegular: segmentRetry
-  });
   /** Choose the right "Representation" for a given "Adaptation". */
-
   var abrManager = new abr(adaptiveOptions);
   /**
    * Create and open a new MediaSource object on the given media element on
@@ -23322,73 +23879,81 @@ function InitializeOnMediaSource(_ref) {
    */
 
   var mediaError$ = (0,throw_on_media_error/* default */.Z)(mediaElement);
-  var initialManifestRequest$;
-
-  if (initialManifest instanceof manifest/* default */.ZP) {
-    initialManifestRequest$ = (0,of.of)({
-      type: "parsed",
-      manifest: initialManifest
-    });
-  } else if (initialManifest !== undefined) {
-    initialManifestRequest$ = manifestFetcher.parse(initialManifest, {
-      previousManifest: null,
-      unsafeMode: false
-    });
-  } else {
-    initialManifestRequest$ = fetchManifest(url, {
-      previousManifest: null,
-      unsafeMode: false
-    });
-  }
   /**
-   * Wait for the MediaKeys to have been created before
-   * opening MediaSource, and ask EME to attach MediaKeys.
+   * Wait for the MediaKeys to have been created before opening the MediaSource,
+   * after that second step is done, ask the EMEManager to attach the MediaKeys.
+   * Steps are done in that specific order to avoid compatibility issues.
+   *
+   * This Observable will emit when ready both the MediaSource and useful
+   * DRM-specific information.
    */
 
-
-  var prepareMediaSource$ = emeManager$.pipe((0,mergeMap/* mergeMap */.zg)(function (evt) {
+  var prepareMediaSource$ = emeManager$.pipe(mergeScan(function (acc, evt) {
     switch (evt.type) {
       case "eme-disabled":
       case "attached-media-keys":
-        return (0,of.of)(undefined);
+        return (0,of.of)({
+          isEmeReady: true,
+          drmSystemId: acc.drmSystemId
+        });
 
       case "created-media-keys":
+        var drmSystemId = evt.value.initializationDataSystemId;
         return openMediaSource$.pipe((0,mergeMap/* mergeMap */.zg)(function () {
-          evt.value.attachMediaKeys$.next();
+          // Now that the MediaSource has been opened and linked to the media
+          // element we can attach the MediaKeys instance to the latter.
+          evt.value.attachMediaKeys$.next(); // If the `disableMediaKeysAttachmentLock` option has been set to
+          // `true`, we should not wait until the MediaKeys instance has been
+          // attached to start loading the content.
+
           var shouldDisableLock = evt.value.options.disableMediaKeysAttachmentLock === true;
-
-          if (shouldDisableLock) {
-            return (0,of.of)(undefined);
-          } // wait for "attached-media-keys"
-
-
-          return empty/* EMPTY */.E;
+          return shouldDisableLock ? (0,of.of)({
+            isEmeReady: true,
+            drmSystemId: drmSystemId
+          }) : empty/* EMPTY */.E;
+        }), (0,startWith/* startWith */.O)({
+          isEmeReady: false,
+          drmSystemId: drmSystemId
         }));
 
       default:
         return empty/* EMPTY */.E;
     }
-  }), (0,take/* take */.q)(1), exhaustMap(function () {
-    return openMediaSource$;
+  }, {
+    isEmeReady: false,
+    drmSystemId: undefined
+  }), (0,filter/* filter */.h)(function (emitted) {
+    return emitted.isEmeReady;
+  }), (0,take/* take */.q)(1), exhaustMap(function (_ref2) {
+    var drmSystemId = _ref2.drmSystemId;
+    return openMediaSource$.pipe((0,map/* map */.U)(function (mediaSource) {
+      return {
+        mediaSource: mediaSource,
+        drmSystemId: drmSystemId
+      };
+    }));
   }));
   /** Load and play the content asked. */
 
-  var loadContent$ = (0,combineLatest/* combineLatest */.aj)([initialManifestRequest$, prepareMediaSource$]).pipe((0,mergeMap/* mergeMap */.zg)(function (_ref2) {
-    var manifestEvt = _ref2[0],
-        initialMediaSource = _ref2[1];
+  var loadContent$ = (0,combineLatest/* combineLatest */.aj)([manifest$, prepareMediaSource$]).pipe((0,mergeMap/* mergeMap */.zg)(function (_ref3) {
+    var manifestEvt = _ref3[0],
+        mediaSourceInfo = _ref3[1];
 
     if (manifestEvt.type === "warning") {
       return (0,of.of)(manifestEvt);
     }
 
     var manifest = manifestEvt.manifest;
+    var initialMediaSource = mediaSourceInfo.mediaSource,
+        drmSystemId = mediaSourceInfo.drmSystemId;
     log/* default.debug */.Z.debug("Init: Calculating initial time");
     var initialTime = getInitialTime(manifest, lowLatencyMode, startAt);
     log/* default.debug */.Z.debug("Init: Initial time calculated:", initialTime);
     var mediaSourceLoader = createMediaSourceLoader({
       abrManager: abrManager,
       bufferOptions: (0,object_assign/* default */.Z)({
-        textTrackOptions: textTrackOptions
+        textTrackOptions: textTrackOptions,
+        drmSystemId: drmSystemId
       }, bufferOptions),
       clock$: clock$,
       manifest: manifest,
@@ -23401,9 +23966,9 @@ function InitializeOnMediaSource(_ref) {
 
     var scheduleRefresh$ = new Subject/* Subject */.xQ();
     var manifestUpdate$ = manifestUpdateScheduler({
-      fetchManifest: fetchManifest,
       initialManifest: manifestEvt,
       manifestUpdateUrl: manifestUpdateUrl,
+      manifestFetcher: manifestFetcher,
       minimumManifestUpdateInterval: minimumManifestUpdateInterval,
       scheduleRefresh$: scheduleRefresh$
     });
@@ -23414,10 +23979,7 @@ function InitializeOnMediaSource(_ref) {
         manifest.addUndecipherableKIDs(evt.value);
       } else if (evt.type === "blacklist-protection-data") {
         log/* default.info */.Z.info("Init: blacklisting Representations based on protection data.");
-
-        if (evt.value.type !== undefined) {
-          manifest.addUndecipherableProtectionData(evt.value.type, evt.value.data);
-        }
+        manifest.addUndecipherableProtectionData(evt.value);
       }
     }), (0,ignoreElements/* ignoreElements */.l)());
     return (0,merge/* merge */.T)(manifestEvents$, manifestUpdate$, setUndecipherableRepresentations$, recursiveLoad$).pipe((0,startWith/* startWith */.O)(events_generators/* default.manifestReady */.Z.manifestReady(manifest)), finalize(function () {
@@ -23477,7 +24039,7 @@ function InitializeOnMediaSource(_ref) {
 
             return null;
 
-          case "protected-segment":
+          case "encryption-data-encountered":
             protectedSegments$.next(evt.value);
             return null;
         }
@@ -23557,7 +24119,7 @@ var SAMPLING_INTERVAL_MEDIASOURCE = config/* default.SAMPLING_INTERVAL_MEDIASOUR
  * @type {Array.<string>}
  */
 
-var SCANNED_MEDIA_ELEMENTS_EVENTS = ["canplay", "play", "progress", "seeking", "seeked", "loadedmetadata", "ratechange"];
+var SCANNED_MEDIA_ELEMENTS_EVENTS = ["canplay", "play", "seeking", "seeked", "loadedmetadata", "ratechange"];
 /**
  * Returns the amount of time in seconds the buffer should have ahead of the
  * current position before resuming playback. Based on the infos of the stall.
@@ -25695,6 +26257,8 @@ function parseAudioRepresentation(_ref5) {
 
 
 
+
+
 /* eslint-disable @typescript-eslint/naming-convention */
 
 var DEFAULT_UNMUTED_VOLUME = config/* default.DEFAULT_UNMUTED_VOLUME */.Z.DEFAULT_UNMUTED_VOLUME;
@@ -25801,7 +26365,6 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     });
     _this._priv_playing$ = new ReplaySubject/* ReplaySubject */.t(1);
     _this._priv_speed$ = new BehaviorSubject(videoElement.playbackRate);
-    _this._priv_stopCurrentContent$ = new Subject/* Subject */.xQ();
     _this._priv_contentLock$ = new BehaviorSubject(false);
     _this._priv_bufferOptions = {
       wantedBufferAhead$: new BehaviorSubject(wantedBufferAhead),
@@ -25854,11 +26417,15 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
    * Stop the playback for the current content.
    */
   _proto.stop = function stop() {
+    if (this._priv_contentInfos !== null) {
+      this._priv_contentInfos.stop$.next();
+
+      this._priv_contentInfos.stop$.complete();
+    }
+
+    this._priv_cleanUpCurrentContentState();
+
     if (this.state !== PLAYER_STATES.STOPPED) {
-      this._priv_stopCurrentContent$.next();
-
-      this._priv_cleanUpCurrentContentState();
-
       this._priv_setPlayerState(PLAYER_STATES.STOPPED);
     }
   }
@@ -25882,8 +26449,6 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
     this._priv_destroy$.complete(); // Complete all subjects
 
-
-    this._priv_stopCurrentContent$.complete();
 
     this._priv_playing$.complete();
 
@@ -26012,14 +26577,17 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
     if (this.videoElement === null) {
       throw new Error("the attached video element is disposed");
-    } // now that every checks have passed, stop previous content
+    }
 
-
-    this.stop();
     var isDirectFile = transport === "directfile";
-    this._priv_currentError = null;
-    this._priv_contentInfos = {
+    /** Subject which will emit to stop the current content. */
+
+    var stopContent$ = new Subject/* Subject */.xQ();
+    /** Future `this._priv_contentInfos` related to this content. */
+
+    var contentInfos = {
       url: url,
+      stop$: stopContent$,
       isDirectFile: isDirectFile,
       segmentBuffersStore: null,
       thumbnails: null,
@@ -26029,10 +26597,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       activeRepresentations: null,
       initialAudioTrack: defaultAudioTrack,
       initialTextTrack: defaultTextTrack
-    }; // inilialize `_priv_playing$` to false (meaning the content is not playing yet)
-
-    this._priv_playing$.next(false);
-
+    };
     var videoElement = this.videoElement;
     /** Global "clock" used for content playback */
 
@@ -26040,9 +26605,6 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       withMediaSource: !isDirectFile,
       lowLatencyMode: lowLatencyMode
     });
-    /** Emit when the current content has been stopped. */
-
-    var contentIsStopped$ = (0,merge/* merge */.T)(this._priv_stopCurrentContent$, this._priv_stopAtEnd ? onEnded$(videoElement) : empty/* EMPTY */.E).pipe((0,take/* take */.q)(1));
     /** Emit playback events. */
 
     var playback$;
@@ -26051,10 +26613,70 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       var transportFn = features/* default.transports */.Z.transports[transport];
 
       if (typeof transportFn !== "function") {
+        // Stop previous content and reset its state
+        this.stop();
+        this._priv_currentError = null;
+
+        this._priv_playing$.next(false);
+
         throw new Error("transport \"" + transport + "\" not supported");
       }
 
       var transportPipelines = transportFn(transportOptions);
+      var offlineRetry = networkConfig.offlineRetry,
+          segmentRetry = networkConfig.segmentRetry,
+          manifestRetry = networkConfig.manifestRetry;
+      /** Interface used to load and refresh the Manifest. */
+
+      var manifestFetcher = new fetchers_manifest(url, transportPipelines, {
+        lowLatencyMode: lowLatencyMode,
+        maxRetryRegular: manifestRetry,
+        maxRetryOffline: offlineRetry
+      });
+      /** Interface used to download segments. */
+
+      var segmentFetcherCreator = new segment(transportPipelines, {
+        lowLatencyMode: lowLatencyMode,
+        maxRetryOffline: offlineRetry,
+        maxRetryRegular: segmentRetry
+      });
+      /** Observable emitting the initial Manifest */
+
+      var manifest$;
+
+      if (initialManifest instanceof manifest/* default */.ZP) {
+        manifest$ = (0,of.of)({
+          type: "parsed",
+          manifest: initialManifest
+        });
+      } else if (initialManifest !== undefined) {
+        manifest$ = manifestFetcher.parse(initialManifest, {
+          previousManifest: null,
+          unsafeMode: false
+        });
+      } else {
+        manifest$ = manifestFetcher.fetch(url).pipe((0,mergeMap/* mergeMap */.zg)(function (response) {
+          return response.type === "warning" ? (0,of.of)(response) : // bubble-up warnings
+          response.parse({
+            previousManifest: null,
+            unsafeMode: false
+          });
+        }));
+      } // Load the Manifest right now and share it with every subscriber until
+      // the content is stopped
+
+
+      manifest$ = manifest$.pipe((0,takeUntil/* takeUntil */.R)(stopContent$), (0,shareReplay/* shareReplay */.d)());
+      manifest$.subscribe(); // now that the Manifest is loading, stop previous content and reset state
+      // This is done after fetching the Manifest as `stop` could technically
+      // take time.
+
+      this.stop();
+      this._priv_currentError = null;
+
+      this._priv_playing$.next(false);
+
+      this._priv_contentInfos = contentInfos;
       var relyOnVideoVisibilityAndSize = canRelyOnVideoVisibilityAndSize();
       var throttlers = {
         throttle: {},
@@ -26069,7 +26691,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
           throttlers.throttle = {
             video: isActive().pipe((0,map/* map */.U)(function (active) {
               return active ? Infinity : 0;
-            }), (0,takeUntil/* takeUntil */.R)(this._priv_stopCurrentContent$))
+            }), (0,takeUntil/* takeUntil */.R)(stopContent$))
           };
         }
       }
@@ -26081,7 +26703,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
           throttlers.throttleBitrate = {
             video: isVideoVisible(this._priv_pictureInPictureEvent$).pipe((0,map/* map */.U)(function (active) {
               return active ? Infinity : 0;
-            }), (0,takeUntil/* takeUntil */.R)(this._priv_stopCurrentContent$))
+            }), (0,takeUntil/* takeUntil */.R)(stopContent$))
           };
         }
       }
@@ -26091,7 +26713,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
           log/* default.warn */.Z.warn("API: Can't apply limitVideoWidth because browser can't be " + "trusted for video size.");
         } else {
           throttlers.limitWidth = {
-            video: videoWidth$(videoElement, this._priv_pictureInPictureEvent$).pipe((0,takeUntil/* takeUntil */.R)(this._priv_stopCurrentContent$))
+            video: videoWidth$(videoElement, this._priv_pictureInPictureEvent$).pipe((0,takeUntil/* takeUntil */.R)(stopContent$))
           };
         }
       }
@@ -26127,27 +26749,31 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         autoPlay: autoPlay,
         bufferOptions: bufferOptions,
         clock$: clock$,
-        content: {
-          initialManifest: initialManifest,
-          manifestUpdateUrl: manifestUpdateUrl,
-          url: url
-        },
         keySystems: keySystems,
         lowLatencyMode: lowLatencyMode,
+        manifest$: manifest$,
+        manifestFetcher: manifestFetcher,
+        manifestUpdateUrl: manifestUpdateUrl,
         mediaElement: videoElement,
         minimumManifestUpdateInterval: minimumManifestUpdateInterval,
-        networkConfig: networkConfig,
-        transportPipelines: transportPipelines,
+        segmentFetcherCreator: segmentFetcherCreator,
         speed$: this._priv_speed$,
         startAt: startAt,
         textTrackOptions: textTrackOptions
-      }).pipe((0,takeUntil/* takeUntil */.R)(contentIsStopped$));
+      }).pipe((0,takeUntil/* takeUntil */.R)(stopContent$));
       playback$ = publish()(init$);
     } else {
+      // Stop previous content and reset its state
+      this.stop();
+      this._priv_currentError = null;
+
+      this._priv_playing$.next(false);
+
       if (features/* default.directfile */.Z.directfile === null) {
         throw new Error("DirectFile feature not activated in your build.");
       }
 
+      this._priv_contentInfos = contentInfos;
       this._priv_mediaElementTrackChoiceManager = new features/* default.directfile.mediaElementTrackChoiceManager */.Z.directfile.mediaElementTrackChoiceManager(this.videoElement);
       var preferredAudioTracks = defaultAudioTrack === undefined ? this._priv_preferredAudioTracks : [defaultAudioTrack];
 
@@ -26198,7 +26824,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         speed$: this._priv_speed$,
         startAt: startAt,
         url: url
-      }).pipe((0,takeUntil/* takeUntil */.R)(contentIsStopped$));
+      }).pipe((0,takeUntil/* takeUntil */.R)(stopContent$));
       playback$ = publish()(directfileInit$);
     }
     /** Emit an object when the player "stalls" and null when it un-stalls */
@@ -26229,7 +26855,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     var seekingEvent$ = onSeeking$(videoElement);
     /** Emit state updates once the content is considered "loaded". */
 
-    var loadedStateUpdates$ = (0,combineLatest/* combineLatest */.aj)([this._priv_playing$, stalled$.pipe((0,startWith/* startWith */.O)(null)), endedEvent$.pipe((0,startWith/* startWith */.O)(null)), seekingEvent$.pipe((0,startWith/* startWith */.O)(null))]).pipe((0,takeUntil/* takeUntil */.R)(this._priv_stopCurrentContent$), (0,map/* map */.U)(function (_ref) {
+    var loadedStateUpdates$ = (0,combineLatest/* combineLatest */.aj)([this._priv_playing$, stalled$.pipe((0,startWith/* startWith */.O)(null)), endedEvent$.pipe((0,startWith/* startWith */.O)(null)), seekingEvent$.pipe((0,startWith/* startWith */.O)(null))]).pipe((0,takeUntil/* takeUntil */.R)(stopContent$), (0,map/* map */.U)(function (_ref) {
       var isPlaying = _ref[0],
           stalledStatus = _ref[1];
       return getLoadedContentState(videoElement, isPlaying, stalledStatus);
@@ -26247,31 +26873,33 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     (0,startWith/* startWith */.O)(PLAYER_STATES.RELOADING) // Starts with "RELOADING" state
     ))))).pipe((0,distinctUntilChanged/* distinctUntilChanged */.x)());
     var playbackSubscription;
-
-    this._priv_stopCurrentContent$.pipe((0,take/* take */.q)(1)).subscribe(function () {
+    stopContent$.pipe((0,take/* take */.q)(1)).subscribe(function () {
       if (playbackSubscription !== undefined) {
         playbackSubscription.unsubscribe();
       }
     }); // Link `_priv_onPlayPauseNext` Observable to "play"/"pause" events
 
-
-    onPlayPause$(videoElement).pipe((0,takeUntil/* takeUntil */.R)(this._priv_stopCurrentContent$)).subscribe(function (e) {
+    onPlayPause$(videoElement).pipe((0,takeUntil/* takeUntil */.R)(stopContent$)).subscribe(function (e) {
       return _this2._priv_onPlayPauseNext(e.type === "play");
     }, noop/* default */.Z); // Link "positionUpdate" events to the clock
 
-    clock$.pipe((0,takeUntil/* takeUntil */.R)(this._priv_stopCurrentContent$)).subscribe(function (x) {
+    clock$.pipe((0,takeUntil/* takeUntil */.R)(stopContent$)).subscribe(function (x) {
       return _this2._priv_triggerPositionUpdate(x);
     }, noop/* default */.Z); // Link "seeking" and "seeked" events (once the content is loaded)
 
-    loaded$.pipe((0,switchMapTo/* switchMapTo */.c)(emitSeekEvents(this.videoElement, clock$)), (0,takeUntil/* takeUntil */.R)(this._priv_stopCurrentContent$)).subscribe(function (evt) {
+    loaded$.pipe((0,switchMapTo/* switchMapTo */.c)(emitSeekEvents(this.videoElement, clock$)), (0,takeUntil/* takeUntil */.R)(stopContent$)).subscribe(function (evt) {
       log/* default.info */.Z.info("API: Triggering \"" + evt + "\" event");
 
       _this2.trigger(evt, null);
     }); // Handle state updates
 
-    playerState$.pipe((0,takeUntil/* takeUntil */.R)(this._priv_stopCurrentContent$)).subscribe(function (x) {
+    playerState$.pipe((0,takeUntil/* takeUntil */.R)(stopContent$)).subscribe(function (x) {
       return _this2._priv_setPlayerState(x);
-    }, noop/* default */.Z); // Link playback events to the corresponding callbacks
+    }, noop/* default */.Z);
+    (this._priv_stopAtEnd ? onEnded$(videoElement) : empty/* EMPTY */.E).pipe((0,takeUntil/* takeUntil */.R)(stopContent$)).subscribe(function () {
+      stopContent$.next();
+      stopContent$.complete();
+    }); // Link playback events to the corresponding callbacks
 
     playback$.subscribe(function (x) {
       return _this2._priv_onPlaybackEvent(x);
@@ -26283,7 +26911,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
     this._priv_contentLock$.pipe((0,filter/* filter */.h)(function (isLocked) {
       return !isLocked;
-    }), (0,take/* take */.q)(1), (0,takeUntil/* takeUntil */.R)(this._priv_stopCurrentContent$)).subscribe(function () {
+    }), (0,take/* take */.q)(1), (0,takeUntil/* takeUntil */.R)(stopContent$)).subscribe(function () {
       // start playback!
       playbackSubscription = playback$.connect();
     });
@@ -27763,7 +28391,11 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     });
     formattedError.fatal = true;
 
-    this._priv_stopCurrentContent$.next();
+    if (this._priv_contentInfos !== null) {
+      this._priv_contentInfos.stop$.next();
+
+      this._priv_contentInfos.stop$.complete();
+    }
 
     this._priv_cleanUpCurrentContentState();
 
@@ -27789,7 +28421,11 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   _proto._priv_onPlaybackFinished = function _priv_onPlaybackFinished() {
     log/* default.info */.Z.info("API: Previous playback finished. Stopping and cleaning-up...");
 
-    this._priv_stopCurrentContent$.next();
+    if (this._priv_contentInfos !== null) {
+      this._priv_contentInfos.stop$.next();
+
+      this._priv_contentInfos.stop$.complete();
+    }
 
     this._priv_cleanUpCurrentContentState();
 
@@ -27821,17 +28457,17 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     var _this5 = this;
 
     var manifest = _ref2.manifest;
+    var contentInfos = this._priv_contentInfos;
 
-    if (this._priv_contentInfos === null) {
+    if (contentInfos === null) {
       log/* default.error */.Z.error("API: The manifest is loaded but no content is.");
       return;
     }
 
-    this._priv_contentInfos.manifest = manifest;
+    contentInfos.manifest = manifest;
     this._priv_lastContentPlaybackInfos.manifest = manifest;
-    var _this$_priv_contentIn20 = this._priv_contentInfos,
-        initialAudioTrack = _this$_priv_contentIn20.initialAudioTrack,
-        initialTextTrack = _this$_priv_contentIn20.initialTextTrack;
+    var initialAudioTrack = contentInfos.initialAudioTrack,
+        initialTextTrack = contentInfos.initialTextTrack;
     this._priv_trackChoiceManager = new TrackChoiceManager();
     var preferredAudioTracks = initialAudioTrack === undefined ? this._priv_preferredAudioTracks : [initialAudioTrack];
 
@@ -27843,7 +28479,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
     this._priv_trackChoiceManager.setPreferredVideoTracks(this._priv_preferredVideoTracks, true);
 
-    (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,takeUntil/* takeUntil */.R)(this._priv_stopCurrentContent$)).subscribe(function () {
+    (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,takeUntil/* takeUntil */.R)(contentInfos.stop$)).subscribe(function () {
       // Update the tracks chosen if it changed
       if (_this5._priv_trackChoiceManager !== null) {
         _this5._priv_trackChoiceManager.update();
@@ -27994,9 +28630,9 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       return;
     }
 
-    var _this$_priv_contentIn21 = this._priv_contentInfos,
-        activeAdaptations = _this$_priv_contentIn21.activeAdaptations,
-        activeRepresentations = _this$_priv_contentIn21.activeRepresentations;
+    var _this$_priv_contentIn20 = this._priv_contentInfos,
+        activeAdaptations = _this$_priv_contentIn20.activeAdaptations,
+        activeRepresentations = _this$_priv_contentIn20.activeRepresentations;
 
     if (!(0,is_null_or_undefined/* default */.Z)(activeAdaptations) && !(0,is_null_or_undefined/* default */.Z)(activeAdaptations[period.id])) {
       var activePeriodAdaptations = activeAdaptations[period.id];
@@ -28053,9 +28689,9 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       this._priv_contentInfos.activeAdaptations = {};
     }
 
-    var _this$_priv_contentIn22 = this._priv_contentInfos,
-        activeAdaptations = _this$_priv_contentIn22.activeAdaptations,
-        currentPeriod = _this$_priv_contentIn22.currentPeriod;
+    var _this$_priv_contentIn21 = this._priv_contentInfos,
+        activeAdaptations = _this$_priv_contentIn21.activeAdaptations,
+        currentPeriod = _this$_priv_contentIn21.currentPeriod;
     var activePeriodAdaptations = activeAdaptations[period.id];
 
     if ((0,is_null_or_undefined/* default */.Z)(activePeriodAdaptations)) {
@@ -28122,9 +28758,9 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       this._priv_contentInfos.activeRepresentations = {};
     }
 
-    var _this$_priv_contentIn23 = this._priv_contentInfos,
-        activeRepresentations = _this$_priv_contentIn23.activeRepresentations,
-        currentPeriod = _this$_priv_contentIn23.currentPeriod;
+    var _this$_priv_contentIn22 = this._priv_contentInfos,
+        activeRepresentations = _this$_priv_contentIn22.activeRepresentations,
+        currentPeriod = _this$_priv_contentIn22.currentPeriod;
     var activePeriodRepresentations = activeRepresentations[period.id];
 
     if ((0,is_null_or_undefined/* default */.Z)(activePeriodRepresentations)) {
@@ -28232,9 +28868,9 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       return;
     }
 
-    var _this$_priv_contentIn24 = this._priv_contentInfos,
-        isDirectFile = _this$_priv_contentIn24.isDirectFile,
-        manifest = _this$_priv_contentIn24.manifest;
+    var _this$_priv_contentIn23 = this._priv_contentInfos,
+        isDirectFile = _this$_priv_contentIn23.isDirectFile,
+        manifest = _this$_priv_contentIn23.manifest;
 
     if (!isDirectFile && manifest === null || (0,is_null_or_undefined/* default */.Z)(clockTick)) {
       return;
@@ -28295,9 +28931,9 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       return null;
     }
 
-    var _this$_priv_contentIn25 = this._priv_contentInfos,
-        currentPeriod = _this$_priv_contentIn25.currentPeriod,
-        activeRepresentations = _this$_priv_contentIn25.activeRepresentations;
+    var _this$_priv_contentIn24 = this._priv_contentInfos,
+        currentPeriod = _this$_priv_contentIn24.currentPeriod,
+        activeRepresentations = _this$_priv_contentIn24.activeRepresentations;
 
     if (currentPeriod === null || activeRepresentations === null || (0,is_null_or_undefined/* default */.Z)(activeRepresentations[currentPeriod.id])) {
       return null;
@@ -28398,7 +29034,7 @@ var features_object = __webpack_require__(7273);
 
 function initializeFeaturesObject() {
   if (true) {
-    features_object/* default.emeManager */.Z.emeManager = __webpack_require__(8745)/* .default */ .ZP;
+    features_object/* default.emeManager */.Z.emeManager = __webpack_require__(1603)/* .default */ .ZP;
   }
 
   if (true) {
@@ -28414,7 +29050,7 @@ function initializeFeaturesObject() {
   }
 
   if (true) {
-    features_object/* default.transports.dash */.Z.transports.dash = __webpack_require__(1459)/* .default */ .Z;
+    features_object/* default.transports.dash */.Z.transports.dash = __webpack_require__(2490)/* .default */ .Z;
   }
 
   if (false) {}
@@ -28789,8 +29425,6 @@ function isCodecSupported(mimeType) {
 
   return true;
 }
-// EXTERNAL MODULE: ./src/utils/byte_parsing.ts
-var byte_parsing = __webpack_require__(6968);
 ;// CONCATENATED MODULE: ./src/manifest/representation.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -28807,7 +29441,6 @@ var byte_parsing = __webpack_require__(6968);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -28863,83 +29496,151 @@ var Representation = /*#__PURE__*/function () {
     return ((_a = this.mimeType) !== null && _a !== void 0 ? _a : "") + ";codecs=\"" + ((_b = this.codec) !== null && _b !== void 0 ? _b : "") + "\"";
   }
   /**
-   * Returns every protection initialization data concatenated.
-   * This data can then be used through the usual EME APIs.
-   * `null` if this Representation has no detected protection initialization
-   * data.
-   * @returns {Array.<Object>|null}
+   * Returns encryption initialization data linked to the given DRM's system ID.
+   * This data may be useful to decrypt encrypted media segments.
+   *
+   * Returns an empty array if there is no data found for that system ID at the
+   * moment.
+   *
+   * When you know that all encryption data has been added to this
+   * Representation, you can also call the `getAllEncryptionData` method.
+   * This second function will return all encryption initialization data
+   * regardless of the DRM system, and might thus be used in all cases.
+   *
+   * /!\ Note that encryption initialization data may be progressively added to
+   * this Representation after `_addProtectionData` calls or Manifest updates.
+   * Because of this, the return value of this function might change after those
+   * events.
+   *
+   * @param {string} drmSystemId - The hexa-encoded DRM system ID
+   * @returns {Array.<Object>}
    */
   ;
 
-  _proto.getProtectionsInitializationData = function getProtectionsInitializationData() {
-    var contentProtections = this.contentProtections;
+  _proto.getEncryptionData = function getEncryptionData(drmSystemId) {
+    var allInitData = this.getAllEncryptionData();
+    var filtered = [];
 
-    if (contentProtections === undefined) {
-      return [];
+    for (var i = 0; i < allInitData.length; i++) {
+      var createdObjForType = false;
+      var initData = allInitData[i];
+
+      for (var j = 0; j < initData.values.length; j++) {
+        if (initData.values[j].systemId.toLowerCase() === drmSystemId.toLowerCase()) {
+          if (!createdObjForType) {
+            filtered.push({
+              type: initData.type,
+              values: [initData.values[j]]
+            });
+            createdObjForType = true;
+          } else {
+            filtered[filtered.length - 1].values.push(initData.values[j]);
+          }
+        }
+      }
     }
 
-    return Object.keys(contentProtections.initData).reduce(function (acc, initDataType) {
-      var initDataArr = contentProtections.initData[initDataType];
-
-      if (initDataArr === undefined || initDataArr.length === 0) {
-        return acc;
-      }
-
-      var initData = byte_parsing/* concat.apply */.zo.apply(void 0, initDataArr.map(function (_ref) {
-        var data = _ref.data;
-        return data;
-      }));
-      acc.push({
-        type: initDataType,
-        data: initData
-      });
-      return acc;
-    }, []);
+    return filtered;
   }
   /**
-   * Add protection data to the Representation to be able to properly blacklist
-   * it if that data is.
+   * Returns all currently-known encryption initialization data linked to this
+   * Representation.
+   * Encryption initialization data is generally required to be able to decrypt
+   * those Representation's media segments.
+   *
+   * Unlike `getEncryptionData`, this method will return all available
+   * encryption data.
+   * It might as such might be used when either the current drm's system id is
+   * not known or when no encryption data specific to it was found. In that
+   * case, providing every encryption data linked to this Representation might
+   * still allow decryption.
+   *
+   * Returns an empty array in two cases:
+   *   - the content is not encrypted.
+   *   - We don't have any decryption data yet.
+   *
+   * /!\ Note that new encryption initialization data can be added progressively
+   * through the `_addProtectionData` method or through Manifest updates.
+   * It is thus highly advised to only rely on this method once every protection
+   * data related to this Representation has been known to be added.
+   *
+   * The main situation where new encryption initialization data is added is
+   * after parsing this Representation's initialization segment, if one exists.
+   * @returns {Array.<Object>}
+   */
+  ;
+
+  _proto.getAllEncryptionData = function getAllEncryptionData() {
+    return this.contentProtections === undefined ? [] : this.contentProtections.initData;
+  }
+  /**
+   * Add new encryption initialization data to this Representation if it was not
+   * already included.
+   *
+   * Returns `true` if new encryption initialization data has been added.
+   * Returns `false` if none has been added (e.g. because it was already known).
+   *
    * /!\ Mutates the current Representation
    * @param {string} initDataArr
    * @param {string} systemId
    * @param {Uint8Array} data
+   * @returns {boolean}
    */
   ;
 
-  _proto._addProtectionData = function _addProtectionData(initDataType, systemId, data) {
-    var newElement = {
-      systemId: systemId,
-      data: data
-    };
+  _proto._addProtectionData = function _addProtectionData(initDataType, data) {
+    var hasUpdatedProtectionData = false;
 
     if (this.contentProtections === undefined) {
-      var _initData;
-
       this.contentProtections = {
         keyIds: [],
-        initData: (_initData = {}, _initData[initDataType] = [newElement], _initData)
+        initData: [{
+          type: initDataType,
+          values: data
+        }]
       };
-      return;
+      return true;
     }
 
-    var initDataArr = this.contentProtections.initData[initDataType];
+    var cInitData = this.contentProtections.initData;
 
-    if (initDataArr === undefined) {
-      this.contentProtections.initData[initDataType] = [newElement];
-      return;
-    }
+    for (var i = 0; i < cInitData.length; i++) {
+      if (cInitData[i].type === initDataType) {
+        var cValues = cInitData[i].values; // loop through data
 
-    for (var i = initDataArr.length - 1; i >= 0; i--) {
-      if (initDataArr[i].systemId === systemId) {
-        if ((0,are_arrays_of_numbers_equal/* default */.Z)(initDataArr[i].data, data)) {
-          return;
+        for (var dataI = 0; dataI < data.length; dataI++) {
+          var dataToAdd = data[dataI];
+          var cValuesIdx = void 0;
+
+          for (cValuesIdx = 0; cValuesIdx < cValues.length; cValuesIdx++) {
+            if (dataToAdd.systemId === cValues[cValuesIdx].systemId) {
+              if ((0,are_arrays_of_numbers_equal/* default */.Z)(dataToAdd.data, cValues[cValuesIdx].data)) {
+                // go to next dataToAdd
+                break;
+              } else {
+                log/* default.warn */.Z.warn("Manifest: different init data for the same system ID");
+              }
+            }
+          }
+
+          if (cValuesIdx === cValues.length) {
+            // we didn't break the loop === we didn't already find that value
+            cValues.push(dataToAdd);
+            hasUpdatedProtectionData = true;
+          }
         }
 
-        log/* default.warn */.Z.warn("Manifest: Two PSSH for the same system ID");
+        return hasUpdatedProtectionData;
       }
-    }
+    } // If we are here, this means that we didn't find the corresponding
+    // init data type in this.contentProtections.initData.
 
-    initDataArr.push(newElement);
+
+    this.contentProtections.initData.push({
+      type: initDataType,
+      values: data
+    });
+    return true;
   };
 
   return Representation;
@@ -29988,20 +30689,36 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
    */
   ;
 
-  _proto.addUndecipherableProtectionData = function addUndecipherableProtectionData(initDataType, initData) {
+  _proto.addUndecipherableProtectionData = function addUndecipherableProtectionData(initData) {
     var updates = updateDeciperability(this, function (representation) {
+      var _a, _b;
+
       if (representation.decipherable === false) {
         return true;
       }
 
-      var segmentProtections = representation.getProtectionsInitializationData();
+      var segmentProtections = (_b = (_a = representation.contentProtections) === null || _a === void 0 ? void 0 : _a.initData) !== null && _b !== void 0 ? _b : [];
 
-      for (var i = 0; i < segmentProtections.length; i++) {
-        if (segmentProtections[i].type === initDataType) {
-          if ((0,are_arrays_of_numbers_equal/* default */.Z)(initData, segmentProtections[i].data)) {
-            return false;
+      var _loop = function _loop(i) {
+        if (initData.type === undefined || segmentProtections[i].type === initData.type) {
+          var containedInitData = initData.values.every(function (undecipherableVal) {
+            return segmentProtections[i].values.some(function (currVal) {
+              return (undecipherableVal.systemId === undefined || currVal.systemId === undecipherableVal.systemId) && (0,are_arrays_of_numbers_equal/* default */.Z)(currVal.data, undecipherableVal.data);
+            });
+          });
+
+          if (containedInitData) {
+            return {
+              v: false
+            };
           }
         }
+      };
+
+      for (var i = 0; i < segmentProtections.length; i++) {
+        var _ret = _loop(i);
+
+        if (typeof _ret === "object") return _ret.v;
       }
 
       return true;
@@ -30654,7 +31371,8 @@ function getMDIA(buf) {
 
 // EXPORTS
 __webpack_require__.d(__webpack_exports__, {
-  "Z": () => /* binding */ takePSSHOut
+  "Z": () => /* binding */ takePSSHOut,
+  "Y": () => /* binding */ getPsshSystemID
 });
 
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
@@ -30767,11 +31485,11 @@ function takePSSHOut(data) {
     }
 
     var pssh = slice_uint8array(moov, psshOffsets[0], psshOffsets[2]);
-    var systemID = getSystemID(pssh, psshOffsets[1] - psshOffsets[0]);
+    var systemId = getPsshSystemID(pssh, psshOffsets[1] - psshOffsets[0]);
 
-    if (systemID !== null) {
+    if (systemId !== undefined) {
       psshBoxes.push({
-        systemID: systemID,
+        systemId: systemId,
         data: pssh
       });
     } // replace by `free` box.
@@ -30787,27 +31505,28 @@ function takePSSHOut(data) {
   return psshBoxes;
 }
 /**
- * Parse systemID from a "pssh" box into an hexadecimal string.
+ * Parse systemId from a "pssh" box into an hexadecimal string.
+ * `undefined` if we could not extract a systemId.
  * @param {Uint8Array} buff - The pssh box
  * @param {number} initialDataOffset - offset of the first byte after the size
  * and name in this pssh box.
- * @returns {string|null}
+ * @returns {string|undefined}
  */
 
-function getSystemID(buff, initialDataOffset) {
+function getPsshSystemID(buff, initialDataOffset) {
   if (buff[initialDataOffset] > 1) {
     log/* default.warn */.Z.warn("ISOBMFF: un-handled PSSH version");
-    return null;
+    return undefined;
   }
 
   var offset = initialDataOffset + 4;
   /* version + flags */
 
   if (offset + 16 > buff.length) {
-    return null;
+    return undefined;
   }
 
-  var systemIDBytes = slice_uint8array(buff, offset + 16);
+  var systemIDBytes = slice_uint8array(buff, offset, offset + 16);
   return (0,string_parsing/* bytesToHex */.ci)(systemIDBytes);
 }
 
@@ -36484,7 +37203,7 @@ function findEndOfCueBlock(linified, startOfCueBlock) {
 
 /***/ }),
 
-/***/ 1459:
+/***/ 2490:
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -36567,7 +37286,7 @@ function imageParser(_ref2) {
       type: "parsed-init-segment",
       value: {
         initializationData: null,
-        segmentProtections: [],
+        protectionDataUpdate: false,
         initTimescale: undefined
       }
     });
@@ -38272,7 +38991,12 @@ function parseAdaptationSetChildren(adaptationSetChildren) {
 
       switch (currentElement.nodeName) {
         case "Accessibility":
-          children.accessibility = parseScheme(currentElement);
+          if (children.accessibilities === undefined) {
+            children.accessibilities = [parseScheme(currentElement)];
+          } else {
+            children.accessibilities.push(parseScheme(currentElement));
+          }
+
           break;
 
         case "BaseURL":
@@ -40287,6 +41011,41 @@ var clear_timeline_from_position = __webpack_require__(8232);
 var is_segment_still_available = __webpack_require__(1091);
 // EXTERNAL MODULE: ./src/parsers/manifest/utils/update_segment_timeline.ts
 var update_segment_timeline = __webpack_require__(5505);
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/indexes/is_period_fulfilled.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+var DEFAULT_MAXIMUM_TIME_ROUNDING_ERROR = config/* default.DEFAULT_MAXIMUM_TIME_ROUNDING_ERROR */.Z.DEFAULT_MAXIMUM_TIME_ROUNDING_ERROR;
+/**
+ * In Javascript, numbers are encoded in a way that a floating number may be
+ * represented internally with a rounding error.
+ *
+ * As the period end is the result of a multiplication between a floating or integer
+ * number (period end * timescale), this function takes into account the potential
+ * rounding error to tell if the period is fulfilled with content.
+ * @param {number} timescale
+ * @param {number} lastSegmentEnd
+ * @param {number} periodEnd
+ * @returns {boolean}
+ */
+
+function isPeriodFulfilled(timescale, lastSegmentEnd, periodEnd) {
+  var scaledRoundingError = DEFAULT_MAXIMUM_TIME_ROUNDING_ERROR * timescale;
+  return lastSegmentEnd + scaledRoundingError >= periodEnd;
+}
 ;// CONCATENATED MODULE: ./src/parsers/manifest/dash/indexes/timeline/convert_element_to_index_segment.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -40740,6 +41499,7 @@ function constructTimelineFromPreviousTimeline(newElements, prevTimeline, scaled
 
 
 
+
  // eslint-disable-next-line max-len
 
 
@@ -41014,10 +41774,8 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
     }
 
     var lastTimelineElement = timeline[timeline.length - 1];
-    var lastTime = (0,index_helpers/* getIndexSegmentEnd */.jH)(lastTimelineElement, null, this._scaledPeriodEnd); // We can never be truly sure if a SegmentTimeline-based index is finished
-    // or not (1 / 60 for possible rounding errors)
-
-    return lastTime + 1 / 60 >= this._scaledPeriodEnd;
+    var lastTime = (0,index_helpers/* getIndexSegmentEnd */.jH)(lastTimelineElement, null, this._scaledPeriodEnd);
+    return isPeriodFulfilled(this._index.timescale, lastTime, this._scaledPeriodEnd);
   }
   /**
    * @returns {Boolean}
@@ -41154,6 +41912,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
 
 
 
+
 var MINIMUM_SEGMENT_SIZE = config/* default.MINIMUM_SEGMENT_SIZE */.Z.MINIMUM_SEGMENT_SIZE;
 /**
  * IRepresentationIndex implementation for DASH' SegmentTemplate without a
@@ -41205,7 +41964,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
     };
     this._isDynamic = isDynamic;
     this._periodStart = periodStart;
-    this._relativePeriodEnd = periodEnd == null ? undefined : periodEnd - periodStart;
+    this._scaledPeriodEnd = periodEnd == null ? undefined : (periodEnd - periodStart) * timescale;
   }
   /**
    * Construct init Segment.
@@ -41232,7 +41991,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
         timescale = index.timescale,
         mediaURLs = index.mediaURLs;
     var scaledStart = this._periodStart * timescale;
-    var scaledEnd = this._relativePeriodEnd == null ? undefined : this._relativePeriodEnd * timescale; // Convert the asked position to the right timescales, and consider them
+    var scaledEnd = this._scaledPeriodEnd; // Convert the asked position to the right timescales, and consider them
     // relatively to the Period's start.
 
     var upFromPeriodStart = fromTime * timescale - scaledStart;
@@ -41388,7 +42147,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
       return true;
     }
 
-    if (this._relativePeriodEnd == null) {
+    if (this._scaledPeriodEnd === undefined) {
       return false;
     }
 
@@ -41402,10 +42161,8 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
       return false;
     }
 
-    var lastSegmentEnd = lastSegmentStart + this._index.duration; // (1 / 60 for possible rounding errors)
-
-    var roundingError = 1 / 60 * timescale;
-    return lastSegmentEnd + roundingError >= this._relativePeriodEnd * timescale;
+    var lastSegmentEnd = lastSegmentStart + this._index.duration;
+    return isPeriodFulfilled(timescale, lastSegmentEnd, this._scaledPeriodEnd);
   }
   /**
    * @returns {Boolean}
@@ -41425,7 +42182,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
     this._aggressiveMode = newIndex._aggressiveMode;
     this._isDynamic = newIndex._isDynamic;
     this._periodStart = newIndex._periodStart;
-    this._relativePeriodEnd = newIndex._relativePeriodEnd;
+    this._scaledPeriodEnd = newIndex._scaledPeriodEnd;
     this._manifestBoundsCalculator = newIndex._manifestBoundsCalculator;
   }
   /**
@@ -41451,7 +42208,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
     } // 1 - check that this index is already available
 
 
-    if (this._relativePeriodEnd === 0 || this._relativePeriodEnd == null) {
+    if (this._scaledPeriodEnd === 0 || this._scaledPeriodEnd === undefined) {
       // /!\ The scaled max position augments continuously and might not
       // reflect exactly the real server-side value. As segments are
       // generated discretely.
@@ -41487,6 +42244,8 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
   ;
 
   _proto._getLastSegmentStart = function _getLastSegmentStart() {
+    var _a;
+
     var _this$_index2 = this._index,
         duration = _this$_index2.duration,
         timescale = _this$_index2.timescale;
@@ -41500,14 +42259,12 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
 
       var agressiveModeOffset = this._aggressiveMode ? duration / timescale : 0;
 
-      if (this._relativePeriodEnd != null && this._relativePeriodEnd < lastPos + agressiveModeOffset - this._periodStart) {
-        var scaledRelativePeriodEnd = this._relativePeriodEnd * timescale;
-
-        if (scaledRelativePeriodEnd < duration) {
+      if (this._scaledPeriodEnd != null && this._scaledPeriodEnd < (lastPos + agressiveModeOffset - this._periodStart) * this._index.timescale) {
+        if (this._scaledPeriodEnd < duration) {
           return null;
         }
 
-        return (Math.floor(scaledRelativePeriodEnd / duration) - 1) * duration;
+        return (Math.floor(this._scaledPeriodEnd / duration) - 1) * duration;
       } // /!\ The scaled last position augments continuously and might not
       // reflect exactly the real server-side value. As segments are
       // generated discretely.
@@ -41524,7 +42281,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
       var numberOfSegmentsAvailable = Math.floor((scaledLastPosition + availabilityTimeOffset) / duration);
       return numberOfSegmentsAvailable <= 0 ? null : (numberOfSegmentsAvailable - 1) * duration;
     } else {
-      var maximumTime = (this._relativePeriodEnd === undefined ? 0 : this._relativePeriodEnd) * timescale;
+      var maximumTime = (_a = this._scaledPeriodEnd) !== null && _a !== void 0 ? _a : 0;
       var numberIndexedToZero = Math.ceil(maximumTime / duration) - 1;
       var regularLastSegmentStart = numberIndexedToZero * duration; // In some SegmentTemplate, we could think that there is one more
       // segment that there actually is due to a very little difference between
@@ -41718,6 +42475,7 @@ function parseRepresentationIndex(representation, representationInfos) {
 
 
 
+
 /**
  * Process intermediate representations to create final parsed representations.
  * @param {Array.<Object>} representationsIR
@@ -41819,25 +42577,38 @@ function parseRepresentations(representationsIR, adaptation, adaptationInfos) {
 
         if (systemId !== undefined) {
           var cencPssh = cp.children.cencPssh;
+          var values = [];
 
           for (var i = 0; i < cencPssh.length; i++) {
             var data = cencPssh[i];
-
-            if (acc.initData.cenc === undefined) {
-              acc.initData.cenc = [];
-            }
-
-            acc.initData.cenc.push({
+            values.push({
               systemId: systemId,
               data: data
             });
+          }
+
+          if (values.length > 0) {
+            var cencInitData = (0,array_find/* default */.Z)(acc.initData, function (i) {
+              return i.type === "cenc";
+            });
+
+            if (cencInitData === undefined) {
+              acc.initData.push({
+                type: "cenc",
+                values: values
+              });
+            } else {
+              var _cencInitData$values;
+
+              (_cencInitData$values = cencInitData.values).push.apply(_cencInitData$values, values);
+            }
           }
         }
 
         return acc;
       }, {
         keyIds: [],
-        initData: {}
+        initData: []
       });
 
       if (Object.keys(contentProtections.initData).length > 0 || contentProtections.keyIds.length > 0) {
@@ -41882,7 +42653,7 @@ function parseRepresentations(representationsIR, adaptation, adaptationInfos) {
 /**
  * Detect if the accessibility given defines an adaptation for the visually
  * impaired.
- * Based on DVB Document A168 (DVB-DASH).
+ * Based on DVB Document A168 (DVB-DASH) and DASH-IF 4.3.
  * @param {Object} accessibility
  * @returns {Boolean}
  */
@@ -41892,7 +42663,9 @@ function isVisuallyImpaired(accessibility) {
     return false;
   }
 
-  return accessibility.schemeIdUri === "urn:tva:metadata:cs:AudioPurposeCS:2007" && accessibility.value === "1";
+  var isVisuallyImpairedAudioDvbDash = accessibility.schemeIdUri === "urn:tva:metadata:cs:AudioPurposeCS:2007" && accessibility.value === "1";
+  var isVisuallyImpairedDashIf = accessibility.schemeIdUri === "urn:mpeg:dash:role:2011" && accessibility.value === "description";
+  return isVisuallyImpairedAudioDvbDash || isVisuallyImpairedDashIf;
 }
 /**
  * Detect if the accessibility given defines an adaptation for the hard of
@@ -42108,7 +42881,7 @@ function parseAdaptationSets(adaptationsIR, periodInfos) {
 
       newID = videoMainAdaptation.id;
     } else {
-      var accessibility = adaptationChildren.accessibility;
+      var accessibilities = adaptationChildren.accessibilities;
       var isDub = void 0;
 
       if (roles !== undefined && roles.some(function (role) {
@@ -42117,9 +42890,30 @@ function parseAdaptationSets(adaptationsIR, periodInfos) {
         isDub = true;
       }
 
-      var isClosedCaption = type === "text" && accessibility != null && isHardOfHearing(accessibility) ? true : undefined;
-      var isAudioDescription = type === "audio" && accessibility != null && isVisuallyImpaired(accessibility) ? true : undefined;
-      var isSignInterpreted = type === "video" && accessibility != null && hasSignLanguageInterpretation(accessibility) ? true : undefined;
+      var isClosedCaption = void 0;
+
+      if (type !== "text") {
+        isClosedCaption = false;
+      } else if (accessibilities !== undefined) {
+        isClosedCaption = accessibilities.some(isHardOfHearing);
+      }
+
+      var isAudioDescription = void 0;
+
+      if (type !== "audio") {
+        isAudioDescription = false;
+      } else if (accessibilities !== undefined) {
+        isAudioDescription = accessibilities.some(isVisuallyImpaired);
+      }
+
+      var isSignInterpreted = void 0;
+
+      if (type !== "video") {
+        isSignInterpreted = false;
+      } else if (accessibilities !== undefined) {
+        isSignInterpreted = accessibilities.some(hasSignLanguageInterpretation);
+      }
+
       var adaptationID = getAdaptationID(adaptation, {
         isAudioDescription: isAudioDescription,
         isClosedCaption: isClosedCaption,
@@ -44123,13 +44917,11 @@ function generateAudioVideoSegmentParser(_ref) {
 
     if (data === null) {
       if (segment.isInit) {
-        var _segmentProtections = representation.getProtectionsInitializationData();
-
         return (0,of.of)({
           type: "parsed-init-segment",
           value: {
             initializationData: null,
-            segmentProtections: _segmentProtections,
+            protectionDataUpdate: false,
             initTimescale: undefined
           }
         });
@@ -44194,26 +44986,21 @@ function generateAudioVideoSegmentParser(_ref) {
 
     var timescale = isWEBM ? getTimeCodeScale(chunkData, 0) : (0,utils/* getMDHDTimescale */.LD)(chunkData);
     var parsedTimescale = (0,is_null_or_undefined/* default */.Z)(timescale) ? undefined : timescale;
+    var protectionDataUpdate = false;
 
     if (!isWEBM) {
-      // TODO extract webm protection information
       var psshInfo = (0,take_pssh_out/* default */.Z)(chunkData);
 
-      for (var i = 0; i < psshInfo.length; i++) {
-        var _psshInfo$i = psshInfo[i],
-            systemID = _psshInfo$i.systemID,
-            psshData = _psshInfo$i.data;
-
-        representation._addProtectionData("cenc", systemID, psshData);
+      if (psshInfo.length > 0) {
+        protectionDataUpdate = representation._addProtectionData("cenc", psshInfo);
       }
     }
 
-    var segmentProtections = representation.getProtectionsInitializationData();
     return (0,of.of)({
       type: "parsed-init-segment",
       value: {
         initializationData: chunkData,
-        segmentProtections: segmentProtections,
+        protectionDataUpdate: protectionDataUpdate,
         initTimescale: parsedTimescale
       }
     });
@@ -44558,7 +45345,7 @@ function parseISOBMFFEmbeddedTextTrack(_ref, __priv_patchLastSegmentInSidx) {
       type: "parsed-init-segment",
       value: {
         initializationData: null,
-        segmentProtections: [],
+        protectionDataUpdate: false,
         initTimescale: mdhdTimescale
       }
     });
@@ -44597,7 +45384,7 @@ function parsePlainTextTrack(_ref2) {
       type: "parsed-init-segment",
       value: {
         initializationData: null,
-        segmentProtections: [],
+        protectionDataUpdate: false,
         initTimescale: undefined
       }
     });
@@ -44658,7 +45445,7 @@ function generateTextTrackParser(_ref3) {
           type: "parsed-init-segment",
           value: {
             initializationData: null,
-            segmentProtections: [],
+            protectionDataUpdate: false,
             initTimescale: undefined
           }
         });
@@ -44807,22 +45594,98 @@ var features = __webpack_require__(7874);
 var log = __webpack_require__(3887);
 // EXTERNAL MODULE: ./src/manifest/index.ts + 10 modules
 var src_manifest = __webpack_require__(1966);
-// EXTERNAL MODULE: ./src/parsers/containers/isobmff/take_pssh_out.ts + 1 modules
-var take_pssh_out = __webpack_require__(6490);
 // EXTERNAL MODULE: ./src/parsers/containers/isobmff/read.ts
 var read = __webpack_require__(6807);
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
 var array_includes = __webpack_require__(7714);
 // EXTERNAL MODULE: ./src/utils/assert.ts
 var assert = __webpack_require__(811);
+// EXTERNAL MODULE: ./src/utils/byte_parsing.ts
+var byte_parsing = __webpack_require__(6968);
 // EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
 var is_non_empty_string = __webpack_require__(6923);
 // EXTERNAL MODULE: ./src/utils/object_assign.ts
 var object_assign = __webpack_require__(8026);
 // EXTERNAL MODULE: ./src/utils/resolve_url.ts
 var resolve_url = __webpack_require__(9829);
+// EXTERNAL MODULE: ./src/utils/string_parsing.ts
+var string_parsing = __webpack_require__(3635);
 // EXTERNAL MODULE: ./src/utils/take_first_set.ts
 var take_first_set = __webpack_require__(5278);
+// EXTERNAL MODULE: ./src/parsers/containers/isobmff/constants.ts
+var constants = __webpack_require__(2689);
+;// CONCATENATED MODULE: ./src/parsers/containers/isobmff/create_box.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+/**
+ * Speed up string to bytes conversion by memorizing the result
+ *
+ * The keys here are ISOBMFF box names. The values are the corresponding
+ * bytes conversion for putting as an ISOBMFF boxes.
+ *
+ * Used by the boxName method.
+ * @type {Object}
+ */
+
+var boxNamesMem = {};
+/**
+ * Convert the string name of an ISOBMFF box into the corresponding bytes.
+ * Has a memorization mechanism to speed-up if you want to translate the
+ * same string multiple times.
+ * @param {string} str
+ * @returns {Uint8Array}
+ */
+
+function boxName(str) {
+  if (boxNamesMem[str] != null) {
+    return boxNamesMem[str];
+  }
+
+  var nameInBytes = (0,string_parsing/* strToUtf8 */.tG)(str);
+  boxNamesMem[str] = nameInBytes;
+  return nameInBytes;
+}
+/**
+ * Create a new ISOBMFF "box" with the given name.
+ * @param {string} name - name of the box you want to create, must always
+ * be 4 characters (uuid boxes not supported)
+ * @param {Uint8Array} buff - content of the box
+ * @returns {Uint8Array} - The entire ISOBMFF box (length+name+content)
+ */
+
+
+function createBox(name, buff) {
+  var len = buff.length + 8;
+  return len <= constants/* MAX_32_BIT_INT */.s ? (0,byte_parsing/* concat */.zo)((0,byte_parsing/* itobe4 */.kh)(len), boxName(name), buff) : (0,byte_parsing/* concat */.zo)((0,byte_parsing/* itobe4 */.kh)(1), boxName(name), (0,byte_parsing/* itobe8 */.el)(len + 8), buff);
+}
+/**
+ * @param {string} name
+ * @param {Array.<Uint8Array>} children
+ * @returns {Uint8Array}
+ */
+
+
+function createBoxWithChildren(name, children) {
+  return createBox(name, byte_parsing/* concat.apply */.zo.apply(void 0, children));
+}
+
+
 ;// CONCATENATED MODULE: ./src/parsers/manifest/utils/check_manifest_ids.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -45038,10 +45901,6 @@ function parseCNodes(nodes) {
 }
 // EXTERNAL MODULE: ./src/utils/base64.ts
 var base64 = __webpack_require__(9689);
-// EXTERNAL MODULE: ./src/utils/byte_parsing.ts
-var byte_parsing = __webpack_require__(6968);
-// EXTERNAL MODULE: ./src/utils/string_parsing.ts
-var string_parsing = __webpack_require__(3635);
 ;// CONCATENATED MODULE: ./src/parsers/containers/isobmff/drm/playready.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -45834,6 +46693,9 @@ function reduceChildren(root, fn, init) {
 
 
 
+
+
+
 /**
  * Default value for the aggressive `mode`.
  * In this mode, segments will be returned even if we're not sure those had time
@@ -46105,8 +46967,7 @@ function createSmoothStreamingParser(parserOptions) {
         // TODO set multiple protections here
         // instead of the first one
         protection: firstProtection != null ? {
-          keyId: firstProtection.keyId,
-          keySystems: firstProtection.keySystems
+          keyId: firstProtection.keyId
         } : undefined
       };
       var aggressiveMode = parserOptions.aggressiveMode == null ? DEFAULT_AGGRESSIVE_MODE : parserOptions.aggressiveMode;
@@ -46122,11 +46983,33 @@ function createSmoothStreamingParser(parserOptions) {
         id: id
       });
 
-      if (keyIDs.length > 0) {
-        representation.contentProtections = {
-          keyIds: keyIDs,
-          initData: {}
-        };
+      if (keyIDs.length > 0 || firstProtection !== undefined) {
+        var initDataValues = firstProtection === undefined ? [] : firstProtection.keySystems.map(function (keySystemData) {
+          var systemId = keySystemData.systemId,
+              privateData = keySystemData.privateData;
+          var cleanedSystemId = systemId.replace(/-/g, "");
+          var pssh = createPSSHBox(cleanedSystemId, privateData);
+          return {
+            systemId: cleanedSystemId,
+            data: pssh
+          };
+        });
+
+        if (initDataValues.length > 0) {
+          var initData = [{
+            type: "cenc",
+            values: initDataValues
+          }];
+          representation.contentProtections = {
+            keyIds: keyIDs,
+            initData: initData
+          };
+        } else {
+          representation.contentProtections = {
+            keyIds: keyIDs,
+            initData: []
+          };
+        }
       }
 
       return representation;
@@ -46338,6 +47221,24 @@ function createSmoothStreamingParser(parserOptions) {
   }
 
   return parseFromDocument;
+}
+/**
+ * @param {string} systemId - Hex string representing the CDM, 16 bytes.
+ * @param {Uint8Array|undefined} privateData - Data associated to protection
+ * specific system.
+ * @returns {Uint8Array}
+ */
+
+
+function createPSSHBox(systemId, privateData) {
+  if (systemId.length !== 32) {
+    throw new Error("HSS: wrong system id length");
+  }
+
+  var version = 0;
+  return createBox("pssh", (0,byte_parsing/* concat */.zo)([version, 0, 0, 0], (0,string_parsing/* hexToBytes */.nr)(systemId),
+  /** To put there KIDs if it exists (necessitate PSSH v1) */
+  (0,byte_parsing/* itobe4 */.kh)(privateData.length), privateData));
 }
 
 /* harmony default export */ const create_parser = (createSmoothStreamingParser);
@@ -46599,80 +47500,6 @@ var browser_detection = __webpack_require__(3666);
 function canPatchISOBMFFSegment() {
   return !browser_detection/* isIEOrEdge */.YM;
 }
-// EXTERNAL MODULE: ./src/parsers/containers/isobmff/constants.ts
-var constants = __webpack_require__(2689);
-;// CONCATENATED MODULE: ./src/parsers/containers/isobmff/create_box.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-/**
- * Speed up string to bytes conversion by memorizing the result
- *
- * The keys here are ISOBMFF box names. The values are the corresponding
- * bytes conversion for putting as an ISOBMFF boxes.
- *
- * Used by the boxName method.
- * @type {Object}
- */
-
-var boxNamesMem = {};
-/**
- * Convert the string name of an ISOBMFF box into the corresponding bytes.
- * Has a memorization mechanism to speed-up if you want to translate the
- * same string multiple times.
- * @param {string} str
- * @returns {Uint8Array}
- */
-
-function boxName(str) {
-  if (boxNamesMem[str] != null) {
-    return boxNamesMem[str];
-  }
-
-  var nameInBytes = (0,string_parsing/* strToUtf8 */.tG)(str);
-  boxNamesMem[str] = nameInBytes;
-  return nameInBytes;
-}
-/**
- * Create a new ISOBMFF "box" with the given name.
- * @param {string} name - name of the box you want to create, must always
- * be 4 characters (uuid boxes not supported)
- * @param {Uint8Array} buff - content of the box
- * @returns {Uint8Array} - The entire ISOBMFF box (length+name+content)
- */
-
-
-function createBox(name, buff) {
-  var len = buff.length + 8;
-  return len <= constants/* MAX_32_BIT_INT */.s ? (0,byte_parsing/* concat */.zo)((0,byte_parsing/* itobe4 */.kh)(len), boxName(name), buff) : (0,byte_parsing/* concat */.zo)((0,byte_parsing/* itobe4 */.kh)(1), boxName(name), (0,byte_parsing/* itobe8 */.el)(len + 8), buff);
-}
-/**
- * @param {string} name
- * @param {Array.<Uint8Array>} children
- * @returns {Uint8Array}
- */
-
-
-function createBoxWithChildren(name, children) {
-  return createBox(name, byte_parsing/* concat.apply */.zo.apply(void 0, children));
-}
-
-
 ;// CONCATENATED MODULE: ./src/transports/smooth/isobmff/create_boxes.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -46939,44 +47766,6 @@ function createMVHDBox(timescale, trackId) {
   [0, 1], 14, // default matrix
   [64, 0, 0, 0], 26, (0,byte_parsing/* itobe2 */.XT)(trackId + 1) // next trackId (=trackId + 1);
   ));
-}
-/**
- * @param {string} systemId - Hex string representing the CDM, 16 bytes.
- * @param {Uint8Array|undefined} privateData - Data associated to protection
- * specific system.
- * @param {Array.<Uint8Array>} keyIds - List of key ids contained in the PSSH
- * @returns {Uint8Array}
- */
-
-
-function createPSSHBox(systemId, privateData, keyIds) {
-  if (privateData === void 0) {
-    privateData = new Uint8Array(0);
-  }
-
-  if (keyIds === void 0) {
-    keyIds = new Uint8Array(0);
-  }
-
-  var _systemId = systemId.replace(/-/g, "");
-
-  if (_systemId.length !== 32) {
-    throw new Error("HSS: wrong system id length");
-  }
-
-  var version;
-  var kidList;
-  var kidCount = keyIds.length;
-
-  if (kidCount > 0) {
-    version = 1;
-    kidList = byte_parsing/* concat.apply */.zo.apply(void 0, [(0,byte_parsing/* itobe4 */.kh)(kidCount)].concat(keyIds));
-  } else {
-    version = 0;
-    kidList = [];
-  }
-
-  return createBox("pssh", (0,byte_parsing/* concat */.zo)([version, 0, 0, 0], (0,string_parsing/* hexToBytes */.nr)(_systemId), kidList, (0,byte_parsing/* itobe4 */.kh)(privateData.length), privateData));
 }
 /**
  * @param {Uint8Array} mfhd
@@ -47302,16 +48091,11 @@ var byte_range = __webpack_require__(281);
  * @param {Uint8Array} mvhd
  * @param {Uint8Array} mvex
  * @param {Uint8Array} trak
- * @param {Object} pssList
  * @returns {Array.<Uint8Array>}
  */
 
-function createMOOVBox(mvhd, mvex, trak, pssList) {
+function createMOOVBox(mvhd, mvex, trak) {
   var children = [mvhd, mvex, trak];
-  pssList.forEach(function (pss) {
-    var pssh = createPSSHBox(pss.systemId, pss.privateData, pss.keyIds);
-    children.push(pssh);
-  });
   return createBoxWithChildren("moov", children);
 }
 /**
@@ -47328,7 +48112,7 @@ function createMOOVBox(mvhd, mvex, trak, pssList) {
  */
 
 
-function createInitSegment(timescale, type, stsd, mhd, width, height, pssList) {
+function createInitSegment(timescale, type, stsd, mhd, width, height) {
   var stbl = createBoxWithChildren("stbl", [stsd, createBox("stts", new Uint8Array(0x08)), createBox("stsc", new Uint8Array(0x08)), createBox("stsz", new Uint8Array(0x0C)), createBox("stco", new Uint8Array(0x08))]);
   var url = createBox("url ", new Uint8Array([0, 0, 0, 1]));
   var dref = createDREFBox(url);
@@ -47345,7 +48129,7 @@ function createInitSegment(timescale, type, stsd, mhd, width, height, pssList) {
   var mvhd = createMVHDBox(timescale, 1); // in fact, we don't give a sh** about
   // this value :O
 
-  var moov = createMOOVBox(mvhd, mvex, trak, pssList);
+  var moov = createMOOVBox(mvhd, mvex, trak);
   var ftyp = createFTYPBox("isom", ["isom", "iso2", "iso6", "avc1", "dash"]);
   return (0,byte_parsing/* concat */.zo)(ftyp, moov);
 }
@@ -47386,9 +48170,7 @@ function createInitSegment(timescale, type, stsd, mhd, width, height, pssList) {
  * @returns {Uint8Array}
  */
 
-function createVideoInitSegment(timescale, width, height, hRes, vRes, nalLength, codecPrivateData, keyId, pssList) {
-  var _pssList = pssList === undefined ? [] : pssList;
-
+function createVideoInitSegment(timescale, width, height, hRes, vRes, nalLength, codecPrivateData, keyId) {
   var _codecPrivateData$spl = codecPrivateData.split("00000001"),
       spsHex = _codecPrivateData$spl[1],
       ppsHex = _codecPrivateData$spl[2];
@@ -47403,7 +48185,7 @@ function createVideoInitSegment(timescale, width, height, hRes, vRes, nalLength,
   var avcc = createAVCCBox(sps, pps, nalLength);
   var stsd;
 
-  if (_pssList.length === 0 || keyId === undefined) {
+  if (keyId === undefined) {
     var avc1 = createAVC1Box(width, height, hRes, vRes, "AVC Coding", 24, avcc);
     stsd = createSTSDBox([avc1]);
   } else {
@@ -47416,7 +48198,7 @@ function createVideoInitSegment(timescale, width, height, hRes, vRes, nalLength,
     stsd = createSTSDBox([encv]);
   }
 
-  return createInitSegment(timescale, "video", stsd, createVMHDBox(), width, height, _pssList);
+  return createInitSegment(timescale, "video", stsd, createVMHDBox(), width, height);
 }
 ;// CONCATENATED MODULE: ./src/transports/smooth/isobmff/get_aaces_header.ts
 /**
@@ -47497,17 +48279,13 @@ function getAacesHeader(type, frequency, chans) {
  * @returns {Uint8Array}
  */
 
-function createAudioInitSegment(timescale, channelsCount, sampleSize, packetSize, sampleRate, codecPrivateData, keyId, pssList) {
-  if (pssList === void 0) {
-    pssList = [];
-  }
-
+function createAudioInitSegment(timescale, channelsCount, sampleSize, packetSize, sampleRate, codecPrivateData, keyId) {
   var _codecPrivateData = codecPrivateData.length === 0 ? getAacesHeader(2, sampleRate, channelsCount) : codecPrivateData;
 
   var esds = createESDSBox(1, _codecPrivateData);
 
   var stsd = function () {
-    if (pssList.length === 0 || keyId === undefined) {
+    if (keyId === undefined) {
       var mp4a = createMP4ABox(1, channelsCount, sampleSize, packetSize, sampleRate, esds);
       return createSTSDBox([mp4a]);
     }
@@ -47521,7 +48299,7 @@ function createAudioInitSegment(timescale, channelsCount, sampleSize, packetSize
     return createSTSDBox([enca]);
   }();
 
-  return createInitSegment(timescale, "audio", stsd, createSMHDBox(), 0, 0, pssList);
+  return createInitSegment(timescale, "audio", stsd, createSMHDBox(), 0, 0);
 }
 ;// CONCATENATED MODULE: ./src/transports/smooth/segment_loader.ts
 /**
@@ -47611,7 +48389,7 @@ var generateSegmentLoader = function generateSegmentLoader(customSegmentLoader) 
                 _representation$heigh = representation.height,
                 height = _representation$heigh === void 0 ? 0 : _representation$heigh;
             responseData = createVideoInitSegment(timescale, width, height, 72, 72, 4, // vRes, hRes, nal
-            codecPrivateData, protection.keyId, protection.keySystems);
+            codecPrivateData, protection.keyId);
             break;
           }
 
@@ -47625,7 +48403,7 @@ var generateSegmentLoader = function generateSegmentLoader(customSegmentLoader) 
                 packetSize = _smoothInitPrivateInf4 === void 0 ? 0 : _smoothInitPrivateInf4,
                 _smoothInitPrivateInf5 = smoothInitPrivateInfos.samplingRate,
                 samplingRate = _smoothInitPrivateInf5 === void 0 ? 0 : _smoothInitPrivateInf5;
-            responseData = createAudioInitSegment(timescale, channels, bitsPerSample, packetSize, samplingRate, codecPrivateData, protection.keyId, protection.keySystems);
+            responseData = createAudioInitSegment(timescale, channels, bitsPerSample, packetSize, samplingRate, codecPrivateData, protection.keyId);
             break;
           }
 
@@ -47968,7 +48746,6 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
       var _a, _b;
 
       var segment = content.segment,
-          representation = content.representation,
           adaptation = content.adaptation,
           manifest = content.manifest;
       var data = response.data,
@@ -47976,12 +48753,11 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
 
       if (data === null) {
         if (segment.isInit) {
-          var segmentProtections = representation.getProtectionsInitializationData();
           return (0,of.of)({
             type: "parsed-init-segment",
             value: {
               initializationData: null,
-              segmentProtections: segmentProtections,
+              protectionDataUpdate: false,
               initTimescale: undefined
             }
           });
@@ -48001,20 +48777,6 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
       var responseBuffer = data instanceof Uint8Array ? data : new Uint8Array(data);
 
       if (segment.isInit) {
-        var psshInfo = (0,take_pssh_out/* default */.Z)(responseBuffer);
-
-        if (psshInfo.length > 0) {
-          for (var i = 0; i < psshInfo.length; i++) {
-            var _psshInfo$i = psshInfo[i],
-                systemID = _psshInfo$i.systemID,
-                psshData = _psshInfo$i.data;
-
-            representation._addProtectionData("cenc", systemID, psshData);
-          }
-        }
-
-        var _segmentProtections = representation.getProtectionsInitializationData();
-
         var timescale = (_b = (_a = segment.privateInfos) === null || _a === void 0 ? void 0 : _a.smoothInitSegment) === null || _b === void 0 ? void 0 : _b.timescale;
         return (0,of.of)({
           type: "parsed-init-segment",
@@ -48023,7 +48785,7 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
             // smooth init segments are crafted by hand.
             // Their timescale is the one from the manifest.
             initTimescale: timescale,
-            segmentProtections: _segmentProtections
+            protectionDataUpdate: false
           }
         });
       }
@@ -48115,7 +48877,7 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
           type: "parsed-init-segment",
           value: {
             initializationData: null,
-            segmentProtections: [],
+            protectionDataUpdate: false,
             initTimescale: undefined
           }
         });
@@ -48276,7 +49038,7 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
           type: "parsed-init-segment",
           value: {
             initializationData: null,
-            segmentProtections: [],
+            protectionDataUpdate: false,
             initTimescale: undefined
           }
         });
@@ -48317,7 +49079,7 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
             timescale: bifObject.timescale
           },
           chunkOffset: 0,
-          segmentProtections: [],
+          protectionDataUpdate: false,
           appendWindow: [undefined, undefined]
         }
       });
@@ -58220,7 +58982,7 @@ function __classPrivateFieldSet(receiver, privateMap, value) {
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(1452);
+/******/ 	return __webpack_require__(4449);
 /******/ })()
 .default;
 });
