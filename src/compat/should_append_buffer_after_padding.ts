@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { isSafari } from "./browser_detection";
-
 /**
  * When the player decides to load another quality and replace
  * currently buffered one, it may append buffer on current playback time.
@@ -25,5 +23,5 @@ import { isSafari } from "./browser_detection";
  * segment if it may be pushed during playback time. We should not buffer
  * under a certain padding from the current time.
  */
-const shouldAppendBufferAfterPadding = isSafari;
+const shouldAppendBufferAfterPadding = true;
 export default shouldAppendBufferAfterPadding;
