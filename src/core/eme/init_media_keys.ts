@@ -26,7 +26,6 @@ import {
   take,
 } from "rxjs/operators";
 import log from "../../log";
-import isNullOrUndefined from "../../utils/is_null_or_undefined";
 import attachMediaKeys, {
   disableMediaKeys,
 } from "./attach_media_keys";
@@ -60,12 +59,7 @@ export default function initMediaKeys(
        * this property unlocks can break the loading of MediaKeySessions
        * persisted in older RxPlayer's versions.
        */
-      let initializationDataSystemId : string | undefined;
-      if (isNullOrUndefined(options.licenseStorage) ||
-          options.licenseStorage.disableRetroCompatibility === true)
-      {
-        initializationDataSystemId = getDrmSystemId(mediaKeySystemAccess.keySystem);
-      }
+      const initializationDataSystemId = getDrmSystemId(mediaKeySystemAccess.keySystem);
 
       const attachMediaKeys$ = new ReplaySubject<void>(1);
       const shouldDisableOldMediaKeys =
