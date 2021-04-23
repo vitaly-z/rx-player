@@ -15,10 +15,10 @@
  */
 
 import { IPeriodIntermediateRepresentation } from "../../../node_parser_types";
+import { TagName } from "../../worker/worker_types";
 import ParsersStack, {
   IChildrenParser,
 } from "../parsers_stack";
-import { TagName } from "../types";
 import {
   generatePeriodAttrParser,
   generatePeriodChildrenParser,
@@ -34,9 +34,7 @@ import {
  */
 export function generateXLinkChildrenParser(
   xlinkObj : { periods: IPeriodIntermediateRepresentation[] },
-  linearMemory : WebAssembly.Memory,
-  parsersStack : ParsersStack,
-  fullMpd : ArrayBuffer
+  parsersStack : ParsersStack
 )  : IChildrenParser {
   return function onRootChildren(nodeId : number) {
     switch (nodeId) {
@@ -47,10 +45,8 @@ export function generateXLinkChildrenParser(
                          attributes: {} };
         xlinkObj.periods.push(period);
         const childrenParser = generatePeriodChildrenParser(period.children,
-                                                            linearMemory,
-                                                            parsersStack,
-                                                            fullMpd);
-        const attributeParser = generatePeriodAttrParser(period.attributes, linearMemory);
+                                                            parsersStack);
+        const attributeParser = generatePeriodAttrParser(period.attributes);
         parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
         break;
       }

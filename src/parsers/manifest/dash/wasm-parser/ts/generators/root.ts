@@ -17,8 +17,8 @@
 import {
   IMPDIntermediateRepresentation,
 } from "../../../node_parser_types";
+import { TagName } from "../../worker/worker_types";
 import ParsersStack from "../parsers_stack";
-import { TagName } from "../types";
 import {
   generateMPDAttrParser,
   generateMPDChildrenParser,
@@ -33,9 +33,7 @@ import {
  */
 export function generateRootChildrenParser(
   rootObj : { mpd? : IMPDIntermediateRepresentation },
-  linearMemory : WebAssembly.Memory,
-  parsersStack : ParsersStack,
-  fullMpd : ArrayBuffer
+  parsersStack : ParsersStack
 )  : (nodeId : number) => void {
   return function onRootChildren(nodeId : number) {
     switch (nodeId) {
@@ -46,12 +44,9 @@ export function generateRootChildrenParser(
                                     utcTimings: [] },
                         attributes: {} };
         const childrenParser = generateMPDChildrenParser(rootObj.mpd.children,
-                                                         linearMemory,
-                                                         parsersStack,
-                                                         fullMpd);
+                                                         parsersStack);
         const attributeParser = generateMPDAttrParser(rootObj.mpd.children,
-                                                      rootObj.mpd.attributes,
-                                                      linearMemory);
+                                                      rootObj.mpd.attributes);
         parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
         break;
     }

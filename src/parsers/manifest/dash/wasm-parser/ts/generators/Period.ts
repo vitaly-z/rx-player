@@ -20,14 +20,14 @@ import {
   IPeriodAttributes,
   IPeriodChildren,
 } from "../../../node_parser_types";
+import {
+  AttributeName,
+  TagName,
+} from "../../worker/worker_types";
 import ParsersStack, {
   IAttributeParser,
   IChildrenParser,
 } from "../parsers_stack";
-import {
-  AttributeName,
-  TagName,
-} from "../types";
 import { parseString } from "../utils";
 import {
   generateAdaptationSetAttrParser,
@@ -50,9 +50,7 @@ import { generateSegmentTemplateAttrParser } from "./SegmentTemplate";
  */
 export function generatePeriodChildrenParser(
   periodChildren : IPeriodChildren,
-  linearMemory : WebAssembly.Memory,
-  parsersStack : ParsersStack,
-  fullMpd : ArrayBuffer
+  parsersStack : ParsersStack
 )  : IChildrenParser {
   return function onRootChildren(nodeId : number) {
     switch (nodeId) {
@@ -63,11 +61,8 @@ export function generatePeriodChildrenParser(
                                 attributes: {} };
         periodChildren.adaptations.push(adaptationObj);
         const childrenParser =
-          generateAdaptationSetChildrenParser(adaptationObj.children,
-                                              linearMemory,
-                                              parsersStack);
-        const attributeParser = generateAdaptationSetAttrParser(adaptationObj.attributes,
-                                                                linearMemory);
+          generateAdaptationSetChildrenParser(adaptationObj.children, parsersStack);
+        const attributeParser = generateAdaptationSetAttrParser(adaptationObj.attributes);
         parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
         break;
       }
@@ -76,7 +71,7 @@ export function generatePeriodChildrenParser(
         const baseUrl = { value: "", attributes: {} };
         periodChildren.baseURLs.push(baseUrl);
         const childrenParser = noop;
-        const attributeParser = generateBaseUrlAttrParser(baseUrl, linearMemory);
+        const attributeParser = generateBaseUrlAttrParser(baseUrl);
         parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
         break;
       }
@@ -86,11 +81,8 @@ export function generatePeriodChildrenParser(
           { children: { events: [] }, attributes: {} };
         periodChildren.eventStreams.push(eventStream);
         const childrenParser = generateEventStreamChildrenParser(eventStream.children,
-                                                                 linearMemory,
-                                                                 parsersStack,
-                                                                 fullMpd);
-        const attrParser = generateEventStreamAttrParser(eventStream.attributes,
-                                                         linearMemory);
+                                                                 parsersStack);
+        const attrParser = generateEventStreamAttrParser(eventStream.attributes);
         parsersStack.pushParsers(nodeId, childrenParser, attrParser);
         break;
       }
@@ -100,7 +92,7 @@ export function generatePeriodChildrenParser(
         periodChildren.segmentTemplate = stObj;
         parsersStack.pushParsers(nodeId,
                                  noop, // SegmentTimeline as treated like an attribute
-                                 generateSegmentTemplateAttrParser(stObj, linearMemory));
+                                 generateSegmentTemplateAttrParser(stObj));
         break;
       }
     }
@@ -113,33 +105,29 @@ export function generatePeriodChildrenParser(
  * @returns {Function}
  */
 export function generatePeriodAttrParser(
-  periodAttrs : IPeriodAttributes,
-  linearMemory : WebAssembly.Memory
+  periodAttrs : IPeriodAttributes
 )  : IAttributeParser {
   const textDecoder = new TextDecoder();
-  return function onPeriodAttribute(attr, ptr, len) {
+  return function onPeriodAttribute(attr, payload) {
     switch (attr) {
       case AttributeName.Id:
-        periodAttrs.id = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        periodAttrs.id = parseString(textDecoder, payload);
         break;
       case AttributeName.Start:
-        periodAttrs.start = new DataView(linearMemory.buffer).getFloat64(ptr, true);
+        periodAttrs.start = new DataView(payload).getFloat64(0, true);
         break;
       case AttributeName.Duration:
-        periodAttrs.duration = new DataView(linearMemory.buffer).getFloat64(ptr, true);
+        periodAttrs.duration = new DataView(payload).getFloat64(0, true);
         break;
       case AttributeName.BitstreamSwitching:
         periodAttrs.bitstreamSwitching =
-          new DataView(linearMemory.buffer).getUint8(0) === 0;
+          new DataView(payload).getUint8(0) === 0;
         break;
       case AttributeName.XLinkHref:
-        periodAttrs.xlinkHref = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        periodAttrs.xlinkHref = parseString(textDecoder, payload);
         break;
       case AttributeName.XLinkActuate:
-        periodAttrs.xlinkActuate = parseString(textDecoder,
-                                               linearMemory.buffer,
-                                               ptr,
-                                               len);
+        periodAttrs.xlinkActuate = parseString(textDecoder, payload);
         break;
     }
   };

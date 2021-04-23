@@ -15,8 +15,8 @@
  */
 
 import { IBaseUrlIntermediateRepresentation } from "../../../node_parser_types";
+import { AttributeName } from "../../worker/worker_types";
 import { IAttributeParser } from "../parsers_stack";
-import { AttributeName } from "../types";
 import { parseString } from "../utils";
 
 /**
@@ -26,20 +26,19 @@ import { parseString } from "../utils";
  * @returns {Function}
  */
 export function generateBaseUrlAttrParser(
-  baseUrlAttrs : IBaseUrlIntermediateRepresentation,
-  linearMemory : WebAssembly.Memory
+  baseUrlAttrs : IBaseUrlIntermediateRepresentation
 )  : IAttributeParser {
   const textDecoder = new TextDecoder();
   let dataView;
-  return function onMPDAttribute(attr : number, ptr : number, len : number) {
+  return function onMPDAttribute(attr : number, payload : ArrayBuffer) {
     switch (attr) {
       case AttributeName.Text:
-        baseUrlAttrs.value = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        baseUrlAttrs.value = parseString(textDecoder, payload);
         break;
 
       case AttributeName.AvailabilityTimeOffset:
-        dataView = new DataView(linearMemory.buffer);
-        baseUrlAttrs.attributes.availabilityTimeOffset = dataView.getFloat64(ptr, true);
+        dataView = new DataView(payload);
+        baseUrlAttrs.attributes.availabilityTimeOffset = dataView.getFloat64(0, true);
         break;
     }
   };

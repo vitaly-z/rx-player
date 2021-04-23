@@ -34,10 +34,13 @@ describe("Features list - DASH WASM Parser", () => {
     expect(initializeSpy).not.toHaveBeenCalled();
 
     /* eslint-disable @typescript-eslint/no-floating-promises */
-    DASH_WASM.initialize({ wasmUrl: "blank" });
+    DASH_WASM.initialize({ wasmUrl: "blank",
+                           workerUrl: "worker" });
     /* eslint-enable @typescript-eslint/no-floating-promises */
 
     expect(initializeSpy).toHaveBeenCalledTimes(1);
+    expect(initializeSpy).toHaveBeenLastCalledWith({ wasmUrl: "blank",
+                                                     workerUrl: "worker" });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const featureObject : any = { transports: {},

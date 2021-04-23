@@ -15,8 +15,8 @@
  */
 
 import { IContentComponentAttributes } from "../../../node_parser_types";
+import { AttributeName } from "../../worker/worker_types";
 import { IAttributeParser } from "../parsers_stack";
-import { AttributeName } from "../types";
 import { parseString } from "../utils";
 
 /**
@@ -26,26 +26,25 @@ import { parseString } from "../utils";
  * @returns {Function}
  */
 export function generateContentComponentAttrParser(
-  ccAttrs : IContentComponentAttributes,
-  linearMemory : WebAssembly.Memory
+  ccAttrs : IContentComponentAttributes
 )  : IAttributeParser {
   const textDecoder = new TextDecoder();
-  return function onMPDAttribute(attr : number, ptr : number, len : number) {
+  return function onMPDAttribute(attr : number, payload : ArrayBuffer) {
     switch (attr) {
       case AttributeName.Id:
-        ccAttrs.id = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        ccAttrs.id = parseString(textDecoder, payload);
         break;
 
       case AttributeName.Language:
-        ccAttrs.language = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        ccAttrs.language = parseString(textDecoder, payload);
         break;
 
       case AttributeName.ContentType:
-        ccAttrs.contentType = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        ccAttrs.contentType = parseString(textDecoder, payload);
         break;
 
       case AttributeName.Par:
-        ccAttrs.par = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        ccAttrs.par = parseString(textDecoder, payload);
         break;
     }
   };

@@ -23,11 +23,9 @@
  */
 function parseString(
   textDecoder : TextDecoder,
-  buffer : ArrayBuffer,
-  ptr : number,
-  len : number
+  buffer : ArrayBuffer
 ) : string {
-  const arr = new Uint8Array(buffer, ptr, len);
+  const arr = new Uint8Array(buffer);
   return textDecoder.decode(arr);
 }
 

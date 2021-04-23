@@ -20,14 +20,14 @@ import {
   IEventStreamChildren,
   IEventStreamEventIntermediateRepresentation,
 } from "../../../node_parser_types";
+import {
+  AttributeName,
+  TagName,
+} from "../../worker/worker_types";
 import ParsersStack, {
   IAttributeParser,
   IChildrenParser,
 } from "../parsers_stack";
-import {
-  AttributeName,
-  TagName,
-} from "../types";
 import { parseString } from "../utils";
 
 /**
@@ -40,16 +40,14 @@ import { parseString } from "../utils";
  */
 export function generateEventStreamChildrenParser(
   childrenObj : IEventStreamChildren,
-  linearMemory : WebAssembly.Memory,
-  parsersStack : ParsersStack,
-  fullMpd : ArrayBuffer
+  parsersStack : ParsersStack
 )  : IChildrenParser {
   return function onRootChildren(nodeId : number) {
     switch (nodeId) {
       case TagName.EventStreamElt: {
         const event = {};
         childrenObj.events.push(event);
-        const attrParser = generateEventAttrParser(event, linearMemory, fullMpd);
+        const attrParser = generateEventAttrParser(event);
         parsersStack.pushParsers(nodeId, noop, attrParser);
         break;
       }
@@ -63,23 +61,22 @@ export function generateEventStreamChildrenParser(
  * @returns {Function}
  */
 export function generateEventStreamAttrParser(
-  esAttrs : IEventStreamAttributes,
-  linearMemory : WebAssembly.Memory
+  esAttrs : IEventStreamAttributes
 )  : IAttributeParser {
   const textDecoder = new TextDecoder();
-  return function onEventStreamAttribute(attr : number, ptr : number, len : number) {
-    const dataView = new DataView(linearMemory.buffer);
+  return function onEventStreamAttribute(attr : number, payload : ArrayBuffer) {
+    const dataView = new DataView(payload);
     switch (attr) {
       case AttributeName.SchemeIdUri:
         esAttrs.schemeIdUri =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
+          parseString(textDecoder, payload);
         break;
       case AttributeName.SchemeValue:
         esAttrs.value =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
+          parseString(textDecoder, payload);
         break;
       case AttributeName.TimeScale:
-        esAttrs.timescale = dataView.getFloat64(ptr, true);
+        esAttrs.timescale = dataView.getFloat64(0, true);
         break;
     }
   };
@@ -92,27 +89,23 @@ export function generateEventStreamAttrParser(
  * @returns {Function}
  */
 function generateEventAttrParser(
-  eventAttr : IEventStreamEventIntermediateRepresentation,
-  linearMemory : WebAssembly.Memory,
-  fullMpd : ArrayBuffer
+  eventAttr : IEventStreamEventIntermediateRepresentation
 ) : IAttributeParser {
   const textDecoder = new TextDecoder();
-  return function onEventStreamAttribute(attr : number, ptr : number, len : number) {
-    const dataView = new DataView(linearMemory.buffer);
+  return function onEventStreamAttribute(attr : number, payload : ArrayBuffer) {
+    const dataView = new DataView(payload);
     switch (attr) {
       case AttributeName.EventPresentationTime:
-        eventAttr.presentationTime = dataView.getFloat64(ptr, true);
+        eventAttr.presentationTime = dataView.getFloat64(0, true);
         break;
       case AttributeName.Duration:
-        eventAttr.duration = dataView.getFloat64(ptr, true);
+        eventAttr.duration = dataView.getFloat64(0, true);
         break;
       case AttributeName.Id:
-        eventAttr.id = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        eventAttr.id = parseString(textDecoder, payload);
         break;
       case AttributeName.EventStreamEltRange:
-        const rangeStart = dataView.getFloat64(ptr, true);
-        const rangeEnd = dataView.getFloat64(ptr + 8, true);
-        eventAttr.eventStreamData = fullMpd.slice(rangeStart, rangeEnd);
+        eventAttr.eventStreamData = payload;
         break;
     }
   };

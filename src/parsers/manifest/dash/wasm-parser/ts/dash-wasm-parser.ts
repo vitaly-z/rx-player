@@ -23,23 +23,25 @@ import parseMpdIr, {
   ILoadedXlinkData,
 } from "../../common";
 import {
-  IMPDIntermediateRepresentation, IPeriodIntermediateRepresentation,
+  IMPDIntermediateRepresentation,
+  IPeriodIntermediateRepresentation,
 } from "../../node_parser_types";
 import {
   IDashParserResponse,
   ILoadedResource,
   IMPDParserArguments,
 } from "../../parsers_types";
+import {
+  IngoingMessageType,
+  IWorkerOutgoingMessage,
+  OutgoingMessageType,
+} from "../worker/worker_types";
 import { generateRootChildrenParser } from "./generators";
 import { generateXLinkChildrenParser } from "./generators/XLink";
 import ParsersStack from "./parsers_stack";
-import {
-  AttributeName,
-  CustomEventType,
-  TagName,
-} from "./types";
 
-const MAX_READ_SIZE = 15e3;
+export type IMPDParsingResult = [ IMPDIntermediateRepresentation | null, Error[] ];
+export type IXlinkParsingResult = [ IPeriodIntermediateRepresentation[], Error[] ];
 
 export default class DashWasmParser {
   /**
@@ -57,70 +59,50 @@ export default class DashWasmParser {
                   "initialized" |
                   "failure";
 
-  /**
-   * Promise used to notify of the initialization status.
-   * `null` when no initialization has happened yet.
-   */
-  private _initProm : Promise<void> | null;
+  private _worker : Worker |
+                    null;
+
+  private _initInfo : {
+    /**
+     * Promise used to notify of the initialization status.
+     * `null` when no initialization has happened yet.
+     */
+    promise : Promise<void> | null;
+    callbacks : { resolve : () => void;
+                  reject : (err : Error) => void; } |
+                null;
+  };
+
+  private _currentParsingOperation :
+    null |
+
+    { type : "mpd";
+      data : { mpd? : IMPDIntermediateRepresentation };
+      warnings : Error[];
+      resolve : (res : IMPDParsingResult) => void;
+      reject : (err : Error) => void; } |
+
+    { type : "xlink";
+      data : { periods : IPeriodIntermediateRepresentation[] };
+      warnings : Error[];
+      resolve : (res : IXlinkParsingResult) => void;
+      reject : (err : Error) => void; };
+
+
   /** Abstraction simplifying the exploitation of the DASH-WASM parser's events. */
   private _parsersStack : ParsersStack;
-  /**
-   * Created WebAssembly instance.
-   * `null` when no WebAssembly instance is created.
-   */
-  private _instance : WebAssembly.WebAssemblyInstantiatedSource | null;
-  /**
-   * Information about the data read by the DASH-WASM parser.
-   * `null` if we're not parsing anything for the moment.
-   */
-  private _mpdData : {
-    /**
-     * First not-yet read position in `mpd`, in bytes.
-     * When the parser asks for new data, we start giving data from that point
-     * on.
-     */
-    cursor : number;
-    /**
-     * Complete data that needs to be parsed.
-     * This is either the full MPD or xlinks.
-     */
-    mpd : ArrayBuffer;
-  } | null;
-  /**
-   * Warnings event currently encountered during parsing.
-   * Emptied when no parsing is taking place.
-   */
-  private _warnings : Error[];
-  /**
-   * Memory used by the WebAssembly instance.
-   * `null` when no WebAssembly instance is created.
-   */
-  private _linearMemory : WebAssembly.Memory | null;
 
-  /**
-   * `true` if we're currently parsing a MPD.
-   * Used to explicitely forbid parsing a MPD when a parsing operation is
-   * already pending, as the current logic cannot handle that.
-   *
-   * Note that this is not needed for now because parsing should happen
-   * synchronously.
-   * Still, this property was added to make it much more explicit, in case of
-   * future improvements.
-   */
-  private _isParsing : boolean;
   /**
    * Create a new `DashWasmParser`.
    * @param {object} opts
    */
   constructor() {
     this._parsersStack = new ParsersStack();
-    this._instance = null;
-    this._mpdData = null;
-    this._linearMemory = null;
+    this._worker = null;
+    this._initInfo = { promise: null,
+                       callbacks: null };
+    this._currentParsingOperation = null;
     this.status = "uninitialized";
-    this._initProm = null;
-    this._warnings = [];
-    this._isParsing = false;
   }
 
   /**
@@ -135,8 +117,124 @@ export default class DashWasmParser {
    * @returns {Promise}
    */
   public waitForInitialization() : Promise<void> {
-    return this._initProm ??
+    return this._initInfo?.promise ??
            PPromise.reject("No initialization performed yet.");
+  }
+
+  private _onWorkerMessage(evt : MessageEvent<IWorkerOutgoingMessage[]>) : void {
+    const msgs = evt.data;
+    for (let i = 0; i < msgs.length; i++) {
+      const msg = msgs[i];
+      switch (msg.type) {
+
+        case OutgoingMessageType.Attribute:
+          // Call the active "attributeParser"
+          return this._parsersStack.attributeParser(msg.attribute, msg.payload);
+
+        case OutgoingMessageType.TagOpen:
+          // Call the active "childrenParser"
+          return this._parsersStack.childrenParser(msg.tag);
+
+        case OutgoingMessageType.TagClose:
+          // Only pop current parsers from the `parsersStack` if that tag was the
+          // active one.
+          return this._parsersStack.popIfCurrent(msg.tag);
+
+        case OutgoingMessageType.ParserWarning:
+          const errorMsg = new TextDecoder().decode(msg.payload);
+          if (this._currentParsingOperation?.type === "mpd") {
+            this._currentParsingOperation.warnings.push(new Error(errorMsg));
+          }
+          return;
+
+        case OutgoingMessageType.MPDParsingFinished:
+          if (this._currentParsingOperation === null ||
+              this._currentParsingOperation.type !== "mpd")
+          {
+            log.warn("DASH-WASM: MPD parsing finished but no MPD parsing was pending.");
+          } else {
+            const { data, warnings, resolve } = this._currentParsingOperation;
+            this._currentParsingOperation = null;
+            this._parsersStack.reset();
+            resolve([data.mpd ?? null, warnings]);
+          }
+          break;
+
+        case OutgoingMessageType.MPDParsingError:
+          if (this._currentParsingOperation === null ||
+              this._currentParsingOperation.type !== "mpd")
+          {
+            log.warn("DASH-WASM: MPD parsing failed but no MPD parsing was pending.");
+          } else {
+            const err = new Error(msg.message);
+            const { reject } = this._currentParsingOperation;
+            this._currentParsingOperation = null;
+            this._parsersStack.reset();
+            reject(err);
+          }
+          break;
+
+        case OutgoingMessageType.XLinkParsingFinished:
+          if (this._currentParsingOperation === null ||
+              this._currentParsingOperation.type !== "xlink")
+          {
+            log.warn("DASH-WASM: xlink parsing finished but no xlink parsing " +
+                     "was pending.");
+          } else {
+            const { data, warnings, resolve } = this._currentParsingOperation;
+            this._currentParsingOperation = null;
+            this._parsersStack.reset();
+            resolve([data.periods, warnings]);
+          }
+          break;
+
+        case OutgoingMessageType.XLinkParsingError:
+          if (this._currentParsingOperation === null ||
+              this._currentParsingOperation.type !== "xlink")
+          {
+            log.warn("DASH-WASM: xlink parsing failed but no xlink parsing " +
+                     "was pending.");
+          } else {
+            const err = new Error(msg.message);
+            const { reject } = this._currentParsingOperation;
+            this._currentParsingOperation = null;
+            this._parsersStack.reset();
+            reject(err);
+          }
+          break;
+
+        case OutgoingMessageType.Initialized:
+          this.status = "initialized";
+          if (this._initInfo.callbacks === null) {
+            log.warn("DASH-WASM: Parser initialized but no initialization was pending.");
+          } else {
+            const { resolve } = this._initInfo.callbacks;
+            this._initInfo.callbacks = null;
+            resolve();
+          }
+          break;
+
+        case OutgoingMessageType.InitializationError:
+          this.status = "failure";
+          if (this._initInfo.callbacks === null) {
+            log.warn("DASH-WASM: Parser initialization failed but no " +
+                     "initialization was pending.");
+          } else {
+            const err = new Error(msg.message);
+            const { reject } = this._initInfo.callbacks;
+            this._initInfo.callbacks = null;
+            reject(err);
+          }
+          break;
+
+        case OutgoingMessageType.InitializationWarning:
+          log.warn(msg.message);
+          return;
+
+        default:
+          assertUnreachable(msg);
+      }
+    }
   }
 
   public async initialize(opts : IDashWasmParserOptions) : Promise<void> {
@@ -148,147 +246,15 @@ export default class DashWasmParser {
     }
     this.status = "initializing";
 
-    const parsersStack = this._parsersStack;
+    const worker = new Worker(opts.workerUrl);
+    this._worker = worker;
+    worker.onmessage = this._onWorkerMessage.bind(this);
 
-    /** Re-used TextDecoder instance. */
-    const textDecoder = new TextDecoder();
-
-    /* eslint-disable @typescript-eslint/no-this-alias */
-    const self = this;
-    /* eslint-enable @typescript-eslint/no-this-alias */
-
-    const imports = {
-      env: {
-        memoryBase: 0,
-        tableBase: 0,
-        memory: new WebAssembly.Memory({ initial: 10 }),
-        table: new WebAssembly.Table({ initial: 2, element: "anyfunc" }),
-        onTagOpen,
-        onCustomEvent,
-        onAttribute,
-        readNext,
-        onTagClose,
-      },
-    };
-
-    const fetchedWasm = fetch(opts.wasmUrl);
-
-    const streamingProm = typeof WebAssembly.instantiateStreaming === "function" ?
-      WebAssembly.instantiateStreaming(fetchedWasm, imports) :
-      PPromise.reject("`WebAssembly.instantiateStreaming` API not available");
-
-    this._initProm = streamingProm
-      .catch(async (e) => {
-        log.warn("Unable to call `instantiateStreaming` on WASM:", e);
-        const res = await fetchedWasm;
-        if (res.status < 200 || res.status >= 300) {
-          throw new Error("WebAssembly request failed. status: " + String(res.status));
-        }
-        const resAb = await res.arrayBuffer();
-        return WebAssembly.instantiate(resAb, imports);
-      })
-      .then((instanceWasm) => {
-        this._instance = instanceWasm;
-
-        // TODO better types?
-        this._linearMemory = this._instance.instance.exports.memory as WebAssembly.Memory;
-
-        this.status = "initialized";
-      }).catch((err : Error) => {
-        const message = err instanceof Error ? err.toString() :
-                                               "Unknown error";
-        log.warn("DW: Could not create DASH-WASM parser:", message);
-        this.status = "failure";
-      });
-
-    return this._initProm;
-
-    /**
-     * Callback called when a new Element has been encountered by the WASM parser.
-     * @param {number} tag - Identify the tag encountered (@see TagName)
-     */
-    function onTagOpen(tag : TagName) : void {
-      // Call the active "childrenParser"
-      return parsersStack.childrenParser(tag);
-    }
-
-    /**
-     * Callback called when an open Element's ending tag has been encountered by
-     * the WASM parser.
-     * @param {number} tag - Identify the tag in question (@see TagName)
-     */
-    function onTagClose(tag : TagName) : void {
-      // Only pop current parsers from the `parsersStack` if that tag was the
-      // active one.
-      return parsersStack.popIfCurrent(tag);
-    }
-
-    /**
-     * Callback called each time a new Element's attribute is encountered by
-     * the WASM parser.
-     *
-     * TODO Merge all attributes into the same callback with `onTagOpen`? I
-     * tried but there's some difficulties if doing that.
-     *
-     * @param {number} attr - Identify the Attribute in question (@see TagName)
-     * @param {number} ptr - Pointer to the first byte containing the
-     * attribute's data in the WebAssembly's linear memory.
-     * @param {number} len - Length of the attribute's value, in bytes.
-     */
-    function onAttribute(attr : AttributeName, ptr : number, len : number) : void {
-      // Call the active "attributeParser"
-      return parsersStack.attributeParser(attr, ptr, len);
-    }
-
-    /**
-     * Callback called on the various "custom events" triggered by the WASM.
-     *
-     * @see CustomEventType
-     * @param {number} evt - The type of the event
-     * @param {number} ptr - Pointer to the first byte of the event's payload in
-     * the WebAssembly's linear memory.
-     * @param {number} len - Length of the payload, in bytes.
-     */
-    function onCustomEvent(evt : CustomEventType, ptr : number, len : number) : void {
-      const linearMemory = self._linearMemory as WebAssembly.Memory;
-      const arr = new Uint8Array(linearMemory.buffer, ptr, len);
-      if (evt === CustomEventType.Error) {
-        const decoded = textDecoder.decode(arr);
-        log.warn("WASM Error Event:", decoded);
-        self._warnings.push(new Error(decoded));
-      } else if (evt === CustomEventType.Log) {
-        const decoded = textDecoder.decode(arr);
-        log.warn("WASM Log Event:", decoded);
-      }
-    }
-
-    /**
-     * Callback called by the WebAssembly when it needs to read new data from
-     * the MPD.
-     *
-     * @param {number} ptr - First byte offset, in the WebAssembly's linear
-     * memory, where the MPD should be set (under an array of bytes form).
-     * @param {number} wantedSize - Size of the data, in bytes, asked by the
-     * WebAssembly parser. It might receive less depending on if there's less
-     * data in the MPD or if it goes over the set maximum size it could read
-     * at a time.
-     * @returns {number} - Return the number of bytes effectively read and set
-     * in WebAssembly's linear memory (at the `ptr` offset).
-     */
-    function readNext(ptr : number, wantedSize : number) : number {
-      if (self._mpdData === null)  {
-        throw new Error("DashWasmParser Error: No MPD to read.");
-      }
-      const linearMemory = self._linearMemory as WebAssembly.Memory;
-      const { mpd, cursor } = self._mpdData;
-      const sizeToRead = Math.min(wantedSize,
-                                  MAX_READ_SIZE,
-                                  mpd.byteLength - cursor);
-      const arr = new Uint8Array(linearMemory.buffer, ptr, sizeToRead);
-      arr.set(new Uint8Array(mpd, cursor, sizeToRead));
-      self._mpdData.cursor += sizeToRead;
-      return sizeToRead;
-    }
+    this._initInfo.promise = new PPromise<void>((resolve, reject) => {
+      this._initInfo.callbacks = { resolve, reject };
+    });
+    worker.postMessage({ type: IngoingMessageType.Initialize });
+    return this._initInfo.promise;
   }
 
   /**
@@ -299,13 +265,14 @@ export default class DashWasmParser {
   public runWasmParser(
     mpd : ArrayBuffer,
     args : IMPDParserArguments
-  ) : IDashParserResponse<string> | IDashParserResponse<ArrayBuffer> {
-    const [mpdIR, warnings] = this._parseMpd(mpd);
-    if (mpdIR === null) {
-      throw new Error("DASH Parser: Unknown error while parsing the MPD");
-    }
-    const ret = parseMpdIr(mpdIR, args, warnings);
-    return this._processParserReturnValue(ret);
+  ) : Promise<IDashParserResponse<string> | IDashParserResponse<ArrayBuffer>> {
+    return this._parseMpd(mpd).then(([mpdIR, warnings]) => {
+      if (mpdIR === null) {
+        throw new Error("DASH Parser: Unknown error while parsing the MPD");
+      }
+      const ret = parseMpdIr(mpdIR, args, warnings);
+      return this._processParserReturnValue(ret);
+    });
   }
 
   /**
@@ -322,89 +289,58 @@ export default class DashWasmParser {
 
   private _parseMpd(
     mpd : ArrayBuffer
-  ) : [IMPDIntermediateRepresentation | null,
-       Error[]]
+  ) : Promise<[IMPDIntermediateRepresentation | null,
+               Error[]]>
   {
-    if (this._instance === null) {
+    if (this._worker === null) {
       throw new Error("DashWasmParser not initialized");
     }
-    if (this._isParsing) {
+    if (this._currentParsingOperation !== null) {
       throw new Error("Parsing operation already pending.");
     }
-    this._isParsing = true;
-    this._mpdData = { mpd, cursor: 0 };
 
     const rootObj : { mpd? : IMPDIntermediateRepresentation } = {};
-
-    const linearMemory = this._linearMemory as WebAssembly.Memory;
-    const rootChildrenParser = generateRootChildrenParser(rootObj,
-                                                          linearMemory,
-                                                          this._parsersStack,
-                                                          mpd);
+    const rootChildrenParser = generateRootChildrenParser(rootObj, this._parsersStack);
     this._parsersStack.pushParsers(null, rootChildrenParser, noop);
-    this._warnings = [];
 
-    try {
-      // TODO better type this
-      (this._instance.instance.exports.parse as () => void)();
-    } catch (err) {
-      this._parsersStack.reset();
-      this._warnings = [];
-      this._isParsing = false;
-      throw err;
-    }
-
-    const parsed = rootObj.mpd ?? null;
-    const warnings = this._warnings;
-
-    this._parsersStack.reset();
-    this._warnings = [];
-    this._isParsing = false;
-
-    return [parsed, warnings];
+    this._worker.postMessage({ type: IngoingMessageType.ParseMpd, mpd }, [mpd]);
+    return new PPromise((resolve, reject) => {
+      this._currentParsingOperation = { type: "mpd",
+                                        data: rootObj,
+                                        warnings: [],
+                                        resolve,
+                                        reject };
+    });
   }
 
   private _parseXlink(
     xlinkData : ArrayBuffer
-  ) : [IPeriodIntermediateRepresentation[],
-       Error[]]
+  ) : Promise<[IPeriodIntermediateRepresentation[],
+               Error[]]>
   {
-    if (this._instance === null) {
+    if (this._worker === null) {
       throw new Error("DashWasmParser not initialized");
     }
-    if (this._isParsing) {
+    if (this._currentParsingOperation !== null) {
       throw new Error("Parsing operation already pending.");
     }
-    this._isParsing = true;
-    this._mpdData = { mpd: xlinkData, cursor: 0 };
 
     const rootObj : { periods : IPeriodIntermediateRepresentation[] } =
       { periods: [] };
 
-    const linearMemory = this._linearMemory as WebAssembly.Memory;
-    const xlinkParser = generateXLinkChildrenParser(rootObj,
-                                                    linearMemory,
-                                                    this._parsersStack,
-                                                    xlinkData);
+    const xlinkParser = generateXLinkChildrenParser(rootObj, this._parsersStack);
     this._parsersStack.pushParsers(null, xlinkParser, noop);
-    this._warnings = [];
 
-    try {
-      // TODO better type this
-      (this._instance.instance.exports.parse_xlink as () => void)();
-    } catch (err) {
-      this._parsersStack.reset();
-      this._warnings = [];
-      this._isParsing = false;
-      throw err;
-    }
-
-    const { periods } = rootObj;
-    const warnings = this._warnings;
-    this._parsersStack.reset();
-    this._warnings = [];
-    this._isParsing = false;
-    return [periods, warnings];
+    this._worker.postMessage({ type: IngoingMessageType.ParseXlink,
+                               xlink: xlinkData },
+                             [xlinkData]);
+    return new PPromise((resolve, reject) => {
+      this._currentParsingOperation = { type: "xlink",
+                                        data: rootObj,
+                                        warnings: [],
+                                        resolve,
+                                        reject };
+    });
   }
 
   /**
@@ -416,29 +352,29 @@ export default class DashWasmParser {
    */
   private _processParserReturnValue(
     initialRes : IIrParserResponse
-  ) : IDashParserResponse<string> | IDashParserResponse<ArrayBuffer> {
+  ) : Promise<IDashParserResponse<string> | IDashParserResponse<ArrayBuffer>> {
     if (initialRes.type === "done") {
-      return initialRes;
+      return PPromise.resolve(initialRes);
 
     } else if (initialRes.type === "needs-clock") {
       const continueParsingMPD = (
         loadedClock : Array<ILoadedResource<string>>
-      ) : IDashParserResponse<string> | IDashParserResponse<ArrayBuffer> => {
+      ) : Promise<IDashParserResponse<string> | IDashParserResponse<ArrayBuffer>> => {
         if (loadedClock.length !== 1) {
           throw new Error("DASH parser: wrong number of loaded ressources.");
         }
         const newRet = initialRes.value.continue(loadedClock[0].responseData);
         return this._processParserReturnValue(newRet);
       };
-      return { type: "needs-resources",
-               value: { urls: [initialRes.value.url],
-                        format: "string",
-                        continue : continueParsingMPD } };
+      return PPromise.resolve({ type: "needs-resources",
+                                value: { urls: [initialRes.value.url],
+                                         format: "string",
+                                         continue : continueParsingMPD } });
 
     } else if (initialRes.type === "needs-xlinks") {
-      const continueParsingMPD = (
+      const continueParsingMPD = async (
         loadedXlinks : Array<ILoadedResource<ArrayBuffer>>
-      ) : IDashParserResponse<string> | IDashParserResponse<ArrayBuffer> => {
+      ) : Promise<IDashParserResponse<string> | IDashParserResponse<ArrayBuffer>> => {
         const resourceInfos : ILoadedXlinkData[] = [];
         for (let i = 0; i < loadedXlinks.length; i++) {
           const { responseData: xlinkData,
@@ -446,7 +382,7 @@ export default class DashWasmParser {
                   sendingTime,
                   url } = loadedXlinks[i];
           const [periodsIr,
-                 periodsIRWarnings] = this._parseXlink(xlinkData);
+                 periodsIRWarnings] = await this._parseXlink(xlinkData);
           resourceInfos.push({ url,
                                receivedTime,
                                sendingTime,
@@ -457,10 +393,10 @@ export default class DashWasmParser {
         return this._processParserReturnValue(newRet);
       };
 
-      return { type: "needs-resources",
-               value: { urls: initialRes.value.xlinksUrls,
-                        format: "arraybuffer",
-                        continue : continueParsingMPD } };
+      return PPromise.resolve({ type: "needs-resources",
+                                value: { urls: initialRes.value.xlinksUrls,
+                                         format: "arraybuffer",
+                                         continue : continueParsingMPD } });
     } else {
       assertUnreachable(initialRes);
     }
@@ -470,4 +406,5 @@ export default class DashWasmParser {
 /** Options needed when constructing the DASH-WASM parser. */
 export interface IDashWasmParserOptions {
   wasmUrl : string;
+  workerUrl : string;
 }

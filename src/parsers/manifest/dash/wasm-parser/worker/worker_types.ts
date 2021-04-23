@@ -251,3 +251,147 @@ export const enum AttributeName {
   /// The second indicating the ending range (non-included).
   EventStreamEltRange = 69,
 }
+
+/** Messages that can be sent to this worker. */
+export type IIngoingMessage = IInitializeIngoingMessage |
+                              IParseMpdIngoingMessage |
+                              IParseXlinkIngoingMessage;
+
+/**
+ * Discriminants indentifying ingoing messages (messages that are sent to the
+ * worker.
+ */
+export const enum IngoingMessageType {
+  Initialize = 0,
+  ParseMpd = 1,
+  ParseXlink = 2,
+}
+
+/**
+ * Message telling the worker that it should initialize (fetch and compile) the
+ * WebAssembly file.
+ *
+ * The sender will know when this task finished once either:
+ *
+ *   - a `IInitializedEvent` message has been received back from the worker
+ *     (meaning the initialization succeeded).
+ *
+ *   - a `IInitializationErrorEvent` message has been received back from the
+ *     worker (meaning the initialization failed).
+ *
+ * During initialization, `IInitializationWarningEvent` messages can be sent by
+ * the worker, indicating some minor errors.
+ */
+export interface IInitializeIngoingMessage {
+  /** Identify a `IInitializeIngoingMessage`. */
+  type : IngoingMessageType.Initialize;
+
+  /** The URL of the WebAssembly file the worker needs to fetch. */
+  wasmUrl : string;
+}
+
+/**
+ * Message telling the worker that it should parse the given MPD file.
+ *
+ * The sender will know when this task finished once either:
+ *
+ *   - a `IMPDParsingFinishedEvent` message has been received back from the
+ *     worker (meaning the parsing operation succeeded).
+ *
+ *   - a `IMPDParsingErrorEvent` message has been received back from the
+ *     worker (meaning the parsing operation failed).
+ *
+ * While parsing is pending, a lot of different message types can be sent.
+ * // XXX TODO continue comment
+ */
+export interface IParseMpdIngoingMessage {
+  /** Identify a `IParseMpdIngoingMessage`. */
+  type : IngoingMessageType.ParseMpd;
+
+  /** The MPD file, encoded in UTF-8 */
+  mpd : ArrayBuffer;
+}
+
+export interface IParseXlinkIngoingMessage {
+  type : IngoingMessageType.ParseXlink;
+  xlink : ArrayBuffer;
+}
+
+export const enum OutgoingMessageType {
+  // 0-10 === Urgent === sent right away
+  Initialized = 0,
+  InitializationWarning = 1,
+  InitializationError = 2,
+  MPDParsingError = 3,
+  MPDParsingFinished = 4,
+  XLinkParsingError = 5,
+  XLinkParsingFinished = 6,
+
+  // 11+ === buffered === sent in groups
+  TagOpen = 11,
+  TagClose = 12,
+
+  // 21+ === buffered + ArrayBuffer `payload`
+  ParserWarning = 21,
+  Attribute = 22,
+}
+
+export interface IInitializedEvent {
+  type : OutgoingMessageType.Initialized;
+}
+
+export interface IInitializationWarningEvent {
+  type : OutgoingMessageType.InitializationWarning;
+  message : string;
+}
+
+export interface IInitializationErrorEvent {
+  type : OutgoingMessageType.InitializationError;
+  message : string;
+}
+
+export interface IMPDParsingErrorEvent {
+  type : OutgoingMessageType.MPDParsingError;
+  message : string;
+}
+
+export interface IMPDParsingFinishedEvent {
+  type : OutgoingMessageType.MPDParsingFinished;
+}
+
+export interface IXLinkParsingErrorEvent {
+  type : OutgoingMessageType.XLinkParsingError;
+  message : string;
+}
+
+export interface IXLinkParsingFinishedEvent {
+  type : OutgoingMessageType.XLinkParsingFinished;
+}
+
+export interface IParsedTagEvent {
+  type : OutgoingMessageType.TagOpen |
+         OutgoingMessageType.TagClose;
+  tag : TagName;
+}
+
+export interface IParserWarningEvent {
+  type : OutgoingMessageType.ParserWarning;
+  payload : ArrayBuffer;
+}
+
+export interface IParsedAttributeEvent {
+  type : OutgoingMessageType.Attribute;
+  attribute : AttributeName;
+  payload : ArrayBuffer;
+}
+
+export type IWorkerOutgoingMessage = IInitializedEvent |
+                                     IInitializationWarningEvent |
+                                     IInitializationErrorEvent |
+                                     IMPDParsingErrorEvent |
+                                     IMPDParsingFinishedEvent |
+                                     IXLinkParsingErrorEvent |
+                                     IXLinkParsingFinishedEvent |
+                                     IParsedTagEvent |
+                                     IParserWarningEvent |
+                                     IParsedAttributeEvent;

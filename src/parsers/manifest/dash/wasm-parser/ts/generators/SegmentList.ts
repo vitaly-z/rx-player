@@ -18,12 +18,10 @@ import noop from "../../../../../../utils/noop";
 import {
   ISegmentListIntermediateRepresentation,
 } from "../../../node_parser_types";
+import { TagName } from "../../worker/worker_types";
 import ParsersStack, {
   IChildrenParser,
 } from "../parsers_stack";
-import {
-  TagName,
-} from "../types";
 import { generateSegmentUrlAttrParser } from "./SegmentUrl";
 
 /**
@@ -35,7 +33,6 @@ import { generateSegmentUrlAttrParser } from "./SegmentUrl";
  */
 export function generateSegmentListChildrenParser(
   segListChildren : ISegmentListIntermediateRepresentation,
-  linearMemory : WebAssembly.Memory,
   parsersStack : ParsersStack
 )  : IChildrenParser {
   return function onRootChildren(nodeId : number) {
@@ -46,7 +43,7 @@ export function generateSegmentListChildrenParser(
           segListChildren.list = [];
         }
         segListChildren.list.push(segmentObj);
-        const attrParser = generateSegmentUrlAttrParser(segmentObj, linearMemory);
+        const attrParser = generateSegmentUrlAttrParser(segmentObj);
         parsersStack.pushParsers(nodeId, noop, attrParser);
         break;
       }

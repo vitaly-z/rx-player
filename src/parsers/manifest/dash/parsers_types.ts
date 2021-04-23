@@ -57,7 +57,10 @@ export interface IDashParserNeedsResources<T extends string | ArrayBuffer> {
      */
     continue : (
       loadedResources : Array<ILoadedResource<T>>
-    ) => IDashParserResponse<string> | IDashParserResponse<ArrayBuffer>;
+    ) => Promise<IDashParserResponse<string> |
+                 IDashParserResponse<ArrayBuffer>> |
+         IDashParserResponse<string> |
+         IDashParserResponse<ArrayBuffer>;
   };
 }
 

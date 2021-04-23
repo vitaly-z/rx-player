@@ -22,7 +22,7 @@ export type IChildrenParser =
 
 /** Type of the function called when an attribute is encountered. */
 export type IAttributeParser =
-  (attr : number, ptr : number, len : number) => void;
+  (attr : number, payload : ArrayBuffer) => void;
 
 /**
  * Maintains a stack of children and attributes parsers, to easily parse

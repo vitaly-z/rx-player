@@ -15,8 +15,8 @@
  */
 
 import { IScheme } from "../../../node_parser_types";
+import { AttributeName } from "../../worker/worker_types";
 import { IAttributeParser } from "../parsers_stack";
-import { AttributeName } from "../types";
 import { parseString } from "../utils";
 
 /**
@@ -26,18 +26,17 @@ import { parseString } from "../utils";
  * @returns {Function}
  */
 export function generateSchemeAttrParser(
-  schemeAttrs : IScheme,
-  linearMemory : WebAssembly.Memory
+  schemeAttrs : IScheme
 )  : IAttributeParser {
   const textDecoder = new TextDecoder();
-  return function onMPDAttribute(attr : number, ptr : number, len : number) {
+  return function onMPDAttribute(attr : number, payload : ArrayBuffer) {
     switch (attr) {
       case AttributeName.SchemeIdUri:
-        schemeAttrs.schemeIdUri = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        schemeAttrs.schemeIdUri = parseString(textDecoder, payload);
         break;
 
       case AttributeName.SchemeValue:
-        schemeAttrs.value = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        schemeAttrs.value = parseString(textDecoder, payload);
         break;
     }
   };

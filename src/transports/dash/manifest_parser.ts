@@ -19,6 +19,7 @@ import features from "../../features";
 import log from "../../log";
 import Manifest from "../../manifest";
 import { IDashParserResponse } from "../../parsers/manifest/dash/parsers_types";
+import isNullOrUndefined from "../../utils/is_null_or_undefined";
 import objectAssign from "../../utils/object_assign";
 import request from "../../utils/request";
 import {
@@ -129,8 +130,15 @@ export default function generateManifestParser(
      * @returns {Observable}
      */
     function processMpdParserResponse(
-      parserResponse : IDashParserResponse<string> | IDashParserResponse<ArrayBuffer>
+      parserResponse : IDashParserResponse<string> |
+                       IDashParserResponse<ArrayBuffer> |
+                       Promise<IDashParserResponse<string> |
+                               IDashParserResponse<ArrayBuffer>>
     ) : IManifestParserResult | Promise<IManifestParserResult> {
+      if (isResponseInPromise(parserResponse)) {
+        return parserResponse
+          .then((res) => processMpdParserResponse(res));
+      }
       if (parserResponse.type === "done") {
         if (parserResponse.value.warnings.length > 0) {
           onWarnings(parserResponse.value.warnings);
@@ -212,6 +220,8 @@ function getManifestAsDocument(manifestSrc : unknown) : Document {
 function getManifestAsArrayBuffer(manifestSrc : unknown) : ArrayBuffer {
   if (manifestSrc instanceof ArrayBuffer) {
     return manifestSrc;
+  } else if (manifestSrc instanceof Uint8Array) {
+    return manifestSrc.buffer;
   } else if (typeof manifestSrc === "string") {
     return strToUtf8(manifestSrc).buffer;
   } else if (manifestSrc instanceof Document) {
@@ -244,4 +254,22 @@ function doesXmlSeemsUtf8Encoded(
   // TODO check encoding from request mimeType and text declaration?
   // https://www.w3.org/TR/xml/#sec-TextDecl
   return true;
+}
+
+/**
+ * Returns `true` if the given return value from a parser seems to be wrapped
+ * in a Promise.
+ * @param {Object | Promise.<Object>} res
+ * @returns {boolean}
+ */
+function isResponseInPromise(
+  res : IDashParserResponse<string> |
+        IDashParserResponse<ArrayBuffer> |
+        Promise<IDashParserResponse<string> |
+                IDashParserResponse<ArrayBuffer>>
+) : res is Promise<IDashParserResponse<string> |
+                   IDashParserResponse<ArrayBuffer>> {
+  return !isNullOrUndefined(res) &&
+         typeof (res as Promise<IDashParserResponse<string>> |
+                        Promise<IDashParserResponse<ArrayBuffer>>).then === "function";
 }

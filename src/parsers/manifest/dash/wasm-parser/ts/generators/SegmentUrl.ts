@@ -17,10 +17,8 @@
 import {
   ISegmentUrlIntermediateRepresentation,
 } from "../../../node_parser_types";
+import { AttributeName } from "../../worker/worker_types";
 import { IAttributeParser } from "../parsers_stack";
-import {
-  AttributeName,
-} from "../types";
 import { parseString } from "../utils";
 
 /**
@@ -31,37 +29,39 @@ import { parseString } from "../utils";
  * @returns {Function}
  */
 export function generateSegmentUrlAttrParser(
-  segmentUrlAttrs : ISegmentUrlIntermediateRepresentation,
-  linearMemory : WebAssembly.Memory
+  segmentUrlAttrs : ISegmentUrlIntermediateRepresentation
 )  : IAttributeParser {
   const textDecoder = new TextDecoder();
-  return function onSegmentUrlAttribute(attr, ptr, len) {
+  return function onSegmentUrlAttribute(
+    attr : AttributeName,
+    payload : ArrayBuffer
+  ) {
     switch (attr) {
 
       case AttributeName.Index:
         segmentUrlAttrs.index =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
+          parseString(textDecoder, payload);
         break;
 
       case AttributeName.IndexRange: {
-        const dataView = new DataView(linearMemory.buffer);
+        const dataView = new DataView(payload);
         segmentUrlAttrs.indexRange = [
-          dataView.getFloat64(ptr, true),
-          dataView.getFloat64(ptr + 8, true),
+          dataView.getFloat64(0, true),
+          dataView.getFloat64(8, true),
         ];
         break;
       }
 
       case AttributeName.Media:
         segmentUrlAttrs.media =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
+          parseString(textDecoder, payload);
         break;
 
       case AttributeName.MediaRange: {
-        const dataView = new DataView(linearMemory.buffer);
+        const dataView = new DataView(payload);
         segmentUrlAttrs.mediaRange = [
-          dataView.getFloat64(ptr, true),
-          dataView.getFloat64(ptr + 8, true),
+          dataView.getFloat64(0, true),
+          dataView.getFloat64(8, true),
         ];
         break;
       }

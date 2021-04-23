@@ -17,21 +17,24 @@
 import {
   ISegmentTemplateIntermediateRepresentation,
 } from "../../../node_parser_types";
+import { AttributeName } from "../../worker/worker_types";
 import { IAttributeParser } from "../parsers_stack";
-import { AttributeName } from "../types";
 import { parseString } from "../utils";
 
 export function generateSegmentTemplateAttrParser(
-  segmentTemplateAttrs : ISegmentTemplateIntermediateRepresentation,
-  linearMemory : WebAssembly.Memory
+  segmentTemplateAttrs : ISegmentTemplateIntermediateRepresentation
 )  : IAttributeParser {
   const textDecoder = new TextDecoder();
-  return function onSegmentTemplateAttribute(attr, ptr, len) {
+  return function onSegmentTemplateAttribute(
+    attr : AttributeName,
+    payload : ArrayBuffer
+  ) {
     switch (attr) {
       case AttributeName.SegmentTimeline: {
-        const dataView = new DataView(linearMemory.buffer);
+        const dataView = new DataView(payload);
         segmentTemplateAttrs.timeline = [];
-        let base = ptr;
+        let base = 0;
+        const len = payload.byteLength;
         for (let i = 0; i < len / 24; i++) {
           segmentTemplateAttrs.timeline.push({
             start: dataView.getFloat64(base, true),
@@ -45,79 +48,79 @@ export function generateSegmentTemplateAttrParser(
 
       case AttributeName.InitializationMedia:
         segmentTemplateAttrs.initialization =
-          { media: parseString(textDecoder, linearMemory.buffer, ptr, len) };
+          { media: parseString(textDecoder, payload) };
         break;
 
       case AttributeName.Index:
         segmentTemplateAttrs.index =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
+          parseString(textDecoder, payload);
         break;
 
       case AttributeName.AvailabilityTimeOffset: {
-        const dataView = new DataView(linearMemory.buffer);
+        const dataView = new DataView(payload);
         segmentTemplateAttrs.availabilityTimeOffset =
-          dataView.getFloat64(ptr, true);
+          dataView.getFloat64(0, true);
         break;
       }
 
       case AttributeName.AvailabilityTimeComplete: {
         segmentTemplateAttrs.availabilityTimeComplete =
-          new DataView(linearMemory.buffer).getUint8(0) === 0;
+          new DataView(payload).getUint8(0) === 0;
         break;
       }
 
       case AttributeName.PresentationTimeOffset: {
-        const dataView = new DataView(linearMemory.buffer);
+        const dataView = new DataView(payload);
         segmentTemplateAttrs.presentationTimeOffset =
-          dataView.getFloat64(ptr, true);
+          dataView.getFloat64(0, true);
         break;
       }
 
       case AttributeName.TimeScale: {
-        const dataView = new DataView(linearMemory.buffer);
+        const dataView = new DataView(payload);
         segmentTemplateAttrs.timescale =
-          dataView.getFloat64(ptr, true);
+          dataView.getFloat64(0, true);
         break;
       }
 
       case AttributeName.IndexRange: {
-        const dataView = new DataView(linearMemory.buffer);
+        const dataView = new DataView(payload);
         segmentTemplateAttrs.indexRange = [
-          dataView.getFloat64(ptr, true),
-          dataView.getFloat64(ptr + 8, true),
+          dataView.getFloat64(0, true),
+          dataView.getFloat64(8, true),
         ];
         break;
       }
 
       case AttributeName.IndexRangeExact: {
         segmentTemplateAttrs.indexRangeExact =
-          new DataView(linearMemory.buffer).getUint8(0) === 0;
+          new DataView(payload).getUint8(0) === 0;
         break;
       }
 
 
       case AttributeName.Media:
         segmentTemplateAttrs.media =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
+          parseString(textDecoder, payload);
         break;
 
       case AttributeName.BitstreamSwitching: {
         segmentTemplateAttrs.bitstreamSwitching =
-          new DataView(linearMemory.buffer).getUint8(0) === 0;
+          new DataView(payload).getUint8(0) === 0;
         break;
       }
 
       case AttributeName.Duration: {
-        const dataView = new DataView(linearMemory.buffer);
+        const dataView = new DataView(payload);
         segmentTemplateAttrs.duration =
-          dataView.getFloat64(ptr, true);
+          dataView.getFloat64(0, true);
         break;
       }
 
       case AttributeName.StartNumber: {
-        const dataView = new DataView(linearMemory.buffer);
+        const dataView = new DataView(payload);
         segmentTemplateAttrs.startNumber =
-          dataView.getFloat64(ptr, true);
+          dataView.getFloat64(0, true);
         break;
       }
 
