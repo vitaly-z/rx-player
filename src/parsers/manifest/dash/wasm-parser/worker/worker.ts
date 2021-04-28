@@ -26,6 +26,9 @@ import {
   TagName,
 } from "./worker_types";
 
+let timer = 0;
+let readTimer = 0;
+
 const MAX_READ_SIZE = 15e3;
 
 // We should always be in a Worker context here.
@@ -112,13 +115,13 @@ function triggerMessage(msg : IWorkerOutgoingMessage) {
     msgBuffer.length = 0;
     reportables.length = 0;
   } else {
-    let sendNow = msgBuffer.length >= 10;
+    let sendNow = false;
     if (msg.type > 20) {
       // TODO I thought TS would be smarter than this
       const payload = (msg as IParserWarningEvent |
                               IParsedAttributeEvent).payload;
       reportables.push(payload);
-      sendNow = payload.byteLength > 100;
+      sendNow = sendNow || payload.byteLength > 100;
     }
     if (sendNow) {
       worker.postMessage(msgBuffer, reportables);
@@ -184,6 +187,8 @@ let isParsing = false;
 function parseMpd(
   mpd : ArrayBuffer
 ) : void {
+  readTimer = 0;
+  timer = 0;
   if (instance === null) {
     throw new Error("DashWasmParser not initialized");
   }
@@ -201,6 +206,7 @@ function parseMpd(
     throw err;
   }
   isParsing = false;
+  console.error("!!!!!!!! Parse TIMER", timer, readTimer);
 }
 
 function parseXlink(
@@ -230,7 +236,9 @@ function parseXlink(
  * @param {number} tag - Identify the tag encountered (@see TagName)
  */
 function onTagOpen(tag : TagName) : void {
+  const p = performance.now();
   triggerMessage({ type: OutgoingMessageType.TagOpen, tag });
+  timer += (performance.now() - p);
 }
 
 /**
@@ -239,7 +247,9 @@ function onTagOpen(tag : TagName) : void {
  * @param {number} tag - Identify the tag in question (@see TagName)
  */
 function onTagClose(tag : TagName) : void {
+  const p = performance.now();
   triggerMessage({ type: OutgoingMessageType.TagClose, tag });
+  timer += (performance.now() - p);
 }
 
 /**
@@ -255,6 +265,7 @@ function onTagClose(tag : TagName) : void {
  * @param {number} len - Length of the attribute's value, in bytes.
  */
 function onAttribute(attr : AttributeName, ptr : number, len : number) : void {
+  const p = performance.now();
   let payload : ArrayBuffer;
   if (attr !== AttributeName.EventStreamEltRange) {
     payload = (linearMemory as WebAssembly.Memory)
@@ -270,6 +281,7 @@ function onAttribute(attr : AttributeName, ptr : number, len : number) : void {
     payload = mpdData.mpd.slice(rangeStart, rangeEnd);
   }
   triggerMessage({ type: OutgoingMessageType.Attribute, attribute: attr, payload });
+  timer += (performance.now() - p);
 }
 
 /**
@@ -282,6 +294,7 @@ function onAttribute(attr : AttributeName, ptr : number, len : number) : void {
  * @param {number} len - Length of the payload, in bytes.
  */
 function onCustomEvent(evt : CustomEventType, ptr : number, len : number) : void {
+  const p = performance.now();
   const payload = (linearMemory as WebAssembly.Memory)
     .buffer.slice(ptr, ptr + len);
 
@@ -298,6 +311,7 @@ function onCustomEvent(evt : CustomEventType, ptr : number, len : number) : void
     triggerMessage({ type: OutgoingMessageType.ParserWarning,
                      payload });
   }
+  timer += (performance.now() - p);
 }
 
 /**
@@ -314,6 +328,7 @@ function onCustomEvent(evt : CustomEventType, ptr : number, len : number) : void
  * in WebAssembly's linear memory (at the `ptr` offset).
  */
 function readNext(ptr : number, wantedSize : number) : number {
+  const p = performance.now();
   if (mpdData === null)  {
     throw new Error("DashWasmParser Error: No MPD to read.");
   }
@@ -323,5 +338,6 @@ function readNext(ptr : number, wantedSize : number) : number {
                              ptr, sizeToRead);
   arr.set(new Uint8Array(mpd, cursor, sizeToRead));
   mpdData.cursor += sizeToRead;
+  readTimer += (performance.now() - p);
   return sizeToRead;
 }

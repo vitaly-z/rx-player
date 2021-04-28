@@ -28,6 +28,51 @@ function _assertThisInitialized(self) {
 
 /***/ }),
 
+/***/ 2137:
+/***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Z": function() { return /* binding */ _asyncToGenerator; }
+/* harmony export */ });
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
+
+/***/ }),
+
 /***/ 5991:
 /***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
 
@@ -197,10 +242,8 @@ module.exports = __webpack_require__(5666);
 
 "use strict";
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "DQ": function() { return /* binding */ HTMLElement_; },
-/* harmony export */   "JJ": function() { return /* binding */ MediaSource_; },
-/* harmony export */   "cX": function() { return /* binding */ READY_STATES; },
-/* harmony export */   "w": function() { return /* binding */ VTTCue_; }
+/* harmony export */   "J": function() { return /* binding */ MediaSource_; },
+/* harmony export */   "c": function() { return /* binding */ READY_STATES; }
 /* harmony export */ });
 /* harmony import */ var _utils_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1946);
 /* harmony import */ var _is_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2203);
@@ -221,29 +264,10 @@ module.exports = __webpack_require__(5666);
  */
 
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-/**
- * Shortcut to the global browser object `window`. Set to an empty object in
- * non-browser platforms
- */
-
-var win = _is_node__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z ? {} : window;
-/** Browser implementation of an HTMLElement. */
-
-var HTMLElement_ = win.HTMLElement;
-/** TextTrack cue constructor, as implemented by the browser. */
-
-var VTTCue_ = !(0,_utils_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(win.VTTCue) ? win.VTTCue : win.TextTrackCue;
+var win = _is_node__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z ? undefined : window;
 /** MediaSource implementation, including vendored implementations. */
 
-var MediaSource_ = !(0,_utils_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(win.MediaSource) ? win.MediaSource : !(0,_utils_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(win.MozMediaSource) ? win.MozMediaSource : !(0,_utils_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(win.WebKitMediaSource) ? win.WebKitMediaSource : win.MSMediaSource;
-/* eslint-enable @typescript-eslint/no-unsafe-assignment */
-
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
+var MediaSource_ = win === undefined ? undefined : !(0,_utils_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(win.MediaSource) ? win.MediaSource : !(0,_utils_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(win.MozMediaSource) ? win.MozMediaSource : !(0,_utils_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(win.WebKitMediaSource) ? win.WebKitMediaSource : win.MSMediaSource;
 /** List an HTMLMediaElement's possible values for its readyState property. */
 
 var READY_STATES = {
@@ -287,35 +311,19 @@ var READY_STATES = {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var _a;
+var _a, _b;
 
  // true on IE11
 // false on Edge and other IEs/browsers.
 
-/* eslint-disable @typescript-eslint/strict-boolean-expressions */
-
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-var isIE11 = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z && !!window.MSInputMethodContext && !!document.documentMode;
-/* eslint-enable @typescript-eslint/strict-boolean-expressions */
-
-/* eslint-enable @typescript-eslint/no-unsafe-member-access */
-// true for IE / Edge
+var isIE11 = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z && typeof window.MSInputMethodContext !== "undefined" && typeof document.documentMode !== "undefined"; // true for IE / Edge
 
 var isIEOrEdge = _is_node__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z ? false : navigator.appName === "Microsoft Internet Explorer" || navigator.appName === "Netscape" && /(Trident|Edge)\//.test(navigator.userAgent);
 var isEdgeChromium = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z && navigator.userAgent.toLowerCase().indexOf("edg/") !== -1;
 var isFirefox = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z && navigator.userAgent.toLowerCase().indexOf("firefox") !== -1;
 var isSamsungBrowser = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z && /SamsungBrowser/.test(navigator.userAgent);
 var isTizen = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z && /Tizen/.test(navigator.userAgent);
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-
-var isSafari = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z && (Object.prototype.toString.call(window.HTMLElement).indexOf("Constructor") >= 0 || ((_a = window.safari) === null || _a === void 0 ? void 0 : _a.pushNotification.toString()) === "[object SafariRemoteNotification]");
-/* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
-/* eslint-enable @typescript-eslint/no-unsafe-call */
-
+var isSafari = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z && (Object.prototype.toString.call(window.HTMLElement).indexOf("Constructor") >= 0 || ((_b = (_a = window.safari) === null || _a === void 0 ? void 0 : _a.pushNotification) === null || _b === void 0 ? void 0 : _b.toString()) === "[object SafariRemoteNotification]");
 var isSafariMobile = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z && typeof navigator.platform === "string" && /iPad|iPhone|iPod/.test(navigator.platform);
 
 
@@ -407,6 +415,8 @@ var of = __webpack_require__(2817);
 var defer = __webpack_require__(9917);
 // EXTERNAL MODULE: ./src/errors/media_error.ts
 var media_error = __webpack_require__(3714);
+// EXTERNAL MODULE: ./src/utils/assert.ts
+var assert = __webpack_require__(811);
 // EXTERNAL MODULE: ./src/utils/cast_to_observable.ts
 var cast_to_observable = __webpack_require__(8117);
 // EXTERNAL MODULE: ./src/compat/browser_detection.ts
@@ -529,19 +539,16 @@ var event_listeners = __webpack_require__(8719);
 var MSMediaKeysConstructor;
 
 if (!is_node/* default */.Z) {
-  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
   var _window = window,
       MSMediaKeys = _window.MSMediaKeys;
 
-  if (MSMediaKeys !== undefined && MSMediaKeys.prototype !== undefined && typeof MSMediaKeys.isTypeSupported === "function" && typeof MSMediaKeys.prototype.createSession === "function") {
-    MSMediaKeysConstructor = MSMediaKeys;
-  }
-  /* eslint-enable @typescript-eslint/no-unsafe-assignment */
-
+  if (MSMediaKeys !== undefined && MSMediaKeys.prototype !== undefined && typeof MSMediaKeys.isTypeSupported === "function" &&
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  typeof MSMediaKeys.prototype.createSession === "function"
   /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
+  ) {
+      MSMediaKeysConstructor = MSMediaKeys;
+    }
 }
 
 
@@ -593,15 +600,7 @@ var IE11MediaKeySession = /*#__PURE__*/function (_EventEmitter) {
         }
 
         try {
-          /* eslint-disable @typescript-eslint/no-unsafe-call */
-
-          /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-          resolve(_this._ss.update(license,
-          /* sessionId */
-          ""));
-          /* eslint-enable @typescript-eslint/no-unsafe-call */
-
-          /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+          resolve(_this._ss.update(license, ""));
         } catch (err) {
           reject(err);
         }
@@ -617,14 +616,8 @@ var IE11MediaKeySession = /*#__PURE__*/function (_EventEmitter) {
     var _this2 = this;
 
     return new promise/* default */.Z(function (resolve) {
-      /* eslint-disable @typescript-eslint/no-unsafe-call */
-
-      /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-      _this2._ss = _this2._mk.createSession("video/mp4", initData);
-      /* eslint-enable @typescript-eslint/no-unsafe-call */
-
-      /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
+      var initDataU8 = initData instanceof Uint8Array ? initData : initData instanceof ArrayBuffer ? new Uint8Array(initData) : new Uint8Array(initData.buffer);
+      _this2._ss = _this2._mk.createSession("video/mp4", initDataU8);
       (0,merge/* merge */.T)(event_listeners/* onKeyMessage$ */.GJ(_this2._ss), event_listeners/* onKeyAdded$ */.GV(_this2._ss), event_listeners/* onKeyError$ */.Xe(_this2._ss)).pipe((0,takeUntil/* takeUntil */.R)(_this2._closeSession$)).subscribe(function (evt) {
         return _this2.trigger(evt.type, evt);
       });
@@ -637,10 +630,7 @@ var IE11MediaKeySession = /*#__PURE__*/function (_EventEmitter) {
 
     return new promise/* default */.Z(function (resolve) {
       if (_this3._ss != null) {
-        /* eslint-disable @typescript-eslint/no-floating-promises */
         _this3._ss.close();
-        /* eslint-enable @typescript-eslint/no-floating-promises */
-
 
         _this3._ss = undefined;
       }
@@ -686,18 +676,10 @@ var IE11CustomMediaKeys = /*#__PURE__*/function () {
 
   _proto2._setVideo = function _setVideo(videoElement) {
     this._videoElement = videoElement;
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-    /* eslint-disable @typescript-eslint/no-unsafe-call */
 
     if (this._videoElement.msSetMediaKeys !== undefined) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return this._videoElement.msSetMediaKeys(this._mediaKeys);
     }
-    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
-    /* eslint-enable @typescript-eslint/no-unsafe-call */
-
   };
 
   _proto2.createSession = function createSession()
@@ -776,19 +758,16 @@ function getIE11MediaKeysCallbacks() {
 var MozMediaKeysConstructor;
 
 if (!is_node/* default */.Z) {
-  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
   var moz_media_keys_constructor_window = window,
       MozMediaKeys = moz_media_keys_constructor_window.MozMediaKeys;
 
-  if (MozMediaKeys !== undefined && MozMediaKeys.prototype !== undefined && typeof MozMediaKeys.isTypeSupported === "function" && typeof MozMediaKeys.prototype.createSession === "function") {
-    MozMediaKeysConstructor = MozMediaKeys;
-  }
-  /* eslint-enable @typescript-eslint/no-unsafe-assignment */
-
+  if (MozMediaKeys !== undefined && MozMediaKeys.prototype !== undefined && typeof MozMediaKeys.isTypeSupported === "function" &&
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  typeof MozMediaKeys.prototype.createSession === "function"
   /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
+  ) {
+      MozMediaKeysConstructor = MozMediaKeys;
+    }
 }
 
 
@@ -813,22 +792,14 @@ function getMozMediaKeysCallbacks() {
     return new MozMediaKeysConstructor(keyType);
   };
 
-  var setMediaKeys = function setMediaKeys(elt, mediaKeys) {
-    /* eslint-disable @typescript-eslint/no-unsafe-return */
+  var setMediaKeys = function setMediaKeys(mediaElement, mediaKeys) {
+    var elt = mediaElement;
 
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-    /* eslint-disable @typescript-eslint/no-unsafe-call */
     if (elt.mozSetMediaKeys === undefined || typeof elt.mozSetMediaKeys !== "function") {
       throw new Error("Can't set video on MozMediaKeys.");
     }
 
     return elt.mozSetMediaKeys(mediaKeys);
-    /* eslint-enable @typescript-eslint/no-unsafe-return */
-
-    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
-    /* eslint-enable @typescript-eslint/no-unsafe-call */
   };
 
   return {
@@ -1003,23 +974,9 @@ function getOldWebKitMediaKeysCallbacks() {
     if (videoElement == null) {
       videoElement = document.createElement("video");
     }
-    /* eslint-disable @typescript-eslint/unbound-method */
-
 
     if (videoElement != null && typeof videoElement.canPlayType === "function") {
-      /* eslint-enable @typescript-eslint/unbound-method */
-
-      /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-      /* eslint-disable @typescript-eslint/strict-boolean-expressions */
-
-      /* eslint-disable @typescript-eslint/no-unsafe-call */
       return !!videoElement.canPlayType("video/mp4", keyType);
-      /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
-      /* eslint-enable @typescript-eslint/strict-boolean-expressions */
-
-      /* eslint-enable @typescript-eslint/no-unsafe-call */
     } else {
       return false;
     }
@@ -1153,18 +1110,13 @@ function isFairplayKeyType(keyType) {
 
 
 function setWebKitMediaKeys(videoElement, mediaKeys) {
-  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-  if (videoElement.webkitSetMediaKeys === undefined) {
+  var elt = videoElement;
+
+  if (elt.webkitSetMediaKeys === undefined) {
     throw new Error("No webKitMediaKeys API.");
   }
-  /* eslint-disable @typescript-eslint/no-unsafe-return */
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
 
-
-  return videoElement.webkitSetMediaKeys(mediaKeys);
-  /* eslint-enable @typescript-eslint/no-unsafe-return */
-
-  /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+  return elt.webkitSetMediaKeys(mediaKeys);
 }
 /**
  * On Safari browsers (>= 9), there are specific webkit prefixed APIs for cyphered
@@ -1235,12 +1187,13 @@ var WebkitMediaKeySession = /*#__PURE__*/function (_EventEmitter) {
     var _this3 = this;
 
     return new promise/* default */.Z(function (resolve) {
-      /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-      if (_this3._videoElement.webkitKeys === undefined || _this3._videoElement.webkitKeys.createSession === undefined) {
+      var _a;
+
+      var elt = _this3._videoElement;
+
+      if (((_a = elt.webkitKeys) === null || _a === void 0 ? void 0 : _a.createSession) === undefined) {
         throw new Error("No WebKitMediaKeys API.");
       }
-      /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
 
       var formattedInitData;
 
@@ -1253,20 +1206,8 @@ var WebkitMediaKeySession = /*#__PURE__*/function (_EventEmitter) {
       } else {
         formattedInitData = initData;
       }
-      /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-      /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-      /* eslint-disable @typescript-eslint/no-unsafe-call */
-
-
-      var keySession = _this3._videoElement.webkitKeys.createSession("video/mp4", formattedInitData);
-      /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
-      /* eslint-enable @typescript-eslint/no-unsafe-assignment */
-
-      /* eslint-enable @typescript-eslint/no-unsafe-call */
-
+      var keySession = elt.webkitKeys.createSession("video/mp4", formattedInitData);
 
       if (keySession === undefined || keySession === null) {
         throw new Error("Impossible to get the key sessions");
@@ -1290,16 +1231,13 @@ var WebkitMediaKeySession = /*#__PURE__*/function (_EventEmitter) {
 
       if (_this4._nativeSession === undefined) {
         reject("No session to close.");
+        return;
       }
-      /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-      /* eslint-disable @typescript-eslint/no-unsafe-call */
+      /* eslint-disable @typescript-eslint/no-floating-promises */
 
 
       _this4._nativeSession.close();
-      /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
-      /* eslint-enable @typescript-eslint/no-unsafe-call */
+      /* eslint-enable @typescript-eslint/no-floating-promises */
 
 
       resolve();
@@ -1430,46 +1368,33 @@ function getWebKitMediaKeysCallbacks() {
 
 
 
+
 var requestMediaKeySystemAccess = null;
 
-var _setMediaKeys = function defaultSetMediaKeys(elt, mediaKeys) {
+var _setMediaKeys = function defaultSetMediaKeys(mediaElement, mediaKeys) {
+  var elt = mediaElement;
   /* eslint-disable @typescript-eslint/unbound-method */
+
   if (typeof elt.setMediaKeys === "function") {
     return elt.setMediaKeys(mediaKeys);
   }
   /* eslint-enable @typescript-eslint/unbound-method */
-
-  /* eslint-disable @typescript-eslint/strict-boolean-expressions */
-
-  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-  /* eslint-disable @typescript-eslint/no-unsafe-return */
-
-  /* eslint-disable @typescript-eslint/no-unsafe-call */
   // If we get in the following code, it means that no compat case has been
   // found and no standard setMediaKeys API exists. This case is particulary
   // rare. We will try to call each API with native media keys.
 
 
-  if (elt.webkitSetMediaKeys) {
+  if (typeof elt.webkitSetMediaKeys === "function") {
     return elt.webkitSetMediaKeys(mediaKeys);
   }
 
-  if (elt.mozSetMediaKeys) {
+  if (typeof elt.mozSetMediaKeys === "function") {
     return elt.mozSetMediaKeys(mediaKeys);
   }
 
-  if (elt.msSetMediaKeys && mediaKeys !== null) {
+  if (typeof elt.msSetMediaKeys === "function" && mediaKeys !== null) {
     return elt.msSetMediaKeys(mediaKeys);
   }
-  /* eslint-enable @typescript-eslint/strict-boolean-expressions */
-
-  /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
-  /* eslint-enable @typescript-eslint/no-unsafe-return */
-
-  /* eslint-enable @typescript-eslint/no-unsafe-call */
-
 };
 /**
  * Since Safari 12.1, EME APIs are available without webkit prefix.
@@ -1514,20 +1439,14 @@ if (is_node/* default */.Z || navigator.requestMediaKeySystemAccess != null && !
     createCustomMediaKeys = _callbacks3.createCustomMediaKeys;
     _setMediaKeys = _callbacks3.setMediaKeys;
   } else {
-    /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-    /* eslint-disable @typescript-eslint/no-unsafe-return */
-    var custom_media_keys_window = window,
-        MediaKeys = custom_media_keys_window.MediaKeys;
+    var MK = window.MediaKeys;
 
     var checkForStandardMediaKeys = function checkForStandardMediaKeys() {
-      if (MediaKeys === undefined) {
+      if (MK === undefined) {
         throw new media_error/* default */.Z("MEDIA_KEYS_NOT_SUPPORTED", "No `MediaKeys` implementation found " + "in the current browser.");
       }
 
-      if (MediaKeys.isTypeSupported === undefined) {
+      if (typeof MK.isTypeSupported === "undefined") {
         var message = "This browser seems to be unable to play encrypted contents " + "currently. Note: Some browsers do not allow decryption " + "in some situations, like when not using HTTPS.";
         throw new Error(message);
       }
@@ -1535,23 +1454,14 @@ if (is_node/* default */.Z || navigator.requestMediaKeySystemAccess != null && !
 
     isTypeSupported = function isTypeSupported(keyType) {
       checkForStandardMediaKeys();
-      /* eslint-disable-next-line @typescript-eslint/no-unsafe-call */
-
-      return MediaKeys.isTypeSupported(keyType);
+      (0,assert/* default */.Z)(typeof MK.isTypeSupported === "function");
+      return MK.isTypeSupported(keyType);
     };
 
     createCustomMediaKeys = function createCustomMediaKeys(keyType) {
       checkForStandardMediaKeys();
-      /* eslint-disable-next-line @typescript-eslint/no-unsafe-call */
-
-      return new MediaKeys(keyType);
+      return new MK(keyType);
     };
-    /* eslint-enable @typescript-eslint/no-unsafe-assignment */
-
-    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
-    /* eslint-enable @typescript-eslint/no-unsafe-return */
-
   }
 
   requestMediaKeySystemAccess = function requestMediaKeySystemAccess(keyType, keySystemConfigurations) {
@@ -1832,8 +1742,6 @@ var switchMap = __webpack_require__(4978);
 var config = __webpack_require__(944);
 // EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
 var is_non_empty_string = __webpack_require__(6923);
-// EXTERNAL MODULE: ./src/compat/browser_compatibility_types.ts
-var browser_compatibility_types = __webpack_require__(3774);
 // EXTERNAL MODULE: ./src/compat/is_node.ts
 var is_node = __webpack_require__(2203);
 // EXTERNAL MODULE: ./src/compat/should_favour_custom_safari_EME.ts
@@ -1866,7 +1774,6 @@ var should_favour_custom_safari_EME = __webpack_require__(5059);
 
 
 
-
 var BROWSER_PREFIXES = ["", "webkit", "moz", "ms"];
 var INACTIVITY_DELAY = config/* default.INACTIVITY_DELAY */.Z.INACTIVITY_DELAY;
 var pixelRatio = is_node/* default */.Z || window.devicePixelRatio == null || window.devicePixelRatio === 0 ? 1 : window.devicePixelRatio;
@@ -1884,8 +1791,7 @@ function isEventSupported(element, eventNameSuffix) {
   if (eventName in clone) {
     return true;
   } else {
-    clone.setAttribute(eventName, "return;"); // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-
+    clone.setAttribute(eventName, "return;");
     return typeof clone[eventName] === "function";
   }
 }
@@ -1929,7 +1835,7 @@ function compatibleListener(eventNames, prefixes) {
   return function (element) {
     // if the element is a HTMLElement we can detect
     // the supported event, and memoize it in `mem`
-    if (element instanceof browser_compatibility_types/* HTMLElement_ */.DQ) {
+    if (element instanceof HTMLElement) {
       if (typeof mem === "undefined") {
         mem = findSupportedEvent(element, prefixedEvents);
       }
@@ -2028,12 +1934,11 @@ function getVideoWidthFromPIPWindow(mediaElement, pipWindow) {
  */
 
 
-function onPictureInPictureEvent$(mediaElement) {
+function onPictureInPictureEvent$(elt) {
   return (0,defer/* defer */.P)(function () {
-    /* eslint-disable @typescript-eslint/strict-boolean-expressions */
+    var mediaElement = elt;
 
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-    if (mediaElement.webkitSupportsPresentationMode && typeof mediaElement.webkitSetPresentationMode === "function") {
+    if (mediaElement.webkitSupportsPresentationMode === true && typeof mediaElement.webkitSetPresentationMode === "function") {
       var isWebKitPIPEnabled = mediaElement.webkitPresentationMode === "picture-in-picture";
       return (0,fromEvent/* fromEvent */.R)(mediaElement, "webkitpresentationmodechanged").pipe((0,map/* map */.U)(function () {
         return {
@@ -2045,29 +1950,23 @@ function onPictureInPictureEvent$(mediaElement) {
         pipWindow: null
       }));
     }
-    /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-
-    var isPIPEnabled = document.pictureInPictureElement && document.pictureInPictureElement === mediaElement;
+    var isPIPEnabled = document.pictureInPictureElement === mediaElement;
     var initialState = {
       isEnabled: isPIPEnabled,
       pipWindow: null
     };
-    /* eslint-enable @typescript-eslint/no-unsafe-assignment */
-
     return (0,merge/* merge */.T)((0,fromEvent/* fromEvent */.R)(mediaElement, "enterpictureinpicture").pipe((0,map/* map */.U)(function (evt) {
+      var _a;
+
       return {
         isEnabled: true,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        pipWindow: evt.pictureInPictureWindow
+        pipWindow: (_a = evt.pictureInPictureWindow) !== null && _a !== void 0 ? _a : null
       };
     })), (0,fromEvent/* fromEvent */.R)(mediaElement, "leavepictureinpicture").pipe((0,mapTo/* mapTo */.h)({
       isEnabled: false,
       pipWindow: null
     }))).pipe((0,startWith/* startWith */.O)(initialState));
-    /* eslint-enable @typescript-eslint/strict-boolean-expressions */
-
-    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
   });
 }
 /**
@@ -2106,8 +2005,7 @@ function videoWidth$(mediaElement, pip$) {
       return (0,of.of)(mediaElement.clientWidth * pixelRatio);
     } else if (pip.pipWindow != null) {
       var pipWindow = pip.pipWindow;
-      var firstWidth = getVideoWidthFromPIPWindow(mediaElement, pipWindow); // RxJS typing issue (for the "as any")
-
+      var firstWidth = getVideoWidthFromPIPWindow(mediaElement, pipWindow);
       return (0,fromEvent/* fromEvent */.R)(pipWindow, "resize").pipe((0,startWith/* startWith */.O)(firstWidth * pixelRatio), (0,map/* map */.U)(function () {
         return getVideoWidthFromPIPWindow(mediaElement, pipWindow) * pixelRatio;
       }));
@@ -2303,8 +2201,8 @@ function isVTTCue(cue) {
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Z": function() { return /* binding */ makeCue; }
 /* harmony export */ });
-/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3887);
-/* harmony import */ var _browser_compatibility_types__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3774);
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3887);
+/* harmony import */ var _utils_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1946);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -2333,18 +2231,22 @@ function isVTTCue(cue) {
  */
 
 function makeCue(startTime, endTime, payload) {
-  if (_browser_compatibility_types__WEBPACK_IMPORTED_MODULE_0__/* .VTTCue_ */ .w == null) {
-    throw new Error("VTT cues not supported in your target");
-  }
-
   if (startTime >= endTime) {
     // IE/Edge will throw in this case.
     // See issue #501
-    _log__WEBPACK_IMPORTED_MODULE_1__/* .default.warn */ .Z.warn("Compat: Invalid cue times: " + startTime + " - " + endTime);
+    _log__WEBPACK_IMPORTED_MODULE_0__/* .default.warn */ .Z.warn("Compat: Invalid cue times: " + startTime + " - " + endTime);
     return null;
   }
 
-  return new _browser_compatibility_types__WEBPACK_IMPORTED_MODULE_0__/* .VTTCue_ */ .w(startTime, endTime, payload);
+  if ((0,_utils_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(window.VTTCue)) {
+    if ((0,_utils_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(window.TextTrackCue)) {
+      throw new Error("VTT cues not supported in your target");
+    }
+
+    return new TextTrackCue(startTime, endTime, payload);
+  } else {
+    return new VTTCue(startTime, endTime, payload);
+  }
 }
 
 /***/ }),
@@ -7576,14 +7478,7 @@ function checkKeyStatuses(session, options, keySystem) {
   var _options$fallbackOn = options.fallbackOn,
       fallbackOn = _options$fallbackOn === void 0 ? {} : _options$fallbackOn,
       throwOnLicenseExpiration = options.throwOnLicenseExpiration;
-  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-  /* eslint-disable @typescript-eslint/no-unsafe-call */
-
   session.keyStatuses.forEach(function (_arg1, _arg2) {
-    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
-    /* eslint-enable @typescript-eslint/no-unsafe-call */
     // Hack present because the order of the arguments has changed in spec
     // and is not the same between some versions of Edge and Chrome.
     var _ref = function () {
@@ -8903,7 +8798,7 @@ var event_listeners = __webpack_require__(8719);
  */
 
 function whenLoadedMetadata$(mediaElement) {
-  if (mediaElement.readyState >= browser_compatibility_types/* READY_STATES.HAVE_METADATA */.cX.HAVE_METADATA) {
+  if (mediaElement.readyState >= browser_compatibility_types/* READY_STATES.HAVE_METADATA */.c.HAVE_METADATA) {
     return (0,of.of)(null);
   } else {
     return (0,event_listeners/* onLoadedMetadata$ */.K4)(mediaElement).pipe((0,take/* take */.q)(1));
@@ -9504,7 +9399,9 @@ var ImageSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
 
       var _infos$data = infos.data,
           appendWindow = _infos$data.appendWindow,
-          chunk = _infos$data.chunk;
+          chunk = _infos$data.chunk; // The following check is ugly. I don't care, the image buffer is there
+      // due to an ugly deprecated API that will soon disappear
+
       var start = chunk.start,
           end = chunk.end,
           timescale = chunk.timescale;
@@ -10601,6 +10498,7 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
       return;
     }
 
+    assertChunkIsTextTrackSegmentData(chunk);
     var startTime = chunk.start,
         endTime = chunk.end,
         dataString = chunk.data,
@@ -10772,8 +10670,37 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
 
   return HTMLTextSegmentBuffer;
 }(types/* SegmentBuffer */.C);
+/**
+ * Throw if the given input is not in the expected format.
+ * Allows to enforce runtime type-checking as compile-time type-checking here is
+ * difficult to enforce.
+ * @param {Object} chunk
+ */
 
 
+
+
+function assertChunkIsTextTrackSegmentData(chunk) {
+  if (true) {
+    return;
+  }
+
+  if (typeof chunk !== "object" || chunk === null || typeof chunk.data !== "string" || typeof chunk.type !== "string" || chunk.language !== undefined && typeof chunk.language !== "string" || chunk.start !== undefined && typeof chunk.start !== "string" || chunk.end !== undefined && typeof chunk.end !== "string") {
+    throw new Error("Invalid format given to a NativeTextSegmentBuffer");
+  }
+}
+/*
+ * The following ugly code is here to provide a compile-time check that an
+ * `INativeTextTracksBufferSegmentData` (type of data pushed to a
+ * `NativeTextSegmentBuffer`) can be derived from a `ITextTrackSegmentData`
+ * (text track data parsed from a segment).
+ *
+ * It doesn't correspond at all to real code that will be called. This is just
+ * a hack to tell TypeScript to perform that check.
+ */
+
+
+if (false) { var _checkType; }
 ;// CONCATENATED MODULE: ./src/core/segment_buffers/implementations/text/html/index.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -11073,6 +11000,7 @@ var NativeTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
           timestampOffset = _infos$data.timestampOffset,
           appendWindow = _infos$data.appendWindow,
           chunk = _infos$data.chunk;
+      assertChunkIsTextTrackSegmentData(chunk);
       var startTime = chunk.start,
           endTime = chunk.end,
           dataString = chunk.data,
@@ -11267,8 +11195,37 @@ var NativeTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
 
   return NativeTextSegmentBuffer;
 }(types/* SegmentBuffer */.C);
+/**
+ * Throw if the given input is not in the expected format.
+ * Allows to enforce runtime type-checking as compile-time type-checking here is
+ * difficult to enforce.
+ * @param {Object} chunk
+ */
 
 
+
+
+function assertChunkIsTextTrackSegmentData(chunk) {
+  if (true) {
+    return;
+  }
+
+  if (typeof chunk !== "object" || chunk === null || typeof chunk.data !== "string" || typeof chunk.type !== "string" || chunk.language !== undefined && typeof chunk.language !== "string" || chunk.start !== undefined && typeof chunk.start !== "string" || chunk.end !== undefined && typeof chunk.end !== "string") {
+    throw new Error("Invalid format given to a NativeTextSegmentBuffer");
+  }
+}
+/*
+ * The following ugly code is here to provide a compile-time check that an
+ * `INativeTextTracksBufferSegmentData` (type of data pushed to a
+ * `NativeTextSegmentBuffer`) can be derived from a `ITextTrackSegmentData`
+ * (text track data parsed from a segment).
+ *
+ * It doesn't correspond at all to real code that will be called. This is just
+ * a hack to tell TypeScript to perform that check.
+ */
+
+
+if (false) { var _checkType; }
 ;// CONCATENATED MODULE: ./src/core/segment_buffers/implementations/text/native/index.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -11514,7 +11471,6 @@ var SegmentInventory = /*#__PURE__*/function () {
     var inventory = this._inventory;
     var newSegment = {
       partiallyPushed: true,
-      estimatedStart: start,
       start: start,
       end: end,
       precizeStart: false,
@@ -12662,50 +12618,6 @@ function errorMessage(name, code, reason) {
 
 /***/ }),
 
-/***/ 9822:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Z": function() { return /* binding */ isKnownError; }
-/* harmony export */ });
-/* harmony import */ var _encrypted_media_error__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5157);
-/* harmony import */ var _error_codes__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(5992);
-/* harmony import */ var _media_error__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3714);
-/* harmony import */ var _network_error__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(9362);
-/* harmony import */ var _other_error__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(5389);
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-/**
- * Whether the error given is a ICustomError.
- * @param {Error} error
- * @returns {Boolean}
- */
-
-function isKnownError(error) {
-  return (error instanceof _encrypted_media_error__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z || error instanceof _media_error__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z || error instanceof _other_error__WEBPACK_IMPORTED_MODULE_2__/* .default */ .Z || error instanceof _network_error__WEBPACK_IMPORTED_MODULE_3__/* .default */ .Z) && Object.keys(_error_codes__WEBPACK_IMPORTED_MODULE_4__/* .ErrorTypes */ .ZB).indexOf(error.type) >= 0;
-}
-
-/***/ }),
-
 /***/ 3714:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
@@ -13210,14 +13122,8 @@ __webpack_require__.d(__webpack_exports__, {
   "Z": function() { return /* binding */ Adaptation; }
 });
 
-// EXTERNAL MODULE: ./src/errors/media_error.ts
-var media_error = __webpack_require__(3714);
-// EXTERNAL MODULE: ./src/log.ts + 1 modules
-var log = __webpack_require__(3887);
 // EXTERNAL MODULE: ./src/utils/array_find.ts
 var array_find = __webpack_require__(3274);
-// EXTERNAL MODULE: ./src/utils/array_includes.ts
-var array_includes = __webpack_require__(7714);
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
 var is_null_or_undefined = __webpack_require__(1946);
 // EXTERNAL MODULE: ./src/utils/languages/index.ts
@@ -13300,19 +13206,21 @@ var browser_compatibility_types = __webpack_require__(3774);
  */
 
 function isCodecSupported(mimeType) {
-  if (browser_compatibility_types/* MediaSource_ */.JJ == null) {
+  if (browser_compatibility_types/* MediaSource_ */.J == null) {
     return false;
   }
   /* eslint-disable @typescript-eslint/unbound-method */
 
 
-  if (typeof browser_compatibility_types/* MediaSource_.isTypeSupported */.JJ.isTypeSupported === "function") {
+  if (typeof browser_compatibility_types/* MediaSource_.isTypeSupported */.J.isTypeSupported === "function") {
     /* eslint-enable @typescript-eslint/unbound-method */
-    return browser_compatibility_types/* MediaSource_.isTypeSupported */.JJ.isTypeSupported(mimeType);
+    return browser_compatibility_types/* MediaSource_.isTypeSupported */.J.isTypeSupported(mimeType);
   }
 
   return true;
 }
+// EXTERNAL MODULE: ./src/log.ts + 1 modules
+var log = __webpack_require__(3887);
 // EXTERNAL MODULE: ./src/utils/are_arrays_of_numbers_equal.ts
 var are_arrays_of_numbers_equal = __webpack_require__(4791);
 ;// CONCATENATED MODULE: ./src/manifest/representation.ts
@@ -13586,21 +13494,9 @@ var Representation = /*#__PURE__*/function () {
 
 
 
-
-
-
 /** List in an array every possible value for the Adaptation's `type` property. */
 
 var SUPPORTED_ADAPTATIONS_TYPE = ["audio", "video", "text", "image"];
-/**
- * Returns true if the given Adaptation's `type` is a valid `type` property.
- * @param {string} adaptationType
- * @returns {boolean}
- */
-
-function isSupportedAdaptationType(adaptationType) {
-  return (0,array_includes/* default */.Z)(SUPPORTED_ADAPTATIONS_TYPE, adaptationType);
-}
 /**
  * Normalized Adaptation structure.
  * An Adaptation describes a single `Track`. For example a specific audio
@@ -13609,7 +13505,6 @@ function isSupportedAdaptationType(adaptationType) {
  * `Representation`.
  * @class Adaptation
  */
-
 
 var Adaptation = /*#__PURE__*/function () {
   /**
@@ -13626,18 +13521,8 @@ var Adaptation = /*#__PURE__*/function () {
     var _options = options,
         representationFilter = _options.representationFilter,
         isManuallyAdded = _options.isManuallyAdded;
-    this.parsingErrors = [];
     this.id = parsedAdaptation.id;
     this.isTrickModeTrack = parsedAdaptation.isTrickModeTrack;
-
-    if (!isSupportedAdaptationType(parsedAdaptation.type)) {
-      log/* default.info */.Z.info("Manifest: Not supported adaptation type", parsedAdaptation.type);
-      /* eslint-disable @typescript-eslint/restrict-template-expressions */
-
-      throw new media_error/* default */.Z("MANIFEST_UNSUPPORTED_ADAPTATION_TYPE", "\"" + parsedAdaptation.type + "\" is not a valid " + "Adaptation type.");
-      /* eslint-enable @typescript-eslint/restrict-template-expressions */
-    }
-
     this.type = parsedAdaptation.type;
 
     if (parsedAdaptation.language !== undefined) {
@@ -13701,12 +13586,6 @@ var Adaptation = /*#__PURE__*/function () {
     this.isSupported = isSupported; // for manuallyAdded adaptations (not in the manifest)
 
     this.manuallyAdded = isManuallyAdded === true;
-
-    if (this.representations.length > 0 && !isSupported) {
-      log/* default.warn */.Z.warn("Incompatible codecs for adaptation", parsedAdaptation);
-      var error = new media_error/* default */.Z("MANIFEST_INCOMPATIBLE_CODECS_ERROR", "An Adaptation contains only incompatible codecs.");
-      this.parsingErrors.push(error);
-    }
   }
   /**
    * Returns unique bitrate for every Representation in this Adaptation.
@@ -13811,6 +13690,8 @@ __webpack_require__.d(__webpack_exports__, {
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inheritsLoose.js
 var inheritsLoose = __webpack_require__(1788);
+// EXTERNAL MODULE: ./src/errors/media_error.ts
+var media_error = __webpack_require__(3714);
 // EXTERNAL MODULE: ./src/utils/are_arrays_of_numbers_equal.ts
 var are_arrays_of_numbers_equal = __webpack_require__(4791);
 // EXTERNAL MODULE: ./src/utils/array_find.ts
@@ -13823,10 +13704,6 @@ var id_generator = __webpack_require__(908);
 var warn_once = __webpack_require__(8806);
 // EXTERNAL MODULE: ./src/manifest/adaptation.ts + 3 modules
 var manifest_adaptation = __webpack_require__(8999);
-// EXTERNAL MODULE: ./src/errors/is_known_error.ts
-var is_known_error = __webpack_require__(9822);
-// EXTERNAL MODULE: ./src/errors/media_error.ts
-var media_error = __webpack_require__(3714);
 // EXTERNAL MODULE: ./src/utils/object_values.ts
 var object_values = __webpack_require__(1679);
 ;// CONCATENATED MODULE: ./src/manifest/period.ts
@@ -13864,7 +13741,7 @@ var Period = /*#__PURE__*/function () {
   function Period(args, representationFilter) {
     var _this = this;
 
-    this.parsingErrors = [];
+    this.contentWarnings = [];
     this.id = args.id;
     this.adaptations = Object.keys(args.adaptations).reduce(function (acc, type) {
       var adaptationsForType = args.adaptations[type];
@@ -13874,29 +13751,19 @@ var Period = /*#__PURE__*/function () {
       }
 
       var filteredAdaptations = adaptationsForType.map(function (adaptation) {
-        var _this$parsingErrors;
+        var newAdaptation = new manifest_adaptation/* default */.Z(adaptation, {
+          representationFilter: representationFilter
+        });
 
-        var newAdaptation = null;
+        if (newAdaptation.representations.length > 0 && !newAdaptation.isSupported) {
+          var error = new media_error/* default */.Z("MANIFEST_INCOMPATIBLE_CODECS_ERROR", "An Adaptation contains only incompatible codecs.");
 
-        try {
-          newAdaptation = new manifest_adaptation/* default */.Z(adaptation, {
-            representationFilter: representationFilter
-          });
-        } catch (err) {
-          if ((0,is_known_error/* default */.Z)(err) && err.code === "MANIFEST_UNSUPPORTED_ADAPTATION_TYPE") {
-            _this.parsingErrors.push(err);
-
-            return null;
-          }
-
-          throw err;
+          _this.contentWarnings.push(error);
         }
-
-        (_this$parsingErrors = _this.parsingErrors).push.apply(_this$parsingErrors, newAdaptation.parsingErrors);
 
         return newAdaptation;
       }).filter(function (adaptation) {
-        return adaptation !== null && adaptation.representations.length > 0;
+        return adaptation.representations.length > 0;
       });
 
       if (filteredAdaptations.every(function (adaptation) {
@@ -14419,6 +14286,7 @@ function updatePeriods(oldPeriods, newPeriods) {
 
 
 
+
 var generateSupplementaryTrackID = (0,id_generator/* default */.Z)();
 var generateNewManifestId = (0,id_generator/* default */.Z)();
 /**
@@ -14448,7 +14316,7 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
    * Construct a Manifest instance from a parsed Manifest object (as returned by
    * Manifest parsers) and options.
    *
-   * Some minor errors can arise during that construction. `this.parsingErrors`
+   * Some minor errors can arise during that construction. `this.contentWarnings`
    * will contain all such errors, in the order they have been encountered.
    * @param {Object} parsedManifest
    * @param {Object} options
@@ -14465,17 +14333,17 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
         supplementaryImageTracks = _options$supplementar2 === void 0 ? [] : _options$supplementar2,
         representationFilter = options.representationFilter,
         manifestUpdateUrl = options.manifestUpdateUrl;
-    _this.parsingErrors = [];
+    _this.contentWarnings = [];
     _this.id = generateNewManifestId();
     _this.expired = (_a = parsedManifest.expired) !== null && _a !== void 0 ? _a : null;
     _this.transport = parsedManifest.transportType;
     _this.clockOffset = parsedManifest.clockOffset;
     _this.periods = parsedManifest.periods.map(function (parsedPeriod) {
-      var _this$parsingErrors;
+      var _this$contentWarnings;
 
       var period = new Period(parsedPeriod, representationFilter);
 
-      (_this$parsingErrors = _this.parsingErrors).push.apply(_this$parsingErrors, period.parsingErrors);
+      (_this$contentWarnings = _this.contentWarnings).push.apply(_this$contentWarnings, period.contentWarnings);
 
       return period;
     }).sort(function (a, b) {
@@ -14817,8 +14685,6 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
     var _imageTracks = Array.isArray(imageTracks) ? imageTracks : [imageTracks];
 
     var newImageTracks = _imageTracks.map(function (_ref3) {
-      var _this2$parsingErrors;
-
       var mimeType = _ref3.mimeType,
           url = _ref3.url;
       var adaptationID = "gen-image-ada-" + generateSupplementaryTrackID();
@@ -14838,7 +14704,11 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
         isManuallyAdded: true
       });
 
-      (_this2$parsingErrors = _this2.parsingErrors).push.apply(_this2$parsingErrors, newAdaptation.parsingErrors);
+      if (newAdaptation.representations.length > 0 && !newAdaptation.isSupported) {
+        var error = new media_error/* default */.Z("MANIFEST_INCOMPATIBLE_CODECS_ERROR", "An Adaptation contains only incompatible codecs.");
+
+        _this2.contentWarnings.push(error);
+      }
 
       return newAdaptation;
     });
@@ -14873,8 +14743,6 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
           closedCaption = _ref4.closedCaption;
       var langsToMapOn = language != null ? [language] : languages != null ? languages : [];
       return allSubs.concat(langsToMapOn.map(function (_language) {
-        var _this3$parsingErrors;
-
         var adaptationID = "gen-text-ada-" + generateSupplementaryTrackID();
         var representationID = "gen-text-rep-" + generateSupplementaryTrackID();
         var newAdaptation = new manifest_adaptation/* default */.Z({
@@ -14895,7 +14763,11 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
           isManuallyAdded: true
         });
 
-        (_this3$parsingErrors = _this3.parsingErrors).push.apply(_this3$parsingErrors, newAdaptation.parsingErrors);
+        if (newAdaptation.representations.length > 0 && !newAdaptation.isSupported) {
+          var error = new media_error/* default */.Z("MANIFEST_INCOMPATIBLE_CODECS_ERROR", "An Adaptation contains only incompatible codecs.");
+
+          _this3.contentWarnings.push(error);
+        }
 
         return newAdaptation;
       }));
@@ -14919,7 +14791,7 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
     this.isLive = newManifest.isLive;
     this.isLastPeriodKnown = newManifest.isLastPeriodKnown;
     this.lifetime = newManifest.lifetime;
-    this.parsingErrors = newManifest.parsingErrors;
+    this.contentWarnings = newManifest.contentWarnings;
     this.suggestedPresentationDelay = newManifest.suggestedPresentationDelay;
     this.transport = newManifest.transport;
     this.publishTime = newManifest.publishTime;
@@ -16220,611 +16092,18 @@ function parseBif(buf) {
 
 /***/ }),
 
-/***/ 7403:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Z": function() { return /* binding */ BaseRepresentationIndex; }
-/* harmony export */ });
-/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(3887);
-/* harmony import */ var _utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3911);
-/* harmony import */ var _get_init_segment__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1915);
-/* harmony import */ var _get_segments_from_timeline__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(6394);
-/* harmony import */ var _tokens__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4784);
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-/**
- * Add a new segment to the index.
- *
- * /!\ Mutate the given index
- * @param {Object} index
- * @param {Object} segmentInfos
- * @returns {Boolean} - true if the segment has been added
- */
-
-function _addSegmentInfos(index, segmentInfos) {
-  if (segmentInfos.timescale !== index.timescale) {
-    var timescale = index.timescale;
-    index.timeline.push({
-      start: segmentInfos.time / segmentInfos.timescale * timescale,
-      duration: segmentInfos.duration / segmentInfos.timescale * timescale,
-      repeatCount: segmentInfos.count === undefined ? 0 : segmentInfos.count,
-      range: segmentInfos.range
-    });
-  } else {
-    index.timeline.push({
-      start: segmentInfos.time,
-      duration: segmentInfos.duration,
-      repeatCount: segmentInfos.count === undefined ? 0 : segmentInfos.count,
-      range: segmentInfos.range
-    });
-  }
-
-  return true;
-}
-
-var BaseRepresentationIndex = /*#__PURE__*/function () {
-  /**
-   * @param {Object} index
-   * @param {Object} context
-   */
-  function BaseRepresentationIndex(index, context) {
-    var _a, _b;
-
-    var periodStart = context.periodStart,
-        periodEnd = context.periodEnd,
-        representationBaseURLs = context.representationBaseURLs,
-        representationId = context.representationId,
-        representationBitrate = context.representationBitrate,
-        isEMSGWhitelisted = context.isEMSGWhitelisted;
-    var timescale = (_a = index.timescale) !== null && _a !== void 0 ? _a : 1;
-    var presentationTimeOffset = index.presentationTimeOffset != null ? index.presentationTimeOffset : 0;
-    var indexTimeOffset = presentationTimeOffset - periodStart * timescale;
-    var mediaURLs = (0,_tokens__WEBPACK_IMPORTED_MODULE_0__/* .createIndexURLs */ .k6)(representationBaseURLs, index.initialization !== undefined ? index.initialization.media : undefined, representationId, representationBitrate); // TODO If indexRange is either undefined or behind the initialization segment
-    // the following logic will not work.
-    // However taking the nth first bytes like `dash.js` does (where n = 1500) is
-    // not straightforward as we would need to clean-up the segment after that.
-    // The following logic corresponds to 100% of tested cases, so good enough for
-    // now.
-
-    var range = index.initialization !== undefined ? index.initialization.range : index.indexRange !== undefined ? [0, index.indexRange[0] - 1] : undefined;
-    this._index = {
-      indexRange: index.indexRange,
-      indexTimeOffset: indexTimeOffset,
-      initialization: {
-        mediaURLs: mediaURLs,
-        range: range
-      },
-      mediaURLs: (0,_tokens__WEBPACK_IMPORTED_MODULE_0__/* .createIndexURLs */ .k6)(representationBaseURLs, index.media, representationId, representationBitrate),
-      startNumber: index.startNumber,
-      timeline: (_b = index.timeline) !== null && _b !== void 0 ? _b : [],
-      timescale: timescale
-    };
-    this._scaledPeriodEnd = periodEnd == null ? undefined : (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__/* .toIndexTime */ .gT)(periodEnd, this._index);
-    this._isInitialized = this._index.timeline.length > 0;
-    this._isEMSGWhitelisted = isEMSGWhitelisted;
-  }
-  /**
-   * Construct init Segment.
-   * @returns {Object}
-   */
-
-
-  var _proto = BaseRepresentationIndex.prototype;
-
-  _proto.getInitSegment = function getInitSegment() {
-    return (0,_get_init_segment__WEBPACK_IMPORTED_MODULE_2__/* .default */ .Z)(this._index, this._isEMSGWhitelisted);
-  }
-  /**
-   * Get the list of segments that are currently available from the `from`
-   * position, in seconds, ending `dur` seconds after that position.
-   *
-   * Note that if not already done, you might need to "initialize" the
-   * `BaseRepresentationIndex` first so that the list of available segments
-   * is known.
-   *
-   * @see isInitialized for more information on `BaseRepresentationIndex`
-   * initialization.
-   * @param {Number} from
-   * @param {Number} dur
-   * @returns {Array.<Object>}
-   */
-  ;
-
-  _proto.getSegments = function getSegments(from, dur) {
-    return (0,_get_segments_from_timeline__WEBPACK_IMPORTED_MODULE_3__/* .default */ .Z)(this._index, from, dur, this._isEMSGWhitelisted, this._scaledPeriodEnd);
-  }
-  /**
-   * Returns false as no Segment-Base based index should need to be refreshed.
-   * @returns {Boolean}
-   */
-  ;
-
-  _proto.shouldRefresh = function shouldRefresh() {
-    return false;
-  }
-  /**
-   * Returns first position in index.
-   * @returns {Number|null}
-   */
-  ;
-
-  _proto.getFirstPosition = function getFirstPosition() {
-    var index = this._index;
-
-    if (index.timeline.length === 0) {
-      return null;
-    }
-
-    return (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__/* .fromIndexTime */ .zG)(index.timeline[0].start, index);
-  }
-  /**
-   * Returns last position in index.
-   * @returns {Number|null}
-   */
-  ;
-
-  _proto.getLastPosition = function getLastPosition() {
-    var timeline = this._index.timeline;
-
-    if (timeline.length === 0) {
-      return null;
-    }
-
-    var lastTimelineElement = timeline[timeline.length - 1];
-    var lastTime = (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__/* .getIndexSegmentEnd */ .jH)(lastTimelineElement, null, this._scaledPeriodEnd);
-    return (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__/* .fromIndexTime */ .zG)(lastTime, this._index);
-  }
-  /**
-   * Segments in a segmentBase scheme should stay available.
-   * @returns {Boolean|undefined}
-   */
-  ;
-
-  _proto.isSegmentStillAvailable = function isSegmentStillAvailable() {
-    return true;
-  }
-  /**
-   * We do not check for discontinuity in SegmentBase-based indexes.
-   * @returns {null}
-   */
-  ;
-
-  _proto.checkDiscontinuity = function checkDiscontinuity() {
-    return null;
-  }
-  /**
-   * `BaseRepresentationIndex` should just already all be generated.
-   * Return `true` as a default value here.
-   * @returns {boolean}
-   */
-  ;
-
-  _proto.areSegmentsChronologicallyGenerated = function areSegmentsChronologicallyGenerated() {
-    return true;
-  }
-  /**
-   * No segment in a `BaseRepresentationIndex` are known initially.
-   * It is only defined generally in an "index segment" that will thus need to
-   * be first loaded and parsed.
-   * Until then, this `BaseRepresentationIndex` is considered as `uninitialized`
-   * (@see isInitialized).
-   *
-   * Once that those information are available, the present
-   * `BaseRepresentationIndex` can be "initialized" by adding that parsed
-   * segment information through this method.
-   * @param {Array.<Object>} indexSegments
-   * @returns {Array.<Object>}
-   */
-  ;
-
-  _proto.initializeIndex = function initializeIndex(indexSegments) {
-    for (var i = 0; i < indexSegments.length; i++) {
-      _addSegmentInfos(this._index, indexSegments[i]);
-    }
-
-    this._isInitialized = true;
-  }
-  /**
-   * Returns `false` as a `BaseRepresentationIndex` should not be dynamic and as
-   * such segments should never fall out-of-sync.
-   * @returns {Boolean}
-   */
-  ;
-
-  _proto.canBeOutOfSyncError = function canBeOutOfSyncError() {
-    return false;
-  }
-  /**
-   * Returns `true` as SegmentBase are not dynamic and as such no new segment
-   * should become available in the future.
-   * @returns {Boolean}
-   */
-  ;
-
-  _proto.isFinished = function isFinished() {
-    return true;
-  }
-  /**
-   * No segment in a `BaseRepresentationIndex` are known initially.
-   * It is only defined generally in an "index segment" that will thus need to
-   * be first loaded and parsed.
-   *
-   * Once the index segment or equivalent has been parsed, the `initializeIndex`
-   * method have to be called with the corresponding segment information so the
-   * `BaseRepresentationIndex` can be considered as "initialized" (and so this
-   * method can return `true`).
-   * Until then this method will return `false` and segments linked to that
-   * Representation may be missing.
-   * @returns {Boolean}
-   */
-  ;
-
-  _proto.isInitialized = function isInitialized() {
-    return this._isInitialized;
-  }
-  /**
-   * Replace in-place this `BaseRepresentationIndex` information by the
-   * information from another one.
-   * @param {Object} newIndex
-   */
-  ;
-
-  _proto._replace = function _replace(newIndex) {
-    this._index = newIndex._index;
-    this._isInitialized = newIndex._isInitialized;
-    this._scaledPeriodEnd = newIndex._scaledPeriodEnd;
-    this._isEMSGWhitelisted = newIndex._isEMSGWhitelisted;
-  };
-
-  _proto._update = function _update() {
-    _log__WEBPACK_IMPORTED_MODULE_4__/* .default.error */ .Z.error("Base RepresentationIndex: Cannot update a SegmentList");
-  };
-
-  return BaseRepresentationIndex;
-}();
-
-
-
-/***/ }),
-
-/***/ 1915:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Z": function() { return /* binding */ getInitSegment; }
-/* harmony export */ });
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Construct init segment for the given index.
- * @param {Object} index
- * @param {function} isEMSGWhitelisted
- * @returns {Object}
- */
-function getInitSegment(index, isEMSGWhitelisted) {
-  var _a;
-
-  var initialization = index.initialization;
-  var privateInfos;
-
-  if (isEMSGWhitelisted !== undefined) {
-    privateInfos = {
-      isEMSGWhitelisted: isEMSGWhitelisted
-    };
-  }
-
-  return {
-    id: "init",
-    isInit: true,
-    time: 0,
-    end: 0,
-    duration: 0,
-    timescale: 1,
-    range: initialization != null ? initialization.range : undefined,
-    indexRange: index.indexRange,
-    mediaURLs: (_a = initialization === null || initialization === void 0 ? void 0 : initialization.mediaURLs) !== null && _a !== void 0 ? _a : null,
-    privateInfos: privateInfos,
-    timestampOffset: -(index.indexTimeOffset / index.timescale)
-  };
-}
-
-/***/ }),
-
-/***/ 6394:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Z": function() { return /* binding */ getSegmentsFromTimeline; }
-/* harmony export */ });
-/* harmony import */ var _utils_index_helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3911);
-/* harmony import */ var _tokens__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4784);
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * For the given start time and duration of a timeline element, calculate how
- * much this element should be repeated to contain the time given.
- * 0 being the same element, 1 being the next one etc.
- * @param {Number} segmentStartTime
- * @param {Number} segmentDuration
- * @param {Number} wantedTime
- * @returns {Number}
- */
-
-function getWantedRepeatIndex(segmentStartTime, segmentDuration, wantedTime) {
-  var diff = wantedTime - segmentStartTime;
-  return diff > 0 ? Math.floor(diff / segmentDuration) : 0;
-}
-/**
- * Get a list of Segments for the time range wanted.
- * @param {Object} index - index object, constructed by parsing the manifest.
- * @param {number} from - starting timestamp wanted, in seconds
- * @param {number} durationWanted - duration wanted, in seconds
- * @param {function} isEMSGWhitelisted
- * @param {number|undefined} maximumTime
- * @returns {Array.<Object>}
- */
-
-
-function getSegmentsFromTimeline(index, from, durationWanted, isEMSGWhitelisted, maximumTime) {
-  var scaledUp = (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_0__/* .toIndexTime */ .gT)(from, index);
-  var scaledTo = (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_0__/* .toIndexTime */ .gT)(from + durationWanted, index);
-  var timeline = index.timeline,
-      timescale = index.timescale,
-      mediaURLs = index.mediaURLs,
-      startNumber = index.startNumber;
-  var currentNumber = startNumber != null ? startNumber : undefined;
-  var segments = [];
-  var timelineLength = timeline.length; // TODO(pierre): use @maxSegmentDuration if possible
-
-  var maxEncounteredDuration = timeline.length > 0 && timeline[0].duration != null ? timeline[0].duration : 0;
-
-  for (var i = 0; i < timelineLength; i++) {
-    var timelineItem = timeline[i];
-    var duration = timelineItem.duration,
-        start = timelineItem.start,
-        range = timelineItem.range;
-    maxEncounteredDuration = Math.max(maxEncounteredDuration, duration);
-    var repeat = (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_0__/* .calculateRepeat */ .KF)(timelineItem, timeline[i + 1], maximumTime);
-    var segmentNumberInCurrentRange = getWantedRepeatIndex(start, duration, scaledUp);
-    var segmentTime = start + segmentNumberInCurrentRange * duration;
-
-    while (segmentTime < scaledTo && segmentNumberInCurrentRange <= repeat) {
-      var segmentNumber = currentNumber != null ? currentNumber + segmentNumberInCurrentRange : undefined;
-      var detokenizedURLs = mediaURLs === null ? null : mediaURLs.map((0,_tokens__WEBPACK_IMPORTED_MODULE_1__/* .createDashUrlDetokenizer */ .QB)(segmentTime, segmentNumber));
-      var time = segmentTime - index.indexTimeOffset;
-      var segment = {
-        id: String(segmentTime),
-        time: time / timescale,
-        end: (time + duration) / timescale,
-        duration: duration / timescale,
-        isInit: false,
-        range: range,
-        timescale: 1,
-        mediaURLs: detokenizedURLs,
-        number: segmentNumber,
-        timestampOffset: -(index.indexTimeOffset / timescale),
-        privateInfos: {
-          isEMSGWhitelisted: isEMSGWhitelisted
-        }
-      };
-      segments.push(segment); // update segment number and segment time for the next segment
-
-      segmentNumberInCurrentRange++;
-      segmentTime = start + segmentNumberInCurrentRange * duration;
-    }
-
-    if (segmentTime >= scaledTo) {
-      // we reached ``scaledTo``, we're done
-      return segments;
-    }
-
-    if (currentNumber != null) {
-      currentNumber += repeat + 1;
-    }
-  }
-
-  return segments;
-}
-
-/***/ }),
-
-/***/ 4784:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "k6": function() { return /* binding */ createIndexURLs; },
-/* harmony export */   "QB": function() { return /* binding */ createDashUrlDetokenizer; }
-/* harmony export */ });
-/* unused harmony export replaceRepresentationDASHTokens */
-/* harmony import */ var _utils_is_non_empty_string__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6923);
-/* harmony import */ var _utils_resolve_url__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9829);
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * Pad with 0 in the left of the given n argument to reach l length
- * @param {Number|string} n
- * @param {Number} l
- * @returns {string}
- */
-
-function padLeftWithZeros(n, l) {
-  var nToString = n.toString();
-
-  if (nToString.length >= l) {
-    return nToString;
-  }
-
-  var arr = new Array(l + 1).join("0") + nToString;
-  return arr.slice(-l);
-}
-/**
- * @param {string|number} replacer
- * @returns {Function}
- */
-
-
-function processFormatedToken(replacer) {
-  return function (_match, _format, widthStr) {
-    var width = (0,_utils_is_non_empty_string__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z)(widthStr) ? parseInt(widthStr, 10) : 1;
-    return padLeftWithZeros(String(replacer), width);
-  };
-}
-/**
- * @param {string} representationURL
- * @param {string|undefined} media
- * @param {string|undefined} id
- * @param {number|undefined} bitrate
- * @returns {string}
- */
-
-
-function createIndexURLs(baseURLs, media, id, bitrate) {
-  if (baseURLs.length === 0) {
-    return media !== undefined ? [replaceRepresentationDASHTokens(media, id, bitrate)] : null;
-  }
-
-  return baseURLs.map(function (baseURL) {
-    return replaceRepresentationDASHTokens((0,_utils_resolve_url__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(baseURL, media), id, bitrate);
-  });
-}
-/**
- * Replace "tokens" written in a given path (e.g. $RepresentationID$) by the corresponding
- * infos, taken from the given segment.
- * @param {string} path
- * @param {string|undefined} id
- * @param {number|undefined} bitrate
- * @returns {string}
- */
-
-function replaceRepresentationDASHTokens(path, id, bitrate) {
-  if (path.indexOf("$") === -1) {
-    return path;
-  } else {
-    return path.replace(/\$\$/g, "$").replace(/\$RepresentationID\$/g, String(id)).replace(/\$Bandwidth(|\%0(\d+)d)\$/g, processFormatedToken(bitrate === undefined ? 0 : bitrate));
-  }
-}
-/**
- * Create function allowing to replace "tokens" in a given DASH segment URL
- * (e.g. $Time$, which has to be replaced by the segment's start time) by the
- * right information.
- * @param {number|undefined} time
- * @param {number|undefined} nb
- * @returns {Function}
- */
-
-function createDashUrlDetokenizer(time, nb) {
-  /**
-   * Replace the tokens in the given `url` by the segment information defined
-   * by the outer function.
-   * @param {string} url
-   * @returns {string}
-   *
-   * @throws Error - Throws if we do not have enough data to construct the URL
-   */
-  return function replaceTokensInUrl(url) {
-    if (url.indexOf("$") === -1) {
-      return url;
-    } else {
-      return url.replace(/\$\$/g, "$").replace(/\$Number(|\%0(\d+)d)\$/g, function (_x, _y, widthStr) {
-        if (nb === undefined) {
-          throw new Error("Segment number not defined in a $Number$ scheme");
-        }
-
-        return processFormatedToken(nb)(_x, _y, widthStr);
-      }).replace(/\$Time(|\%0(\d+)d)\$/g, function (_x, _y, widthStr) {
-        if (time === undefined) {
-          throw new Error("Segment time not defined in a $Time$ scheme");
-        }
-
-        return processFormatedToken(time)(_x, _y, widthStr);
-      });
-    }
-  };
-}
-
-/***/ }),
-
-/***/ 148:
+/***/ 6992:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 
 // EXPORTS
 __webpack_require__.d(__webpack_exports__, {
-  "Z": function() { return /* binding */ js_parser; }
+  "ZP": function() { return /* binding */ common; }
 });
 
-// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
-var assert_unreachable = __webpack_require__(8418);
-// EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
-var is_null_or_undefined = __webpack_require__(1946);
+// UNUSED EXPORTS: BaseRepresentationIndex, ListRepresentationIndex, TemplateRepresentationIndex, TimelineRepresentationIndex
+
 // EXTERNAL MODULE: ./src/config.ts
 var config = __webpack_require__(944);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
@@ -20788,14 +20067,628 @@ function parseCompleteIntermediateRepresentation(mpdIR, args, warnings, xlinkInf
 
 /* harmony default export */ var common = (parseMpdIr);
 
+
+/***/ }),
+
+/***/ 7403:
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Z": function() { return /* binding */ BaseRepresentationIndex; }
+/* harmony export */ });
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(3887);
+/* harmony import */ var _utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3911);
+/* harmony import */ var _get_init_segment__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1915);
+/* harmony import */ var _get_segments_from_timeline__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(6394);
+/* harmony import */ var _tokens__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4784);
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+/**
+ * Add a new segment to the index.
+ *
+ * /!\ Mutate the given index
+ * @param {Object} index
+ * @param {Object} segmentInfos
+ * @returns {Boolean} - true if the segment has been added
+ */
+
+function _addSegmentInfos(index, segmentInfos) {
+  if (segmentInfos.timescale !== index.timescale) {
+    var timescale = index.timescale;
+    index.timeline.push({
+      start: segmentInfos.time / segmentInfos.timescale * timescale,
+      duration: segmentInfos.duration / segmentInfos.timescale * timescale,
+      repeatCount: segmentInfos.count === undefined ? 0 : segmentInfos.count,
+      range: segmentInfos.range
+    });
+  } else {
+    index.timeline.push({
+      start: segmentInfos.time,
+      duration: segmentInfos.duration,
+      repeatCount: segmentInfos.count === undefined ? 0 : segmentInfos.count,
+      range: segmentInfos.range
+    });
+  }
+
+  return true;
+}
+
+var BaseRepresentationIndex = /*#__PURE__*/function () {
+  /**
+   * @param {Object} index
+   * @param {Object} context
+   */
+  function BaseRepresentationIndex(index, context) {
+    var _a, _b;
+
+    var periodStart = context.periodStart,
+        periodEnd = context.periodEnd,
+        representationBaseURLs = context.representationBaseURLs,
+        representationId = context.representationId,
+        representationBitrate = context.representationBitrate,
+        isEMSGWhitelisted = context.isEMSGWhitelisted;
+    var timescale = (_a = index.timescale) !== null && _a !== void 0 ? _a : 1;
+    var presentationTimeOffset = index.presentationTimeOffset != null ? index.presentationTimeOffset : 0;
+    var indexTimeOffset = presentationTimeOffset - periodStart * timescale;
+    var mediaURLs = (0,_tokens__WEBPACK_IMPORTED_MODULE_0__/* .createIndexURLs */ .k6)(representationBaseURLs, index.initialization !== undefined ? index.initialization.media : undefined, representationId, representationBitrate); // TODO If indexRange is either undefined or behind the initialization segment
+    // the following logic will not work.
+    // However taking the nth first bytes like `dash.js` does (where n = 1500) is
+    // not straightforward as we would need to clean-up the segment after that.
+    // The following logic corresponds to 100% of tested cases, so good enough for
+    // now.
+
+    var range = index.initialization !== undefined ? index.initialization.range : index.indexRange !== undefined ? [0, index.indexRange[0] - 1] : undefined;
+    this._index = {
+      indexRange: index.indexRange,
+      indexTimeOffset: indexTimeOffset,
+      initialization: {
+        mediaURLs: mediaURLs,
+        range: range
+      },
+      mediaURLs: (0,_tokens__WEBPACK_IMPORTED_MODULE_0__/* .createIndexURLs */ .k6)(representationBaseURLs, index.media, representationId, representationBitrate),
+      startNumber: index.startNumber,
+      timeline: (_b = index.timeline) !== null && _b !== void 0 ? _b : [],
+      timescale: timescale
+    };
+    this._scaledPeriodEnd = periodEnd == null ? undefined : (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__/* .toIndexTime */ .gT)(periodEnd, this._index);
+    this._isInitialized = this._index.timeline.length > 0;
+    this._isEMSGWhitelisted = isEMSGWhitelisted;
+  }
+  /**
+   * Construct init Segment.
+   * @returns {Object}
+   */
+
+
+  var _proto = BaseRepresentationIndex.prototype;
+
+  _proto.getInitSegment = function getInitSegment() {
+    return (0,_get_init_segment__WEBPACK_IMPORTED_MODULE_2__/* .default */ .Z)(this._index, this._isEMSGWhitelisted);
+  }
+  /**
+   * Get the list of segments that are currently available from the `from`
+   * position, in seconds, ending `dur` seconds after that position.
+   *
+   * Note that if not already done, you might need to "initialize" the
+   * `BaseRepresentationIndex` first so that the list of available segments
+   * is known.
+   *
+   * @see isInitialized for more information on `BaseRepresentationIndex`
+   * initialization.
+   * @param {Number} from
+   * @param {Number} dur
+   * @returns {Array.<Object>}
+   */
+  ;
+
+  _proto.getSegments = function getSegments(from, dur) {
+    return (0,_get_segments_from_timeline__WEBPACK_IMPORTED_MODULE_3__/* .default */ .Z)(this._index, from, dur, this._isEMSGWhitelisted, this._scaledPeriodEnd);
+  }
+  /**
+   * Returns false as no Segment-Base based index should need to be refreshed.
+   * @returns {Boolean}
+   */
+  ;
+
+  _proto.shouldRefresh = function shouldRefresh() {
+    return false;
+  }
+  /**
+   * Returns first position in index.
+   * @returns {Number|null}
+   */
+  ;
+
+  _proto.getFirstPosition = function getFirstPosition() {
+    var index = this._index;
+
+    if (index.timeline.length === 0) {
+      return null;
+    }
+
+    return (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__/* .fromIndexTime */ .zG)(index.timeline[0].start, index);
+  }
+  /**
+   * Returns last position in index.
+   * @returns {Number|null}
+   */
+  ;
+
+  _proto.getLastPosition = function getLastPosition() {
+    var timeline = this._index.timeline;
+
+    if (timeline.length === 0) {
+      return null;
+    }
+
+    var lastTimelineElement = timeline[timeline.length - 1];
+    var lastTime = (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__/* .getIndexSegmentEnd */ .jH)(lastTimelineElement, null, this._scaledPeriodEnd);
+    return (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__/* .fromIndexTime */ .zG)(lastTime, this._index);
+  }
+  /**
+   * Segments in a segmentBase scheme should stay available.
+   * @returns {Boolean|undefined}
+   */
+  ;
+
+  _proto.isSegmentStillAvailable = function isSegmentStillAvailable() {
+    return true;
+  }
+  /**
+   * We do not check for discontinuity in SegmentBase-based indexes.
+   * @returns {null}
+   */
+  ;
+
+  _proto.checkDiscontinuity = function checkDiscontinuity() {
+    return null;
+  }
+  /**
+   * `BaseRepresentationIndex` should just already all be generated.
+   * Return `true` as a default value here.
+   * @returns {boolean}
+   */
+  ;
+
+  _proto.areSegmentsChronologicallyGenerated = function areSegmentsChronologicallyGenerated() {
+    return true;
+  }
+  /**
+   * No segment in a `BaseRepresentationIndex` are known initially.
+   * It is only defined generally in an "index segment" that will thus need to
+   * be first loaded and parsed.
+   * Until then, this `BaseRepresentationIndex` is considered as `uninitialized`
+   * (@see isInitialized).
+   *
+   * Once that those information are available, the present
+   * `BaseRepresentationIndex` can be "initialized" by adding that parsed
+   * segment information through this method.
+   * @param {Array.<Object>} indexSegments
+   * @returns {Array.<Object>}
+   */
+  ;
+
+  _proto.initializeIndex = function initializeIndex(indexSegments) {
+    for (var i = 0; i < indexSegments.length; i++) {
+      _addSegmentInfos(this._index, indexSegments[i]);
+    }
+
+    this._isInitialized = true;
+  }
+  /**
+   * Returns `false` as a `BaseRepresentationIndex` should not be dynamic and as
+   * such segments should never fall out-of-sync.
+   * @returns {Boolean}
+   */
+  ;
+
+  _proto.canBeOutOfSyncError = function canBeOutOfSyncError() {
+    return false;
+  }
+  /**
+   * Returns `true` as SegmentBase are not dynamic and as such no new segment
+   * should become available in the future.
+   * @returns {Boolean}
+   */
+  ;
+
+  _proto.isFinished = function isFinished() {
+    return true;
+  }
+  /**
+   * No segment in a `BaseRepresentationIndex` are known initially.
+   * It is only defined generally in an "index segment" that will thus need to
+   * be first loaded and parsed.
+   *
+   * Once the index segment or equivalent has been parsed, the `initializeIndex`
+   * method have to be called with the corresponding segment information so the
+   * `BaseRepresentationIndex` can be considered as "initialized" (and so this
+   * method can return `true`).
+   * Until then this method will return `false` and segments linked to that
+   * Representation may be missing.
+   * @returns {Boolean}
+   */
+  ;
+
+  _proto.isInitialized = function isInitialized() {
+    return this._isInitialized;
+  }
+  /**
+   * Replace in-place this `BaseRepresentationIndex` information by the
+   * information from another one.
+   * @param {Object} newIndex
+   */
+  ;
+
+  _proto._replace = function _replace(newIndex) {
+    this._index = newIndex._index;
+    this._isInitialized = newIndex._isInitialized;
+    this._scaledPeriodEnd = newIndex._scaledPeriodEnd;
+    this._isEMSGWhitelisted = newIndex._isEMSGWhitelisted;
+  };
+
+  _proto._update = function _update() {
+    _log__WEBPACK_IMPORTED_MODULE_4__/* .default.error */ .Z.error("Base RepresentationIndex: Cannot update a SegmentList");
+  };
+
+  return BaseRepresentationIndex;
+}();
+
+
+
+/***/ }),
+
+/***/ 1915:
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Z": function() { return /* binding */ getInitSegment; }
+/* harmony export */ });
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Construct init segment for the given index.
+ * @param {Object} index
+ * @param {function} isEMSGWhitelisted
+ * @returns {Object}
+ */
+function getInitSegment(index, isEMSGWhitelisted) {
+  var _a;
+
+  var initialization = index.initialization;
+  var privateInfos;
+
+  if (isEMSGWhitelisted !== undefined) {
+    privateInfos = {
+      isEMSGWhitelisted: isEMSGWhitelisted
+    };
+  }
+
+  return {
+    id: "init",
+    isInit: true,
+    time: 0,
+    end: 0,
+    duration: 0,
+    timescale: 1,
+    range: initialization != null ? initialization.range : undefined,
+    indexRange: index.indexRange,
+    mediaURLs: (_a = initialization === null || initialization === void 0 ? void 0 : initialization.mediaURLs) !== null && _a !== void 0 ? _a : null,
+    privateInfos: privateInfos,
+    timestampOffset: -(index.indexTimeOffset / index.timescale)
+  };
+}
+
+/***/ }),
+
+/***/ 6394:
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Z": function() { return /* binding */ getSegmentsFromTimeline; }
+/* harmony export */ });
+/* harmony import */ var _utils_index_helpers__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3911);
+/* harmony import */ var _tokens__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4784);
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * For the given start time and duration of a timeline element, calculate how
+ * much this element should be repeated to contain the time given.
+ * 0 being the same element, 1 being the next one etc.
+ * @param {Number} segmentStartTime
+ * @param {Number} segmentDuration
+ * @param {Number} wantedTime
+ * @returns {Number}
+ */
+
+function getWantedRepeatIndex(segmentStartTime, segmentDuration, wantedTime) {
+  var diff = wantedTime - segmentStartTime;
+  return diff > 0 ? Math.floor(diff / segmentDuration) : 0;
+}
+/**
+ * Get a list of Segments for the time range wanted.
+ * @param {Object} index - index object, constructed by parsing the manifest.
+ * @param {number} from - starting timestamp wanted, in seconds
+ * @param {number} durationWanted - duration wanted, in seconds
+ * @param {function} isEMSGWhitelisted
+ * @param {number|undefined} maximumTime
+ * @returns {Array.<Object>}
+ */
+
+
+function getSegmentsFromTimeline(index, from, durationWanted, isEMSGWhitelisted, maximumTime) {
+  var scaledUp = (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_0__/* .toIndexTime */ .gT)(from, index);
+  var scaledTo = (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_0__/* .toIndexTime */ .gT)(from + durationWanted, index);
+  var timeline = index.timeline,
+      timescale = index.timescale,
+      mediaURLs = index.mediaURLs,
+      startNumber = index.startNumber;
+  var currentNumber = startNumber != null ? startNumber : undefined;
+  var segments = [];
+  var timelineLength = timeline.length; // TODO(pierre): use @maxSegmentDuration if possible
+
+  var maxEncounteredDuration = timeline.length > 0 && timeline[0].duration != null ? timeline[0].duration : 0;
+
+  for (var i = 0; i < timelineLength; i++) {
+    var timelineItem = timeline[i];
+    var duration = timelineItem.duration,
+        start = timelineItem.start,
+        range = timelineItem.range;
+    maxEncounteredDuration = Math.max(maxEncounteredDuration, duration);
+    var repeat = (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_0__/* .calculateRepeat */ .KF)(timelineItem, timeline[i + 1], maximumTime);
+    var segmentNumberInCurrentRange = getWantedRepeatIndex(start, duration, scaledUp);
+    var segmentTime = start + segmentNumberInCurrentRange * duration;
+
+    while (segmentTime < scaledTo && segmentNumberInCurrentRange <= repeat) {
+      var segmentNumber = currentNumber != null ? currentNumber + segmentNumberInCurrentRange : undefined;
+      var detokenizedURLs = mediaURLs === null ? null : mediaURLs.map((0,_tokens__WEBPACK_IMPORTED_MODULE_1__/* .createDashUrlDetokenizer */ .QB)(segmentTime, segmentNumber));
+      var time = segmentTime - index.indexTimeOffset;
+      var segment = {
+        id: String(segmentTime),
+        time: time / timescale,
+        end: (time + duration) / timescale,
+        duration: duration / timescale,
+        isInit: false,
+        range: range,
+        timescale: 1,
+        mediaURLs: detokenizedURLs,
+        number: segmentNumber,
+        timestampOffset: -(index.indexTimeOffset / timescale),
+        privateInfos: {
+          isEMSGWhitelisted: isEMSGWhitelisted
+        }
+      };
+      segments.push(segment); // update segment number and segment time for the next segment
+
+      segmentNumberInCurrentRange++;
+      segmentTime = start + segmentNumberInCurrentRange * duration;
+    }
+
+    if (segmentTime >= scaledTo) {
+      // we reached ``scaledTo``, we're done
+      return segments;
+    }
+
+    if (currentNumber != null) {
+      currentNumber += repeat + 1;
+    }
+  }
+
+  return segments;
+}
+
+/***/ }),
+
+/***/ 4784:
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "k6": function() { return /* binding */ createIndexURLs; },
+/* harmony export */   "QB": function() { return /* binding */ createDashUrlDetokenizer; }
+/* harmony export */ });
+/* unused harmony export replaceRepresentationDASHTokens */
+/* harmony import */ var _utils_is_non_empty_string__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6923);
+/* harmony import */ var _utils_resolve_url__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9829);
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Pad with 0 in the left of the given n argument to reach l length
+ * @param {Number|string} n
+ * @param {Number} l
+ * @returns {string}
+ */
+
+function padLeftWithZeros(n, l) {
+  var nToString = n.toString();
+
+  if (nToString.length >= l) {
+    return nToString;
+  }
+
+  var arr = new Array(l + 1).join("0") + nToString;
+  return arr.slice(-l);
+}
+/**
+ * @param {string|number} replacer
+ * @returns {Function}
+ */
+
+
+function processFormatedToken(replacer) {
+  return function (_match, _format, widthStr) {
+    var width = (0,_utils_is_non_empty_string__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z)(widthStr) ? parseInt(widthStr, 10) : 1;
+    return padLeftWithZeros(String(replacer), width);
+  };
+}
+/**
+ * @param {string} representationURL
+ * @param {string|undefined} media
+ * @param {string|undefined} id
+ * @param {number|undefined} bitrate
+ * @returns {string}
+ */
+
+
+function createIndexURLs(baseURLs, media, id, bitrate) {
+  if (baseURLs.length === 0) {
+    return media !== undefined ? [replaceRepresentationDASHTokens(media, id, bitrate)] : null;
+  }
+
+  return baseURLs.map(function (baseURL) {
+    return replaceRepresentationDASHTokens((0,_utils_resolve_url__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(baseURL, media), id, bitrate);
+  });
+}
+/**
+ * Replace "tokens" written in a given path (e.g. $RepresentationID$) by the corresponding
+ * infos, taken from the given segment.
+ * @param {string} path
+ * @param {string|undefined} id
+ * @param {number|undefined} bitrate
+ * @returns {string}
+ */
+
+function replaceRepresentationDASHTokens(path, id, bitrate) {
+  if (path.indexOf("$") === -1) {
+    return path;
+  } else {
+    return path.replace(/\$\$/g, "$").replace(/\$RepresentationID\$/g, String(id)).replace(/\$Bandwidth(|\%0(\d+)d)\$/g, processFormatedToken(bitrate === undefined ? 0 : bitrate));
+  }
+}
+/**
+ * Create function allowing to replace "tokens" in a given DASH segment URL
+ * (e.g. $Time$, which has to be replaced by the segment's start time) by the
+ * right information.
+ * @param {number|undefined} time
+ * @param {number|undefined} nb
+ * @returns {Function}
+ */
+
+function createDashUrlDetokenizer(time, nb) {
+  /**
+   * Replace the tokens in the given `url` by the segment information defined
+   * by the outer function.
+   * @param {string} url
+   * @returns {string}
+   *
+   * @throws Error - Throws if we do not have enough data to construct the URL
+   */
+  return function replaceTokensInUrl(url) {
+    if (url.indexOf("$") === -1) {
+      return url;
+    } else {
+      return url.replace(/\$\$/g, "$").replace(/\$Number(|\%0(\d+)d)\$/g, function (_x, _y, widthStr) {
+        if (nb === undefined) {
+          throw new Error("Segment number not defined in a $Number$ scheme");
+        }
+
+        return processFormatedToken(nb)(_x, _y, widthStr);
+      }).replace(/\$Time(|\%0(\d+)d)\$/g, function (_x, _y, widthStr) {
+        if (time === undefined) {
+          throw new Error("Segment time not defined in a $Time$ scheme");
+        }
+
+        return processFormatedToken(time)(_x, _y, widthStr);
+      });
+    }
+  };
+}
+
+/***/ }),
+
+/***/ 3139:
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, {
+  "Z": function() { return /* binding */ js_parser; }
+});
+
+// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
+var assert_unreachable = __webpack_require__(8418);
+// EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
+var is_null_or_undefined = __webpack_require__(1946);
+// EXTERNAL MODULE: ./src/parsers/manifest/dash/common/index.ts + 31 modules
+var common = __webpack_require__(6992);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js
 var assertThisInitialized = __webpack_require__(3349);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inheritsLoose.js
 var inheritsLoose = __webpack_require__(1788);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/wrapNativeSuper.js + 4 modules
 var wrapNativeSuper = __webpack_require__(3786);
+// EXTERNAL MODULE: ./src/log.ts + 1 modules
+var log = __webpack_require__(3887);
 // EXTERNAL MODULE: ./src/utils/base64.ts
 var base64 = __webpack_require__(9689);
+// EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
+var is_non_empty_string = __webpack_require__(6923);
 ;// CONCATENATED MODULE: ./src/parsers/manifest/dash/js-parser/node_parsers/utils.ts
 
 
@@ -21244,6 +21137,8 @@ function parseContentComponent(root) {
 
   return ret;
 }
+// EXTERNAL MODULE: ./src/utils/string_parsing.ts
+var string_parsing = __webpack_require__(3635);
 ;// CONCATENATED MODULE: ./src/parsers/manifest/dash/js-parser/node_parsers/ContentProtection.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -21510,6 +21405,8 @@ function parseSegmentBase(root) {
 
   return [attributes, warnings];
 }
+// EXTERNAL MODULE: ./src/utils/object_assign.ts
+var object_assign = __webpack_require__(8026);
 ;// CONCATENATED MODULE: ./src/parsers/manifest/dash/js-parser/node_parsers/SegmentURL.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -22923,7 +22820,7 @@ function parseFromDocument(document, args) {
       mpdIR = _createMPDIntermediat[0],
       warnings = _createMPDIntermediat[1];
 
-  var ret = common(mpdIR, args, warnings);
+  var ret = (0,common/* default */.ZP)(mpdIR, args, warnings);
   return processReturn(ret);
   /**
    * Handle `parseMpdIr` return values, asking for resources if they are needed
@@ -24203,20 +24100,11 @@ function generateSpansFromSRTText(text) {
 
         _spanChild2.style.textDecoration = "underline";
         span.appendChild(_spanChild2);
-      } else if (currentNode.nodeName === "FONT" && // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      currentNode.color != null) {
+      } else if (isNodeFontWithColorProp(currentNode) && typeof currentNode.color === "string") {
         // TODO loop through attributes to find color?
-
-        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-        /* eslint-disable @typescript-eslint/no-unsafe-member-access */
         var _spanChild3 = _loop(currentNode);
 
         _spanChild3.style.color = currentNode.color;
-        /* eslint-enable @typescript-eslint/no-unsafe-assignment */
-
-        /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
         span.appendChild(_spanChild3);
       } else {
         var _spanChild4 = _loop(currentNode);
@@ -24229,6 +24117,17 @@ function generateSpansFromSRTText(text) {
   };
 
   return _loop(secureDiv);
+}
+/**
+ * Returns `true` if the given node is a `<font>` element which contains a
+ * `color` attribute.
+ * @param {Node} node
+ * @returns {boolean}
+ */
+
+
+function isNodeFontWithColorProp(node) {
+  return node.nodeName === "FONT" && "color" in node;
 }
 
 /***/ }),
@@ -26527,7 +26426,8 @@ var get_styling = __webpack_require__(3791);
  * @returns {Element}
  */
 function getBodyNode(tt) {
-  return tt.getElementsByTagName("body")[0];
+  var bodyNodes = tt.getElementsByTagName("body");
+  return bodyNodes.length > 0 ? bodyNodes[0] : null;
 }
 /**
  * @param {Element} tt - <tt> node
@@ -28119,7 +28019,7 @@ function findEndOfCueBlock(linified, startOfCueBlock) {
 
 /***/ }),
 
-/***/ 1732:
+/***/ 5877:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28133,8 +28033,9 @@ __webpack_require__.d(__webpack_exports__, {
 var features = __webpack_require__(7874);
 // EXTERNAL MODULE: ./src/transports/utils/generate_manifest_loader.ts + 1 modules
 var generate_manifest_loader = __webpack_require__(8791);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
-var of = __webpack_require__(2817);
+// EXTERNAL MODULE: ./node_modules/pinkie/index.js
+var pinkie = __webpack_require__(8555);
+var pinkie_default = /*#__PURE__*/__webpack_require__.n(pinkie);
 // EXTERNAL MODULE: ./src/utils/request/index.ts + 1 modules
 var request = __webpack_require__(4597);
 // EXTERNAL MODULE: ./src/utils/take_first_set.ts
@@ -28161,27 +28062,33 @@ var take_first_set = __webpack_require__(5278);
 
 /**
  * Loads an image segment.
- * @param {Object} args
- * @returns {Observable}
+ * @param {string|null} url
+ * @param {Object} content
+ * @param {Object} cancelSignal
+ * @param {Object} callbacks
+ * @returns {Promise}
  */
 
-function imageLoader(_ref) {
-  var segment = _ref.segment,
-      url = _ref.url;
+function imageLoader(url, content, cancelSignal, callbacks) {
+  var segment = content.segment;
 
   if (segment.isInit || url === null) {
-    return (0,of.of)({
-      type: "data-created",
-      value: {
-        responseData: null
-      }
+    return pinkie_default().resolve({
+      resultType: "segment-created",
+      resultData: null
     });
   }
 
   return (0,request/* default */.ZP)({
     url: url,
     responseType: "arraybuffer",
-    sendProgressEvents: true
+    onProgress: callbacks.onProgress,
+    cancelSignal: cancelSignal
+  }).then(function (data) {
+    return {
+      resultType: "segment-loaded",
+      resultData: data
+    };
   });
 }
 /**
@@ -28190,24 +28097,20 @@ function imageLoader(_ref) {
  * @returns {Object}
  */
 
-function imageParser(_ref2) {
-  var response = _ref2.response,
-      content = _ref2.content;
+function imageParser(loadedSegment, content) {
   var segment = content.segment,
       period = content.period;
-  var data = response.data,
-      isChunked = response.isChunked;
+  var data = loadedSegment.data,
+      isChunked = loadedSegment.isChunked;
 
   if (content.segment.isInit) {
     // image init segment has no use
-    return (0,of.of)({
-      type: "parsed-init-segment",
-      value: {
-        initializationData: null,
-        protectionDataUpdate: false,
-        initTimescale: undefined
-      }
-    });
+    return {
+      segmentType: "init",
+      initializationData: null,
+      protectionDataUpdate: false,
+      initTimescale: undefined
+    };
   }
 
   if (isChunked) {
@@ -28217,66 +28120,49 @@ function imageParser(_ref2) {
   var chunkOffset = (0,take_first_set/* default */.Z)(segment.timestampOffset, 0); // TODO image Parsing should be more on the buffer side, no?
 
   if (data === null || features/* default.imageParser */.Z.imageParser === null) {
-    return (0,of.of)({
-      type: "parsed-segment",
-      value: {
-        chunkData: null,
-        chunkInfos: {
-          duration: segment.duration,
-          time: segment.time
-        },
-        chunkOffset: chunkOffset,
-        appendWindow: [period.start, period.end],
-        protectionDataUpdate: false
-      }
-    });
+    return {
+      segmentType: "media",
+      chunkData: null,
+      chunkInfos: {
+        duration: segment.duration,
+        time: segment.time
+      },
+      chunkOffset: chunkOffset,
+      protectionDataUpdate: false,
+      appendWindow: [period.start, period.end]
+    };
   }
 
   var bifObject = features/* default.imageParser */.Z.imageParser(new Uint8Array(data));
   var thumbsData = bifObject.thumbs;
-  return (0,of.of)({
-    type: "parsed-segment",
-    value: {
-      chunkData: {
-        data: thumbsData,
-        start: 0,
-        end: Number.MAX_VALUE,
-        timescale: 1,
-        type: "bif"
-      },
-      chunkInfos: {
-        time: 0,
-        duration: Number.MAX_VALUE,
-        timescale: bifObject.timescale
-      },
-      chunkOffset: chunkOffset,
-      appendWindow: [period.start, period.end],
-      protectionDataUpdate: false
-    }
-  });
+  return {
+    segmentType: "media",
+    chunkData: {
+      data: thumbsData,
+      start: 0,
+      end: Number.MAX_VALUE,
+      timescale: 1,
+      type: "bif"
+    },
+    chunkInfos: {
+      time: 0,
+      duration: Number.MAX_VALUE
+    },
+    chunkOffset: chunkOffset,
+    protectionDataUpdate: false,
+    appendWindow: [period.start, period.end]
+  };
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/from.js + 13 modules
-var from = __webpack_require__(1973);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
-var concat = __webpack_require__(6362);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/combineLatest.js + 2 modules
-var combineLatest = __webpack_require__(2334);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/mergeMap.js
-var mergeMap = __webpack_require__(3994);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/filter.js
-var filter = __webpack_require__(4975);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/map.js
-var map = __webpack_require__(9127);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
 // EXTERNAL MODULE: ./src/manifest/index.ts + 6 modules
 var src_manifest = __webpack_require__(1989);
+// EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
+var is_null_or_undefined = __webpack_require__(1946);
 // EXTERNAL MODULE: ./src/utils/object_assign.ts
 var object_assign = __webpack_require__(8026);
 // EXTERNAL MODULE: ./src/utils/string_parsing.ts
 var string_parsing = __webpack_require__(3635);
-// EXTERNAL MODULE: ./src/transports/utils/return_parsed_manifest.ts
-var return_parsed_manifest = __webpack_require__(7445);
 ;// CONCATENATED MODULE: ./src/transports/dash/manifest_parser.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -28301,29 +28187,20 @@ var return_parsed_manifest = __webpack_require__(7445);
 
 
 
-
-/**
- * @param {Object} options
- * @returns {Function}
- */
-
 function generateManifestParser(options) {
   var aggressiveMode = options.aggressiveMode,
       referenceDateTime = options.referenceDateTime;
   var serverTimeOffset = options.serverSyncInfos !== undefined ? options.serverSyncInfos.serverTimestamp - options.serverSyncInfos.clientTime : undefined;
-  return function manifestParser(args) {
+  return function manifestParser(manifestData, parserOptions, onWarnings, cancelSignal, scheduleRequest) {
     var _a;
 
-    var response = args.response,
-        scheduleRequest = args.scheduleRequest,
-        loaderURL = args.url,
-        argClockOffset = args.externalClockOffset;
-    var url = (_a = response.url) !== null && _a !== void 0 ? _a : loaderURL;
-    var responseData = response.responseData;
+    var responseData = manifestData.responseData;
+    var argClockOffset = parserOptions.externalClockOffset;
+    var url = (_a = manifestData.url) !== null && _a !== void 0 ? _a : parserOptions.originalUrl;
     var optAggressiveMode = aggressiveMode === true;
     var externalClockOffset = serverTimeOffset !== null && serverTimeOffset !== void 0 ? serverTimeOffset : argClockOffset;
-    var unsafelyBaseOnPreviousManifest = args.unsafeMode ? args.previousManifest : null;
-    var parserOpts = {
+    var unsafelyBaseOnPreviousManifest = parserOptions.unsafeMode ? parserOptions.previousManifest : null;
+    var dashParserOpts = {
       aggressiveMode: optAggressiveMode,
       unsafelyBaseOnPreviousManifest: unsafelyBaseOnPreviousManifest,
       url: url,
@@ -28345,21 +28222,21 @@ function generateManifestParser(options) {
 
       if (parsers.wasm.status === "initialized") {
         log/* default.debug */.Z.debug("DASH: Running WASM MPD Parser.");
-        var parsed = parsers.wasm.runWasmParser(manifestAB, parserOpts);
+        var parsed = parsers.wasm.runWasmParser(manifestAB, dashParserOpts);
         return processMpdParserResponse(parsed);
       } else {
         log/* default.debug */.Z.debug("DASH: Awaiting WASM initialization before parsing the MPD.");
         var initProm = parsers.wasm.waitForInitialization()["catch"](function () {});
-        return (0,from/* from */.Dp)(initProm).pipe((0,mergeMap/* mergeMap */.z)(function () {
+        return initProm.then(function () {
           if (parsers.wasm === null || parsers.wasm.status !== "initialized") {
             log/* default.warn */.Z.warn("DASH: WASM MPD parser initialization failed. " + "Running JS parser instead");
             return runDefaultJsParser();
           }
 
           log/* default.debug */.Z.debug("DASH: Running WASM MPD Parser.");
-          var parsed = parsers.wasm.runWasmParser(manifestAB, parserOpts);
+          var parsed = parsers.wasm.runWasmParser(manifestAB, dashParserOpts);
           return processMpdParserResponse(parsed);
-        }));
+        });
       }
     }
     /**
@@ -28376,7 +28253,7 @@ function generateManifestParser(options) {
       }
 
       var manifestDoc = getManifestAsDocument(responseData);
-      var parsedManifest = parsers.js(manifestDoc, parserOpts);
+      var parsedManifest = parsers.js(manifestDoc, dashParserOpts);
       return processMpdParserResponse(parsedManifest);
     }
     /**
@@ -28388,34 +28265,44 @@ function generateManifestParser(options) {
 
 
     function processMpdParserResponse(parserResponse) {
-      if (parserResponse.type === "done") {
-        var _parserResponse$value = parserResponse.value,
-            warnings = _parserResponse$value.warnings,
-            _parsed = _parserResponse$value.parsed;
-        var warningEvents = warnings.map(function (warning) {
-          return {
-            type: "warning",
-            value: warning
-          };
+      if (isResponseInPromise(parserResponse)) {
+        return parserResponse.then(function (res) {
+          return processMpdParserResponse(res);
         });
-        var manifest = new src_manifest/* default */.ZP(_parsed, options);
-        return (0,concat/* concat */.z)(of.of.apply(void 0, warningEvents), (0,return_parsed_manifest/* default */.Z)(manifest, url));
+      }
+
+      if (parserResponse.type === "done") {
+        if (parserResponse.value.warnings.length > 0) {
+          onWarnings(parserResponse.value.warnings);
+        }
+
+        if (cancelSignal.isCancelled) {
+          return pinkie_default().reject(cancelSignal.cancellationError);
+        }
+
+        var manifest = new src_manifest/* default */.ZP(parserResponse.value.parsed, options);
+        return {
+          manifest: manifest,
+          url: url
+        };
       }
 
       var value = parserResponse.value;
-      var externalResources$ = value.urls.map(function (resourceUrl) {
+      var externalResources = value.urls.map(function (resourceUrl) {
         return scheduleRequest(function () {
-          return (0,request/* default */.ZP)({
+          var req = value.format === "string" ? (0,request/* default */.ZP)({
             url: resourceUrl,
-            responseType: value.format === "string" ? "text" : "arraybuffer"
-          }).pipe((0,filter/* filter */.h)(function (e) {
-            return e.type === "data-loaded";
-          }), (0,map/* map */.U)(function (e) {
-            return e.value;
-          }));
+            responseType: "text",
+            cancelSignal: cancelSignal
+          }) : (0,request/* default */.ZP)({
+            url: resourceUrl,
+            responseType: "arraybuffer",
+            cancelSignal: cancelSignal
+          });
+          return req;
         });
       });
-      return (0,combineLatest/* combineLatest */.a)(externalResources$).pipe((0,mergeMap/* mergeMap */.z)(function (loadedResources) {
+      return pinkie_default().all(externalResources).then(function (loadedResources) {
         if (value.format === "string") {
           var resources = loadedResources.map(function (resource) {
             if (typeof resource.responseData !== "string") {
@@ -28442,7 +28329,7 @@ function generateManifestParser(options) {
 
           return processMpdParserResponse(value["continue"](_resources));
         }
-      }));
+      });
     }
   };
 }
@@ -28477,6 +28364,8 @@ function getManifestAsDocument(manifestSrc) {
 function getManifestAsArrayBuffer(manifestSrc) {
   if (manifestSrc instanceof ArrayBuffer) {
     return manifestSrc;
+  } else if (manifestSrc instanceof Uint8Array) {
+    return manifestSrc.buffer;
   } else if (typeof manifestSrc === "string") {
     return (0,string_parsing/* strToUtf8 */.tG)(manifestSrc).buffer;
   } else if (manifestSrc instanceof Document) {
@@ -28510,46 +28399,21 @@ function doesXmlSeemsUtf8Encoded(xmlData) {
 
   return true;
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
-var Observable = __webpack_require__(1480);
+/**
+ * Returns `true` if the given return value from a parser seems to be wrapped
+ * in a Promise.
+ * @param {Object | Promise.<Object>} res
+ * @returns {boolean}
+ */
+
+
+function isResponseInPromise(res) {
+  return !(0,is_null_or_undefined/* default */.Z)(res) && typeof res.then === "function";
+}
 // EXTERNAL MODULE: ./src/errors/custom_loader_error.ts
 var custom_loader_error = __webpack_require__(7839);
-;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-  try {
-    var info = gen[key](arg);
-    var value = info.value;
-  } catch (error) {
-    reject(error);
-    return;
-  }
-
-  if (info.done) {
-    resolve(value);
-  } else {
-    Promise.resolve(value).then(_next, _throw);
-  }
-}
-
-function _asyncToGenerator(fn) {
-  return function () {
-    var self = this,
-        args = arguments;
-    return new Promise(function (resolve, reject) {
-      var gen = fn.apply(self, args);
-
-      function _next(value) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-      }
-
-      function _throw(err) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-      }
-
-      _next(undefined);
-    });
-  };
-}
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(2137);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
 var regenerator = __webpack_require__(7757);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
@@ -28559,8 +28423,6 @@ var config = __webpack_require__(944);
 var request_error = __webpack_require__(9105);
 // EXTERNAL MODULE: ./src/errors/error_codes.ts
 var error_codes = __webpack_require__(5992);
-// EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
-var is_null_or_undefined = __webpack_require__(1946);
 ;// CONCATENATED MODULE: ./src/utils/request/fetch.ts
 
 
@@ -28580,7 +28442,6 @@ var is_null_or_undefined = __webpack_require__(1946);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -28608,148 +28469,141 @@ function fetchRequest(options) {
     }
   }
 
-  return new Observable/* Observable */.y(function (obs) {
-    log/* default.debug */.Z.debug("Fetch: Called with URL", options.url);
-    var hasAborted = false;
-    var timeouted = false;
-    var isDone = false;
-    var sendingTime = performance.now();
-    var abortController = !(0,is_null_or_undefined/* default */.Z)(_AbortController) ? new _AbortController() : null;
-    /**
-     * Abort current fetchRequest by triggering AbortController signal.
-     * @returns {void}
-     */
+  log/* default.debug */.Z.debug("Fetch: Called with URL", options.url);
+  var cancellation = null;
+  var timeouted = false;
+  var sendingTime = performance.now();
+  var abortController = !(0,is_null_or_undefined/* default */.Z)(_AbortController) ? new _AbortController() : null;
+  /**
+   * Abort current fetchRequest by triggering AbortController signal.
+   * @returns {void}
+   */
 
-    function abortRequest() {
-      if (!isDone) {
-        if (!(0,is_null_or_undefined/* default */.Z)(abortController)) {
-          abortController.abort();
-          return;
-        }
-
-        log/* default.warn */.Z.warn("Fetch: AbortController API not available.");
-      }
+  function abortFetch() {
+    if ((0,is_null_or_undefined/* default */.Z)(abortController)) {
+      log/* default.warn */.Z.warn("Fetch: AbortController API not available.");
+      return;
     }
 
-    var requestTimeout = (0,is_null_or_undefined/* default */.Z)(options.timeout) ? DEFAULT_REQUEST_TIMEOUT : options.timeout;
-    var timeout = window.setTimeout(function () {
-      timeouted = true;
-      abortRequest();
-    }, requestTimeout);
-    fetch(options.url, {
-      headers: headers,
-      method: "GET",
-      signal: !(0,is_null_or_undefined/* default */.Z)(abortController) ? abortController.signal : undefined
-    }).then(function (response) {
-      if (!(0,is_null_or_undefined/* default */.Z)(timeout)) {
-        clearTimeout(timeout);
-      }
+    abortController.abort();
+  }
 
-      if (response.status >= 300) {
-        log/* default.warn */.Z.warn("Fetch: Request HTTP Error", response);
-        obs.error(new request_error/* default */.Z(response.url, response.status, error_codes/* NetworkErrorTypes.ERROR_HTTP_CODE */.br.ERROR_HTTP_CODE));
-        return undefined;
-      }
+  var requestTimeout = (0,is_null_or_undefined/* default */.Z)(options.timeout) ? DEFAULT_REQUEST_TIMEOUT : options.timeout;
+  var timeout = window.setTimeout(function () {
+    timeouted = true;
+    abortFetch();
+  }, requestTimeout);
+  var deregisterCancelLstnr = options.cancelSignal.register(function abortRequest(err) {
+    cancellation = err;
+    abortFetch();
+  });
+  return fetch(options.url, {
+    headers: headers,
+    method: "GET",
+    signal: !(0,is_null_or_undefined/* default */.Z)(abortController) ? abortController.signal : undefined
+  }).then(function (response) {
+    if (!(0,is_null_or_undefined/* default */.Z)(timeout)) {
+      clearTimeout(timeout);
+    }
 
-      if ((0,is_null_or_undefined/* default */.Z)(response.body)) {
-        obs.error(new request_error/* default */.Z(response.url, response.status, error_codes/* NetworkErrorTypes.PARSE_ERROR */.br.PARSE_ERROR));
-        return undefined;
-      }
+    if (response.status >= 300) {
+      log/* default.warn */.Z.warn("Fetch: Request HTTP Error", response);
+      throw new request_error/* default */.Z(response.url, response.status, error_codes/* NetworkErrorTypes.ERROR_HTTP_CODE */.br.ERROR_HTTP_CODE);
+    }
 
-      var contentLengthHeader = response.headers.get("Content-Length");
-      var contentLength = !(0,is_null_or_undefined/* default */.Z)(contentLengthHeader) && !isNaN(+contentLengthHeader) ? +contentLengthHeader : undefined;
-      var reader = response.body.getReader();
-      var size = 0;
-      return readBufferAndSendEvents();
+    if ((0,is_null_or_undefined/* default */.Z)(response.body)) {
+      throw new request_error/* default */.Z(response.url, response.status, error_codes/* NetworkErrorTypes.PARSE_ERROR */.br.PARSE_ERROR);
+    }
 
-      function readBufferAndSendEvents() {
-        return _readBufferAndSendEvents.apply(this, arguments);
-      }
+    var contentLengthHeader = response.headers.get("Content-Length");
+    var contentLength = !(0,is_null_or_undefined/* default */.Z)(contentLengthHeader) && !isNaN(+contentLengthHeader) ? +contentLengthHeader : undefined;
+    var reader = response.body.getReader();
+    var size = 0;
+    return readBufferAndSendEvents();
 
-      function _readBufferAndSendEvents() {
-        _readBufferAndSendEvents = _asyncToGenerator( /*#__PURE__*/regenerator_default().mark(function _callee() {
-          var data, currentTime, dataChunk, receivedTime, duration;
-          return regenerator_default().wrap(function _callee$(_context) {
-            while (1) {
-              switch (_context.prev = _context.next) {
-                case 0:
-                  _context.next = 2;
-                  return reader.read();
+    function readBufferAndSendEvents() {
+      return _readBufferAndSendEvents.apply(this, arguments);
+    }
 
-                case 2:
-                  data = _context.sent;
+    function _readBufferAndSendEvents() {
+      _readBufferAndSendEvents = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee() {
+        var data, currentTime, dataInfo, receivedTime, duration;
+        return regenerator_default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return reader.read();
 
-                  if (!(!data.done && !(0,is_null_or_undefined/* default */.Z)(data.value))) {
-                    _context.next = 11;
-                    break;
-                  }
+              case 2:
+                data = _context.sent;
 
-                  size += data.value.byteLength;
-                  currentTime = performance.now();
-                  dataChunk = {
-                    type: "data-chunk",
-                    value: {
-                      url: response.url,
-                      currentTime: currentTime,
-                      duration: currentTime - sendingTime,
-                      sendingTime: sendingTime,
-                      chunkSize: data.value.byteLength,
-                      chunk: data.value.buffer,
-                      size: size,
-                      totalSize: contentLength
-                    }
-                  };
-                  obs.next(dataChunk);
-                  return _context.abrupt("return", readBufferAndSendEvents());
+                if (!(!data.done && !(0,is_null_or_undefined/* default */.Z)(data.value))) {
+                  _context.next = 11;
+                  break;
+                }
 
-                case 11:
-                  if (data.done) {
-                    receivedTime = performance.now();
-                    duration = receivedTime - sendingTime;
-                    isDone = true;
-                    obs.next({
-                      type: "data-complete",
-                      value: {
-                        duration: duration,
-                        receivedTime: receivedTime,
-                        sendingTime: sendingTime,
-                        size: size,
-                        status: response.status,
-                        url: response.url
-                      }
-                    });
-                    obs.complete();
-                  }
+                size += data.value.byteLength;
+                currentTime = performance.now();
+                dataInfo = {
+                  url: response.url,
+                  currentTime: currentTime,
+                  duration: currentTime - sendingTime,
+                  sendingTime: sendingTime,
+                  chunkSize: data.value.byteLength,
+                  chunk: data.value.buffer,
+                  size: size,
+                  totalSize: contentLength
+                };
+                options.onData(dataInfo);
+                return _context.abrupt("return", readBufferAndSendEvents());
 
-                case 12:
-                case "end":
-                  return _context.stop();
-              }
+              case 11:
+                if (!data.done) {
+                  _context.next = 16;
+                  break;
+                }
+
+                deregisterCancelLstnr();
+                receivedTime = performance.now();
+                duration = receivedTime - sendingTime;
+                return _context.abrupt("return", {
+                  duration: duration,
+                  receivedTime: receivedTime,
+                  sendingTime: sendingTime,
+                  size: size,
+                  status: response.status,
+                  url: response.url
+                });
+
+              case 16:
+                return _context.abrupt("return", readBufferAndSendEvents());
+
+              case 17:
+              case "end":
+                return _context.stop();
             }
-          }, _callee);
-        }));
-        return _readBufferAndSendEvents.apply(this, arguments);
-      }
-    })["catch"](function (err) {
-      if (hasAborted) {
-        log/* default.debug */.Z.debug("Fetch: Request aborted.");
-        return;
-      }
+          }
+        }, _callee);
+      }));
+      return _readBufferAndSendEvents.apply(this, arguments);
+    }
+  })["catch"](function (err) {
+    if (cancellation !== null) {
+      throw cancellation;
+    }
 
-      if (timeouted) {
-        log/* default.warn */.Z.warn("Fetch: Request timeouted.");
-        obs.error(new request_error/* default */.Z(options.url, 0, error_codes/* NetworkErrorTypes.TIMEOUT */.br.TIMEOUT));
-        return;
-      }
+    deregisterCancelLstnr();
 
-      log/* default.warn */.Z.warn("Fetch: Request Error", err instanceof Error ? err.toString() : "");
-      obs.error(new request_error/* default */.Z(options.url, 0, error_codes/* NetworkErrorTypes.ERROR_EVENT */.br.ERROR_EVENT));
-      return;
-    });
-    return function () {
-      hasAborted = true;
-      abortRequest();
-    };
+    if (timeouted) {
+      log/* default.warn */.Z.warn("Fetch: Request timeouted.");
+      throw new request_error/* default */.Z(options.url, 0, error_codes/* NetworkErrorTypes.TIMEOUT */.br.TIMEOUT);
+    } else if (err instanceof request_error/* default */.Z) {
+      throw err;
+    }
+
+    log/* default.warn */.Z.warn("Fetch: Request Error", err instanceof Error ? err.toString() : "");
+    throw new request_error/* default */.Z(options.url, 0, error_codes/* NetworkErrorTypes.ERROR_EVENT */.br.ERROR_EVENT);
   });
 }
 /**
@@ -28757,11 +28611,9 @@ function fetchRequest(options) {
  * @return {boolean}
  */
 
-
 function fetchIsSupported() {
   return typeof window.fetch === "function" && !(0,is_null_or_undefined/* default */.Z)(_AbortController) && !(0,is_null_or_undefined/* default */.Z)(_Headers);
 }
-/* harmony default export */ var request_fetch = (fetchRequest);
 // EXTERNAL MODULE: ./src/utils/warn_once.ts
 var warn_once = __webpack_require__(8806);
 // EXTERNAL MODULE: ./src/transports/utils/byte_range.ts
@@ -28812,8 +28664,8 @@ function inferSegmentContainer(adaptationType, representation) {
 
   return undefined;
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/tap.js
-var tap = __webpack_require__(2006);
+// EXTERNAL MODULE: ./src/utils/task_canceller.ts
+var task_canceller = __webpack_require__(288);
 // EXTERNAL MODULE: ./src/transports/utils/check_isobmff_integrity.ts
 var check_isobmff_integrity = __webpack_require__(4460);
 ;// CONCATENATED MODULE: ./src/transports/dash/add_segment_integrity_checks_to_loader.ts
@@ -28835,13 +28687,70 @@ var check_isobmff_integrity = __webpack_require__(4460);
 
 
 
+/**
+ * Add multiple checks on the response given by the `segmentLoader` in argument.
+ * If the response appear to be corrupted, the returned Promise will reject with
+ * an error with an `INTEGRITY_ERROR` code.
+ * @param {Function} segmentLoader
+ * @returns {Function}
+ */
+
 function addSegmentIntegrityChecks(segmentLoader) {
-  return function (content) {
-    return segmentLoader(content).pipe((0,tap/* tap */.b)(function (res) {
-      if ((res.type === "data-loaded" || res.type === "data-chunk") && res.value.responseData !== null && typeof res.value.responseData !== "string" && inferSegmentContainer(content.adaptation.type, content.representation) === "mp4") {
-        (0,check_isobmff_integrity/* default */.Z)(new Uint8Array(res.value.responseData), content.segment.isInit);
+  return function (url, content, initialCancelSignal, callbacks) {
+    return new Promise(function (res, rej) {
+      var canceller = new task_canceller/* default */.ZP();
+      var unregisterCancelLstnr = initialCancelSignal.register(function onCheckCancellation(err) {
+        canceller.cancel();
+        rej(err);
+      });
+      /**
+       * If the data's seems to be corrupted, cancel the loading task and reject
+       * with an `INTEGRITY_ERROR` error.
+       * @param {*} data
+       */
+
+      function cancelAndRejectOnBadIntegrity(data) {
+        if (!(data instanceof Array) && !(data instanceof Uint8Array) || inferSegmentContainer(content.adaptation.type, content.representation) !== "mp4") {
+          return;
+        }
+
+        try {
+          (0,check_isobmff_integrity/* default */.Z)(new Uint8Array(data), content.segment.isInit);
+        } catch (err) {
+          unregisterCancelLstnr();
+          canceller.cancel();
+          rej(err);
+        }
       }
-    }));
+
+      segmentLoader(url, content, canceller.signal, Object.assign(Object.assign({}, callbacks), {
+        onNewChunk: function onNewChunk(data) {
+          cancelAndRejectOnBadIntegrity(data);
+
+          if (!canceller.isUsed) {
+            callbacks.onNewChunk(data);
+          }
+        }
+      })).then(function (info) {
+        if (canceller.isUsed) {
+          return;
+        }
+
+        unregisterCancelLstnr();
+
+        if (info.resultType === "segment-loaded") {
+          cancelAndRejectOnBadIntegrity(info.resultData.responseData);
+        }
+
+        res(info);
+      }, function (error) {
+        // The segmentLoader's cancellations cases are all handled here
+        if (!task_canceller/* default.isCancellationError */.ZP.isCancellationError(error)) {
+          unregisterCancelLstnr();
+          rej(error);
+        }
+      });
+    });
   };
 }
 // EXTERNAL MODULE: ./src/utils/byte_parsing.ts
@@ -28866,21 +28775,27 @@ var byte_parsing = __webpack_require__(6968);
 
 
 
-
 /**
  * Perform a request for an initialization segment, agnostic to the container.
  * @param {string} url
- * @param {Object} content
+ * @param {Object} segment
+ * @param {CancellationSignal} cancelSignal
+ * @param {Object} callbacks
+ * @returns {Promise}
  */
 
-function initSegmentLoader(url, _ref) {
-  var segment = _ref.segment;
-
+function initSegmentLoader(url, segment, cancelSignal, callbacks) {
   if (segment.range === undefined) {
     return (0,request/* default */.ZP)({
       url: url,
       responseType: "arraybuffer",
-      sendProgressEvents: true
+      cancelSignal: cancelSignal,
+      onProgress: callbacks.onProgress
+    }).then(function (data) {
+      return {
+        resultType: "segment-loaded",
+        resultData: data
+      };
     });
   }
 
@@ -28891,7 +28806,13 @@ function initSegmentLoader(url, _ref) {
         Range: (0,byte_range/* default */.Z)(segment.range)
       },
       responseType: "arraybuffer",
-      sendProgressEvents: true
+      cancelSignal: cancelSignal,
+      onProgress: callbacks.onProgress
+    }).then(function (data) {
+      return {
+        resultType: "segment-loaded",
+        resultData: data
+      };
     });
   } // range and indexRange are contiguous (99% of the cases)
 
@@ -28903,7 +28824,13 @@ function initSegmentLoader(url, _ref) {
         Range: (0,byte_range/* default */.Z)([segment.range[0], segment.indexRange[1]])
       },
       responseType: "arraybuffer",
-      sendProgressEvents: true
+      cancelSignal: cancelSignal,
+      onProgress: callbacks.onProgress
+    }).then(function (data) {
+      return {
+        resultType: "segment-loaded",
+        resultData: data
+      };
     });
   }
 
@@ -28913,7 +28840,8 @@ function initSegmentLoader(url, _ref) {
       Range: (0,byte_range/* default */.Z)(segment.range)
     },
     responseType: "arraybuffer",
-    sendProgressEvents: false
+    cancelSignal: cancelSignal,
+    onProgress: callbacks.onProgress
   });
   var indexRequest$ = (0,request/* default */.ZP)({
     url: url,
@@ -28921,29 +28849,28 @@ function initSegmentLoader(url, _ref) {
       Range: (0,byte_range/* default */.Z)(segment.indexRange)
     },
     responseType: "arraybuffer",
-    sendProgressEvents: false
+    cancelSignal: cancelSignal,
+    onProgress: callbacks.onProgress
   });
-  return (0,combineLatest/* combineLatest */.a)([rangeRequest$, indexRequest$]).pipe((0,map/* map */.U)(function (_ref2) {
-    var initData = _ref2[0],
-        indexData = _ref2[1];
-    var data = (0,byte_parsing/* concat */.zo)(new Uint8Array(initData.value.responseData), new Uint8Array(indexData.value.responseData));
-    var sendingTime = Math.min(initData.value.sendingTime, indexData.value.sendingTime);
-    var receivedTime = Math.max(initData.value.receivedTime, indexData.value.receivedTime);
+  return pinkie_default().all([rangeRequest$, indexRequest$]).then(function (_ref) {
+    var initData = _ref[0],
+        indexData = _ref[1];
+    var data = (0,byte_parsing/* concat */.zo)(new Uint8Array(initData.responseData), new Uint8Array(indexData.responseData));
+    var sendingTime = Math.min(initData.sendingTime, indexData.sendingTime);
+    var receivedTime = Math.max(initData.receivedTime, indexData.receivedTime);
     return {
-      type: "data-loaded",
-      value: {
+      resultType: "segment-loaded",
+      resultData: {
         url: url,
         responseData: data,
-        size: initData.value.size + indexData.value.size,
+        size: initData.size + indexData.size,
         duration: receivedTime - sendingTime,
         sendingTime: sendingTime,
         receivedTime: receivedTime
       }
     };
-  }));
+  });
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/scan.js + 1 modules
-var scan = __webpack_require__(3074);
 // EXTERNAL MODULE: ./src/transports/utils/find_complete_box.ts
 var find_complete_box = __webpack_require__(8766);
 ;// CONCATENATED MODULE: ./src/transports/dash/extract_complete_chunks.ts
@@ -29041,86 +28968,66 @@ function extractCompleteChunks(buffer) {
 
 
 
+/**
+ * Load segments through a "chunk" mode (decodable chunk by decodable chunk).
+ *
+ * This method is particularly adapted to low-latency streams.
+ *
+ * @param {string} url - URL of the segment to download.
+ * @param {Object} content - Context of the segment needed.
+ * @param {Object} callbacks
+ * @param {CancellationSignal} cancelSignal
+ * @returns {Promise}
+ */
 
-
-
-function lowLatencySegmentLoader(url, args) {
-  var segment = args.segment;
+function lowLatencySegmentLoader(url, content, callbacks, cancelSignal) {
+  var segment = content.segment;
   var headers = segment.range !== undefined ? {
     Range: (0,byte_range/* default */.Z)(segment.range)
   } : undefined;
-  return request_fetch({
-    url: url,
-    headers: headers
-  }).pipe((0,scan/* scan */.R)(function (acc, evt) {
-    if (evt.type === "data-complete") {
-      if (acc.partialChunk !== null) {
-        log/* default.warn */.Z.warn("DASH Pipelines: remaining chunk does not belong to any segment");
+  var partialChunk = null;
+  /**
+   * Called each time `fetch` has new data available.
+   * @param {Object} info
+   */
+
+  function onData(info) {
+    var chunk = new Uint8Array(info.chunk);
+    var concatenated = partialChunk !== null ? (0,byte_parsing/* concat */.zo)(partialChunk, chunk) : chunk;
+    var res = extractCompleteChunks(concatenated);
+    var completeChunks = res[0];
+    partialChunk = res[1];
+
+    for (var i = 0; i < completeChunks.length; i++) {
+      callbacks.onNewChunk(completeChunks[i]);
+
+      if (cancelSignal.isCancelled) {
+        return;
       }
-
-      return {
-        event: evt,
-        completeChunks: [],
-        partialChunk: null
-      };
     }
 
-    var data = new Uint8Array(evt.value.chunk);
-    var concatenated = acc.partialChunk !== null ? (0,byte_parsing/* concat */.zo)(acc.partialChunk, data) : data;
+    callbacks.onProgress({
+      duration: info.duration,
+      size: info.size,
+      totalSize: info.totalSize
+    });
 
-    var _extractCompleteChunk = extractCompleteChunks(concatenated),
-        completeChunks = _extractCompleteChunk[0],
-        partialChunk = _extractCompleteChunk[1];
+    if (cancelSignal.isCancelled) {
+      return;
+    }
+  }
 
+  return fetchRequest({
+    url: url,
+    headers: headers,
+    onData: onData,
+    cancelSignal: cancelSignal
+  }).then(function (res) {
     return {
-      event: evt,
-      completeChunks: completeChunks,
-      partialChunk: partialChunk
+      resultType: "chunk-complete",
+      resultData: res
     };
-  }, {
-    event: null,
-    completeChunks: [],
-    partialChunk: null
-  }), (0,mergeMap/* mergeMap */.z)(function (evt) {
-    var emitted = [];
-
-    for (var i = 0; i < evt.completeChunks.length; i++) {
-      emitted.push({
-        type: "data-chunk",
-        value: {
-          responseData: evt.completeChunks[i]
-        }
-      });
-    }
-
-    var event = evt.event;
-
-    if (event !== null && event.type === "data-chunk") {
-      var value = event.value;
-      emitted.push({
-        type: "progress",
-        value: {
-          duration: value.duration,
-          size: value.size,
-          totalSize: value.totalSize
-        }
-      });
-    } else if (event !== null && event.type === "data-complete") {
-      var _value = event.value;
-      emitted.push({
-        type: "data-chunk-complete",
-        value: {
-          duration: _value.duration,
-          receivedTime: _value.receivedTime,
-          sendingTime: _value.sendingTime,
-          size: _value.size,
-          url: _value.url
-        }
-      });
-    }
-
-    return of.of.apply(void 0, emitted);
-  }));
+  });
 }
 ;// CONCATENATED MODULE: ./src/transports/dash/segment_loader.ts
 /**
@@ -29149,40 +29056,49 @@ function lowLatencySegmentLoader(url, args) {
 
 /**
  * Segment loader triggered if there was no custom-defined one in the API.
- * @param {Object} opt
- * @returns {Observable}
+ * @param {string} uri
+ * @param {Object} content
+ * @param {boolean} lowLatencyMode
+ * @param {Object} callbacks
+ * @param {Object} cancelSignal
+ * @returns {Promise}
  */
 
-function regularSegmentLoader(url, args, lowLatencyMode) {
-  if (args.segment.isInit) {
-    return initSegmentLoader(url, args);
+function regularSegmentLoader(url, content, lowLatencyMode, callbacks, cancelSignal) {
+  if (content.segment.isInit) {
+    return initSegmentLoader(url, content.segment, cancelSignal, callbacks);
   }
 
-  var containerType = inferSegmentContainer(args.adaptation.type, args.representation);
+  var containerType = inferSegmentContainer(content.adaptation.type, content.representation);
 
   if (lowLatencyMode && (containerType === "mp4" || containerType === undefined)) {
     if (fetchIsSupported()) {
-      return lowLatencySegmentLoader(url, args);
+      return lowLatencySegmentLoader(url, content, callbacks, cancelSignal);
     } else {
       (0,warn_once/* default */.Z)("DASH: Your browser does not have the fetch API. You will have " + "a higher chance of rebuffering when playing close to the live edge");
     }
   }
 
-  var segment = args.segment;
+  var segment = content.segment;
   return (0,request/* default */.ZP)({
     url: url,
     responseType: "arraybuffer",
-    sendProgressEvents: true,
     headers: segment.range !== undefined ? {
       Range: (0,byte_range/* default */.Z)(segment.range)
-    } : undefined
+    } : undefined,
+    cancelSignal: cancelSignal,
+    onProgress: callbacks.onProgress
+  }).then(function (data) {
+    return {
+      resultType: "segment-loaded",
+      resultData: data
+    };
   });
 }
 /**
  * @param {Object} config
  * @returns {Function}
  */
-
 
 function generateSegmentLoader(_ref) {
   var lowLatencyMode = _ref.lowLatencyMode,
@@ -29194,20 +29110,16 @@ function generateSegmentLoader(_ref) {
    * @returns {Observable}
    */
 
-  function segmentLoader(content) {
-    var url = content.url;
-
+  function segmentLoader(url, content, cancelSignal, callbacks) {
     if (url == null) {
-      return (0,of.of)({
-        type: "data-created",
-        value: {
-          responseData: null
-        }
+      return pinkie_default().resolve({
+        resultType: "segment-created",
+        resultData: null
       });
     }
 
     if (lowLatencyMode || customSegmentLoader === undefined) {
-      return regularSegmentLoader(url, content, lowLatencyMode);
+      return regularSegmentLoader(url, content, lowLatencyMode, callbacks, cancelSignal);
     }
 
     var args = {
@@ -29219,27 +29131,29 @@ function generateSegmentLoader(_ref) {
       transport: "dash",
       url: url
     };
-    return new Observable/* Observable */.y(function (obs) {
+    return new Promise(function (res, rej) {
+      /** `true` when the custom segmentLoader should not be active anymore. */
       var hasFinished = false;
-      var hasFallbacked = false;
       /**
        * Callback triggered when the custom segment loader has a response.
        * @param {Object} args
        */
 
       var resolve = function resolve(_args) {
-        if (!hasFallbacked) {
-          hasFinished = true;
-          obs.next({
-            type: "data-loaded",
-            value: {
-              responseData: _args.data,
-              size: _args.size,
-              duration: _args.duration
-            }
-          });
-          obs.complete();
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
         }
+
+        hasFinished = true;
+        cancelSignal.deregister(abortCustomLoader);
+        res({
+          resultType: "segment-loaded",
+          resultData: {
+            responseData: _args.data,
+            size: _args.size,
+            duration: _args.duration
+          }
+        });
       };
       /**
        * Callback triggered when the custom segment loader fails
@@ -29254,27 +29168,29 @@ function generateSegmentLoader(_ref) {
 
         var _a, _b, _c;
 
-        if (!hasFallbacked) {
-          hasFinished = true; // Format error and send it
-
-          var castedErr = err;
-          var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching a DASH segment through a " + "custom segmentLoader.";
-          var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
-          obs.error(emittedErr);
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
         }
+
+        hasFinished = true;
+        cancelSignal.deregister(abortCustomLoader); // Format error and send it
+
+        var castedErr = err;
+        var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching a DASH segment through a " + "custom segmentLoader.";
+        var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
+        rej(emittedErr);
       };
 
       var progress = function progress(_args) {
-        if (!hasFallbacked) {
-          obs.next({
-            type: "progress",
-            value: {
-              duration: _args.duration,
-              size: _args.size,
-              totalSize: _args.totalSize
-            }
-          });
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
         }
+
+        callbacks.onProgress({
+          duration: _args.duration,
+          size: _args.size,
+          totalSize: _args.totalSize
+        });
       };
       /**
        * Callback triggered when the custom segment loader wants to fallback to
@@ -29283,32 +29199,41 @@ function generateSegmentLoader(_ref) {
 
 
       var fallback = function fallback() {
-        hasFallbacked = true;
-        var regular$ = regularSegmentLoader(url, content, lowLatencyMode); // HACK What is TypeScript/RxJS doing here??????
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
+        }
 
-        /* eslint-disable import/no-deprecated */
-
-        /* eslint-disable @typescript-eslint/ban-ts-comment */
-        // @ts-ignore
-
-        regular$.subscribe(obs);
-        /* eslint-enable import/no-deprecated */
-
-        /* eslint-enable @typescript-eslint/ban-ts-comment */
+        hasFinished = true;
+        cancelSignal.deregister(abortCustomLoader);
+        regularSegmentLoader(url, content, lowLatencyMode, callbacks, cancelSignal).then(res, rej);
       };
 
-      var callbacks = {
+      var customCallbacks = {
         reject: reject,
         resolve: resolve,
         progress: progress,
         fallback: fallback
       };
-      var abort = customSegmentLoader(args, callbacks);
-      return function () {
-        if (!hasFinished && !hasFallbacked && typeof abort === "function") {
+      var abort = customSegmentLoader(args, customCallbacks);
+      cancelSignal.register(abortCustomLoader);
+      /**
+       * The logic to run when the custom loader is cancelled while pending.
+       * @param {Error} err
+       */
+
+      function abortCustomLoader(err) {
+        if (hasFinished) {
+          return;
+        }
+
+        hasFinished = true;
+
+        if (typeof abort === "function") {
           abort();
         }
-      };
+
+        rej(err);
+      }
     });
   }
 }
@@ -29820,7 +29745,6 @@ function getEventsOutOfEMSGs(parsedEMSGs, manifestPublishTime) {
 
 
 
-
 /**
  * @param {Object} config
  * @returns {Function}
@@ -29828,41 +29752,34 @@ function getEventsOutOfEMSGs(parsedEMSGs, manifestPublishTime) {
 
 function generateAudioVideoSegmentParser(_ref) {
   var __priv_patchLastSegmentInSidx = _ref.__priv_patchLastSegmentInSidx;
-  return function audioVideoSegmentParser(_ref2) {
-    var content = _ref2.content,
-        response = _ref2.response,
-        initTimescale = _ref2.initTimescale;
+  return function audioVideoSegmentParser(loadedSegment, content, initTimescale) {
     var period = content.period,
         adaptation = content.adaptation,
         representation = content.representation,
         segment = content.segment,
         manifest = content.manifest;
-    var data = response.data,
-        isChunked = response.isChunked;
+    var data = loadedSegment.data,
+        isChunked = loadedSegment.isChunked;
     var appendWindow = [period.start, period.end];
 
     if (data === null) {
       if (segment.isInit) {
-        return (0,of.of)({
-          type: "parsed-init-segment",
-          value: {
-            initializationData: null,
-            protectionDataUpdate: false,
-            initTimescale: undefined
-          }
-        });
+        return {
+          segmentType: "init",
+          initializationData: null,
+          protectionDataUpdate: false,
+          initTimescale: undefined
+        };
       }
 
-      return (0,of.of)({
-        type: "parsed-segment",
-        value: {
-          chunkData: null,
-          chunkInfos: null,
-          chunkOffset: 0,
-          appendWindow: appendWindow,
-          protectionDataUpdate: false
-        }
-      });
+      return {
+        segmentType: "media",
+        chunkData: null,
+        chunkInfos: null,
+        chunkOffset: 0,
+        protectionDataUpdate: false,
+        appendWindow: appendWindow
+      };
     }
 
     var chunkData = data instanceof Uint8Array ? data : new Uint8Array(data);
@@ -29900,32 +29817,28 @@ function generateAudioVideoSegmentParser(_ref) {
           if (events !== undefined) {
             var needsManifestRefresh = events.needsManifestRefresh,
                 inbandEvents = events.inbandEvents;
-            return (0,of.of)({
-              type: "parsed-segment",
-              value: {
-                chunkData: chunkData,
-                chunkInfos: chunkInfos,
-                chunkOffset: chunkOffset,
-                appendWindow: appendWindow,
-                inbandEvents: inbandEvents,
-                needsManifestRefresh: needsManifestRefresh,
-                protectionDataUpdate: protectionDataUpdate
-              }
-            });
+            return {
+              segmentType: "media",
+              chunkData: chunkData,
+              chunkInfos: chunkInfos,
+              chunkOffset: chunkOffset,
+              appendWindow: appendWindow,
+              inbandEvents: inbandEvents,
+              protectionDataUpdate: protectionDataUpdate,
+              needsManifestRefresh: needsManifestRefresh
+            };
           }
         }
       }
 
-      return (0,of.of)({
-        type: "parsed-segment",
-        value: {
-          chunkData: chunkData,
-          chunkInfos: chunkInfos,
-          chunkOffset: chunkOffset,
-          appendWindow: appendWindow,
-          protectionDataUpdate: protectionDataUpdate
-        }
-      });
+      return {
+        segmentType: "media",
+        chunkData: chunkData,
+        chunkInfos: chunkInfos,
+        chunkOffset: chunkOffset,
+        protectionDataUpdate: protectionDataUpdate,
+        appendWindow: appendWindow
+      };
     } // we're handling an initialization segment
 
 
@@ -29958,14 +29871,12 @@ function generateAudioVideoSegmentParser(_ref) {
 
     var timescale = seemsToBeMP4 ? (0,utils/* getMDHDTimescale */.LD)(chunkData) : containerType === "webm" ? getTimeCodeScale(chunkData, 0) : undefined;
     var parsedTimescale = (0,is_null_or_undefined/* default */.Z)(timescale) ? undefined : timescale;
-    return (0,of.of)({
-      type: "parsed-init-segment",
-      value: {
-        initializationData: chunkData,
-        protectionDataUpdate: protectionDataUpdate,
-        initTimescale: parsedTimescale
-      }
-    });
+    return {
+      segmentType: "init",
+      initializationData: chunkData,
+      protectionDataUpdate: protectionDataUpdate,
+      initTimescale: parsedTimescale
+    };
   };
 }
 ;// CONCATENATED MODULE: ./src/transports/dash/text_loader.ts
@@ -30003,47 +29914,71 @@ function generateTextTrackLoader(_ref) {
       checkMediaSegmentIntegrity = _ref.checkMediaSegmentIntegrity;
   return checkMediaSegmentIntegrity !== true ? textTrackLoader : addSegmentIntegrityChecks(textTrackLoader);
   /**
-   * @param {Object} args
-   * @returns {Observable}
+   * @param {string|null} url
+   * @param {Object} content
+   * @param {Object} cancelSignal
+   * @param {Object} callbacks
+   * @returns {Promise}
    */
 
-  function textTrackLoader(args) {
-    var range = args.segment.range;
-    var url = args.url;
+  function textTrackLoader(url, content, cancelSignal, callbacks) {
+    var adaptation = content.adaptation,
+        representation = content.representation,
+        segment = content.segment;
+    var range = segment.range;
 
     if (url === null) {
-      return (0,of.of)({
-        type: "data-created",
-        value: {
-          responseData: null
-        }
+      return pinkie_default().resolve({
+        resultType: "segment-created",
+        resultData: null
       });
     }
 
-    if (args.segment.isInit) {
-      return initSegmentLoader(url, args);
+    if (segment.isInit) {
+      return initSegmentLoader(url, segment, cancelSignal, callbacks);
     }
 
-    var containerType = inferSegmentContainer(args.adaptation.type, args.representation);
+    var containerType = inferSegmentContainer(adaptation.type, representation);
     var seemsToBeMP4 = containerType === "mp4" || containerType === undefined;
 
     if (lowLatencyMode && seemsToBeMP4) {
       if (fetchIsSupported()) {
-        return lowLatencySegmentLoader(url, args);
+        return lowLatencySegmentLoader(url, content, callbacks, cancelSignal);
       } else {
         (0,warn_once/* default */.Z)("DASH: Your browser does not have the fetch API. You will have " + "a higher chance of rebuffering when playing close to the live edge");
       }
-    } // ArrayBuffer when in mp4 to parse isobmff manually, text otherwise
+    }
 
+    if (seemsToBeMP4) {
+      return (0,request/* default */.ZP)({
+        url: url,
+        responseType: "arraybuffer",
+        headers: Array.isArray(range) ? {
+          Range: (0,byte_range/* default */.Z)(range)
+        } : null,
+        onProgress: callbacks.onProgress,
+        cancelSignal: cancelSignal
+      }).then(function (data) {
+        return {
+          resultType: "segment-loaded",
+          resultData: data
+        };
+      });
+    }
 
-    var responseType = seemsToBeMP4 ? "arraybuffer" : "text";
     return (0,request/* default */.ZP)({
       url: url,
-      responseType: responseType,
+      responseType: "text",
       headers: Array.isArray(range) ? {
         Range: (0,byte_range/* default */.Z)(range)
       } : null,
-      sendProgressEvents: true
+      onProgress: callbacks.onProgress,
+      cancelSignal: cancelSignal
+    }).then(function (data) {
+      return {
+        resultType: "segment-loaded",
+        resultData: data
+      };
     });
   }
 }
@@ -30243,24 +30178,32 @@ function getPlainTextTrackData(_ref2, textTrackData, isChunked) {
 
 
 
-
 /**
  * Parse TextTrack data when it is embedded in an ISOBMFF file.
- * @param {Object} infos
+ *
+ * @param {ArrayBuffer|Uint8Array|string} data - The segment data.
+ * @param {boolean} isChunked - If `true`, the `data` may contain only a
+ * decodable subpart of the full data in the linked segment.
+ * @param {Object} content - Object describing the context of the given
+ * segment's data: of which segment, `Representation`, `Adaptation`, `Period`,
+ * `Manifest` it is a part of etc.
+ * @param {number|undefined} initTimescale - `timescale` value - encountered
+ * in this linked initialization segment (if it exists) - that may also apply
+ * to that segment if no new timescale is defined in it.
+ * Can be `undefined` if no timescale was defined, if it is not known, or if
+ * no linked initialization segment was yet parsed.
+ * @param {boolean} __priv_patchLastSegmentInSidx - Enable ugly Canal+-specific
+ * fix for an issue people on the content-packaging side could not fix.
+ * For more information on that, look at the code using it.
  * @returns {Observable.<Object>}
  */
 
-function parseISOBMFFEmbeddedTextTrack(_ref, __priv_patchLastSegmentInSidx) {
-  var response = _ref.response,
-      content = _ref.content,
-      initTimescale = _ref.initTimescale;
+function parseISOBMFFEmbeddedTextTrack(data, isChunked, content, initTimescale, __priv_patchLastSegmentInSidx) {
   var period = content.period,
       representation = content.representation,
       segment = content.segment;
   var isInit = segment.isInit,
       indexRange = segment.indexRange;
-  var data = response.data,
-      isChunked = response.isChunked;
   var chunkBytes = typeof data === "string" ? (0,string_parsing/* strToUtf8 */.tG)(data) : data instanceof Uint8Array ? data : new Uint8Array(data);
 
   if (isInit) {
@@ -30286,58 +30229,54 @@ function parseISOBMFFEmbeddedTextTrack(_ref, __priv_patchLastSegmentInSidx) {
       representation.index.initializeIndex(sidxSegments);
     }
 
-    return (0,of.of)({
-      type: "parsed-init-segment",
-      value: {
-        initializationData: null,
-        protectionDataUpdate: false,
-        initTimescale: mdhdTimescale
-      }
-    });
+    return {
+      segmentType: "init",
+      initializationData: null,
+      protectionDataUpdate: false,
+      initTimescale: mdhdTimescale
+    };
   }
 
   var chunkInfos = getISOBMFFTimingInfos(chunkBytes, isChunked, segment, initTimescale);
   var chunkData = getISOBMFFEmbeddedTextTrackData(content, chunkBytes, chunkInfos, isChunked);
   var chunkOffset = (0,take_first_set/* default */.Z)(segment.timestampOffset, 0);
-  return (0,of.of)({
-    type: "parsed-segment",
-    value: {
-      chunkData: chunkData,
-      chunkInfos: chunkInfos,
-      chunkOffset: chunkOffset,
-      appendWindow: [period.start, period.end],
-      protectionDataUpdate: false
-    }
-  });
+  return {
+    segmentType: "media",
+    chunkData: chunkData,
+    chunkInfos: chunkInfos,
+    chunkOffset: chunkOffset,
+    protectionDataUpdate: false,
+    appendWindow: [period.start, period.end]
+  };
 }
 /**
- * Parse TextTrack data in plain text form.
- * @param {Object} infos
+ * Parse TextTrack data when it is in plain text form.
+ *
+ * @param {ArrayBuffer|Uint8Array|string} data - The segment data.
+ * @param {boolean} isChunked - If `true`, the `data` may contain only a
+ * decodable subpart of the full data in the linked segment.
+ * @param {Object} content - Object describing the context of the given
+ * segment's data: of which segment, `Representation`, `Adaptation`, `Period`,
+ * `Manifest` it is a part of etc.
  * @returns {Observable.<Object>}
  */
 
 
-function parsePlainTextTrack(_ref2) {
-  var response = _ref2.response,
-      content = _ref2.content;
+function parsePlainTextTrack(data, isChunked, content) {
   var period = content.period,
       segment = content.segment;
   var _segment$timestampOff = segment.timestampOffset,
       timestampOffset = _segment$timestampOff === void 0 ? 0 : _segment$timestampOff;
 
   if (segment.isInit) {
-    return (0,of.of)({
-      type: "parsed-init-segment",
-      value: {
-        initializationData: null,
-        protectionDataUpdate: false,
-        initTimescale: undefined
-      }
-    });
+    return {
+      segmentType: "init",
+      initializationData: null,
+      protectionDataUpdate: false,
+      initTimescale: undefined
+    };
   }
 
-  var data = response.data,
-      isChunked = response.isChunked;
   var textTrackData;
 
   if (typeof data !== "string") {
@@ -30348,67 +30287,56 @@ function parsePlainTextTrack(_ref2) {
   }
 
   var chunkData = getPlainTextTrackData(content, textTrackData, isChunked);
-  return (0,of.of)({
-    type: "parsed-segment",
-    value: {
-      chunkData: chunkData,
-      chunkInfos: null,
-      chunkOffset: timestampOffset,
-      appendWindow: [period.start, period.end],
-      protectionDataUpdate: false
-    }
-  });
+  return {
+    segmentType: "media",
+    chunkData: chunkData,
+    chunkInfos: null,
+    chunkOffset: timestampOffset,
+    protectionDataUpdate: false,
+    appendWindow: [period.start, period.end]
+  };
 }
 /**
+ * Generate a "segment parser" for DASH text tracks.
+ *
  * @param {Object} config
  * @returns {Function}
  */
 
 
-function generateTextTrackParser(_ref3) {
-  var __priv_patchLastSegmentInSidx = _ref3.__priv_patchLastSegmentInSidx;
+function generateTextTrackParser(_ref) {
+  var __priv_patchLastSegmentInSidx = _ref.__priv_patchLastSegmentInSidx;
 
   /**
    * Parse TextTrack data.
    * @param {Object} infos
    * @returns {Observable.<Object>}
    */
-  return function textTrackParser(_ref4) {
-    var response = _ref4.response,
-        content = _ref4.content,
-        initTimescale = _ref4.initTimescale;
+  return function textTrackParser(loadedSegment, content, initTimescale) {
+    var _a;
+
     var period = content.period,
         adaptation = content.adaptation,
         representation = content.representation,
         segment = content.segment;
-    var _segment$timestampOff2 = segment.timestampOffset,
-        timestampOffset = _segment$timestampOff2 === void 0 ? 0 : _segment$timestampOff2;
-    var data = response.data,
-        isChunked = response.isChunked;
+    var data = loadedSegment.data,
+        isChunked = loadedSegment.isChunked;
 
     if (data === null) {
-      // No data, just return empty infos
-      if (segment.isInit) {
-        return (0,of.of)({
-          type: "parsed-init-segment",
-          value: {
-            initializationData: null,
-            protectionDataUpdate: false,
-            initTimescale: undefined
-          }
-        });
-      }
-
-      return (0,of.of)({
-        type: "parsed-segment",
-        value: {
-          chunkData: null,
-          chunkInfos: null,
-          chunkOffset: timestampOffset,
-          appendWindow: [period.start, period.end],
-          protectionDataUpdate: false
-        }
-      });
+      // No data, just return an empty placeholder object
+      return segment.isInit ? {
+        segmentType: "init",
+        initializationData: null,
+        protectionDataUpdate: false,
+        initTimescale: undefined
+      } : {
+        segmentType: "media",
+        chunkData: null,
+        chunkInfos: null,
+        chunkOffset: (_a = segment.timestampOffset) !== null && _a !== void 0 ? _a : 0,
+        protectionDataUpdate: false,
+        appendWindow: [period.start, period.end]
+      };
     }
 
     var containerType = inferSegmentContainer(adaptation.type, representation); // TODO take a look to check if this is an ISOBMFF/webm when undefined?
@@ -30417,22 +30345,9 @@ function generateTextTrackParser(_ref3) {
       // TODO Handle webm containers
       throw new Error("Text tracks with a WEBM container are not yet handled.");
     } else if (containerType === "mp4") {
-      return parseISOBMFFEmbeddedTextTrack({
-        response: {
-          data: data,
-          isChunked: isChunked
-        },
-        content: content,
-        initTimescale: initTimescale
-      }, __priv_patchLastSegmentInSidx);
+      return parseISOBMFFEmbeddedTextTrack(data, isChunked, content, initTimescale, __priv_patchLastSegmentInSidx);
     } else {
-      return parsePlainTextTrack({
-        response: {
-          data: data,
-          isChunked: isChunked
-        },
-        content: content
-      });
+      return parsePlainTextTrack(data, isChunked, content);
     }
   };
 }
@@ -30478,24 +30393,24 @@ function generateTextTrackParser(_ref3) {
   var textTrackParser = generateTextTrackParser(options);
   return {
     manifest: {
-      loader: manifestLoader,
-      parser: manifestParser
+      loadManifest: manifestLoader,
+      parseManifest: manifestParser
     },
     audio: {
-      loader: segmentLoader,
-      parser: audioVideoSegmentParser
+      loadSegment: segmentLoader,
+      parseSegment: audioVideoSegmentParser
     },
     video: {
-      loader: segmentLoader,
-      parser: audioVideoSegmentParser
+      loadSegment: segmentLoader,
+      parseSegment: audioVideoSegmentParser
     },
     text: {
-      loader: textTrackLoader,
-      parser: textTrackParser
+      loadSegment: textTrackLoader,
+      parseSegment: textTrackParser
     },
     image: {
-      loader: imageLoader,
-      parser: imageParser
+      loadSegment: imageLoader,
+      parseSegment: imageParser
     }
   };
 }
@@ -30544,12 +30459,9 @@ __webpack_require__.d(__webpack_exports__, {
   "Z": function() { return /* binding */ transports_smooth; }
 });
 
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
-var of = __webpack_require__(2817);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/map.js
-var map = __webpack_require__(9127);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/tap.js
-var tap = __webpack_require__(2006);
+// EXTERNAL MODULE: ./node_modules/pinkie/index.js
+var pinkie = __webpack_require__(8555);
+var pinkie_default = /*#__PURE__*/__webpack_require__.n(pinkie);
 // EXTERNAL MODULE: ./src/features/index.ts
 var features = __webpack_require__(7874);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
@@ -32281,8 +32193,6 @@ var warn_once = __webpack_require__(8806);
 var check_isobmff_integrity = __webpack_require__(4460);
 // EXTERNAL MODULE: ./src/transports/utils/generate_manifest_loader.ts + 1 modules
 var generate_manifest_loader = __webpack_require__(8791);
-// EXTERNAL MODULE: ./src/transports/utils/return_parsed_manifest.ts
-var return_parsed_manifest = __webpack_require__(7445);
 // EXTERNAL MODULE: ./src/parsers/containers/isobmff/utils.ts
 var utils = __webpack_require__(4644);
 // EXTERNAL MODULE: ./src/parsers/containers/isobmff/get_box.ts
@@ -33075,8 +32985,6 @@ function updateTrunDataOffset(oldTrunBox, initialDataOffset) {
   newTrunBox.set(oldTrunBox.subarray(initialDataOffset + 8, oldTrunBox.length), initialDataOffset + 12);
   return (0,utils/* updateBoxLength */.J6)(newTrunBox); // update the trun box's length
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
-var Observable = __webpack_require__(1480);
 // EXTERNAL MODULE: ./src/errors/custom_loader_error.ts
 var custom_loader_error = __webpack_require__(7839);
 // EXTERNAL MODULE: ./src/transports/utils/byte_range.ts
@@ -33176,10 +33084,7 @@ function createInitSegment(timescale, type, stsd, mhd, width, height) {
  * @param {Number} vRes
  * @param {Number} nalLength (1, 2 or 4)
  * @param {string} codecPrivateData
- * @param {Uint8Array} keyId - hex string representing the key Id,
- * 32 chars. eg. a800dbed49c12c4cb8e0b25643844b9b
- * @param {Array.<Object>} [pssList] - List of dict, example:
- * {systemId: "DEADBEEF", codecPrivateData: "DEAFBEEF}
+ * @param {Uint8Array} [keyId]
  * @returns {Uint8Array}
  */
 
@@ -33314,237 +33219,6 @@ function createAudioInitSegment(timescale, channelsCount, sampleSize, packetSize
 
   return createInitSegment(timescale, "audio", stsd, createSMHDBox(), 0, 0);
 }
-;// CONCATENATED MODULE: ./src/transports/smooth/segment_loader.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-/**
- * Segment loader triggered if there was no custom-defined one in the API.
- * @param {Object} opt
- * @returns {Observable}
- */
-
-function regularSegmentLoader(_ref) {
-  var url = _ref.url,
-      segment = _ref.segment;
-  var headers;
-  var range = segment.range;
-
-  if (Array.isArray(range)) {
-    headers = {
-      Range: (0,byte_range/* default */.Z)(range)
-    };
-  }
-
-  return (0,request/* default */.ZP)({
-    url: url,
-    responseType: "arraybuffer",
-    headers: headers,
-    sendProgressEvents: true
-  });
-}
-/**
- * Defines the url for the request, load the right loader (custom/default
- * one).
- */
-
-
-var generateSegmentLoader = function generateSegmentLoader(customSegmentLoader) {
-  return function (_ref2) {
-    var segment = _ref2.segment,
-        representation = _ref2.representation,
-        adaptation = _ref2.adaptation,
-        period = _ref2.period,
-        manifest = _ref2.manifest,
-        url = _ref2.url;
-
-    if (segment.isInit) {
-      if (segment.privateInfos === undefined || segment.privateInfos.smoothInitSegment === undefined) {
-        throw new Error("Smooth: Invalid segment format");
-      }
-
-      var smoothInitPrivateInfos = segment.privateInfos.smoothInitSegment;
-      var responseData;
-      var codecPrivateData = smoothInitPrivateInfos.codecPrivateData,
-          timescale = smoothInitPrivateInfos.timescale,
-          _smoothInitPrivateInf = smoothInitPrivateInfos.protection,
-          protection = _smoothInitPrivateInf === void 0 ? {
-        keyId: undefined,
-        keySystems: undefined
-      } : _smoothInitPrivateInf;
-
-      if (codecPrivateData === undefined) {
-        throw new Error("Smooth: no codec private data.");
-      }
-
-      switch (adaptation.type) {
-        case "video":
-          {
-            var _representation$width = representation.width,
-                width = _representation$width === void 0 ? 0 : _representation$width,
-                _representation$heigh = representation.height,
-                height = _representation$heigh === void 0 ? 0 : _representation$heigh;
-            responseData = createVideoInitSegment(timescale, width, height, 72, 72, 4, // vRes, hRes, nal
-            codecPrivateData, protection.keyId);
-            break;
-          }
-
-        case "audio":
-          {
-            var _smoothInitPrivateInf2 = smoothInitPrivateInfos.channels,
-                channels = _smoothInitPrivateInf2 === void 0 ? 0 : _smoothInitPrivateInf2,
-                _smoothInitPrivateInf3 = smoothInitPrivateInfos.bitsPerSample,
-                bitsPerSample = _smoothInitPrivateInf3 === void 0 ? 0 : _smoothInitPrivateInf3,
-                _smoothInitPrivateInf4 = smoothInitPrivateInfos.packetSize,
-                packetSize = _smoothInitPrivateInf4 === void 0 ? 0 : _smoothInitPrivateInf4,
-                _smoothInitPrivateInf5 = smoothInitPrivateInfos.samplingRate,
-                samplingRate = _smoothInitPrivateInf5 === void 0 ? 0 : _smoothInitPrivateInf5;
-            responseData = createAudioInitSegment(timescale, channels, bitsPerSample, packetSize, samplingRate, codecPrivateData, protection.keyId);
-            break;
-          }
-
-        default:
-          if (false) {}
-
-          responseData = new Uint8Array(0);
-      }
-
-      return (0,of.of)({
-        type: "data-created",
-        value: {
-          responseData: responseData
-        }
-      });
-    } else if (url === null) {
-      return (0,of.of)({
-        type: "data-created",
-        value: {
-          responseData: null
-        }
-      });
-    } else {
-      var args = {
-        adaptation: adaptation,
-        manifest: manifest,
-        period: period,
-        representation: representation,
-        segment: segment,
-        transport: "smooth",
-        url: url
-      };
-
-      if (typeof customSegmentLoader !== "function") {
-        return regularSegmentLoader(args);
-      }
-
-      return new Observable/* Observable */.y(function (obs) {
-        var hasFinished = false;
-        var hasFallbacked = false;
-        /**
-         * Callback triggered when the custom segment loader has a response.
-         * @param {Object} args
-         */
-
-        var resolve = function resolve(_args) {
-          if (!hasFallbacked) {
-            hasFinished = true;
-            obs.next({
-              type: "data-loaded",
-              value: {
-                responseData: _args.data,
-                size: _args.size,
-                duration: _args.duration
-              }
-            });
-            obs.complete();
-          }
-        };
-        /**
-         * Callback triggered when the custom segment loader fails
-         * @param {*} err - The corresponding error encountered
-         */
-
-
-        var reject = function reject(err) {
-          if (err === void 0) {
-            err = {};
-          }
-
-          var _a, _b, _c;
-
-          if (!hasFallbacked) {
-            hasFinished = true; // Format error and send it
-
-            var castedErr = err;
-            var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching a Smooth segment through a " + "custom segmentLoader.";
-            var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
-            obs.error(emittedErr);
-          }
-        };
-
-        var progress = function progress(_args) {
-          if (!hasFallbacked) {
-            obs.next({
-              type: "progress",
-              value: {
-                duration: _args.duration,
-                size: _args.size,
-                totalSize: _args.totalSize
-              }
-            });
-          }
-        };
-
-        var fallback = function fallback() {
-          hasFallbacked = true; // HACK What is TypeScript/RxJS doing here??????
-
-          /* eslint-disable import/no-deprecated */
-
-          /* eslint-disable @typescript-eslint/ban-ts-comment */
-          // @ts-ignore
-
-          regularSegmentLoader(args).subscribe(obs);
-          /* eslint-enable import/no-deprecated */
-
-          /* eslint-enable @typescript-eslint/ban-ts-comment */
-        };
-
-        var callbacks = {
-          reject: reject,
-          resolve: resolve,
-          fallback: fallback,
-          progress: progress
-        };
-        var abort = customSegmentLoader(args, callbacks);
-        return function () {
-          if (!hasFinished && !hasFallbacked && typeof abort === "function") {
-            abort();
-          }
-        };
-      });
-    }
-  };
-};
-
-/* harmony default export */ var segment_loader = (generateSegmentLoader);
 ;// CONCATENATED MODULE: ./src/transports/smooth/utils.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -33624,9 +33298,20 @@ function resolveManifest(url) {
 
   return url;
 }
+/**
+ * Returns `true` if the given Representation refers to segments in an MP4
+ * container
+ * @param {Representation} representation
+ * @returns {Boolean}
+ */
 
 
-;// CONCATENATED MODULE: ./src/transports/smooth/pipelines.ts
+function isMP4EmbeddedTrack(representation) {
+  return typeof representation.mimeType === "string" && representation.mimeType.indexOf("mp4") >= 0;
+}
+
+
+;// CONCATENATED MODULE: ./src/transports/smooth/segment_loader.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -33644,6 +33329,284 @@ function resolveManifest(url) {
  */
 
 
+
+
+
+
+
+
+/**
+ * Segment loader triggered if there was no custom-defined one in the API.
+ * @param {string} uri
+ * @param {Object} content
+ * @param {Object} callbacks
+ * @param {Object} cancelSignal
+ * @param {boolean} checkMediaSegmentIntegrity
+ * @returns {Promise}
+ */
+
+function regularSegmentLoader(url, content, callbacks, cancelSignal, checkMediaSegmentIntegrity) {
+  var headers;
+  var range = content.segment.range;
+
+  if (Array.isArray(range)) {
+    headers = {
+      Range: (0,byte_range/* default */.Z)(range)
+    };
+  }
+
+  return (0,request/* default */.ZP)({
+    url: url,
+    responseType: "arraybuffer",
+    headers: headers,
+    cancelSignal: cancelSignal,
+    onProgress: callbacks.onProgress
+  }).then(function (data) {
+    var isMP4 = isMP4EmbeddedTrack(content.representation);
+
+    if (!isMP4 || checkMediaSegmentIntegrity !== true) {
+      return {
+        resultType: "segment-loaded",
+        resultData: data
+      };
+    }
+
+    var dataU8 = new Uint8Array(data.responseData);
+    (0,check_isobmff_integrity/* default */.Z)(dataU8, content.segment.isInit);
+    return {
+      resultType: "segment-loaded",
+      resultData: Object.assign(Object.assign({}, data), {
+        responseData: dataU8
+      })
+    };
+  });
+}
+/**
+ * Defines the url for the request, load the right loader (custom/default
+ * one).
+ */
+
+
+var generateSegmentLoader = function generateSegmentLoader(_ref) {
+  var checkMediaSegmentIntegrity = _ref.checkMediaSegmentIntegrity,
+      customSegmentLoader = _ref.customSegmentLoader;
+  return function (url, content, cancelSignal, callbacks) {
+    var segment = content.segment,
+        manifest = content.manifest,
+        period = content.period,
+        adaptation = content.adaptation,
+        representation = content.representation;
+
+    if (segment.isInit) {
+      if (segment.privateInfos === undefined || segment.privateInfos.smoothInitSegment === undefined) {
+        throw new Error("Smooth: Invalid segment format");
+      }
+
+      var smoothInitPrivateInfos = segment.privateInfos.smoothInitSegment;
+      var responseData;
+      var codecPrivateData = smoothInitPrivateInfos.codecPrivateData,
+          timescale = smoothInitPrivateInfos.timescale,
+          _smoothInitPrivateInf = smoothInitPrivateInfos.protection,
+          protection = _smoothInitPrivateInf === void 0 ? {
+        keyId: undefined,
+        keySystems: undefined
+      } : _smoothInitPrivateInf;
+
+      if (codecPrivateData === undefined) {
+        throw new Error("Smooth: no codec private data.");
+      }
+
+      switch (adaptation.type) {
+        case "video":
+          {
+            var _representation$width = representation.width,
+                width = _representation$width === void 0 ? 0 : _representation$width,
+                _representation$heigh = representation.height,
+                height = _representation$heigh === void 0 ? 0 : _representation$heigh;
+            responseData = createVideoInitSegment(timescale, width, height, 72, 72, 4, // vRes, hRes, nal
+            codecPrivateData, protection.keyId);
+            break;
+          }
+
+        case "audio":
+          {
+            var _smoothInitPrivateInf2 = smoothInitPrivateInfos.channels,
+                channels = _smoothInitPrivateInf2 === void 0 ? 0 : _smoothInitPrivateInf2,
+                _smoothInitPrivateInf3 = smoothInitPrivateInfos.bitsPerSample,
+                bitsPerSample = _smoothInitPrivateInf3 === void 0 ? 0 : _smoothInitPrivateInf3,
+                _smoothInitPrivateInf4 = smoothInitPrivateInfos.packetSize,
+                packetSize = _smoothInitPrivateInf4 === void 0 ? 0 : _smoothInitPrivateInf4,
+                _smoothInitPrivateInf5 = smoothInitPrivateInfos.samplingRate,
+                samplingRate = _smoothInitPrivateInf5 === void 0 ? 0 : _smoothInitPrivateInf5;
+            responseData = createAudioInitSegment(timescale, channels, bitsPerSample, packetSize, samplingRate, codecPrivateData, protection.keyId);
+            break;
+          }
+
+        default:
+          if (false) {}
+
+          responseData = new Uint8Array(0);
+      }
+
+      return pinkie_default().resolve({
+        resultType: "segment-created",
+        resultData: responseData
+      });
+    } else if (url === null) {
+      return pinkie_default().resolve({
+        resultType: "segment-created",
+        resultData: null
+      });
+    } else {
+      var args = {
+        adaptation: adaptation,
+        manifest: manifest,
+        period: period,
+        representation: representation,
+        segment: segment,
+        transport: "smooth",
+        url: url
+      };
+
+      if (typeof customSegmentLoader !== "function") {
+        return regularSegmentLoader(url, content, callbacks, cancelSignal, checkMediaSegmentIntegrity);
+      }
+
+      return new Promise(function (res, rej) {
+        /** `true` when the custom segmentLoader should not be active anymore. */
+        var hasFinished = false;
+        /**
+         * Callback triggered when the custom segment loader has a response.
+         * @param {Object} args
+         */
+
+        var resolve = function resolve(_args) {
+          if (hasFinished || cancelSignal.isCancelled) {
+            return;
+          }
+
+          hasFinished = true;
+          cancelSignal.deregister(abortCustomLoader);
+          var isMP4 = isMP4EmbeddedTrack(content.representation);
+
+          if (!isMP4 || checkMediaSegmentIntegrity !== true) {
+            res({
+              resultType: "segment-loaded",
+              resultData: {
+                responseData: _args.data,
+                size: _args.size,
+                duration: _args.duration
+              }
+            });
+          }
+
+          var dataU8 = _args.data instanceof Uint8Array ? _args.data : new Uint8Array(_args.data);
+          (0,check_isobmff_integrity/* default */.Z)(dataU8, content.segment.isInit);
+          res({
+            resultType: "segment-loaded",
+            resultData: {
+              responseData: dataU8,
+              size: _args.size,
+              duration: _args.duration
+            }
+          });
+        };
+        /**
+         * Callback triggered when the custom segment loader fails
+         * @param {*} err - The corresponding error encountered
+         */
+
+
+        var reject = function reject(err) {
+          if (err === void 0) {
+            err = {};
+          }
+
+          var _a, _b, _c;
+
+          if (hasFinished || cancelSignal.isCancelled) {
+            return;
+          }
+
+          hasFinished = true;
+          cancelSignal.deregister(abortCustomLoader); // Format error and send it
+
+          var castedErr = err;
+          var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching a Smooth segment through a " + "custom segmentLoader.";
+          var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
+          rej(emittedErr);
+        };
+
+        var progress = function progress(_args) {
+          if (hasFinished || cancelSignal.isCancelled) {
+            return;
+          }
+
+          callbacks.onProgress({
+            duration: _args.duration,
+            size: _args.size,
+            totalSize: _args.totalSize
+          });
+        };
+
+        var fallback = function fallback() {
+          if (hasFinished || cancelSignal.isCancelled) {
+            return;
+          }
+
+          hasFinished = true;
+          cancelSignal.deregister(abortCustomLoader);
+          regularSegmentLoader(url, content, callbacks, cancelSignal, checkMediaSegmentIntegrity).then(res, rej);
+        };
+
+        var customCallbacks = {
+          reject: reject,
+          resolve: resolve,
+          fallback: fallback,
+          progress: progress
+        };
+        var abort = customSegmentLoader(args, customCallbacks);
+        cancelSignal.register(abortCustomLoader);
+        /**
+         * The logic to run when the custom loader is cancelled while pending.
+         * @param {Error} err
+         */
+
+        function abortCustomLoader(err) {
+          if (hasFinished) {
+            return;
+          }
+
+          hasFinished = true;
+
+          if (!hasFinished && typeof abort === "function") {
+            abort();
+          }
+
+          rej(err);
+        }
+      });
+    }
+  };
+};
+
+/* harmony default export */ var segment_loader = (generateSegmentLoader);
+;// CONCATENATED MODULE: ./src/transports/smooth/pipelines.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 
@@ -33685,21 +33648,17 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
 
 /* harmony default export */ function pipelines(options) {
   var smoothManifestParser = smooth(options);
-  var segmentLoader = segment_loader(options.segmentLoader);
+  var segmentLoader = segment_loader(options);
   var manifestLoaderOptions = {
     customManifestLoader: options.manifestLoader
   };
   var manifestLoader = (0,generate_manifest_loader/* default */.Z)(manifestLoaderOptions, "text");
   var manifestPipeline = {
-    resolver: function resolver(_ref) {
-      var url = _ref.url;
-
+    // TODO (v4.x.x) Remove that function
+    resolveManifestUrl: function resolveManifestUrl(url, cancelSignal) {
       if (url === undefined) {
-        return (0,of.of)({
-          url: undefined
-        });
-      } // TODO Remove WSX logic
-
+        return pinkie_default().resolve(undefined);
+      }
 
       var resolving;
 
@@ -33707,9 +33666,9 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
         (0,warn_once/* default */.Z)("Giving WSX URL to loadVideo is deprecated." + " You should only give Manifest URLs.");
         resolving = (0,request/* default */.ZP)({
           url: replaceToken(url, ""),
-          responseType: "document"
-        }).pipe((0,map/* map */.U)(function (_ref2) {
-          var value = _ref2.value;
+          responseType: "document",
+          cancelSignal: cancelSignal
+        }).then(function (value) {
           var extractedURL = extractISML(value.responseData);
 
           if (extractedURL === null || extractedURL.length === 0) {
@@ -33717,98 +33676,95 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
           }
 
           return extractedURL;
-        }));
+        });
       } else {
-        resolving = (0,of.of)(url);
+        resolving = pinkie_default().resolve(url);
       }
 
       var token = extractToken(url);
-      return resolving.pipe((0,map/* map */.U)(function (_url) {
-        return {
-          url: replaceToken(resolveManifest(_url), token)
-        };
-      }));
+      return resolving.then(function (_url) {
+        return replaceToken(resolveManifest(_url), token);
+      });
     },
-    loader: manifestLoader,
-    parser: function parser(_ref3) {
-      var response = _ref3.response,
-          reqURL = _ref3.url;
-      var url = response.url === undefined ? reqURL : response.url;
-      var data = typeof response.responseData === "string" ? new DOMParser().parseFromString(response.responseData, "text/xml") : response.responseData; // TODO find a way to check if Document?
+    loadManifest: manifestLoader,
+    parseManifest: function parseManifest(manifestData, parserOptions) {
+      var _a;
 
-      var manifestReceivedTime = response.receivedTime;
-      var parserResult = smoothManifestParser(data, url, manifestReceivedTime);
+      var url = (_a = manifestData.url) !== null && _a !== void 0 ? _a : parserOptions.originalUrl;
+      var manifestReceivedTime = manifestData.receivedTime,
+          responseData = manifestData.responseData;
+      var documentData = typeof responseData === "string" ? new DOMParser().parseFromString(responseData, "text/xml") : responseData; // TODO find a way to check if Document?
+
+      var parserResult = smoothManifestParser(documentData, url, manifestReceivedTime);
       var manifest = new src_manifest/* default */.ZP(parserResult, {
         representationFilter: options.representationFilter,
         supplementaryImageTracks: options.supplementaryImageTracks,
         supplementaryTextTracks: options.supplementaryTextTracks
       });
-      return (0,return_parsed_manifest/* default */.Z)(manifest, url);
+      return {
+        manifest: manifest,
+        url: url
+      };
     }
   };
-  var segmentPipeline = {
-    loader: function loader(content) {
-      if (content.segment.isInit || options.checkMediaSegmentIntegrity !== true) {
-        return segmentLoader(content);
-      }
+  /**
+   * Export functions allowing to load and parse audio and video smooth
+   * segments.
+   */
 
-      return segmentLoader(content).pipe((0,tap/* tap */.b)(function (res) {
-        if ((res.type === "data-loaded" || res.type === "data-chunk") && res.value.responseData !== null) {
-          (0,check_isobmff_integrity/* default */.Z)(new Uint8Array(res.value.responseData), content.segment.isInit);
-        }
-      }));
+  var audioVideoPipeline = {
+    /**
+     * Load a Smooth audio/video segment.
+     * @param {string|null} url
+     * @param {Object} content
+     * @param {Object} cancelSignal
+     * @param {Object} callbacks
+     * @returns {Promise}
+     */
+    loadSegment: function loadSegment(url, content, cancelSignal, callbacks) {
+      return segmentLoader(url, content, cancelSignal, callbacks);
     },
-    parser: function parser(_ref4) {
-      var content = _ref4.content,
-          response = _ref4.response,
-          initTimescale = _ref4.initTimescale;
-
+    parseSegment: function parseSegment(loadedSegment, content, initTimescale) {
       var _a, _b;
 
       var segment = content.segment,
           adaptation = content.adaptation,
           manifest = content.manifest;
-      var data = response.data,
-          isChunked = response.isChunked;
+      var data = loadedSegment.data,
+          isChunked = loadedSegment.isChunked;
 
       if (data === null) {
         if (segment.isInit) {
-          return (0,of.of)({
-            type: "parsed-init-segment",
-            value: {
-              initializationData: null,
-              protectionDataUpdate: false,
-              initTimescale: undefined
-            }
-          });
+          return {
+            segmentType: "init",
+            initializationData: null,
+            protectionDataUpdate: false,
+            initTimescale: undefined
+          };
         }
 
-        return (0,of.of)({
-          type: "parsed-segment",
-          value: {
-            chunkData: null,
-            chunkInfos: null,
-            chunkOffset: 0,
-            appendWindow: [undefined, undefined],
-            protectionDataUpdate: false
-          }
-        });
+        return {
+          segmentType: "media",
+          chunkData: null,
+          chunkInfos: null,
+          chunkOffset: 0,
+          protectionDataUpdate: false,
+          appendWindow: [undefined, undefined]
+        };
       }
 
       var responseBuffer = data instanceof Uint8Array ? data : new Uint8Array(data);
 
       if (segment.isInit) {
         var timescale = (_b = (_a = segment.privateInfos) === null || _a === void 0 ? void 0 : _a.smoothInitSegment) === null || _b === void 0 ? void 0 : _b.timescale;
-        return (0,of.of)({
-          type: "parsed-init-segment",
-          value: {
-            initializationData: data,
-            // smooth init segments are crafted by hand.
-            // Their timescale is the one from the manifest.
-            initTimescale: timescale,
-            protectionDataUpdate: false
-          }
-        });
+        return {
+          segmentType: "init",
+          initializationData: data,
+          // smooth init segments are crafted by hand.
+          // Their timescale is the one from the manifest.
+          initTimescale: timescale,
+          protectionDataUpdate: false
+        };
       }
 
       var timingInfos = initTimescale !== undefined ? extractTimingsInfos(responseBuffer, isChunked, initTimescale, segment, manifest.isLive) : null;
@@ -33826,58 +33782,68 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
         addNextSegments(adaptation, nextSegments, segment);
       }
 
-      return (0,of.of)({
-        type: "parsed-segment",
-        value: {
-          chunkData: chunkData,
-          chunkInfos: chunkInfos,
-          chunkOffset: 0,
-          appendWindow: [undefined, undefined],
-          protectionDataUpdate: false
-        }
-      });
+      return {
+        segmentType: "media",
+        chunkData: chunkData,
+        chunkInfos: chunkInfos,
+        chunkOffset: 0,
+        protectionDataUpdate: false,
+        appendWindow: [undefined, undefined]
+      };
     }
   };
   var textTrackPipeline = {
-    loader: function loader(_ref5) {
-      var segment = _ref5.segment,
-          representation = _ref5.representation,
-          url = _ref5.url;
+    loadSegment: function loadSegment(url, content, cancelSignal, callbacks) {
+      var segment = content.segment,
+          representation = content.representation;
 
       if (segment.isInit || url === null) {
-        return (0,of.of)({
-          type: "data-created",
-          value: {
-            responseData: null
-          }
+        return pinkie_default().resolve({
+          resultType: "segment-created",
+          resultData: null
         });
       }
 
       var isMP4 = isMP4EmbeddedTrack(representation);
 
-      if (!isMP4 || options.checkMediaSegmentIntegrity !== true) {
+      if (!isMP4) {
         return (0,request/* default */.ZP)({
           url: url,
-          responseType: isMP4 ? "arraybuffer" : "text",
-          sendProgressEvents: true
+          responseType: "text",
+          cancelSignal: cancelSignal,
+          onProgress: callbacks.onProgress
+        }).then(function (data) {
+          return {
+            resultType: "segment-loaded",
+            resultData: data
+          };
+        });
+      } else {
+        return (0,request/* default */.ZP)({
+          url: url,
+          responseType: "arraybuffer",
+          cancelSignal: cancelSignal,
+          onProgress: callbacks.onProgress
+        }).then(function (data) {
+          if (options.checkMediaSegmentIntegrity !== true) {
+            return {
+              resultType: "segment-loaded",
+              resultData: data
+            };
+          }
+
+          var dataU8 = new Uint8Array(data.responseData);
+          (0,check_isobmff_integrity/* default */.Z)(dataU8, content.segment.isInit);
+          return {
+            resultType: "segment-loaded",
+            resultData: Object.assign(Object.assign({}, data), {
+              responseData: dataU8
+            })
+          };
         });
       }
-
-      return (0,request/* default */.ZP)({
-        url: url,
-        responseType: "arraybuffer",
-        sendProgressEvents: true
-      }).pipe((0,tap/* tap */.b)(function (res) {
-        if (res.type === "data-loaded") {
-          (0,check_isobmff_integrity/* default */.Z)(new Uint8Array(res.value.responseData), segment.isInit);
-        }
-      }));
     },
-    parser: function parser(_ref6) {
-      var content = _ref6.content,
-          response = _ref6.response,
-          initTimescale = _ref6.initTimescale;
-
+    parseSegment: function parseSegment(loadedSegment, content, initTimescale) {
       var _a;
 
       var manifest = content.manifest,
@@ -33890,32 +33856,28 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
           mimeType = _representation$mimeT === void 0 ? "" : _representation$mimeT,
           _representation$codec = representation.codec,
           codec = _representation$codec === void 0 ? "" : _representation$codec;
-      var data = response.data,
-          isChunked = response.isChunked;
+      var data = loadedSegment.data,
+          isChunked = loadedSegment.isChunked;
 
       if (segment.isInit) {
         // text init segment has no use in HSS
-        return (0,of.of)({
-          type: "parsed-init-segment",
-          value: {
-            initializationData: null,
-            protectionDataUpdate: false,
-            initTimescale: undefined
-          }
-        });
+        return {
+          segmentType: "init",
+          initializationData: null,
+          protectionDataUpdate: false,
+          initTimescale: undefined
+        };
       }
 
       if (data === null) {
-        return (0,of.of)({
-          type: "parsed-segment",
-          value: {
-            chunkData: null,
-            chunkInfos: null,
-            chunkOffset: 0,
-            appendWindow: [undefined, undefined],
-            protectionDataUpdate: false
-          }
-        });
+        return {
+          segmentType: "media",
+          chunkData: null,
+          chunkInfos: null,
+          chunkOffset: 0,
+          protectionDataUpdate: false,
+          appendWindow: [undefined, undefined]
+        };
       }
 
       var nextSegments;
@@ -34011,61 +33973,56 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
       }
 
       var chunkOffset = segmentStart !== null && segmentStart !== void 0 ? segmentStart : 0;
-      return (0,of.of)({
-        type: "parsed-segment",
-        value: {
-          chunkData: {
-            type: _sdType,
-            data: _sdData,
-            start: segmentStart,
-            end: segmentEnd,
-            language: language
-          },
-          chunkInfos: chunkInfos,
-          chunkOffset: chunkOffset,
-          appendWindow: [undefined, undefined],
-          protectionDataUpdate: false
-        }
-      });
+      return {
+        segmentType: "media",
+        chunkData: {
+          type: _sdType,
+          data: _sdData,
+          start: segmentStart,
+          end: segmentEnd,
+          language: language
+        },
+        chunkInfos: chunkInfos,
+        chunkOffset: chunkOffset,
+        protectionDataUpdate: false,
+        appendWindow: [undefined, undefined]
+      };
     }
   };
   var imageTrackPipeline = {
-    loader: function loader(_ref7) {
-      var segment = _ref7.segment,
-          url = _ref7.url;
-
-      if (segment.isInit || url === null) {
+    loadSegment: function loadSegment(url, content, cancelSignal, callbacks) {
+      if (content.segment.isInit || url === null) {
         // image do not need an init segment. Passthrough directly to the parser
-        return (0,of.of)({
-          type: "data-created",
-          value: {
-            responseData: null
-          }
+        return pinkie_default().resolve({
+          resultType: "segment-created",
+          resultData: null
         });
       }
 
       return (0,request/* default */.ZP)({
         url: url,
         responseType: "arraybuffer",
-        sendProgressEvents: true
+        onProgress: callbacks.onProgress,
+        cancelSignal: cancelSignal
+      }).then(function (data) {
+        return {
+          resultType: "segment-loaded",
+          resultData: data
+        };
       });
     },
-    parser: function parser(_ref8) {
-      var response = _ref8.response,
-          content = _ref8.content;
-      var data = response.data,
-          isChunked = response.isChunked;
+    parseSegment: function parseSegment(loadedSegment, content, _initTimescale) {
+      var data = loadedSegment.data,
+          isChunked = loadedSegment.isChunked;
 
       if (content.segment.isInit) {
         // image init segment has no use
-        return (0,of.of)({
-          type: "parsed-init-segment",
-          value: {
-            initializationData: null,
-            protectionDataUpdate: false,
-            initTimescale: undefined
-          }
-        });
+        return {
+          segmentType: "init",
+          initializationData: null,
+          protectionDataUpdate: false,
+          initTimescale: undefined
+        };
       }
 
       if (isChunked) {
@@ -34074,59 +34031,44 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
 
 
       if (data === null || features/* default.imageParser */.Z.imageParser === null) {
-        return (0,of.of)({
-          type: "parsed-segment",
-          value: {
-            chunkData: null,
-            chunkInfos: null,
-            chunkOffset: 0,
-            appendWindow: [undefined, undefined],
-            protectionDataUpdate: false
-          }
-        });
+        return {
+          segmentType: "media",
+          chunkData: null,
+          chunkInfos: null,
+          chunkOffset: 0,
+          protectionDataUpdate: false,
+          appendWindow: [undefined, undefined]
+        };
       }
 
       var bifObject = features/* default.imageParser */.Z.imageParser(new Uint8Array(data));
       var thumbsData = bifObject.thumbs;
-      return (0,of.of)({
-        type: "parsed-segment",
-        value: {
-          chunkData: {
-            data: thumbsData,
-            start: 0,
-            end: Number.MAX_VALUE,
-            timescale: 1,
-            type: "bif"
-          },
-          chunkInfos: {
-            time: 0,
-            duration: Number.MAX_VALUE,
-            timescale: bifObject.timescale
-          },
-          chunkOffset: 0,
-          protectionDataUpdate: false,
-          appendWindow: [undefined, undefined]
-        }
-      });
+      return {
+        segmentType: "media",
+        chunkData: {
+          data: thumbsData,
+          start: 0,
+          end: Number.MAX_VALUE,
+          timescale: 1,
+          type: "bif"
+        },
+        chunkInfos: {
+          time: 0,
+          duration: Number.MAX_VALUE
+        },
+        chunkOffset: 0,
+        protectionDataUpdate: false,
+        appendWindow: [undefined, undefined]
+      };
     }
   };
   return {
     manifest: manifestPipeline,
-    audio: segmentPipeline,
-    video: segmentPipeline,
+    audio: audioVideoPipeline,
+    video: audioVideoPipeline,
     text: textTrackPipeline,
     image: imageTrackPipeline
   };
-}
-/**
- * Returns true if the given texttrack segment represents a textrack embedded
- * in a mp4 file.
- * @param {Representation} representation
- * @returns {Boolean}
- */
-
-function isMP4EmbeddedTrack(representation) {
-  return typeof representation.mimeType === "string" && representation.mimeType.indexOf("mp4") >= 0;
 }
 ;// CONCATENATED MODULE: ./src/transports/smooth/index.ts
 /**
@@ -34346,12 +34288,13 @@ __webpack_require__.d(__webpack_exports__, {
   "Z": function() { return /* binding */ generateManifestLoader; }
 });
 
-// EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
-var is_null_or_undefined = __webpack_require__(1946);
+// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
+var assert_unreachable = __webpack_require__(8418);
 // EXTERNAL MODULE: ./src/utils/request/index.ts + 1 modules
 var request = __webpack_require__(4597);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
-var Observable = __webpack_require__(1480);
+// EXTERNAL MODULE: ./node_modules/pinkie/index.js
+var pinkie = __webpack_require__(8555);
+var pinkie_default = /*#__PURE__*/__webpack_require__.n(pinkie);
 // EXTERNAL MODULE: ./src/errors/custom_loader_error.ts
 var custom_loader_error = __webpack_require__(7839);
 ;// CONCATENATED MODULE: ./src/transports/utils/call_custom_manifest_loader.ts
@@ -34373,35 +34316,34 @@ var custom_loader_error = __webpack_require__(7839);
 
 
 function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) {
-  return function (args) {
-    return new Observable/* Observable */.y(function (obs) {
-      var url = args.url;
+  return function (url, cancelSignal) {
+    return new (pinkie_default())(function (res, rej) {
       var timeAPIsDelta = Date.now() - performance.now();
+      /** `true` when the custom segmentLoader should not be active anymore. */
+
       var hasFinished = false;
-      var hasFallbacked = false;
       /**
        * Callback triggered when the custom manifest loader has a response.
        * @param {Object} args
        */
 
       var resolve = function resolve(_args) {
-        if (!hasFallbacked) {
-          hasFinished = true;
-          var receivedTime = _args.receivingTime !== undefined ? _args.receivingTime - timeAPIsDelta : undefined;
-          var sendingTime = _args.sendingTime !== undefined ? _args.sendingTime - timeAPIsDelta : undefined;
-          obs.next({
-            type: "data-loaded",
-            value: {
-              responseData: _args.data,
-              size: _args.size,
-              duration: _args.duration,
-              url: _args.url,
-              receivedTime: receivedTime,
-              sendingTime: sendingTime
-            }
-          });
-          obs.complete();
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
         }
+
+        hasFinished = true;
+        cancelSignal.deregister(abortCustomLoader);
+        var receivedTime = _args.receivingTime !== undefined ? _args.receivingTime - timeAPIsDelta : undefined;
+        var sendingTime = _args.sendingTime !== undefined ? _args.sendingTime - timeAPIsDelta : undefined;
+        res({
+          responseData: _args.data,
+          size: _args.size,
+          duration: _args.duration,
+          url: _args.url,
+          receivedTime: receivedTime,
+          sendingTime: sendingTime
+        });
       };
       /**
        * Callback triggered when the custom manifest loader fails
@@ -34412,14 +34354,17 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
       var reject = function reject(err) {
         var _a, _b, _c;
 
-        if (!hasFallbacked) {
-          hasFinished = true; // Format error and send it
-
-          var castedErr = err;
-          var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching the Manifest through a " + "custom manifestLoader.";
-          var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
-          obs.error(emittedErr);
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
         }
+
+        hasFinished = true;
+        cancelSignal.deregister(abortCustomLoader); // Format error and send it
+
+        var castedErr = err;
+        var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching the Manifest through a " + "custom manifestLoader.";
+        var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
+        rej(emittedErr);
       };
       /**
        * Callback triggered when the custom manifest loader wants to fallback to
@@ -34428,8 +34373,13 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
 
 
       var fallback = function fallback() {
-        hasFallbacked = true;
-        fallbackManifestLoader(args).subscribe(obs);
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
+        }
+
+        hasFinished = true;
+        cancelSignal.deregister(abortCustomLoader);
+        fallbackManifestLoader(url, cancelSignal).then(res, rej);
       };
 
       var callbacks = {
@@ -34438,11 +34388,25 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
         fallback: fallback
       };
       var abort = customManifestLoader(url, callbacks);
-      return function () {
-        if (!hasFinished && !hasFallbacked && typeof abort === "function") {
+      cancelSignal.register(abortCustomLoader);
+      /**
+       * The logic to run when the custom loader is cancelled while pending.
+       * @param {Error} err
+       */
+
+      function abortCustomLoader(err) {
+        if (hasFinished) {
+          return;
+        }
+
+        hasFinished = true;
+
+        if (typeof abort === "function") {
           abort();
         }
-      };
+
+        rej(err);
+      }
     });
   };
 }
@@ -34472,17 +34436,39 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
  */
 
 function generateRegularManifestLoader(preferredType) {
-  return function regularManifestLoader(_ref) {
-    var url = _ref.url;
-
+  return function regularManifestLoader(url, cancelSignal) {
     if (url === undefined) {
       throw new Error("Cannot perform HTTP(s) request. URL not known");
-    }
+    } // What follows could be written in a single line, but TypeScript wouldn't
+    // shut up.
+    // So I wrote that instead, temporarily of course ;)
 
-    return (0,request/* default */.ZP)({
-      url: url,
-      responseType: preferredType
-    });
+
+    switch (preferredType) {
+      case "arraybuffer":
+        return (0,request/* default */.ZP)({
+          url: url,
+          responseType: "arraybuffer",
+          cancelSignal: cancelSignal
+        });
+
+      case "text":
+        return (0,request/* default */.ZP)({
+          url: url,
+          responseType: "text",
+          cancelSignal: cancelSignal
+        });
+
+      case "document":
+        return (0,request/* default */.ZP)({
+          url: url,
+          responseType: "document",
+          cancelSignal: cancelSignal
+        });
+
+      default:
+        (0,assert_unreachable/* default */.Z)(preferredType);
+    }
   };
 }
 /**
@@ -34492,67 +34478,15 @@ function generateRegularManifestLoader(preferredType) {
  */
 
 
-function generateManifestLoader(_ref2, preferredType) {
-  var customManifestLoader = _ref2.customManifestLoader;
+function generateManifestLoader(_ref, preferredType) {
+  var customManifestLoader = _ref.customManifestLoader;
   var regularManifestLoader = generateRegularManifestLoader(preferredType);
 
-  if ((0,is_null_or_undefined/* default */.Z)(customManifestLoader)) {
+  if (typeof customManifestLoader !== "function") {
     return regularManifestLoader;
   }
 
   return callCustomManifestLoader(customManifestLoader, regularManifestLoader);
-}
-
-/***/ }),
-
-/***/ 7445:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Z": function() { return /* binding */ returnParsedManifest; }
-/* harmony export */ });
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2817);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(6362);
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * As a Manifest instance is obtained, emit the right `warning` events
- * (according to the Manifest's `parsingErrors` property`) followed by the right
- * `parsed` event, as expected from a Manifest parser.
- * @param {Manifest} manifest
- * @param {string|undefined} url
- * @returns {Observable}
- */
-
-function returnParsedManifest(manifest, url) {
-  var warningEvts$ = rxjs__WEBPACK_IMPORTED_MODULE_0__.of.apply(void 0, manifest.parsingErrors.map(function (error) {
-    return {
-      type: "warning",
-      value: error
-    };
-  }));
-  return (0,rxjs__WEBPACK_IMPORTED_MODULE_1__/* .concat */ .z)(warningEvts$, (0,rxjs__WEBPACK_IMPORTED_MODULE_0__.of)({
-    type: "parsed",
-    value: {
-      manifest: manifest,
-      url: url
-    }
-  }));
 }
 
 /***/ }),
@@ -34625,16 +34559,6 @@ function areArraysOfNumbersEqual(arr1, arr2) {
  * limitations under the License.
  */
 
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-
-/* eslint-disable no-restricted-properties */
-
 /**
  * Array.prototype.find ponyfill.
  * @param {Array} arr
@@ -34684,16 +34608,6 @@ function arrayFind(arr, predicate, thisArg) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-
-/* eslint-disable no-restricted-properties */
 
 /**
  * Array.prototype.find ponyfill.
@@ -35351,10 +35265,12 @@ function toUint8Array(input) {
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1480);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1973);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(2817);
-/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1946);
+/* harmony import */ var pinkie__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(8555);
+/* harmony import */ var pinkie__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(pinkie__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1480);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(1973);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(2817);
+/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1946);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -35371,22 +35287,23 @@ function toUint8Array(input) {
  * limitations under the License.
  */
 
- // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+
+
+/**
+ * Try to cast the given value into an observable.
+ * StraightForward - test first for an Observable then for a Promise.
+ * @param {Observable|Function|*}
+ * @returns {Observable}
+ */
 
 function castToObservable(value) {
-  if (value instanceof rxjs__WEBPACK_IMPORTED_MODULE_0__/* .Observable */ .y) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  if (value instanceof rxjs__WEBPACK_IMPORTED_MODULE_1__/* .Observable */ .y) {
     return value;
+  } else if (value instanceof (pinkie__WEBPACK_IMPORTED_MODULE_0___default()) || value instanceof Promise || !(0,_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_2__/* .default */ .Z)(value) && typeof value.then === "function") {
+    return (0,rxjs__WEBPACK_IMPORTED_MODULE_3__/* .from */ .Dp)(value);
   }
 
-  if (!(0,_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(value) && (
-  /* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */
-  typeof value.subscribe === "function" || typeof value.then === "function")) {
-    return (0,rxjs__WEBPACK_IMPORTED_MODULE_2__/* .from */ .Dp)(value);
-  } // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-
-
-  return (0,rxjs__WEBPACK_IMPORTED_MODULE_3__.of)(value);
+  return (0,rxjs__WEBPACK_IMPORTED_MODULE_4__.of)(value);
 }
 
 /* harmony default export */ __webpack_exports__["Z"] = (castToObservable);
@@ -35870,22 +35787,10 @@ function filterMap(callback, filteringToken) {
  */
 function flatMap(originalArray, fn) {
   /* eslint-disable @typescript-eslint/unbound-method */
-
-  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-  /* eslint-disable @typescript-eslint/no-unsafe-return */
-
-  /* eslint-disable @typescript-eslint/no-unsafe-call */
   if (typeof Array.prototype.flatMap === "function") {
     return originalArray.flatMap(fn);
   }
   /* eslint-enable @typescript-eslint/unbound-method */
-
-  /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
-  /* eslint-enable @typescript-eslint/no-unsafe-return */
-
-  /* eslint-enable @typescript-eslint/no-unsafe-call */
 
 
   return originalArray.reduce(function (acc, arg) {
@@ -36020,7 +35925,8 @@ function hashBuffer(buffer) {
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 /**
- * Creates an ID generator which generates an ID each time you call it.
+ * Creates an ID generator which generates a number containing an incremented
+ * number each time you call it.
  * @returns {Function}
  */
 function idGenerator() {
@@ -37255,8 +37161,6 @@ __webpack_require__.d(__webpack_exports__, {
 
 // UNUSED EXPORTS: fetchIsSupported, fetchRequest, xhr
 
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
-var Observable = __webpack_require__(1480);
 // EXTERNAL MODULE: ./src/config.ts
 var config = __webpack_require__(944);
 // EXTERNAL MODULE: ./src/errors/request_error.ts
@@ -37285,22 +37189,8 @@ var is_null_or_undefined = __webpack_require__(1946);
 
 
 
-
 var DEFAULT_REQUEST_TIMEOUT = config/* default.DEFAULT_REQUEST_TIMEOUT */.Z.DEFAULT_REQUEST_TIMEOUT;
 var DEFAULT_RESPONSE_TYPE = "json";
-/**
- * @param {string} data
- * @returns {Object|null}
- */
-
-function toJSONForIE(data) {
-  try {
-    return JSON.parse(data);
-  } catch (e) {
-    return null;
-  }
-}
-
 function request(options) {
   var requestOptions = {
     url: options.url,
@@ -37308,7 +37198,9 @@ function request(options) {
     responseType: (0,is_null_or_undefined/* default */.Z)(options.responseType) ? DEFAULT_RESPONSE_TYPE : options.responseType,
     timeout: (0,is_null_or_undefined/* default */.Z)(options.timeout) ? DEFAULT_REQUEST_TIMEOUT : options.timeout
   };
-  return new Observable/* Observable */.y(function (obs) {
+  return new Promise(function (resolve, reject) {
+    var onProgress = options.onProgress,
+        cancelSignal = options.cancelSignal;
     var url = requestOptions.url,
         headers = requestOptions.headers,
         responseType = requestOptions.responseType,
@@ -37336,35 +37228,60 @@ function request(options) {
       }
     }
 
-    var sendingTime = performance.now();
+    var sendingTime = performance.now(); // Handle request cancellation
+
+    var deregisterCancellationListener = null;
+
+    if (cancelSignal !== undefined) {
+      deregisterCancellationListener = cancelSignal.register(function abortRequest(err) {
+        if (!(0,is_null_or_undefined/* default */.Z)(xhr) && xhr.readyState !== 4) {
+          xhr.abort();
+        }
+
+        reject(err);
+      });
+
+      if (cancelSignal.isCancelled) {
+        return;
+      }
+    }
 
     xhr.onerror = function onXHRError() {
-      obs.error(new request_error/* default */.Z(url, xhr.status, "ERROR_EVENT", xhr));
+      if (deregisterCancellationListener !== null) {
+        deregisterCancellationListener();
+      }
+
+      reject(new request_error/* default */.Z(url, xhr.status, "ERROR_EVENT", xhr));
     };
 
     xhr.ontimeout = function onXHRTimeout() {
-      obs.error(new request_error/* default */.Z(url, xhr.status, "TIMEOUT", xhr));
+      if (deregisterCancellationListener !== null) {
+        deregisterCancellationListener();
+      }
+
+      reject(new request_error/* default */.Z(url, xhr.status, "TIMEOUT", xhr));
     };
 
-    if (options.sendProgressEvents === true) {
+    if (onProgress !== undefined) {
       xhr.onprogress = function onXHRProgress(event) {
         var currentTime = performance.now();
-        obs.next({
-          type: "progress",
-          value: {
-            url: url,
-            duration: currentTime - sendingTime,
-            sendingTime: sendingTime,
-            currentTime: currentTime,
-            size: event.loaded,
-            totalSize: event.total
-          }
+        onProgress({
+          url: url,
+          duration: currentTime - sendingTime,
+          sendingTime: sendingTime,
+          currentTime: currentTime,
+          size: event.loaded,
+          totalSize: event.total
         });
       };
     }
 
     xhr.onload = function onXHRLoad(event) {
       if (xhr.readyState === 4) {
+        if (deregisterCancellationListener !== null) {
+          deregisterCancellationListener();
+        }
+
         if (xhr.status >= 200 && xhr.status < 300) {
           var receivedTime = performance.now();
           var totalSize = xhr.response instanceof ArrayBuffer ? xhr.response.byteLength : event.total;
@@ -37385,40 +37302,41 @@ function request(options) {
           }
 
           if ((0,is_null_or_undefined/* default */.Z)(responseData)) {
-            obs.error(new request_error/* default */.Z(url, xhr.status, "PARSE_ERROR", xhr));
+            reject(new request_error/* default */.Z(url, xhr.status, "PARSE_ERROR", xhr));
             return;
           }
 
-          obs.next({
-            type: "data-loaded",
-            value: {
-              status: status,
-              url: _url,
-              responseType: loadedResponseType,
-              sendingTime: sendingTime,
-              receivedTime: receivedTime,
-              duration: receivedTime - sendingTime,
-              size: totalSize,
-              responseData: responseData
-            }
+          resolve({
+            status: status,
+            url: _url,
+            responseType: loadedResponseType,
+            sendingTime: sendingTime,
+            receivedTime: receivedTime,
+            duration: receivedTime - sendingTime,
+            size: totalSize,
+            responseData: responseData
           });
-          obs.complete();
         } else {
-          obs.error(new request_error/* default */.Z(url, xhr.status, "ERROR_HTTP_CODE", xhr));
+          reject(new request_error/* default */.Z(url, xhr.status, "ERROR_HTTP_CODE", xhr));
         }
       }
     };
 
     xhr.send();
-    return function () {
-      if (!(0,is_null_or_undefined/* default */.Z)(xhr) && xhr.readyState !== 4) {
-        xhr.abort();
-      }
-    };
   });
 }
+/**
+ * @param {string} data
+ * @returns {Object|null}
+ */
 
-/* harmony default export */ var xhr = (request);
+function toJSONForIE(data) {
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return null;
+  }
+}
 ;// CONCATENATED MODULE: ./src/utils/request/index.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -37437,7 +37355,7 @@ function request(options) {
  */
 
 
-/* harmony default export */ var utils_request = (xhr);
+/* harmony default export */ var utils_request = (request);
 
 
 /***/ }),
@@ -38144,6 +38062,333 @@ function takeFirstSet() {
   }
 
   return undefined;
+}
+
+/***/ }),
+
+/***/ 288:
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ZP": function() { return /* binding */ TaskCanceller; }
+/* harmony export */ });
+/* unused harmony exports CancellationSignal, CancellationError */
+/* harmony import */ var _babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3349);
+/* harmony import */ var _babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1788);
+/* harmony import */ var _babel_runtime_helpers_wrapNativeSuper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(3786);
+/* harmony import */ var _assert__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(811);
+/* harmony import */ var _noop__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(8894);
+
+
+
+
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Class facilitating asynchronous task cancellation.
+ *
+ * This class can be used to notify some code running an asynchronous task (for
+ * example, a request) that is should abort what it is doing (for example, abort
+ * a request when it isn't needed anymore).
+ *
+ * To do that, the code which might ask for cancellation have to create a new
+ * `TaskCanceller`:
+ * ```js
+ * const canceller = new TaskCanceller();
+ * ```
+ *
+ * And has to provide its associated `CancellationSignal` to the code running
+ * the asynchronous task:
+ * ```js
+ * runAsyncTask(canceller.signal);
+ * ```
+ *
+ * In the asynchronous task, the signal can be listened to (see documentation
+ * on `CancellationSignal` for more information):
+ * ```js
+ * function runAsyncTask(cancellationSignal) {
+ *  // Let's say this function returns a Promise (this is not mandatory however)
+ *  return Promise((resolve, reject) => {
+ *    // In this example, we'll even catch the case where an asynchronous task
+ *    // was already cancelled before being called.
+ *    // This ensure that no code will run if that's the case.
+ *    if (cancellationSignal.isCancelled) {
+ *      // Here we're rejecting the CancellationError to notify the caller that
+ *      // this error was due to the task being aborted.
+ *      reject(cancellationSignal.cancellationError);
+ *      return;
+ *    }
+ *
+ *    // Example:
+ *    // performing asynchronous task and registering callbacks on success/failure.
+ *    const myCancellableTask = doSomeAsyncTasks()
+ *      .onFinished(onTaskFinished);
+ *      .onFailed(onTaskFailed);
+ *
+ *    // Run a callback when/if the corresponding `TaskCanceller` was triggered.
+ *    // Run immediately if the TaskCanceller was already triggered.
+ *    const deregisterSignal = cancellationSignal.register(onCancellation);
+ *
+ *    // Callback called on cancellation (if this task was cancelled while the
+ *    // cancellationSignal's listener is still registered).
+ *    // The `error` in argument is linked to that cancellation. It is usually
+ *    // expected that the same Error instance is used when rejecting Promises.
+ *    function onCancellation(error : CancellationError) {
+ *      // abort asynchronous task
+ *      myCancellableTask.cancel();
+ *
+ *      // In this example, reject the current pending Promise
+ *      reject(CancellationError);
+ *    }
+ *
+ *    // Callback called after the asynchronous task has finished with success.
+ *    function onTaskFinished() {
+ *      // Stop listening to the cancellationSignal
+ *      deregisterSignal();
+ *
+ *      // Resolve the Promise
+ *      resolve();
+ *    }
+ *
+ *    // Callback called after the asynchronous task has finished with failure.
+ *    function onTaskFailed(someError : Error) {
+ *      // Stop listening to the cancellationSignal
+ *      deregisterSignal();
+ *
+ *      // Resolve the Promise
+ *      reject(error);
+ *    }
+ *  });
+ * }
+ * ```
+ *
+ * The code asking for cancellation can then trigger a cancellation at any time
+ * (even before the signal was given) and listen to possible CancellationErrors
+ * to know when it was cancelled.
+ * ```js
+ * const canceller = new TaskCanceller();
+ *
+ * runAsyncTask(canceller.signal)
+ *   .then(() => { console.log("Task succeeded!"); )
+ *   .catch((err) => {
+ *      if (TaskCanceller.isCancellationError(err)) {
+ *        console.log("Task cancelled!");
+ *      } else {
+ *        console.log("Task failed:", err);
+ *      }
+ *   });
+ * canceller.cancel(); // Cancel the task, calling registered callbacks
+ * ```
+ * @class TaskCanceller
+ */
+
+var TaskCanceller = /*#__PURE__*/function () {
+  /**
+   * Creates a new `TaskCanceller`, with its own `CancellationSignal` created
+   * as its `signal` provide.
+   * You can then pass this property to async task you wish to be cancellable.
+   */
+  function TaskCanceller() {
+    var _createCancellationFu = createCancellationFunctions(),
+        trigger = _createCancellationFu[0],
+        register = _createCancellationFu[1];
+
+    this.isUsed = false;
+    this._trigger = trigger;
+    this.signal = new CancellationSignal(register);
+  }
+  /**
+   * "Trigger" the `TaskCanceller`, notify through its associated
+   * `CancellationSignal` (its `signal` property) that a task should be aborted.
+   *
+   * Once called the `TaskCanceller` is permanently triggered.
+   *
+   * An optional CancellationError can be given in argument for when this
+   * cancellation is actually triggered as a chain reaction from a previous
+   * cancellation.
+   * @param {Error} [originError]
+   */
+
+
+  var _proto = TaskCanceller.prototype;
+
+  _proto.cancel = function cancel(originError) {
+    if (this.isUsed) {
+      return;
+    }
+
+    this.isUsed = true;
+    var cancellationError = originError !== null && originError !== void 0 ? originError : new CancellationError();
+
+    this._trigger(cancellationError);
+  }
+  /**
+   * Check that the `error` in argument is a `CancellationError`, most likely
+   * meaning that the linked error is due to a task aborted via a
+   * `CancellationSignal`.
+   * @param {*} error
+   * @returns {boolean}
+   */
+  ;
+
+  TaskCanceller.isCancellationError = function isCancellationError(error) {
+    return error instanceof CancellationError;
+  };
+
+  return TaskCanceller;
+}();
+/**
+ * Class associated to a TaskCanceller allowing to be notified when a task
+ * needs to be aborted.
+ * @class
+ */
+
+
+
+var CancellationSignal = /*#__PURE__*/function () {
+  /**
+   * Creates a new CancellationSignal.
+   * /!\ Note: Only a `TaskCanceller` is supposed to be able to create one.
+   * @param {Function} registerToSource - Function called when the task is
+   * cancelled.
+   */
+  function CancellationSignal(registerToSource) {
+    var _this = this;
+
+    this.isCancelled = false;
+    this.cancellationError = null;
+    this._listeners = [];
+    registerToSource(function (cancellationError) {
+      _this.cancellationError = cancellationError;
+      _this.isCancelled = true;
+
+      while (_this._listeners.length > 0) {
+        var listener = _this._listeners.splice(_this._listeners.length - 1, 1)[0];
+
+        listener(cancellationError);
+      }
+    });
+  }
+  /**
+   * Registers a function that will be called when/if the current task is
+   * cancelled.
+   *
+   * Multiple calls to `register` can be performed to register multiple
+   * callbacks on cancellation associated to the same `CancellationSignal`.
+   *
+   * @param {Function} fn - This function should perform all logic allowing to
+   * abort everything the task is doing.
+   *
+   * It takes in argument the `CancellationError` which was created when the
+   * task was aborted.
+   * You can use this error to notify callers that the task has been aborted,
+   * for example through a rejected Promise.
+   *
+   * @return {Function} - Removes that cancellation listener. You can call this
+   * once you don't want the callback to be triggered anymore (e.g. after the
+   * task succeeded or failed).
+   * You don't need to call that function when cancellation has already been
+   * performed.
+   */
+
+
+  var _proto2 = CancellationSignal.prototype;
+
+  _proto2.register = function register(fn) {
+    var _this2 = this;
+
+    if (this.isCancelled) {
+      (0,_assert__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z)(this.cancellationError !== null);
+      fn(this.cancellationError);
+    }
+
+    this._listeners.push(fn);
+
+    return function () {
+      return _this2.deregister(fn);
+    };
+  }
+  /**
+   * De-register a function registered through the `register` function.
+   * Do nothing if that function wasn't registered.
+   *
+   * You can call this method when using the return value of `register` is not
+   * practical.
+   * @param {Function} fn
+   */
+  ;
+
+  _proto2.deregister = function deregister(fn) {
+    if (this.isCancelled) {
+      return;
+    }
+
+    for (var i = 0; i < this._listeners.length; i++) {
+      if (this._listeners[i] === fn) {
+        this._listeners.splice(i, 1);
+
+        return;
+      }
+    }
+  };
+
+  return CancellationSignal;
+}();
+/**
+ * Error created when a task is cancelled through the TaskCanceller.
+ *
+ * @class CancellationError
+ * @extends Error
+ */
+
+var CancellationError = /*#__PURE__*/function (_Error) {
+  (0,_babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(CancellationError, _Error);
+
+  /**
+   * @param {string} message
+   */
+  function CancellationError() {
+    var _this3;
+
+    _this3 = _Error.call(this) || this; // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
+
+    Object.setPrototypeOf((0,_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_2__/* .default */ .Z)(_this3), CancellationError.prototype);
+    _this3.name = "CancellationError";
+    _this3.message = "This task was cancelled.";
+    return _this3;
+  }
+
+  return CancellationError;
+}( /*#__PURE__*/(0,_babel_runtime_helpers_wrapNativeSuper__WEBPACK_IMPORTED_MODULE_3__/* .default */ .Z)(Error));
+/**
+ * Helper function allowing communication between a `TaskCanceller` and a
+ * `CancellationSignal`.
+ * @returns {Array.<Function>}
+ */
+
+function createCancellationFunctions() {
+  var listener = _noop__WEBPACK_IMPORTED_MODULE_4__/* .default */ .Z;
+  return [function trigger(error) {
+    listener(error);
+  }, function register(newListener) {
+    listener = newListener;
+  }];
 }
 
 /***/ }),
@@ -41427,53 +41672,6 @@ function mergeMapTo(innerObservable, resultSelector, concurrent) {
 
 /***/ }),
 
-/***/ 3074:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-
-// EXPORTS
-__webpack_require__.d(__webpack_exports__, {
-  "R": function() { return /* binding */ scan; }
-});
-
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/lift.js
-var lift = __webpack_require__(6798);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/OperatorSubscriber.js
-var OperatorSubscriber = __webpack_require__(2566);
-;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/scanInternals.js
-
-function scanInternals(accumulator, seed, hasSeed, emitOnNext, emitBeforeComplete) {
-    return function (source, subscriber) {
-        var hasState = hasSeed;
-        var state = seed;
-        var index = 0;
-        source.subscribe(new OperatorSubscriber/* OperatorSubscriber */.Q(subscriber, function (value) {
-            var i = index++;
-            state = hasState
-                ?
-                    accumulator(state, value, i)
-                :
-                    ((hasState = true), value);
-            emitOnNext && subscriber.next(state);
-        }, emitBeforeComplete &&
-            (function () {
-                hasState && subscriber.next(state);
-                subscriber.complete();
-            })));
-    };
-}
-//# sourceMappingURL=scanInternals.js.map
-;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/scan.js
-
-
-function scan(accumulator, seed) {
-    return (0,lift/* operate */.e)(scanInternals(accumulator, seed, arguments.length >= 2, true));
-}
-//# sourceMappingURL=scan.js.map
-
-/***/ }),
-
 /***/ 5583:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
@@ -42858,9 +43056,7 @@ function requestFullscreen(element) {
     } else if (typeof elt.mozRequestFullScreen === "function") {
       elt.mozRequestFullScreen();
     } else if (typeof elt.webkitRequestFullscreen === "function") {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      elt.webkitRequestFullscreen // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      (Element.ALLOW_KEYBOARD_INPUT);
+      elt.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
     }
   }
 }
@@ -42997,10 +43193,6 @@ function getFirefoxVersion() {
  */
 
 function canRelyOnVideoVisibilityAndSize() {
-  var _a, _b;
-  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-
   if (!browser_detection/* isFirefox */.vU) {
     return true;
   }
@@ -43011,17 +43203,51 @@ function canRelyOnVideoVisibilityAndSize() {
     return true;
   }
 
-  return ((_b = (_a = HTMLVideoElement) === null || _a === void 0 ? void 0 : _a.prototype) === null || _b === void 0 ? void 0 : _b.requirePictureInPicture) !== undefined;
-  /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+  var proto = HTMLVideoElement === null || HTMLVideoElement === void 0 ? void 0 : HTMLVideoElement.prototype;
+  return (proto === null || proto === void 0 ? void 0 : proto.requirePictureInPicture) !== undefined;
 }
 // EXTERNAL MODULE: ./src/config.ts
 var config = __webpack_require__(944);
 // EXTERNAL MODULE: ./src/errors/media_error.ts
 var media_error = __webpack_require__(3714);
-// EXTERNAL MODULE: ./src/errors/is_known_error.ts
-var is_known_error = __webpack_require__(9822);
+// EXTERNAL MODULE: ./src/errors/encrypted_media_error.ts
+var encrypted_media_error = __webpack_require__(5157);
+// EXTERNAL MODULE: ./src/errors/error_codes.ts
+var error_codes = __webpack_require__(5992);
+// EXTERNAL MODULE: ./src/errors/network_error.ts
+var network_error = __webpack_require__(9362);
 // EXTERNAL MODULE: ./src/errors/other_error.ts
 var other_error = __webpack_require__(5389);
+;// CONCATENATED MODULE: ./src/errors/is_known_error.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+/**
+ * Whether the error given is a ICustomError.
+ * @param {Error} error
+ * @returns {Boolean}
+ */
+
+function isKnownError(error) {
+  return (error instanceof encrypted_media_error/* default */.Z || error instanceof media_error/* default */.Z || error instanceof other_error/* default */.Z || error instanceof network_error/* default */.Z) && Object.keys(error_codes/* ErrorTypes */.ZB).indexOf(error.type) >= 0;
+}
 ;// CONCATENATED MODULE: ./src/errors/format_error.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -43050,27 +43276,2508 @@ function formatError(error, _ref) {
   var defaultCode = _ref.defaultCode,
       defaultReason = _ref.defaultReason;
 
-  if ((0,is_known_error/* default */.Z)(error)) {
+  if (isKnownError(error)) {
     return error;
   }
 
   var reason = error instanceof Error ? error.toString() : defaultReason;
   return new other_error/* default */.Z(defaultCode, reason);
 }
-// EXTERNAL MODULE: ./src/errors/error_codes.ts
-var error_codes = __webpack_require__(5992);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(2137);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
+var regenerator = __webpack_require__(7757);
+var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
+// EXTERNAL MODULE: ./node_modules/pinkie/index.js
+var pinkie = __webpack_require__(8555);
+var pinkie_default = /*#__PURE__*/__webpack_require__.n(pinkie);
+// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
+var assert_unreachable = __webpack_require__(8418);
+// EXTERNAL MODULE: ./src/utils/noop.ts
+var noop = __webpack_require__(8894);
+// EXTERNAL MODULE: ./src/parsers/manifest/dash/common/index.ts + 31 modules
+var common = __webpack_require__(6992);
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/utils.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {TextDecoder} textDecoder
+ * @param {ArrayBuffer} buffer
+ * @param {number} ptr
+ * @param {number} len
+ * @returns {string}
+ */
+function parseString(textDecoder, buffer) {
+  var arr = new Uint8Array(buffer);
+  return textDecoder.decode(arr);
+}
+/**
+ * @param {number} val
+ * @returns {number|boolean}
+ */
+
+
+function parseFloatOrBool(val) {
+  return val === Infinity ? true : val === -Infinity ? false : val;
+}
+
+
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/BaseURL.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Generate an "attribute parser" once inside a `BaseURL` node.
+ * @param {Object} baseUrlAttrs
+ * @param {WebAssembly.Memory} linearMemory
+ * @returns {Function}
+ */
+
+function generateBaseUrlAttrParser(baseUrlAttrs) {
+  var textDecoder = new TextDecoder();
+  var dataView;
+  return function onMPDAttribute(attr, payload) {
+    switch (attr) {
+      case 64
+      /* Text */
+      :
+        baseUrlAttrs.value = parseString(textDecoder, payload);
+        break;
+
+      case 43
+      /* AvailabilityTimeOffset */
+      :
+        dataView = new DataView(payload);
+        baseUrlAttrs.attributes.availabilityTimeOffset = dataView.getFloat64(0, true);
+        break;
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/ContentComponent.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Generate an "attribute parser" once inside a `BaseURL` node.
+ * @param {Object} baseUrlAttrs
+ * @param {WebAssembly.Memory} linearMemory
+ * @returns {Function}
+ */
+
+function generateContentComponentAttrParser(ccAttrs) {
+  var textDecoder = new TextDecoder();
+  return function onMPDAttribute(attr, payload) {
+    switch (attr) {
+      case 0
+      /* Id */
+      :
+        ccAttrs.id = parseString(textDecoder, payload);
+        break;
+
+      case 60
+      /* Language */
+      :
+        ccAttrs.language = parseString(textDecoder, payload);
+        break;
+
+      case 61
+      /* ContentType */
+      :
+        ccAttrs.contentType = parseString(textDecoder, payload);
+        break;
+
+      case 62
+      /* Par */
+      :
+        ccAttrs.par = parseString(textDecoder, payload);
+        break;
+    }
+  };
+}
+// EXTERNAL MODULE: ./src/utils/base64.ts
+var base64 = __webpack_require__(9689);
+// EXTERNAL MODULE: ./src/utils/string_parsing.ts
+var string_parsing = __webpack_require__(3635);
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/ContentProtection.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+/**
+ * @param {Object} cpAttrs
+ * @param {WebAssembly.Memory} linearMemory
+ * @returns {Function}
+ */
+
+function generateContentProtectionAttrParser(cp) {
+  var cpAttrs = cp.attributes;
+  var cpChildren = cp.children;
+  var textDecoder = new TextDecoder();
+  return function onContentProtectionAttribute(attr, payload) {
+    switch (attr) {
+      case 16
+      /* SchemeIdUri */
+      :
+        cpAttrs.schemeIdUri = parseString(textDecoder, payload);
+        break;
+
+      case 13
+      /* ContentProtectionValue */
+      :
+        cpAttrs.value = parseString(textDecoder, payload);
+        break;
+
+      case 14
+      /* ContentProtectionKeyId */
+      :
+        var kid = parseString(textDecoder, payload);
+        cpAttrs.keyId = (0,string_parsing/* hexToBytes */.nr)(kid.replace(/-/g, ""));
+        break;
+
+      case 15
+      /* ContentProtectionCencPSSH */
+      :
+        try {
+          var b64 = parseString(textDecoder, payload);
+          cpChildren.cencPssh.push((0,base64/* base64ToBytes */.K)(b64));
+        } catch (_) {
+          /* TODO log error? register as warning? */
+        }
+
+        break;
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/Scheme.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Generate an "attribute parser" once inside a `BaseURL` node.
+ * @param {Object} baseUrlAttrs
+ * @param {WebAssembly.Memory} linearMemory
+ * @returns {Function}
+ */
+
+function generateSchemeAttrParser(schemeAttrs) {
+  var textDecoder = new TextDecoder();
+  return function onMPDAttribute(attr, payload) {
+    switch (attr) {
+      case 16
+      /* SchemeIdUri */
+      :
+        schemeAttrs.schemeIdUri = parseString(textDecoder, payload);
+        break;
+
+      case 17
+      /* SchemeValue */
+      :
+        schemeAttrs.value = parseString(textDecoder, payload);
+        break;
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/SegmentBase.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+function generateSegmentBaseAttrParser(segmentBaseAttrs) {
+  var textDecoder = new TextDecoder();
+  return function onSegmentBaseAttribute(attr, payload) {
+    switch (attr) {
+      case 29
+      /* InitializationRange */
+      :
+        {
+          var dataView = new DataView(payload);
+
+          if (segmentBaseAttrs.initialization === undefined) {
+            segmentBaseAttrs.initialization = {};
+          }
+
+          segmentBaseAttrs.initialization.range = [dataView.getFloat64(0, true), dataView.getFloat64(8, true)];
+          break;
+        }
+
+      case 67
+      /* InitializationMedia */
+      :
+        if (segmentBaseAttrs.initialization === undefined) {
+          segmentBaseAttrs.initialization = {};
+        }
+
+        segmentBaseAttrs.initialization.media = parseString(textDecoder, payload);
+        break;
+
+      case 43
+      /* AvailabilityTimeOffset */
+      :
+        {
+          var _dataView = new DataView(payload);
+
+          segmentBaseAttrs.availabilityTimeOffset = _dataView.getFloat64(0, true);
+          break;
+        }
+
+      case 22
+      /* AvailabilityTimeComplete */
+      :
+        {
+          segmentBaseAttrs.availabilityTimeComplete = new DataView(payload).getUint8(0) === 0;
+          break;
+        }
+
+      case 24
+      /* PresentationTimeOffset */
+      :
+        {
+          var _dataView2 = new DataView(payload);
+
+          segmentBaseAttrs.presentationTimeOffset = _dataView2.getFloat64(0, true);
+          break;
+        }
+
+      case 27
+      /* TimeScale */
+      :
+        {
+          var _dataView3 = new DataView(payload);
+
+          segmentBaseAttrs.timescale = _dataView3.getFloat64(0, true);
+          break;
+        }
+
+      case 31
+      /* IndexRange */
+      :
+        {
+          var _dataView4 = new DataView(payload);
+
+          segmentBaseAttrs.indexRange = [_dataView4.getFloat64(0, true), _dataView4.getFloat64(8, true)];
+          break;
+        }
+
+      case 23
+      /* IndexRangeExact */
+      :
+        {
+          segmentBaseAttrs.indexRangeExact = new DataView(payload).getUint8(0) === 0;
+          break;
+        }
+
+      case 1
+      /* Duration */
+      :
+        {
+          var _dataView5 = new DataView(payload);
+
+          segmentBaseAttrs.duration = _dataView5.getFloat64(0, true);
+          break;
+        }
+
+      case 20
+      /* StartNumber */
+      :
+        {
+          var _dataView6 = new DataView(payload);
+
+          segmentBaseAttrs.startNumber = _dataView6.getFloat64(0, true);
+          break;
+        }
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/SegmentUrl.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Generate "attribute parser" for an encountered `SegmentURL` opening
+ * tag.
+ * @param {Object} segmentUrlAttrs
+ * @param {WebAssembly.Memory} linearMemory
+ * @returns {Function}
+ */
+
+function generateSegmentUrlAttrParser(segmentUrlAttrs) {
+  var textDecoder = new TextDecoder();
+  return function onSegmentUrlAttribute(attr, payload) {
+    switch (attr) {
+      case 28
+      /* Index */
+      :
+        segmentUrlAttrs.index = parseString(textDecoder, payload);
+        break;
+
+      case 31
+      /* IndexRange */
+      :
+        {
+          var dataView = new DataView(payload);
+          segmentUrlAttrs.indexRange = [dataView.getFloat64(0, true), dataView.getFloat64(8, true)];
+          break;
+        }
+
+      case 30
+      /* Media */
+      :
+        segmentUrlAttrs.media = parseString(textDecoder, payload);
+        break;
+
+      case 18
+      /* MediaRange */
+      :
+        {
+          var _dataView = new DataView(payload);
+
+          segmentUrlAttrs.mediaRange = [_dataView.getFloat64(0, true), _dataView.getFloat64(8, true)];
+          break;
+        }
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/SegmentList.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Generate a "children parser" once inside a `SegmentList` node.
+ * @param {Object} segListChildren
+ * @param {WebAssembly.Memory} linearMemory
+ * @param {ParsersStack} parsersStack
+ * @returns {Function}
+ */
+
+function generateSegmentListChildrenParser(segListChildren, parsersStack) {
+  return function onRootChildren(nodeId) {
+    switch (nodeId) {
+      case 20
+      /* SegmentUrl */
+      :
+        {
+          var segmentObj = {};
+
+          if (segListChildren.list === undefined) {
+            segListChildren.list = [];
+          }
+
+          segListChildren.list.push(segmentObj);
+          var attrParser = generateSegmentUrlAttrParser(segmentObj);
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, attrParser);
+          break;
+        }
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/SegmentTemplate.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+function generateSegmentTemplateAttrParser(segmentTemplateAttrs) {
+  var textDecoder = new TextDecoder();
+  return function onSegmentTemplateAttribute(attr, payload) {
+    switch (attr) {
+      case 19
+      /* SegmentTimeline */
+      :
+        {
+          var dataView = new DataView(payload);
+          segmentTemplateAttrs.timeline = [];
+          var base = 0;
+          var len = payload.byteLength;
+
+          for (var i = 0; i < len / 24; i++) {
+            segmentTemplateAttrs.timeline.push({
+              start: dataView.getFloat64(base, true),
+              duration: dataView.getFloat64(base + 8, true),
+              repeatCount: dataView.getFloat64(base + 16, true)
+            });
+            base += 24;
+          }
+
+          break;
+        }
+
+      case 67
+      /* InitializationMedia */
+      :
+        segmentTemplateAttrs.initialization = {
+          media: parseString(textDecoder, payload)
+        };
+        break;
+
+      case 28
+      /* Index */
+      :
+        segmentTemplateAttrs.index = parseString(textDecoder, payload);
+        break;
+
+      case 43
+      /* AvailabilityTimeOffset */
+      :
+        {
+          var _dataView = new DataView(payload);
+
+          segmentTemplateAttrs.availabilityTimeOffset = _dataView.getFloat64(0, true);
+          break;
+        }
+
+      case 22
+      /* AvailabilityTimeComplete */
+      :
+        {
+          segmentTemplateAttrs.availabilityTimeComplete = new DataView(payload).getUint8(0) === 0;
+          break;
+        }
+
+      case 24
+      /* PresentationTimeOffset */
+      :
+        {
+          var _dataView2 = new DataView(payload);
+
+          segmentTemplateAttrs.presentationTimeOffset = _dataView2.getFloat64(0, true);
+          break;
+        }
+
+      case 27
+      /* TimeScale */
+      :
+        {
+          var _dataView3 = new DataView(payload);
+
+          segmentTemplateAttrs.timescale = _dataView3.getFloat64(0, true);
+          break;
+        }
+
+      case 31
+      /* IndexRange */
+      :
+        {
+          var _dataView4 = new DataView(payload);
+
+          segmentTemplateAttrs.indexRange = [_dataView4.getFloat64(0, true), _dataView4.getFloat64(8, true)];
+          break;
+        }
+
+      case 23
+      /* IndexRangeExact */
+      :
+        {
+          segmentTemplateAttrs.indexRangeExact = new DataView(payload).getUint8(0) === 0;
+          break;
+        }
+
+      case 30
+      /* Media */
+      :
+        segmentTemplateAttrs.media = parseString(textDecoder, payload);
+        break;
+
+      case 32
+      /* BitstreamSwitching */
+      :
+        {
+          segmentTemplateAttrs.bitstreamSwitching = new DataView(payload).getUint8(0) === 0;
+          break;
+        }
+
+      case 1
+      /* Duration */
+      :
+        {
+          var _dataView5 = new DataView(payload);
+
+          segmentTemplateAttrs.duration = _dataView5.getFloat64(0, true);
+          break;
+        }
+
+      case 20
+      /* StartNumber */
+      :
+        {
+          var _dataView6 = new DataView(payload);
+
+          segmentTemplateAttrs.startNumber = _dataView6.getFloat64(0, true);
+          break;
+        }
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/Representation.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+
+/**
+ * Generate a "children parser" once inside a `Representation` node.
+ * @param {Object} childrenObj
+ * @param {WebAssembly.Memory} linearMemory
+ * @param {ParsersStack} parsersStack
+ * @returns {Function}
+ */
+
+function generateRepresentationChildrenParser(childrenObj, parsersStack) {
+  return function onRootChildren(nodeId) {
+    switch (nodeId) {
+      case 15
+      /* BaseURL */
+      :
+        {
+          var baseUrl = {
+            value: "",
+            attributes: {}
+          };
+          childrenObj.baseURLs.push(baseUrl);
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, generateBaseUrlAttrParser(baseUrl));
+          break;
+        }
+
+      case 19
+      /* InbandEventStream */
+      :
+        {
+          var inbandEvent = {};
+
+          if (childrenObj.inbandEventStreams === undefined) {
+            childrenObj.inbandEventStreams = [];
+          }
+
+          childrenObj.inbandEventStreams.push(inbandEvent);
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, generateSchemeAttrParser(inbandEvent));
+          break;
+        }
+
+      case 17
+      /* SegmentBase */
+      :
+        {
+          var segmentBaseObj = {};
+          childrenObj.segmentBase = segmentBaseObj;
+          var attributeParser = generateSegmentBaseAttrParser(segmentBaseObj);
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, attributeParser);
+          break;
+        }
+
+      case 18
+      /* SegmentList */
+      :
+        {
+          var segmentListObj = {
+            list: []
+          };
+          childrenObj.segmentList = segmentListObj;
+          var childrenParser = generateSegmentListChildrenParser(segmentListObj, parsersStack); // Re-use SegmentBase attribute parse as we should have the same attributes
+
+          var _attributeParser = generateSegmentBaseAttrParser(segmentListObj);
+
+          parsersStack.pushParsers(nodeId, childrenParser, _attributeParser);
+          break;
+        }
+
+      case 16
+      /* SegmentTemplate */
+      :
+        {
+          var stObj = {};
+          childrenObj.segmentTemplate = stObj;
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, // SegmentTimeline as treated like an attribute
+          generateSegmentTemplateAttrParser(stObj));
+          break;
+        }
+    }
+  };
+}
+/**
+ * @param {Object} representationAttrs
+ * @param {WebAssembly.Memory} linearMemory
+ * @returns {Function}
+ */
+
+function generateRepresentationAttrParser(representationAttrs) {
+  var textDecoder = new TextDecoder();
+  return function onRepresentationAttribute(attr, payload) {
+    var dataView = new DataView(payload);
+
+    switch (attr) {
+      case 0
+      /* Id */
+      :
+        representationAttrs.id = parseString(textDecoder, payload);
+        break;
+
+      case 3
+      /* AudioSamplingRate */
+      :
+        representationAttrs.audioSamplingRate = parseString(textDecoder, payload);
+        break;
+
+      case 63
+      /* Bitrate */
+      :
+        representationAttrs.bitrate = dataView.getFloat64(0, true);
+        break;
+
+      case 4
+      /* Codecs */
+      :
+        representationAttrs.codecs = parseString(textDecoder, payload);
+        break;
+
+      case 5
+      /* CodingDependency */
+      :
+        representationAttrs.codingDependency = new DataView(payload).getUint8(0) === 0;
+        break;
+
+      case 6
+      /* FrameRate */
+      :
+        representationAttrs.frameRate = parseString(textDecoder, payload);
+        break;
+
+      case 7
+      /* Height */
+      :
+        representationAttrs.height = dataView.getFloat64(0, true);
+        break;
+
+      case 8
+      /* Width */
+      :
+        representationAttrs.width = dataView.getFloat64(0, true);
+        break;
+
+      case 9
+      /* MaxPlayoutRate */
+      :
+        representationAttrs.maxPlayoutRate = dataView.getFloat64(0, true);
+        break;
+
+      case 10
+      /* MaxSAPPeriod */
+      :
+        representationAttrs.maximumSAPPeriod = dataView.getFloat64(0, true);
+        break;
+
+      case 11
+      /* MimeType */
+      :
+        representationAttrs.mimeType = parseString(textDecoder, payload);
+        break;
+
+      case 2
+      /* Profiles */
+      :
+        representationAttrs.profiles = parseString(textDecoder, payload);
+        break;
+
+      case 65
+      /* QualityRanking */
+      :
+        representationAttrs.qualityRanking = dataView.getFloat64(0, true);
+        break;
+
+      case 12
+      /* SegmentProfiles */
+      :
+        representationAttrs.segmentProfiles = parseString(textDecoder, payload);
+        break;
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/AdaptationSet.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+
+
+
+
+/**
+ * Generate a "children parser" once inside a `AdaptationSet` node.
+ * @param {Object} adaptationSetChildren
+ * @param {WebAssembly.Memory} linearMemory
+ * @param {ParsersStack} parsersStack
+ * @returns {Function}
+ */
+
+function generateAdaptationSetChildrenParser(adaptationSetChildren, parsersStack) {
+  return function onRootChildren(nodeId) {
+    switch (nodeId) {
+      case 8
+      /* Accessibility */
+      :
+        {
+          var accessibility = {};
+
+          if (adaptationSetChildren.accessibilities === undefined) {
+            adaptationSetChildren.accessibilities = [];
+          }
+
+          adaptationSetChildren.accessibilities.push(accessibility);
+          var schemeAttrParser = generateSchemeAttrParser(accessibility);
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, schemeAttrParser);
+          break;
+        }
+
+      case 15
+      /* BaseURL */
+      :
+        {
+          var baseUrl = {
+            value: "",
+            attributes: {}
+          };
+          adaptationSetChildren.baseURLs.push(baseUrl);
+          var attributeParser = generateBaseUrlAttrParser(baseUrl);
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, attributeParser);
+          break;
+        }
+
+      case 9
+      /* ContentComponent */
+      :
+        {
+          var contentComponent = {};
+          adaptationSetChildren.contentComponent = contentComponent;
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, generateContentComponentAttrParser(contentComponent));
+          break;
+        }
+
+      case 10
+      /* ContentProtection */
+      :
+        {
+          var contentProtection = {
+            children: {
+              cencPssh: []
+            },
+            attributes: {}
+          };
+
+          if (adaptationSetChildren.contentProtections === undefined) {
+            adaptationSetChildren.contentProtections = [];
+          }
+
+          adaptationSetChildren.contentProtections.push(contentProtection);
+          var contentProtAttrParser = generateContentProtectionAttrParser(contentProtection);
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, contentProtAttrParser);
+          break;
+        }
+
+      case 11
+      /* EssentialProperty */
+      :
+        {
+          var essentialProperty = {};
+
+          if (adaptationSetChildren.essentialProperties === undefined) {
+            adaptationSetChildren.essentialProperties = [];
+          }
+
+          adaptationSetChildren.essentialProperties.push(essentialProperty);
+          var childrenParser = noop/* default */.Z; // EssentialProperty have no sub-element
+
+          var _attributeParser = generateSchemeAttrParser(essentialProperty);
+
+          parsersStack.pushParsers(nodeId, childrenParser, _attributeParser);
+          break;
+        }
+
+      case 19
+      /* InbandEventStream */
+      :
+        {
+          var inbandEvent = {};
+
+          if (adaptationSetChildren.inbandEventStreams === undefined) {
+            adaptationSetChildren.inbandEventStreams = [];
+          }
+
+          adaptationSetChildren.inbandEventStreams.push(inbandEvent);
+          var _childrenParser = noop/* default */.Z; // InbandEventStream have no sub-element
+
+          var _attributeParser2 = generateSchemeAttrParser(inbandEvent);
+
+          parsersStack.pushParsers(nodeId, _childrenParser, _attributeParser2);
+          break;
+        }
+
+      case 7
+      /* Representation */
+      :
+        {
+          var representationObj = {
+            children: {
+              baseURLs: []
+            },
+            attributes: {}
+          };
+          adaptationSetChildren.representations.push(representationObj);
+
+          var _childrenParser2 = generateRepresentationChildrenParser(representationObj.children, parsersStack);
+
+          var _attributeParser3 = generateRepresentationAttrParser(representationObj.attributes);
+
+          parsersStack.pushParsers(nodeId, _childrenParser2, _attributeParser3);
+          break;
+        }
+
+      case 12
+      /* Role */
+      :
+        {
+          var role = {};
+
+          if (adaptationSetChildren.roles === undefined) {
+            adaptationSetChildren.roles = [];
+          }
+
+          adaptationSetChildren.roles.push(role);
+
+          var _attributeParser4 = generateSchemeAttrParser(role);
+
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, _attributeParser4);
+          break;
+        }
+
+      case 13
+      /* SupplementalProperty */
+      :
+        {
+          var supplementalProperty = {};
+
+          if (adaptationSetChildren.supplementalProperties === undefined) {
+            adaptationSetChildren.supplementalProperties = [];
+          }
+
+          adaptationSetChildren.supplementalProperties.push(supplementalProperty);
+
+          var _attributeParser5 = generateSchemeAttrParser(supplementalProperty);
+
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, _attributeParser5);
+          break;
+        }
+
+      case 17
+      /* SegmentBase */
+      :
+        {
+          var segmentBaseObj = {};
+          adaptationSetChildren.segmentBase = segmentBaseObj;
+
+          var _attributeParser6 = generateSegmentBaseAttrParser(segmentBaseObj);
+
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, _attributeParser6);
+          break;
+        }
+
+      case 18
+      /* SegmentList */
+      :
+        {
+          var segmentListObj = {
+            list: []
+          };
+          adaptationSetChildren.segmentList = segmentListObj;
+
+          var _childrenParser3 = generateSegmentListChildrenParser(segmentListObj, parsersStack); // Re-use SegmentBase attribute parse as we should have the same attributes
+
+
+          var _attributeParser7 = generateSegmentBaseAttrParser(segmentListObj);
+
+          parsersStack.pushParsers(nodeId, _childrenParser3, _attributeParser7);
+          break;
+        }
+
+      case 16
+      /* SegmentTemplate */
+      :
+        {
+          var stObj = {};
+          adaptationSetChildren.segmentTemplate = stObj;
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, // SegmentTimeline as treated like an attribute
+          generateSegmentTemplateAttrParser(stObj));
+          break;
+        }
+    }
+  };
+}
+/**
+ * @param {Object} adaptationAttrs
+ * @param {WebAssembly.Memory} linearMemory
+ * @returns {Function}
+ */
+
+function generateAdaptationSetAttrParser(adaptationAttrs) {
+  var textDecoder = new TextDecoder();
+  return function onAdaptationSetAttribute(attr, payload) {
+    var dataView = new DataView(payload);
+
+    switch (attr) {
+      case 0
+      /* Id */
+      :
+        adaptationAttrs.id = parseString(textDecoder, payload);
+        break;
+
+      case 48
+      /* Group */
+      :
+        adaptationAttrs.group = dataView.getFloat64(0, true);
+        break;
+
+      case 60
+      /* Language */
+      :
+        adaptationAttrs.language = parseString(textDecoder, payload);
+        break;
+
+      case 61
+      /* ContentType */
+      :
+        adaptationAttrs.contentType = parseString(textDecoder, payload);
+        break;
+
+      case 62
+      /* Par */
+      :
+        adaptationAttrs.par = parseString(textDecoder, payload);
+        break;
+
+      case 53
+      /* MinBandwidth */
+      :
+        adaptationAttrs.minBitrate = dataView.getFloat64(0, true);
+        break;
+
+      case 49
+      /* MaxBandwidth */
+      :
+        adaptationAttrs.maxBitrate = dataView.getFloat64(0, true);
+        break;
+
+      case 56
+      /* MinWidth */
+      :
+        adaptationAttrs.minWidth = dataView.getFloat64(0, true);
+        break;
+
+      case 52
+      /* MaxWidth */
+      :
+        adaptationAttrs.maxWidth = dataView.getFloat64(0, true);
+        break;
+
+      case 55
+      /* MinHeight */
+      :
+        adaptationAttrs.minHeight = dataView.getFloat64(0, true);
+        break;
+
+      case 51
+      /* MaxHeight */
+      :
+        adaptationAttrs.maxHeight = dataView.getFloat64(0, true);
+        break;
+
+      case 54
+      /* MinFrameRate */
+      :
+        adaptationAttrs.minFrameRate = parseString(textDecoder, payload);
+        break;
+
+      case 50
+      /* MaxFrameRate */
+      :
+        adaptationAttrs.maxFrameRate = parseString(textDecoder, payload);
+        break;
+
+      case 57
+      /* SelectionPriority */
+      :
+        adaptationAttrs.selectionPriority = dataView.getFloat64(0, true);
+        break;
+
+      case 58
+      /* SegmentAlignment */
+      :
+        adaptationAttrs.segmentAlignment = parseFloatOrBool(dataView.getFloat64(0, true));
+        break;
+
+      case 59
+      /* SubsegmentAlignment */
+      :
+        adaptationAttrs.subsegmentAlignment = parseFloatOrBool(dataView.getFloat64(0, true));
+        break;
+
+      case 32
+      /* BitstreamSwitching */
+      :
+        adaptationAttrs.bitstreamSwitching = dataView.getFloat64(0, true) !== 0;
+        break;
+
+      case 3
+      /* AudioSamplingRate */
+      :
+        adaptationAttrs.audioSamplingRate = parseString(textDecoder, payload);
+        break;
+
+      case 4
+      /* Codecs */
+      :
+        adaptationAttrs.codecs = parseString(textDecoder, payload);
+        break;
+
+      case 2
+      /* Profiles */
+      :
+        adaptationAttrs.profiles = parseString(textDecoder, payload);
+        break;
+
+      case 12
+      /* SegmentProfiles */
+      :
+        adaptationAttrs.segmentProfiles = parseString(textDecoder, payload);
+        break;
+
+      case 11
+      /* MimeType */
+      :
+        adaptationAttrs.mimeType = parseString(textDecoder, payload);
+        break;
+
+      case 5
+      /* CodingDependency */
+      :
+        adaptationAttrs.codingDependency = dataView.getFloat64(0, true) !== 0;
+        break;
+
+      case 6
+      /* FrameRate */
+      :
+        adaptationAttrs.frameRate = parseString(textDecoder, payload);
+        break;
+
+      case 7
+      /* Height */
+      :
+        adaptationAttrs.height = dataView.getFloat64(0, true);
+        break;
+
+      case 8
+      /* Width */
+      :
+        adaptationAttrs.width = dataView.getFloat64(0, true);
+        break;
+
+      case 9
+      /* MaxPlayoutRate */
+      :
+        adaptationAttrs.maxPlayoutRate = dataView.getFloat64(0, true);
+        break;
+
+      case 10
+      /* MaxSAPPeriod */
+      :
+        adaptationAttrs.maximumSAPPeriod = dataView.getFloat64(0, true);
+        break;
+      // TODO
+      // case AttributeName.StartsWithSap:
+      //   adaptationAttrs.startsWithSap = dataView.getFloat64(0, true);
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/EventStream.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Generate a "children parser" once inside a `EventStream` node.
+ * @param {Object} childrenObj
+ * @param {WebAssembly.Memory} linearMemory
+ * @param {ParsersStack} parsersStack
+ * @param {ArrayBuffer} fullMpd
+ * @returns {Function}
+ */
+
+function generateEventStreamChildrenParser(childrenObj, parsersStack) {
+  return function onRootChildren(nodeId) {
+    switch (nodeId) {
+      case 6
+      /* EventStreamElt */
+      :
+        {
+          var event = {};
+          childrenObj.events.push(event);
+          var attrParser = generateEventAttrParser(event);
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, attrParser);
+          break;
+        }
+    }
+  };
+}
+/**
+ * @param {Object} esAttrs
+ * @param {WebAssembly.Memory} linearMemory
+ * @returns {Function}
+ */
+
+function generateEventStreamAttrParser(esAttrs) {
+  var textDecoder = new TextDecoder();
+  return function onEventStreamAttribute(attr, payload) {
+    var dataView = new DataView(payload);
+
+    switch (attr) {
+      case 16
+      /* SchemeIdUri */
+      :
+        esAttrs.schemeIdUri = parseString(textDecoder, payload);
+        break;
+
+      case 17
+      /* SchemeValue */
+      :
+        esAttrs.value = parseString(textDecoder, payload);
+        break;
+
+      case 27
+      /* TimeScale */
+      :
+        esAttrs.timescale = dataView.getFloat64(0, true);
+        break;
+    }
+  };
+}
+/**
+ * @param {Object} eventAttr
+ * @param {WebAssembly.Memory} linearMemory
+ * @param {ArrayBuffer} fullMpd
+ * @returns {Function}
+ */
+
+function generateEventAttrParser(eventAttr) {
+  var textDecoder = new TextDecoder();
+  return function onEventStreamAttribute(attr, payload) {
+    var dataView = new DataView(payload);
+
+    switch (attr) {
+      case 25
+      /* EventPresentationTime */
+      :
+        eventAttr.presentationTime = dataView.getFloat64(0, true);
+        break;
+
+      case 1
+      /* Duration */
+      :
+        eventAttr.duration = dataView.getFloat64(0, true);
+        break;
+
+      case 0
+      /* Id */
+      :
+        eventAttr.id = parseString(textDecoder, payload);
+        break;
+
+      case 69
+      /* EventStreamEltRange */
+      :
+        eventAttr.eventStreamData = payload;
+        break;
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/Period.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+/**
+ * Generate a "children parser" once inside a `Perod` node.
+ * @param {Object} periodChildren
+ * @param {WebAssembly.Memory} linearMemory
+ * @param {ParsersStack} parsersStack
+ * @param {ArrayBuffer} fullMpd
+ * @returns {Function}
+ */
+
+function generatePeriodChildrenParser(periodChildren, parsersStack) {
+  return function onRootChildren(nodeId) {
+    switch (nodeId) {
+      case 4
+      /* AdaptationSet */
+      :
+        {
+          var adaptationObj = {
+            children: {
+              baseURLs: [],
+              representations: []
+            },
+            attributes: {}
+          };
+          periodChildren.adaptations.push(adaptationObj);
+          var childrenParser = generateAdaptationSetChildrenParser(adaptationObj.children, parsersStack);
+          var attributeParser = generateAdaptationSetAttrParser(adaptationObj.attributes);
+          parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
+          break;
+        }
+
+      case 15
+      /* BaseURL */
+      :
+        {
+          var baseUrl = {
+            value: "",
+            attributes: {}
+          };
+          periodChildren.baseURLs.push(baseUrl);
+          var _childrenParser = noop/* default */.Z;
+
+          var _attributeParser = generateBaseUrlAttrParser(baseUrl);
+
+          parsersStack.pushParsers(nodeId, _childrenParser, _attributeParser);
+          break;
+        }
+
+      case 5
+      /* EventStream */
+      :
+        {
+          var eventStream = {
+            children: {
+              events: []
+            },
+            attributes: {}
+          };
+          periodChildren.eventStreams.push(eventStream);
+
+          var _childrenParser2 = generateEventStreamChildrenParser(eventStream.children, parsersStack);
+
+          var attrParser = generateEventStreamAttrParser(eventStream.attributes);
+          parsersStack.pushParsers(nodeId, _childrenParser2, attrParser);
+          break;
+        }
+
+      case 16
+      /* SegmentTemplate */
+      :
+        {
+          var stObj = {};
+          periodChildren.segmentTemplate = stObj;
+          parsersStack.pushParsers(nodeId, noop/* default */.Z, // SegmentTimeline as treated like an attribute
+          generateSegmentTemplateAttrParser(stObj));
+          break;
+        }
+    }
+  };
+}
+/**
+ * @param {Object} periodAttrs
+ * @param {WebAssembly.Memory} linearMemory
+ * @returns {Function}
+ */
+
+function generatePeriodAttrParser(periodAttrs) {
+  var textDecoder = new TextDecoder();
+  return function onPeriodAttribute(attr, payload) {
+    switch (attr) {
+      case 0
+      /* Id */
+      :
+        periodAttrs.id = parseString(textDecoder, payload);
+        break;
+
+      case 45
+      /* Start */
+      :
+        periodAttrs.start = new DataView(payload).getFloat64(0, true);
+        break;
+
+      case 1
+      /* Duration */
+      :
+        periodAttrs.duration = new DataView(payload).getFloat64(0, true);
+        break;
+
+      case 32
+      /* BitstreamSwitching */
+      :
+        periodAttrs.bitstreamSwitching = new DataView(payload).getUint8(0) === 0;
+        break;
+
+      case 46
+      /* XLinkHref */
+      :
+        periodAttrs.xlinkHref = parseString(textDecoder, payload);
+        break;
+
+      case 47
+      /* XLinkActuate */
+      :
+        periodAttrs.xlinkActuate = parseString(textDecoder, payload);
+        break;
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/MPD.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+/**
+ * Generate a "children parser" once inside an `MPD` node.
+ * @param {Object} mpdChildren
+ * @param {WebAssembly.Memory} linearMemory
+ * @param {ParsersStack} parsersStack
+ * @param {ArrayBuffer} fullMpd
+ * @returns {Function}
+ */
+
+function generateMPDChildrenParser(mpdChildren, parsersStack) {
+  return function onRootChildren(nodeId) {
+    switch (nodeId) {
+      case 15
+      /* BaseURL */
+      :
+        {
+          var baseUrl = {
+            value: "",
+            attributes: {}
+          };
+          mpdChildren.baseURLs.push(baseUrl);
+          var childrenParser = noop/* default */.Z; // BaseURL have no sub-element
+
+          var attributeParser = generateBaseUrlAttrParser(baseUrl);
+          parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
+          break;
+        }
+
+      case 2
+      /* Period */
+      :
+        {
+          var period = {
+            children: {
+              adaptations: [],
+              baseURLs: [],
+              eventStreams: []
+            },
+            attributes: {}
+          };
+          mpdChildren.periods.push(period);
+
+          var _childrenParser = generatePeriodChildrenParser(period.children, parsersStack);
+
+          var _attributeParser = generatePeriodAttrParser(period.attributes);
+
+          parsersStack.pushParsers(nodeId, _childrenParser, _attributeParser);
+          break;
+        }
+
+      case 3
+      /* UtcTiming */
+      :
+        {
+          var utcTiming = {};
+          mpdChildren.utcTimings.push(utcTiming);
+          var _childrenParser2 = noop/* default */.Z; // UTCTiming have no sub-element
+
+          var _attributeParser2 = generateSchemeAttrParser(utcTiming);
+
+          parsersStack.pushParsers(nodeId, _childrenParser2, _attributeParser2);
+          break;
+        }
+    }
+  };
+}
+function generateMPDAttrParser(mpdChildren, mpdAttrs) {
+  var dataView;
+  var textDecoder = new TextDecoder();
+  return function onMPDAttribute(attr, payload) {
+    switch (attr) {
+      case 0
+      /* Id */
+      :
+        mpdAttrs.id = parseString(textDecoder, payload);
+        break;
+
+      case 2
+      /* Profiles */
+      :
+        mpdAttrs.profiles = parseString(textDecoder, payload);
+        break;
+
+      case 33
+      /* Type */
+      :
+        mpdAttrs.type = parseString(textDecoder, payload);
+        break;
+
+      case 34
+      /* AvailabilityStartTime */
+      :
+        var startTime = parseString(textDecoder, payload);
+        mpdAttrs.availabilityStartTime = new Date(startTime).getTime() / 1000;
+        break;
+
+      case 35
+      /* AvailabilityEndTime */
+      :
+        var endTime = parseString(textDecoder, payload);
+        mpdAttrs.availabilityEndTime = new Date(endTime).getTime() / 1000;
+        break;
+
+      case 36
+      /* PublishTime */
+      :
+        var publishTime = parseString(textDecoder, payload);
+        mpdAttrs.publishTime = new Date(publishTime).getTime() / 1000;
+        break;
+
+      case 68
+      /* MediaPresentationDuration */
+      :
+        dataView = new DataView(payload);
+        mpdAttrs.duration = dataView.getFloat64(0, true);
+        break;
+
+      case 37
+      /* MinimumUpdatePeriod */
+      :
+        dataView = new DataView(payload);
+        mpdAttrs.minimumUpdatePeriod = dataView.getFloat64(0, true);
+        break;
+
+      case 38
+      /* MinBufferTime */
+      :
+        dataView = new DataView(payload);
+        mpdAttrs.minBufferTime = dataView.getFloat64(0, true);
+        break;
+
+      case 39
+      /* TimeShiftBufferDepth */
+      :
+        dataView = new DataView(payload);
+        mpdAttrs.timeShiftBufferDepth = dataView.getFloat64(0, true);
+        break;
+
+      case 40
+      /* SuggestedPresentationDelay */
+      :
+        dataView = new DataView(payload);
+        mpdAttrs.suggestedPresentationDelay = dataView.getFloat64(0, true);
+        break;
+
+      case 41
+      /* MaxSegmentDuration */
+      :
+        dataView = new DataView(payload);
+        mpdAttrs.maxSegmentDuration = dataView.getFloat64(0, true);
+        break;
+
+      case 42
+      /* MaxSubsegmentDuration */
+      :
+        dataView = new DataView(payload);
+        mpdAttrs.maxSubsegmentDuration = dataView.getFloat64(0, true);
+        break;
+
+      case 66
+      /* Location */
+      :
+        var location = parseString(textDecoder, payload);
+        mpdChildren.locations.push(location);
+        break;
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/root.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {Object} rootObj
+ * @param {WebAssembly.Memory} linearMemory
+ * @param {ParsersStack} parsersStack
+ * @param {ArrayBuffer} fullMpd
+ * @returns {Function}
+ */
+
+function generateRootChildrenParser(rootObj, parsersStack) {
+  return function onRootChildren(nodeId) {
+    switch (nodeId) {
+      case 1
+      /* MPD */
+      :
+        rootObj.mpd = {
+          children: {
+            baseURLs: [],
+            locations: [],
+            periods: [],
+            utcTimings: []
+          },
+          attributes: {}
+        };
+        var childrenParser = generateMPDChildrenParser(rootObj.mpd.children, parsersStack);
+        var attributeParser = generateMPDAttrParser(rootObj.mpd.children, rootObj.mpd.attributes);
+        parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
+        break;
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/generators/XLink.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Generate a "children parser" when an XLink has been loaded.
+ * @param {Object} xlinkObj
+ * @param {WebAssembly.Memory} linearMemory
+ * @param {ParsersStack} parsersStack
+ * @param {ArrayBuffer} fullMpd
+ * @returns {Function}
+ */
+
+function generateXLinkChildrenParser(xlinkObj, parsersStack) {
+  return function onRootChildren(nodeId) {
+    switch (nodeId) {
+      case 2
+      /* Period */
+      :
+        {
+          var period = {
+            children: {
+              adaptations: [],
+              baseURLs: [],
+              eventStreams: []
+            },
+            attributes: {}
+          };
+          xlinkObj.periods.push(period);
+          var childrenParser = generatePeriodChildrenParser(period.children, parsersStack);
+          var attributeParser = generatePeriodAttrParser(period.attributes);
+          parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
+          break;
+        }
+    }
+  };
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/parsers_stack.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Maintains a stack of children and attributes parsers, to easily parse
+ * the very hierarchical MPDs.
+ *
+ * This class allows to easily push and pop such parsers once nodes are
+ * respectively opened and closed.
+ *
+ * @class ParsersStack
+ */
+
+var ParsersStack = /*#__PURE__*/function () {
+  function ParsersStack() {
+    this._currentNodeId = null;
+    this.childrenParser = noop/* default */.Z;
+    this.attributeParser = noop/* default */.Z;
+    this._stack = [{
+      nodeId: null,
+      children: noop/* default */.Z,
+      attribute: noop/* default */.Z
+    }];
+  }
+
+  var _proto = ParsersStack.prototype;
+
+  _proto.pushParsers = function pushParsers(nodeId, childrenParser, attrParser) {
+    this._currentNodeId = nodeId;
+    this.childrenParser = childrenParser;
+    this.attributeParser = attrParser;
+
+    this._stack.push({
+      nodeId: nodeId,
+      attribute: attrParser,
+      children: childrenParser
+    });
+  };
+
+  _proto.popIfCurrent = function popIfCurrent(idToPop) {
+    if (this._currentNodeId !== idToPop) {
+      return;
+    }
+
+    this._stack.pop();
+
+    var _this$_stack = this._stack[this._stack.length - 1],
+        nodeId = _this$_stack.nodeId,
+        children = _this$_stack.children,
+        attribute = _this$_stack.attribute;
+    this._currentNodeId = nodeId;
+    this.attributeParser = attribute;
+    this.childrenParser = children;
+    return;
+  };
+
+  _proto.reset = function reset() {
+    this.childrenParser = noop/* default */.Z;
+    this.attributeParser = noop/* default */.Z;
+    this._stack = [{
+      nodeId: null,
+      children: noop/* default */.Z,
+      attribute: noop/* default */.Z
+    }];
+  };
+
+  return ParsersStack;
+}();
+
+
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/ts/dash-wasm-parser.ts
+
+
+
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+
+
+var timer = 0;
+
+var DashWasmParser = /*#__PURE__*/function () {
+  /**
+   * Create a new `DashWasmParser`.
+   * @param {object} opts
+   */
+  function DashWasmParser() {
+    this._parsersStack = new ParsersStack();
+    this._worker = null;
+    this._initInfo = {
+      promise: null,
+      callbacks: null
+    };
+    this._currentParsingOperation = null;
+    this.status = "uninitialized";
+  }
+  /**
+   * Returns Promise that will resolve when the initialization has ended (either
+   * with success, in which cases the Promise resolves, either with failure, in
+   * which case it rejects the corresponding error).
+   *
+   * This is actually the exact same Promise than the one returned by the first
+   * `initialize` call.
+   *
+   * If that method was never called, returns a rejecting Promise.
+   * @returns {Promise}
+   */
+
+
+  var _proto = DashWasmParser.prototype;
+
+  _proto.waitForInitialization = function waitForInitialization() {
+    var _a, _b;
+
+    return (_b = (_a = this._initInfo) === null || _a === void 0 ? void 0 : _a.promise) !== null && _b !== void 0 ? _b : pinkie_default().reject("No initialization performed yet.");
+  };
+
+  _proto._onWorkerMessage = function _onWorkerMessage(evt) {
+    var _a, _b;
+
+    var p = performance.now();
+    var msgs = evt.data;
+
+    for (var i = 0; i < msgs.length; i++) {
+      var msg = msgs[i];
+
+      switch (msg.type) {
+        case 22
+        /* Attribute */
+        :
+          // Call the active "attributeParser"
+          this._parsersStack.attributeParser(msg.attribute, msg.payload);
+
+          break;
+
+        case 11
+        /* TagOpen */
+        :
+          // Call the active "childrenParser"
+          this._parsersStack.childrenParser(msg.tag);
+
+          break;
+
+        case 12
+        /* TagClose */
+        :
+          // Only pop current parsers from the `parsersStack` if that tag was the
+          // active one.
+          this._parsersStack.popIfCurrent(msg.tag);
+
+          break;
+
+        case 21
+        /* ParserWarning */
+        :
+          var errorMsg = new TextDecoder().decode(msg.payload);
+
+          if (((_a = this._currentParsingOperation) === null || _a === void 0 ? void 0 : _a.type) === "mpd") {
+            this._currentParsingOperation.warnings.push(new Error(errorMsg));
+          }
+
+          break;
+
+        case 4
+        /* MPDParsingFinished */
+        :
+          if (this._currentParsingOperation === null || this._currentParsingOperation.type !== "mpd") {
+            log/* default.warn */.Z.warn("DASH-WASM: MPD parsing finished but no MPD parsing was pending.");
+          } else {
+            var _this$_currentParsing = this._currentParsingOperation,
+                data = _this$_currentParsing.data,
+                warnings = _this$_currentParsing.warnings,
+                resolve = _this$_currentParsing.resolve;
+            this._currentParsingOperation = null;
+
+            this._parsersStack.reset();
+
+            resolve([(_b = data.mpd) !== null && _b !== void 0 ? _b : null, warnings]);
+          }
+
+          break;
+
+        case 3
+        /* MPDParsingError */
+        :
+          if (this._currentParsingOperation === null || this._currentParsingOperation.type !== "mpd") {
+            log/* default.warn */.Z.warn("DASH-WASM: MPD parsing failed but no MPD parsing was pending.");
+          } else {
+            var err = new Error(msg.message);
+            var reject = this._currentParsingOperation.reject;
+            this._currentParsingOperation = null;
+
+            this._parsersStack.reset();
+
+            reject(err);
+          }
+
+          break;
+
+        case 6
+        /* XLinkParsingFinished */
+        :
+          if (this._currentParsingOperation === null || this._currentParsingOperation.type !== "xlink") {
+            log/* default.warn */.Z.warn("DASH-WASM: xlink parsing finished but no xlink parsing " + "was pending.");
+          } else {
+            var _this$_currentParsing2 = this._currentParsingOperation,
+                _data = _this$_currentParsing2.data,
+                _warnings = _this$_currentParsing2.warnings,
+                _resolve = _this$_currentParsing2.resolve;
+            this._currentParsingOperation = null;
+
+            this._parsersStack.reset();
+
+            _resolve([_data.periods, _warnings]);
+          }
+
+          break;
+
+        case 5
+        /* XLinkParsingError */
+        :
+          if (this._currentParsingOperation === null || this._currentParsingOperation.type !== "xlink") {
+            log/* default.warn */.Z.warn("DASH-WASM: xlink parsing failed but no xlink parsing " + "was pending.");
+          } else {
+            var _err = new Error(msg.message);
+
+            var _reject = this._currentParsingOperation.reject;
+            this._currentParsingOperation = null;
+
+            this._parsersStack.reset();
+
+            _reject(_err);
+          }
+
+          break;
+
+        case 0
+        /* Initialized */
+        :
+          this.status = "initialized";
+
+          if (this._initInfo.callbacks === null) {
+            log/* default.warn */.Z.warn("DASH-WASM: Parser initialized but no initialization was pending.");
+          } else {
+            var _resolve2 = this._initInfo.callbacks.resolve;
+            this._initInfo.callbacks = null;
+
+            _resolve2();
+          }
+
+          break;
+
+        case 2
+        /* InitializationError */
+        :
+          this.status = "failure";
+
+          if (this._initInfo.callbacks === null) {
+            log/* default.warn */.Z.warn("DASH-WASM: Parser initialization failed but no " + "initialization was pending.");
+          } else {
+            var _err2 = new Error(msg.message);
+
+            var _reject2 = this._initInfo.callbacks.reject;
+            this._initInfo.callbacks = null;
+
+            _reject2(_err2);
+          }
+
+          break;
+
+        case 1
+        /* InitializationWarning */
+        :
+          log/* default.warn */.Z.warn(msg.message);
+          break;
+
+        default:
+          (0,assert_unreachable/* default */.Z)(msg);
+      }
+    }
+
+    timer += performance.now() - p;
+  };
+
+  _proto.initialize = /*#__PURE__*/function () {
+    var _initialize = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(opts) {
+      var _this = this;
+
+      var worker;
+      return regenerator_default().wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              if (!(this.status !== "uninitialized")) {
+                _context.next = 4;
+                break;
+              }
+
+              return _context.abrupt("return", pinkie_default().reject(new Error("DashWasmParser already initialized.")));
+
+            case 4:
+              if (this.isCompatible()) {
+                _context.next = 7;
+                break;
+              }
+
+              this.status = "failure";
+              return _context.abrupt("return", pinkie_default().reject(new Error("Target not compatible with WebAssembly.")));
+
+            case 7:
+              this.status = "initializing";
+              worker = new Worker(opts.workerUrl);
+              this._worker = worker;
+              worker.onmessage = this._onWorkerMessage.bind(this);
+              this._initInfo.promise = new (pinkie_default())(function (resolve, reject) {
+                _this._initInfo.callbacks = {
+                  resolve: resolve,
+                  reject: reject
+                };
+              });
+              worker.postMessage({
+                type: 0
+                /* Initialize */
+                ,
+                wasmUrl: opts.wasmUrl
+              });
+              return _context.abrupt("return", this._initInfo.promise);
+
+            case 14:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, this);
+    }));
+
+    function initialize(_x) {
+      return _initialize.apply(this, arguments);
+    }
+
+    return initialize;
+  }()
+  /**
+   * @param {Document} manifest - Original manifest as returned by the server
+   * @param {Object} args
+   * @returns {Object}
+   */
+  ;
+
+  _proto.runWasmParser = function runWasmParser(mpd, args) {
+    var _this2 = this;
+
+    timer = 0;
+    return this._parseMpd(mpd).then(function (_ref) {
+      var mpdIR = _ref[0],
+          warnings = _ref[1];
+
+      if (mpdIR === null) {
+        throw new Error("DASH Parser: Unknown error while parsing the MPD");
+      }
+
+      var ret = (0,common/* default */.ZP)(mpdIR, args, warnings);
+      console.warn("!!!!!!!!! Parse Main thread", timer);
+      return _this2._processParserReturnValue(ret);
+    });
+  }
+  /**
+   * Return `true` if the current plaform is compatible with WebAssembly and the
+   * TextDecoder interface (for faster UTF-8 parsing), which are needed features
+   * for the `DashWasmParser`.
+   * @returns {boolean}
+   */
+  ;
+
+  _proto.isCompatible = function isCompatible() {
+    return typeof WebAssembly === "object" && typeof WebAssembly.instantiate === "function" && typeof window.TextDecoder === "function";
+  };
+
+  _proto._parseMpd = function _parseMpd(mpd) {
+    var _this3 = this;
+
+    if (this._worker === null) {
+      throw new Error("DashWasmParser not initialized");
+    }
+
+    if (this._currentParsingOperation !== null) {
+      throw new Error("Parsing operation already pending.");
+    }
+
+    var rootObj = {};
+    var rootChildrenParser = generateRootChildrenParser(rootObj, this._parsersStack);
+
+    this._parsersStack.pushParsers(null, rootChildrenParser, noop/* default */.Z);
+
+    this._worker.postMessage({
+      type: 1
+      /* ParseMpd */
+      ,
+      mpd: mpd
+    }, [mpd]);
+
+    return new (pinkie_default())(function (resolve, reject) {
+      _this3._currentParsingOperation = {
+        type: "mpd",
+        data: rootObj,
+        warnings: [],
+        resolve: resolve,
+        reject: reject
+      };
+    });
+  };
+
+  _proto._parseXlink = function _parseXlink(xlinkData) {
+    var _this4 = this;
+
+    if (this._worker === null) {
+      throw new Error("DashWasmParser not initialized");
+    }
+
+    if (this._currentParsingOperation !== null) {
+      throw new Error("Parsing operation already pending.");
+    }
+
+    var rootObj = {
+      periods: []
+    };
+    var xlinkParser = generateXLinkChildrenParser(rootObj, this._parsersStack);
+
+    this._parsersStack.pushParsers(null, xlinkParser, noop/* default */.Z);
+
+    this._worker.postMessage({
+      type: 2
+      /* ParseXlink */
+      ,
+      xlink: xlinkData
+    }, [xlinkData]);
+
+    return new (pinkie_default())(function (resolve, reject) {
+      _this4._currentParsingOperation = {
+        type: "xlink",
+        data: rootObj,
+        warnings: [],
+        resolve: resolve,
+        reject: reject
+      };
+    });
+  }
+  /**
+   * Handle `parseMpdIr` return values, asking for resources if they are needed
+   * and pre-processing them before continuing parsing.
+   *
+   * @param {Object} initialRes
+   * @returns {Object}
+   */
+  ;
+
+  _proto._processParserReturnValue = function _processParserReturnValue(initialRes) {
+    var _this5 = this;
+
+    if (initialRes.type === "done") {
+      return pinkie_default().resolve(initialRes);
+    } else if (initialRes.type === "needs-clock") {
+      var continueParsingMPD = function continueParsingMPD(loadedClock) {
+        if (loadedClock.length !== 1) {
+          throw new Error("DASH parser: wrong number of loaded ressources.");
+        }
+
+        var newRet = initialRes.value["continue"](loadedClock[0].responseData);
+        return _this5._processParserReturnValue(newRet);
+      };
+
+      return pinkie_default().resolve({
+        type: "needs-resources",
+        value: {
+          urls: [initialRes.value.url],
+          format: "string",
+          "continue": continueParsingMPD
+        }
+      });
+    } else if (initialRes.type === "needs-xlinks") {
+      var _continueParsingMPD = /*#__PURE__*/function () {
+        var _ref2 = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee2(loadedXlinks) {
+          var resourceInfos, i, _loadedXlinks$i, xlinkData, receivedTime, sendingTime, url, _yield$_this5$_parseX, periodsIr, periodsIRWarnings, newRet;
+
+          return regenerator_default().wrap(function _callee2$(_context2) {
+            while (1) {
+              switch (_context2.prev = _context2.next) {
+                case 0:
+                  resourceInfos = [];
+                  i = 0;
+
+                case 2:
+                  if (!(i < loadedXlinks.length)) {
+                    _context2.next = 13;
+                    break;
+                  }
+
+                  _loadedXlinks$i = loadedXlinks[i], xlinkData = _loadedXlinks$i.responseData, receivedTime = _loadedXlinks$i.receivedTime, sendingTime = _loadedXlinks$i.sendingTime, url = _loadedXlinks$i.url;
+                  _context2.next = 6;
+                  return _this5._parseXlink(xlinkData);
+
+                case 6:
+                  _yield$_this5$_parseX = _context2.sent;
+                  periodsIr = _yield$_this5$_parseX[0];
+                  periodsIRWarnings = _yield$_this5$_parseX[1];
+                  resourceInfos.push({
+                    url: url,
+                    receivedTime: receivedTime,
+                    sendingTime: sendingTime,
+                    parsed: periodsIr,
+                    warnings: periodsIRWarnings
+                  });
+
+                case 10:
+                  i++;
+                  _context2.next = 2;
+                  break;
+
+                case 13:
+                  newRet = initialRes.value["continue"](resourceInfos);
+                  return _context2.abrupt("return", _this5._processParserReturnValue(newRet));
+
+                case 15:
+                case "end":
+                  return _context2.stop();
+              }
+            }
+          }, _callee2);
+        }));
+
+        return function _continueParsingMPD(_x2) {
+          return _ref2.apply(this, arguments);
+        };
+      }();
+
+      return pinkie_default().resolve({
+        type: "needs-resources",
+        value: {
+          urls: initialRes.value.xlinksUrls,
+          format: "arraybuffer",
+          "continue": _continueParsingMPD
+        }
+      });
+    } else {
+      (0,assert_unreachable/* default */.Z)(initialRes);
+    }
+  };
+
+  return DashWasmParser;
+}();
+
+
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/wasm-parser/index.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* harmony default export */ var wasm_parser = (DashWasmParser);
+// EXTERNAL MODULE: ./src/transports/dash/index.ts + 17 modules
+var dash = __webpack_require__(5877);
+;// CONCATENATED MODULE: ./src/experimental/features/dash_wasm.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+var dashWasmParser = new wasm_parser();
+var dashWasmFeature = {
+  _addFeature: function _addFeature(features) {
+    if (features.transports.dash === undefined) {
+      features.transports.dash = dash/* default */.Z;
+    }
+
+    features.dashParsers.wasm = dashWasmParser;
+  },
+  initialize: function initialize(opts) {
+    return dashWasmParser.initialize(opts);
+  }
+};
+
+/* harmony default export */ var dash_wasm = ((/* unused pure expression or super */ null && (dashWasmFeature)));
 // EXTERNAL MODULE: ./src/features/index.ts
 var features = __webpack_require__(7874);
+// EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
+var is_null_or_undefined = __webpack_require__(1946);
+// EXTERNAL MODULE: ./src/features/features_object.ts
+var features_object = __webpack_require__(7273);
+;// CONCATENATED MODULE: ./src/features/add_features.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIE OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * @param {Array.<Object>} featureFuncList
+ */
+
+function addFeatures(featureFuncList) {
+  for (var i = 0; i < featureFuncList.length; i++) {
+    var addFeature = featureFuncList[i];
+
+    if (typeof addFeature === "function") {
+      addFeature(features_object/* default */.Z);
+    } else if (!(0,is_null_or_undefined/* default */.Z)(addFeature) && typeof addFeature._addFeature === "function") {
+      addFeature._addFeature(features_object/* default */.Z);
+    } else {
+      throw new Error("Unrecognized feature");
+    }
+  }
+}
 // EXTERNAL MODULE: ./src/manifest/index.ts + 6 modules
 var manifest = __webpack_require__(1989);
 // EXTERNAL MODULE: ./src/utils/are_arrays_of_numbers_equal.ts
 var are_arrays_of_numbers_equal = __webpack_require__(4791);
 // EXTERNAL MODULE: ./src/utils/event_emitter.ts
 var event_emitter = __webpack_require__(1959);
-// EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
-var is_null_or_undefined = __webpack_require__(1946);
-// EXTERNAL MODULE: ./src/utils/noop.ts
-var noop = __webpack_require__(8894);
 // EXTERNAL MODULE: ./src/utils/object_assign.ts
 var object_assign = __webpack_require__(8026);
 // EXTERNAL MODULE: ./src/utils/promise.ts
@@ -43253,29 +45960,12 @@ function clearEMESession(mediaElement) {
     return empty/* EMPTY */.E;
   });
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/catchError.js
-var catchError = __webpack_require__(9878);
-;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/finalize.js
-
-function finalize(callback) {
-    return (0,lift/* operate */.e)(function (source, subscriber) {
-        try {
-            source.subscribe(subscriber);
-        }
-        finally {
-            subscriber.add(callback);
-        }
-    });
-}
-//# sourceMappingURL=finalize.js.map
-// EXTERNAL MODULE: ./src/utils/rx-try_catch.ts
-var rx_try_catch = __webpack_require__(5561);
-// EXTERNAL MODULE: ./src/utils/filter_map.ts
-var filter_map = __webpack_require__(2793);
+// EXTERNAL MODULE: ./src/utils/assert.ts
+var assert = __webpack_require__(811);
+// EXTERNAL MODULE: ./src/utils/task_canceller.ts
+var task_canceller = __webpack_require__(288);
 // EXTERNAL MODULE: ./src/errors/request_error.ts
 var request_error = __webpack_require__(9105);
-// EXTERNAL MODULE: ./src/errors/network_error.ts
-var network_error = __webpack_require__(9362);
 ;// CONCATENATED MODULE: ./src/core/fetchers/utils/error_selector.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -43310,8 +46000,6 @@ function errorSelector(error) {
     defaultReason: "Unknown error when fetching the Manifest"
   });
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/timer.js
-var timer = __webpack_require__(6625);
 ;// CONCATENATED MODULE: ./src/compat/is_offline.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -43359,9 +46047,7 @@ function isOffline() {
 }
 // EXTERNAL MODULE: ./src/errors/custom_loader_error.ts
 var custom_loader_error = __webpack_require__(7839);
-// EXTERNAL MODULE: ./src/utils/get_fuzzed_delay.ts
-var get_fuzzed_delay = __webpack_require__(2572);
-;// CONCATENATED MODULE: ./src/core/fetchers/utils/try_urls_with_backoff.ts
+;// CONCATENATED MODULE: ./src/utils/cancellable_sleep.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -43377,6 +46063,55 @@ var get_fuzzed_delay = __webpack_require__(2572);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Wait the given `delay`, resolving the Promise when finished.
+ *
+ * The `cancellationSignal` given allows to cancel that timeout. In the case it
+ * is triggered before the timeout ended, this function will reject the
+ * corresponding `CancellationError` through the returned Promise.
+ *
+ * @param {number} delay - Delay to wait, in milliseconds
+ * @param {Object} cancellationSignal - `CancellationSignal` allowing to abort
+ * the timeout.
+ * @returns {Promise} - Resolve on timeout completion, rejects on timeout
+ * cancellation with the corresponding `CancellationError`.
+ */
+
+function cancellableSleep(delay, cancellationSignal) {
+  return new (pinkie_default())(function (res, rej) {
+    var timeout = setTimeout(function () {
+      unregisterCancelSignal();
+      res();
+    }, delay);
+    var unregisterCancelSignal = cancellationSignal.register(function onCancel(cancellationError) {
+      clearTimeout(timeout);
+      rej(cancellationError);
+    });
+  });
+}
+// EXTERNAL MODULE: ./src/utils/get_fuzzed_delay.ts
+var get_fuzzed_delay = __webpack_require__(2572);
+;// CONCATENATED MODULE: ./src/core/fetchers/utils/try_urls_with_backoff.ts
+
+
+
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 
 
@@ -43421,7 +46156,7 @@ function shouldRetry(error) {
     return false;
   }
 
-  return (0,is_known_error/* default */.Z)(error) && error.code === "INTEGRITY_ERROR";
+  return isKnownError(error) && error.code === "INTEGRITY_ERROR";
 }
 /**
  * Returns true if we're pretty sure that the current error is due to the
@@ -43440,14 +46175,6 @@ function isOfflineRequestError(error) {
 
   return false; // under doubt, return false
 }
-
-var REQUEST_ERROR_TYPES;
-
-(function (REQUEST_ERROR_TYPES) {
-  REQUEST_ERROR_TYPES[REQUEST_ERROR_TYPES["None"] = 0] = "None";
-  REQUEST_ERROR_TYPES[REQUEST_ERROR_TYPES["Regular"] = 1] = "Regular";
-  REQUEST_ERROR_TYPES[REQUEST_ERROR_TYPES["Offline"] = 2] = "Offline";
-})(REQUEST_ERROR_TYPES || (REQUEST_ERROR_TYPES = {}));
 /**
  * Guess the type of error obtained.
  * @param {*} error
@@ -43456,19 +46183,26 @@ var REQUEST_ERROR_TYPES;
 
 
 function getRequestErrorType(error) {
-  return isOfflineRequestError(error) ? REQUEST_ERROR_TYPES.Offline : REQUEST_ERROR_TYPES.Regular;
+  return isOfflineRequestError(error) ? 2
+  /* Offline */
+  : 1
+  /* Regular */
+  ;
 }
 /**
  * Specific algorithm used to perform segment and manifest requests.
  *
  * Here how it works:
  *
- *   1. we give it one or multiple URLs available for the element we want to
- *      request, the request callback and some options
+ *   1. You give it one or multiple URLs available for the resource you want to
+ *      request (from the most important URL to the least important), the
+ *      request callback itself, and some options.
  *
  *   2. it tries to call the request callback with the first URL:
- *        - if it works as expected, it wrap the response in a `response` event.
- *        - if it fails, it emits a `retry` event and try with the next one.
+ *        - if it works as expected, it resolves the returned Promise with that
+ *          request's response.
+ *        - if it fails, it calls ther `onRetry` callback given with the
+ *          corresponding error and try with the next URL.
  *
  *   3. When all URLs have been tested (and failed), it decides - according to
  *      the error counters, configuration and errors received - if it can retry
@@ -43476,32 +46210,41 @@ function getRequestErrorType(error) {
  *        - If it can, it increments the corresponding error counter, wait a
  *          delay (based on an exponential backoff) and restart the same logic
  *          for all retry-able URL.
- *        - If it can't it just throws the error.
+ *        - If it can't it just reject the error through the returned Promise.
  *
  * Note that there are in fact two separate counters:
  *   - one for "offline" errors
  *   - one for other xhr errors
  * Both counters are resetted if the error type changes from an error to the
  * next.
- * @param {Array.<string} obs$
- * @param {Function} request$
+ *
+ * @param {Array.<string>} urls
+ * @param {Function} performRequest
  * @param {Object} options - Configuration options.
- * @returns {Observable}
+ * @param {Object} cancellationSignal
+ * @returns {Promise}
  */
 
 
-function tryURLsWithBackoff(urls, request$, options) {
+function tryURLsWithBackoff(urls, performRequest, options, cancellationSignal) {
+  if (cancellationSignal.isCancelled) {
+    return pinkie_default().reject(cancellationSignal.cancellationError);
+  }
+
   var baseDelay = options.baseDelay,
       maxDelay = options.maxDelay,
       maxRetryRegular = options.maxRetryRegular,
-      maxRetryOffline = options.maxRetryOffline;
+      maxRetryOffline = options.maxRetryOffline,
+      onRetry = options.onRetry;
   var retryCount = 0;
-  var lastError = REQUEST_ERROR_TYPES.None;
+  var lastError = 0
+  /* None */
+  ;
   var urlsToTry = urls.slice();
 
   if (urlsToTry.length === 0) {
     log/* default.warn */.Z.warn("Fetchers: no URL given to `tryURLsWithBackoff`.");
-    return empty/* EMPTY */.E;
+    return pinkie_default().reject(new Error("No URL to request"));
   }
 
   return tryURLsRecursively(urlsToTry[0], 0);
@@ -43519,82 +46262,160 @@ function tryURLsWithBackoff(urls, request$, options) {
    * @returns {Observable}
    */
 
-  function tryURLsRecursively(url, index) {
-    return request$(url).pipe((0,map/* map */.U)(function (res) {
-      return {
-        type: "response",
-        value: res
-      };
-    }), (0,catchError/* catchError */.K)(function (error) {
-      if (!shouldRetry(error)) {
-        // ban this URL
-        if (urlsToTry.length <= 1) {
-          // This was the last one, throw
-          throw error;
-        } // else, remove that element from the array and go the next URL
+  function tryURLsRecursively(_x, _x2) {
+    return _tryURLsRecursively.apply(this, arguments);
+  }
 
+  function _tryURLsRecursively() {
+    _tryURLsRecursively = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(url, index) {
+      var res, newIndex, currentError, maxRetry, _newIndex, delay, fuzzedDelay, nextURL;
 
-        urlsToTry.splice(index, 1);
-        var newIndex = index >= urlsToTry.length - 1 ? 0 : index;
-        return tryURLsRecursively(urlsToTry[newIndex], newIndex).pipe((0,startWith/* startWith */.O)({
-          type: "retry",
-          value: error
-        }));
-      }
+      return regenerator_default().wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.prev = 0;
+              _context.next = 3;
+              return performRequest(url, cancellationSignal);
 
-      var currentError = getRequestErrorType(error);
-      var maxRetry = currentError === REQUEST_ERROR_TYPES.Offline ? maxRetryOffline : maxRetryRegular;
+            case 3:
+              res = _context.sent;
+              return _context.abrupt("return", res);
 
-      if (currentError !== lastError) {
-        retryCount = 0;
-        lastError = currentError;
-      }
+            case 7:
+              _context.prev = 7;
+              _context.t0 = _context["catch"](0);
 
-      if (index < urlsToTry.length - 1) {
-        // there is still URLs to test
-        var _newIndex = index + 1;
+              if (!task_canceller/* default.isCancellationError */.ZP.isCancellationError(_context.t0)) {
+                _context.next = 11;
+                break;
+              }
 
-        return tryURLsRecursively(urlsToTry[_newIndex], _newIndex).pipe((0,startWith/* startWith */.O)({
-          type: "retry",
-          value: error
-        }));
-      } // Here, we were using the last element of the `urlsToTry` array.
-      // Increment counter and restart with the first URL
+              throw _context.t0;
 
+            case 11:
+              if (shouldRetry(_context.t0)) {
+                _context.next = 20;
+                break;
+              }
 
-      retryCount++;
+              if (!(urlsToTry.length <= 1)) {
+                _context.next = 14;
+                break;
+              }
 
-      if (retryCount > maxRetry) {
-        throw error;
-      }
+              throw _context.t0;
 
-      var delay = Math.min(baseDelay * Math.pow(2, retryCount - 1), maxDelay);
-      var fuzzedDelay = (0,get_fuzzed_delay/* default */.Z)(delay);
-      var nextURL = urlsToTry[0];
-      return (0,timer/* timer */.H)(fuzzedDelay).pipe((0,mergeMap/* mergeMap */.z)(function () {
-        return tryURLsRecursively(nextURL, 0);
-      }), (0,startWith/* startWith */.O)({
-        type: "retry",
-        value: error
-      }));
+            case 14:
+              // else, remove that element from the array and go the next URL
+              urlsToTry.splice(index, 1);
+              newIndex = index >= urlsToTry.length - 1 ? 0 : index;
+              onRetry(_context.t0);
+
+              if (!cancellationSignal.isCancelled) {
+                _context.next = 19;
+                break;
+              }
+
+              throw cancellationSignal.cancellationError;
+
+            case 19:
+              return _context.abrupt("return", tryURLsRecursively(urlsToTry[newIndex], newIndex));
+
+            case 20:
+              currentError = getRequestErrorType(_context.t0);
+              maxRetry = currentError === 2
+              /* Offline */
+              ? maxRetryOffline : maxRetryRegular;
+
+              if (currentError !== lastError) {
+                retryCount = 0;
+                lastError = currentError;
+              }
+
+              if (!(index < urlsToTry.length - 1)) {
+                _context.next = 29;
+                break;
+              }
+
+              // there is still URLs to test
+              _newIndex = index + 1;
+              onRetry(_context.t0);
+
+              if (!cancellationSignal.isCancelled) {
+                _context.next = 28;
+                break;
+              }
+
+              throw cancellationSignal.cancellationError;
+
+            case 28:
+              return _context.abrupt("return", tryURLsRecursively(urlsToTry[_newIndex], _newIndex));
+
+            case 29:
+              // Here, we were using the last element of the `urlsToTry` array.
+              // Increment counter and restart with the first URL
+              retryCount++;
+
+              if (!(retryCount > maxRetry)) {
+                _context.next = 32;
+                break;
+              }
+
+              throw _context.t0;
+
+            case 32:
+              delay = Math.min(baseDelay * Math.pow(2, retryCount - 1), maxDelay);
+              fuzzedDelay = (0,get_fuzzed_delay/* default */.Z)(delay);
+              nextURL = urlsToTry[0];
+              onRetry(_context.t0);
+
+              if (!cancellationSignal.isCancelled) {
+                _context.next = 38;
+                break;
+              }
+
+              throw cancellationSignal.cancellationError;
+
+            case 38:
+              _context.next = 40;
+              return cancellableSleep(fuzzedDelay, cancellationSignal);
+
+            case 40:
+              return _context.abrupt("return", tryURLsRecursively(nextURL, 0));
+
+            case 41:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, null, [[0, 7]]);
     }));
+    return _tryURLsRecursively.apply(this, arguments);
   }
 }
 /**
  * Lightweight version of the request algorithm, this time with only a simple
- * Observable given.
+ * Promise given.
  * @param {Function} request$
  * @param {Object} options
  * @returns {Observable}
  */
 
-function tryRequestObservableWithBackoff(request$, options) {
+function tryRequestPromiseWithBackoff(performRequest, options, cancellationSignal) {
   // same than for a single unknown URL
-  return tryURLsWithBackoff([null], function () {
-    return request$;
-  }, options);
+  return tryURLsWithBackoff([null], performRequest, options, cancellationSignal);
 }
-;// CONCATENATED MODULE: ./src/core/fetchers/utils/create_request_scheduler.ts
+;// CONCATENATED MODULE: ./src/core/fetchers/manifest/manifest_fetcher.ts
+
+
+
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -43615,90 +46436,14 @@ function tryRequestObservableWithBackoff(request$, options) {
 
 
 
-function createRequestScheduler(backoffOptions, warning$) {
-  /**
-   * Allow the parser to schedule a new request.
-   * @param {Function} request - Function performing the request.
-   * @returns {Function}
-   */
-  return function scheduleRequest(request) {
-    return tryRequestObservableWithBackoff((0,rx_try_catch/* default */.Z)(request, undefined), backoffOptions).pipe((0,filter_map/* default */.Z)(function (evt) {
-      if (evt.type === "retry") {
-        warning$.next(errorSelector(evt.value));
-        return null;
-      }
 
-      return evt.value;
-    }, null), (0,catchError/* catchError */.K)(function (error) {
-      throw errorSelector(error);
-    }));
-  };
-}
-;// CONCATENATED MODULE: ./src/core/fetchers/manifest/get_manifest_backoff_options.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
+
 
 var DEFAULT_MAX_MANIFEST_REQUEST_RETRY = config/* default.DEFAULT_MAX_MANIFEST_REQUEST_RETRY */.Z.DEFAULT_MAX_MANIFEST_REQUEST_RETRY,
     DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
     INITIAL_BACKOFF_DELAY_BASE = config/* default.INITIAL_BACKOFF_DELAY_BASE */.Z.INITIAL_BACKOFF_DELAY_BASE,
     MAX_BACKOFF_DELAY_BASE = config/* default.MAX_BACKOFF_DELAY_BASE */.Z.MAX_BACKOFF_DELAY_BASE;
-/**
- * Parse config to replace missing manifest backoff options.
- * @param {Object} backoffOptions
- * @returns {Object}
- */
-
-function getManifestBackoffOptions(_ref) {
-  var maxRetryRegular = _ref.maxRetryRegular,
-      maxRetryOffline = _ref.maxRetryOffline,
-      lowLatencyMode = _ref.lowLatencyMode;
-  var baseDelay = lowLatencyMode ? INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : INITIAL_BACKOFF_DELAY_BASE.REGULAR;
-  var maxDelay = lowLatencyMode ? MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : MAX_BACKOFF_DELAY_BASE.REGULAR;
-  return {
-    baseDelay: baseDelay,
-    maxDelay: maxDelay,
-    maxRetryRegular: maxRetryRegular !== undefined ? maxRetryRegular : DEFAULT_MAX_MANIFEST_REQUEST_RETRY,
-    maxRetryOffline: maxRetryOffline !== undefined ? maxRetryOffline : DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE
-  };
-}
-;// CONCATENATED MODULE: ./src/core/fetchers/manifest/manifest_fetcher.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-
-
-
 /**
  * Class allowing to facilitate the task of loading and parsing a Manifest.
  * @class ManifestFetcher
@@ -43720,21 +46465,29 @@ function getManifestBackoffOptions(_ref) {
 
 var ManifestFetcher = /*#__PURE__*/function () {
   /**
-   * @param {string | undefined} url
-   * @param {Object} pipelines
-   * @param {Object} backoffOptions
+   * Construct a new ManifestFetcher.
+   * @param {string | undefined} url - Default Manifest url, will be used when
+   * no URL is provided to the `fetch` function.
+   * `undefined` if unknown or if a Manifest should be retrieved through other
+   * means than an HTTP request.
+   * @param {Object} pipelines - Transport pipelines used to perform the
+   * Manifest loading and parsing operations.
+   * @param {Object} settings - Configure the `ManifestFetcher`.
    */
-  function ManifestFetcher(url, pipelines, backoffOptions) {
+  function ManifestFetcher(url, pipelines, settings) {
     this._manifestUrl = url;
     this._pipelines = pipelines.manifest;
-    this._backoffOptions = getManifestBackoffOptions(backoffOptions);
+    this._settings = settings;
   }
   /**
-   * (re-)Load the Manifest without yet parsing it.
+   * (re-)Load the Manifest.
+   * This method does not yet parse it, parsing will then be available through
+   * a callback available on the response.
    *
    * You can set an `url` on which that Manifest will be requested.
-   * If not set, the regular Manifest url - defined on the
-   * `ManifestFetcher` instanciation - will be used instead.
+   * If not set, the regular Manifest url - defined on the `ManifestFetcher`
+   * instanciation - will be used instead.
+   *
    * @param {string} [url]
    * @returns {Observable}
    */
@@ -43745,32 +46498,85 @@ var ManifestFetcher = /*#__PURE__*/function () {
   _proto.fetch = function fetch(url) {
     var _this = this;
 
-    var _a;
+    return new Observable/* Observable */.y(function (obs) {
+      var pipelines = _this._pipelines;
+      var requestUrl = url !== null && url !== void 0 ? url : _this._manifestUrl;
+      /** `true` if the loading pipeline is already completely executed. */
 
-    var requestUrl = url !== null && url !== void 0 ? url : this._manifestUrl; // TODO Remove the resolver completely in the next major version
+      var hasFinishedLoading = false;
+      /** Allows to cancel the loading operation. */
 
-    var resolver = (_a = this._pipelines.resolver) !== null && _a !== void 0 ? _a : of.of;
-    var loader = this._pipelines.loader;
-    return (0,rx_try_catch/* default */.Z)(resolver, {
-      url: requestUrl
-    }).pipe((0,catchError/* catchError */.K)(function (error) {
-      throw errorSelector(error);
-    }), (0,mergeMap/* mergeMap */.z)(function (loaderArgument) {
-      var loader$ = (0,rx_try_catch/* default */.Z)(loader, loaderArgument);
-      return tryRequestObservableWithBackoff(loader$, _this._backoffOptions).pipe((0,catchError/* catchError */.K)(function (error) {
-        throw errorSelector(error);
-      }), (0,map/* map */.U)(function (evt) {
-        return evt.type === "retry" ? {
+      var canceller = new task_canceller/* default */.ZP();
+
+      var backoffSettings = _this._getBackoffSetting(function (err) {
+        obs.next({
           type: "warning",
-          value: errorSelector(evt.value)
-        } : {
+          value: errorSelector(err)
+        });
+      });
+
+      var loadingPromise = pipelines.resolveManifestUrl === undefined ? callLoaderWithRetries(requestUrl) : callResolverWithRetries(requestUrl).then(callLoaderWithRetries);
+      loadingPromise.then(function (response) {
+        hasFinishedLoading = true;
+        obs.next({
           type: "response",
           parse: function parse(parserOptions) {
-            return _this._parseLoadedManifest(evt.value.value, parserOptions);
+            return _this._parseLoadedManifest(response, parserOptions);
           }
+        });
+        obs.complete();
+      })["catch"](function (err) {
+        if (canceller.isUsed) {
+          // Cancellation has already been handled by RxJS
+          return;
+        }
+
+        hasFinishedLoading = true;
+        obs.error(errorSelector(err));
+      });
+      return function () {
+        if (!hasFinishedLoading) {
+          canceller.cancel();
+        }
+      };
+      /**
+       * Call the resolver part of the pipeline, retrying if it fails according
+       * to the current settings.
+       * Returns the Promise of the last attempt.
+       * /!\ This pipeline should have a `resolveManifestUrl` function defined.
+       * @param {string | undefined}  resolverUrl
+       * @returns {Promise}
+       */
+
+      function callResolverWithRetries(resolverUrl) {
+        var resolveManifestUrl = pipelines.resolveManifestUrl;
+        (0,assert/* default */.Z)(resolveManifestUrl !== undefined);
+
+        var callResolver = function callResolver() {
+          return resolveManifestUrl(resolverUrl, canceller.signal);
         };
-      }));
-    }));
+
+        return tryRequestPromiseWithBackoff(callResolver, backoffSettings, canceller.signal);
+      }
+      /**
+       * Call the loader part of the pipeline, retrying if it fails according
+       * to the current settings.
+       * Returns the Promise of the last attempt.
+       * @param {string | undefined}  resolverUrl
+       * @returns {Promise}
+       */
+
+
+      function callLoaderWithRetries(manifestUrl) {
+        var loadManifest = pipelines.loadManifest;
+
+        var callLoader = function callLoader() {
+          return loadManifest(manifestUrl, canceller.signal);
+        };
+
+        return tryRequestPromiseWithBackoff(callLoader, backoffSettings, canceller.signal);
+      }
+    });
   }
   /**
    * Parse an already loaded Manifest.
@@ -43803,59 +46609,202 @@ var ManifestFetcher = /*#__PURE__*/function () {
   ;
 
   _proto._parseLoadedManifest = function _parseLoadedManifest(loaded, parserOptions) {
-    var sendingTime = loaded.sendingTime,
-        receivedTime = loaded.receivedTime;
-    var parsingTimeStart = performance.now();
-    var schedulerWarnings$ = new Subject/* Subject */.x();
-    var scheduleRequest = createRequestScheduler(this._backoffOptions, schedulerWarnings$);
-    return (0,merge/* merge */.T)(schedulerWarnings$.pipe((0,map/* map */.U)(function (err) {
-      return {
-        type: "warning",
-        value: err
-      };
-    })), this._pipelines.parser({
-      response: loaded,
-      url: this._manifestUrl,
-      externalClockOffset: parserOptions.externalClockOffset,
-      previousManifest: parserOptions.previousManifest,
-      scheduleRequest: scheduleRequest,
-      unsafeMode: parserOptions.unsafeMode
-    }).pipe((0,catchError/* catchError */.K)(function (error) {
-      throw formatError(error, {
-        defaultCode: "PIPELINE_PARSE_ERROR",
-        defaultReason: "Unknown error when parsing the Manifest"
+    var _this2 = this;
+
+    return new Observable/* Observable */.y(function (obs) {
+      var parsingTimeStart = performance.now();
+      var canceller = new task_canceller/* default */.ZP();
+      var sendingTime = loaded.sendingTime,
+          receivedTime = loaded.receivedTime;
+
+      var backoffSettings = _this2._getBackoffSetting(function (err) {
+        obs.next({
+          type: "warning",
+          value: errorSelector(err)
+        });
       });
-    }), (0,map/* map */.U)(function (parsingEvt) {
-      if (parsingEvt.type === "warning") {
-        var formatted = formatError(parsingEvt.value, {
+
+      var opts = {
+        externalClockOffset: parserOptions.externalClockOffset,
+        unsafeMode: parserOptions.unsafeMode,
+        previousManifest: parserOptions.previousManifest,
+        originalUrl: _this2._manifestUrl
+      };
+
+      try {
+        var res = _this2._pipelines.parseManifest(loaded, opts, onWarnings, canceller.signal, scheduleRequest);
+
+        if (!isPromise(res)) {
+          emitManifestAndComplete(res.manifest);
+        } else {
+          res.then(function (_ref) {
+            var manifest = _ref.manifest;
+            return emitManifestAndComplete(manifest);
+          })["catch"](function (err) {
+            if (canceller.isUsed) {
+              // Cancellation is already handled by RxJS
+              return;
+            }
+
+            emitError(err, true);
+          });
+        }
+      } catch (err) {
+        if (canceller.isUsed) {
+          // Cancellation is already handled by RxJS
+          return undefined;
+        }
+
+        emitError(err, true);
+      }
+
+      return function () {
+        canceller.cancel();
+      };
+      /**
+       * Perform a request with the same retry mechanisms and error handling
+       * than for a Manifest loader.
+       * @param {Function} performRequest
+       * @returns {Function}
+       */
+
+      function scheduleRequest(_x) {
+        return _scheduleRequest.apply(this, arguments);
+      }
+      /**
+       * Handle minor errors encountered by a Manifest parser.
+       * @param {Array.<Error>} warnings
+       */
+
+
+      function _scheduleRequest() {
+        _scheduleRequest = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(performRequest) {
+          var data;
+          return regenerator_default().wrap(function _callee$(_context) {
+            while (1) {
+              switch (_context.prev = _context.next) {
+                case 0:
+                  _context.prev = 0;
+                  _context.next = 3;
+                  return tryRequestPromiseWithBackoff(performRequest, backoffSettings, canceller.signal);
+
+                case 3:
+                  data = _context.sent;
+                  return _context.abrupt("return", data);
+
+                case 7:
+                  _context.prev = 7;
+                  _context.t0 = _context["catch"](0);
+                  throw errorSelector(_context.t0);
+
+                case 10:
+                case "end":
+                  return _context.stop();
+              }
+            }
+          }, _callee, null, [[0, 7]]);
+        }));
+        return _scheduleRequest.apply(this, arguments);
+      }
+
+      function onWarnings(warnings) {
+        for (var _iterator = _createForOfIteratorHelperLoose(warnings), _step; !(_step = _iterator()).done;) {
+          var warning = _step.value;
+
+          if (canceller.isUsed) {
+            return;
+          }
+
+          emitError(warning, false);
+        }
+      }
+      /**
+       * Emit a formatted "parsed" event through `obs`.
+       * To call once the Manifest has been parsed.
+       * @param {Object} manifest
+       */
+
+
+      function emitManifestAndComplete(manifest) {
+        onWarnings(manifest.contentWarnings);
+        var parsingTime = performance.now() - parsingTimeStart;
+        log/* default.info */.Z.info("MF: Manifest parsed in " + parsingTime + "ms");
+        obs.next({
+          type: "parsed",
+          manifest: manifest,
+          sendingTime: sendingTime,
+          receivedTime: receivedTime,
+          parsingTime: parsingTime
+        });
+        obs.complete();
+      }
+      /**
+       * Format the given Error and emit it through `obs`.
+       * Either through a `"warning"` event, if `isFatal` is `false`, or through
+       * a fatal Observable error, if `isFatal` is set to `true`.
+       * @param {*} err
+       * @param {boolean} isFatal
+       */
+
+
+      function emitError(err, isFatal) {
+        var formattedError = formatError(err, {
           defaultCode: "PIPELINE_PARSE_ERROR",
           defaultReason: "Unknown error when parsing the Manifest"
         });
-        return {
-          type: "warning",
-          value: formatted
-        };
-      } // 2 - send response
 
+        if (isFatal) {
+          obs.error(formattedError);
+        } else {
+          obs.next({
+            type: "warning",
+            value: formattedError
+          });
+        }
+      }
+    });
+  }
+  /**
+   * Construct "backoff settings" that can be used with a range of functions
+   * allowing to perform multiple request attempts
+   * @param {Function} onRetry
+   * @returns {Object}
+   */
+  ;
 
-      var parsingTime = performance.now() - parsingTimeStart;
-      log/* default.info */.Z.info("MF: Manifest parsed in " + parsingTime + "ms");
-      return {
-        type: "parsed",
-        manifest: parsingEvt.value.manifest,
-        sendingTime: sendingTime,
-        receivedTime: receivedTime,
-        parsingTime: parsingTime
-      };
-    }), finalize(function () {
-      schedulerWarnings$.complete();
-    })));
+  _proto._getBackoffSetting = function _getBackoffSetting(onRetry) {
+    var _this$_settings = this._settings,
+        lowLatencyMode = _this$_settings.lowLatencyMode,
+        ogRegular = _this$_settings.maxRetryRegular,
+        ogOffline = _this$_settings.maxRetryOffline;
+    var baseDelay = lowLatencyMode ? INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : INITIAL_BACKOFF_DELAY_BASE.REGULAR;
+    var maxDelay = lowLatencyMode ? MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : MAX_BACKOFF_DELAY_BASE.REGULAR;
+    var maxRetryRegular = ogRegular !== null && ogRegular !== void 0 ? ogRegular : DEFAULT_MAX_MANIFEST_REQUEST_RETRY;
+    var maxRetryOffline = ogOffline !== null && ogOffline !== void 0 ? ogOffline : DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE;
+    return {
+      onRetry: onRetry,
+      baseDelay: baseDelay,
+      maxDelay: maxDelay,
+      maxRetryRegular: maxRetryRegular,
+      maxRetryOffline: maxRetryOffline
+    };
   };
 
   return ManifestFetcher;
 }();
+/**
+ * Returns `true` when the returned value seems to be a Promise instance, as
+ * created by the RxPlayer.
+ * @param {*} val
+ * @returns {boolean}
+ */
 
 
+
+
+function isPromise(val) {
+  return val instanceof (pinkie_default()) || val instanceof Promise;
+}
 ;// CONCATENATED MODULE: ./src/core/fetchers/manifest/index.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -43874,44 +46823,6 @@ var ManifestFetcher = /*#__PURE__*/function () {
  */
 
 /* harmony default export */ var fetchers_manifest = (ManifestFetcher);
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/get_segment_backoff_options.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
-    get_segment_backoff_options_DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
-    get_segment_backoff_options_INITIAL_BACKOFF_DELAY_BASE = config/* default.INITIAL_BACKOFF_DELAY_BASE */.Z.INITIAL_BACKOFF_DELAY_BASE,
-    get_segment_backoff_options_MAX_BACKOFF_DELAY_BASE = config/* default.MAX_BACKOFF_DELAY_BASE */.Z.MAX_BACKOFF_DELAY_BASE;
-/**
- * @param {string} bufferType
- * @param {Object}
- * @returns {Object}
- */
-
-function getSegmentBackoffOptions(bufferType, _ref) {
-  var maxRetryRegular = _ref.maxRetryRegular,
-      maxRetryOffline = _ref.maxRetryOffline,
-      lowLatencyMode = _ref.lowLatencyMode;
-  return {
-    maxRetryRegular: bufferType === "image" ? 0 : maxRetryRegular !== null && maxRetryRegular !== void 0 ? maxRetryRegular : DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
-    maxRetryOffline: maxRetryOffline !== null && maxRetryOffline !== void 0 ? maxRetryOffline : get_segment_backoff_options_DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
-    baseDelay: lowLatencyMode ? get_segment_backoff_options_INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : get_segment_backoff_options_INITIAL_BACKOFF_DELAY_BASE.REGULAR,
-    maxDelay: lowLatencyMode ? get_segment_backoff_options_MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : get_segment_backoff_options_MAX_BACKOFF_DELAY_BASE.REGULAR
-  };
-}
 ;// CONCATENATED MODULE: ./src/core/fetchers/segment/prioritized_segment_fetcher.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -44515,12 +47426,8 @@ var ObservablePrioritizer = /*#__PURE__*/function () {
 }();
 
 
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/tap.js
-var tap = __webpack_require__(2006);
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
 var array_includes = __webpack_require__(7714);
-// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
-var assert_unreachable = __webpack_require__(8418);
 // EXTERNAL MODULE: ./src/utils/id_generator.ts
 var id_generator = __webpack_require__(908);
 ;// CONCATENATED MODULE: ./src/utils/initialization_segment_cache.ts
@@ -44590,169 +47497,6 @@ var InitializationSegmentCache = /*#__PURE__*/function () {
 }();
 
 /* harmony default export */ var initialization_segment_cache = (InitializationSegmentCache);
-// EXTERNAL MODULE: ./src/utils/cast_to_observable.ts
-var cast_to_observable = __webpack_require__(8117);
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/create_segment_loader.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-
-
-/**
- * Returns a function allowing to load any wanted segment.
- *
- * The function returned takes in argument information about the wanted segment
- * and returns an Observable which will emit various events related to the
- * segment request (see ISegmentLoaderEvent).
- *
- * This observable will throw if, following the options given, the request and
- * possible retry all failed.
- *
- * This observable will complete after emitting all the segment's data.
- *
- * Type parameters:
- *   - T: type of the data emitted
- *
- * @param {Function} loader
- * @param {Object | undefined} cache
- * @param {Object} options
- * @returns {Function}
- */
-
-function createSegmentLoader(loader, cache, backoffOptions) {
-  /**
-   * Try to retrieve the segment from the cache and if not found call the
-   * pipeline's loader (with possible retries) to load it.
-   * @param {Object} loaderArgument - Context for the wanted segment.
-   * @returns {Observable}
-   */
-  function loadData(wantedContent) {
-    /**
-     * Call the Pipeline's loader with an exponential Backoff.
-     * @returns {Observable}
-     */
-    function startLoaderWithBackoff() {
-      var _a;
-
-      var request$ = function request$(url) {
-        var loaderArgument = (0,object_assign/* default */.Z)({
-          url: url
-        }, wantedContent);
-        return (0,concat/* concat */.z)((0,of.of)({
-          type: "request",
-          value: loaderArgument
-        }), (0,rx_try_catch/* default */.Z)(loader, loaderArgument));
-      };
-
-      return tryURLsWithBackoff((_a = wantedContent.segment.mediaURLs) !== null && _a !== void 0 ? _a : [null], request$, backoffOptions).pipe((0,catchError/* catchError */.K)(function (error) {
-        throw errorSelector(error);
-      }), (0,map/* map */.U)(function (evt) {
-        if (evt.type === "retry") {
-          return {
-            type: "warning",
-            value: errorSelector(evt.value)
-          };
-        } else if (evt.value.type === "request") {
-          return evt.value;
-        }
-
-        var response = evt.value;
-
-        if (response.type === "data-loaded" && cache != null) {
-          cache.add(wantedContent, response.value);
-        }
-
-        return evt.value;
-      }));
-    }
-
-    var dataFromCache = cache != null ? cache.get(wantedContent) : null;
-
-    if (dataFromCache != null) {
-      return (0,cast_to_observable/* default */.Z)(dataFromCache).pipe((0,map/* map */.U)(function (response) {
-        return {
-          type: "cache",
-          value: response
-        };
-      }), (0,catchError/* catchError */.K)(startLoaderWithBackoff));
-    }
-
-    return startLoaderWithBackoff();
-  }
-  /**
-   * Load the corresponding segment.
-   * @param {Object} content
-   * @returns {Observable}
-   */
-
-
-  return function loadSegment(content) {
-    return loadData(content).pipe((0,mergeMap/* mergeMap */.z)(function (arg) {
-      var metrics$;
-
-      if ((arg.type === "data-chunk-complete" || arg.type === "data-loaded") && arg.value.size !== undefined && arg.value.duration !== undefined) {
-        metrics$ = (0,of.of)({
-          type: "metrics",
-          value: {
-            size: arg.value.size,
-            duration: arg.value.duration,
-            content: content
-          }
-        });
-      } else {
-        metrics$ = empty/* EMPTY */.E;
-      }
-
-      switch (arg.type) {
-        case "warning":
-        case "request":
-        case "progress":
-          return (0,of.of)(arg);
-
-        case "cache":
-        case "data-created":
-        case "data-loaded":
-          return (0,concat/* concat */.z)((0,of.of)({
-            type: "data",
-            value: arg.value
-          }), metrics$);
-
-        case "data-chunk":
-          return (0,of.of)({
-            type: "chunk",
-            value: arg.value
-          });
-
-        case "data-chunk-complete":
-          return (0,concat/* concat */.z)((0,of.of)({
-            type: "chunk-complete",
-            value: null
-          }), metrics$);
-
-        default:
-          (0,assert_unreachable/* default */.Z)(arg);
-      }
-    }));
-  };
-}
 ;// CONCATENATED MODULE: ./src/core/fetchers/segment/segment_fetcher.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -44777,6 +47521,12 @@ function createSegmentLoader(loader, cache, backoffOptions) {
 
 
 
+
+
+var DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
+    segment_fetcher_DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
+    segment_fetcher_INITIAL_BACKOFF_DELAY_BASE = config/* default.INITIAL_BACKOFF_DELAY_BASE */.Z.INITIAL_BACKOFF_DELAY_BASE,
+    segment_fetcher_MAX_BACKOFF_DELAY_BASE = config/* default.MAX_BACKOFF_DELAY_BASE */.Z.MAX_BACKOFF_DELAY_BASE;
 var generateRequestID = (0,id_generator/* default */.Z)();
 /**
  * Create a function which will fetch and parse segments.
@@ -44787,160 +47537,230 @@ var generateRequestID = (0,id_generator/* default */.Z)();
  * @returns {Function}
  */
 
-function segment_fetcher_createSegmentFetcher(bufferType, transport, requests$, options) {
-  var cache = (0,array_includes/* default */.Z)(["audio", "video"], bufferType) ? new initialization_segment_cache() : undefined;
-  var segmentLoader = createSegmentLoader(transport[bufferType].loader, cache, options); // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-
-  var segmentParser = transport[bufferType].parser; // deal with it
-
+function segment_fetcher_createSegmentFetcher(bufferType, pipeline, requests$, options) {
   /**
-   * Process the segmentLoader observable to adapt it to the the rest of the
-   * code:
-   *   - use the requests subject for network requests and their progress
-   *   - use the warning$ subject for retries' error messages
-   *   - only emit the data
+   * Cache audio and video initialization segments.
+   * This allows to avoid doing too many requests for what are usually very
+   * small files.
+   */
+  var cache = (0,array_includes/* default */.Z)(["audio", "video"], bufferType) ? new initialization_segment_cache() : undefined;
+  var loadSegment = pipeline.loadSegment,
+      parseSegment = pipeline.parseSegment;
+  /**
+   * Fetch a specific segment.
+   *
+   * This function returns an Observable which will fetch the segment on
+   * subscription.
+   * This Observable will emit various events during that request lifecycle and
+   * throw if the segment request(s) (including potential retries) fail.
+   *
+   * The Observable will automatically complete once no events are left to be
+   * sent.
    * @param {Object} content
    * @returns {Observable}
    */
 
   return function fetchSegment(content) {
-    var id = generateRequestID();
-    var requestBeginSent = false;
-    return segmentLoader(content).pipe((0,tap/* tap */.b)(function (arg) {
-      switch (arg.type) {
-        case "metrics":
-          {
-            requests$.next(arg);
-            break;
-          }
+    var segment = content.segment;
+    return new Observable/* Observable */.y(function (obs) {
+      var _a; // Retrieve from cache if it exists
 
-        case "request":
-          {
-            var value = arg.value; // format it for ABR Handling
 
-            var segment = value.segment;
+      var cached = cache !== undefined ? cache.get(content) : null;
 
-            if (segment === undefined) {
-              return;
-            }
+      if (cached !== null) {
+        obs.next({
+          type: "chunk",
+          parse: generateParserFunction(cached, false)
+        });
+        obs.next({
+          type: "chunk-complete"
+        });
+        obs.complete();
+        return undefined;
+      }
 
-            requestBeginSent = true;
+      var id = generateRequestID();
+      requests$.next({
+        type: "requestBegin",
+        value: {
+          duration: segment.duration,
+          time: segment.time,
+          requestTimestamp: performance.now(),
+          id: id
+        }
+      });
+      var canceller = new task_canceller/* default */.ZP();
+      var hasRequestEnded = false;
+      var loaderCallbacks = {
+        /**
+         * Callback called when the segment loader has progress information on
+         * the request.
+         * @param {Object} info
+         */
+        onProgress: function onProgress(info) {
+          if (info.totalSize !== undefined && info.size < info.totalSize) {
             requests$.next({
-              type: "requestBegin",
+              type: "progress",
               value: {
-                duration: segment.duration,
-                time: segment.time,
-                requestTimestamp: performance.now(),
+                duration: info.duration,
+                size: info.size,
+                totalSize: info.totalSize,
+                timestamp: performance.now(),
                 id: id
               }
             });
-            break;
           }
-
-        case "progress":
-          {
-            var _value = arg.value;
-
-            if (_value.totalSize != null && _value.size < _value.totalSize) {
-              requests$.next({
-                type: "progress",
-                value: {
-                  duration: _value.duration,
-                  size: _value.size,
-                  totalSize: _value.totalSize,
-                  timestamp: performance.now(),
-                  id: id
-                }
-              });
-            }
-
-            break;
-          }
-      }
-    }), finalize(function () {
-      if (requestBeginSent) {
-        requests$.next({
-          type: "requestEnd",
-          value: {
-            id: id
-          }
-        });
-      }
-    }), (0,filter/* filter */.h)(function (e) {
-      switch (e.type) {
-        case "warning":
-        case "chunk":
-        case "chunk-complete":
-        case "data":
-          return true;
-
-        case "progress":
-        case "metrics":
-        case "request":
-          return false;
-
-        default:
-          (0,assert_unreachable/* default */.Z)(e);
-      }
-    }), (0,mergeMap/* mergeMap */.z)(function (evt) {
-      if (evt.type === "warning") {
-        return (0,of.of)(evt);
-      }
-
-      if (evt.type === "chunk-complete") {
-        return (0,of.of)({
-          type: "chunk-complete"
-        });
-      }
-
-      var isChunked = evt.type === "chunk";
-      var data = {
-        type: "chunk",
+        },
 
         /**
-         * Parse the loaded data.
-         * @param {Object} [initTimescale]
-         * @returns {Observable}
+         * Callback called when the segment is communicated by the loader
+         * through decodable sub-segment(s) called chunk(s), with a chunk in
+         * argument.
+         * @param {*} chunkData
          */
-        parse: function parse(initTimescale) {
-          var response = {
-            data: evt.value.responseData,
+        onNewChunk: function onNewChunk(chunkData) {
+          obs.next({
+            type: "chunk",
+            parse: generateParserFunction(chunkData, true)
+          });
+        }
+      };
+      tryURLsWithBackoff((_a = segment.mediaURLs) !== null && _a !== void 0 ? _a : [null], callLoaderWithUrl, (0,object_assign/* default */.Z)({
+        onRetry: onRetry
+      }, options), canceller.signal).then(function (res) {
+        if (res.resultType === "segment-loaded") {
+          var loadedData = res.resultData.responseData;
+
+          if (cache !== undefined) {
+            cache.add(content, res.resultData.responseData);
+          }
+
+          obs.next({
+            type: "chunk",
+            parse: generateParserFunction(loadedData, false)
+          });
+        } else if (res.resultType === "segment-created") {
+          obs.next({
+            type: "chunk",
+            parse: generateParserFunction(res.resultData, false)
+          });
+        }
+
+        hasRequestEnded = true;
+        obs.next({
+          type: "chunk-complete"
+        });
+
+        if ((res.resultType === "segment-loaded" || res.resultType === "chunk-complete") && res.resultData.size !== undefined && res.resultData.duration !== undefined) {
+          requests$.next({
+            type: "metrics",
+            value: {
+              size: res.resultData.size,
+              duration: res.resultData.duration,
+              content: content
+            }
+          });
+        }
+
+        if (!canceller.isUsed) {
+          // The current Observable could have been canceled as a result of one
+          // of the previous `next` calls. In that case, we don't want to send
+          // a "requestEnd" again as it has already been sent on cancellation.
+          //
+          // Note that we only perform this check for `"requestEnd"` on
+          // purpose. Observable's events should have been ignored by RxJS if
+          // the Observable has already been canceled and we don't care if
+          // `"metrics"` is sent there.
+          requests$.next({
+            type: "requestEnd",
+            value: {
+              id: id
+            }
+          });
+        }
+
+        obs.complete();
+      })["catch"](function (err) {
+        hasRequestEnded = true;
+        obs.error(errorSelector(err));
+      });
+      return function () {
+        if (!hasRequestEnded) {
+          canceller.cancel();
+          requests$.next({
+            type: "requestEnd",
+            value: {
+              id: id
+            }
+          });
+        }
+      };
+      /**
+       * Call a segment loader for the given URL with the right arguments.
+       * @param {string|null} url
+       * @param {Object} cancellationSignal
+       * @returns {Promise}
+       */
+
+      function callLoaderWithUrl(url, cancellationSignal) {
+        return loadSegment(url, content, cancellationSignal, loaderCallbacks);
+      }
+      /**
+       * Generate function allowing to parse a loaded segment.
+       * @param {*} data
+       * @param {Boolean} isChunked
+       * @returns {Function}
+       */
+
+
+      function generateParserFunction(data, isChunked) {
+        return function parse(initTimescale) {
+          var loaded = {
+            data: data,
             isChunked: isChunked
           };
-          /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-          /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-          /* eslint-disable @typescript-eslint/no-unsafe-return */
-
-          return segmentParser({
-            response: response,
-            initTimescale: initTimescale,
-            content: content
-          })
-          /* eslint-enable @typescript-eslint/no-unsafe-call */
-
-          /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
-          /* eslint-enable @typescript-eslint/no-unsafe-return */
-          .pipe((0,catchError/* catchError */.K)(function (error) {
+          try {
+            return parseSegment(loaded, content, initTimescale);
+          } catch (error) {
             throw formatError(error, {
               defaultCode: "PIPELINE_PARSE_ERROR",
               defaultReason: "Unknown parsing error"
             });
-          }));
-        }
-      };
-
-      if (isChunked) {
-        return (0,of.of)(data);
+          }
+        };
       }
+      /**
+       * Function called when the function request is retried.
+       * @param {*} err
+       */
 
-      return (0,concat/* concat */.z)((0,of.of)(data), (0,of.of)({
-        type: "chunk-complete"
-      }));
-    }), (0,share/* share */.B)() // avoid multiple side effects if multiple subs
-    );
+
+      function onRetry(err) {
+        obs.next({
+          type: "warning",
+          value: errorSelector(err)
+        });
+      }
+    });
+  };
+}
+/**
+ * @param {string} bufferType
+ * @param {Object}
+ * @returns {Object}
+ */
+
+function getSegmentFetcherOptions(bufferType, _ref) {
+  var maxRetryRegular = _ref.maxRetryRegular,
+      maxRetryOffline = _ref.maxRetryOffline,
+      lowLatencyMode = _ref.lowLatencyMode;
+  return {
+    maxRetryRegular: bufferType === "image" ? 0 : maxRetryRegular !== null && maxRetryRegular !== void 0 ? maxRetryRegular : DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
+    maxRetryOffline: maxRetryOffline !== null && maxRetryOffline !== void 0 ? maxRetryOffline : segment_fetcher_DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
+    baseDelay: lowLatencyMode ? segment_fetcher_INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : segment_fetcher_INITIAL_BACKOFF_DELAY_BASE.REGULAR,
+    maxDelay: lowLatencyMode ? segment_fetcher_MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : segment_fetcher_MAX_BACKOFF_DELAY_BASE.REGULAR
   };
 }
 ;// CONCATENATED MODULE: ./src/core/fetchers/segment/segment_fetcher_creator.ts
@@ -44959,7 +47779,6 @@ function segment_fetcher_createSegmentFetcher(bufferType, transport, requests$, 
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -45021,9 +47840,11 @@ var SegmentFetcherCreator = /*#__PURE__*/function () {
   var _proto = SegmentFetcherCreator.prototype;
 
   _proto.createSegmentFetcher = function createSegmentFetcher(bufferType, requests$) {
-    var backoffOptions = getSegmentBackoffOptions(bufferType, this._backoffOptions);
+    var backoffOptions = getSegmentFetcherOptions(bufferType, this._backoffOptions);
+    var pipelines = this._transport[bufferType]; // Types are very complicated here as they are per-type of buffer.
+    // This is the reason why `any` is used instead.
 
-    var segmentFetcher = segment_fetcher_createSegmentFetcher(bufferType, this._transport, requests$, backoffOptions);
+    var segmentFetcher = segment_fetcher_createSegmentFetcher(bufferType, pipelines, requests$, backoffOptions);
 
     return applyPrioritizerToSegmentFetcher(this._prioritizer, segmentFetcher);
   };
@@ -45097,6 +47918,21 @@ function exhaustMap(project, resultSelector) {
     });
 }
 //# sourceMappingURL=exhaustMap.js.map
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/tap.js
+var tap = __webpack_require__(2006);
+;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/finalize.js
+
+function finalize(callback) {
+    return (0,lift/* operate */.e)(function (source, subscriber) {
+        try {
+            source.subscribe(subscriber);
+        }
+        finally {
+            subscriber.add(callback);
+        }
+    });
+}
+//# sourceMappingURL=finalize.js.map
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/switchMap.js
 var switchMap = __webpack_require__(4978);
 ;// CONCATENATED MODULE: ./src/compat/should_reload_media_source_on_decipherability_update.ts
@@ -45131,6 +47967,8 @@ function shouldReloadMediaSourceOnDecipherabilityUpdate(currentKeySystem) {
 }
 // EXTERNAL MODULE: ./src/utils/defer_subscriptions.ts + 6 modules
 var defer_subscriptions = __webpack_require__(4437);
+// EXTERNAL MODULE: ./src/utils/filter_map.ts
+var filter_map = __webpack_require__(2793);
 // EXTERNAL MODULE: ./src/utils/take_first_set.ts
 var take_first_set = __webpack_require__(5278);
 ;// CONCATENATED MODULE: ./src/core/abr/ewma.ts
@@ -46854,7 +49692,7 @@ function resetMediaSource(mediaElement, mediaSource, mediaSourceURL) {
 
 function createMediaSource(mediaElement) {
   return new Observable/* Observable */.y(function (observer) {
-    if (browser_compatibility_types/* MediaSource_ */.JJ == null) {
+    if (browser_compatibility_types/* MediaSource_ */.J == null) {
       throw new media_error/* default */.Z("MEDIA_SOURCE_NOT_SUPPORTED", "No MediaSource Object was found in the current browser.");
     } // make sure the media has been correctly reset
 
@@ -46862,7 +49700,7 @@ function createMediaSource(mediaElement) {
     var oldSrc = (0,is_non_empty_string/* default */.Z)(mediaElement.src) ? mediaElement.src : null;
     resetMediaSource(mediaElement, null, oldSrc);
     log/* default.info */.Z.info("Init: Creating MediaSource");
-    var mediaSource = new browser_compatibility_types/* MediaSource_ */.JJ();
+    var mediaSource = new browser_compatibility_types/* MediaSource_ */.J();
     var objectURL = URL.createObjectURL(mediaSource);
     log/* default.info */.Z.info("Init: Attaching MediaSource URL to the media element", objectURL);
     mediaElement.src = objectURL;
@@ -47151,6 +49989,7 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
   var _proto = AudioVideoSegmentBuffer.prototype;
 
   _proto.pushChunk = function pushChunk(infos) {
+    assertPushedDataIsBufferSource(infos);
     log/* default.debug */.Z.debug("AVSB: receiving order to push data to the SourceBuffer", this.bufferType, infos);
     return this._addToQueue({
       type: types/* SegmentBufferOperation.Push */.f.Push,
@@ -47212,7 +50051,7 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
 
   _proto.getPendingOperations = function getPendingOperations() {
     var parseQueuedOperation = function parseQueuedOperation(op) {
-      // Had to be written that way for TypeScrypt
+      // Had to be written that way for TypeScript
       switch (op.type) {
         case types/* SegmentBufferOperation.Push */.f.Push:
           return {
@@ -47561,8 +50400,29 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
 
   return AudioVideoSegmentBuffer;
 }(types/* SegmentBuffer */.C);
+/**
+ * Throw if the given input is not in the expected format.
+ * Allows to enforce runtime type-checking as compile-time type-checking here is
+ * difficult to enforce.
+ * @param {Object} pushedData
+ */
 
 
+
+
+function assertPushedDataIsBufferSource(pushedData) {
+  if (true) {
+    return;
+  }
+
+  var _pushedData$data = pushedData.data,
+      chunk = _pushedData$data.chunk,
+      initSegment = _pushedData$data.initSegment;
+
+  if (typeof chunk !== "object" || typeof initSegment !== "object" || chunk !== null && !(chunk instanceof ArrayBuffer) && !(chunk.buffer instanceof ArrayBuffer) || initSegment !== null && !(initSegment instanceof ArrayBuffer) && !(initSegment.buffer instanceof ArrayBuffer)) {
+    throw new Error("Invalid data given to the AudioVideoSegmentBuffer");
+  }
+}
 ;// CONCATENATED MODULE: ./src/core/segment_buffers/implementations/audio_video/index.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -48583,6 +51443,66 @@ var EVENTS = {
   }
 };
 /* harmony default export */ var stream_events_generators = (EVENTS);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/catchError.js
+var catchError = __webpack_require__(9878);
+;// CONCATENATED MODULE: ./src/core/stream/reload_after_switch.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Regularly ask to reload the MediaSource on each `clock$` tick.
+ *
+ * If and only if the Period currently played corresponds to `Period`, applies
+ * an offset to the reloaded position corresponding to `deltaPos`.
+ * This can be useful for example when switching the audio/video track, where
+ * you might want to give back some context if that was the currently played
+ * track.
+ *
+ * @param {Object} period - The Period linked to the Adaptation or
+ * Representation that you want to switch to.
+ * @param {Observable} clock$ - Observable emitting playback conditions.
+ * Has to emit last playback conditions immediately on subscribe.
+ * @param {number} deltaPos - If the concerned Period is playing at the time
+ * this function is called, we will add this value, in seconds, to the current
+ * position to indicate the position we should reload at.
+ * This value allows to give back context (by replaying some media data) after
+ * a switch.
+ * @returns {Observable}
+ */
+
+function reloadAfterSwitch(period, clock$, deltaPos) {
+  return clock$.pipe((0,map/* map */.U)(function (tick) {
+    var _a;
+
+    var currentTime = tick.getCurrentTime();
+
+    if (currentTime < period.start || period.end !== undefined && currentTime > period.end) {
+      // The Period was not playing, ask to reload to the same position we're
+      // currently at
+      return stream_events_generators.needsMediaSourceReload(period, currentTime, !tick.isPaused);
+    } // The Period was playing at the time of the switch, add `deltaPos`
+
+
+    var pos = currentTime + deltaPos; // Bind to Period start and end
+
+    var reloadAt = Math.min(Math.max(period.start, pos), (_a = period.end) !== null && _a !== void 0 ? _a : Infinity);
+    return stream_events_generators.needsMediaSourceReload(period, reloadAt, !tick.isPaused);
+  }));
+}
 // EXTERNAL MODULE: ./node_modules/next-tick/index.js
 var next_tick = __webpack_require__(7473);
 var next_tick_default = /*#__PURE__*/__webpack_require__.n(next_tick);
@@ -49730,6 +52650,7 @@ function RepresentationStream(_ref) {
    */
 
   var initSegmentObject = initSegment === null ? {
+    segmentType: "init",
     initializationData: null,
     protectionDataUpdate: false,
     initTimescale: undefined
@@ -49924,19 +52845,15 @@ function RepresentationStream(_ref) {
           case "warning":
             return (0,of.of)({
               type: "retry",
-              value: {
-                segment: segment,
-                error: evt.value
-              }
+              segment: segment,
+              error: evt.value
             });
 
           case "chunk-complete":
             currentSegmentRequest = null;
             return (0,of.of)({
               type: "end-of-segment",
-              value: {
-                segment: segment
-              }
+              segment: segment
             });
 
           case "interrupted":
@@ -49945,11 +52862,12 @@ function RepresentationStream(_ref) {
 
           case "chunk":
             var initTimescale = initSegmentObject === null || initSegmentObject === void 0 ? void 0 : initSegmentObject.initTimescale;
-            return evt.parse(initTimescale).pipe((0,map/* map */.U)(function (parserResponse) {
-              return (0,object_assign/* default */.Z)({
-                segment: segment
-              }, parserResponse);
-            }));
+            var parsed = evt.parse(initTimescale);
+            return (0,of.of)({
+              type: "parsed",
+              segment: segment,
+              payload: parsed
+            });
 
           case "ended":
             return requestNextSegment$;
@@ -49971,75 +52889,30 @@ function RepresentationStream(_ref) {
 
 
   function onLoaderEvent(evt) {
-    var _a;
-
     switch (evt.type) {
       case "retry":
         return (0,concat/* concat */.z)((0,of.of)({
           type: "warning",
-          value: evt.value.error
+          value: evt.error
         }), (0,defer/* defer */.P)(function () {
-          var retriedSegment = evt.value.segment;
+          var retriedSegment = evt.segment;
           var index = representation.index;
 
           if (index.isSegmentStillAvailable(retriedSegment) === false) {
             reCheckNeededSegments$.next();
-          } else if (index.canBeOutOfSyncError(evt.value.error, retriedSegment)) {
+          } else if (index.canBeOutOfSyncError(evt.error, retriedSegment)) {
             return (0,of.of)(stream_events_generators.manifestMightBeOufOfSync());
           }
 
           return empty/* EMPTY */.E; // else, ignore.
         }));
 
-      case "parsed-init-segment":
-        {
-          initSegmentObject = evt.value; // Now that the initialization segment has been parsed - which may have
-          // included encryption information - take care of the encryption event
-          // if not already done.
-
-          var allEncryptionData = representation.getAllEncryptionData();
-          var initEncEvt$ = !hasSentEncryptionData && allEncryptionData.length > 0 ? of.of.apply(void 0, allEncryptionData.map(function (p) {
-            return stream_events_generators.encryptionDataEncountered(p);
-          })) : empty/* EMPTY */.E;
-          var pushEvent$ = pushInitSegment({
-            clock$: clock$,
-            content: content,
-            segment: evt.segment,
-            segmentData: evt.value.initializationData,
-            segmentBuffer: segmentBuffer
-          });
-          return (0,merge/* merge */.T)(initEncEvt$, pushEvent$);
-        }
-
-      case "parsed-segment":
-        {
-          var initSegmentData = (_a = initSegmentObject === null || initSegmentObject === void 0 ? void 0 : initSegmentObject.initializationData) !== null && _a !== void 0 ? _a : null;
-          var _evt$value = evt.value,
-              inbandEvents = _evt$value.inbandEvents,
-              needsManifestRefresh = _evt$value.needsManifestRefresh; // TODO better handle use cases like key rotation by not always grouping
-          // every protection data together? To check.
-
-          var segmentEncryptionEvent = evt.value.protectionDataUpdate && !hasSentEncryptionData ? of.of.apply(void 0, representation.getAllEncryptionData().map(function (p) {
-            return stream_events_generators.encryptionDataEncountered(p);
-          })) : empty/* EMPTY */.E;
-          var manifestRefresh$ = needsManifestRefresh === true ? (0,of.of)(stream_events_generators.needsManifestRefresh()) : empty/* EMPTY */.E;
-          var inbandEvents$ = inbandEvents !== undefined && inbandEvents.length > 0 ? (0,of.of)({
-            type: "inband-events",
-            value: inbandEvents
-          }) : empty/* EMPTY */.E;
-          return (0,concat/* concat */.z)(segmentEncryptionEvent, manifestRefresh$, inbandEvents$, pushMediaSegment({
-            clock$: clock$,
-            content: content,
-            initSegmentData: initSegmentData,
-            parsedSegment: evt.value,
-            segment: evt.segment,
-            segmentBuffer: segmentBuffer
-          }));
-        }
+      case "parsed":
+        return onParsedChunk(evt);
 
       case "end-of-segment":
         {
-          var segment = evt.value.segment;
+          var segment = evt.segment;
           return segmentBuffer.endOfSegment((0,object_assign/* default */.Z)({
             segment: segment
           }, content)).pipe((0,ignoreElements/* ignoreElements */.l)());
@@ -50047,6 +52920,61 @@ function RepresentationStream(_ref) {
 
       default:
         (0,assert_unreachable/* default */.Z)(evt);
+    }
+  }
+  /**
+   * Process a chunk that has just been parsed by pushing it to the
+   * SegmentBuffer and emitting the right events.
+   * @param {Object} evt
+   * @returns {Observable}
+   */
+
+
+  function onParsedChunk(evt) {
+    var _a;
+
+    var parsed = evt.payload;
+
+    if (parsed.segmentType === "init") {
+      initSegmentObject = parsed; // Now that the initialization segment has been parsed - which may have
+      // included encryption information - take care of the encryption event
+      // if not already done.
+
+      var allEncryptionData = representation.getAllEncryptionData();
+      var initEncEvt$ = !hasSentEncryptionData && allEncryptionData.length > 0 ? of.of.apply(void 0, allEncryptionData.map(function (p) {
+        return stream_events_generators.encryptionDataEncountered(p);
+      })) : empty/* EMPTY */.E;
+      var pushEvent$ = pushInitSegment({
+        clock$: clock$,
+        content: content,
+        segment: evt.segment,
+        segmentData: parsed.initializationData,
+        segmentBuffer: segmentBuffer
+      });
+      return (0,merge/* merge */.T)(initEncEvt$, pushEvent$);
+    } else {
+      var initSegmentData = (_a = initSegmentObject === null || initSegmentObject === void 0 ? void 0 : initSegmentObject.initializationData) !== null && _a !== void 0 ? _a : null;
+      var inbandEvents = parsed.inbandEvents,
+          needsManifestRefresh = parsed.needsManifestRefresh,
+          protectionDataUpdate = parsed.protectionDataUpdate; // TODO better handle use cases like key rotation by not always grouping
+      // every protection data together? To check.
+
+      var segmentEncryptionEvent$ = protectionDataUpdate && !hasSentEncryptionData ? of.of.apply(void 0, representation.getAllEncryptionData().map(function (p) {
+        return stream_events_generators.encryptionDataEncountered(p);
+      })) : empty/* EMPTY */.E;
+      var manifestRefresh$ = needsManifestRefresh === true ? (0,of.of)(stream_events_generators.needsManifestRefresh()) : empty/* EMPTY */.E;
+      var inbandEvents$ = inbandEvents !== undefined && inbandEvents.length > 0 ? (0,of.of)({
+        type: "inband-events",
+        value: inbandEvents
+      }) : empty/* EMPTY */.E;
+      return (0,concat/* concat */.z)(segmentEncryptionEvent$, manifestRefresh$, inbandEvents$, pushMediaSegment({
+        clock$: clock$,
+        content: content,
+        initSegmentData: initSegmentData,
+        parsedSegment: parsed,
+        segment: evt.segment,
+        segmentBuffer: segmentBuffer
+      }));
     }
   }
 }
@@ -50068,81 +52996,6 @@ function RepresentationStream(_ref) {
  */
 
 /* harmony default export */ var stream_representation = (RepresentationStream);
-;// CONCATENATED MODULE: ./src/core/stream/utils.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-/**
- * Switching to another `Adaptation` and or `Representation` can necessitate a
- * complete reload of the MediaSource.
- *
- * This is done through the `INeedsMediaSourceReload` event which among other
- * things indicate the position the player should seek to after "reloading".
- * That position depends on the playback conditions at the time of the switch.
- *
- * When you already know you have to reload, you can call this function to take
- * care of that complex behavior:
- *
- *   - If `period` is not being played when that function is called, this
- *     function will emit regularly the `INeedsMediaSourceReload` event after
- *     applying the given `deltaPos` value to the reloading position.
- *
- *   - If `period` is not being when that function is called, it emits regularly
- *     the `INeedsMediaSourceReload` without applying the given `deltaPos` value
- *     to the reloading position.
- *     This is because that value is only applied when the previous Adaptation
- *     or Representation for the current Period was being played and should not
- *     be for cases like entering the current Period, or seeking _into_ th
- *     current Period.
- *     The main point of that configuration variable being to give back some
- *     context, there is no context to give back on those cases (as the Period
- *     was not already playing).
- *
- * @param {Object} period - The Period linked to the Adaptation or
- * Representation that you want to switch to.
- * @param {Observable} clock$ - Observable emitting playback conditions.
- * Has to emit last playback conditions immediately on subscribe.
- * @param {number} deltaPos - If the concerned Period is playing at the time
- * this function is called, we will add this value, in seconds, to the current
- * position to indicate the position we should reload at.
- * This value allows to give back context (by replaying some media data) after
- * a switch.
- * @returns {Observable}
- */
-
-function reloadAfterSwitch(period, clock$, deltaPos) {
-  return clock$.pipe((0,take/* take */.q)(1), // only the first (current) event interests us here
-  (0,mergeMap/* mergeMap */.z)(function (initialTick) {
-    var _a;
-
-    if (period.start <= initialTick.position && (period.end === undefined || period.end > initialTick.position)) {
-      // if the Period was playing at the time of the switch
-      var pos = initialTick.getCurrentTime() + deltaPos;
-      var reloadAt = Math.min(Math.max(period.start, pos), (_a = period.end) !== null && _a !== void 0 ? _a : Infinity);
-      return (0,of.of)(stream_events_generators.needsMediaSourceReload(period, reloadAt, !initialTick.isPaused));
-    } // If the Period was not playing, just ask to reload to the exact same position
-
-
-    return clock$.pipe((0,map/* map */.U)(function (tick) {
-      return stream_events_generators.needsMediaSourceReload(period, tick.getCurrentTime(), !tick.isPaused);
-    }));
-  }));
-}
 ;// CONCATENATED MODULE: ./src/core/stream/adaptation/create_representation_estimator.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -50962,7 +53815,7 @@ function PeriodStream(_ref) {
         log/* default.info */.Z.info("Stream: Clearing previous " + bufferType + " SegmentBuffer");
 
         if (segment_buffers.isNative(bufferType)) {
-          return reloadAfterSwitch(period, clock$, relativePosAfterSwitch);
+          return reloadAfterSwitch(period, clock$, 0);
         }
 
         cleanBuffer$ = segmentBufferStatus.value.removeBuffer(period.start, period.end == null ? Infinity : period.end);
@@ -51112,8 +53965,36 @@ function getFirstDeclaredMimeType(adaptation) {
  */
 
 /* harmony default export */ var period = (PeriodStream);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/scan.js + 1 modules
-var scan = __webpack_require__(3074);
+;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/scanInternals.js
+
+function scanInternals(accumulator, seed, hasSeed, emitOnNext, emitBeforeComplete) {
+    return function (source, subscriber) {
+        var hasState = hasSeed;
+        var state = seed;
+        var index = 0;
+        source.subscribe(new OperatorSubscriber/* OperatorSubscriber */.Q(subscriber, function (value) {
+            var i = index++;
+            state = hasState
+                ?
+                    accumulator(state, value, i)
+                :
+                    ((hasState = true), value);
+            emitOnNext && subscriber.next(state);
+        }, emitBeforeComplete &&
+            (function () {
+                hasState && subscriber.next(state);
+                subscriber.complete();
+            })));
+    };
+}
+//# sourceMappingURL=scanInternals.js.map
+;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/scan.js
+
+
+function scan(accumulator, seed) {
+    return (0,lift/* operate */.e)(scanInternals(accumulator, seed, arguments.length >= 2, true));
+}
+//# sourceMappingURL=scan.js.map
 ;// CONCATENATED MODULE: ./src/core/stream/orchestrator/active_period_emitter.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -51177,7 +54058,7 @@ function ActivePeriodEmitter(buffers$) {
   (0,filter/* filter */.h)(function (_ref) {
     var type = _ref.type;
     return type === "periodStreamCleared" || type === "adaptationChange" || type === "representationChange";
-  }), (0,scan/* scan */.R)(function (acc, evt) {
+  }), scan(function (acc, evt) {
     switch (evt.type) {
       case "periodStreamCleared":
         {
@@ -52273,7 +55154,7 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, setC
    */
 
   var discontinuitiesStore$ = discontinuityUpdate$.pipe(withLatestFrom(clock$), // listen to clock to clean-up old discontinuities
-  (0,scan/* scan */.R)(function (discontinuitiesStore, _ref) {
+  scan(function (discontinuitiesStore, _ref) {
     var evt = _ref[0],
         tick = _ref[1];
     return updateDiscontinuitiesStore(discontinuitiesStore, evt, tick);
@@ -52717,7 +55598,7 @@ function isFiniteStreamEvent(evt) {
 function streamEventsEmitter(manifest, mediaElement, clock$) {
   var eventsBeingPlayed = new WeakMap();
   var lastScheduledEvents = [];
-  var scheduledEvents$ = (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,startWith/* startWith */.O)(null), (0,scan/* scan */.R)(function (oldScheduledEvents) {
+  var scheduledEvents$ = (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,startWith/* startWith */.O)(null), scan(function (oldScheduledEvents) {
     return refresh_scheduled_events_list(oldScheduledEvents, manifest);
   }, []));
   /**
@@ -53002,6 +55883,8 @@ function createMediaSourceLoader(_ref) {
     }));
   };
 }
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/timer.js
+var observable_timer = __webpack_require__(6625);
 ;// CONCATENATED MODULE: ./src/utils/rx-throttle.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -53156,7 +56039,7 @@ function manifestUpdateScheduler(_ref) {
     }));
     /** Emit when the Manifest tells us that it has "expired". */
 
-    var expired$ = manifest.expired === null ? empty/* EMPTY */.E : (0,timer/* timer */.H)(minInterval).pipe((0,mergeMapTo/* mergeMapTo */.j)((0,from/* from */.Dp)(manifest.expired)), (0,mapTo/* mapTo */.h)({
+    var expired$ = manifest.expired === null ? empty/* EMPTY */.E : (0,observable_timer/* timer */.H)(minInterval).pipe((0,mergeMapTo/* mergeMapTo */.j)((0,from/* from */.Dp)(manifest.expired)), (0,mapTo/* mapTo */.h)({
       completeRefresh: true,
       unsafeMode: unsafeModeEnabled
     }));
@@ -53224,7 +56107,7 @@ function manifestUpdateScheduler(_ref) {
         actualRefreshInterval = regularRefreshDelay;
       }
 
-      return (0,timer/* timer */.H)(Math.max(actualRefreshInterval, minInterval)).pipe((0,mapTo/* mapTo */.h)({
+      return (0,observable_timer/* timer */.H)(Math.max(actualRefreshInterval, minInterval)).pipe((0,mapTo/* mapTo */.h)({
         completeRefresh: false,
         unsafeMode: unsafeModeEnabled
       }));
@@ -53321,7 +56204,7 @@ function startManualRefreshTimer(wantedDelay, minimumManifestUpdateInterval, las
 
     var _minInterval = Math.max(minimumManifestUpdateInterval - timeSinceLastRefresh, 0);
 
-    return (0,timer/* timer */.H)(Math.max(wantedDelay - timeSinceLastRefresh, _minInterval));
+    return (0,observable_timer/* timer */.H)(Math.max(wantedDelay - timeSinceLastRefresh, _minInterval));
   });
 }
 // EXTERNAL MODULE: ./src/core/init/throw_on_media_error.ts
@@ -54127,11 +57010,11 @@ function getLoadedContentState(mediaElement, isPlaying, stalledStatus) {
 // EXTERNAL MODULE: ./src/utils/languages/normalize.ts + 2 modules
 var normalize = __webpack_require__(5553);
 ;// CONCATENATED MODULE: ./src/core/api/option_utils.ts
-function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function option_utils_createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = option_utils_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function option_utils_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return option_utils_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return option_utils_arrayLikeToArray(o, minLen); }
 
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function option_utils_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 /**
  * Copyright 2015 CANAL+ Group
@@ -54458,7 +57341,7 @@ function parseLoadVideoOptions(options) {
   } else {
     keySystems = Array.isArray(options.keySystems) ? options.keySystems : [options.keySystems];
 
-    for (var _iterator = _createForOfIteratorHelperLoose(keySystems), _step; !(_step = _iterator()).done;) {
+    for (var _iterator = option_utils_createForOfIteratorHelperLoose(keySystems), _step; !(_step = _iterator()).done;) {
       var keySystem = _step.value;
 
       if (typeof keySystem.type !== "string" || typeof keySystem.getLicense !== "function") {
@@ -54501,7 +57384,7 @@ function parseLoadVideoOptions(options) {
     (0,warn_once/* default */.Z)("The `supplementaryTextTracks` loadVideo option is deprecated.\n" + "Please use the `TextTrackRenderer` tool instead.");
     var supplementaryTextTracks = Array.isArray(options.supplementaryTextTracks) ? options.supplementaryTextTracks : [options.supplementaryTextTracks];
 
-    for (var _iterator2 = _createForOfIteratorHelperLoose(supplementaryTextTracks), _step2; !(_step2 = _iterator2()).done;) {
+    for (var _iterator2 = option_utils_createForOfIteratorHelperLoose(supplementaryTextTracks), _step2; !(_step2 = _iterator2()).done;) {
       var supplementaryTextTrack = _step2.value;
 
       if (typeof supplementaryTextTrack.language !== "string" || typeof supplementaryTextTrack.mimeType !== "string" || typeof supplementaryTextTrack.url !== "string") {
@@ -54516,7 +57399,7 @@ function parseLoadVideoOptions(options) {
     (0,warn_once/* default */.Z)("The `supplementaryImageTracks` loadVideo option is deprecated.\n" + "Please use the `parseBifThumbnails` tool instead.");
     var supplementaryImageTracks = Array.isArray(options.supplementaryImageTracks) ? options.supplementaryImageTracks : [options.supplementaryImageTracks];
 
-    for (var _iterator3 = _createForOfIteratorHelperLoose(supplementaryImageTracks), _step3; !(_step3 = _iterator3()).done;) {
+    for (var _iterator3 = option_utils_createForOfIteratorHelperLoose(supplementaryImageTracks), _step3; !(_step3 = _iterator3()).done;) {
       var supplementaryImageTrack = _step3.value;
 
       if (typeof supplementaryImageTrack.mimeType !== "string" || typeof supplementaryImageTrack.url !== "string") {
@@ -54640,6 +57523,7 @@ var languages = __webpack_require__(7829);
 
 
 
+
 /**
  * Transform an array of IAudioTrackPreference into an array of
  * INormalizedPreferredAudioTrack to be exploited by the TrackChoiceManager.
@@ -54649,7 +57533,7 @@ var languages = __webpack_require__(7829);
 
 function normalizeAudioTracks(tracks) {
   return tracks.map(function (t) {
-    return t == null ? t : {
+    return t === null ? t : {
       normalized: t.language === undefined ? undefined : (0,languages/* default */.ZP)(t.language),
       audioDescription: t.audioDescription,
       codec: t.codec
@@ -54666,7 +57550,7 @@ function normalizeAudioTracks(tracks) {
 
 function normalizeTextTracks(tracks) {
   return tracks.map(function (t) {
-    return t == null ? t : {
+    return t === null ? t : {
       normalized: (0,languages/* default */.ZP)(t.language),
       closedCaption: t.closedCaption
     };
@@ -54755,8 +57639,8 @@ var TrackChoiceManager = /*#__PURE__*/function () {
     var periodItem = getPeriodItem(this._periods, period);
     var adaptations = period.getSupportedAdaptations(bufferType);
 
-    if (periodItem != null) {
-      if (periodItem[bufferType] != null) {
+    if (periodItem !== undefined) {
+      if (periodItem[bufferType] !== undefined) {
         log/* default.warn */.Z.warn("TrackChoiceManager: " + bufferType + " already added for period", period);
         return;
       } else {
@@ -54787,21 +57671,21 @@ var TrackChoiceManager = /*#__PURE__*/function () {
   _proto.removePeriod = function removePeriod(bufferType, period) {
     var periodIndex = findPeriodIndex(this._periods, period);
 
-    if (periodIndex == null) {
+    if (periodIndex === undefined) {
       log/* default.warn */.Z.warn("TrackChoiceManager: " + bufferType + " not found for period", period);
       return;
     }
 
     var periodItem = this._periods.get(periodIndex);
 
-    if (periodItem[bufferType] == null) {
+    if (periodItem[bufferType] === undefined) {
       log/* default.warn */.Z.warn("TrackChoiceManager: " + bufferType + " already removed for period", period);
       return;
     }
 
     delete periodItem[bufferType];
 
-    if (periodItem.audio == null && periodItem.text == null && periodItem.video == null) {
+    if (periodItem.audio === undefined && periodItem.text === undefined && periodItem.video === undefined) {
       this._periods.removeElement(periodItem);
     }
   };
@@ -54835,9 +57719,9 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
   _proto.setInitialAudioTrack = function setInitialAudioTrack(period) {
     var periodItem = getPeriodItem(this._periods, period);
-    var audioInfos = periodItem != null ? periodItem.audio : null;
+    var audioInfos = periodItem !== undefined ? periodItem.audio : null;
 
-    if (audioInfos == null || periodItem == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(audioInfos) || periodItem === undefined) {
       throw new Error("TrackChoiceManager: Given Period not found.");
     }
 
@@ -54871,9 +57755,9 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
   _proto.setInitialTextTrack = function setInitialTextTrack(period) {
     var periodItem = getPeriodItem(this._periods, period);
-    var textInfos = periodItem != null ? periodItem.text : null;
+    var textInfos = periodItem !== undefined ? periodItem.text : null;
 
-    if (textInfos == null || periodItem == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(textInfos) || periodItem === undefined) {
       throw new Error("TrackChoiceManager: Given Period not found.");
     }
 
@@ -54907,9 +57791,9 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
   _proto.setInitialVideoTrack = function setInitialVideoTrack(period) {
     var periodItem = getPeriodItem(this._periods, period);
-    var videoInfos = periodItem != null ? periodItem.video : null;
+    var videoInfos = periodItem !== undefined ? periodItem.video : null;
 
-    if (videoInfos == null || periodItem == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(videoInfos) || periodItem === undefined) {
       throw new Error("TrackChoiceManager: Given Period not found.");
     }
 
@@ -54956,9 +57840,9 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
   _proto.setAudioTrackByID = function setAudioTrackByID(period, wantedId) {
     var periodItem = getPeriodItem(this._periods, period);
-    var audioInfos = periodItem != null ? periodItem.audio : null;
+    var audioInfos = periodItem !== undefined ? periodItem.audio : null;
 
-    if (audioInfos == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(audioInfos)) {
       throw new Error("TrackChoiceManager: Given Period not found.");
     }
 
@@ -54990,9 +57874,9 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
   _proto.setTextTrackByID = function setTextTrackByID(period, wantedId) {
     var periodItem = getPeriodItem(this._periods, period);
-    var textInfos = periodItem != null ? periodItem.text : null;
+    var textInfos = periodItem !== undefined ? periodItem.text : null;
 
-    if (textInfos == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(textInfos)) {
       throw new Error("TrackChoiceManager: Given Period not found.");
     }
 
@@ -55028,9 +57912,9 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
   _proto.setVideoTrackByID = function setVideoTrackByID(period, wantedId) {
     var periodItem = getPeriodItem(this._periods, period);
-    var videoInfos = periodItem != null ? periodItem.video : null;
+    var videoInfos = periodItem !== undefined ? periodItem.video : null;
 
-    if (videoInfos == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(videoInfos)) {
       throw new Error("LanguageManager: Given Period not found.");
     }
 
@@ -55063,9 +57947,9 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
   _proto.disableTextTrack = function disableTextTrack(period) {
     var periodItem = getPeriodItem(this._periods, period);
-    var textInfos = periodItem != null ? periodItem.text : null;
+    var textInfos = periodItem !== undefined ? periodItem.text : null;
 
-    if (textInfos == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(textInfos)) {
       throw new Error("TrackChoiceManager: Given Period not found.");
     }
 
@@ -55146,15 +58030,15 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
   _proto.getChosenAudioTrack = function getChosenAudioTrack(period) {
     var periodItem = getPeriodItem(this._periods, period);
-    var audioInfos = periodItem != null ? periodItem.audio : null;
+    var audioInfos = periodItem !== undefined ? periodItem.audio : null;
 
-    if (audioInfos == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(audioInfos)) {
       return null;
     }
 
     var chosenTrack = this._audioChoiceMemory.get(period);
 
-    if (chosenTrack == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(chosenTrack)) {
       return null;
     }
 
@@ -55186,15 +58070,15 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
   _proto.getChosenTextTrack = function getChosenTextTrack(period) {
     var periodItem = getPeriodItem(this._periods, period);
-    var textInfos = periodItem != null ? periodItem.text : null;
+    var textInfos = periodItem !== undefined ? periodItem.text : null;
 
-    if (textInfos == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(textInfos)) {
       return null;
     }
 
     var chosenTextAdaptation = this._textChoiceMemory.get(period);
 
-    if (chosenTextAdaptation == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(chosenTextAdaptation)) {
       return null;
     }
 
@@ -55219,19 +58103,15 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
   _proto.getChosenVideoTrack = function getChosenVideoTrack(period) {
     var periodItem = getPeriodItem(this._periods, period);
-    var videoInfos = periodItem != null ? periodItem.video : null;
+    var videoInfos = periodItem !== undefined ? periodItem.video : null;
 
-    if (videoInfos == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(videoInfos)) {
       return null;
     }
 
     var chosenVideoAdaptation = this._videoChoiceMemory.get(period);
 
-    if (chosenVideoAdaptation === undefined) {
-      return null; // not set yet
-    }
-
-    if (chosenVideoAdaptation === null) {
+    if ((0,is_null_or_undefined/* default */.Z)(chosenVideoAdaptation)) {
       return null;
     }
 
@@ -55279,22 +58159,22 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
   _proto.getAvailableAudioTracks = function getAvailableAudioTracks(period) {
     var periodItem = getPeriodItem(this._periods, period);
-    var audioInfos = periodItem != null ? periodItem.audio : null;
+    var audioInfos = periodItem !== undefined ? periodItem.audio : null;
 
-    if (audioInfos == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(audioInfos)) {
       return [];
     }
 
     var chosenAudioAdaptation = this._audioChoiceMemory.get(period);
 
-    var currentId = chosenAudioAdaptation != null ? chosenAudioAdaptation.id : null;
+    var currentId = !(0,is_null_or_undefined/* default */.Z)(chosenAudioAdaptation) ? chosenAudioAdaptation.id : null;
     return audioInfos.adaptations.map(function (adaptation) {
       var formatted = {
         language: (0,take_first_set/* default */.Z)(adaptation.language, ""),
         normalized: (0,take_first_set/* default */.Z)(adaptation.normalizedLanguage, ""),
         audioDescription: adaptation.isAudioDescription === true,
         id: adaptation.id,
-        active: currentId == null ? false : currentId === adaptation.id,
+        active: currentId === null ? false : currentId === adaptation.id,
         representations: adaptation.representations.map(parseAudioRepresentation)
       };
 
@@ -55316,22 +58196,22 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
   _proto.getAvailableTextTracks = function getAvailableTextTracks(period) {
     var periodItem = getPeriodItem(this._periods, period);
-    var textInfos = periodItem != null ? periodItem.text : null;
+    var textInfos = periodItem !== undefined ? periodItem.text : null;
 
-    if (textInfos == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(textInfos)) {
       return [];
     }
 
     var chosenTextAdaptation = this._textChoiceMemory.get(period);
 
-    var currentId = chosenTextAdaptation != null ? chosenTextAdaptation.id : null;
+    var currentId = !(0,is_null_or_undefined/* default */.Z)(chosenTextAdaptation) ? chosenTextAdaptation.id : null;
     return textInfos.adaptations.map(function (adaptation) {
       return {
         language: (0,take_first_set/* default */.Z)(adaptation.language, ""),
         normalized: (0,take_first_set/* default */.Z)(adaptation.normalizedLanguage, ""),
         closedCaption: adaptation.isClosedCaption === true,
         id: adaptation.id,
-        active: currentId == null ? false : currentId === adaptation.id
+        active: currentId === null ? false : currentId === adaptation.id
       };
     });
   }
@@ -55347,9 +58227,9 @@ var TrackChoiceManager = /*#__PURE__*/function () {
     var _a;
 
     var periodItem = getPeriodItem(this._periods, period);
-    var videoInfos = periodItem != null ? periodItem.video : null;
+    var videoInfos = periodItem !== undefined ? periodItem.video : null;
 
-    if (videoInfos == null) {
+    if ((0,is_null_or_undefined/* default */.Z)(videoInfos)) {
       return [];
     }
 
@@ -55447,7 +58327,7 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
       var periodItem = _this._periods.get(index);
 
-      if (periodItem.audio == null) {
+      if ((0,is_null_or_undefined/* default */.Z)(periodItem.audio)) {
         // No audio choice for this period, check next one
         recursiveUpdateAudioTrack(index + 1);
         return;
@@ -55500,7 +58380,7 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
       var periodItem = _this2._periods.get(index);
 
-      if (periodItem.text == null) {
+      if ((0,is_null_or_undefined/* default */.Z)(periodItem.text)) {
         // No text choice for this period, check next one
         recursiveUpdateTextTrack(index + 1);
         return;
@@ -55552,7 +58432,7 @@ var TrackChoiceManager = /*#__PURE__*/function () {
 
       var periodItem = _this3._periods.get(index);
 
-      if (periodItem.video == null) {
+      if ((0,is_null_or_undefined/* default */.Z)(periodItem.video)) {
         // No video choice for this period, check next one
         recursiveUpdateVideoTrack(index + 1);
         return;
@@ -55966,6 +58846,7 @@ function getRightVideoTrack(adaptation, isTrickModeEnabled) {
 
 
 /* eslint-disable-next-line max-len */
+
 
 
 
@@ -58749,7 +61630,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   _proto._priv_triggerAvailableBitratesChangeEvent = function _priv_triggerAvailableBitratesChangeEvent(event, newVal) {
     var prevVal = this._priv_contentEventsMemory[event];
 
-    if (prevVal === undefined || (0,are_arrays_of_numbers_equal/* default */.Z)(newVal, prevVal)) {
+    if (prevVal === undefined || !(0,are_arrays_of_numbers_equal/* default */.Z)(newVal, prevVal)) {
       this._priv_contentEventsMemory[event] = newVal;
       this.trigger(event, newVal);
     }
@@ -58824,7 +61705,21 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.26.0";
+"3.26.0"; // XXX TODO remove
+
+/* eslint-disable */
+
+window.dashWasmParser = {
+  initialize: function initialize(opts) {
+    addFeatures([dashWasmFeature]);
+    console.time("fetch");
+    return dashWasmFeature.initialize(opts).then(function () {
+      console.timeEnd("fetch");
+    });
+  }
+};
+/* eslint-enable */
+
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
@@ -58844,8 +61739,6 @@ Player.version =
  */
 
 /* harmony default export */ var api = (public_api);
-// EXTERNAL MODULE: ./src/features/features_object.ts
-var features_object = __webpack_require__(7273);
 ;// CONCATENATED MODULE: ./src/features/initialize_features.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -58893,8 +61786,8 @@ function initializeFeaturesObject() {
   }
 
   if (true) {
-    features_object/* default.transports.dash */.Z.transports.dash = __webpack_require__(1732)/* .default */ .Z;
-    features_object/* default.dashParsers.js */.Z.dashParsers.js = __webpack_require__(148)/* .default */ .Z;
+    features_object/* default.transports.dash */.Z.transports.dash = __webpack_require__(5877)/* .default */ .Z;
+    features_object/* default.dashParsers.js */.Z.dashParsers.js = __webpack_require__(3139)/* .default */ .Z;
   }
 
   if (false) {}

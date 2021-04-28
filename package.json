@@ -26,7 +26,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "webpack --progress --config webpack.config.js",
-    "build:all": "npm run build && npm run build:min && npm run build:wasm:release && npm run build:modular",
+    "build:all": "npm run build && npm run build:min && npm run build:wasm:release && npm run build:worker:all && npm run build:modular",
     "build:min": "cross-env RXP_MINIFY=true webpack --progress --config webpack.config.js",
     "build:min:report": "cross-env RXP_SIZE_REPORT=true cross-env RXP_MINIFY=true webpack --progress --config webpack.config.js",
     "build:modular": "./scripts/build/generate_build.js",
@@ -36,6 +36,9 @@
     "build:min:watch": "cross-env RXP_MINIFY=true webpack --progress --config webpack.config.js -w",
     "build:wasm:debug": "cd ./src/parsers/manifest/dash/wasm-parser && cargo build --target wasm32-unknown-unknown && cp target/wasm32-unknown-unknown/debug/mpd_node_parser.wasm ../../../../../dist/mpd-parser.wasm",
     "build:wasm:release": "cd ./src/parsers/manifest/dash/wasm-parser && cargo build --target wasm32-unknown-unknown --release && wasm-opt -O3 -o ../../../../../dist/mpd-parser.wasm target/wasm32-unknown-unknown/release/mpd_node_parser.wasm && cd ../../../../../ && npm run wasm-strip",
+    "build:worker": "webpack --progress --config webpack-worker.config.js",
+    "build:worker:all": "npm run build:worker && npm run build:worker:min",
+    "build:worker:min": "cross-env RXP_MINIFY=true webpack --progress --config webpack-worker.config.js",
     "certificate": "./scripts/generate_certificate",
     "check": "npm run check:types && npm run lint && npm run test:unit",
     "check:all": "npm run check:types && npm run lint && npm run lint:demo && npm run lint:tests && npm run test && npm run test:memory && node -r esm ./scripts/check_nodejs_import_compatibility.js",
@@ -191,11 +194,14 @@
       },
       "WebAssembly MPD parser builds (needs Rust, Cargo and binaryen)": {
         "build:wasm:debug": "Build the DASH MPD parser written in rust as WebAssembly into debug mode, and output the result as dist/mpd-parser.wasm",
-        "build:wasm:release": "Build the DASH MPD parser written in rust as WebAssembly into release mode, and output the result as dist/mpd-parser.wasm"
+        "build:wasm:release": "Build the DASH MPD parser written in rust as WebAssembly into release mode, and output the result as dist/mpd-parser.wasm",
+        "build:worker": "Build the non-minified version of the worker used to run the DASH MPD Parser written in WebAssembly, and output the result as dist/mpd-parser.worker.js",
+        "build:worker:all": "Build both the non-minified and minified version of the worker used to run the DASH MPD Parser written in WebAssembly.",
+        "build:worker:min": "Build the minified version of the worker used to run the DASH MPD Parser written in WebAssembly, and output the result as dist/mpd-parser.worker.min.js"
       },
       "Combinations of multiple builds": {
-        "build:all": "Perform all possible builds of the player (regular RxPlayer builds and the WebAssembly DASH MPD parser release build).",
-        "build:rxp:all": "Perform all possible builds of the RxPlayer main code (that is, excluding the WebAssembly DASH MPD parser build)."
+        "build:all": "Perform all possible builds of the player (build, build:min and build:modular)",
+        "build:rxp:all": "Perform all possible builds of the RxPlayer main code (that is excluding the MPD parser using a supplementary WebAssembly and Worker file)."
       }
     },
     "Build the documentation pages": {

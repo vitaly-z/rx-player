@@ -43,6 +43,8 @@ import ParsersStack from "./parsers_stack";
 export type IMPDParsingResult = [ IMPDIntermediateRepresentation | null, Error[] ];
 export type IXlinkParsingResult = [ IPeriodIntermediateRepresentation[], Error[] ];
 
+let timer = 0;
+
 export default class DashWasmParser {
   /**
    * Current "status" of the DASH-WASM parser.
@@ -122,6 +124,7 @@ export default class DashWasmParser {
   }
 
   private _onWorkerMessage(evt : MessageEvent<IWorkerOutgoingMessage[]>) : void {
+    const p = performance.now();
     const msgs = evt.data;
     for (let i = 0; i < msgs.length; i++) {
       const msg = msgs[i];
@@ -129,23 +132,26 @@ export default class DashWasmParser {
 
         case OutgoingMessageType.Attribute:
           // Call the active "attributeParser"
-          return this._parsersStack.attributeParser(msg.attribute, msg.payload);
+          this._parsersStack.attributeParser(msg.attribute, msg.payload);
+          break;
 
         case OutgoingMessageType.TagOpen:
           // Call the active "childrenParser"
-          return this._parsersStack.childrenParser(msg.tag);
+          this._parsersStack.childrenParser(msg.tag);
+          break;
 
         case OutgoingMessageType.TagClose:
           // Only pop current parsers from the `parsersStack` if that tag was the
           // active one.
-          return this._parsersStack.popIfCurrent(msg.tag);
+          this._parsersStack.popIfCurrent(msg.tag);
+          break;
 
         case OutgoingMessageType.ParserWarning:
           const errorMsg = new TextDecoder().decode(msg.payload);
           if (this._currentParsingOperation?.type === "mpd") {
             this._currentParsingOperation.warnings.push(new Error(errorMsg));
           }
-          return;
+          break;
 
         case OutgoingMessageType.MPDParsingFinished:
           if (this._currentParsingOperation === null ||
@@ -229,12 +235,13 @@ export default class DashWasmParser {
 
         case OutgoingMessageType.InitializationWarning:
           log.warn(msg.message);
-          return;
+          break;
 
         default:
           assertUnreachable(msg);
       }
     }
+    timer += (performance.now() - p);
   }
 
   public async initialize(opts : IDashWasmParserOptions) : Promise<void> {
@@ -253,7 +260,8 @@ export default class DashWasmParser {
     this._initInfo.promise = new PPromise<void>((resolve, reject) => {
       this._initInfo.callbacks = { resolve, reject };
     });
-    worker.postMessage({ type: IngoingMessageType.Initialize });
+    worker.postMessage({ type: IngoingMessageType.Initialize,
+                         wasmUrl: opts.wasmUrl });
     return this._initInfo.promise;
   }
 
@@ -266,11 +274,13 @@ export default class DashWasmParser {
     mpd : ArrayBuffer,
     args : IMPDParserArguments
   ) : Promise<IDashParserResponse<string> | IDashParserResponse<ArrayBuffer>> {
+    timer = 0;
     return this._parseMpd(mpd).then(([mpdIR, warnings]) => {
       if (mpdIR === null) {
         throw new Error("DASH Parser: Unknown error while parsing the MPD");
       }
       const ret = parseMpdIr(mpdIR, args, warnings);
+      console.warn("!!!!!!!!! Parse Main thread", timer);
       return this._processParserReturnValue(ret);
     });
   }

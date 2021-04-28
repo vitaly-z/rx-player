@@ -67,7 +67,10 @@ import {
   IErrorType,
   MediaError,
 } from "../../errors";
-import features from "../../features";
+import { DASH_WASM } from "../../experimental/features/dash_wasm";
+import features, {
+  addFeatures,
+} from "../../features";
 import log from "../../log";
 import Manifest, {
   Adaptation,
@@ -75,6 +78,7 @@ import Manifest, {
   Representation,
 } from "../../manifest";
 import { IBifThumbnail } from "../../parsers/images/bif";
+import { IDashWasmParserOptions } from "../../parsers/manifest/dash/wasm-parser";
 import areArraysOfNumbersEqual from "../../utils/are_arrays_of_numbers_equal";
 import EventEmitter, {
   fromEvent,
@@ -2978,6 +2982,20 @@ class Player extends EventEmitter<IPublicAPIEvent> {
   }
 }
 Player.version = /* PLAYER_VERSION */"3.26.0";
+
+// XXX TODO remove
+/* eslint-disable */
+
+(window as any).dashWasmParser = {
+  initialize(opts : IDashWasmParserOptions) : Promise<void> {
+    addFeatures([DASH_WASM]);
+    console.time("fetch");
+    return DASH_WASM.initialize(opts).then(() => {
+      console.timeEnd("fetch");
+    });
+  },
+};
+/* eslint-enable */
 
 export default Player;
 export { IStreamEventData };

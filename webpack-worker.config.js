@@ -20,7 +20,16 @@ module.exports = {
   },
   output: {
     path: path.join(__dirname, "./dist"),
-    filename: shouldMinify ? "worker.min.js" : "worker.js",
+    filename: shouldMinify ? "mpd-parser.worker.min.js" : "mpd-parser.worker.js",
+    environment: {
+      arrowFunction: false,
+      bigIntLiteral: false,
+      const: false,
+      destructuring: false,
+      dynamicImport: false,
+      forOf: false,
+      module: false,
+    },
   },
   optimization: {
     minimize: shouldMinify,
