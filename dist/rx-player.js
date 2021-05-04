@@ -18262,6 +18262,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
   function TemplateRepresentationIndex(index, context) {
     var _a;
 
+    debugger;
     var aggressiveMode = context.aggressiveMode,
         availabilityTimeOffset = context.availabilityTimeOffset,
         manifestBoundsCalculator = context.manifestBoundsCalculator,
@@ -18749,6 +18750,7 @@ function parseRepresentationIndex(representation, representationInfos) {
     });
   };
 
+  debugger;
   var context = {
     aggressiveMode: aggressiveMode,
     availabilityTimeOffset: availabilityTimeOffset,
@@ -20405,7 +20407,7 @@ function getInitSegment(index, isEMSGWhitelisted) {
     end: 0,
     duration: 0,
     timescale: 1,
-    range: initialization != null ? initialization.range : undefined,
+    range: initialization === null || initialization === void 0 ? void 0 : initialization.range,
     indexRange: index.indexRange,
     mediaURLs: (_a = initialization === null || initialization === void 0 ? void 0 : initialization.mediaURLs) !== null && _a !== void 0 ? _a : null,
     privateInfos: privateInfos,
@@ -45252,12 +45254,12 @@ var DashWasmParser = /*#__PURE__*/function () {
     for (var i = 0; i < msgs.length; i++) {
       var msg = msgs[i];
 
-      switch (msg.type) {
+      switch (msg[0]) {
         case 22
         /* Attribute */
         :
           // Call the active "attributeParser"
-          this._parsersStack.attributeParser(msg.attribute, msg.payload);
+          this._parsersStack.attributeParser(msg[2], msg[1]);
 
           break;
 
@@ -45265,7 +45267,7 @@ var DashWasmParser = /*#__PURE__*/function () {
         /* TagOpen */
         :
           // Call the active "childrenParser"
-          this._parsersStack.childrenParser(msg.tag);
+          this._parsersStack.childrenParser(msg[1]);
 
           break;
 
@@ -45274,14 +45276,14 @@ var DashWasmParser = /*#__PURE__*/function () {
         :
           // Only pop current parsers from the `parsersStack` if that tag was the
           // active one.
-          this._parsersStack.popIfCurrent(msg.tag);
+          this._parsersStack.popIfCurrent(msg[1]);
 
           break;
 
         case 21
         /* ParserWarning */
         :
-          var errorMsg = new TextDecoder().decode(msg.payload);
+          var errorMsg = new TextDecoder().decode(msg[1]);
 
           if (((_a = this._currentParsingOperation) === null || _a === void 0 ? void 0 : _a.type) === "mpd") {
             this._currentParsingOperation.warnings.push(new Error(errorMsg));
@@ -45314,7 +45316,7 @@ var DashWasmParser = /*#__PURE__*/function () {
           if (this._currentParsingOperation === null || this._currentParsingOperation.type !== "mpd") {
             log/* default.warn */.Z.warn("DASH-WASM: MPD parsing failed but no MPD parsing was pending.");
           } else {
-            var err = new Error(msg.message);
+            var err = new Error(msg[1]);
             var reject = this._currentParsingOperation.reject;
             this._currentParsingOperation = null;
 
@@ -45350,7 +45352,7 @@ var DashWasmParser = /*#__PURE__*/function () {
           if (this._currentParsingOperation === null || this._currentParsingOperation.type !== "xlink") {
             log/* default.warn */.Z.warn("DASH-WASM: xlink parsing failed but no xlink parsing " + "was pending.");
           } else {
-            var _err = new Error(msg.message);
+            var _err = new Error(msg[1]);
 
             var _reject = this._currentParsingOperation.reject;
             this._currentParsingOperation = null;
@@ -45386,7 +45388,7 @@ var DashWasmParser = /*#__PURE__*/function () {
           if (this._initInfo.callbacks === null) {
             log/* default.warn */.Z.warn("DASH-WASM: Parser initialization failed but no " + "initialization was pending.");
           } else {
-            var _err2 = new Error(msg.message);
+            var _err2 = new Error(msg[1]);
 
             var _reject2 = this._initInfo.callbacks.reject;
             this._initInfo.callbacks = null;
@@ -45399,7 +45401,7 @@ var DashWasmParser = /*#__PURE__*/function () {
         case 1
         /* InitializationWarning */
         :
-          log/* default.warn */.Z.warn(msg.message);
+          log/* default.warn */.Z.warn(msg[1]);
           break;
 
         default:
@@ -56031,6 +56033,7 @@ function manifestUpdateScheduler(_ref) {
       var completeRefresh = _ref3.completeRefresh,
           delay = _ref3.delay,
           canUseUnsafeMode = _ref3.canUseUnsafeMode;
+      debugger;
       var unsafeMode = canUseUnsafeMode && unsafeModeEnabled;
       return startManualRefreshTimer(delay !== null && delay !== void 0 ? delay : 0, minimumManifestUpdateInterval, sendingTime).pipe((0,mapTo/* mapTo */.h)({
         completeRefresh: completeRefresh,

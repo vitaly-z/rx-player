@@ -166,6 +166,7 @@ export default function manifestUpdateScheduler({
     /** Emit when the RxPlayer determined that a refresh should be done. */
     const internalRefresh$ = scheduleRefresh$
       .pipe(mergeMap(({ completeRefresh, delay, canUseUnsafeMode }) => {
+        debugger;
         const unsafeMode = canUseUnsafeMode && unsafeModeEnabled;
         return startManualRefreshTimer(delay ?? 0,
                                        minimumManifestUpdateInterval,

@@ -30,12 +30,12 @@ function onWorkerMessage(msg) {
     const { data } = msg;
     if (data.type === 0 /* Initialize */) {
         initializeWasm(data.wasmUrl)
-            .then(() => triggerMessage({ type: 0 /* Initialized */ }))
+            .then(() => triggerMessage([0 /* Initialized */]))
             .catch((err) => {
             const initErrorMsg = err instanceof Error ? err.toString() :
                 "Unknown initialization error";
-            triggerMessage({ type: 2 /* InitializationError */,
-                message: initErrorMsg });
+            triggerMessage([2 /* InitializationError */,
+                initErrorMsg]);
         });
     }
     else if (data.type === 1 /* ParseMpd */) {
@@ -45,11 +45,11 @@ function onWorkerMessage(msg) {
         catch (err) {
             const parsingErrorMsg = err instanceof Error ? err.toString() :
                 "Unknown parsing error";
-            triggerMessage({ type: 3 /* MPDParsingError */,
-                message: parsingErrorMsg });
+            triggerMessage([3 /* MPDParsingError */,
+                parsingErrorMsg]);
             return;
         }
-        triggerMessage({ type: 4 /* MPDParsingFinished */ });
+        triggerMessage([4 /* MPDParsingFinished */]);
     }
     else if (data.type === 2 /* ParseXlink */) {
         try {
@@ -58,11 +58,11 @@ function onWorkerMessage(msg) {
         catch (err) {
             const parsingErrorMsg = err instanceof Error ? err.toString() :
                 "Unknown parsing error";
-            triggerMessage({ type: 5 /* XLinkParsingError */,
-                message: parsingErrorMsg });
+            triggerMessage([5 /* XLinkParsingError */,
+                parsingErrorMsg]);
             return;
         }
-        triggerMessage({ type: 6 /* XLinkParsingFinished */ });
+        triggerMessage([6 /* XLinkParsingFinished */]);
     }
 }
 /**
@@ -83,16 +83,16 @@ const msgBuffer = [];
 const reportables = [];
 function triggerMessage(msg) {
     msgBuffer.push(msg);
-    if (msg.type <= 10) {
+    if (msg[0] <= 10) {
         worker.postMessage(msgBuffer, reportables);
         msgBuffer.length = 0;
         reportables.length = 0;
     }
     else {
         let sendNow = false;
-        if (msg.type > 20) {
+        if (msg[0] > 20) {
             // TODO I thought TS would be smarter than this
-            const payload = msg.payload;
+            const payload = msg[1];
             reportables.push(payload);
             sendNow = sendNow || payload.byteLength > 100;
         }
@@ -130,8 +130,8 @@ function initializeWasm(wasmUrl) {
         const errMsg = err instanceof Error ? err.toString() :
             "unknown error";
         const warning = `Unable to call \`instantiateStreaming\` on WASM: ${errMsg}`;
-        triggerMessage({ type: 1 /* InitializationWarning */,
-            message: warning });
+        triggerMessage([1 /* InitializationWarning */,
+            warning]);
         const res = await fetchedWasm;
         if (res.status < 200 || res.status >= 300) {
             const reqErr = new Error("WebAssembly request failed. status: " +
@@ -195,7 +195,7 @@ function parseXlink(xlinkData) {
  */
 function onTagOpen(tag) {
     const p = performance.now();
-    triggerMessage({ type: 11 /* TagOpen */, tag });
+    triggerMessage([11 /* TagOpen */, tag]);
     timer += (performance.now() - p);
 }
 /**
@@ -205,7 +205,7 @@ function onTagOpen(tag) {
  */
 function onTagClose(tag) {
     const p = performance.now();
-    triggerMessage({ type: 12 /* TagClose */, tag });
+    triggerMessage([12 /* TagClose */, tag]);
     timer += (performance.now() - p);
 }
 /**
@@ -237,7 +237,7 @@ function onAttribute(attr, ptr, len) {
         const rangeEnd = dataView.getFloat64(ptr + 8, true);
         payload = mpdData.mpd.slice(rangeStart, rangeEnd);
     }
-    triggerMessage({ type: 22 /* Attribute */, attribute: attr, payload });
+    triggerMessage([22 /* Attribute */, payload, attr]);
     timer += (performance.now() - p);
 }
 /**
@@ -263,8 +263,8 @@ function onCustomEvent(evt, ptr, len) {
         }
     }
     if (evt === 1 /* Error */) {
-        triggerMessage({ type: 21 /* ParserWarning */,
-            payload });
+        triggerMessage([21 /* ParserWarning */,
+            payload]);
     }
     timer += (performance.now() - p);
 }

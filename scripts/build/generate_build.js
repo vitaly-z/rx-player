@@ -122,6 +122,13 @@ async function generateBuild() {
 
     console.log(" 📦 Generating imported files from templates...");
     await generateImportFilesFromTemplates();
+
+    // XXX TODO
+    console.log(" 📦 Generating inline worker import...");
+    await generateInlineWorker(
+      path.join(ROOT_DIR, "dist/mpd-parser.worker.min.js"),
+      path.join(ROOT_DIR, "experimental/tools/mpd-parser_inline-worker.js")
+    );
   } catch (err) {
     console.error(
       "Fatal error:",
@@ -381,5 +388,19 @@ async function replaceTokensInTemplates(fileDest) {
         [],
         (code) => new Error(`Template process exited with code ${code}`),
       );
+  }
+}
+
+async function generateInlineWorker(input, output) {
+  try {
+    await fs.access(input);
+    const fileContent = await fs.readFile(input);
+    const stringifiedContent =
+      `export default ${JSON.stringify(fileContent.toString())};`;
+    await fs.writeFile(output, stringifiedContent);
+    console.log(`Succeeded to create inline version for Worker ${input} at: ${output}`);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
   }
 }

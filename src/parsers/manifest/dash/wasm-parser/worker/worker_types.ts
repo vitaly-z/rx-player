@@ -336,54 +336,49 @@ export const enum OutgoingMessageType {
   Attribute = 22,
 }
 
-export interface IInitializedEvent {
-  type : OutgoingMessageType.Initialized;
-}
+export type IInitializedEvent = [OutgoingMessageType.Initialized];
 
-export interface IInitializationWarningEvent {
-  type : OutgoingMessageType.InitializationWarning;
-  message : string;
-}
+export type IInitializationWarningEvent = [
+  OutgoingMessageType.InitializationWarning,
+  string,
+];
 
-export interface IInitializationErrorEvent {
-  type : OutgoingMessageType.InitializationError;
-  message : string;
-}
+export type IInitializationErrorEvent = [
+  OutgoingMessageType.InitializationError,
+  string,
+];
 
-export interface IMPDParsingErrorEvent {
-  type : OutgoingMessageType.MPDParsingError;
-  message : string;
-}
+export type IMPDParsingErrorEvent = [
+  OutgoingMessageType.MPDParsingError,
+  string,
+];
 
-export interface IMPDParsingFinishedEvent {
-  type : OutgoingMessageType.MPDParsingFinished;
-}
+export type IMPDParsingFinishedEvent = [ OutgoingMessageType.MPDParsingFinished ];
 
-export interface IXLinkParsingErrorEvent {
-  type : OutgoingMessageType.XLinkParsingError;
-  message : string;
-}
+export type IXLinkParsingErrorEvent = [
+  OutgoingMessageType.XLinkParsingError,
+  string,
+];
 
-export interface IXLinkParsingFinishedEvent {
-  type : OutgoingMessageType.XLinkParsingFinished;
-}
+export type IXLinkParsingFinishedEvent = [
+  OutgoingMessageType.XLinkParsingFinished,
+];
 
-export interface IParsedTagEvent {
-  type : OutgoingMessageType.TagOpen |
-         OutgoingMessageType.TagClose;
-  tag : TagName;
-}
+export type IParsedTagEvent = [
+  OutgoingMessageType.TagOpen | OutgoingMessageType.TagClose,
+  TagName,
+];
 
-export interface IParserWarningEvent {
-  type : OutgoingMessageType.ParserWarning;
-  payload : ArrayBuffer;
-}
+export type IParserWarningEvent = [
+  OutgoingMessageType.ParserWarning,
+  ArrayBuffer,
+];
 
-export interface IParsedAttributeEvent {
-  type : OutgoingMessageType.Attribute;
-  attribute : AttributeName;
-  payload : ArrayBuffer;
-}
+export type IParsedAttributeEvent = [
+  OutgoingMessageType.Attribute,
+  ArrayBuffer,
+  AttributeName,
+];
 
 export type IWorkerOutgoingMessage = IInitializedEvent |
                                      IInitializationWarningEvent |

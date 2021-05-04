@@ -128,26 +128,26 @@ export default class DashWasmParser {
     const msgs = evt.data;
     for (let i = 0; i < msgs.length; i++) {
       const msg = msgs[i];
-      switch (msg.type) {
+      switch (msg[0]) {
 
         case OutgoingMessageType.Attribute:
           // Call the active "attributeParser"
-          this._parsersStack.attributeParser(msg.attribute, msg.payload);
+          this._parsersStack.attributeParser(msg[2], msg[1]);
           break;
 
         case OutgoingMessageType.TagOpen:
           // Call the active "childrenParser"
-          this._parsersStack.childrenParser(msg.tag);
+          this._parsersStack.childrenParser(msg[1]);
           break;
 
         case OutgoingMessageType.TagClose:
           // Only pop current parsers from the `parsersStack` if that tag was the
           // active one.
-          this._parsersStack.popIfCurrent(msg.tag);
+          this._parsersStack.popIfCurrent(msg[1]);
           break;
 
         case OutgoingMessageType.ParserWarning:
-          const errorMsg = new TextDecoder().decode(msg.payload);
+          const errorMsg = new TextDecoder().decode(msg[1]);
           if (this._currentParsingOperation?.type === "mpd") {
             this._currentParsingOperation.warnings.push(new Error(errorMsg));
           }
@@ -172,7 +172,7 @@ export default class DashWasmParser {
           {
             log.warn("DASH-WASM: MPD parsing failed but no MPD parsing was pending.");
           } else {
-            const err = new Error(msg.message);
+            const err = new Error(msg[1]);
             const { reject } = this._currentParsingOperation;
             this._currentParsingOperation = null;
             this._parsersStack.reset();
@@ -201,7 +201,7 @@ export default class DashWasmParser {
             log.warn("DASH-WASM: xlink parsing failed but no xlink parsing " +
                      "was pending.");
           } else {
-            const err = new Error(msg.message);
+            const err = new Error(msg[1]);
             const { reject } = this._currentParsingOperation;
             this._currentParsingOperation = null;
             this._parsersStack.reset();
@@ -226,7 +226,7 @@ export default class DashWasmParser {
             log.warn("DASH-WASM: Parser initialization failed but no " +
                      "initialization was pending.");
           } else {
-            const err = new Error(msg.message);
+            const err = new Error(msg[1]);
             const { reject } = this._initInfo.callbacks;
             this._initInfo.callbacks = null;
             reject(err);
@@ -234,7 +234,7 @@ export default class DashWasmParser {
           break;
 
         case OutgoingMessageType.InitializationWarning:
-          log.warn(msg.message);
+          log.warn(msg[1]);
           break;
 
         default:

@@ -165,6 +165,7 @@ export default class TemplateRepresentationIndex implements IRepresentationIndex
     index : ITemplateIndexIndexArgument,
     context : ITemplateIndexContextArgument
   ) {
+    debugger;
     const { aggressiveMode,
             availabilityTimeOffset,
             manifestBoundsCalculator,

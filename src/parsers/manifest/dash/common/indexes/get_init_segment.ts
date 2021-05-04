@@ -41,8 +41,7 @@ export default function getInitSegment(
            end: 0,
            duration: 0,
            timescale: 1,
-           range: initialization != null ? initialization.range :
-                                           undefined,
+           range: initialization?.range,
            indexRange: index.indexRange,
            mediaURLs: initialization?.mediaURLs ?? null,
            privateInfos,

@@ -13,4 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import inlineDashWasmWorker from "./mpd-parser_inline-worker";
 export * from "../../__BUILD_DIR__/experimental/tools/index.js";
+export { inlineDashWasmWorker };

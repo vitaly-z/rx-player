@@ -14,3 +14,4 @@
  * limitations under the License.
  */
 export * from "../../__BUILD_DIR__/experimental/tools/index";
+export const inlineDashWasmWorker : string;

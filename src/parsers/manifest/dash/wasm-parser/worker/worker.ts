@@ -58,12 +58,12 @@ function onWorkerMessage(msg : MessageEvent<IIngoingMessage>) {
   const { data } = msg;
   if (data.type === IngoingMessageType.Initialize) {
     initializeWasm(data.wasmUrl)
-      .then(() => triggerMessage({ type: OutgoingMessageType.Initialized }))
+      .then(() => triggerMessage([ OutgoingMessageType.Initialized ]))
       .catch((err) => {
         const initErrorMsg = err instanceof Error ? err.toString() :
                                                     "Unknown initialization error";
-        triggerMessage({ type: OutgoingMessageType.InitializationError,
-                         message: initErrorMsg });
+        triggerMessage([ OutgoingMessageType.InitializationError,
+                         initErrorMsg ]);
       });
   } else if (data.type === IngoingMessageType.ParseMpd) {
     try {
@@ -71,22 +71,22 @@ function onWorkerMessage(msg : MessageEvent<IIngoingMessage>) {
     } catch (err) {
       const parsingErrorMsg = err instanceof Error ? err.toString() :
                                                      "Unknown parsing error";
-      triggerMessage({ type: OutgoingMessageType.MPDParsingError,
-                       message: parsingErrorMsg });
+      triggerMessage([ OutgoingMessageType.MPDParsingError,
+                       parsingErrorMsg ]);
       return;
     }
-    triggerMessage({ type: OutgoingMessageType.MPDParsingFinished });
+    triggerMessage([ OutgoingMessageType.MPDParsingFinished ]);
   } else if (data.type === IngoingMessageType.ParseXlink) {
     try {
       parseXlink(data.xlink);
     } catch (err) {
       const parsingErrorMsg = err instanceof Error ? err.toString() :
                                                      "Unknown parsing error";
-      triggerMessage({ type: OutgoingMessageType.XLinkParsingError,
-                       message: parsingErrorMsg });
+      triggerMessage([ OutgoingMessageType.XLinkParsingError,
+                       parsingErrorMsg ]);
       return;
     }
-    triggerMessage({ type: OutgoingMessageType.XLinkParsingFinished });
+    triggerMessage([ OutgoingMessageType.XLinkParsingFinished ]);
   }
 }
 
@@ -110,16 +110,16 @@ const reportables : ArrayBuffer[] = [];
 
 function triggerMessage(msg : IWorkerOutgoingMessage) {
   msgBuffer.push(msg);
-  if (msg.type <= 10) {
+  if (msg[0] <= 10) {
     worker.postMessage(msgBuffer, reportables);
     msgBuffer.length = 0;
     reportables.length = 0;
   } else {
     let sendNow = false;
-    if (msg.type > 20) {
+    if (msg[0] > 20) {
       // TODO I thought TS would be smarter than this
       const payload = (msg as IParserWarningEvent |
-                              IParsedAttributeEvent).payload;
+                              IParsedAttributeEvent)[1];
       reportables.push(payload);
       sendNow = sendNow || payload.byteLength > 100;
     }
@@ -162,8 +162,8 @@ function initializeWasm(wasmUrl : string) : Promise<void> {
       const errMsg = err instanceof Error ? err.toString() :
                                             "unknown error";
       const warning = `Unable to call \`instantiateStreaming\` on WASM: ${errMsg}`;
-      triggerMessage({ type: OutgoingMessageType.InitializationWarning,
-                       message: warning });
+      triggerMessage([ OutgoingMessageType.InitializationWarning,
+                       warning ]);
 
       const res = await fetchedWasm;
       if (res.status < 200 || res.status >= 300) {
@@ -237,7 +237,7 @@ function parseXlink(
  */
 function onTagOpen(tag : TagName) : void {
   const p = performance.now();
-  triggerMessage({ type: OutgoingMessageType.TagOpen, tag });
+  triggerMessage([ OutgoingMessageType.TagOpen, tag ]);
   timer += (performance.now() - p);
 }
 
@@ -248,7 +248,7 @@ function onTagOpen(tag : TagName) : void {
  */
 function onTagClose(tag : TagName) : void {
   const p = performance.now();
-  triggerMessage({ type: OutgoingMessageType.TagClose, tag });
+  triggerMessage([ OutgoingMessageType.TagClose, tag ]);
   timer += (performance.now() - p);
 }
 
@@ -280,7 +280,7 @@ function onAttribute(attr : AttributeName, ptr : number, len : number) : void {
     const rangeEnd = dataView.getFloat64(ptr + 8, true);
     payload = mpdData.mpd.slice(rangeStart, rangeEnd);
   }
-  triggerMessage({ type: OutgoingMessageType.Attribute, attribute: attr, payload });
+  triggerMessage([ OutgoingMessageType.Attribute, payload, attr ]);
   timer += (performance.now() - p);
 }
 
@@ -308,8 +308,8 @@ function onCustomEvent(evt : CustomEventType, ptr : number, len : number) : void
     }
   }
   if (evt === CustomEventType.Error) {
-    triggerMessage({ type: OutgoingMessageType.ParserWarning,
-                     payload });
+    triggerMessage([ OutgoingMessageType.ParserWarning,
+                     payload ]);
   }
   timer += (performance.now() - p);
 }
