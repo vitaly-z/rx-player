@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import PPromise from "pinkie";
 import {
   concat as observableConcat,
-  defer as observableDefer,
   interval as observableInterval,
   merge as observableMerge,
   Observable,
@@ -203,26 +203,30 @@ export default class HTMLTextSegmentBuffer
   /**
    * Push segment on Subscription.
    * @param {Object} infos
-   * @returns {Observable}
+   * @returns {Promise}
    */
-  public pushChunk(infos : IPushChunkInfos<ITextTrackSegmentData>) : Observable<void> {
-    return observableDefer(() => {
+  public pushChunk(infos : IPushChunkInfos<ITextTrackSegmentData>) : PPromise<void> {
+    try {
       this.pushChunkSync(infos);
-      return observableOf(undefined);
-    });
+    } catch (e) {
+      return PPromise.reject(e);
+    }
+    return PPromise.resolve();
   }
 
   /**
    * Remove buffered data.
    * @param {number} start - start position, in seconds
    * @param {number} end - end position, in seconds
-   * @returns {Observable}
+   * @returns {Promise}
    */
-  public removeBuffer(start : number, end : number) : Observable<void> {
-    return observableDefer(() => {
+  public removeBuffer(start : number, end : number) : Promise<void> {
+    try {
       this.removeBufferSync(start, end);
-      return observableOf(undefined);
-    });
+    } catch (e) {
+      return PPromise.reject(e);
+    }
+    return PPromise.resolve();
   }
 
   /**
@@ -232,13 +236,11 @@ export default class HTMLTextSegmentBuffer
    * The returned Observable will emit and complete successively once the whole
    * segment has been pushed and this indication is acknowledged.
    * @param {Object} infos
-   * @returns {Observable}
+   * @returns {Promise}
    */
-  public endOfSegment(_infos : IEndOfSegmentInfos) : Observable<void> {
-    return observableDefer(() => {
-      this._segmentInventory.completeSegment(_infos);
-      return observableOf(undefined);
-    });
+  public endOfSegment(_infos : IEndOfSegmentInfos) : PPromise<void> {
+    this._segmentInventory.completeSegment(_infos);
+    return PPromise.resolve(undefined);
   }
 
   /**
@@ -367,10 +369,7 @@ export default class HTMLTextSegmentBuffer
    * @param {number} start
    * @param {number} end
    */
-  public removeBufferSync(
-    start : number,
-    end : number
-  ) : void {
+  public removeBufferSync(start : number, end : number) : void {
     log.debug("HTSB: Removing html text track data", start, end);
     this._buffer.remove(start, end);
     this._buffered.remove(start, end);

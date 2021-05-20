@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { Observable } from "rxjs";
 import {
   Adaptation,
   ISegment,
   Period,
   Representation,
 } from "../../../manifest";
+import { CancellationSignal } from "../../../utils/task_canceller";
 import SegmentInventory, {
   IBufferedChunk,
   IInsertedChunkInfos,
@@ -91,7 +91,7 @@ export abstract class SegmentBuffer<T> {
    *
    * Once all chunks of a single Segment have been given to `pushChunk`, you
    * should call `endOfSegment` to indicate that the whole Segment has been
-   * pushed.
+   * given to `pushChunk`.
    *
    * Depending on the type of data appended, the pushed chunk might rely on an
    * initialization segment, given through the `data.initSegment` property.
@@ -109,29 +109,48 @@ export abstract class SegmentBuffer<T> {
    * You can also only push an initialization segment by setting the
    * `data.chunk` argument to null.
    *
-   * @param {Object} infos
-   * @returns {Observable}
+   * @param {Object} infos - Information and data on the chunk you want to push.
+   * @param {CancellationSignal} cancellationSignal - Allows to cancel the
+   * operation if it is still possible.
+   * @returns {Promise} - Resolves when this push operation finished.
+   * Rejects on error and on cancellation.
    */
-  public abstract pushChunk(infos : IPushChunkInfos<T>) : Observable<void>;
+  public abstract pushChunk(
+    infos : IPushChunkInfos<T>,
+    cancellationSignal : CancellationSignal
+  ) : Promise<void>;
 
   /**
    * Remove buffered data (added to the same FIFO queue than `pushChunk`).
    * @param {number} start - start position, in seconds
    * @param {number} end - end position, in seconds
-   * @returns {Observable}
+   * @param {CancellationSignal} cancellationSignal - Allows to cancel the
+   * operation if it is still possible.
+   * @returns {Promise} - Resolves when this remove operation finished.
+   * Rejects on error.
    */
-  public abstract removeBuffer(start : number, end : number) : Observable<void>;
+  public abstract removeBuffer(
+    start : number,
+    end : number,
+    cancellationSignal : CancellationSignal
+  ) : Promise<void>;
 
   /**
    * Indicate that every chunks from a Segment has been given to pushChunk so
    * far.
    * This will update our internal Segment inventory accordingly.
-   * The returned Observable will emit and complete successively once the whole
-   * segment has been pushed and this indication is acknowledged.
+   * The returned Promise will resolve once the whole segment has been pushed
+   * and this indication is acknowledged.
    * @param {Object} infos
-   * @returns {Observable}
+   * @param {CancellationSignal} cancellationSignal - Allows to cancel the
+   * operation if it is still possible.
+   * @returns {Promise} - Resolves when this operation finished.
+   * This Promise should never reject.
    */
-  public abstract endOfSegment(infos : IEndOfSegmentInfos) : Observable<void>;
+  public abstract endOfSegment(
+    infos : IEndOfSegmentInfos,
+    cancellationSignal : CancellationSignal
+  ) : Promise<void>;
 
   /**
    * Returns the currently buffered data, in a TimeRanges object.
