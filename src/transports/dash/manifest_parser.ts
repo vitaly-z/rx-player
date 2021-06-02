@@ -126,6 +126,20 @@ export default function generateManifestParser(
         throw new Error("No MPD parser is imported");
       }
       const manifestDoc = getManifestAsDocument(responseData);
+      const parserErrors = manifestDoc.getElementsByTagName("parsererror");
+      let parsingErrorStr : string | undefined;
+      if (parserErrors.length > 0) {
+        for (let i = 0; i < parserErrors.length; i++) {
+          const content = parserErrors[i].textContent;
+          if (content !== null) {
+            parsingErrorStr = content + "\n";
+          }
+        }
+      }
+      /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+      (window as any).MPDParsingError = parsingErrorStr;
+      /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+
       const parsedManifest = parsers.js(manifestDoc, parserOpts);
       return processMpdParserResponse(parsedManifest);
     }

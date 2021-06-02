@@ -650,6 +650,9 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @param {Object} opts
    */
   loadVideo(opts : ILoadVideoOptions) : void {
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+    (window as any).MPDParsingError = undefined;
+    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
     const options = parseLoadVideoOptions(opts);
     log.info("API: Calling loadvideo", options);
     this._priv_lastContentPlaybackInfos = { options };
