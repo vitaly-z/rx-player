@@ -77,6 +77,20 @@ export default function generateManifestParser(
                                                    "text/xml") :
                    // TODO find a way to check if Document?
                    response.responseData as Document;
+    const parserErrors = data.getElementsByTagName("parsererror");
+    let parsingErrorStr : string | undefined;
+    if (parserErrors.length > 0) {
+      for (let i = 0; i < parserErrors.length; i++) {
+        const content = parserErrors[i].textContent;
+        if (content !== null) {
+          parsingErrorStr = content + "\n";
+        }
+      }
+    }
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+    (window as any).MPDParsingError = parsingErrorStr;
+    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+
 
     const externalClockOffset = serverTimeOffset ?? argClockOffset;
     const unsafelyBaseOnPreviousManifest = args.unsafeMode ? args.previousManifest :
