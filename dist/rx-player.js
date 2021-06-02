@@ -28376,6 +28376,24 @@ function generateManifestParser(options) {
       }
 
       var manifestDoc = getManifestAsDocument(responseData);
+      var parserErrors = manifestDoc.getElementsByTagName("parsererror");
+      var parsingErrorStr;
+
+      if (parserErrors.length > 0) {
+        for (var i = 0; i < parserErrors.length; i++) {
+          var content = parserErrors[i].textContent;
+
+          if (content !== null) {
+            parsingErrorStr = content + "\n";
+          }
+        }
+      }
+      /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+
+      window.MPDParsingError = parsingErrorStr;
+      /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+
       var parsedManifest = parsers.js(manifestDoc, parserOpts);
       return processMpdParserResponse(parsedManifest);
     }
@@ -56218,6 +56236,10 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.loadVideo = function loadVideo(opts) {
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+    window.MPDParsingError = undefined;
+    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+
     var options = parseLoadVideoOptions(opts);
     log/* default.info */.Z.info("API: Calling loadvideo", options);
     this._priv_lastContentPlaybackInfos = {
