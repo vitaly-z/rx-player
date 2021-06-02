@@ -27989,6 +27989,24 @@ function generateManifestParser(options) {
     var url = (_a = response.url) !== null && _a !== void 0 ? _a : loaderURL;
     var data = typeof response.responseData === "string" ? new DOMParser().parseFromString(response.responseData, "text/xml") : // TODO find a way to check if Document?
     response.responseData;
+    var parserErrors = data.getElementsByTagName("parsererror");
+    var parsingErrorStr;
+
+    if (parserErrors.length > 0) {
+      for (var i = 0; i < parserErrors.length; i++) {
+        var content = parserErrors[i].textContent;
+
+        if (content !== null) {
+          parsingErrorStr = content + "\n";
+        }
+      }
+    }
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+
+    window.MPDParsingError = parsingErrorStr;
+    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+
     var externalClockOffset = serverTimeOffset !== null && serverTimeOffset !== void 0 ? serverTimeOffset : argClockOffset;
     var unsafelyBaseOnPreviousManifest = args.unsafeMode ? args.previousManifest : null;
     var parsedManifest = dash(data, {
@@ -28026,8 +28044,8 @@ function generateManifestParser(options) {
       return (0,combineLatest/* combineLatest */.aj)(externalResources$).pipe((0,mergeMap/* mergeMap */.zg)(function (loadedResources) {
         var resources = [];
 
-        for (var i = 0; i < loadedResources.length; i++) {
-          var resource = loadedResources[i];
+        for (var _i = 0; _i < loadedResources.length; _i++) {
+          var resource = loadedResources[_i];
 
           if (typeof resource.responseData !== "string") {
             throw new Error("External DASH resources should only be strings");
@@ -56991,6 +57009,10 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.loadVideo = function loadVideo(opts) {
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+    window.MPDParsingError = undefined;
+    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+
     var options = parseLoadVideoOptions(opts);
     log/* default.info */.Z.info("API: Calling loadvideo", options);
     this._priv_lastContentPlaybackInfos = {
