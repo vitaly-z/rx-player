@@ -269,6 +269,10 @@ function request<T>(
           const totalSize = xhr.response instanceof
                               ArrayBuffer ? xhr.response.byteLength :
                                             event.total;
+          /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+          (window as any).url = url;
+          (window as any).status = xhr.status;
+
           const status = xhr.status;
           const loadedResponseType = xhr.responseType;
           const _url = isNonEmptyString(xhr.responseURL) ? xhr.responseURL :

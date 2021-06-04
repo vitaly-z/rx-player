@@ -102,7 +102,18 @@ export default function generateManifestParser(options) {
                 }
             }
             /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+            /* eslint-disable @typescript-eslint/no-unsafe-assignment */
             window.MPDParsingError = parsingErrorStr;
+            var MPDParsingInfos = {};
+            MPDParsingInfos.fullMpd = typeof responseData === "string" ?
+                responseData :
+                "Error: Shouldn't be a document";
+            if (typeof window.url === "string" &&
+                window.url.indexOf(".mpd") > 0) {
+                MPDParsingInfos.url = window.url;
+                MPDParsingInfos.status = window.status;
+            }
+            window.MPDParsingInfos = MPDParsingInfos;
             /* eslint-enable @typescript-eslint/no-unsafe-member-access */
             var parsedManifest = parsers.js(manifestDoc, parserOpts);
             return processMpdParserResponse(parsedManifest);
