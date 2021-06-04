@@ -171,6 +171,9 @@ export default class DashWasmParser {
       },
     };
 
+    let nowReqStart = performance.now();
+    /* eslint-disable no-console */
+    console.warn("!!!! Doing the request");
     const fetchedWasm = fetch(opts.wasmUrl);
 
     const streamingProm = typeof WebAssembly.instantiateStreaming === "function" ?
@@ -179,15 +182,22 @@ export default class DashWasmParser {
 
     this._initProm = streamingProm
       .catch(async (e) => {
+        console.warn("!!!! InstantiateStreaming failed", performance.now() - nowReqStart);
         log.warn("Unable to call `instantiateStreaming` on WASM:", e);
+        const newStart = performance.now();
         const res = await fetchedWasm;
+        console.warn("!!!! New request res", performance.now() - newStart);
         if (res.status < 200 || res.status >= 300) {
           throw new Error("WebAssembly request failed. status: " + String(res.status));
         }
+        const perf = performance.now();
         const resAb = await res.arrayBuffer();
+        console.warn("!!!! full res ArrayBuffer", performance.now() - perf);
+        nowReqStart = performance.now();
         return WebAssembly.instantiate(resAb, imports);
       })
       .then((instanceWasm) => {
+        console.warn("!!!! instance available", performance.now() - nowReqStart);
         this._instance = instanceWasm;
 
         // TODO better types?
@@ -348,6 +358,7 @@ export default class DashWasmParser {
     this._parsersStack.pushParsers(null, rootChildrenParser, noop);
     this._warnings = [];
 
+    const now = performance.now();
     try {
       // TODO better type this
       /* eslint-disable @typescript-eslint/no-unsafe-call */
@@ -356,11 +367,13 @@ export default class DashWasmParser {
       /* eslint-enable @typescript-eslint/no-unsafe-call */
       /* eslint-enable @typescript-eslint/no-unsafe-member-access */
     } catch (err) {
+      console.warn("!!!!!!!! FAILED PRE-PARSING", performance.now() - now);
       this._parsersStack.reset();
       this._warnings = [];
       this._isParsing = false;
       throw err;
     }
+    console.warn("!!!!!!!! FINISHED PRE-PARSING", performance.now() - now);
 
     const parsed = rootObj.mpd ?? null;
     const warnings = this._warnings;
