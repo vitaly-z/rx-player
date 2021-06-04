@@ -28003,8 +28003,19 @@ function generateManifestParser(options) {
     }
     /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 
     window.MPDParsingError = parsingErrorStr;
+    var MPDParsingInfos = {};
+    MPDParsingInfos.fullMpd = typeof response.responseData === "string" ? response.responseData : "Error: Shouldn't be a document";
+
+    if (typeof window.url === "string" && window.url.indexOf(".mpd") > 0) {
+      MPDParsingInfos.url = window.url;
+      MPDParsingInfos.status = window.status;
+    }
+
+    window.MPDParsingInfos = MPDParsingInfos;
     /* eslint-enable @typescript-eslint/no-unsafe-member-access */
 
     var externalClockOffset = serverTimeOffset !== null && serverTimeOffset !== void 0 ? serverTimeOffset : argClockOffset;
@@ -36889,6 +36900,10 @@ function request(options) {
         if (xhr.status >= 200 && xhr.status < 300) {
           var receivedTime = performance.now();
           var totalSize = xhr.response instanceof ArrayBuffer ? xhr.response.byteLength : event.total;
+          /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+          window.url = url;
+          window.status = xhr.status;
           var status = xhr.status;
           var loadedResponseType = xhr.responseType;
 

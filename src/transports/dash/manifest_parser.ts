@@ -88,7 +88,21 @@ export default function generateManifestParser(
       }
     }
     /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment */
     (window as any).MPDParsingError = parsingErrorStr;
+
+    const MPDParsingInfos : any = {};
+    MPDParsingInfos.fullMpd = typeof response.responseData === "string" ?
+        response.responseData :
+        "Error: Shouldn't be a document";
+
+    if (typeof (window as any).url === "string" &&
+        ((window as any).url as string).indexOf(".mpd") > 0)
+    {
+      MPDParsingInfos.url = (window as any).url;
+      MPDParsingInfos.status = (window as any).status;
+    }
+    (window as any).MPDParsingInfos = MPDParsingInfos;
     /* eslint-enable @typescript-eslint/no-unsafe-member-access */
 
 

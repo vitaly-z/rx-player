@@ -82,6 +82,9 @@ function request(options) {
                     var totalSize = xhr.response instanceof
                         ArrayBuffer ? xhr.response.byteLength :
                         event.total;
+                    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+                    window.url = url;
+                    window.status = xhr.status;
                     var status_1 = xhr.status;
                     var loadedResponseType = xhr.responseType;
                     var _url = isNonEmptyString(xhr.responseURL) ? xhr.responseURL :
