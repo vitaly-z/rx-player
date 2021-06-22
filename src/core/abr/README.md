@@ -1,8 +1,9 @@
-# `ABRManager` #################################################################
+# `RepresentationPickerController` #############################################
 
-The `ABRManager` (ABR for Adaptive BitRate) is a class which facilitates the
-choice between multiple audio/video qualities in function of the current
-bandwidth, the network capacities and other specific settings set by the client.
+The `RepresentationPickerController` defined in this directory is a class which
+facilitates the choice between multiple audio/video qualities in function of the
+current bandwidth, the network capacities and other specific settings set by the
+client.
 
 It does so by receiving various values such as:
   - when network requests begin, progresses or end

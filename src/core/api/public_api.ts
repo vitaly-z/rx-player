@@ -90,6 +90,9 @@ import {
   getSizeOfRange,
 } from "../../utils/ranges";
 import warnOnce from "../../utils/warn_once";
+import RepresentationPickerController, {
+  IABRThrottlers,
+} from "../abr";
 import {
   clearEMESession,
   disposeEME,
@@ -288,7 +291,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
   /** Information on the current bitrate settings. */
   private readonly _priv_bitrateInfos : {
     /**
-     * Store last bitrates for each type for ABRManager instanciation.
+     * Store last bitrates for each type of media.
      * Store the initial wanted bitrates at first.
      */
     lastBitrates : { audio? : number;
@@ -296,17 +299,23 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                      text? : number;
                      image? : number; };
 
-    /** Store last wanted minAutoBitrates for the next ABRManager instanciation. */
-    minAutoBitrates : { audio : BehaviorSubject<number>;
-                        video : BehaviorSubject<number>; };
+    /** Store last wanted minAudioBitrate. */
+    minAudioBitrate : number;
 
-    /** Store last wanted maxAutoBitrates for the next ABRManager instanciation. */
-    maxAutoBitrates : { audio : BehaviorSubject<number>;
-                        video : BehaviorSubject<number>; };
+    /** Store last wanted minVideoBitrate. */
+    minVideoBitrate : number;
 
-    /** Store last wanted manual bitrates for the next ABRManager instanciation. */
-    manualBitrates : { audio : BehaviorSubject<number>;
-                       video : BehaviorSubject<number>; };
+    /** Store last wanted maxAudioBitrate. */
+    maxAudioBitrate : number;
+
+    /** Store last wanted maxVideoBitrate. */
+    maxVideoBitrate : number;
+
+    /** Store last wanted forced audio bitrate. */
+    manualAudioBitrate : number;
+
+    /** Store last wanted forced video bitrate. */
+    manualVideoBitrate : number;
   };
 
   /**
@@ -376,6 +385,9 @@ class Player extends EventEmitter<IPublicAPIEvent> {
 
     /** Store starting text track if one. */
     initialTextTrack : undefined|ITextTrackPreference;
+
+    /** Choose a Representation (i.e. qualities) from multiple available ones. */
+    representationPickerCtrl : RepresentationPickerController | null;
 
     /** Keep information on the active SegmentBuffers. */
     segmentBuffersStore : SegmentBuffersStore | null;
@@ -562,12 +574,12 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     this._priv_bitrateInfos = {
       lastBitrates: { audio: initialAudioBitrate,
                       video: initialVideoBitrate },
-      minAutoBitrates: { audio: new BehaviorSubject(minAudioBitrate),
-                         video: new BehaviorSubject(minVideoBitrate) },
-      maxAutoBitrates: { audio: new BehaviorSubject(maxAudioBitrate),
-                         video: new BehaviorSubject(maxVideoBitrate) },
-      manualBitrates: { audio: new BehaviorSubject(-1),
-                        video: new BehaviorSubject(-1) },
+      minAudioBitrate,
+      minVideoBitrate,
+      maxAudioBitrate,
+      maxVideoBitrate,
+      manualAudioBitrate: -1,
+      manualVideoBitrate: -1,
     };
 
     this._priv_throttleWhenHidden = throttleWhenHidden;
@@ -632,12 +644,6 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     this._priv_bufferOptions.maxBufferAhead$.complete();
     this._priv_bufferOptions.maxBufferBehind$.complete();
     this._priv_pictureInPictureEvent$.complete();
-    this._priv_bitrateInfos.manualBitrates.video.complete();
-    this._priv_bitrateInfos.manualBitrates.audio.complete();
-    this._priv_bitrateInfos.minAutoBitrates.video.complete();
-    this._priv_bitrateInfos.minAutoBitrates.audio.complete();
-    this._priv_bitrateInfos.maxAutoBitrates.video.complete();
-    this._priv_bitrateInfos.maxAutoBitrates.audio.complete();
 
     this._priv_lastContentPlaybackInfos = {};
 
@@ -736,6 +742,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     const contentInfos = { url,
                            stop$: stopContent$,
                            isDirectFile,
+                           representationPickerCtrl: null,
                            segmentBuffersStore: null,
                            thumbnails: null,
                            manifest: null,
@@ -819,21 +826,17 @@ class Player extends EventEmitter<IPublicAPIEvent> {
       this._priv_contentInfos = contentInfos;
 
       const relyOnVideoVisibilityAndSize = canRelyOnVideoVisibilityAndSize();
-      const throttlers = { throttle: {},
-                           throttleBitrate: {},
-                           limitWidth: {} };
+      const throttlers : IABRThrottlers = {};
 
       if (this._priv_throttleWhenHidden) {
         if (!relyOnVideoVisibilityAndSize) {
           log.warn("API: Can't apply throttleWhenHidden because " +
                    "browser can't be trusted for visibility.");
         } else {
-          throttlers.throttle = {
-            video: isActive().pipe(
-              map(active => active ? Infinity :
-                                       0),
-              takeUntil(stopContent$)),
-          };
+          throttlers.throttleVideo = isActive().pipe(
+            map(active => active ? Infinity :
+                                     0),
+            takeUntil(stopContent$));
         }
       }
       if (this._priv_throttleVideoBitrateWhenHidden) {
@@ -841,12 +844,11 @@ class Player extends EventEmitter<IPublicAPIEvent> {
           log.warn("API: Can't apply throttleVideoBitrateWhenHidden because " +
                    "browser can't be trusted for visibility.");
         } else {
-          throttlers.throttleBitrate = {
-            video: isVideoVisible(this._priv_pictureInPictureEvent$).pipe(
+          throttlers.throttleVideoBitrate =
+            isVideoVisible(this._priv_pictureInPictureEvent$).pipe(
               map(active => active ? Infinity :
                                      0),
-              takeUntil(stopContent$)),
-          };
+              takeUntil(stopContent$));
         }
       }
       if (this._priv_limitVideoWidth) {
@@ -854,22 +856,27 @@ class Player extends EventEmitter<IPublicAPIEvent> {
           log.warn("API: Can't apply limitVideoWidth because browser can't be " +
                    "trusted for video size.");
         } else {
-          throttlers.limitWidth = {
-            video: videoWidth$(videoElement, this._priv_pictureInPictureEvent$)
-              .pipe(takeUntil(stopContent$)),
-          };
+          throttlers.limitVideoWidth = videoWidth$(videoElement,
+                                                   this._priv_pictureInPictureEvent$)
+            .pipe(takeUntil(stopContent$));
         }
       }
 
-      /** Options used by the ABR Manager. */
-      const adaptiveOptions = {
+      const representationPickerCtrl = new RepresentationPickerController({
         initialBitrates: this._priv_bitrateInfos.lastBitrates,
         lowLatencyMode,
-        manualBitrates: this._priv_bitrateInfos.manualBitrates,
-        minAutoBitrates: this._priv_bitrateInfos.minAutoBitrates,
-        maxAutoBitrates: this._priv_bitrateInfos.maxAutoBitrates,
         throttlers,
-      };
+      });
+
+      const brInfos = this._priv_bitrateInfos;
+      representationPickerCtrl.setMinAudioBitrate(brInfos.minAudioBitrate);
+      representationPickerCtrl.setMaxAudioBitrate(brInfos.maxAudioBitrate);
+      representationPickerCtrl.setMinVideoBitrate(brInfos.minVideoBitrate);
+      representationPickerCtrl.setMaxVideoBitrate(brInfos.maxVideoBitrate);
+      representationPickerCtrl.lockAudioBitrate(brInfos.manualAudioBitrate);
+      representationPickerCtrl.lockVideoBitrate(brInfos.manualVideoBitrate);
+
+      this._priv_contentInfos.representationPickerCtrl = representationPickerCtrl;
 
       /** Options used by the TextTrack SegmentBuffer. */
       const textTrackOptions = options.textTrackMode === "native" ?
@@ -885,8 +892,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                                          this._priv_bufferOptions);
 
       // We've every options set up. Start everything now
-      const init$ = initializeMediaSourcePlayback({ adaptiveOptions,
-                                                    autoPlay,
+      const init$ = initializeMediaSourcePlayback({ autoPlay,
                                                     bufferOptions,
                                                     clock$,
                                                     keySystems,
@@ -895,6 +901,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                                                     manifestFetcher,
                                                     mediaElement: videoElement,
                                                     minimumManifestUpdateInterval,
+                                                    representationPickerCtrl,
                                                     segmentFetcherCreator,
                                                     setCurrentTime,
                                                     speed$,
@@ -1505,7 +1512,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @returns {Number}
    */
   getManualAudioBitrate() : number {
-    return this._priv_bitrateInfos.manualBitrates.audio.getValue();
+    return this._priv_bitrateInfos.manualAudioBitrate;
   }
 
   /**
@@ -1513,7 +1520,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @returns {Number}
    */
   getManualVideoBitrate() : number {
-    return this._priv_bitrateInfos.manualBitrates.video.getValue();
+    return this._priv_bitrateInfos.manualVideoBitrate;
   }
 
   /**
@@ -1545,7 +1552,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @returns {Number}
    */
   getMinVideoBitrate() : number {
-    return this._priv_bitrateInfos.minAutoBitrates.video.getValue();
+    return this._priv_bitrateInfos.minVideoBitrate;
   }
 
   /**
@@ -1553,7 +1560,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @returns {Number}
    */
   getMinAudioBitrate() : number {
-    return this._priv_bitrateInfos.minAutoBitrates.audio.getValue();
+    return this._priv_bitrateInfos.minAudioBitrate;
   }
 
   /**
@@ -1561,7 +1568,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @returns {Number}
    */
   getMaxVideoBitrate() : number {
-    return this._priv_bitrateInfos.maxAutoBitrates.video.getValue();
+    return this._priv_bitrateInfos.maxVideoBitrate;
   }
 
   /**
@@ -1569,7 +1576,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @returns {Number}
    */
   getMaxAudioBitrate() : number {
-    return this._priv_bitrateInfos.maxAutoBitrates.audio.getValue();
+    return this._priv_bitrateInfos.maxAudioBitrate;
   }
 
   /**
@@ -1772,7 +1779,12 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @param {Number} btr
    */
   setVideoBitrate(btr : number) : void {
-    this._priv_bitrateInfos.manualBitrates.video.next(btr);
+    this._priv_bitrateInfos.manualVideoBitrate = btr;
+    if (this._priv_contentInfos !== null &&
+        this._priv_contentInfos.representationPickerCtrl !== null)
+    {
+      this._priv_contentInfos.representationPickerCtrl.lockVideoBitrate(btr);
+    }
   }
 
   /**
@@ -1781,7 +1793,12 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @param {Number} btr
    */
   setAudioBitrate(btr : number) : void {
-    this._priv_bitrateInfos.manualBitrates.audio.next(btr);
+    this._priv_bitrateInfos.manualAudioBitrate = btr;
+    if (this._priv_contentInfos !== null &&
+        this._priv_contentInfos.representationPickerCtrl !== null)
+    {
+      this._priv_contentInfos.representationPickerCtrl.lockAudioBitrate(btr);
+    }
   }
 
   /**
@@ -1789,13 +1806,18 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @param {Number} btr
    */
   setMinVideoBitrate(btr : number) : void {
-    const maxVideoBitrate = this._priv_bitrateInfos.maxAutoBitrates.video.getValue();
+    const { maxVideoBitrate } = this._priv_bitrateInfos;
     if (btr > maxVideoBitrate) {
       throw new Error("Invalid minimum video bitrate given. " +
                       `Its value, "${btr}" is superior the current maximum ` +
                       `video birate, "${maxVideoBitrate}".`);
     }
-    this._priv_bitrateInfos.minAutoBitrates.video.next(btr);
+    this._priv_bitrateInfos.minVideoBitrate = btr;
+    if (this._priv_contentInfos !== null &&
+        this._priv_contentInfos.representationPickerCtrl !== null)
+    {
+      this._priv_contentInfos.representationPickerCtrl.setMinVideoBitrate(btr);
+    }
   }
 
   /**
@@ -1803,13 +1825,18 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @param {Number} btr
    */
   setMinAudioBitrate(btr : number) : void {
-    const maxAudioBitrate = this._priv_bitrateInfos.maxAutoBitrates.audio.getValue();
+    const { maxAudioBitrate } = this._priv_bitrateInfos;
     if (btr > maxAudioBitrate) {
       throw new Error("Invalid minimum audio bitrate given. " +
                       `Its value, "${btr}" is superior the current maximum ` +
                       `audio birate, "${maxAudioBitrate}".`);
     }
-    this._priv_bitrateInfos.minAutoBitrates.audio.next(btr);
+    this._priv_bitrateInfos.minAudioBitrate = btr;
+    if (this._priv_contentInfos !== null &&
+        this._priv_contentInfos.representationPickerCtrl !== null)
+    {
+      this._priv_contentInfos.representationPickerCtrl.setMinAudioBitrate(btr);
+    }
   }
 
   /**
@@ -1817,13 +1844,18 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @param {Number} btr
    */
   setMaxVideoBitrate(btr : number) : void {
-    const minVideoBitrate = this._priv_bitrateInfos.minAutoBitrates.video.getValue();
+    const { minVideoBitrate } = this._priv_bitrateInfos;
     if (btr < minVideoBitrate) {
       throw new Error("Invalid maximum video bitrate given. " +
                       `Its value, "${btr}" is inferior the current minimum ` +
                       `video birate, "${minVideoBitrate}".`);
     }
-    this._priv_bitrateInfos.maxAutoBitrates.video.next(btr);
+    this._priv_bitrateInfos.maxVideoBitrate = btr;
+    if (this._priv_contentInfos !== null &&
+        this._priv_contentInfos.representationPickerCtrl !== null)
+    {
+      this._priv_contentInfos.representationPickerCtrl.setMaxVideoBitrate(btr);
+    }
   }
 
   /**
@@ -1831,13 +1863,18 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @param {Number} btr
    */
   setMaxAudioBitrate(btr : number) : void {
-    const minAudioBitrate = this._priv_bitrateInfos.minAutoBitrates.audio.getValue();
+    const { minAudioBitrate } = this._priv_bitrateInfos;
     if (btr < minAudioBitrate) {
       throw new Error("Invalid maximum audio bitrate given. " +
                       `Its value, "${btr}" is inferior the current minimum ` +
                       `audio birate, "${minAudioBitrate}".`);
     }
-    this._priv_bitrateInfos.maxAutoBitrates.audio.next(btr);
+    this._priv_bitrateInfos.maxAudioBitrate = btr;
+    if (this._priv_contentInfos !== null &&
+        this._priv_contentInfos.representationPickerCtrl !== null)
+    {
+      this._priv_contentInfos.representationPickerCtrl.setMaxAudioBitrate(btr);
+    }
   }
 
   /**

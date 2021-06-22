@@ -67,13 +67,13 @@ Stream (./core/stream)           | ~                                            
 |                          | ~            | ~            | ~     |                    | ~
 |                          | ~            | ~            | ~     |                    | ~
 |                  (audio) v ~    (video) V ~     (text) v ~     |  +--------------+  | ~
-|                  +----------+   +----------+    +----------+ ---> |              |  | ~
-| Create the right |          |   |          |    |          | <~~~ |  ABRManager  |  | ~
+|                  +----------+   +----------+    +----------+ ---> |Representation|  | ~
+| Create the right |          |   |          |    |          | <~~~ |    Picker    |  | ~
 | Representation-  |Adaptation|-+ |Adaptation|-+  |Adaptation|-+ |  | (./core/abr) |  | ~
 | Stream depending |  Stream  | | |  Stream  | |  |  Stream  | | |  |              |  | ~
 | on the current   |          | | |          | |  |          | | |  +--------------+  | ~
 | network,         +----------+ | +----------+ |  +----------+ | |   Find the best    | ~
-| settings...       |        (./core/stream/adaptation)        | |   profile to play  | ~
+| settings...       |        (./core/stream/adaptation)        | |   quality to play  | ~
 |                   +-----------+  +-----------+   +-----------+ |                    | ~
 |                          | ^            | ^            | ^     |                    | ~
 |                          | ~            | ~            | ~     |                    | ~

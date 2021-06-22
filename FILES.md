@@ -213,17 +213,12 @@ As this directory is versatile and complicated, it also deserves its own chapter
 <a name="core-abr"></a>
 ### src/core/abr/: The adaptive bitrate code ###################################
 
-Defines an ABRManager class which manages the adaptive streaming part of the
-player.
+Defines a `RepresentationPickerController` class which manages the adaptive
+streaming part of the player.
 
-This manager takes various observables/options as inputs to record the current
-situation of the player, give an opinion about the best media tracks to choose,
-and provide methods allowing to get/set various ABR-related options.
-
-Despite containing several files and using several classes, only the ABRManager
-defined in ``abr/index.js`` should be needed by the rest of the core.
-This allows to isolate this complex part and facilitate future refactoring and
-improvements.
+This class will give what it guesses about the best media Representation to
+choose according to the current playback and network situation as well as user
+preferences, which can be updated any time.
 
 
 <a name="core-api"></a>

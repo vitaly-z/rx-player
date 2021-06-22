@@ -20,8 +20,9 @@
  * An `AdaptationStream` downloads and push segment for a single Adaptation
  * (e.g.  a single audio, video or text track).
  * It chooses which Representation to download mainly thanks to the
- * ABRManager, and orchestrates a RepresentationStream, which will download and
- * push segments corresponding to a chosen Representation.
+ * RepresentationPickerController, and orchestrates a RepresentationStream,
+ * which will download and push segments corresponding to a chosen
+ * Representation.
  */
 
 import {
@@ -53,7 +54,7 @@ import Manifest, {
   Representation,
 } from "../../../manifest";
 import deferSubscriptions from "../../../utils/defer_subscriptions";
-import ABRManager, {
+import RepresentationPickerController, {
   IABREstimate,
 } from "../../abr";
 import { SegmentFetcherCreator } from "../../fetchers";
@@ -92,11 +93,6 @@ export interface IAdaptationStreamClockTick extends IRepresentationStreamClockTi
 /** Arguments given when creating a new `AdaptationStream`. */
 export interface IAdaptationStreamArguments<T> {
   /**
-   * Module allowing to find the best Representation depending on the current
-   * conditions like the current network bandwidth.
-   */
-  abrManager : ABRManager;
-  /**
    * Regularly emit playback conditions.
    * The main AdaptationStream logic will be triggered on each `tick`.
    */
@@ -106,6 +102,11 @@ export interface IAdaptationStreamArguments<T> {
               period : Period;
               adaptation : Adaptation; };
   options: IAdaptationStreamOptions;
+  /**
+   * Module allowing to find the best Representation depending on the current
+   * conditions like the current network bandwidth.
+   */
+  representationPickerCtrl : RepresentationPickerController;
   /** SourceBuffer wrapper - needed to push media segments. */
   segmentBuffer : SegmentBuffer<T>;
   /** Module used to fetch the wanted media segments. */
@@ -164,9 +165,9 @@ export interface IAdaptationStreamOptions {
  * Create new AdaptationStream Observable, which task will be to download the
  * media data for a given Adaptation (i.e. "track").
  *
- * It will rely on the ABRManager to choose at any time the best Representation
- * for this Adaptation and then run the logic to download and push the
- * corresponding segments in the SegmentBuffer.
+ * It will rely on the RepresentationPickerController to choose at any time the best
+ * Representation for this Adaptation and then run the logic to download and
+ * push the corresponding segments in the SegmentBuffer.
  *
  * After being subscribed to, it will start running and will emit various events
  * to report its current status.
@@ -175,10 +176,10 @@ export interface IAdaptationStreamOptions {
  * @returns {Observable}
  */
 export default function AdaptationStream<T>({
-  abrManager,
   clock$,
   content,
   options,
+  representationPickerCtrl,
   segmentBuffer,
   segmentFetcherCreator,
   wantedBufferAhead$,
@@ -197,7 +198,7 @@ export default function AdaptationStream<T>({
   const bufferGoalRatioMap: Partial<Record<string, number>> = {};
 
   const { estimator$, requestFeedback$, streamFeedback$ } =
-    createRepresentationEstimator(content, abrManager, clock$);
+    createRepresentationEstimator(content, representationPickerCtrl, clock$);
 
   /** Allows the `RepresentationStream` to easily fetch media segments. */
   const segmentFetcher = segmentFetcherCreator.createSegmentFetcher(adaptation.type,
@@ -217,7 +218,7 @@ export default function AdaptationStream<T>({
     deferSubscriptions(),
     share());
 
-  /** Emit at each bitrate estimate done by the ABRManager. */
+  /** Emit at each bitrate estimate done by the RepresentationPickerController. */
   const bitrateEstimate$ = abrEstimate$.pipe(
     filter(({ bitrate }) => bitrate != null),
     distinctUntilChanged((old, current) => old.bitrate === current.bitrate),

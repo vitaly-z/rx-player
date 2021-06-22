@@ -47,9 +47,7 @@ import deferSubscriptions from "../../utils/defer_subscriptions";
 import { fromEvent } from "../../utils/event_emitter";
 import filterMap from "../../utils/filter_map";
 import objectAssign from "../../utils/object_assign";
-import ABRManager, {
-  IABRManagerArguments,
-} from "../abr";
+import RepresentationPickerController from "../abr";
 import {
   getCurrentKeySystem,
   IContentProtection,
@@ -86,8 +84,6 @@ const { OUT_OF_SYNC_MANIFEST_REFRESH_DELAY } = config;
 
 /** Arguments to give to the `InitializeOnMediaSource` function. */
 export interface IInitializeArguments {
-  /** Options concerning the ABR logic. */
-  adaptiveOptions: IABRManagerArguments;
   /** `true` if we should play when loaded. */
   autoPlay : boolean;
   /** Options concerning the media buffers. */
@@ -125,6 +121,8 @@ export interface IInitializeArguments {
   mediaElement : HTMLMediaElement;
   /** Limit the frequency of Manifest updates. */
   minimumManifestUpdateInterval : number;
+  /** Will choose which Representation/Quality to play */
+  representationPickerCtrl : RepresentationPickerController;
   /** Interface allowing to load segments */
   segmentFetcherCreator : SegmentFetcherCreator<any>;
   /** Perform an internal seek */
@@ -169,8 +167,7 @@ export interface IInitializeArguments {
  * @returns {Observable}
  */
 export default function InitializeOnMediaSource(
-  { adaptiveOptions,
-    autoPlay,
+  { autoPlay,
     bufferOptions,
     clock$,
     keySystems,
@@ -179,15 +176,13 @@ export default function InitializeOnMediaSource(
     manifestFetcher,
     mediaElement,
     minimumManifestUpdateInterval,
+    representationPickerCtrl,
     segmentFetcherCreator,
     setCurrentTime,
     speed$,
     startAt,
     textTrackOptions } : IInitializeArguments
 ) : Observable<IInitEvent> {
-  /** Choose the right "Representation" for a given "Adaptation". */
-  const abrManager = new ABRManager(adaptiveOptions);
-
   /**
    * Create and open a new MediaSource object on the given media element on
    * subscription.
@@ -295,12 +290,12 @@ export default function InitializeOnMediaSource(
       log.debug("Init: Initial time calculated:", initialTime);
 
       const mediaSourceLoader = createMediaSourceLoader({
-        abrManager,
         bufferOptions: objectAssign({ textTrackOptions, drmSystemId },
                                     bufferOptions),
         clock$,
         manifest,
         mediaElement,
+        representationPickerCtrl,
         segmentFetcherCreator,
         speed$,
         setCurrentTime,

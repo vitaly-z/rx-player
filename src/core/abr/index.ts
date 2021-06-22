@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import ABRManager, {
-  IABRManagerArguments,
-  IABRManagerClockTick,
-} from "./abr_manager";
+import RepresentationPickerController, {
+  IABRThrottlers,
+  IRepresentationPickerControllerOptions,
+} from "./representation_picker_controller";
 export {
   IABRAddedSegmentEvent,
   IABRStreamEvents,
@@ -27,10 +27,11 @@ export {
   IABRRequestBeginEvent,
   IABRRequestEndEvent,
   IABRRequestProgressEvent,
-} from "./representation_estimator";
+  IRepresentationPickerClockTick,
+} from "./representation_picker";
 
-export default ABRManager;
+export default RepresentationPickerController;
 export {
-  IABRManagerArguments,
-  IABRManagerClockTick,
+  IABRThrottlers,
+  IRepresentationPickerControllerOptions,
 };

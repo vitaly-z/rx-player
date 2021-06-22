@@ -31,9 +31,9 @@ import Manifest, {
   Representation,
 } from "../../../manifest";
 import { fromEvent } from "../../../utils/event_emitter";
-import ABRManager, {
+import RepresentationPickerController, {
   IABREstimate,
-  IABRManagerClockTick,
+  IRepresentationPickerClockTick,
   IABRMetricsEvent,
   IABRRequestBeginEvent,
   IABRRequestEndEvent,
@@ -63,15 +63,15 @@ import {
  * possible so the estimation is as adapted as possible.
  *
  * @param {Object} content
- * @param {Object} abrManager
+ * @param {Object} representationPickerCtrl
  * @param {Observable} clock$
  * @returns {Object}
  */
 export default function createRepresentationEstimator(
   { manifest, adaptation } : { manifest : Manifest;
                                adaptation : Adaptation; },
-  abrManager : ABRManager,
-  clock$ : Observable<IABRManagerClockTick>
+  representationPickerCtrl : RepresentationPickerController,
+  clock$ : Observable<IRepresentationPickerClockTick>
 ) : { estimator$ : Observable<IABREstimate>;
       streamFeedback$ : Subject<IStreamEventAddedSegment<unknown> |
                                 IRepresentationChangeEvent>;
@@ -117,7 +117,10 @@ export default function createRepresentationEstimator(
       return true;
     }),
     switchMap((playableRepresentations) =>
-      abrManager.get$(adaptation.type, playableRepresentations, clock$, abrEvents$)));
+      representationPickerCtrl.startPicker(adaptation.type,
+                                            playableRepresentations,
+                                            clock$,
+                                            abrEvents$)));
 
   return { estimator$,
            streamFeedback$,

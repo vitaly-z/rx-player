@@ -50,9 +50,9 @@ import selectOptimalRepresentation from "./select_optimal_representation";
 /**
  * Adaptive BitRate estimate object.
  *
- * The `RepresentationEstimator` helps the player to choose a Representation
- * (i.e. a quality) by frequently measuring the current network and playback
- * conditions.
+ * The `startRepresentationPicker` function helps the player to choose a
+ * Representation (i.e. a quality) by frequently measuring the current network
+ * and playback conditions.
  *
  * At regular intervals, an `IABREstimate` will be sent to that end.
  */
@@ -112,8 +112,8 @@ export interface IABREstimate {
   knownStableBitrate?: number;
 }
 
-/** Properties the `RepresentationEstimator` will need at each "clock tick". */
-export interface IRepresentationEstimatorClockTick {
+/** Properties the `startRepresentationPicker` function will need at each "clock tick". */
+export interface IRepresentationPickerClockTick {
   /**
    * For the concerned media buffer, difference in seconds between the next
    * position where no segment data is available and the current position.
@@ -143,8 +143,7 @@ interface IABRMetricsEventValue {
 }
 
 /**
- * "metrics" event which allows to communicate current network conditions to the
- * `RepresentationEstimator`.
+ * "metrics" event which allows to communicate current network conditions.
  *
  * This event should be generated and sent after all segment requests for the
  * current type (e.g. "audio", "video" etc.) and Period.
@@ -153,9 +152,9 @@ export interface IABRMetricsEvent { type : "metrics";
                                    value : IABRMetricsEventValue; }
 
 /**
- * "representationChange" event, allowing to communicate to the
- * `RepresentationEstimator` when a new `Representation` is now downloaded for
- * the current type (e.g. "audio", "video" etc.) and Period.
+ * "representationChange" event, allowing to communicate when a new
+ * `Representation` is now downloaded for the current type (e.g. "audio",
+ * "video" etc.) and Period.
  */
 export interface IABRRepresentationChangeEvent {
   type: "representationChange";
@@ -178,8 +177,7 @@ export interface IABRRequestBeginEvent {
     /**
      * String identifying this request.
      *
-     * Only one request communicated to the current `RepresentationEstimator`
-     * should have this `id` at the same time.
+     * Only one request communicated should have this `id` at the same time.
      */
     id: string;
     /** Presentation time at which the corresponding segment begins, in seconds. */
@@ -263,9 +261,9 @@ export interface IABRFiltersObject {
 }
 
 /**
- * "added-segment" event emitted to indicate to the `RepresentationEstimator`
- * that a new segment for the given type (e.g. "audio", "video" etc.) and
- * Period has been correctly added to the underlying media buffer.
+ * "added-segment" event emitted to indicate that a new segment for the given
+ * type (e.g. "audio", "video" etc.) and Period has been correctly added to the
+ * underlying media buffer.
  */
 export interface IABRAddedSegmentEvent {
   type : "added-segment";
@@ -280,9 +278,8 @@ export interface IABRAddedSegmentEvent {
 }
 
 /**
- * Events allowing to communicate to the `RepresentationEstimator` the current
- * playback and network conditions for the current type (e.g.  "audio", "video"
- * etc.) and Period.
+ * Events allowing to communicate the current playback and network conditions for
+ * the current type (e.g.  "audio", "video" etc.) and Period.
  */
 export type IABRStreamEvents = IABRAddedSegmentEvent |
                                IABRMetricsEvent |
@@ -291,14 +288,14 @@ export type IABRStreamEvents = IABRAddedSegmentEvent |
                                IABRRequestProgressEvent |
                                IABRRequestEndEvent;
 
-/** Arguments to give to a `RepresentationEstimator`. */
-export interface IRepresentationEstimatorArguments {
+/** Arguments to give to `startRepresentationPicker`. */
+export interface IRepresentationPickerArguments {
   /** Class allowing to estimate the current network bandwidth. */
   bandwidthEstimator : BandwidthEstimator;
   /** Events indicating current playback and network conditions. */
   streamEvents$ : Observable<IABRStreamEvents>;
   /** Observable emitting regularly the current playback situation. */
-  clock$ : Observable<IRepresentationEstimatorClockTick>;
+  clock$ : Observable<IRepresentationPickerClockTick>;
   /** Observable allows to filter out Representation in our estimations. */
   filters$ : Observable<IABRFiltersObject>;
   /**
@@ -316,7 +313,7 @@ export interface IRepresentationEstimatorArguments {
    */
   lowLatencyMode: boolean;
   /**
-   * Observable allowing to set manually choose a Representation:
+   * Observable allowing to force a given bitrate:
    *
    * The highest-quality Representation with a bitrate lower-or-equal to that
    * value will be chosen.
@@ -326,19 +323,19 @@ export interface IRepresentationEstimatorArguments {
    * If no Representation has a bitrate lower or equal to that value, the
    * Representation with the lowest bitrate will be chosen instead.
    *
-   * Set it to a negative value to enable "adaptative mode" instead: the
-   * RepresentationEstimator will choose the best Representation based on the
-   * current network and playback conditions.
+   * Set it to a negative value to enable "adaptative mode" instead: the best
+   * Representation based on the current network and playback conditions will
+   * be chosen.
    */
   manualBitrate$ : Observable<number>;
   /**
    * Set a bitrate floor (the minimum reachable bitrate) for adaptative
    * streaming.
    *
-   * When the `RepresentationEstimator` is choosing a `Representation` in
-   * adaptative mode (e.g. no Representation has been manually chosen through
-   * the `manualBitrate$` Observable), it will never choose a Representation
-   * having a bitrate inferior to that value, with a notable exception:
+   * When choosing a `Representation` in adaptative mode (e.g. no Representation
+   * has been manually chosen through the `manualBitrate$` Observable),
+   * `startRepresentationPicker` will never choose a Representation having a
+   * bitrate inferior to that value, with a notable exception:
    * If no Representation has a bitrate superior or equal to that value, the
    * Representation with the lowest bitrate will be chosen instead.
    *
@@ -349,17 +346,17 @@ export interface IRepresentationEstimatorArguments {
    * Set a bitrate ceil (the maximum reachable bitrate) for adaptative
    * streaming.
    *
-   * When the `RepresentationEstimator` is choosing a `Representation` in
-   * adaptative mode (e.g. no Representation has been manually chosen through
-   * the `manualBitrate$` Observable), it will never choose a Representation
-   * having a bitrate superior to that value, with a notable exception:
+   * When choosing a `Representation` in adaptative mode (e.g. no Representation
+   * has been manually chosen through the `manualBitrate$` Observable),
+   * `startRepresentationPicker` will never choose a Representation having a
+   * bitrate superior to that value, with a notable exception:
    * If no Representation has a bitrate lower or equal to that value, the
    * Representation with the lowest bitrate will be chosen instead.
    *
    * You can set it to `Infinity` to disable any effect of that option.
    */
   maxAutoBitrate$ : Observable<number>;
-  /** The list of Representations the `RepresentationEstimator` can choose from. */
+  /** The list of Representations to choose from. */
   representations : Representation[];
 }
 
@@ -390,15 +387,15 @@ function getFilteredRepresentations(
  * Estimate regularly the current network bandwidth and the best Representation
  * that can be played according to the current network and playback conditions.
  *
- * A `RepresentationEstimator` only does estimations for a given type (e.g.
+ * `startRepresentationPicker` only does estimations for a given type (e.g.
  * "audio", "video" etc.) and Period.
  *
  * If estimates for multiple types and/or Periods are needed, you should
- * create as many `RepresentationEstimator`.
+ * call that function as many times.
  * @param {Object} args
  * @returns {Observable}
  */
-export default function RepresentationEstimator({
+export default function startRepresentationPicker({
   bandwidthEstimator,
   clock$,
   filters$,
@@ -409,7 +406,7 @@ export default function RepresentationEstimator({
   maxAutoBitrate$,
   representations,
   streamEvents$,
-} : IRepresentationEstimatorArguments) : Observable<IABREstimate> {
+} : IRepresentationPickerArguments) : Observable<IABREstimate> {
   const scoreCalculator = new RepresentationScoreCalculator();
   const networkAnalyzer = new NetworkAnalyzer(initialBitrate == null ? 0 :
                                                                        initialBitrate,
@@ -470,7 +467,7 @@ export default function RepresentationEstimator({
 
   const estimate$ = observableDefer(() => {
     if (representations.length === 0) {
-      throw new Error("ABRManager: no representation choice given");
+      throw new Error("RepresentationPicker: no representation choice given");
     }
 
     if (representations.length === 1) {
@@ -483,7 +480,8 @@ export default function RepresentationEstimator({
 
     return manualBitrate$.pipe(switchMap(manualBitrate => {
       if (manualBitrate >= 0) {
-        // -- MANUAL mode --
+        // A representation is forced: This is called "manual" mode
+
         const manualRepresentation = selectOptimalRepresentation(representations,
                                                                  manualBitrate,
                                                                  0,

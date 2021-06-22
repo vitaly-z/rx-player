@@ -49,7 +49,7 @@ import { fromEvent } from "../../../utils/event_emitter";
 import filterMap from "../../../utils/filter_map";
 import SortedList from "../../../utils/sorted_list";
 import WeakMapMemory from "../../../utils/weak_map_memory";
-import ABRManager from "../../abr";
+import RepresentationPickerController from "../../abr";
 import { SegmentFetcherCreator } from "../../fetchers";
 import SegmentBuffersStore, {
   BufferGarbageCollector,
@@ -100,8 +100,8 @@ export type IStreamOrchestratorOptions =
  *
  * @param {Object} content
  * @param {Observable} clock$ - Emit position information
- * @param {Object} abrManager - Emit bitrate estimates and best Representation
- * to play.
+ * @param {Object} representationPickerCtrl - Emit bitrate estimates and best
+ * Representation to play.
  * @param {Object} segmentBuffersStore - Will be used to lazily create
  * SegmentBuffer instances associated with the current content.
  * @param {Object} segmentFetcherCreator - Allow to download segments.
@@ -112,7 +112,7 @@ export default function StreamOrchestrator(
   content : { manifest : Manifest;
               initialPeriod : Period; },
   clock$ : Observable<IStreamOrchestratorClockTick>,
-  abrManager : ABRManager,
+  representationPickerCtrl : RepresentationPickerController,
   segmentBuffersStore : SegmentBuffersStore,
   segmentFetcherCreator : SegmentFetcherCreator<any>,
   options: IStreamOrchestratorOptions
@@ -436,11 +436,11 @@ export default function StreamOrchestrator(
     // Will emit when the current Stream should be destroyed.
     const killCurrentStream$ = observableMerge(endOfCurrentStream$, destroyAll$);
 
-    const periodStream$ = PeriodStream({ abrManager,
-                                         bufferType,
+    const periodStream$ = PeriodStream({ bufferType,
                                          clock$,
                                          content: { manifest, period: basePeriod },
                                          garbageCollectors,
+                                         representationPickerCtrl,
                                          segmentFetcherCreator,
                                          segmentBuffersStore,
                                          options,

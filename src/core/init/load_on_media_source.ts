@@ -32,7 +32,7 @@ import {
 import { MediaError } from "../../errors";
 import log from "../../log";
 import Manifest from "../../manifest";
-import ABRManager from "../abr";
+import RepresentationPickerController from "../abr";
 import { SegmentFetcherCreator } from "../fetchers";
 import SegmentBuffersStore from "../segment_buffers";
 import StreamOrchestrator, {
@@ -55,8 +55,6 @@ import updatePlaybackRate from "./update_playback_rate";
 
 /** Arguments needed by `createMediaSourceLoader`. */
 export interface IMediaSourceLoaderArguments {
-  /** Module helping to choose the right Representation. */
-  abrManager : ABRManager;
   /** Various stream-related options. */
   bufferOptions : IStreamOrchestratorOptions;
   /** Observable emitting playback conditions regularly. */
@@ -65,6 +63,8 @@ export interface IMediaSourceLoaderArguments {
   manifest : Manifest;
   /** Media Element on which the content will be played. */
   mediaElement : HTMLMediaElement;
+  /** Module helping to choose the right Representation. */
+  representationPickerCtrl : RepresentationPickerController;
   /** Module to facilitate segment fetching. */
   segmentFetcherCreator : SegmentFetcherCreator<any>;
   /**
@@ -88,7 +88,7 @@ export default function createMediaSourceLoader(
     clock$,
     speed$,
     bufferOptions,
-    abrManager,
+    representationPickerCtrl,
     segmentFetcherCreator,
     setCurrentTime } : IMediaSourceLoaderArguments
 ) : (mediaSource : MediaSource, initialTime : number, autoPlay : boolean) =>
@@ -147,7 +147,7 @@ export default function createMediaSourceLoader(
     // Creates Observable which will manage every Stream for the given Content.
     const streams$ = StreamOrchestrator({ manifest, initialPeriod },
                                         streamClock$,
-                                        abrManager,
+                                        representationPickerCtrl,
                                         segmentBuffersStore,
                                         segmentFetcherCreator,
                                         bufferOptions

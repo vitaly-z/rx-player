@@ -43,7 +43,7 @@ import Manifest, {
 import objectAssign from "../../../utils/object_assign";
 import { getLeftSizeOfRange } from "../../../utils/ranges";
 import WeakMapMemory from "../../../utils/weak_map_memory";
-import ABRManager from "../../abr";
+import RepresentationPickerController from "../../abr";
 import { IStalledStatus } from "../../api";
 import { SegmentFetcherCreator } from "../../fetchers";
 import SegmentBuffersStore, {
@@ -81,12 +81,12 @@ export interface IPeriodStreamClockTick {
 }
 
 export interface IPeriodStreamArguments {
-  abrManager : ABRManager;
   bufferType : IBufferType;
   clock$ : Observable<IPeriodStreamClockTick>;
   content : { manifest : Manifest;
               period : Period; };
   garbageCollectors : WeakMapMemory<SegmentBuffer<unknown>, Observable<never>>;
+  representationPickerCtrl : RepresentationPickerController;
   segmentFetcherCreator : SegmentFetcherCreator<any>;
   segmentBuffersStore : SegmentBuffersStore;
   options: IPeriodStreamOptions;
@@ -126,11 +126,11 @@ export type IPeriodStreamOptions =
  * @returns {Observable}
  */
 export default function PeriodStream({
-  abrManager,
   bufferType,
   clock$,
   content,
   garbageCollectors,
+  representationPickerCtrl,
   segmentFetcherCreator,
   segmentBuffersStore,
   options,
@@ -258,10 +258,10 @@ export default function PeriodStream({
                           { bufferGap: getLeftSizeOfRange(buffered,
                                                           tick.position) });
     }));
-    return AdaptationStream({ abrManager,
-                              clock$: adaptationStreamClock$,
+    return AdaptationStream({ clock$: adaptationStreamClock$,
                               content: { manifest, period, adaptation },
                               options,
+                              representationPickerCtrl,
                               segmentBuffer,
                               segmentFetcherCreator,
                               wantedBufferAhead$ }).pipe(
