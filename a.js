@@ -9,9 +9,20 @@ representationPickerCtrl.setMaxVideoBitrate(22555);
 const audioPicker = representationPickerCtrl
   .registerPicker({ period, type: "audio" }, representations);
 
+
+
 // AdaptationStream
 audioPicker.start(clock$, abrEvents$)
   .subscribe();
+
+// const audioPicker = representationPickerCtrl
+//   .createPicker({ period, type: "audio" },
+//                 representations,
+//                 clock$,
+//                 abrEvents$);
+
+// audioPicker.subscribe();
+
 
 // Public API
 function setMaxVideoBitrate(btr) {

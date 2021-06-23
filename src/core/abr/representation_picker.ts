@@ -15,6 +15,7 @@
  */
 
 import {
+  BehaviorSubject,
   combineLatest as observableCombineLatest,
   defer as observableDefer,
   merge as observableMerge,
@@ -36,6 +37,7 @@ import {
   ISegment,
   Representation,
 } from "../../manifest";
+import arrayFind from "../../utils/array_find";
 import { getLeftSizeOfRange } from "../../utils/ranges";
 import BandwidthEstimator from "./bandwidth_estimator";
 import BufferBasedChooser from "./buffer_based_chooser";
@@ -292,10 +294,6 @@ export type IABRStreamEvents = IABRAddedSegmentEvent |
 export interface IRepresentationPickerArguments {
   /** Class allowing to estimate the current network bandwidth. */
   bandwidthEstimator : BandwidthEstimator;
-  /** Events indicating current playback and network conditions. */
-  streamEvents$ : Observable<IABRStreamEvents>;
-  /** Observable emitting regularly the current playback situation. */
-  clock$ : Observable<IRepresentationPickerClockTick>;
   /** Observable allows to filter out Representation in our estimations. */
   filters$ : Observable<IABRFiltersObject>;
   /**
@@ -360,6 +358,288 @@ export interface IRepresentationPickerArguments {
   representations : Representation[];
 }
 
+export default class RepresentationPicker {
+  private _bandwidthEstimator : BandwidthEstimator;
+  private _initialBitrate : number | undefined;
+  private _lowLatencyMode : boolean;
+  private _manualBitrate$ : Observable<number>;
+  private _minAutoBitrate$ : Observable<number>;
+  private _maxAutoBitrate$ : Observable<number>;
+  private _filters$ : Observable<IABRFiltersObject>;
+  private _representations : Representation[];
+  public _lockedRepresentation : BehaviorSubject<Representation | null>;
+  constructor(args : IRepresentationPickerArguments) {
+    this._bandwidthEstimator = args.bandwidthEstimator;
+    this._filters$ = args.filters$;
+    this._lowLatencyMode = args.lowLatencyMode;
+    this._initialBitrate = args.initialBitrate;
+    this._manualBitrate$ = args.manualBitrate$;
+    this._minAutoBitrate$ = args.minAutoBitrate$;
+    this._maxAutoBitrate$ = args.maxAutoBitrate$;
+    this._representations = args.representations;
+    this._lockedRepresentation = new BehaviorSubject<Representation | null>(null);
+  }
+
+  public getAvailableRepresentations() : Representation[] {
+    return this._representations;
+  }
+
+  public lockRepresentation(id : string) : void {
+    const representation = arrayFind(this._representations,
+                                     r => r.id === id);
+    if (representation === undefined) {
+      throw new Error("ABR: No Representation found with that id");
+    }
+    this._lockedRepresentation.next(representation);
+  }
+
+  public unlockRepresentation() : void {
+    this._lockedRepresentation.next(null);
+  }
+
+  public isRepresentationLocked() : boolean {
+    return this._lockedRepresentation.getValue() !== null;
+  }
+
+  /**
+   * @param {Observable.<Object>} clock$ - Observable emitting regularly the
+   * current playback situation.
+   * @param {Observable.<Object>} streamEvents$ - Events indicating current
+   * playback and network conditions.
+   * @returns {Observable.<Object>}
+   */
+  public start$(
+    clock$ : Observable<IRepresentationPickerClockTick>,
+    streamEvents$ : Observable<IABRStreamEvents>
+  ) : Observable<IABREstimate> {
+    const bandwidthEstimator = this._bandwidthEstimator;
+    const representations = this._representations;
+
+    const scoreCalculator = new RepresentationScoreCalculator();
+    const networkAnalyzer = new NetworkAnalyzer(this._initialBitrate ?? 0,
+                                                this._lowLatencyMode);
+    const requestsStore = new PendingRequestsStore();
+    const shouldIgnoreMetrics = generateCachedSegmentDetector();
+
+    const metrics$ = streamEvents$.pipe(
+      filter((e) : e is IABRMetricsEvent => e.type === "metrics"),
+      tap(({ value }) => onMetric(value)),
+      ignoreElements());
+
+    const requests$ = streamEvents$.pipe(
+      tap((evt) => {
+        switch (evt.type) {
+          case "requestBegin":
+            requestsStore.add(evt.value);
+            break;
+          case "requestEnd":
+            requestsStore.remove(evt.value.id);
+            break;
+          case "progress":
+            requestsStore.addProgress(evt.value);
+            break;
+        }
+      }),
+      ignoreElements());
+
+    const currentRepresentation$ = streamEvents$.pipe(
+      filter((e) : e is IABRRepresentationChangeEvent =>
+        e.type === "representationChange"),
+      map((e) => e.value.representation),
+      startWith(null));
+
+    const estimate$ = observableDefer(() => {
+      if (representations.length === 0) {
+        throw new Error("RepresentationPicker: no representation choice given");
+      }
+
+      if (representations.length === 1) {
+        return observableOf({ bitrate: undefined,
+                              representation: representations[0],
+                              manual: false,
+                              urgent: true,
+                              knownStableBitrate: undefined });
+      }
+
+      return observableCombineLatest([
+        this._manualBitrate$,
+        this._lockedRepresentation,
+      ]).pipe(switchMap(([manualBitrate, lockedRepresentation]) => {
+        if (lockedRepresentation !== null) {
+          // A representation is forced
+          return observableOf({
+            representation: lockedRepresentation,
+            bitrate: undefined, // Bitrate estimation is deactivated here
+            knownStableBitrate: undefined,
+            manual: true,
+            urgent: true, // a manual Representation switch should happen immediately
+          });
+        } else if (manualBitrate >= 0) {
+          // A bitrate is forced
+          const manualRepresentation = selectOptimalRepresentation(representations,
+                                                                   manualBitrate,
+                                                                   0,
+                                                                   Infinity);
+          return observableOf({
+            representation: manualRepresentation,
+            bitrate: undefined, // Bitrate estimation is deactivated here
+            knownStableBitrate: undefined,
+            manual: true,
+            urgent: true, // a manual bitrate switch should happen immediately
+          });
+        }
+
+        // -- AUTO mode --
+        let lastEstimatedBitrate : number | undefined;
+        let forceBandwidthMode = true;
+
+        // Emit each time a buffer-based estimation should be actualized (each
+        // time a segment is added).
+        const bufferBasedClock$ = streamEvents$.pipe(
+          filter((e) : e is IABRAddedSegmentEvent => e.type === "added-segment"),
+          withLatestFrom(clock$),
+          map(([{ value: evtValue }, { speed, position } ]) => {
+            const timeRanges = evtValue.buffered;
+            const bufferGap = getLeftSizeOfRange(timeRanges, position);
+            const { representation } = evtValue.content;
+            const currentScore = scoreCalculator.getEstimate(representation);
+            const currentBitrate = representation.bitrate;
+            return { bufferGap, currentBitrate, currentScore, speed };
+          })
+        );
+
+        const bitrates = representations.map(r => r.bitrate);
+        const bufferBasedEstimation$ = BufferBasedChooser(bufferBasedClock$, bitrates)
+          .pipe(startWith(undefined));
+
+        return observableCombineLatest([ clock$,
+                                         this._minAutoBitrate$,
+                                         this._maxAutoBitrate$,
+                                         this._filters$,
+                                         bufferBasedEstimation$ ]
+        ).pipe(
+          withLatestFrom(currentRepresentation$),
+          map(([ [ clock, minAutoBitrate, maxAutoBitrate, filters, bufferBasedBitrate ],
+                 currentRepresentation ]
+          ) : IABREstimate => {
+            const _representations = getFilteredRepresentations(representations,
+                                                                filters);
+            const requests = requestsStore.getRequests();
+            const { bandwidthEstimate, bitrateChosen } = networkAnalyzer
+              .getBandwidthEstimate(clock,
+                                    bandwidthEstimator,
+                                    currentRepresentation,
+                                    requests,
+                                    lastEstimatedBitrate);
+
+            lastEstimatedBitrate = bandwidthEstimate;
+
+            const stableRepresentation = scoreCalculator.getLastStableRepresentation();
+            const knownStableBitrate = stableRepresentation == null ?
+              undefined :
+              stableRepresentation.bitrate / (clock.speed > 0 ? clock.speed : 1);
+
+            const { bufferGap } = clock;
+            if (!forceBandwidthMode && bufferGap <= 5) {
+              forceBandwidthMode = true;
+            } else if (forceBandwidthMode && isFinite(bufferGap) && bufferGap > 10) {
+              forceBandwidthMode = false;
+            }
+
+            const chosenRepFromBandwidth = selectOptimalRepresentation(_representations,
+                                                                       bitrateChosen,
+                                                                       minAutoBitrate,
+                                                                       maxAutoBitrate);
+            if (forceBandwidthMode) {
+              log.debug("ABR: Choosing representation with bandwidth estimation.",
+                        chosenRepFromBandwidth);
+              return { bitrate: bandwidthEstimate,
+                       representation: chosenRepFromBandwidth,
+                       urgent: networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate,
+                                                        currentRepresentation,
+                                                        requests,
+                                                        clock),
+                       manual: false,
+                       knownStableBitrate };
+            }
+            if (bufferBasedBitrate == null ||
+                chosenRepFromBandwidth.bitrate >= bufferBasedBitrate)
+            {
+              log.debug("ABR: Choosing representation with bandwidth estimation.",
+                        chosenRepFromBandwidth);
+              return { bitrate: bandwidthEstimate,
+                       representation: chosenRepFromBandwidth,
+                       urgent: networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate,
+                                                        currentRepresentation,
+                                                        requests,
+                                                        clock),
+                       manual: false,
+                       knownStableBitrate };
+            }
+            const chosenRepresentation = selectOptimalRepresentation(_representations,
+                                                                     bufferBasedBitrate,
+                                                                     minAutoBitrate,
+                                                                     maxAutoBitrate);
+            if (bufferBasedBitrate <= maxAutoBitrate) {
+              log.debug("ABR: Choosing representation with buffer based bitrate ceiling.",
+                        chosenRepresentation);
+            }
+            return { bitrate: bandwidthEstimate,
+                     representation: chosenRepresentation,
+                     urgent: networkAnalyzer.isUrgent(bufferBasedBitrate,
+                                                      currentRepresentation,
+                                                      requests,
+                                                      clock),
+                     manual: false,
+                     knownStableBitrate };
+          })
+        );
+      }));
+    });
+
+    return observableMerge(metrics$, requests$, estimate$);
+
+    /**
+     * Callback to call when new metrics are available
+     * @param {Object} value
+     */
+    function onMetric(value : IABRMetricsEventValue) : void {
+      const { duration, size, content } = value;
+
+      if (shouldIgnoreMetrics(content, duration)) {
+        // We already loaded not cached segments.
+        // Do not consider cached segments anymore.
+        return;
+      }
+
+      // calculate bandwidth
+      bandwidthEstimator.addSample(duration, size);
+
+      // calculate "maintainability score"
+      const { segment } = content;
+      const requestDuration = duration / 1000;
+      const segmentDuration = segment.duration;
+
+      const { representation } = content;
+      scoreCalculator.addSample(representation, requestDuration, segmentDuration);
+    }
+  }
+}
+
+/**
+ * XXX TODO
+ * Estimate regularly the current network bandwidth and the best Representation
+ * that can be played according to the current network and playback conditions.
+ *
+ * `startRepresentationPicker` only does estimations for a given type (e.g.
+ * "audio", "video" etc.) and Period.
+ *
+ * If estimates for multiple types and/or Periods are needed, you should
+ * call that function as many times.
+ * @param {Object} args
+ * @returns {Observable}
+ */
+
 /**
  * Filter representations given through filters options.
  * @param {Array.<Representation>} representations
@@ -381,227 +661,4 @@ function getFilteredRepresentations(
   }
 
   return _representations;
-}
-
-/**
- * Estimate regularly the current network bandwidth and the best Representation
- * that can be played according to the current network and playback conditions.
- *
- * `startRepresentationPicker` only does estimations for a given type (e.g.
- * "audio", "video" etc.) and Period.
- *
- * If estimates for multiple types and/or Periods are needed, you should
- * call that function as many times.
- * @param {Object} args
- * @returns {Observable}
- */
-export default function startRepresentationPicker({
-  bandwidthEstimator,
-  clock$,
-  filters$,
-  initialBitrate,
-  lowLatencyMode,
-  manualBitrate$,
-  minAutoBitrate$,
-  maxAutoBitrate$,
-  representations,
-  streamEvents$,
-} : IRepresentationPickerArguments) : Observable<IABREstimate> {
-  const scoreCalculator = new RepresentationScoreCalculator();
-  const networkAnalyzer = new NetworkAnalyzer(initialBitrate == null ? 0 :
-                                                                       initialBitrate,
-                                              lowLatencyMode);
-  const requestsStore = new PendingRequestsStore();
-  const shouldIgnoreMetrics = generateCachedSegmentDetector();
-
-  /**
-   * Callback to call when new metrics are available
-   * @param {Object} value
-   */
-  function onMetric(value : IABRMetricsEventValue) : void {
-    const { duration, size, content } = value;
-
-    if (shouldIgnoreMetrics(content, duration)) {
-      // We already loaded not cached segments.
-      // Do not consider cached segments anymore.
-      return;
-    }
-
-    // calculate bandwidth
-    bandwidthEstimator.addSample(duration, size);
-
-    // calculate "maintainability score"
-    const { segment } = content;
-    const requestDuration = duration / 1000;
-    const segmentDuration = segment.duration;
-
-    const { representation } = content;
-    scoreCalculator.addSample(representation, requestDuration, segmentDuration);
-  }
-
-  const metrics$ = streamEvents$.pipe(
-    filter((e) : e is IABRMetricsEvent => e.type === "metrics"),
-    tap(({ value }) => onMetric(value)),
-    ignoreElements());
-
-  const requests$ = streamEvents$.pipe(
-    tap((evt) => {
-      switch (evt.type) {
-        case "requestBegin":
-          requestsStore.add(evt.value);
-          break;
-        case "requestEnd":
-          requestsStore.remove(evt.value.id);
-          break;
-        case "progress":
-          requestsStore.addProgress(evt.value);
-          break;
-      }
-    }),
-    ignoreElements());
-
-  const currentRepresentation$ = streamEvents$.pipe(
-    filter((e) : e is IABRRepresentationChangeEvent => e.type === "representationChange"),
-    map((e) => e.value.representation),
-    startWith(null));
-
-  const estimate$ = observableDefer(() => {
-    if (representations.length === 0) {
-      throw new Error("RepresentationPicker: no representation choice given");
-    }
-
-    if (representations.length === 1) {
-      return observableOf({ bitrate: undefined,
-                            representation: representations[0],
-                            manual: false,
-                            urgent: true,
-                            knownStableBitrate: undefined });
-    }
-
-    return manualBitrate$.pipe(switchMap(manualBitrate => {
-      if (manualBitrate >= 0) {
-        // A representation is forced: This is called "manual" mode
-
-        const manualRepresentation = selectOptimalRepresentation(representations,
-                                                                 manualBitrate,
-                                                                 0,
-                                                                 Infinity);
-        return observableOf({
-          representation: manualRepresentation,
-          bitrate: undefined, // Bitrate estimation is deactivated here
-          knownStableBitrate: undefined,
-          manual: true,
-          urgent: true, // a manual bitrate switch should happen immediately
-        });
-      }
-
-      // -- AUTO mode --
-      let lastEstimatedBitrate : number | undefined;
-      let forceBandwidthMode = true;
-
-      // Emit each time a buffer-based estimation should be actualized (each
-      // time a segment is added).
-      const bufferBasedClock$ = streamEvents$.pipe(
-        filter((e) : e is IABRAddedSegmentEvent => e.type === "added-segment"),
-        withLatestFrom(clock$),
-        map(([{ value: evtValue }, { speed, position } ]) => {
-          const timeRanges = evtValue.buffered;
-          const bufferGap = getLeftSizeOfRange(timeRanges, position);
-          const { representation } = evtValue.content;
-          const currentScore = scoreCalculator.getEstimate(representation);
-          const currentBitrate = representation.bitrate;
-          return { bufferGap, currentBitrate, currentScore, speed };
-        })
-      );
-
-      const bitrates = representations.map(r => r.bitrate);
-      const bufferBasedEstimation$ = BufferBasedChooser(bufferBasedClock$, bitrates)
-        .pipe(startWith(undefined));
-
-      return observableCombineLatest([ clock$,
-                                       minAutoBitrate$,
-                                       maxAutoBitrate$,
-                                       filters$,
-                                       bufferBasedEstimation$ ]
-      ).pipe(
-        withLatestFrom(currentRepresentation$),
-        map(([ [ clock, minAutoBitrate, maxAutoBitrate, filters, bufferBasedBitrate ],
-               currentRepresentation ]
-        ) : IABREstimate => {
-          const _representations = getFilteredRepresentations(representations,
-                                                              filters);
-          const requests = requestsStore.getRequests();
-          const { bandwidthEstimate, bitrateChosen } = networkAnalyzer
-            .getBandwidthEstimate(clock,
-                                  bandwidthEstimator,
-                                  currentRepresentation,
-                                  requests,
-                                  lastEstimatedBitrate);
-
-          lastEstimatedBitrate = bandwidthEstimate;
-
-          const stableRepresentation = scoreCalculator.getLastStableRepresentation();
-          const knownStableBitrate = stableRepresentation == null ?
-            undefined :
-            stableRepresentation.bitrate / (clock.speed > 0 ? clock.speed : 1);
-
-          const { bufferGap } = clock;
-          if (!forceBandwidthMode && bufferGap <= 5) {
-            forceBandwidthMode = true;
-          } else if (forceBandwidthMode && isFinite(bufferGap) && bufferGap > 10) {
-            forceBandwidthMode = false;
-          }
-
-          const chosenRepFromBandwidth = selectOptimalRepresentation(_representations,
-                                                                     bitrateChosen,
-                                                                     minAutoBitrate,
-                                                                     maxAutoBitrate);
-          if (forceBandwidthMode) {
-            log.debug("ABR: Choosing representation with bandwidth estimation.",
-                      chosenRepFromBandwidth);
-            return { bitrate: bandwidthEstimate,
-                     representation: chosenRepFromBandwidth,
-                     urgent: networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate,
-                                                      currentRepresentation,
-                                                      requests,
-                                                      clock),
-                     manual: false,
-                     knownStableBitrate };
-          }
-          if (bufferBasedBitrate == null ||
-              chosenRepFromBandwidth.bitrate >= bufferBasedBitrate)
-          {
-            log.debug("ABR: Choosing representation with bandwidth estimation.",
-                      chosenRepFromBandwidth);
-            return { bitrate: bandwidthEstimate,
-                     representation: chosenRepFromBandwidth,
-                     urgent: networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate,
-                                                      currentRepresentation,
-                                                      requests,
-                                                      clock),
-                     manual: false,
-                     knownStableBitrate };
-          }
-          const chosenRepresentation = selectOptimalRepresentation(_representations,
-                                                                   bufferBasedBitrate,
-                                                                   minAutoBitrate,
-                                                                   maxAutoBitrate);
-          if (bufferBasedBitrate <= maxAutoBitrate) {
-            log.debug("ABR: Choosing representation with buffer based bitrate ceiling.",
-                      chosenRepresentation);
-          }
-          return { bitrate: bandwidthEstimate,
-                   representation: chosenRepresentation,
-                   urgent: networkAnalyzer.isUrgent(bufferBasedBitrate,
-                                                    currentRepresentation,
-                                                    requests,
-                                                    clock),
-                   manual: false,
-                   knownStableBitrate };
-        })
-      );
-    }));
-  });
-
-  return observableMerge(metrics$, requests$, estimate$);
 }

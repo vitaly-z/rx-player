@@ -21,23 +21,22 @@ import {
   of as observableOf,
 } from "rxjs";
 import log from "../../log";
-import { Representation } from "../../manifest";
+import {
+  IAdaptationType,
+  Period,
+  Representation,
+} from "../../manifest";
 import takeFirstSet from "../../utils/take_first_set";
-import { IBufferType } from "../segment_buffers";
 import BandwidthEstimator from "./bandwidth_estimator";
 import createFilters from "./create_filters";
-import startRepresentationPicker, {
-  IABREstimate,
-  IABRStreamEvents,
-  IRepresentationPickerClockTick,
-} from "./representation_picker";
+import RepresentationPicker from "./representation_picker";
 
 /** Options given to the RepresentationPickerController. */
 export interface IRepresentationPickerControllerOptions {
   /**
    * Initial bitrate calculation, for each type of buffer.
    */
-  initialBitrates: Partial<Record<IBufferType, number>>;
+  initialBitrates: Partial<Record<IAdaptationType, number>>;
   /**
    * If `true` the current content run in "lowLatencyMode", i.e. it's a special
    * content played very close to the live edge.
@@ -74,14 +73,14 @@ export interface IRepresentationPickerControllerOptions {
    */
   maxVideoBitrate? : number;
   /**
-   * If set to a value of `-1`, the adaptative logic will only switch to an
-   * audio Representation with a bitrate immediately lower or equal to that
+   * If set to a value other than `-1`, the adaptative logic will only switch to
+   * an audio Representation with a bitrate immediately lower or equal to that
    * value, or to the lowest bitrate if the former is impossible.
    */
   lockedAudioBitrate? : number;
   /**
-   * If set to a value of `-1`, the adaptative logic will only switch to a
-   * video Representation with a bitrate immediately lower or equal to that
+   * If set to a value other than `-1`, the adaptative logic will only switch to
+   * a video Representation with a bitrate immediately lower or equal to that
    * value, or to the lowest bitrate if the former is impossible.
    */
   lockedVideoBitrate? : number;
@@ -123,18 +122,34 @@ export interface IABRThrottlers {
  * @class RepresentationPickerController
  */
 export default class RepresentationPickerController {
-  private _bandwidthEstimators : Partial<Record<IBufferType, BandwidthEstimator>>;
+  /**
+   * Common (between `RepresentationPicker` instances of the same type)
+   * interface to calculate the bandwidth, per type.
+   */
+  private _bandwidthEstimators : Partial<Record<IAdaptationType, BandwidthEstimator>>;
+  /** Audio bitrate "locked" to. `-1` if no locking is wanted. */
   private _lockedAudioBitrate$ : BehaviorSubject<number>;
+  /** Video bitrate "locked" to. `-1` if no locking is wanted. */
   private _lockedVideoBitrate$ : BehaviorSubject<number>;
   private _minAudioBitrate$ : BehaviorSubject<number>;
   private _maxAudioBitrate$ : BehaviorSubject<number>;
   private _minVideoBitrate$ : BehaviorSubject<number>;
   private _maxVideoBitrate$ : BehaviorSubject<number>;
-  private _initialBitrates : Partial<Record<IBufferType, number>>;
+  private _initialBitrates : Partial<Record<IAdaptationType, number>>;
   private _throttlers : IABRThrottlers;
+  /** If true, the current content is playing in "lowLatencyMode". */
   private _lowLatencyMode : boolean;
 
+  private _pickerStore : Map<string,
+                             Map<IAdaptationType, RepresentationPicker>>;
+
+  private _lockedRepresentations : WeakMap<Period,
+                                           Map<IAdaptationType, Representation>>;
+
+
   /**
+   * Construct a new `RepresentationPickerController`.
+   * Only one `RepresentationPickerController` should be created per content.
    * @param {Object} options
    */
   constructor(options : IRepresentationPickerControllerOptions) {
@@ -160,24 +175,23 @@ export default class RepresentationPickerController {
 
     this._minVideoBitrate$ = new BehaviorSubject(minVideoBitrate ?? 0);
     this._maxVideoBitrate$ = new BehaviorSubject(maxVideoBitrate ?? Infinity);
+
+    this._pickerStore = new Map();
   }
 
-  /**
-   * Take type and an array of the available representations, spit out an
-   * observable emitting the best representation (given the network/buffer
-   * state).
-   * @param {string} bufferType
-   * @param {Array.<Representation>} representations
-   * @param {Observable<Object>} clock$
-   * @param {Observable<Object>} streamEvents$
-   * @returns {Observable}
-   */
-  public startPicker(
-    bufferType : IBufferType,
-    representations : Representation[],
-    clock$ : Observable<IRepresentationPickerClockTick>,
-    streamEvents$ : Observable<IABRStreamEvents>
-  ) : Observable<IABREstimate> {
+  public registerPicker(
+    { period, bufferType } : { period : Period; bufferType : IAdaptationType },
+    representations : Representation[]
+  ) : RepresentationPicker {
+    let periodMap = this._pickerStore.get(period.id);
+    if (periodMap === undefined) {
+      periodMap = new Map<IAdaptationType, RepresentationPicker>();
+      this._pickerStore.set(period.id, periodMap);
+    }
+    if (periodMap.get(bufferType)) {
+      throw new Error("ABR: Cannot register picker: Another picker is already " +
+                      "registered for the same Period and buffer type.");
+    }
     const bandwidthEstimator = this._getBandwidthEstimator(bufferType);
     const initialBitrate = takeFirstSet<number>(this._initialBitrates[bufferType], 0);
     const filters$ = bufferType === "video" ?
@@ -206,17 +220,35 @@ export default class RepresentationPickerController {
         maxAutoBitrate$ = observableOf(Infinity);
         break;
     }
+    const picker = new RepresentationPicker({
+      bandwidthEstimator,
+      filters$,
+      initialBitrate,
+      manualBitrate$,
+      minAutoBitrate$,
+      maxAutoBitrate$,
+      representations,
+      lowLatencyMode: this._lowLatencyMode,
+    });
 
-    return startRepresentationPicker({ bandwidthEstimator,
-                                       streamEvents$,
-                                       clock$,
-                                       filters$,
-                                       initialBitrate,
-                                       manualBitrate$,
-                                       minAutoBitrate$,
-                                       maxAutoBitrate$,
-                                       representations,
-                                       lowLatencyMode: this._lowLatencyMode });
+    periodMap.set(bufferType, picker);
+    return picker;
+  }
+
+  public deregisterPicker(
+    { period, bufferType } : { period : Period; bufferType : IAdaptationType }
+  ) : boolean {
+    const periodMap = this._pickerStore.get(period.id);
+    if (periodMap === undefined) {
+      return false;
+    }
+    return periodMap.delete(bufferType);
+  }
+
+  public getPicker(
+    { period, bufferType } : { period : Period; bufferType : IAdaptationType }
+  ) : RepresentationPicker | null {
+    return this._pickerStore.get(period.id)?.get(bufferType) ?? null;
   }
 
   public lockAudioBitrate(bitrate : number) : void {
@@ -271,7 +303,7 @@ export default class RepresentationPickerController {
    * @param {string} bufferType
    * @returns {Object}
    */
-  private _getBandwidthEstimator(bufferType : IBufferType) : BandwidthEstimator {
+  private _getBandwidthEstimator(bufferType : IAdaptationType) : BandwidthEstimator {
     const originalBandwidthEstimator = this._bandwidthEstimators[bufferType];
     if (originalBandwidthEstimator == null) {
       log.debug("ABR: Creating new BandwidthEstimator for ", bufferType);

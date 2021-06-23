@@ -93,6 +93,7 @@ import warnOnce from "../../utils/warn_once";
 import RepresentationPickerController, {
   IABRThrottlers,
 } from "../abr";
+import RepresentationPicker from "../abr/representation_picker";
 import {
   clearEMESession,
   disposeEME,
@@ -1463,6 +1464,68 @@ class Player extends EventEmitter<IPublicAPIEvent> {
         this._priv_trackChoiceManager.disableVideoTrickModeTracks();
       }
     }
+  }
+
+  getAvailableVideoRepresentations() : Representation[] {
+    if (this._priv_contentInfos === null) {
+      return [];
+    }
+    const { currentPeriod,
+            representationPickerCtrl } = this._priv_contentInfos;
+    if (currentPeriod === null || representationPickerCtrl === null) {
+      return [];
+    }
+    const picker = representationPickerCtrl.getPicker({ period: currentPeriod,
+                                                        bufferType: "video" });
+    if (picker === null) {
+      return [];
+    }
+
+    // XXX TODO map & current
+    return picker.getAvailableRepresentations();
+  }
+
+  lockVideoRepresentation(id : string) : void {
+    this._getActiveRepresentationPicker("video").lockRepresentation(id);
+  }
+
+  unlockVideoRepresentation() : void {
+    this._getActiveRepresentationPicker("video").unlockRepresentation();
+  }
+
+  isVideoRepresentationLocked() : boolean {
+    return this._getActiveRepresentationPicker("video").isRepresentationLocked();
+  }
+
+  getAvailableAudioRepresentations() : Representation[] {
+    if (this._priv_contentInfos === null) {
+      return [];
+    }
+    const { currentPeriod,
+            representationPickerCtrl } = this._priv_contentInfos;
+    if (currentPeriod === null || representationPickerCtrl === null) {
+      return [];
+    }
+    const picker = representationPickerCtrl.getPicker({ period: currentPeriod,
+                                                        bufferType: "audio" });
+    if (picker === null) {
+      return [];
+    }
+
+    // XXX TODO map & current
+    return picker.getAvailableRepresentations();
+  }
+
+  lockAudioRepresentation(id : string) : void {
+    this._getActiveRepresentationPicker("audio").lockRepresentation(id);
+  }
+
+  unlockAudioRepresentation() : void {
+    this._getActiveRepresentationPicker("audio").unlockRepresentation();
+  }
+
+  isAudioRepresentationLocked() : boolean {
+    return this._getActiveRepresentationPicker("audio").isRepresentationLocked();
   }
 
   /**
@@ -3010,6 +3073,25 @@ class Player extends EventEmitter<IPublicAPIEvent> {
       return null;
     }
     return activeRepresentations[currentPeriod.id];
+  }
+
+  private _getActiveRepresentationPicker(
+    bufferType : IBufferType
+  ) : RepresentationPicker {
+    if (this._priv_contentInfos === null ||
+        this._priv_contentInfos.currentPeriod === null ||
+        this._priv_contentInfos.representationPickerCtrl === null)
+    {
+      throw new Error("No available content to lock currently.");
+    }
+    const { currentPeriod,
+            representationPickerCtrl } = this._priv_contentInfos;
+    const picker = representationPickerCtrl.getPicker({ period: currentPeriod,
+                                                        bufferType });
+    if (picker === null) {
+      throw new Error("No available content to lock currently.");
+    }
+    return picker;
   }
 }
 Player.version = /* PLAYER_VERSION */"3.26.0";

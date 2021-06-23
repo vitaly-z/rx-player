@@ -234,6 +234,11 @@ export default function AdaptationStream<T>({
       return recursivelyCreateRepresentationStreams(estimate, i === 0);
     }));
 
+  // representationPicker$
+  // const representationChoice = representationPicker$.pipe(
+  //   switchMap((picker) => {
+  //     return EVENTS.availableRepresentationsChange(representations);
+  //   });
   return observableMerge(representationStreams$, bitrateEstimate$);
 
   /**

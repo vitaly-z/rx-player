@@ -17,20 +17,15 @@
 import {
   merge as observableMerge,
   Observable,
-  of as observableOf,
   Subject,
 } from "rxjs";
-import {
-  distinctUntilChanged,
-  map,
-  switchMap,
-} from "rxjs/operators";
+import { switchMap } from "rxjs/operators";
 import { MediaError } from "../../../errors";
 import Manifest, {
   Adaptation,
+  Period,
   Representation,
 } from "../../../manifest";
-import { fromEvent } from "../../../utils/event_emitter";
 import RepresentationPickerController, {
   IABREstimate,
   IRepresentationPickerClockTick,
@@ -39,6 +34,7 @@ import RepresentationPickerController, {
   IABRRequestEndEvent,
   IABRRequestProgressEvent,
 } from "../../abr";
+import RepresentationPicker from "../../abr/representation_picker";
 import {
   IRepresentationChangeEvent,
   IStreamEventAddedSegment,
@@ -68,8 +64,9 @@ import {
  * @returns {Object}
  */
 export default function createRepresentationEstimator(
-  { manifest, adaptation } : { manifest : Manifest;
-                               adaptation : Adaptation; },
+  contentInfos : { manifest : Manifest;
+                   period : Period;
+                   adaptation : Adaptation; },
   representationPickerCtrl : RepresentationPickerController,
   clock$ : Observable<IRepresentationPickerClockTick>
 ) : { estimator$ : Observable<IABREstimate>;
@@ -88,41 +85,85 @@ export default function createRepresentationEstimator(
                                        IABRRequestEndEvent>();
   const abrEvents$ = observableMerge(streamFeedback$, requestFeedback$);
 
-  const estimator$ = observableMerge(
-    // subscribe "first" (hack as it is a merge here) to event
-    fromEvent(manifest, "decipherabilityUpdate"),
-    // Emit directly a first time on subscription (after subscribing to event)
-    observableOf(null)
-  ).pipe(
-    map(() : Representation[] => {
-      /** Representations for which a `RepresentationStream` can be created. */
-      const playableRepresentations = adaptation.getPlayableRepresentations();
-      if (playableRepresentations.length <= 0) {
-        const noRepErr = new MediaError("NO_PLAYABLE_REPRESENTATION",
-                                        "No Representation in the chosen " +
-                                        adaptation.type + " Adaptation can be played");
-        throw noRepErr;
-      }
-      return playableRepresentations;
-    }),
-    distinctUntilChanged((prevRepr, newRepr) => {
-      if (prevRepr.length !== newRepr.length) {
-        return false;
-      }
-      for (let i = 0; i < newRepr.length; i++) {
-        if (prevRepr[i].id !== newRepr[i].id) {
-          return false;
-        }
-      }
-      return true;
-    }),
-    switchMap((playableRepresentations) =>
-      representationPickerCtrl.startPicker(adaptation.type,
-                                            playableRepresentations,
-                                            clock$,
-                                            abrEvents$)));
+  const picker$ = getRepresentationPicker$(representationPickerCtrl, contentInfos);
+  const estimator$ = picker$.pipe(
+    switchMap((picker) => picker.start$(clock$, abrEvents$)));
 
   return { estimator$,
            streamFeedback$,
            requestFeedback$ };
+}
+
+/**
+ * Emit a new RepresentationPicker on Subscription and each time the list of
+ * playable Representations changes.
+ * @param {Object} representationPickerCtrl
+ * @param {Object} contentInfos
+ * @returns {Observable.<Object>}
+ */
+function getRepresentationPicker$(
+  representationPickerCtrl : RepresentationPickerController,
+  contentInfos : { manifest : Manifest;
+                   period : Period;
+                   adaptation : Adaptation; }
+) : Observable<RepresentationPicker> {
+  return new Observable((obs) => {
+    const { manifest, period, adaptation } = contentInfos;
+
+    /** Representations for which a `RepresentationStream` can be created. */
+    const playableRepresentations = getPlayableRepresentations(adaptation);
+
+    const initialPicker = representationPickerCtrl
+      .registerPicker({ period, bufferType: adaptation.type },
+                      playableRepresentations);
+
+    obs.next(initialPicker);
+    let currentRepresentations = playableRepresentations;
+
+    manifest.addEventListener("decipherabilityUpdate", onDecipherabilityUpdate);
+
+    function onDecipherabilityUpdate() {
+      const newRepresentations = getPlayableRepresentations(adaptation);
+      if (newRepresentations.length !== currentRepresentations.length) {
+        let isDifferent = false;
+        for (let i = 0; i < newRepresentations.length; i++) {
+          if (newRepresentations[i].id !== currentRepresentations[i].id) {
+            isDifferent = true;
+          }
+        }
+        if (!isDifferent) {
+          return;
+        }
+      }
+
+      representationPickerCtrl.deregisterPicker({ period,
+                                                  bufferType: adaptation.type });
+      const newPicker = representationPickerCtrl
+        .registerPicker({ period, bufferType: adaptation.type },
+                        newRepresentations);
+      obs.next(newPicker);
+      currentRepresentations = newRepresentations;
+    }
+
+    return () => {
+      manifest.removeEventListener("decipherabilityUpdate", onDecipherabilityUpdate);
+      representationPickerCtrl.deregisterPicker({ period,
+                                                  bufferType: adaptation.type });
+    };
+  });
+}
+
+// XXX TODO
+function getPlayableRepresentations(
+  adaptation : Adaptation
+) : Representation[] {
+  /** Representations for which a `RepresentationStream` can be created. */
+  const playableRepresentations = adaptation.getPlayableRepresentations();
+  if (playableRepresentations.length <= 0) {
+    const noRepErr = new MediaError("NO_PLAYABLE_REPRESENTATION",
+                                    "No Representation in the chosen " +
+                                    adaptation.type + " Adaptation can be played");
+    throw noRepErr;
+  }
+  return playableRepresentations;
 }
