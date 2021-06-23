@@ -32,20 +32,82 @@ import startRepresentationPicker, {
   IRepresentationPickerClockTick,
 } from "./representation_picker";
 
-/** Options provided to every `startRepresentationPicker` */
-export interface IABRThrottlers {
-  limitVideoWidth? : Observable<number>;
-  throttleVideo? : Observable<number>;
-  throttleVideoBitrate? : Observable<number>;
+/** Options given to the RepresentationPickerController. */
+export interface IRepresentationPickerControllerOptions {
+  /**
+   * Initial bitrate calculation, for each type of buffer.
+   */
+  initialBitrates: Partial<Record<IBufferType, number>>;
+  /**
+   * If `true` the current content run in "lowLatencyMode", i.e. it's a special
+   * content played very close to the live edge.
+   * Some settings or adaptative logic depend on that status.
+   */
+  lowLatencyMode: boolean;
+  /**
+   * Observables allowing to limit the choice of Representations that can be
+   * automatically switched to.
+   */
+  throttlers: IABRThrottlers;
+  /**
+   * Initial value for the `minAudioBitrate`, that is the minimum audio bitrate
+   * the adaptative logic can automatically switch to, unless there's no other
+   * choice.
+   */
+  minAudioBitrate? : number;
+  /**
+   * Initial value for the `minVideoBitrate`, that is the minimum video bitrate
+   * the adaptative logic can automatically switch to, unless there's no other
+   * choice.
+   */
+  minVideoBitrate? : number;
+  /**
+   * Initial value for the `maxAudioBitrate`, that is the maximum audio bitrate
+   * the adaptative logic can automatically switch to, unless there's no other
+   * choice.
+   */
+  maxAudioBitrate? : number;
+  /**
+   * Initial value for the `maxVideoBitrate`, that is the maximum video bitrate
+   * the adaptative logic can automatically switch to, unless there's no other
+   * choice.
+   */
+  maxVideoBitrate? : number;
+  /**
+   * If set to a value of `-1`, the adaptative logic will only switch to an
+   * audio Representation with a bitrate immediately lower or equal to that
+   * value, or to the lowest bitrate if the former is impossible.
+   */
+  lockedAudioBitrate? : number;
+  /**
+   * If set to a value of `-1`, the adaptative logic will only switch to a
+   * video Representation with a bitrate immediately lower or equal to that
+   * value, or to the lowest bitrate if the former is impossible.
+   */
+  lockedVideoBitrate? : number;
 }
 
-export interface IRepresentationPickerControllerOptions {
-  initialBitrates: Partial<Record<IBufferType, // Initial bitrate chosen, per
-                                  number>>;    // type (minimum if not set)
-  lowLatencyMode: boolean; // Some settings can depend on wether you're playing a
-                           // low-latency content. Set it to `true` if you're playing
-                           // such content.
-  throttlers: IABRThrottlers; // Throttle from external events
+/** Collection of Observables allowing to reduce the choice of Representations. */
+export interface IABRThrottlers {
+  /**
+   * Emit the maximum width the application seems to be able to show for now.
+   * If multiple Representations have a width higher than this value, only the
+   * one immediately higher (can still be multiple ones in cases of width
+   * equality) might be automatically switched to.
+   */
+  limitVideoWidth? : Observable<number>;
+  /**
+   * This option is deprecated, but is roughly synonymous to
+   * `throttleVideoBitrate`.
+   */
+  throttleVideo? : Observable<number>;
+  /**
+   * Emit the maximum bitrate for video tracks the adaptative logic can switch
+   * to.
+   * This might be used for example when the video element is detected to be
+   * offscreen.
+   */
+  throttleVideoBitrate? : Observable<number>;
 }
 
 /**
@@ -62,16 +124,12 @@ export interface IRepresentationPickerControllerOptions {
  */
 export default class RepresentationPickerController {
   private _bandwidthEstimators : Partial<Record<IBufferType, BandwidthEstimator>>;
-
   private _lockedAudioBitrate$ : BehaviorSubject<number>;
   private _lockedVideoBitrate$ : BehaviorSubject<number>;
-
   private _minAudioBitrate$ : BehaviorSubject<number>;
   private _maxAudioBitrate$ : BehaviorSubject<number>;
-
   private _minVideoBitrate$ : BehaviorSubject<number>;
   private _maxVideoBitrate$ : BehaviorSubject<number>;
-
   private _initialBitrates : Partial<Record<IBufferType, number>>;
   private _throttlers : IABRThrottlers;
   private _lowLatencyMode : boolean;
@@ -80,19 +138,28 @@ export default class RepresentationPickerController {
    * @param {Object} options
    */
   constructor(options : IRepresentationPickerControllerOptions) {
-    this._initialBitrates = options.initialBitrates;
-    this._throttlers = options.throttlers;
+    const { initialBitrates,
+            lowLatencyMode,
+            throttlers,
+            minAudioBitrate,
+            minVideoBitrate,
+            maxAudioBitrate,
+            maxVideoBitrate,
+            lockedAudioBitrate,
+            lockedVideoBitrate } = options;
+    this._initialBitrates = initialBitrates;
+    this._throttlers = throttlers;
     this._bandwidthEstimators = {};
-    this._lowLatencyMode = options.lowLatencyMode;
+    this._lowLatencyMode = lowLatencyMode;
 
-    this._lockedAudioBitrate$ = new BehaviorSubject(-1);
-    this._lockedVideoBitrate$ = new BehaviorSubject(-1);
+    this._lockedAudioBitrate$ = new BehaviorSubject(lockedAudioBitrate ?? -1);
+    this._lockedVideoBitrate$ = new BehaviorSubject(lockedVideoBitrate ?? -1);
 
-    this._minAudioBitrate$ = new BehaviorSubject(0);
-    this._maxAudioBitrate$ = new BehaviorSubject(Infinity);
+    this._minAudioBitrate$ = new BehaviorSubject(minAudioBitrate ?? 0);
+    this._maxAudioBitrate$ = new BehaviorSubject(maxAudioBitrate ?? Infinity);
 
-    this._minVideoBitrate$ = new BehaviorSubject(0);
-    this._maxVideoBitrate$ = new BehaviorSubject(Infinity);
+    this._minVideoBitrate$ = new BehaviorSubject(minVideoBitrate ?? 0);
+    this._maxVideoBitrate$ = new BehaviorSubject(maxVideoBitrate ?? Infinity);
   }
 
   /**

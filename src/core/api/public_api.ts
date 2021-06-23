@@ -862,20 +862,18 @@ class Player extends EventEmitter<IPublicAPIEvent> {
         }
       }
 
+      const brInfos = this._priv_bitrateInfos;
       const representationPickerCtrl = new RepresentationPickerController({
-        initialBitrates: this._priv_bitrateInfos.lastBitrates,
         lowLatencyMode,
         throttlers,
+        initialBitrates: this._priv_bitrateInfos.lastBitrates,
+        minAudioBitrate: brInfos.minAudioBitrate,
+        minVideoBitrate: brInfos.minVideoBitrate,
+        maxAudioBitrate: brInfos.maxAudioBitrate,
+        maxVideoBitrate: brInfos.maxVideoBitrate,
+        lockedAudioBitrate: brInfos.manualAudioBitrate,
+        lockedVideoBitrate: brInfos.manualVideoBitrate,
       });
-
-      const brInfos = this._priv_bitrateInfos;
-      representationPickerCtrl.setMinAudioBitrate(brInfos.minAudioBitrate);
-      representationPickerCtrl.setMaxAudioBitrate(brInfos.maxAudioBitrate);
-      representationPickerCtrl.setMinVideoBitrate(brInfos.minVideoBitrate);
-      representationPickerCtrl.setMaxVideoBitrate(brInfos.maxVideoBitrate);
-      representationPickerCtrl.lockAudioBitrate(brInfos.manualAudioBitrate);
-      representationPickerCtrl.lockVideoBitrate(brInfos.manualVideoBitrate);
-
       this._priv_contentInfos.representationPickerCtrl = representationPickerCtrl;
 
       /** Options used by the TextTrack SegmentBuffer. */
