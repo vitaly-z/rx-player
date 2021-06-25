@@ -28395,7 +28395,14 @@ function generateManifestParser(options) {
 
       window.MPDParsingError = parsingErrorStr;
       var MPDParsingInfos = {};
-      MPDParsingInfos.fullMpd = typeof responseData === "string" ? responseData : "Error: Shouldn't be a document";
+
+      if (typeof responseData !== "string") {
+        if (typeof manifestDoc.documentElement.outerHTML === "string") {
+          MPDParsingInfos.fullMpd = manifestDoc.documentElement.outerHTML;
+        }
+      } else {
+        MPDParsingInfos.fullMpd = responseData;
+      }
 
       if (typeof window.url === "string" && window.url.indexOf(".mpd") > 0) {
         MPDParsingInfos.url = window.url;
