@@ -141,9 +141,13 @@ export default function generateManifestParser(
       (window as any).MPDParsingError = parsingErrorStr;
 
       const MPDParsingInfos : any = {};
-      MPDParsingInfos.fullMpd = typeof responseData === "string" ?
-        responseData :
-        "Error: Shouldn't be a document";
+      if (typeof responseData !== "string") {
+        if (typeof manifestDoc.documentElement.outerHTML === "string") {
+          MPDParsingInfos.fullMpd = manifestDoc.documentElement.outerHTML;
+        }
+      } else {
+        MPDParsingInfos.fullMpd = responseData;
+      }
 
       if (typeof (window as any).url === "string" &&
           ((window as any).url as string).indexOf(".mpd") > 0)
