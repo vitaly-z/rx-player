@@ -383,6 +383,38 @@ export default class TrackChoiceManager {
   }
 
   /**
+   * XXX TODO
+   */
+  public getOptimalAudioAdaptation(period : Period) : Adaptation | null {
+    const periodItem = getPeriodItem(this._periods, period);
+    const audioInfos = periodItem != null ? periodItem.audio :
+                                            null;
+    if (audioInfos == null || periodItem == null) {
+      throw new Error("TrackChoiceManager: Given Period not found.");
+    }
+
+    const audioAdaptations = period.getSupportedAdaptations("audio");
+    const chosenAudioAdaptation = this._audioChoiceMemory.get(period);
+
+    if (chosenAudioAdaptation === null) {
+      // If the Period was previously without audio, keep it that way
+      return null;
+    } else if (chosenAudioAdaptation === undefined ||
+               !arrayIncludes(audioAdaptations, chosenAudioAdaptation)
+    ) {
+      // Find the optimal audio Adaptation
+      const preferredAudioTracks = this._preferredAudioTracks;
+      const normalizedPref = normalizeAudioTracks(preferredAudioTracks);
+      const optimalAdaptation = findFirstOptimalAudioAdaptation(audioAdaptations,
+                                                                normalizedPref);
+
+      return optimalAdaptation;
+    } else {
+      return chosenAudioAdaptation; // set last one
+    }
+  }
+
+  /**
    * Emit initial audio Adaptation through the given Subject based on:
    *   - the preferred audio tracks
    *   - the last choice for this period, if one

@@ -160,6 +160,13 @@ const { isActive,
         onTextTrackChanges$,
         videoWidth$ } = events;
 
+export interface IPeriodInformation {
+  id : string;
+  current : boolean;
+  start : number;
+  end : number | undefined;
+}
+
 /** Payload emitted with a `positionUpdate` event. */
 interface IPositionUpdateItem {
   /** current position the player is in, in seconds. */
@@ -392,6 +399,8 @@ class Player extends EventEmitter<IPublicAPIEvent> {
 
     /** Keep information on the active SegmentBuffers. */
     segmentBuffersStore : SegmentBuffersStore | null;
+
+    selectedRepresentationStorage : SelectedRepresentationStorage | null;
   };
 
   /** List of favorite audio tracks, in preference order.  */
@@ -744,6 +753,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                            stop$: stopContent$,
                            isDirectFile,
                            representationPickerCtrl: null,
+                           selectedRepresentationStorage: null,
                            segmentBuffersStore: null,
                            thumbnails: null,
                            manifest: null,
@@ -862,6 +872,9 @@ class Player extends EventEmitter<IPublicAPIEvent> {
             .pipe(takeUntil(stopContent$));
         }
       }
+
+      this._priv_contentInfos.selectedRepresentationStorage =
+        new SelectedRepresentationStorage();
 
       const brInfos = this._priv_bitrateInfos;
       const representationPickerCtrl = new RepresentationPickerController({
@@ -1466,6 +1479,31 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     }
   }
 
+  /**
+   * Returns information about every Period currently in the Manifest for which
+   * segments can theoretically be downloaded.
+   *
+   * This method allows to XXX TODO
+   *
+   * @returns {Array.<Object>}
+   */
+  getKnownPeriodList() : IPeriodInformation[] {
+    if (this._priv_contentInfos === null ||
+        this._priv_contentInfos.manifest === null)
+    {
+      return [];
+    }
+    const manifest = this._priv_contentInfos.manifest;
+    const currentPeriod = this._priv_contentInfos.currentPeriod;
+    return manifest.periods.map(p => {
+      const isCurrent = currentPeriod !== null && p.id === currentPeriod.id;
+      return { id: p.id,
+               current: isCurrent,
+               start: p.start,
+               end: p.end };
+    });
+  }
+
   getAvailableVideoRepresentations() : Representation[] {
     if (this._priv_contentInfos === null) {
       return [];
@@ -1486,6 +1524,21 @@ class Player extends EventEmitter<IPublicAPIEvent> {
   }
 
   lockVideoRepresentation(id : string) : void {
+    if (this._priv_contentInfos === null ||
+        this._priv_contentInfos.currentPeriod === null ||
+        this._priv_contentInfos.representationPickerCtrl === null)
+    {
+      throw new Error("No available content to lock currently.");
+    }
+    const { currentPeriod,
+            selectedRepresentationStorage,
+            representationPickerCtrl } = this._priv_contentInfos;
+    selectedRepresentationStorage?.store(currentPeriod, , representation)
+    const picker = representationPickerCtrl.getPicker({ period: currentPeriod,
+                                                        bufferType });
+    if (picker === null) {
+      throw new Error("No available content to lock currently.");
+    }
     this._getActiveRepresentationPicker("video").lockRepresentation(id);
   }
 
@@ -1504,13 +1557,13 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     const { currentPeriod,
             representationPickerCtrl } = this._priv_contentInfos;
     if (currentPeriod === null || representationPickerCtrl === null) {
-      return [];
-    }
+      return []; }
     const picker = representationPickerCtrl.getPicker({ period: currentPeriod,
                                                         bufferType: "audio" });
     if (picker === null) {
       return [];
     }
+    this._priv_trackChoiceManager?.getOptimalAudioAdaptation(period);
 
     // XXX TODO map & current
     return picker.getAvailableRepresentations();
@@ -3095,6 +3148,164 @@ class Player extends EventEmitter<IPublicAPIEvent> {
   }
 }
 Player.version = /* PLAYER_VERSION */"3.26.0";
+
+/**
+ * Store various settings related to Adaptation preferences and previous
+ * Adaptation choices and select on demand the most adapted Adaptation for any
+ * Period.
+ *
+ * @class AdaptationSelector
+ */
+export class AdaptationSelector {
+  private _map : Map<"audio" | "video" | "text",
+                     Map<string /* Period's id */,
+                         Adaptation>>;
+  /**
+   * Array of preferred settings for audio tracks.
+   * Sorted by order of preference descending.
+   */
+  private _preferredAudioTracks : IAudioTrackPreference[];
+
+  /**
+   * Array of preferred languages for text tracks.
+   * Sorted by order of preference descending.
+   */
+  private _preferredTextTracks : ITextTrackPreference[];
+
+  /**
+   * Array of preferred settings for video tracks.
+   * Sorted by order of preference descending.
+   */
+  private _preferredVideoTracks : IVideoTrackPreference[];
+
+  /** Tells if trick mode has been enabled by the RxPlayer user */
+  public trickModeTrackEnabled: boolean;
+
+  constructor(
+    args : { preferTrickModeTracks: boolean }
+  ) {
+    this._map = new Map();
+    this._preferredAudioTracks = [];
+    this._preferredTextTracks = [];
+    this._preferredVideoTracks = [];
+    this.trickModeTrackEnabled = args.preferTrickModeTracks;
+  }
+
+  /**
+   * Update the list of preferred audio tracks, in preference order.
+   * @param {Array.<Object>} preferredAudioTracks
+   */
+  public setPreferredAudioTracks(
+    preferredAudioTracks : IAudioTrackPreference[]
+  ) : void {
+    this._preferredAudioTracks = preferredAudioTracks;
+  }
+
+  /**
+   * Update the list of preferred text tracks, in preference order.
+   * @param {Array.<Object>} preferredTextTracks
+   */
+  public setPreferredTextTracks(
+    preferredTextTracks : ITextTrackPreference[]
+  ) : void {
+    this._preferredTextTracks = preferredTextTracks;
+  }
+
+  /**
+   * Update the list of preferred text tracks, in preference order.
+   * @param {Array.<Object>} tracks
+   */
+  public setPreferredVideoTracks(
+    preferredVideoTracks : IVideoTrackPreference[],
+  ) : void {
+    this._preferredVideoTracks = preferredVideoTracks;
+  }
+
+  /**
+   * @param {Object} period
+   */
+  public disableVideoTrickModeTracks(): void {
+    this.trickModeTrackEnabled = false;
+  }
+
+  /**
+   * @param {Object} period
+   */
+  public enableVideoTrickModeTracks() : void {
+    this.trickModeTrackEnabled = true;
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  public isTrickModeEnabled() : boolean {
+    return this.trickModeTrackEnabled;
+  }
+
+  public storeAdaptation(
+    period : Period,
+    bufferType : "audio" | "video" | "text",
+    adaptation : Adaptation
+  ) {
+
+  }
+
+  /**
+   */
+  public getOptimalAdaptation(
+    period : Period,
+    bufferType : "audio" | "video" | "text"
+  ) : Adaptation | null {
+    this._map.get(audio)
+  }
+
+}
+
+/**
+ * Class storing chosen Representation for every Period and Adaptation where a
+ * choice has been made.
+ *
+ * Because the list of Period could grow indefinitely for live contents, the
+ * `updatePeriods` allows to remove every Period for which you don't want to
+ * store any data anymore.
+ *
+ * @class SelectedRepresentationStorage
+ */
+export class SelectedRepresentationStorage {
+  private _map : Map<string /* Period id */,
+                     Map<string /* Adaptation id */,
+                         Representation>>;
+
+  constructor() {
+    this._map = new Map();
+  }
+
+  public updatePeriods(_periods : Period[]) : void {
+  }
+
+  public store(
+    period : Period,
+    adaptation : Adaptation,
+    representation : Representation
+  ) : void {
+    let adapMap = this._map.get(period.id);
+    if (adapMap === undefined) {
+      adapMap = new Map();
+      this._map.set(period.id, adapMap);
+    }
+
+    adapMap.set(adaptation.id, representation);
+  }
+
+  public get(period : Period, adaptation : Adaptation) : Representation | undefined {
+    let adapMap = this._map.get(period.id);
+    if (adapMap === undefined) {
+      adapMap = new Map();
+      this._map.set(period.id, adapMap);
+    }
+    return adapMap.get(adaptation.id);
+  }
+}
 
 export default Player;
 export { IStreamEventData };
