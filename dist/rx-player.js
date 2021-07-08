@@ -37301,6 +37301,8 @@ var request_error = __webpack_require__(9105);
 var is_non_empty_string = __webpack_require__(6923);
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
 var is_null_or_undefined = __webpack_require__(1946);
+// EXTERNAL MODULE: ./src/utils/ranges.ts
+var ranges = __webpack_require__(2829);
 ;// CONCATENATED MODULE: ./src/utils/request/xhr.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -37317,6 +37319,7 @@ var is_null_or_undefined = __webpack_require__(1946);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 
@@ -37375,10 +37378,12 @@ function request(options) {
     var sendingTime = performance.now();
 
     xhr.onerror = function onXHRError() {
+      addRequestInfos(url, "error", xhr.status, performance.now() - sendingTime);
       obs.error(new request_error/* default */.Z(url, xhr.status, "ERROR_EVENT", xhr));
     };
 
     xhr.ontimeout = function onXHRTimeout() {
+      addRequestInfos(url, "timeout", xhr.status, performance.now() - sendingTime);
       obs.error(new request_error/* default */.Z(url, xhr.status, "TIMEOUT", xhr));
     };
 
@@ -37401,8 +37406,11 @@ function request(options) {
 
     xhr.onload = function onXHRLoad(event) {
       if (xhr.readyState === 4) {
+        var receivedTime = performance.now();
+        var duration = receivedTime - sendingTime;
+        addRequestInfos(url, "loaded", xhr.status, duration);
+
         if (xhr.status >= 200 && xhr.status < 300) {
-          var receivedTime = performance.now();
           var totalSize = xhr.response instanceof ArrayBuffer ? xhr.response.byteLength : event.total;
           /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
@@ -37437,7 +37445,7 @@ function request(options) {
               responseType: loadedResponseType,
               sendingTime: sendingTime,
               receivedTime: receivedTime,
-              duration: receivedTime - sendingTime,
+              duration: duration,
               size: totalSize,
               responseData: responseData
             }
@@ -37456,6 +37464,33 @@ function request(options) {
       }
     };
   });
+}
+
+function addRequestInfos(url, reason, status, requestDuration) {
+  var _a;
+  /* eslint-disable */
+
+
+  var vid = window.vid;
+  var currentTime = vid.currentTime;
+  var maximum = (_a = window.manifest) === null || _a === void 0 ? void 0 : _a.getMaximumPosition();
+  var liveGap = maximum != null ? maximum - currentTime : undefined;
+  var bufferGap = (0,ranges/* getLeftSizeOfRange */.L7)(vid.buffered, vid.currentTime);
+  window.requestInfos.push({
+    url: url,
+    reason: reason,
+    bufferGap: bufferGap,
+    currentTime: currentTime,
+    liveGap: liveGap,
+    status: status,
+    requestDuration: requestDuration
+  });
+
+  if (window.requestInfos.length > 25) {
+    window.requestInfos.splice(0, window.requestInfos.length - 25);
+  }
+  /* eslint-enable */
+
 }
 
 /* harmony default export */ var xhr = (request);
@@ -56259,7 +56294,10 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
   _proto.loadVideo = function loadVideo(opts) {
     /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+    window.manifest = null;
     window.MPDParsingError = undefined;
+    window.requestInfos = [];
+    window.vid = this.videoElement;
     /* eslint-enable @typescript-eslint/no-unsafe-member-access */
 
     var options = parseLoadVideoOptions(opts);
@@ -58350,6 +58388,11 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     }
 
     contentInfos.manifest = manifest;
+    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+    window.manifest = manifest;
+    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+
     this._priv_lastContentPlaybackInfos.manifest = manifest;
     var initialAudioTrack = contentInfos.initialAudioTrack,
         initialTextTrack = contentInfos.initialTextTrack;

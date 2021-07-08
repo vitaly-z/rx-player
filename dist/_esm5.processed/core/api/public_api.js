@@ -255,7 +255,10 @@ var Player = /** @class */ (function (_super) {
      */
     Player.prototype.loadVideo = function (opts) {
         /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+        window.manifest = null;
         window.MPDParsingError = undefined;
+        window.requestInfos = [];
+        window.vid = this.videoElement;
         /* eslint-enable @typescript-eslint/no-unsafe-member-access */
         var options = parseLoadVideoOptions(opts);
         log.info("API: Calling loadvideo", options);
@@ -1904,6 +1907,9 @@ var Player = /** @class */ (function (_super) {
             return;
         }
         contentInfos.manifest = manifest;
+        /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+        window.manifest = manifest;
+        /* eslint-enable @typescript-eslint/no-unsafe-member-access */
         this._priv_lastContentPlaybackInfos.manifest = manifest;
         var initialAudioTrack = contentInfos.initialAudioTrack, initialTextTrack = contentInfos.initialTextTrack;
         this._priv_trackChoiceManager = new TrackChoiceManager({

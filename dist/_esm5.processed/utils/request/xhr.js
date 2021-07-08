@@ -18,6 +18,7 @@ import config from "../../config";
 import { RequestError } from "../../errors";
 import isNonEmptyString from "../is_non_empty_string";
 import isNullOrUndefined from "../is_null_or_undefined";
+import { getLeftSizeOfRange } from "../ranges";
 var DEFAULT_REQUEST_TIMEOUT = config.DEFAULT_REQUEST_TIMEOUT;
 var DEFAULT_RESPONSE_TYPE = "json";
 /**
@@ -62,9 +63,11 @@ function request(options) {
         }
         var sendingTime = performance.now();
         xhr.onerror = function onXHRError() {
+            addRequestInfos(url, "error", xhr.status, performance.now() - sendingTime);
             obs.error(new RequestError(url, xhr.status, "ERROR_EVENT", xhr));
         };
         xhr.ontimeout = function onXHRTimeout() {
+            addRequestInfos(url, "timeout", xhr.status, performance.now() - sendingTime);
             obs.error(new RequestError(url, xhr.status, "TIMEOUT", xhr));
         };
         if (options.sendProgressEvents === true) {
@@ -81,8 +84,10 @@ function request(options) {
         }
         xhr.onload = function onXHRLoad(event) {
             if (xhr.readyState === 4) {
+                var receivedTime = performance.now();
+                var duration = receivedTime - sendingTime;
+                addRequestInfos(url, "loaded", xhr.status, duration);
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    var receivedTime = performance.now();
                     var totalSize = xhr.response instanceof
                         ArrayBuffer ? xhr.response.byteLength :
                         event.total;
@@ -115,7 +120,7 @@ function request(options) {
                             responseType: loadedResponseType,
                             sendingTime: sendingTime,
                             receivedTime: receivedTime,
-                            duration: receivedTime - sendingTime,
+                            duration: duration,
                             size: totalSize,
                             responseData: responseData } });
                     obs.complete();
@@ -132,5 +137,28 @@ function request(options) {
             }
         };
     });
+}
+function addRequestInfos(url, reason, status, requestDuration) {
+    var _a;
+    /* eslint-disable */
+    var vid = window.vid;
+    var currentTime = vid.currentTime;
+    var maximum = (_a = window.manifest) === null || _a === void 0 ? void 0 : _a.getMaximumPosition();
+    var liveGap = maximum != null ? maximum - currentTime :
+        undefined;
+    var bufferGap = getLeftSizeOfRange(vid.buffered, vid.currentTime);
+    window.requestInfos.push({
+        url: url,
+        reason: reason,
+        bufferGap: bufferGap,
+        currentTime: currentTime,
+        liveGap: liveGap,
+        status: status,
+        requestDuration: requestDuration,
+    });
+    if (window.requestInfos.length > 25) {
+        window.requestInfos.splice(0, window.requestInfos.length - 25);
+    }
+    /* eslint-enable */
 }
 export default request;
