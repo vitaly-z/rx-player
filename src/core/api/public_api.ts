@@ -651,7 +651,10 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    */
   loadVideo(opts : ILoadVideoOptions) : void {
     /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+    (window as any).manifest = null;
     (window as any).MPDParsingError = undefined;
+    (window as any).requestInfos = [];
+    (window as any).vid = this.videoElement;
     /* eslint-enable @typescript-eslint/no-unsafe-member-access */
     const options = parseLoadVideoOptions(opts);
     log.info("API: Calling loadvideo", options);
@@ -2516,6 +2519,9 @@ class Player extends EventEmitter<IPublicAPIEvent> {
       return;
     }
     contentInfos.manifest = manifest;
+     /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+    (window as any).manifest = manifest;
+    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
     this._priv_lastContentPlaybackInfos.manifest = manifest;
 
     const { initialAudioTrack, initialTextTrack } = contentInfos;

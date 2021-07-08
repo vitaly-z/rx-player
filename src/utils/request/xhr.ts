@@ -19,6 +19,7 @@ import config from "../../config";
 import { RequestError } from "../../errors";
 import isNonEmptyString from "../is_non_empty_string";
 import isNullOrUndefined from "../is_null_or_undefined";
+import { getLeftSizeOfRange } from "../ranges";
 
 const { DEFAULT_REQUEST_TIMEOUT } = config;
 
@@ -242,10 +243,18 @@ function request<T>(
     const sendingTime = performance.now();
 
     xhr.onerror = function onXHRError() {
+      addRequestInfos(url,
+                      "error",
+                      xhr.status,
+                      performance.now() - sendingTime);
       obs.error(new RequestError(url, xhr.status, "ERROR_EVENT", xhr));
     };
 
     xhr.ontimeout = function onXHRTimeout() {
+      addRequestInfos(url,
+                      "timeout",
+                      xhr.status,
+                      performance.now() - sendingTime);
       obs.error(new RequestError(url, xhr.status, "TIMEOUT", xhr));
     };
 
@@ -264,8 +273,10 @@ function request<T>(
 
     xhr.onload = function onXHRLoad(event : ProgressEvent) {
       if (xhr.readyState === 4) {
+        const receivedTime = performance.now();
+        const duration = receivedTime - sendingTime;
+        addRequestInfos(url, "loaded", xhr.status, duration);
         if (xhr.status >= 200 && xhr.status < 300) {
-          const receivedTime = performance.now();
           const totalSize = xhr.response instanceof
                               ArrayBuffer ? xhr.response.byteLength :
                                             event.total;
@@ -301,7 +312,7 @@ function request<T>(
                               responseType: loadedResponseType,
                               sendingTime,
                               receivedTime,
-                              duration: receivedTime - sendingTime,
+                              duration,
                               size: totalSize,
                               responseData } });
           obs.complete();
@@ -319,6 +330,34 @@ function request<T>(
       }
     };
   });
+}
+
+function addRequestInfos(
+  url : string,
+  reason : string,
+  status : number,
+  requestDuration : number
+) : void {
+  /* eslint-disable */
+  const vid = (window as any).vid;
+  const currentTime = vid.currentTime;
+  const maximum = (window as any).manifest?.getMaximumPosition();
+  const liveGap = maximum != null ? maximum - currentTime :
+                                    undefined;
+  const bufferGap = getLeftSizeOfRange(vid.buffered, vid.currentTime);
+  (window as any).requestInfos.push({
+    url,
+    reason,
+    bufferGap,
+    currentTime,
+    liveGap,
+    status,
+    requestDuration,
+  });
+  if ((window as any).requestInfos.length > 25) {
+    (window as any).requestInfos.splice(0, (window as any).requestInfos.length - 25);
+  }
+  /* eslint-enable */
 }
 
 export default request;
