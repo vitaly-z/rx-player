@@ -227,12 +227,6 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    */
   public publishTime?: number;
 
-  /**
-   * Array containing every minor errors that happened when the Manifest has
-   * been created, in the order they have happened.
-   */
-  public parsingErrors : ICustomError[];
-
   /*
    * Difference between the server's clock in milliseconds and the return of the
    * JS function `performance.now`.
@@ -316,8 +310,6 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * Construct a Manifest instance from a parsed Manifest object (as returned by
    * Manifest parsers) and options.
    *
-   * Some minor errors can arise during that construction. `this.parsingErrors`
-   * will contain all such errors, in the order they have been encountered.
    * @param {Object} parsedManifest
    * @param {Object} options
    */
@@ -327,17 +319,14 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
             supplementaryImageTracks = [],
             representationFilter,
             manifestUpdateUrl } = options;
-    this.parsingErrors = [];
     this.id = generateNewManifestId();
     this.expired = parsedManifest.expired ?? null;
     this.transport = parsedManifest.transportType;
     this.clockOffset = parsedManifest.clockOffset;
 
-    this.periods = parsedManifest.periods.map((parsedPeriod) => {
-      const period = new Period(parsedPeriod, representationFilter);
-      this.parsingErrors.push(...period.parsingErrors);
-      return period;
-    }).sort((a, b) => a.start - b.start);
+    this.periods = parsedManifest.periods
+      .map((parsedPeriod) => new Period(parsedPeriod, representationFilter))
+      .sort((a, b) => a.start - b.start);
 
     /**
      * @deprecated It is here to ensure compatibility with the way the
@@ -645,7 +634,6 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
                                                  media: url,
                                                }) }] },
                                            { isManuallyAdded: true });
-      this.parsingErrors.push(...newAdaptation.parsingErrors);
       return newAdaptation;
     });
 
@@ -698,7 +686,6 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
                                                    media: url,
                                                  }) }] },
                                              { isManuallyAdded: true });
-        this.parsingErrors.push(...newAdaptation.parsingErrors);
         return newAdaptation;
       }));
     }, []);
@@ -725,7 +712,6 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
     this.isLive = newManifest.isLive;
     this.isLastPeriodKnown = newManifest.isLastPeriodKnown;
     this.lifetime = newManifest.lifetime;
-    this.parsingErrors = newManifest.parsingErrors;
     this.suggestedPresentationDelay = newManifest.suggestedPresentationDelay;
     this.transport = newManifest.transport;
     this.publishTime = newManifest.publishTime;

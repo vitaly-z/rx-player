@@ -1608,7 +1608,6 @@ class Player extends EventEmitter<IPublicAPIEvent> {
   }
 
   /**
-   * Seek to a given absolute position.
    * @param {Number|Object} time
    * @returns {Number} - The time the player has seek to
    */
@@ -2940,7 +2939,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     newVal : number[]
   ) : void {
     const prevVal = this._priv_contentEventsMemory[event];
-    if (prevVal === undefined || areArraysOfNumbersEqual(newVal, prevVal)) {
+    if (prevVal === undefined || !areArraysOfNumbersEqual(newVal, prevVal)) {
       this._priv_contentEventsMemory[event] = newVal;
       this.trigger(event, newVal);
     }

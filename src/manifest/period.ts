@@ -27,10 +27,117 @@ import objectValues from "../utils/object_values";
 import Adaptation, {
   IRepresentationFilter,
 } from "./adaptation";
-import { IAdaptationType } from "./types";
+import {
+  IAdaptationType,
+  IHDRInformation,
+} from "./types";
+
+    // if (trackOrganizer !== undefined) {
+    //   let callFinished = false;
+
+    //   const self = this;
+    //   const currTracks = this.getAdaptations();
+    //   function createNewTrackFrom(trackId : string) : string {
+    //     if (callFinished) {
+    //       throw new Error("You cannot call `createNewTrackFrom` once the " +
+    //                       "`trackOrganizer` call has ended,");
+    //     }
+    //     const ogTrack = arrayFind(currTracks, ({ id }) => id === trackId);
+    //     if (ogTrack === undefined ||
+    //         (ogTrack.type !== "audio" &&
+    //           ogTrack.type !== "video" &&
+    //           ogTrack.type !== "text"))
+    //     {
+    //       throw new Error("Cannot create new track. " +
+    //                       `Base track "${trackId}" not found.`);
+    //     }
+    //     let adaptationsForType = self.adaptations[ogTrack.type];
+    //     if (adaptationsForType === undefined) {
+    //       adaptationsForType = [];
+    //       self.adaptations[ogTrack.type] = adaptationsForType;
+    //     }
+    //     const newTrackId = "TODO";
+    //     const newAdaptation = ogTrack.clone(newTrackId, []);
+    //     adaptationsForType.push
+
+    //     return newTrackId;
+    //   }
+    // }
 
 /** Structure listing every `Adaptation` in a Period. */
 export type IManifestAdaptations = Partial<Record<IAdaptationType, Adaptation[]>>;
+
+interface ITrackOrganizerAudioRepresentation {
+  id : string;
+  bitrate? : number | undefined;
+  codec? : string | undefined;
+}
+
+export interface ITrackOrganizerAudioTrack {
+  language : string;
+  normalized : string;
+  audioDescription : boolean;
+  dub? : boolean | undefined;
+  id : number|string;
+  representations: ITrackOrganizerAudioRepresentation[];
+}
+
+interface ITrackOrganizerVideoRepresentation {
+  id : string;
+  bitrate? : number | undefined;
+  width? : number | undefined;
+  height? : number | undefined;
+  codec? : string | undefined;
+  frameRate? : string | undefined;
+  hdrInfo?: IHDRInformation | undefined;
+}
+
+interface ITrackOrganizerTextRepresentation {
+  id : string;
+  bitrate? : number | undefined;
+  codec? : string | undefined;
+}
+
+export interface ITrackOrganizerTextTrack {
+  language : string;
+  normalized : string;
+  closedCaption : boolean;
+  id : number;
+  representations : ITrackOrganizerTextRepresentation[];
+}
+
+/** Video track returned by the TrackChoiceManager. */
+export interface ITrackOrganizerVideoTrack {
+  id : number;
+  signInterpreted? : boolean | undefined;
+  isTrickModeTrack? : boolean | undefined;
+  trickModeTracks?: ITrackOrganizerVideoTrack[];
+  representations: ITrackOrganizerVideoRepresentation[];
+}
+
+
+export interface ITrackOrganizerTracksInformation {
+  periodStart : number;
+  periodEnd : number | undefined;
+  audioTracks : ITrackOrganizerAudioTrack[];
+  videoTracks : ITrackOrganizerVideoTrack[];
+}
+
+export interface ITrackOrganizerCallbacks {
+  createNewTrackFrom(trackId : string) : string;
+  moveRepresentation(
+    representationId : string,
+    oldTrackId : string,
+    newTrackId : string
+  ) : void;
+  removeRepresentation(representationId : string, trackId : string) : void;
+  removeTrack(representationId : string) : void;
+}
+
+export type ITrackOrganizer = (
+  tracksInfo : ITrackOrganizerTracksInformation,
+  callbacks : ITrackOrganizerCallbacks
+) => void;
 
 /**
  * Class representing the tracks and qualities available from a given time
@@ -59,12 +166,6 @@ export default class Period {
    */
   public end? : number;
 
-  /**
-   * Array containing every errors that happened when the Period has been
-   * created, in the order they have happened.
-   */
-  public readonly parsingErrors : ICustomError[];
-
   /** Array containing every stream event happening on the period */
   public streamEvents : IManifestStreamEvent[];
 
@@ -77,7 +178,6 @@ export default class Period {
     args : IParsedPeriod,
     representationFilter? : IRepresentationFilter
   ) {
-    this.parsingErrors = [];
     this.id = args.id;
     this.adaptations = (Object.keys(args.adaptations) as IAdaptationType[])
       .reduce<IManifestAdaptations>((acc, type) => {
@@ -87,31 +187,32 @@ export default class Period {
         }
         const filteredAdaptations = adaptationsForType
           .map((adaptation) : Adaptation|null => {
-            let newAdaptation : Adaptation|null = null;
-            try {
-              newAdaptation = new Adaptation(adaptation, { representationFilter });
-            } catch (err) {
-              if (isKnownError(err) &&
-                  err.code === "MANIFEST_UNSUPPORTED_ADAPTATION_TYPE")
-              {
-                this.parsingErrors.push(err);
-                return null;
-              }
-              throw err;
-            }
-            this.parsingErrors.push(...newAdaptation.parsingErrors);
-            return newAdaptation;
+            return new Adaptation(adaptation, { representationFilter });
+            // XXX TODO
+            // Emit lazily?
+            // if (newAdaptation.representations.length > 0 &&
+            //     !newAdaptation.isSupported)
+            // {
+            //   log.warn("Incompatible codecs for adaptation", newAdaptation);
+            //   const error = new MediaError(
+            //     "MANIFEST_INCOMPATIBLE_CODECS_ERROR",
+            //     "An Adaptation contains only incompatible codecs.");
+            //   this.parsingErrors.push(error);
+            // }
           })
           .filter((adaptation) : adaptation is Adaptation =>
             adaptation !== null && adaptation.representations.length > 0
           );
-        if (filteredAdaptations.every(adaptation => !adaptation.isSupported) &&
-            adaptationsForType.length > 0 &&
-            (type === "video" || type === "audio")
-        ) {
-          throw new MediaError("MANIFEST_PARSE_ERROR",
-                               "No supported " + type + " adaptations");
-        }
+
+        // // XXX TODO
+        // // Throw lazily?
+        // if (filteredAdaptations.every(adaptation => !adaptation.isSupported) &&
+        //     adaptationsForType.length > 0 &&
+        //     (type === "video" || type === "audio")
+        // ) {
+        //   throw new MediaError("MANIFEST_PARSE_ERROR",
+        //                        `A Period has only unsupported ${type} Adaptations`);
+        // }
 
         if (filteredAdaptations.length > 0) {
           acc[type] = filteredAdaptations;
@@ -119,12 +220,14 @@ export default class Period {
         return acc;
       }, {});
 
-    if (!Array.isArray(this.adaptations.video) &&
-        !Array.isArray(this.adaptations.audio))
-    {
-      throw new MediaError("MANIFEST_PARSE_ERROR",
-                           "No supported audio and video tracks.");
-    }
+    // // XXX TODO
+    // // Throw lazily?
+    // if (!Array.isArray(this.adaptations.video) &&
+    //     !Array.isArray(this.adaptations.audio))
+    // {
+    //   throw new MediaError("MANIFEST_PARSE_ERROR",
+    //                        "A Period has no supported audio nor video tracks.");
+    // }
 
     this.duration = args.duration;
     this.start = args.start;
@@ -181,6 +284,7 @@ export default class Period {
   getSupportedAdaptations(type? : IAdaptationType) : Adaptation[] {
     if (type === undefined) {
       return this.getAdaptations().filter(ada => {
+        // XXX TODO check that isSupported == false includes no representations
         return ada.isSupported;
       });
     }

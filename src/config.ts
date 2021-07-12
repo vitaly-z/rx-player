@@ -755,29 +755,6 @@ export default {
   TEXT_TRACK_SIZE_CHECKS_INTERVAL: 250,
 
   /**
-   * The Buffer padding is a time offset from the current time that affects
-   * the buffer.
-   *
-   * Basically, from a given time, if the current buffer gap number (time
-   * between the current time and the end of the downloaded buffer) is above
-   * the padding described here (of the corresponding type), we won't
-   * reschedule segments for that range.
-   *
-   * This is to avoid excessive re-buffering.
-   *
-   * Keeping the padding too low would increase the risk of re-bufferings.
-   *
-   * Keeping the padding too high would delay visible quality increase.
-   *
-   * @type {Object}
-   */
-  BUFFER_PADDING: {
-    audio: 1, // only "audio" segments
-    video: 3, // only "video" segments
-    other: 1, // tracks which are not audio/video (text images).
-  },
-
-  /**
    * Segments of different types are downloaded by steps:
    *
    *   - first the audio/video/text Segments which are immediately needed

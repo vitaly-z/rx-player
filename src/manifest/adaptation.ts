@@ -21,12 +21,16 @@ import {
 import log from "../log";
 import { IParsedAdaptation } from "../parsers/manifest";
 import arrayFind from "../utils/array_find";
+import arrayFindIndex from "../utils/array_find_index";
 import arrayIncludes from "../utils/array_includes";
 import isNullOrUndefined from "../utils/is_null_or_undefined";
 import normalizeLanguage from "../utils/languages";
 import uniq from "../utils/uniq";
 import Representation from "./representation";
-import { IAdaptationType } from "./types";
+import {
+  IAdaptationType,
+  IHDRInformation,
+} from "./types";
 
 /** List in an array every possible value for the Adaptation's `type` property. */
 export const SUPPORTED_ADAPTATIONS_TYPE: IAdaptationType[] = [ "audio",
@@ -73,14 +77,14 @@ export default class Adaptation {
   /** ID uniquely identifying the Adaptation in the Period. */
   public readonly id : string;
 
+  /** Type of this Adaptation. */
+  public readonly type : IAdaptationType;
+
   /**
    * Different `Representations` (e.g. qualities) this Adaptation is available
    * in.
    */
-  public readonly representations : Representation[];
-
-  /** Type of this Adaptation. */
-  public readonly type : IAdaptationType;
+  public representations : Representation[];
 
   /** Whether this track contains an audio description for the visually impaired. */
   public isAudioDescription? : boolean;
@@ -115,13 +119,7 @@ export default class Adaptation {
   /** Tells if the track is a trick mode track. */
   public isTrickModeTrack? : boolean;
 
-  /**
-   * Array containing every errors that happened when the Adaptation has been
-   * created, in the order they have happened.
-   */
-  public readonly parsingErrors : ICustomError[];
-
-  public readonly trickModeTracks? : Adaptation[];
+  public trickModeTracks? : Adaptation[];
 
   /**
    * @constructor
@@ -134,18 +132,8 @@ export default class Adaptation {
   } = {}) {
     const { trickModeTracks } = parsedAdaptation;
     const { representationFilter, isManuallyAdded } = options;
-    this.parsingErrors = [];
     this.id = parsedAdaptation.id;
     this.isTrickModeTrack = parsedAdaptation.isTrickModeTrack;
-
-    if (!isSupportedAdaptationType(parsedAdaptation.type)) {
-      log.info("Manifest: Not supported adaptation type", parsedAdaptation.type);
-      /* eslint-disable @typescript-eslint/restrict-template-expressions */
-      throw new MediaError("MANIFEST_UNSUPPORTED_ADAPTATION_TYPE",
-                           `"${parsedAdaptation.type}" is not a valid ` +
-                           "Adaptation type.");
-      /* eslint-enable @typescript-eslint/restrict-template-expressions */
-    }
     this.type = parsedAdaptation.type;
 
     if (parsedAdaptation.language !== undefined) {
@@ -201,13 +189,6 @@ export default class Adaptation {
 
     // for manuallyAdded adaptations (not in the manifest)
     this.manuallyAdded = isManuallyAdded === true;
-
-    if (this.representations.length > 0 && !isSupported) {
-      log.warn("Incompatible codecs for adaptation", parsedAdaptation);
-      const error = new MediaError("MANIFEST_INCOMPATIBLE_CODECS_ERROR",
-                                   "An Adaptation contains only incompatible codecs.");
-      this.parsingErrors.push(error);
-    }
   }
 
   /**
@@ -243,5 +224,54 @@ export default class Adaptation {
    */
   getRepresentation(wantedId : number|string) : Representation|undefined {
     return arrayFind(this.representations, ({ id }) => wantedId === id);
+  }
+
+  // XXX TODO Event listener?
+  /**
+   * Remove all references for a `Representation` from this `Adaptation`, based
+   * on its `id` property.
+   * @param {number|string} wantedId
+   * @returns {Object|null}
+   */
+  removeRepresentation(wantedId : number|string) : Representation | null {
+    const idx = arrayFindIndex(this.representations, ({ id }) => wantedId === id);
+    if (idx < 0) {
+      return null;
+    }
+    return this.representations.splice(idx, 1)[0];
+  }
+
+  /**
+   * Returns a new `Adaptation`, having the same characteristics than this one
+   * (and even the same trickModeTracks tracks - with the same references) but
+   * different Representations - which are given in argument.
+   *
+   * This method can be used e.g. to split a given `Adaptation` in two by first
+   * removing `Representations` through the `removeRepresentation` callback and
+   * then creating a new `Adaptation` with removed `Representations` in it.
+   *
+   * @param {string} newTrackId - The `id` property of the new `Adaptation` that
+   * should be created. Note that is should respect the same rule than any other
+   * `Adaptation`'s id: it should be unique for the Period in which the
+   * `Adaptation` will be set.
+   * @param {Array.<Object>} representations
+   * @returns {Object}
+   */
+  clone(newTrackId : string, representations : Representation[]) : Adaptation {
+    const clone = new Adaptation({
+      id: newTrackId,
+      type: this.type,
+      audioDescription: this.isAudioDescription,
+      closedCaption: this.isClosedCaption,
+      isDub: this.isDub,
+      isSignInterpreted: this.isSignInterpreted,
+      isTrickModeTrack: this.isTrickModeTrack,
+      language: this.language,
+      trickModeTracks: [],
+      representations: [],
+    });
+    clone.trickModeTracks = this.trickModeTracks;
+    clone.representations = representations.sort((a, b) => a.bitrate - b.bitrate);
+    return clone;
   }
 }
