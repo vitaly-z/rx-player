@@ -48,7 +48,14 @@ export default function applyExtent(element, extent) {
         if (secondExtent[2] === "px" ||
             secondExtent[2] === "%" ||
             secondExtent[2] === "em") {
-            element.style.height = secondExtent[1] + secondExtent[2];
+            var toNum = Number(secondExtent[1]);
+            if (secondExtent[2] === "%" && !isNaN(toNum) &&
+                (toNum < 0 || toNum > 100)) {
+                element.style.width = "80%";
+            }
+            else {
+                element.style.height = secondExtent[1] + secondExtent[2];
+            }
         }
         else if (secondExtent[2] === "c") {
             addClassName(element, "proportional-style");
