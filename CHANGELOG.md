@@ -1,6 +1,6 @@
 # Changelog
 
-## v3.28.0-dev.2022061700 (2022-06-17)
+## v3.28.0-canal.2022061700 (2022-06-17)
 
 ### Features
 
@@ -19,6 +19,7 @@
   - DASH: Fix possibility of wrong segments being requested when a SegmentTimeline in a given Period (whose Period@end is set) had an S@r set to `-1` at its end [#1098]
   - DASH: If the first `<S>` has its S@t attribute not set, make as if it is set to `0` [#1118]
   - Reload in the paused state when the action that lead to reloading was performed directly as the RxPlayer went into the `PAUSED` state [#1132]
+  - subtitles/TTML: Set default values for `tts:extent` and `tts:origin` when improbable values are found
 
 ### Other improvements
 
