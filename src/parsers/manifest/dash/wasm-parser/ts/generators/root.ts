@@ -16,12 +16,13 @@
 
 import noop from "../../../../../../utils/noop";
 import {
+  IMPDChildren,
   IMPDIntermediateRepresentation,
 } from "../../../node_parser_types";
 import ParsersStack from "../parsers_stack";
 import { TagName } from "../types";
 import {
-  generateMPDAttrParser,
+  decodeMPDAttributes,
   generateMPDChildrenParser,
 } from "./MPD";
 
@@ -37,29 +38,34 @@ export function generateRootChildrenParser(
   linearMemory : WebAssembly.Memory,
   parsersStack : ParsersStack,
   fullMpd : ArrayBuffer
-)  : (nodeId : number) => void {
-  return function onRootChildren(nodeId : number) {
+)  : (nodeId : number, attrPtr : number, attrLen : number) => void {
+  return function onRootChildren(
+    nodeId : number,
+    attrPtr : number,
+    attrLen : number
+  ) {
     switch (nodeId) {
       case TagName.MPD:
-        rootObj.mpd = { children: { baseURLs: [],
-                                    locations : [],
-                                    periods: [],
-                                    utcTimings: [] },
-                        attributes: {} };
-        const childrenParser = generateMPDChildrenParser(rootObj.mpd.children,
+        const mpdChildren : IMPDChildren = { baseURLs: [],
+                                             locations : [],
+                                             periods: [],
+                                             utcTimings: [] };
+        const childrenParser = generateMPDChildrenParser(mpdChildren,
                                                          linearMemory,
                                                          parsersStack,
                                                          fullMpd);
-        const attributeParser = generateMPDAttrParser(rootObj.mpd.children,
-                                                      rootObj.mpd.attributes,
-                                                      linearMemory);
-        parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
+        const mpdAttrs = decodeMPDAttributes(mpdChildren,
+                                             linearMemory,
+                                             attrPtr,
+                                             attrLen);
+        rootObj.mpd = { children: mpdChildren, attributes: mpdAttrs };
+        parsersStack.pushParser(nodeId, childrenParser);
         break;
 
       default:
         // Allows to make sure we're not mistakenly closing a re-opened
         // tag.
-        parsersStack.pushParsers(nodeId, noop, noop);
+        parsersStack.pushParser(nodeId, noop);
         break;
     }
   };

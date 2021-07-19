@@ -14,49 +14,62 @@
  * limitations under the License.
  */
 
-import { base64ToBytes } from "../../../../../../utils/base64";
+// import { base64ToBytes } from "../../../../../../utils/base64";
 import { hexToBytes } from "../../../../../../utils/string_parsing";
 import {
   IContentProtectionIntermediateRepresentation,
 } from "../../../node_parser_types";
-import { IAttributeParser } from "../parsers_stack";
 import { AttributeName } from "../types";
-import { parseString } from "../utils";
+import { readEncodedString } from "../utils";
 
-/**
- * @param {Object} cpAttrs
- * @param {WebAssembly.Memory} linearMemory
- * @returns {Function}
- */
-export function generateContentProtectionAttrParser(
-  cp : IContentProtectionIntermediateRepresentation,
-  linearMemory : WebAssembly.Memory
-)  : IAttributeParser {
-  const cpAttrs = cp.attributes;
-  const cpChildren = cp.children;
-  const textDecoder = new TextDecoder();
-  return function onContentProtectionAttribute(
-    attr : number,
-    ptr : number,
-    len : number
-  ) {
-    switch (attr) {
-      case AttributeName.SchemeIdUri:
-        cpAttrs.schemeIdUri = parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
-      case AttributeName.ContentProtectionValue:
-        cpAttrs.value = parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
-      case AttributeName.ContentProtectionKeyId:
-        const kid = parseString(textDecoder, linearMemory.buffer, ptr, len);
-        cpAttrs.keyId = hexToBytes(kid.replace(/-/g, ""));
-        break;
-      case AttributeName.ContentProtectionCencPSSH:
-        try {
-          const b64 = parseString(textDecoder, linearMemory.buffer, ptr, len);
-          cpChildren.cencPssh.push(base64ToBytes(b64));
-        } catch (_) { /* TODO log error? register as warning? */ }
-        break;
-    }
+export function decodeContentProtection(
+  linearMemory : WebAssembly.Memory,
+  ptr : number,
+  len : number
+)  : IContentProtectionIntermediateRepresentation {
+  const contentProtection : IContentProtectionIntermediateRepresentation = {
+    attributes: {},
+    children: { cencPssh: [] },
   };
+  const textDecoder = new TextDecoder();
+  const dv = new DataView(linearMemory.buffer);
+
+  let offset = ptr;
+  const max = ptr + len;
+  while (offset < max) {
+    const attr = dv.getUint8(offset);
+    offset += 1;
+    switch (attr) {
+      case AttributeName.SchemeIdUri: {
+        const [schemeIdUri, newOffset] = readEncodedString(textDecoder, dv, offset);
+        contentProtection.attributes.schemeIdUri = schemeIdUri;
+        offset = newOffset;
+        break ;
+      }
+      case AttributeName.ContentProtectionValue: {
+        const [val, newOffset] = readEncodedString(textDecoder, dv, offset);
+        contentProtection.attributes.value = val;
+        offset = newOffset;
+        break ;
+      }
+      case AttributeName.ContentProtectionKeyId: {
+        const [kid, newOffset] = readEncodedString(textDecoder, dv, offset);
+        contentProtection.attributes.keyId = hexToBytes(kid.replace(/-/g, ""));
+        offset = newOffset;
+        break ;
+      }
+      // case AttributeName.ContentProtectionCencPSSH: {
+      //   const [b64, newOffset] = readEncodedString(textDecoder, dv, offset);
+      //   offset = newOffset;
+      //   try {
+      //     contentProtection.children.cencPssh.push(base64ToBytes(b64));
+      //   } catch (_) { /* TODO log error? register as warning? */ }
+
+      //   break ;
+      // }
+
+      default: throw new Error("Unexpected ContentProtection attribute.");
+    }
+  }
+  return contentProtection;
 }

@@ -18,10 +18,9 @@ import noop from "../../../../../../utils/noop";
 import {
   IAdaptationSetAttributes,
   IAdaptationSetChildren,
-  ISegmentListIntermediateRepresentation,
+  // ISegmentListIntermediateRepresentation,
 } from "../../../node_parser_types";
 import ParsersStack, {
-  IAttributeParser,
   IChildrenParser,
 } from "../parsers_stack";
 import {
@@ -30,19 +29,19 @@ import {
 } from "../types";
 import {
   parseFloatOrBool,
-  parseString,
+  readEncodedString,
 } from "../utils";
-import { generateBaseUrlAttrParser } from "./BaseURL";
-import { generateContentComponentAttrParser } from "./ContentComponent";
-import { generateContentProtectionAttrParser } from "./ContentProtection";
-import {
-  generateRepresentationAttrParser,
-  generateRepresentationChildrenParser,
-} from "./Representation";
-import { generateSchemeAttrParser } from "./Scheme";
-import { generateSegmentBaseAttrParser } from "./SegmentBase";
-import { generateSegmentListChildrenParser } from "./SegmentList";
-import { generateSegmentTemplateAttrParser } from "./SegmentTemplate";
+import { decodeBaseUrl } from "./BaseURL";
+import { decodeContentComponentAttributes } from "./ContentComponent";
+import { decodeContentProtection } from "./ContentProtection";
+// import {
+//   generateRepresentationAttrParser,
+//   generateRepresentationChildrenParser,
+// } from "./Representation";
+import { decodeScheme } from "./Scheme";
+// import { generateSegmentBaseAttrParser } from "./SegmentBase";
+// import { generateSegmentListChildrenParser } from "./SegmentList";
+// import { generateSegmentTemplateAttrParser } from "./SegmentTemplate";
 
 /**
  * Generate a "children parser" once inside a `AdaptationSet` node.
@@ -56,274 +55,312 @@ export function generateAdaptationSetChildrenParser(
   linearMemory : WebAssembly.Memory,
   parsersStack : ParsersStack
 )  : IChildrenParser {
-  return function onRootChildren(nodeId : number) {
+  return function onRootChildren(
+    nodeId : number,
+    attrPtr : number,
+    attrLen : number
+  ) {
     switch (nodeId) {
 
       case TagName.Accessibility: {
-        const accessibility = {};
+        const accessibility = decodeScheme(linearMemory, attrPtr, attrLen);
         if (adaptationSetChildren.accessibilities === undefined) {
           adaptationSetChildren.accessibilities = [];
         }
         adaptationSetChildren.accessibilities.push(accessibility);
-        const schemeAttrParser = generateSchemeAttrParser(accessibility,
-                                                          linearMemory);
-        parsersStack.pushParsers(nodeId, noop, schemeAttrParser);
+        parsersStack.pushParser(nodeId, noop); // Accessibility have no sub-element
         break;
       }
 
       case TagName.BaseURL: {
-        const baseUrl = { value: "", attributes: {} };
+        const baseUrl = decodeBaseUrl(linearMemory, attrPtr, attrLen);
         adaptationSetChildren.baseURLs.push(baseUrl);
-        const attributeParser = generateBaseUrlAttrParser(baseUrl, linearMemory);
-        parsersStack.pushParsers(nodeId, noop, attributeParser);
+        parsersStack.pushParser(nodeId, noop); // BaseURL have no sub-element
         break;
       }
 
       case TagName.ContentComponent: {
-        const contentComponent = {};
+        const contentComponent = decodeContentComponentAttributes(linearMemory,
+                                                                  attrPtr,
+                                                                  attrLen);
         adaptationSetChildren.contentComponent = contentComponent;
-        parsersStack.pushParsers(nodeId,
-                                 noop,
-                                 generateContentComponentAttrParser(contentComponent,
-                                                                    linearMemory));
+        parsersStack.pushParser(nodeId, noop);
         break;
       }
 
       case TagName.ContentProtection: {
-        const contentProtection = { children: { cencPssh: [] },
-                                    attributes: {} };
+        const contentProtection = decodeContentProtection(linearMemory,
+                                                          attrPtr,
+                                                          attrLen);
         if (adaptationSetChildren.contentProtections === undefined) {
           adaptationSetChildren.contentProtections = [];
         }
         adaptationSetChildren.contentProtections.push(contentProtection);
-        const contentProtAttrParser =
-          generateContentProtectionAttrParser(contentProtection, linearMemory);
-        parsersStack.pushParsers(nodeId, noop, contentProtAttrParser);
+        parsersStack.pushParser(nodeId, noop);
         break;
       }
 
       case TagName.EssentialProperty: {
-        const essentialProperty = {};
+        const essentialProperty = decodeScheme(linearMemory, attrPtr, attrLen);
         if (adaptationSetChildren.essentialProperties === undefined) {
           adaptationSetChildren.essentialProperties = [];
         }
         adaptationSetChildren.essentialProperties.push(essentialProperty);
-
-        const childrenParser = noop; // EssentialProperty have no sub-element
-        const attributeParser = generateSchemeAttrParser(essentialProperty,
-                                                         linearMemory);
-        parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
+        parsersStack.pushParser(nodeId, noop); // SupplementalProperty have no sub-element
         break;
       }
 
-      case TagName.InbandEventStream: {
-        const inbandEvent = {};
-        if (adaptationSetChildren.inbandEventStreams === undefined) {
-          adaptationSetChildren.inbandEventStreams = [];
-        }
-        adaptationSetChildren.inbandEventStreams.push(inbandEvent);
+//       case TagName.InbandEventStream: {
+//         const inbandEvent = {};
+//         if (adaptationSetChildren.inbandEventStreams === undefined) {
+//           adaptationSetChildren.inbandEventStreams = [];
+//         }
+//         adaptationSetChildren.inbandEventStreams.push(inbandEvent);
 
-        const childrenParser = noop; // InbandEventStream have no sub-element
-        const attributeParser = generateSchemeAttrParser(inbandEvent,
-                                                         linearMemory);
-        parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
-        break;
-      }
+//         const childrenParser = noop; // InbandEventStream have no sub-element
+//         const attributeParser = generateSchemeAttrParser(inbandEvent,
+//                                                          linearMemory);
+//         parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
+//         break;
+//       }
 
-      case TagName.Representation: {
-        const representationObj = { children: { baseURLs: [] },
-                                    attributes: {} };
-        adaptationSetChildren.representations.push(representationObj);
-        const childrenParser =
-          generateRepresentationChildrenParser(representationObj.children,
-                                               linearMemory,
-                                               parsersStack);
-        const attributeParser =
-          generateRepresentationAttrParser(representationObj.attributes, linearMemory);
-        parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
-        break;
-      }
+//       case TagName.Representation: {
+//         const representationObj = { children: { baseURLs: [] },
+//                                     attributes: {} };
+//         adaptationSetChildren.representations.push(representationObj);
+//         const childrenParser =
+//           generateRepresentationChildrenParser(representationObj.children,
+//                                                linearMemory,
+//                                                parsersStack);
+//         const attributeParser =
+//           generateRepresentationAttrParser(representationObj.attributes, linearMemory);
+//         parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
+//         break;
+//       }
 
       case TagName.Role: {
-        const role = {};
+        const role = decodeScheme(linearMemory, attrPtr, attrLen);
         if (adaptationSetChildren.roles === undefined) {
           adaptationSetChildren.roles = [];
         }
         adaptationSetChildren.roles.push(role);
-        const attributeParser = generateSchemeAttrParser(role,
-                                                         linearMemory);
-        parsersStack.pushParsers(nodeId, noop, attributeParser);
+        parsersStack.pushParser(nodeId, noop); // Role have no sub-element
         break;
       }
 
       case TagName.SupplementalProperty: {
-        const supplementalProperty = {};
+        const supplementalProperty = decodeScheme(linearMemory, attrPtr, attrLen);
         if (adaptationSetChildren.supplementalProperties === undefined) {
           adaptationSetChildren.supplementalProperties = [];
         }
         adaptationSetChildren.supplementalProperties.push(supplementalProperty);
-        const attributeParser = generateSchemeAttrParser(supplementalProperty,
-                                                         linearMemory);
-        parsersStack.pushParsers(nodeId, noop, attributeParser);
+        parsersStack.pushParser(nodeId, noop); // SupplementalProperty have no sub-element
         break;
       }
 
-      case TagName.SegmentBase: {
-        const segmentBaseObj = {};
-        adaptationSetChildren.segmentBase = segmentBaseObj;
-        const attributeParser = generateSegmentBaseAttrParser(segmentBaseObj,
-                                                              linearMemory);
-        parsersStack.pushParsers(nodeId, noop, attributeParser);
-        break;
-      }
+//       case TagName.SegmentBase: {
+//         const segmentBaseObj = {};
+//         adaptationSetChildren.segmentBase = segmentBaseObj;
+//         const attributeParser = generateSegmentBaseAttrParser(segmentBaseObj,
+//                                                               linearMemory);
+//         parsersStack.pushParsers(nodeId, noop, attributeParser);
+//         break;
+//       }
 
-      case TagName.SegmentList: {
-        const segmentListObj : ISegmentListIntermediateRepresentation =
-          { list: [] };
-        adaptationSetChildren.segmentList = segmentListObj;
-        const childrenParser = generateSegmentListChildrenParser(segmentListObj,
-                                                                 linearMemory,
-                                                                 parsersStack);
+//       case TagName.SegmentList: {
+//         const segmentListObj : ISegmentListIntermediateRepresentation =
+//           { list: [] };
+//         adaptationSetChildren.segmentList = segmentListObj;
+//         const childrenParser = generateSegmentListChildrenParser(segmentListObj,
+//                                                                  linearMemory,
+//                                                                  parsersStack);
 
-        // Re-use SegmentBase attribute parse as we should have the same attributes
-        const attributeParser = generateSegmentBaseAttrParser(segmentListObj,
-                                                              linearMemory);
-        parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
-        break;
-      }
+//         // Re-use SegmentBase attribute parse as we should have the same attributes
+//         const attributeParser = generateSegmentBaseAttrParser(segmentListObj,
+//                                                               linearMemory);
+//         parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
+//         break;
+//       }
 
-      case TagName.SegmentTemplate: {
-        const stObj = {};
-        adaptationSetChildren.segmentTemplate = stObj;
-        parsersStack.pushParsers(nodeId,
-                                 noop, // SegmentTimeline as treated like an attribute
-                                 generateSegmentTemplateAttrParser(stObj, linearMemory));
-        break;
-      }
+//       case TagName.SegmentTemplate: {
+//         const stObj = {};
+//         adaptationSetChildren.segmentTemplate = stObj;
+//         parsersStack.pushParsers(nodeId,
+//                                  noop, // SegmentTimeline as treated like an attribute
+//                       generateSegmentTemplateAttrParser(stObj, linearMemory));
+//         break;
+//       }
 
       default:
         // Allows to make sure we're not mistakenly closing a re-opened
         // tag.
-        parsersStack.pushParsers(nodeId, noop, noop);
+        parsersStack.pushParser(nodeId, noop);
         break;
 
     }
   };
 }
 
-/**
- * @param {Object} adaptationAttrs
- * @param {WebAssembly.Memory} linearMemory
- * @returns {Function}
- */
-export function generateAdaptationSetAttrParser(
-  adaptationAttrs : IAdaptationSetAttributes,
-  linearMemory : WebAssembly.Memory
-)  : IAttributeParser {
+export function decodeAdaptationSetAttributes(
+  linearMemory : WebAssembly.Memory,
+  ptr : number,
+  len : number
+)  : IAdaptationSetAttributes {
+  const adaptationAttrs : IAdaptationSetAttributes = {};
   const textDecoder = new TextDecoder();
-  return function onAdaptationSetAttribute(attr : number, ptr : number, len : number) {
-    const dataView = new DataView(linearMemory.buffer);
+  const dv = new DataView(linearMemory.buffer);
+
+  let offset = ptr;
+  const max = ptr + len;
+  while (offset < max) {
+    const attr = dv.getUint8(offset);
+    offset += 1;
     switch (attr) {
-      case AttributeName.Id:
-        adaptationAttrs.id = parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
+      case AttributeName.Id: {
+        const [id, newOffset] = readEncodedString(textDecoder, dv, offset);
+        adaptationAttrs.id = id;
+        offset = newOffset;
+        break ;
+      }
       case AttributeName.Group:
-        adaptationAttrs.group = dataView.getFloat64(ptr, true);
+        adaptationAttrs.group = dv.getFloat64(ptr, true);
+        offset += 8;
         break;
-      case AttributeName.Language:
-        adaptationAttrs.language =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
-      case AttributeName.ContentType:
-        adaptationAttrs.contentType =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
-      case AttributeName.Par:
-        adaptationAttrs.par = parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
+      case AttributeName.Language: {
+        const [language, newOffset] = readEncodedString(textDecoder, dv, offset);
+        adaptationAttrs.language = language;
+        offset = newOffset;
+        break ;
+      }
+      case AttributeName.ContentType: {
+        const [contentType, newOffset] = readEncodedString(textDecoder, dv, offset);
+        adaptationAttrs.contentType = contentType;
+        offset = newOffset;
+        break ;
+      }
+      case AttributeName.Par: {
+        const [par, newOffset] = readEncodedString(textDecoder, dv, offset);
+        adaptationAttrs.par = par;
+        offset = newOffset;
+        break ;
+      }
       case AttributeName.MinBandwidth:
-        adaptationAttrs.minBitrate = dataView.getFloat64(ptr, true);
+        adaptationAttrs.minBitrate = dv.getFloat64(ptr, true);
+        offset += 8;
         break;
       case AttributeName.MaxBandwidth:
-        adaptationAttrs.maxBitrate = dataView.getFloat64(ptr, true);
+        adaptationAttrs.maxBitrate = dv.getFloat64(ptr, true);
+        offset += 8;
         break;
       case AttributeName.MinWidth:
-        adaptationAttrs.minWidth = dataView.getFloat64(ptr, true);
+        adaptationAttrs.minWidth = dv.getFloat64(ptr, true);
+        offset += 8;
         break;
       case AttributeName.MaxWidth:
-        adaptationAttrs.maxWidth = dataView.getFloat64(ptr, true);
+        adaptationAttrs.maxWidth = dv.getFloat64(ptr, true);
+        offset += 8;
         break;
       case AttributeName.MinHeight:
-        adaptationAttrs.minHeight = dataView.getFloat64(ptr, true);
+        adaptationAttrs.minHeight = dv.getFloat64(ptr, true);
+        offset += 8;
         break;
       case AttributeName.MaxHeight:
-        adaptationAttrs.maxHeight = dataView.getFloat64(ptr, true);
+        adaptationAttrs.maxHeight = dv.getFloat64(ptr, true);
+        offset += 8;
         break;
-      case AttributeName.MinFrameRate:
-        adaptationAttrs.minFrameRate =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
-      case AttributeName.MaxFrameRate:
-        adaptationAttrs.maxFrameRate =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
+      case AttributeName.MinFrameRate: {
+        const [minFrameRate, newOffset] = readEncodedString(textDecoder, dv, offset);
+        adaptationAttrs.minFrameRate = minFrameRate;
+        offset = newOffset;
+        break ;
+      }
+      case AttributeName.MaxFrameRate: {
+        const [maxFrameRate, newOffset] = readEncodedString(textDecoder, dv, offset);
+        adaptationAttrs.maxFrameRate = maxFrameRate;
+        offset = newOffset;
+        break ;
+      }
       case AttributeName.SelectionPriority:
-        adaptationAttrs.selectionPriority = dataView.getFloat64(ptr, true);
+        adaptationAttrs.selectionPriority = dv.getFloat64(ptr, true);
+        offset += 8;
         break;
       case AttributeName.SegmentAlignment:
         adaptationAttrs.segmentAlignment =
-          parseFloatOrBool(dataView.getFloat64(ptr, true));
+          parseFloatOrBool(dv.getFloat64(ptr, true));
+        offset += 8;
         break;
       case AttributeName.SubsegmentAlignment:
         adaptationAttrs.subsegmentAlignment =
-          parseFloatOrBool(dataView.getFloat64(ptr, true));
+          parseFloatOrBool(dv.getFloat64(ptr, true));
+        offset += 8;
         break;
       case AttributeName.BitstreamSwitching:
-        adaptationAttrs.bitstreamSwitching = dataView.getFloat64(ptr, true) !== 0;
+        adaptationAttrs.bitstreamSwitching = dv.getFloat64(ptr, true) !== 0;
+        offset += 8;
         break;
-      case AttributeName.AudioSamplingRate:
-        adaptationAttrs.audioSamplingRate =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
-      case AttributeName.Codecs:
-        adaptationAttrs.codecs =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
-      case AttributeName.Profiles:
-        adaptationAttrs.profiles =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
-      case AttributeName.SegmentProfiles:
-        adaptationAttrs.segmentProfiles =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
-      case AttributeName.MimeType:
-        adaptationAttrs.mimeType =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
+      case AttributeName.AudioSamplingRate: {
+        const [audioSamplingRate, newOffset] = readEncodedString(textDecoder, dv, offset);
+        adaptationAttrs.audioSamplingRate = audioSamplingRate;
+        offset = newOffset;
+        break ;
+      }
+      case AttributeName.Codecs: {
+        const [codecs, newOffset] = readEncodedString(textDecoder, dv, offset);
+        adaptationAttrs.codecs = codecs;
+        offset = newOffset;
+        break ;
+      }
+      case AttributeName.Profiles: {
+        const [profiles, newOffset] = readEncodedString(textDecoder, dv, offset);
+        adaptationAttrs.profiles = profiles;
+        offset = newOffset;
+        break ;
+      }
+      case AttributeName.SegmentProfiles: {
+        const [segmentProfiles, newOffset] = readEncodedString(textDecoder, dv, offset);
+        adaptationAttrs.segmentProfiles = segmentProfiles;
+        offset = newOffset;
+        break ;
+      }
+      case AttributeName.MimeType: {
+        const [mimeType, newOffset] = readEncodedString(textDecoder, dv, offset);
+        adaptationAttrs.mimeType = mimeType;
+        offset = newOffset;
+        break ;
+      }
       case AttributeName.CodingDependency:
-        adaptationAttrs.codingDependency = dataView.getFloat64(ptr, true) !== 0;
+        adaptationAttrs.codingDependency = dv.getFloat64(ptr, true) !== 0;
+        offset += 8;
         break;
-      case AttributeName.FrameRate:
-        adaptationAttrs.frameRate =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
+      case AttributeName.FrameRate: {
+        const [frameRate, newOffset] = readEncodedString(textDecoder, dv, offset);
+        adaptationAttrs.frameRate = frameRate;
+        offset = newOffset;
+        break ;
+      }
       case AttributeName.Height:
-        adaptationAttrs.height = dataView.getFloat64(ptr, true);
+        adaptationAttrs.height = dv.getFloat64(ptr, true);
+        offset += 8;
         break;
       case AttributeName.Width:
-        adaptationAttrs.width = dataView.getFloat64(ptr, true);
+        adaptationAttrs.width = dv.getFloat64(ptr, true);
+        offset += 8;
         break;
       case AttributeName.MaxPlayoutRate:
-        adaptationAttrs.maxPlayoutRate = dataView.getFloat64(ptr, true);
+        adaptationAttrs.maxPlayoutRate = dv.getFloat64(ptr, true);
+        offset += 8;
         break;
       case AttributeName.MaxSAPPeriod:
-        adaptationAttrs.maximumSAPPeriod = dataView.getFloat64(ptr, true);
+        adaptationAttrs.maximumSAPPeriod = dv.getFloat64(ptr, true);
+        offset += 8;
         break;
 
-      // TODO
+      // XXX TODO? Check if WASM implement it
       // case AttributeName.StartsWithSap:
-      //   adaptationAttrs.startsWithSap = dataView.getFloat64(ptr, true);
+      //   adaptationAttrs.startsWithSap = dv.getFloat64(ptr, true);
+
+      default: throw new Error("Unexpected AdaptationSet attribute.");
     }
-  };
+  }
+  return adaptationAttrs;
 }

@@ -15,39 +15,51 @@
  */
 
 import { IContentComponentAttributes } from "../../../node_parser_types";
-import { IAttributeParser } from "../parsers_stack";
 import { AttributeName } from "../types";
-import { parseString } from "../utils";
+import { readEncodedString } from "../utils";
 
-/**
- * Generate an "attribute parser" once inside a `BaseURL` node.
- * @param {Object} baseUrlAttrs
- * @param {WebAssembly.Memory} linearMemory
- * @returns {Function}
- */
-export function generateContentComponentAttrParser(
-  ccAttrs : IContentComponentAttributes,
-  linearMemory : WebAssembly.Memory
-)  : IAttributeParser {
+export function decodeContentComponentAttributes(
+  linearMemory : WebAssembly.Memory,
+  ptr : number,
+  len : number
+)  : IContentComponentAttributes {
+  const contentComponentAttrs : IContentComponentAttributes = {};
   const textDecoder = new TextDecoder();
-  return function onMPDAttribute(attr : number, ptr : number, len : number) {
+  const dv = new DataView(linearMemory.buffer);
+
+  let offset = ptr;
+  const max = ptr + len;
+  while (offset < max) {
+    const attr = dv.getUint8(offset);
+    offset += 1;
     switch (attr) {
-      case AttributeName.Id:
-        ccAttrs.id = parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
+      case AttributeName.Id: {
+        const [id, newOffset] = readEncodedString(textDecoder, dv, offset);
+        contentComponentAttrs.id = id;
+        offset = newOffset;
+        break ;
+      }
+      case AttributeName.Language: {
+        const [language, newOffset] = readEncodedString(textDecoder, dv, offset);
+        contentComponentAttrs.language = language;
+        offset = newOffset;
+        break ;
+      }
+      case AttributeName.ContentType: {
+        const [contentType, newOffset] = readEncodedString(textDecoder, dv, offset);
+        contentComponentAttrs.contentType = contentType;
+        offset = newOffset;
+        break ;
+      }
+      case AttributeName.Par: {
+        const [par, newOffset] = readEncodedString(textDecoder, dv, offset);
+        contentComponentAttrs.par = par;
+        offset = newOffset;
+        break ;
+      }
 
-      case AttributeName.Language:
-        ccAttrs.language = parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
-
-      case AttributeName.ContentType:
-        ccAttrs.contentType = parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
-
-      case AttributeName.Par:
-        ccAttrs.par = parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
+      default: throw new Error("Unexpected ContentComponent attribute.");
     }
-  };
+  }
+  return contentComponentAttrs;
 }
-

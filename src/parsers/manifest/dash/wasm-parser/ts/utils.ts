@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+function readEncodedString(
+  textDecoder : TextDecoder,
+  dv : DataView,
+  baseOffset : number
+) : [string, number] {
+  let offset = baseOffset;
+  const strLen = dv.getUint32(offset, true);
+  offset += 4;
+  const arr = new Uint8Array(dv.buffer, offset, strLen);
+  offset += strLen;
+  return [textDecoder.decode(arr), offset];
+}
+
 /**
  * @param {TextDecoder} textDecoder
  * @param {ArrayBuffer} buffer
@@ -42,6 +55,7 @@ function parseFloatOrBool(val : number) : number | boolean {
 }
 
 export {
+  readEncodedString,
   parseString,
   parseFloatOrBool,
 };

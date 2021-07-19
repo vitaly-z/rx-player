@@ -18,22 +18,22 @@ import noop from "../../../../../../utils/noop";
 import {
   IMPDAttributes,
   IMPDChildren,
+  IPeriodChildren,
 } from "../../../node_parser_types";
 import ParsersStack, {
-  IAttributeParser,
   IChildrenParser,
 } from "../parsers_stack";
 import {
   AttributeName,
   TagName,
 } from "../types";
-import { parseString } from "../utils";
-import { generateBaseUrlAttrParser } from "./BaseURL";
+import { readEncodedString } from "../utils";
+import { decodeBaseUrl } from "./BaseURL";
 import {
-  generatePeriodAttrParser,
+  decodePeriodAttributes,
   generatePeriodChildrenParser,
 } from "./Period";
-import { generateSchemeAttrParser } from "./Scheme";
+import { decodeScheme } from "./Scheme";
 
 /**
  * Generate a "children parser" once inside an `MPD` node.
@@ -49,115 +49,139 @@ export function generateMPDChildrenParser(
   parsersStack : ParsersStack,
   fullMpd : ArrayBuffer
 )  : IChildrenParser {
-  return function onRootChildren(nodeId : number) {
+  return function onRootChildren(
+    nodeId : number,
+    attrPtr : number,
+    attrLen : number
+  ) {
     switch (nodeId) {
 
       case TagName.BaseURL: {
-        const baseUrl = { value: "", attributes: {} };
+        const baseUrl = decodeBaseUrl(linearMemory, attrPtr, attrLen);
         mpdChildren.baseURLs.push(baseUrl);
-
-        const childrenParser = noop; // BaseURL have no sub-element
-        const attributeParser = generateBaseUrlAttrParser(baseUrl, linearMemory);
-        parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
+        parsersStack.pushParser(nodeId, noop); // BaseURL have no sub-element
         break;
       }
 
       case TagName.Period: {
-        const period = { children: { adaptations: [],
-                                     baseURLs: [],
-                                     eventStreams: [] },
-                         attributes: {} };
-        mpdChildren.periods.push(period);
-        const childrenParser = generatePeriodChildrenParser(period.children,
+        const periodChildren : IPeriodChildren = { adaptations: [],
+                                                   baseURLs: [],
+                                                   eventStreams: [] };
+        const childrenParser = generatePeriodChildrenParser(periodChildren,
                                                             linearMemory,
                                                             parsersStack,
                                                             fullMpd);
-        const attributeParser = generatePeriodAttrParser(period.attributes, linearMemory);
-        parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
+        const periodAttrs = decodePeriodAttributes(linearMemory, attrPtr, attrLen);
+        mpdChildren.periods.push({ children: periodChildren, attributes: periodAttrs });
+        parsersStack.pushParser(nodeId, childrenParser);
         break;
       }
 
       case TagName.UtcTiming: {
-        const utcTiming = {};
+        const utcTiming = decodeScheme(linearMemory, attrPtr, attrLen);
         mpdChildren.utcTimings.push(utcTiming);
-
-        const childrenParser = noop; // UTCTiming have no sub-element
-        const attributeParser = generateSchemeAttrParser(utcTiming, linearMemory);
-        parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
+        parsersStack.pushParser(nodeId, noop); // UTCTiming have no sub-element
         break;
       }
 
       default:
         // Allows to make sure we're not mistakenly closing a re-opened
         // tag.
-        parsersStack.pushParsers(nodeId, noop, noop);
+        parsersStack.pushParser(nodeId, noop);
         break;
     }
   };
 }
 
-export function generateMPDAttrParser(
+export function decodeMPDAttributes(
   mpdChildren : IMPDChildren,
-  mpdAttrs : IMPDAttributes,
-  linearMemory : WebAssembly.Memory
-)  : IAttributeParser {
-  let dataView;
+  linearMemory : WebAssembly.Memory,
+  ptr : number,
+  len : number
+) : IMPDAttributes {
+  const mpdAttrs : IMPDAttributes = {};
   const textDecoder = new TextDecoder();
-  return function onMPDAttribute(attr : number, ptr : number, len : number) {
+  const dv = new DataView(linearMemory.buffer);
+
+  let offset = ptr;
+  const max = ptr + len;
+  while (offset < max) {
+    const attr = dv.getUint8(offset);
+    offset += 1;
     switch (attr) {
-      case AttributeName.Id:
-        mpdAttrs.id = parseString(textDecoder, linearMemory.buffer, ptr, len);
+      case AttributeName.Id: {
+        const [id, newOffset] = readEncodedString(textDecoder, dv, offset);
+        mpdAttrs.id = id;
+        offset = newOffset;
+        break ;
+      }
+      case AttributeName.Profiles: {
+        const [profiles, newOffset] = readEncodedString(textDecoder, dv, offset);
+        mpdAttrs.profiles = profiles;
+        offset = newOffset;
         break;
-      case AttributeName.Profiles:
-        mpdAttrs.profiles = parseString(textDecoder, linearMemory.buffer, ptr, len);
+      }
+      case AttributeName.Type: {
+        const [type, newOffset] = readEncodedString(textDecoder, dv, offset);
+        mpdAttrs.profiles = type;
+        offset = newOffset;
         break;
-      case AttributeName.Type:
-        mpdAttrs.type = parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
-      case AttributeName.AvailabilityStartTime:
-        const startTime = parseString(textDecoder, linearMemory.buffer, ptr, len);
+      }
+      case AttributeName.AvailabilityStartTime: {
+        const [startTime, newOffset] = readEncodedString(textDecoder, dv, offset);
         mpdAttrs.availabilityStartTime = new Date(startTime).getTime() / 1000;
+        offset = newOffset;
         break;
-      case AttributeName.AvailabilityEndTime:
-        const endTime = parseString(textDecoder, linearMemory.buffer, ptr, len);
-        mpdAttrs.availabilityEndTime = new Date(endTime).getTime() / 1000;
+      }
+      case AttributeName.AvailabilityEndTime: {
+        const [startTime, newOffset] = readEncodedString(textDecoder, dv, offset);
+        mpdAttrs.availabilityEndTime = new Date(startTime).getTime() / 1000;
+        offset = newOffset;
         break;
-      case AttributeName.PublishTime:
-        const publishTime = parseString(textDecoder, linearMemory.buffer, ptr, len);
+      }
+      case AttributeName.PublishTime: {
+        const [publishTime, newOffset] = readEncodedString(textDecoder, dv, offset);
         mpdAttrs.publishTime = new Date(publishTime).getTime() / 1000;
+        offset = newOffset;
         break;
+      }
       case AttributeName.MediaPresentationDuration:
-        dataView = new DataView(linearMemory.buffer);
-        mpdAttrs.duration = dataView.getFloat64(ptr, true);
+        mpdAttrs.duration = dv.getFloat64(offset, true);
+        offset += 8;
         break;
       case AttributeName.MinimumUpdatePeriod:
-        dataView = new DataView(linearMemory.buffer);
-        mpdAttrs.minimumUpdatePeriod = dataView.getFloat64(ptr, true);
+        mpdAttrs.minimumUpdatePeriod = dv.getFloat64(offset, true);
+        offset += 8;
         break;
       case AttributeName.MinBufferTime:
-        dataView = new DataView(linearMemory.buffer);
-        mpdAttrs.minBufferTime = dataView.getFloat64(ptr, true);
+        mpdAttrs.minBufferTime = dv.getFloat64(offset, true);
+        offset += 8;
         break;
       case AttributeName.TimeShiftBufferDepth:
-        dataView = new DataView(linearMemory.buffer);
-        mpdAttrs.timeShiftBufferDepth = dataView.getFloat64(ptr, true);
+        mpdAttrs.timeShiftBufferDepth = dv.getFloat64(offset, true);
+        offset += 8;
         break;
       case AttributeName.SuggestedPresentationDelay:
-        dataView = new DataView(linearMemory.buffer);
-        mpdAttrs.suggestedPresentationDelay = dataView.getFloat64(ptr, true);
+        mpdAttrs.suggestedPresentationDelay = dv.getFloat64(offset, true);
+        offset += 8;
         break;
       case AttributeName.MaxSegmentDuration:
-        dataView = new DataView(linearMemory.buffer);
-        mpdAttrs.maxSegmentDuration = dataView.getFloat64(ptr, true);
+        mpdAttrs.maxSegmentDuration = dv.getFloat64(offset, true);
+        offset += 8;
         break;
       case AttributeName.MaxSubsegmentDuration:
-        dataView = new DataView(linearMemory.buffer);
-        mpdAttrs.maxSubsegmentDuration = dataView.getFloat64(ptr, true);
+        mpdAttrs.maxSubsegmentDuration = dv.getFloat64(offset, true);
+        offset += 8;
         break;
-      case AttributeName.Location:
-        const location = parseString(textDecoder, linearMemory.buffer, ptr, len);
+      case AttributeName.Location: {
+        const [location, newOffset] = readEncodedString(textDecoder, dv, offset);
         mpdChildren.locations.push(location);
+        offset = newOffset;
         break;
+      }
+
+      default: throw new Error("Unexpected MPD attribute.");
     }
-  };
+  }
+  return mpdAttrs;
 }

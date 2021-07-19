@@ -1,4 +1,4 @@
-use crate::{ParsingError, onTagClose, onTagOpen};
+use crate::{ParsingError, onTagClose};
 
 #[derive(Clone, Copy)]
 #[repr(C)]
@@ -93,7 +93,7 @@ pub enum TagName {
 }
 
 #[derive(PartialEq, Clone, Copy)]
-#[repr(C)]
+#[repr(u8)]
 pub enum AttributeName {
     /// Describes the "id" attribute that can be found in many, many elements.
     ///
@@ -252,12 +252,12 @@ pub enum AttributeName {
 
 impl TagName {
     /// Signal a new tag opening to the application
-    pub fn report_tag_open(self) {
-        debug_assert!(self as u64 <= u8::MAX as u64);
+    // pub fn report_tag_open(self) {
+    //     debug_assert!(self as u64 <= u8::MAX as u64);
 
-        // UNSAFE: We're using FFI, but there should be no risk at all here
-        unsafe { onTagOpen(self) };
-    }
+    //     // UNSAFE: We're using FFI, but there should be no risk at all here
+    //     unsafe { onTagOpen(self) };
+    // }
 
     /// Signal that a previously-open tag closed to the application
     pub fn report_tag_close(self) {
@@ -268,84 +268,84 @@ impl TagName {
     }
 }
 
-use crate::reportable::ReportableAttribute;
-use crate::utils;
+// use crate::reportable::ReportableAttribute;
+// use crate::utils;
 
 impl AttributeName {
-    #[inline(always)]
-    pub fn report<T: ReportableAttribute>(self, val: T) {
-        val.report_as_attr(self)
-    }
+    // #[inline(always)]
+    // pub fn report<T: ReportableAttribute>(self, val: T) {
+    //     val.report_as_attr(self)
+    // }
 
-    pub fn try_report_as_string(
-        self,
-        attr : &quick_xml::events::attributes::Attribute
-    ) {
-        match attr.unescaped_value() {
-            Ok(val) => self.report(val),
-            Err(_) =>
-                ParsingError("Could not escape original value".to_owned())
-                    .report_err(),
-        }
-    }
+    // pub fn try_report_as_string(
+    //     self,
+    //     attr : &quick_xml::events::attributes::Attribute
+    // ) {
+    //     match attr.unescaped_value() {
+    //         Ok(val) => self.report(val),
+    //         Err(_) =>
+    //             ParsingError("Could not escape original value".to_owned())
+    //                 .report_err(),
+    //     }
+    // }
 
-    pub fn try_report_as_f64(
-        self,
-        attr : &quick_xml::events::attributes::Attribute
-    ) {
-        match utils::parse_f64(&attr.value) {
-            Ok(val) => self.report(val),
-            Err(error) => error.report_err(),
-        }
-    }
+    // pub fn try_report_as_f64(
+    //     self,
+    //     attr : &quick_xml::events::attributes::Attribute
+    // ) {
+    //     match utils::parse_f64(&attr.value) {
+    //         Ok(val) => self.report(val),
+    //         Err(error) => error.report_err(),
+    //     }
+    // }
 
-    pub fn try_report_as_iso_8601_duration(
-        self,
-        attr : &quick_xml::events::attributes::Attribute
-    ) {
-        match utils::parse_iso_8601_duration(&attr.value) {
-            Ok(val) => self.report(val),
-            Err(error) => error.report_err(),
-        }
-    }
+    // pub fn try_report_as_iso_8601_duration(
+    //     self,
+    //     attr : &quick_xml::events::attributes::Attribute
+    // ) {
+    //     match utils::parse_iso_8601_duration(&attr.value) {
+    //         Ok(val) => self.report(val),
+    //         Err(error) => error.report_err(),
+    //     }
+    // }
 
-    pub fn try_report_as_u64(
-        self,
-        attr : &quick_xml::events::attributes::Attribute
-    ) {
-        match utils::parse_u64(&attr.value) {
-            Ok(val) => self.report(val as f64),
-            Err(error) => error.report_err(),
-        }
-    }
+    // pub fn try_report_as_u64(
+    //     self,
+    //     attr : &quick_xml::events::attributes::Attribute
+    // ) {
+    //     match utils::parse_u64(&attr.value) {
+    //         Ok(val) => self.report(val as f64),
+    //         Err(error) => error.report_err(),
+    //     }
+    // }
 
-    pub fn try_report_as_u64_or_bool(
-        self,
-        attr : &quick_xml::events::attributes::Attribute
-    ) {
-        match utils::parse_u64_or_bool(&attr.value) {
-            Ok(val) => self.report(val),
-            Err(error) => error.report_err(),
-        }
-    }
+    // pub fn try_report_as_u64_or_bool(
+    //     self,
+    //     attr : &quick_xml::events::attributes::Attribute
+    // ) {
+    //     match utils::parse_u64_or_bool(&attr.value) {
+    //         Ok(val) => self.report(val),
+    //         Err(error) => error.report_err(),
+    //     }
+    // }
 
-    pub fn try_report_as_bool(
-        self,
-        attr : &quick_xml::events::attributes::Attribute
-    ) {
-        match utils::parse_bool(&attr.value) {
-            Ok(val) => self.report(val),
-            Err(error) => error.report_err(),
-        }
-    }
+    // pub fn try_report_as_bool(
+    //     self,
+    //     attr : &quick_xml::events::attributes::Attribute
+    // ) {
+    //     match utils::parse_bool(&attr.value) {
+    //         Ok(val) => self.report(val),
+    //         Err(error) => error.report_err(),
+    //     }
+    // }
 
-    pub fn try_report_as_range(
-        self,
-        attr : &quick_xml::events::attributes::Attribute
-    ) {
-        match utils::parse_byte_range(&attr.value) {
-            Ok(val) => self.report(val),
-            Err(error) => error.report_err(),
-        }
-    }
+    // pub fn try_report_as_range(
+    //     self,
+    //     attr : &quick_xml::events::attributes::Attribute
+    // ) {
+    //     match utils::parse_byte_range(&attr.value) {
+    //         Ok(val) => self.report(val),
+    //         Err(error) => error.report_err(),
+    //     }
+    // }
 }

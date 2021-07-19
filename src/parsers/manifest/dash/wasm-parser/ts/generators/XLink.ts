@@ -15,13 +15,16 @@
  */
 
 import noop from "../../../../../../utils/noop";
-import { IPeriodIntermediateRepresentation } from "../../../node_parser_types";
+import {
+  IPeriodChildren,
+  IPeriodIntermediateRepresentation,
+} from "../../../node_parser_types";
 import ParsersStack, {
   IChildrenParser,
 } from "../parsers_stack";
 import { TagName } from "../types";
 import {
-  generatePeriodAttrParser,
+  decodePeriodAttributes,
   generatePeriodChildrenParser,
 } from "./Period";
 
@@ -39,27 +42,30 @@ export function generateXLinkChildrenParser(
   parsersStack : ParsersStack,
   fullMpd : ArrayBuffer
 )  : IChildrenParser {
-  return function onRootChildren(nodeId : number) {
+  return function onRootChildren(
+    nodeId : number,
+    attrPtr : number,
+    attrLen : number
+  ) {
     switch (nodeId) {
       case TagName.Period: {
-        const period = { children: { adaptations: [],
-                                     baseURLs: [],
-                                     eventStreams: [] },
-                         attributes: {} };
-        xlinkObj.periods.push(period);
-        const childrenParser = generatePeriodChildrenParser(period.children,
+        const periodChildren : IPeriodChildren = { adaptations: [],
+                                                   baseURLs: [],
+                                                   eventStreams: [] };
+        const childrenParser = generatePeriodChildrenParser(periodChildren,
                                                             linearMemory,
                                                             parsersStack,
                                                             fullMpd);
-        const attributeParser = generatePeriodAttrParser(period.attributes, linearMemory);
-        parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
+        const periodAttrs = decodePeriodAttributes(linearMemory, attrPtr, attrLen);
+        xlinkObj.periods.push({ children: periodChildren, attributes: periodAttrs });
+        parsersStack.pushParser(nodeId, childrenParser);
         break;
       }
 
       default:
         // Allows to make sure we're not mistakenly closing a re-opened
         // tag.
-        parsersStack.pushParsers(nodeId, noop, noop);
+        parsersStack.pushParser(nodeId, noop);
         break;
     }
   };

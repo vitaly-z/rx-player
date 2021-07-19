@@ -16,16 +16,6 @@ use processor::MPDProcessor;
 use reader::MPDReader;
 
 extern "C" {
-    /// JS callback called each time a new known tag is encountered in the MPD.
-    ///
-    /// The `tag_name` corresponds to the value of the TagName enum (@see
-    /// events), casted as a single byte.
-    ///
-    /// # Arguments
-    ///
-    /// * `tag_name` - u8 describing the name of the tag encountered.
-    fn onTagOpen(tag_name : TagName);
-
     /// JS callback called each time a previously-opened known tag is encountered in
     /// the MPD now closed.
     ///
@@ -47,6 +37,8 @@ extern "C" {
     ///
     /// * `len` - Length of the data - starting at `ptr` - in bytes.
     fn onAttribute(attr_name : AttributeName, ptr : *const u8, len : usize);
+
+    fn onTagOpen2(tag_name : TagName, ptr : *const u8, len : usize);
 
     /// JS callback for other specific operations, for example logging and warnings.
     ///

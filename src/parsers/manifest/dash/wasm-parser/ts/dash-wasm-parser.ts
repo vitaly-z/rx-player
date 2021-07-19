@@ -17,7 +17,6 @@
 import PPromise from "pinkie";
 import log from "../../../../../log";
 import assertUnreachable from "../../../../../utils/assert_unreachable";
-import noop from "../../../../../utils/noop";
 import parseMpdIr, {
   IIrParserResponse,
   ILoadedXlinkData,
@@ -163,7 +162,7 @@ export default class DashWasmParser {
         tableBase: 0,
         memory: new WebAssembly.Memory({ initial: 10 }),
         table: new WebAssembly.Table({ initial: 1, element: "anyfunc" }),
-        onTagOpen,
+        onTagOpen2,
         onCustomEvent,
         onAttribute,
         readNext,
@@ -192,6 +191,11 @@ export default class DashWasmParser {
 
         // TODO better types?
         this._linearMemory = this._instance.instance.exports.memory as WebAssembly.Memory;
+        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+        /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+        (window as any).mem = this._linearMemory;
+        /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+        /* eslint-enable @typescript-eslint/no-unsafe-assignment */
 
         this.status = "initialized";
       }).catch((err : Error) => {
@@ -207,9 +211,8 @@ export default class DashWasmParser {
      * Callback called when a new Element has been encountered by the WASM parser.
      * @param {number} tag - Identify the tag encountered (@see TagName)
      */
-    function onTagOpen(tag : TagName) : void {
-      // Call the active "childrenParser"
-      return parsersStack.childrenParser(tag);
+    function onTagOpen2(tag : TagName, attrPtr : number, attrLen : number) {
+      return parsersStack.childrenParser(tag, attrPtr, attrLen);
     }
 
     /**
@@ -235,9 +238,9 @@ export default class DashWasmParser {
      * attribute's data in the WebAssembly's linear memory.
      * @param {number} len - Length of the attribute's value, in bytes.
      */
-    function onAttribute(attr : AttributeName, ptr : number, len : number) : void {
+    function onAttribute(_attr : AttributeName, _ptr : number, _len : number) : void {
       // Call the active "attributeParser"
-      return parsersStack.attributeParser(attr, ptr, len);
+      // return parsersStack.attributeParser(attr, ptr, len);
     }
 
     /**
@@ -341,12 +344,15 @@ export default class DashWasmParser {
                                                           linearMemory,
                                                           this._parsersStack,
                                                           mpd);
-    this._parsersStack.pushParsers(null, rootChildrenParser, noop);
+    this._parsersStack.pushParser(null, rootChildrenParser);
     this._warnings = [];
 
     try {
+      console.time("A");
       // TODO better type this
       (this._instance.instance.exports.parse as () => void)();
+      console.timeEnd("A");
+      debugger;
     } catch (err) {
       this._parsersStack.reset();
       this._warnings = [];
@@ -386,7 +392,7 @@ export default class DashWasmParser {
                                                     linearMemory,
                                                     this._parsersStack,
                                                     xlinkData);
-    this._parsersStack.pushParsers(null, xlinkParser, noop);
+    this._parsersStack.pushParser(null, xlinkParser);
     this._warnings = [];
 
     try {

@@ -15,30 +15,42 @@
  */
 
 import { IScheme } from "../../../node_parser_types";
-import { IAttributeParser } from "../parsers_stack";
 import { AttributeName } from "../types";
-import { parseString } from "../utils";
+import { readEncodedString } from "../utils";
 
-/**
- * Generate an "attribute parser" once inside a `BaseURL` node.
- * @param {Object} baseUrlAttrs
- * @param {WebAssembly.Memory} linearMemory
- * @returns {Function}
- */
-export function generateSchemeAttrParser(
-  schemeAttrs : IScheme,
-  linearMemory : WebAssembly.Memory
-)  : IAttributeParser {
+export function decodeScheme(
+  linearMemory : WebAssembly.Memory,
+  ptr : number,
+  len : number
+)  : IScheme {
+  const scheme : IScheme = {};
   const textDecoder = new TextDecoder();
-  return function onMPDAttribute(attr : number, ptr : number, len : number) {
-    switch (attr) {
-      case AttributeName.SchemeIdUri:
-        schemeAttrs.schemeIdUri = parseString(textDecoder, linearMemory.buffer, ptr, len);
-        break;
+  const dv = new DataView(linearMemory.buffer);
 
-      case AttributeName.SchemeValue:
-        schemeAttrs.value = parseString(textDecoder, linearMemory.buffer, ptr, len);
+  let offset = ptr;
+  const max = ptr + len;
+  while (offset < max) {
+    const attr = dv.getUint8(offset);
+    offset += 1;
+    switch (attr) {
+      case AttributeName.SchemeIdUri: {
+        const [schemeIdUri, newOffset] = readEncodedString(textDecoder, dv, offset);
+        scheme.schemeIdUri = schemeIdUri;
+        offset = newOffset;
+        break ;
+      }
+
+      case AttributeName.SchemeValue: {
+        const [value, newOffset] = readEncodedString(textDecoder, dv, offset);
+        scheme.value = value;
+        offset = newOffset;
         break;
+      }
+
+      default: {
+        throw new Error("Unexpected scheme-like attribute.");
+      }
     }
-  };
+  }
+  return scheme;
 }

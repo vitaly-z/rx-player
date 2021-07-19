@@ -15,32 +15,38 @@
  */
 
 import { IBaseUrlIntermediateRepresentation } from "../../../node_parser_types";
-import { IAttributeParser } from "../parsers_stack";
 import { AttributeName } from "../types";
-import { parseString } from "../utils";
+import { readEncodedString } from "../utils";
 
-/**
- * Generate an "attribute parser" once inside a `BaseURL` node.
- * @param {Object} baseUrlAttrs
- * @param {WebAssembly.Memory} linearMemory
- * @returns {Function}
- */
-export function generateBaseUrlAttrParser(
-  baseUrlAttrs : IBaseUrlIntermediateRepresentation,
-  linearMemory : WebAssembly.Memory
-)  : IAttributeParser {
+export function decodeBaseUrl(
+  linearMemory : WebAssembly.Memory,
+  ptr : number,
+  len : number
+)  : IBaseUrlIntermediateRepresentation {
+  const ret : IBaseUrlIntermediateRepresentation = { value: "", attributes: {} };
   const textDecoder = new TextDecoder();
-  let dataView;
-  return function onMPDAttribute(attr : number, ptr : number, len : number) {
+  const dv = new DataView(linearMemory.buffer);
+
+  let offset = ptr;
+  const max = ptr + len;
+  while (offset < max) {
+    const attr = dv.getUint8(offset);
+    offset += 1;
     switch (attr) {
       case AttributeName.Text:
-        baseUrlAttrs.value = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        const [val, newOffset] = readEncodedString(textDecoder, dv, offset);
+        ret.value = val;
+        offset = newOffset;
         break;
 
       case AttributeName.AvailabilityTimeOffset:
-        dataView = new DataView(linearMemory.buffer);
-        baseUrlAttrs.attributes.availabilityTimeOffset = dataView.getFloat64(ptr, true);
+        ret.attributes.availabilityTimeOffset = dv.getFloat64(ptr, true);
+        offset += 8;
         break;
+
+      default:
+        throw new Error("Unexpected BaseURL attribute.");
     }
-  };
+  }
+  return ret;
 }
