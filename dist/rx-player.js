@@ -28,6 +28,51 @@ function _assertThisInitialized(self) {
 
 /***/ }),
 
+/***/ 2137:
+/***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Z": function() { return /* binding */ _asyncToGenerator; }
+/* harmony export */ });
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
+
+/***/ }),
+
 /***/ 5991:
 /***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
 
@@ -9440,8 +9485,8 @@ var defer = __webpack_require__(9917);
 var of = __webpack_require__(2817);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
-// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 1 modules
-var types = __webpack_require__(4123);
+// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 3 modules
+var types = __webpack_require__(4081);
 // EXTERNAL MODULE: ./src/core/segment_buffers/implementations/utils/manual_time_ranges.ts
 var manual_time_ranges = __webpack_require__(4309);
 ;// CONCATENATED MODULE: ./src/core/segment_buffers/implementations/image/image_segment_buffer.ts
@@ -9739,8 +9784,8 @@ function onHeightWidthChange(element, interval) {
 }
 // EXTERNAL MODULE: ./src/config.ts
 var config = __webpack_require__(944);
-// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 1 modules
-var types = __webpack_require__(4123);
+// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 3 modules
+var types = __webpack_require__(4081);
 // EXTERNAL MODULE: ./src/core/segment_buffers/implementations/utils/manual_time_ranges.ts
 var manual_time_ranges = __webpack_require__(4309);
 // EXTERNAL MODULE: ./src/features/index.ts
@@ -10946,8 +10991,8 @@ function removeCue(track, cue) {
     log/* default.warn */.Z.warn("Compat: Could not remove cue from text track.");
   }
 }
-// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 1 modules
-var types = __webpack_require__(4123);
+// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 3 modules
+var types = __webpack_require__(4081);
 // EXTERNAL MODULE: ./src/core/segment_buffers/implementations/utils/manual_time_ranges.ts
 var manual_time_ranges = __webpack_require__(4309);
 // EXTERNAL MODULE: ./src/features/index.ts
@@ -11290,7 +11335,7 @@ var NativeTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
 
 /***/ }),
 
-/***/ 4123:
+/***/ 4081:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11309,7 +11354,13 @@ var log = __webpack_require__(3887);
 var are_same_content = __webpack_require__(5952);
 // EXTERNAL MODULE: ./src/utils/take_first_set.ts
 var take_first_set = __webpack_require__(5278);
-;// CONCATENATED MODULE: ./src/core/segment_buffers/segment_inventory.ts
+;// CONCATENATED MODULE: ./src/core/segment_buffers/inventory/inventory_buffered_history.ts
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -11325,6 +11376,107 @@ var take_first_set = __webpack_require__(5278);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Register a short-lived history of initial buffered information found linked
+ * to a segment.
+ *
+ * @class BufferedInfoHistory
+ */
+
+var BufferedInfoHistory = /*#__PURE__*/function () {
+  function BufferedInfoHistory(lifetime, maxHistoryLength) {
+    this._history = [];
+    this._lifetime = lifetime;
+    this._maxHistoryLength = maxHistoryLength;
+  }
+
+  var _proto = BufferedInfoHistory.prototype;
+
+  _proto.setBufferedStart = function setBufferedStart(context, expectedStart, bufferedStart) {
+    var now = performance.now();
+
+    this._history.push({
+      type: 0
+      /* InitialBufferedStart */
+      ,
+      date: now,
+      bufferedStart: bufferedStart,
+      expectedStart: expectedStart,
+      context: context
+    });
+
+    this._cleanHistory(now);
+  };
+
+  _proto.setBufferedEnd = function setBufferedEnd(context, expectedEnd, bufferedEnd) {
+    var now = performance.now();
+
+    this._history.push({
+      type: 1
+      /* InitialBufferedEnd */
+      ,
+      date: now,
+      bufferedEnd: bufferedEnd,
+      expectedEnd: expectedEnd,
+      context: context
+    });
+
+    this._cleanHistory(now);
+  };
+
+  _proto.getHistoryFor = function getHistoryFor(context) {
+    return this._history.filter(function (el) {
+      return (0,are_same_content/* default */.Z)(el.context, context);
+    });
+  };
+
+  _proto._cleanHistory = function _cleanHistory(now) {
+    var historyEarliestLimit = now - this._lifetime;
+    var firstKeptIndex = 0;
+
+    for (var _iterator = _createForOfIteratorHelperLoose(this._history), _step; !(_step = _iterator()).done;) {
+      var element = _step.value;
+
+      if (element.date < historyEarliestLimit) {
+        firstKeptIndex++;
+      } else {
+        break;
+      }
+    }
+
+    if (firstKeptIndex > 0) {
+      this._history.splice(firstKeptIndex);
+    }
+
+    if (this._history.length > this._maxHistoryLength) {
+      var toRemove = this._history.length - this._maxHistoryLength;
+
+      this._history.splice(toRemove);
+    }
+  };
+
+  return BufferedInfoHistory;
+}();
+
+
+;// CONCATENATED MODULE: ./src/core/segment_buffers/inventory/segment_inventory.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 
 
@@ -11345,6 +11497,7 @@ var MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE = config/* default.MAX_MANIFEST_B
 var SegmentInventory = /*#__PURE__*/function () {
   function SegmentInventory() {
     this._inventory = [];
+    this._bufferedInfoHistory = new BufferedInfoHistory(60000, 200);
   }
   /**
    * Reset the whole inventory.
@@ -11432,10 +11585,21 @@ var SegmentInventory = /*#__PURE__*/function () {
 
 
       if (rangeEnd - (0,take_first_set/* default */.Z)(thisSegment.bufferedStart, thisSegment.start) >= MINIMUM_SEGMENT_SIZE) {
+        var prevBufferedStart = thisSegment.bufferedStart;
         guessBufferedStartFromRangeStart(thisSegment, rangeStart, lastDeletedSegmentInfos, bufferType);
 
+        if (prevBufferedStart === undefined && thisSegment.bufferedStart !== undefined) {
+          this._bufferedInfoHistory.setBufferedStart(thisSegment.infos, thisSegment.start, thisSegment.bufferedStart);
+        }
+
         if (inventoryIndex === inventory.length - 1) {
+          var prevBufferedEnd = thisSegment.bufferedEnd;
           guessBufferedEndFromRangeEnd(thisSegment, rangeEnd, bufferType);
+
+          if (prevBufferedEnd === undefined && thisSegment.bufferedEnd !== undefined) {
+            this._bufferedInfoHistory.setBufferedEnd(thisSegment.infos, thisSegment.start, thisSegment.bufferedEnd);
+          }
+
           return;
         }
 
@@ -11451,10 +11615,19 @@ var SegmentInventory = /*#__PURE__*/function () {
 
           if (prevSegment.bufferedEnd === undefined) {
             prevSegment.bufferedEnd = thisSegment.precizeStart ? thisSegment.start : prevSegment.end;
+
+            this._bufferedInfoHistory.setBufferedEnd(prevSegment.infos, prevSegment.end, prevSegment.bufferedEnd);
+
             log/* default.debug */.Z.debug("SI: calculating buffered end of contiguous segment", bufferType, prevSegment.bufferedEnd, prevSegment.end);
           }
 
+          var _prevStart = thisSegment.bufferedStart;
           thisSegment.bufferedStart = prevSegment.bufferedEnd;
+
+          if (_prevStart === undefined && thisSegment.bufferedStart !== undefined) {
+            this._bufferedInfoHistory.setBufferedStart(thisSegment.infos, thisSegment.start, thisSegment.bufferedStart);
+          }
+
           thisSegment = inventory[++inventoryIndex];
 
           if (thisSegment !== undefined) {
@@ -11468,7 +11641,12 @@ var SegmentInventory = /*#__PURE__*/function () {
       var lastSegmentInRange = inventory[inventoryIndex - 1];
 
       if (lastSegmentInRange !== undefined) {
+        var _prevEnd = lastSegmentInRange.bufferedEnd;
         guessBufferedEndFromRangeEnd(lastSegmentInRange, rangeEnd, bufferType);
+
+        if (_prevEnd === undefined && lastSegmentInRange.bufferedEnd !== undefined) {
+          this._bufferedInfoHistory.setBufferedEnd(lastSegmentInRange.infos, lastSegmentInRange.end, lastSegmentInRange.bufferedEnd);
+        }
       }
     } // if we still have segments left, they are not affiliated to any range.
     // They might have been garbage collected, delete them from here.
@@ -11514,7 +11692,6 @@ var SegmentInventory = /*#__PURE__*/function () {
     var inventory = this._inventory;
     var newSegment = {
       partiallyPushed: true,
-      estimatedStart: start,
       start: start,
       end: end,
       precizeStart: false,
@@ -11904,6 +12081,10 @@ var SegmentInventory = /*#__PURE__*/function () {
     return this._inventory;
   };
 
+  _proto.getHistoryFor = function getHistoryFor(context) {
+    return this._bufferedInfoHistory.getHistoryFor(context);
+  };
+
   return SegmentInventory;
 }();
 /**
@@ -12130,6 +12311,24 @@ function prettyPrintInventory(inventory) {
   });
   return str;
 }
+;// CONCATENATED MODULE: ./src/core/segment_buffers/inventory/index.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* harmony default export */ var inventory = (SegmentInventory);
 ;// CONCATENATED MODULE: ./src/core/segment_buffers/implementations/types.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -12188,7 +12387,7 @@ function prettyPrintInventory(inventory) {
 var SegmentBuffer = /*#__PURE__*/function () {
   function SegmentBuffer() {
     // Use SegmentInventory by default for inventory purposes
-    this._segmentInventory = new SegmentInventory();
+    this._segmentInventory = new inventory();
   }
   /**
    * The maintained inventory can fall out of sync from garbage collection or
@@ -12231,6 +12430,10 @@ var SegmentBuffer = /*#__PURE__*/function () {
   _proto.getPendingOperations = function getPendingOperations() {
     // Return no pending operation by default (for synchronous SegmentBuffers)
     return [];
+  };
+
+  _proto.getHistoryFor = function getHistoryFor(context) {
+    return this._segmentInventory.getHistoryFor(context);
   };
 
   return SegmentBuffer;
@@ -24442,7 +24645,7 @@ function parseCueBlock(cueLines, timeOffset) {
 
 /***/ }),
 
-/***/ 1318:
+/***/ 4123:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -24998,7 +25201,7 @@ var is_non_empty_string = __webpack_require__(6923);
 // EXTERNAL MODULE: ./src/utils/object_assign.ts
 var object_assign = __webpack_require__(8026);
 // EXTERNAL MODULE: ./src/parsers/texttracks/ttml/get_parent_elements_by_tag_name.ts
-var get_parent_elements_by_tag_name = __webpack_require__(1318);
+var get_parent_elements_by_tag_name = __webpack_require__(4123);
 // EXTERNAL MODULE: ./src/parsers/texttracks/ttml/get_styling.ts
 var get_styling = __webpack_require__(3791);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
@@ -26502,7 +26705,7 @@ function getParameters(tt) {
   };
 }
 // EXTERNAL MODULE: ./src/parsers/texttracks/ttml/get_parent_elements_by_tag_name.ts
-var get_parent_elements_by_tag_name = __webpack_require__(1318);
+var get_parent_elements_by_tag_name = __webpack_require__(4123);
 // EXTERNAL MODULE: ./src/parsers/texttracks/ttml/get_styling.ts
 var get_styling = __webpack_require__(3791);
 ;// CONCATENATED MODULE: ./src/parsers/texttracks/ttml/nodes.ts
@@ -28119,7 +28322,7 @@ function findEndOfCueBlock(linified, startOfCueBlock) {
 
 /***/ }),
 
-/***/ 1732:
+/***/ 5877:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -28133,8 +28336,9 @@ __webpack_require__.d(__webpack_exports__, {
 var features = __webpack_require__(7874);
 // EXTERNAL MODULE: ./src/transports/utils/generate_manifest_loader.ts + 1 modules
 var generate_manifest_loader = __webpack_require__(8791);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
-var of = __webpack_require__(2817);
+// EXTERNAL MODULE: ./node_modules/pinkie/index.js
+var pinkie = __webpack_require__(8555);
+var pinkie_default = /*#__PURE__*/__webpack_require__.n(pinkie);
 // EXTERNAL MODULE: ./src/utils/request/index.ts + 1 modules
 var request = __webpack_require__(4597);
 // EXTERNAL MODULE: ./src/utils/take_first_set.ts
@@ -28161,27 +28365,33 @@ var take_first_set = __webpack_require__(5278);
 
 /**
  * Loads an image segment.
- * @param {Object} args
- * @returns {Observable}
+ * @param {string|null} url
+ * @param {Object} content
+ * @param {Object} cancelSignal
+ * @param {Object} callbacks
+ * @returns {Promise}
  */
 
-function imageLoader(_ref) {
-  var segment = _ref.segment,
-      url = _ref.url;
+function imageLoader(url, content, cancelSignal, callbacks) {
+  var segment = content.segment;
 
   if (segment.isInit || url === null) {
-    return (0,of.of)({
-      type: "data-created",
-      value: {
-        responseData: null
-      }
+    return pinkie_default().resolve({
+      resultType: "segment-created",
+      resultData: null
     });
   }
 
   return (0,request/* default */.ZP)({
     url: url,
     responseType: "arraybuffer",
-    sendProgressEvents: true
+    onProgress: callbacks.onProgress,
+    cancelSignal: cancelSignal
+  }).then(function (data) {
+    return {
+      resultType: "segment-loaded",
+      resultData: data
+    };
   });
 }
 /**
@@ -28190,24 +28400,20 @@ function imageLoader(_ref) {
  * @returns {Object}
  */
 
-function imageParser(_ref2) {
-  var response = _ref2.response,
-      content = _ref2.content;
+function imageParser(loadedSegment, content) {
   var segment = content.segment,
       period = content.period;
-  var data = response.data,
-      isChunked = response.isChunked;
+  var data = loadedSegment.data,
+      isChunked = loadedSegment.isChunked;
 
   if (content.segment.isInit) {
     // image init segment has no use
-    return (0,of.of)({
-      type: "parsed-init-segment",
-      value: {
-        initializationData: null,
-        protectionDataUpdate: false,
-        initTimescale: undefined
-      }
-    });
+    return {
+      segmentType: "init",
+      initializationData: null,
+      protectionDataUpdate: false,
+      initTimescale: undefined
+    };
   }
 
   if (isChunked) {
@@ -28217,56 +28423,39 @@ function imageParser(_ref2) {
   var chunkOffset = (0,take_first_set/* default */.Z)(segment.timestampOffset, 0); // TODO image Parsing should be more on the buffer side, no?
 
   if (data === null || features/* default.imageParser */.Z.imageParser === null) {
-    return (0,of.of)({
-      type: "parsed-segment",
-      value: {
-        chunkData: null,
-        chunkInfos: {
-          duration: segment.duration,
-          time: segment.time
-        },
-        chunkOffset: chunkOffset,
-        appendWindow: [period.start, period.end],
-        protectionDataUpdate: false
-      }
-    });
+    return {
+      segmentType: "media",
+      chunkData: null,
+      chunkInfos: {
+        duration: segment.duration,
+        time: segment.time
+      },
+      chunkOffset: chunkOffset,
+      protectionDataUpdate: false,
+      appendWindow: [period.start, period.end]
+    };
   }
 
   var bifObject = features/* default.imageParser */.Z.imageParser(new Uint8Array(data));
   var thumbsData = bifObject.thumbs;
-  return (0,of.of)({
-    type: "parsed-segment",
-    value: {
-      chunkData: {
-        data: thumbsData,
-        start: 0,
-        end: Number.MAX_VALUE,
-        timescale: 1,
-        type: "bif"
-      },
-      chunkInfos: {
-        time: 0,
-        duration: Number.MAX_VALUE,
-        timescale: bifObject.timescale
-      },
-      chunkOffset: chunkOffset,
-      appendWindow: [period.start, period.end],
-      protectionDataUpdate: false
-    }
-  });
+  return {
+    segmentType: "media",
+    chunkData: {
+      data: thumbsData,
+      start: 0,
+      end: Number.MAX_VALUE,
+      timescale: 1,
+      type: "bif"
+    },
+    chunkInfos: {
+      time: 0,
+      duration: Number.MAX_VALUE
+    },
+    chunkOffset: chunkOffset,
+    protectionDataUpdate: false,
+    appendWindow: [period.start, period.end]
+  };
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/from.js + 13 modules
-var from = __webpack_require__(1973);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
-var concat = __webpack_require__(6362);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/combineLatest.js + 2 modules
-var combineLatest = __webpack_require__(2334);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/mergeMap.js
-var mergeMap = __webpack_require__(3994);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/filter.js
-var filter = __webpack_require__(4975);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/map.js
-var map = __webpack_require__(9127);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
 // EXTERNAL MODULE: ./src/manifest/index.ts + 6 modules
@@ -28275,8 +28464,6 @@ var src_manifest = __webpack_require__(1989);
 var object_assign = __webpack_require__(8026);
 // EXTERNAL MODULE: ./src/utils/string_parsing.ts
 var string_parsing = __webpack_require__(3635);
-// EXTERNAL MODULE: ./src/transports/utils/return_parsed_manifest.ts
-var return_parsed_manifest = __webpack_require__(7445);
 ;// CONCATENATED MODULE: ./src/transports/dash/manifest_parser.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -28300,30 +28487,20 @@ var return_parsed_manifest = __webpack_require__(7445);
 
 
 
-
-
-/**
- * @param {Object} options
- * @returns {Function}
- */
-
 function generateManifestParser(options) {
   var aggressiveMode = options.aggressiveMode,
       referenceDateTime = options.referenceDateTime;
   var serverTimeOffset = options.serverSyncInfos !== undefined ? options.serverSyncInfos.serverTimestamp - options.serverSyncInfos.clientTime : undefined;
-  return function manifestParser(args) {
+  return function manifestParser(manifestData, parserOptions, onWarnings, cancelSignal, scheduleRequest) {
     var _a;
 
-    var response = args.response,
-        scheduleRequest = args.scheduleRequest,
-        loaderURL = args.url,
-        argClockOffset = args.externalClockOffset;
-    var url = (_a = response.url) !== null && _a !== void 0 ? _a : loaderURL;
-    var responseData = response.responseData;
+    var responseData = manifestData.responseData;
+    var argClockOffset = parserOptions.externalClockOffset;
+    var url = (_a = manifestData.url) !== null && _a !== void 0 ? _a : parserOptions.originalUrl;
     var optAggressiveMode = aggressiveMode === true;
     var externalClockOffset = serverTimeOffset !== null && serverTimeOffset !== void 0 ? serverTimeOffset : argClockOffset;
-    var unsafelyBaseOnPreviousManifest = args.unsafeMode ? args.previousManifest : null;
-    var parserOpts = {
+    var unsafelyBaseOnPreviousManifest = parserOptions.unsafeMode ? parserOptions.previousManifest : null;
+    var dashParserOpts = {
       aggressiveMode: optAggressiveMode,
       unsafelyBaseOnPreviousManifest: unsafelyBaseOnPreviousManifest,
       url: url,
@@ -28345,21 +28522,21 @@ function generateManifestParser(options) {
 
       if (parsers.wasm.status === "initialized") {
         log/* default.debug */.Z.debug("DASH: Running WASM MPD Parser.");
-        var parsed = parsers.wasm.runWasmParser(manifestAB, parserOpts);
+        var parsed = parsers.wasm.runWasmParser(manifestAB, dashParserOpts);
         return processMpdParserResponse(parsed);
       } else {
         log/* default.debug */.Z.debug("DASH: Awaiting WASM initialization before parsing the MPD.");
         var initProm = parsers.wasm.waitForInitialization()["catch"](function () {});
-        return (0,from/* from */.Dp)(initProm).pipe((0,mergeMap/* mergeMap */.z)(function () {
+        return initProm.then(function () {
           if (parsers.wasm === null || parsers.wasm.status !== "initialized") {
             log/* default.warn */.Z.warn("DASH: WASM MPD parser initialization failed. " + "Running JS parser instead");
             return runDefaultJsParser();
           }
 
           log/* default.debug */.Z.debug("DASH: Running WASM MPD Parser.");
-          var parsed = parsers.wasm.runWasmParser(manifestAB, parserOpts);
+          var parsed = parsers.wasm.runWasmParser(manifestAB, dashParserOpts);
           return processMpdParserResponse(parsed);
-        }));
+        });
       }
     }
     /**
@@ -28376,7 +28553,7 @@ function generateManifestParser(options) {
       }
 
       var manifestDoc = getManifestAsDocument(responseData);
-      var parsedManifest = parsers.js(manifestDoc, parserOpts);
+      var parsedManifest = parsers.js(manifestDoc, dashParserOpts);
       return processMpdParserResponse(parsedManifest);
     }
     /**
@@ -28389,33 +28566,37 @@ function generateManifestParser(options) {
 
     function processMpdParserResponse(parserResponse) {
       if (parserResponse.type === "done") {
-        var _parserResponse$value = parserResponse.value,
-            warnings = _parserResponse$value.warnings,
-            _parsed = _parserResponse$value.parsed;
-        var warningEvents = warnings.map(function (warning) {
-          return {
-            type: "warning",
-            value: warning
-          };
-        });
-        var manifest = new src_manifest/* default */.ZP(_parsed, options);
-        return (0,concat/* concat */.z)(of.of.apply(void 0, warningEvents), (0,return_parsed_manifest/* default */.Z)(manifest, url));
+        if (parserResponse.value.warnings.length > 0) {
+          onWarnings(parserResponse.value.warnings);
+        }
+
+        if (cancelSignal.isCancelled) {
+          return pinkie_default().reject(cancelSignal.cancellationError);
+        }
+
+        var manifest = new src_manifest/* default */.ZP(parserResponse.value.parsed, options);
+        return {
+          manifest: manifest,
+          url: url
+        };
       }
 
       var value = parserResponse.value;
-      var externalResources$ = value.urls.map(function (resourceUrl) {
+      var externalResources = value.urls.map(function (resourceUrl) {
         return scheduleRequest(function () {
-          return (0,request/* default */.ZP)({
+          var req = value.format === "string" ? (0,request/* default */.ZP)({
             url: resourceUrl,
-            responseType: value.format === "string" ? "text" : "arraybuffer"
-          }).pipe((0,filter/* filter */.h)(function (e) {
-            return e.type === "data-loaded";
-          }), (0,map/* map */.U)(function (e) {
-            return e.value;
-          }));
+            responseType: "text",
+            cancelSignal: cancelSignal
+          }) : (0,request/* default */.ZP)({
+            url: resourceUrl,
+            responseType: "arraybuffer",
+            cancelSignal: cancelSignal
+          });
+          return req;
         });
       });
-      return (0,combineLatest/* combineLatest */.a)(externalResources$).pipe((0,mergeMap/* mergeMap */.z)(function (loadedResources) {
+      return pinkie_default().all(externalResources).then(function (loadedResources) {
         if (value.format === "string") {
           var resources = loadedResources.map(function (resource) {
             if (typeof resource.responseData !== "string") {
@@ -28442,7 +28623,7 @@ function generateManifestParser(options) {
 
           return processMpdParserResponse(value["continue"](_resources));
         }
-      }));
+      });
     }
   };
 }
@@ -28510,46 +28691,10 @@ function doesXmlSeemsUtf8Encoded(xmlData) {
 
   return true;
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
-var Observable = __webpack_require__(1480);
 // EXTERNAL MODULE: ./src/errors/custom_loader_error.ts
 var custom_loader_error = __webpack_require__(7839);
-;// CONCATENATED MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-  try {
-    var info = gen[key](arg);
-    var value = info.value;
-  } catch (error) {
-    reject(error);
-    return;
-  }
-
-  if (info.done) {
-    resolve(value);
-  } else {
-    Promise.resolve(value).then(_next, _throw);
-  }
-}
-
-function _asyncToGenerator(fn) {
-  return function () {
-    var self = this,
-        args = arguments;
-    return new Promise(function (resolve, reject) {
-      var gen = fn.apply(self, args);
-
-      function _next(value) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-      }
-
-      function _throw(err) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-      }
-
-      _next(undefined);
-    });
-  };
-}
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(2137);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
 var regenerator = __webpack_require__(7757);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
@@ -28584,7 +28729,6 @@ var is_null_or_undefined = __webpack_require__(1946);
 
 
 
-
 var DEFAULT_REQUEST_TIMEOUT = config/* default.DEFAULT_REQUEST_TIMEOUT */.Z.DEFAULT_REQUEST_TIMEOUT;
 
 var _Headers = typeof Headers === "function" ? Headers : null;
@@ -28608,148 +28752,141 @@ function fetchRequest(options) {
     }
   }
 
-  return new Observable/* Observable */.y(function (obs) {
-    log/* default.debug */.Z.debug("Fetch: Called with URL", options.url);
-    var hasAborted = false;
-    var timeouted = false;
-    var isDone = false;
-    var sendingTime = performance.now();
-    var abortController = !(0,is_null_or_undefined/* default */.Z)(_AbortController) ? new _AbortController() : null;
-    /**
-     * Abort current fetchRequest by triggering AbortController signal.
-     * @returns {void}
-     */
+  log/* default.debug */.Z.debug("Fetch: Called with URL", options.url);
+  var cancellation = null;
+  var timeouted = false;
+  var sendingTime = performance.now();
+  var abortController = !(0,is_null_or_undefined/* default */.Z)(_AbortController) ? new _AbortController() : null;
+  /**
+   * Abort current fetchRequest by triggering AbortController signal.
+   * @returns {void}
+   */
 
-    function abortRequest() {
-      if (!isDone) {
-        if (!(0,is_null_or_undefined/* default */.Z)(abortController)) {
-          abortController.abort();
-          return;
-        }
-
-        log/* default.warn */.Z.warn("Fetch: AbortController API not available.");
-      }
+  function abortFetch() {
+    if ((0,is_null_or_undefined/* default */.Z)(abortController)) {
+      log/* default.warn */.Z.warn("Fetch: AbortController API not available.");
+      return;
     }
 
-    var requestTimeout = (0,is_null_or_undefined/* default */.Z)(options.timeout) ? DEFAULT_REQUEST_TIMEOUT : options.timeout;
-    var timeout = window.setTimeout(function () {
-      timeouted = true;
-      abortRequest();
-    }, requestTimeout);
-    fetch(options.url, {
-      headers: headers,
-      method: "GET",
-      signal: !(0,is_null_or_undefined/* default */.Z)(abortController) ? abortController.signal : undefined
-    }).then(function (response) {
-      if (!(0,is_null_or_undefined/* default */.Z)(timeout)) {
-        clearTimeout(timeout);
-      }
+    abortController.abort();
+  }
 
-      if (response.status >= 300) {
-        log/* default.warn */.Z.warn("Fetch: Request HTTP Error", response);
-        obs.error(new request_error/* default */.Z(response.url, response.status, error_codes/* NetworkErrorTypes.ERROR_HTTP_CODE */.br.ERROR_HTTP_CODE));
-        return undefined;
-      }
+  var requestTimeout = (0,is_null_or_undefined/* default */.Z)(options.timeout) ? DEFAULT_REQUEST_TIMEOUT : options.timeout;
+  var timeout = window.setTimeout(function () {
+    timeouted = true;
+    abortFetch();
+  }, requestTimeout);
+  var deregisterCancelLstnr = options.cancelSignal.register(function abortRequest(err) {
+    cancellation = err;
+    abortFetch();
+  });
+  return fetch(options.url, {
+    headers: headers,
+    method: "GET",
+    signal: !(0,is_null_or_undefined/* default */.Z)(abortController) ? abortController.signal : undefined
+  }).then(function (response) {
+    if (!(0,is_null_or_undefined/* default */.Z)(timeout)) {
+      clearTimeout(timeout);
+    }
 
-      if ((0,is_null_or_undefined/* default */.Z)(response.body)) {
-        obs.error(new request_error/* default */.Z(response.url, response.status, error_codes/* NetworkErrorTypes.PARSE_ERROR */.br.PARSE_ERROR));
-        return undefined;
-      }
+    if (response.status >= 300) {
+      log/* default.warn */.Z.warn("Fetch: Request HTTP Error", response);
+      throw new request_error/* default */.Z(response.url, response.status, error_codes/* NetworkErrorTypes.ERROR_HTTP_CODE */.br.ERROR_HTTP_CODE);
+    }
 
-      var contentLengthHeader = response.headers.get("Content-Length");
-      var contentLength = !(0,is_null_or_undefined/* default */.Z)(contentLengthHeader) && !isNaN(+contentLengthHeader) ? +contentLengthHeader : undefined;
-      var reader = response.body.getReader();
-      var size = 0;
-      return readBufferAndSendEvents();
+    if ((0,is_null_or_undefined/* default */.Z)(response.body)) {
+      throw new request_error/* default */.Z(response.url, response.status, error_codes/* NetworkErrorTypes.PARSE_ERROR */.br.PARSE_ERROR);
+    }
 
-      function readBufferAndSendEvents() {
-        return _readBufferAndSendEvents.apply(this, arguments);
-      }
+    var contentLengthHeader = response.headers.get("Content-Length");
+    var contentLength = !(0,is_null_or_undefined/* default */.Z)(contentLengthHeader) && !isNaN(+contentLengthHeader) ? +contentLengthHeader : undefined;
+    var reader = response.body.getReader();
+    var size = 0;
+    return readBufferAndSendEvents();
 
-      function _readBufferAndSendEvents() {
-        _readBufferAndSendEvents = _asyncToGenerator( /*#__PURE__*/regenerator_default().mark(function _callee() {
-          var data, currentTime, dataChunk, receivedTime, duration;
-          return regenerator_default().wrap(function _callee$(_context) {
-            while (1) {
-              switch (_context.prev = _context.next) {
-                case 0:
-                  _context.next = 2;
-                  return reader.read();
+    function readBufferAndSendEvents() {
+      return _readBufferAndSendEvents.apply(this, arguments);
+    }
 
-                case 2:
-                  data = _context.sent;
+    function _readBufferAndSendEvents() {
+      _readBufferAndSendEvents = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee() {
+        var data, currentTime, dataInfo, receivedTime, duration;
+        return regenerator_default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return reader.read();
 
-                  if (!(!data.done && !(0,is_null_or_undefined/* default */.Z)(data.value))) {
-                    _context.next = 11;
-                    break;
-                  }
+              case 2:
+                data = _context.sent;
 
-                  size += data.value.byteLength;
-                  currentTime = performance.now();
-                  dataChunk = {
-                    type: "data-chunk",
-                    value: {
-                      url: response.url,
-                      currentTime: currentTime,
-                      duration: currentTime - sendingTime,
-                      sendingTime: sendingTime,
-                      chunkSize: data.value.byteLength,
-                      chunk: data.value.buffer,
-                      size: size,
-                      totalSize: contentLength
-                    }
-                  };
-                  obs.next(dataChunk);
-                  return _context.abrupt("return", readBufferAndSendEvents());
+                if (!(!data.done && !(0,is_null_or_undefined/* default */.Z)(data.value))) {
+                  _context.next = 11;
+                  break;
+                }
 
-                case 11:
-                  if (data.done) {
-                    receivedTime = performance.now();
-                    duration = receivedTime - sendingTime;
-                    isDone = true;
-                    obs.next({
-                      type: "data-complete",
-                      value: {
-                        duration: duration,
-                        receivedTime: receivedTime,
-                        sendingTime: sendingTime,
-                        size: size,
-                        status: response.status,
-                        url: response.url
-                      }
-                    });
-                    obs.complete();
-                  }
+                size += data.value.byteLength;
+                currentTime = performance.now();
+                dataInfo = {
+                  url: response.url,
+                  currentTime: currentTime,
+                  duration: currentTime - sendingTime,
+                  sendingTime: sendingTime,
+                  chunkSize: data.value.byteLength,
+                  chunk: data.value.buffer,
+                  size: size,
+                  totalSize: contentLength
+                };
+                options.onData(dataInfo);
+                return _context.abrupt("return", readBufferAndSendEvents());
 
-                case 12:
-                case "end":
-                  return _context.stop();
-              }
+              case 11:
+                if (!data.done) {
+                  _context.next = 16;
+                  break;
+                }
+
+                deregisterCancelLstnr();
+                receivedTime = performance.now();
+                duration = receivedTime - sendingTime;
+                return _context.abrupt("return", {
+                  duration: duration,
+                  receivedTime: receivedTime,
+                  sendingTime: sendingTime,
+                  size: size,
+                  status: response.status,
+                  url: response.url
+                });
+
+              case 16:
+                return _context.abrupt("return", readBufferAndSendEvents());
+
+              case 17:
+              case "end":
+                return _context.stop();
             }
-          }, _callee);
-        }));
-        return _readBufferAndSendEvents.apply(this, arguments);
-      }
-    })["catch"](function (err) {
-      if (hasAborted) {
-        log/* default.debug */.Z.debug("Fetch: Request aborted.");
-        return;
-      }
+          }
+        }, _callee);
+      }));
+      return _readBufferAndSendEvents.apply(this, arguments);
+    }
+  })["catch"](function (err) {
+    if (cancellation !== null) {
+      throw cancellation;
+    }
 
-      if (timeouted) {
-        log/* default.warn */.Z.warn("Fetch: Request timeouted.");
-        obs.error(new request_error/* default */.Z(options.url, 0, error_codes/* NetworkErrorTypes.TIMEOUT */.br.TIMEOUT));
-        return;
-      }
+    deregisterCancelLstnr();
 
-      log/* default.warn */.Z.warn("Fetch: Request Error", err instanceof Error ? err.toString() : "");
-      obs.error(new request_error/* default */.Z(options.url, 0, error_codes/* NetworkErrorTypes.ERROR_EVENT */.br.ERROR_EVENT));
-      return;
-    });
-    return function () {
-      hasAborted = true;
-      abortRequest();
-    };
+    if (timeouted) {
+      log/* default.warn */.Z.warn("Fetch: Request timeouted.");
+      throw new request_error/* default */.Z(options.url, 0, error_codes/* NetworkErrorTypes.TIMEOUT */.br.TIMEOUT);
+    } else if (err instanceof request_error/* default */.Z) {
+      throw err;
+    }
+
+    log/* default.warn */.Z.warn("Fetch: Request Error", err instanceof Error ? err.toString() : "");
+    throw new request_error/* default */.Z(options.url, 0, error_codes/* NetworkErrorTypes.ERROR_EVENT */.br.ERROR_EVENT);
   });
 }
 /**
@@ -28757,11 +28894,9 @@ function fetchRequest(options) {
  * @return {boolean}
  */
 
-
 function fetchIsSupported() {
   return typeof window.fetch === "function" && !(0,is_null_or_undefined/* default */.Z)(_AbortController) && !(0,is_null_or_undefined/* default */.Z)(_Headers);
 }
-/* harmony default export */ var request_fetch = (fetchRequest);
 // EXTERNAL MODULE: ./src/utils/warn_once.ts
 var warn_once = __webpack_require__(8806);
 // EXTERNAL MODULE: ./src/transports/utils/byte_range.ts
@@ -28812,8 +28947,8 @@ function inferSegmentContainer(adaptationType, representation) {
 
   return undefined;
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/tap.js
-var tap = __webpack_require__(2006);
+// EXTERNAL MODULE: ./src/utils/task_canceller.ts
+var task_canceller = __webpack_require__(288);
 // EXTERNAL MODULE: ./src/transports/utils/check_isobmff_integrity.ts
 var check_isobmff_integrity = __webpack_require__(4460);
 ;// CONCATENATED MODULE: ./src/transports/dash/add_segment_integrity_checks_to_loader.ts
@@ -28835,13 +28970,70 @@ var check_isobmff_integrity = __webpack_require__(4460);
 
 
 
+/**
+ * Add multiple checks on the response given by the `segmentLoader` in argument.
+ * If the response appear to be corrupted, the returned Promise will reject with
+ * an error with an `INTEGRITY_ERROR` code.
+ * @param {Function} segmentLoader
+ * @returns {Function}
+ */
+
 function addSegmentIntegrityChecks(segmentLoader) {
-  return function (content) {
-    return segmentLoader(content).pipe((0,tap/* tap */.b)(function (res) {
-      if ((res.type === "data-loaded" || res.type === "data-chunk") && res.value.responseData !== null && typeof res.value.responseData !== "string" && inferSegmentContainer(content.adaptation.type, content.representation) === "mp4") {
-        (0,check_isobmff_integrity/* default */.Z)(new Uint8Array(res.value.responseData), content.segment.isInit);
+  return function (url, content, initialCancelSignal, callbacks) {
+    return new Promise(function (res, rej) {
+      var canceller = new task_canceller/* default */.ZP();
+      var unregisterCancelLstnr = initialCancelSignal.register(function onCheckCancellation(err) {
+        canceller.cancel();
+        rej(err);
+      });
+      /**
+       * If the data's seems to be corrupted, cancel the loading task and reject
+       * with an `INTEGRITY_ERROR` error.
+       * @param {*} data
+       */
+
+      function cancelAndRejectOnBadIntegrity(data) {
+        if (!(data instanceof Array) && !(data instanceof Uint8Array) || inferSegmentContainer(content.adaptation.type, content.representation) !== "mp4") {
+          return;
+        }
+
+        try {
+          (0,check_isobmff_integrity/* default */.Z)(new Uint8Array(data), content.segment.isInit);
+        } catch (err) {
+          unregisterCancelLstnr();
+          canceller.cancel();
+          rej(err);
+        }
       }
-    }));
+
+      segmentLoader(url, content, canceller.signal, Object.assign(Object.assign({}, callbacks), {
+        onNewChunk: function onNewChunk(data) {
+          cancelAndRejectOnBadIntegrity(data);
+
+          if (!canceller.isUsed) {
+            callbacks.onNewChunk(data);
+          }
+        }
+      })).then(function (info) {
+        if (canceller.isUsed) {
+          return;
+        }
+
+        unregisterCancelLstnr();
+
+        if (info.resultType === "segment-loaded") {
+          cancelAndRejectOnBadIntegrity(info.resultData.responseData);
+        }
+
+        res(info);
+      }, function (error) {
+        // The segmentLoader's cancellations cases are all handled here
+        if (!task_canceller/* default.isCancellationError */.ZP.isCancellationError(error)) {
+          unregisterCancelLstnr();
+          rej(error);
+        }
+      });
+    });
   };
 }
 // EXTERNAL MODULE: ./src/utils/byte_parsing.ts
@@ -28866,21 +29058,27 @@ var byte_parsing = __webpack_require__(6968);
 
 
 
-
 /**
  * Perform a request for an initialization segment, agnostic to the container.
  * @param {string} url
- * @param {Object} content
+ * @param {Object} segment
+ * @param {CancellationSignal} cancelSignal
+ * @param {Object} callbacks
+ * @returns {Promise}
  */
 
-function initSegmentLoader(url, _ref) {
-  var segment = _ref.segment;
-
+function initSegmentLoader(url, segment, cancelSignal, callbacks) {
   if (segment.range === undefined) {
     return (0,request/* default */.ZP)({
       url: url,
       responseType: "arraybuffer",
-      sendProgressEvents: true
+      cancelSignal: cancelSignal,
+      onProgress: callbacks.onProgress
+    }).then(function (data) {
+      return {
+        resultType: "segment-loaded",
+        resultData: data
+      };
     });
   }
 
@@ -28891,7 +29089,13 @@ function initSegmentLoader(url, _ref) {
         Range: (0,byte_range/* default */.Z)(segment.range)
       },
       responseType: "arraybuffer",
-      sendProgressEvents: true
+      cancelSignal: cancelSignal,
+      onProgress: callbacks.onProgress
+    }).then(function (data) {
+      return {
+        resultType: "segment-loaded",
+        resultData: data
+      };
     });
   } // range and indexRange are contiguous (99% of the cases)
 
@@ -28903,7 +29107,13 @@ function initSegmentLoader(url, _ref) {
         Range: (0,byte_range/* default */.Z)([segment.range[0], segment.indexRange[1]])
       },
       responseType: "arraybuffer",
-      sendProgressEvents: true
+      cancelSignal: cancelSignal,
+      onProgress: callbacks.onProgress
+    }).then(function (data) {
+      return {
+        resultType: "segment-loaded",
+        resultData: data
+      };
     });
   }
 
@@ -28913,7 +29123,8 @@ function initSegmentLoader(url, _ref) {
       Range: (0,byte_range/* default */.Z)(segment.range)
     },
     responseType: "arraybuffer",
-    sendProgressEvents: false
+    cancelSignal: cancelSignal,
+    onProgress: callbacks.onProgress
   });
   var indexRequest$ = (0,request/* default */.ZP)({
     url: url,
@@ -28921,29 +29132,28 @@ function initSegmentLoader(url, _ref) {
       Range: (0,byte_range/* default */.Z)(segment.indexRange)
     },
     responseType: "arraybuffer",
-    sendProgressEvents: false
+    cancelSignal: cancelSignal,
+    onProgress: callbacks.onProgress
   });
-  return (0,combineLatest/* combineLatest */.a)([rangeRequest$, indexRequest$]).pipe((0,map/* map */.U)(function (_ref2) {
-    var initData = _ref2[0],
-        indexData = _ref2[1];
-    var data = (0,byte_parsing/* concat */.zo)(new Uint8Array(initData.value.responseData), new Uint8Array(indexData.value.responseData));
-    var sendingTime = Math.min(initData.value.sendingTime, indexData.value.sendingTime);
-    var receivedTime = Math.max(initData.value.receivedTime, indexData.value.receivedTime);
+  return pinkie_default().all([rangeRequest$, indexRequest$]).then(function (_ref) {
+    var initData = _ref[0],
+        indexData = _ref[1];
+    var data = (0,byte_parsing/* concat */.zo)(new Uint8Array(initData.responseData), new Uint8Array(indexData.responseData));
+    var sendingTime = Math.min(initData.sendingTime, indexData.sendingTime);
+    var receivedTime = Math.max(initData.receivedTime, indexData.receivedTime);
     return {
-      type: "data-loaded",
-      value: {
+      resultType: "segment-loaded",
+      resultData: {
         url: url,
         responseData: data,
-        size: initData.value.size + indexData.value.size,
+        size: initData.size + indexData.size,
         duration: receivedTime - sendingTime,
         sendingTime: sendingTime,
         receivedTime: receivedTime
       }
     };
-  }));
+  });
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/scan.js + 1 modules
-var scan = __webpack_require__(3074);
 // EXTERNAL MODULE: ./src/transports/utils/find_complete_box.ts
 var find_complete_box = __webpack_require__(8766);
 ;// CONCATENATED MODULE: ./src/transports/dash/extract_complete_chunks.ts
@@ -29041,86 +29251,66 @@ function extractCompleteChunks(buffer) {
 
 
 
+/**
+ * Load segments through a "chunk" mode (decodable chunk by decodable chunk).
+ *
+ * This method is particularly adapted to low-latency streams.
+ *
+ * @param {string} url - URL of the segment to download.
+ * @param {Object} content - Context of the segment needed.
+ * @param {Object} callbacks
+ * @param {CancellationSignal} cancelSignal
+ * @returns {Promise}
+ */
 
-
-
-function lowLatencySegmentLoader(url, args) {
-  var segment = args.segment;
+function lowLatencySegmentLoader(url, content, callbacks, cancelSignal) {
+  var segment = content.segment;
   var headers = segment.range !== undefined ? {
     Range: (0,byte_range/* default */.Z)(segment.range)
   } : undefined;
-  return request_fetch({
-    url: url,
-    headers: headers
-  }).pipe((0,scan/* scan */.R)(function (acc, evt) {
-    if (evt.type === "data-complete") {
-      if (acc.partialChunk !== null) {
-        log/* default.warn */.Z.warn("DASH Pipelines: remaining chunk does not belong to any segment");
+  var partialChunk = null;
+  /**
+   * Called each time `fetch` has new data available.
+   * @param {Object} info
+   */
+
+  function onData(info) {
+    var chunk = new Uint8Array(info.chunk);
+    var concatenated = partialChunk !== null ? (0,byte_parsing/* concat */.zo)(partialChunk, chunk) : chunk;
+    var res = extractCompleteChunks(concatenated);
+    var completeChunks = res[0];
+    partialChunk = res[1];
+
+    for (var i = 0; i < completeChunks.length; i++) {
+      callbacks.onNewChunk(completeChunks[i]);
+
+      if (cancelSignal.isCancelled) {
+        return;
       }
-
-      return {
-        event: evt,
-        completeChunks: [],
-        partialChunk: null
-      };
     }
 
-    var data = new Uint8Array(evt.value.chunk);
-    var concatenated = acc.partialChunk !== null ? (0,byte_parsing/* concat */.zo)(acc.partialChunk, data) : data;
+    callbacks.onProgress({
+      duration: info.duration,
+      size: info.size,
+      totalSize: info.totalSize
+    });
 
-    var _extractCompleteChunk = extractCompleteChunks(concatenated),
-        completeChunks = _extractCompleteChunk[0],
-        partialChunk = _extractCompleteChunk[1];
+    if (cancelSignal.isCancelled) {
+      return;
+    }
+  }
 
+  return fetchRequest({
+    url: url,
+    headers: headers,
+    onData: onData,
+    cancelSignal: cancelSignal
+  }).then(function (res) {
     return {
-      event: evt,
-      completeChunks: completeChunks,
-      partialChunk: partialChunk
+      resultType: "chunk-complete",
+      resultData: res
     };
-  }, {
-    event: null,
-    completeChunks: [],
-    partialChunk: null
-  }), (0,mergeMap/* mergeMap */.z)(function (evt) {
-    var emitted = [];
-
-    for (var i = 0; i < evt.completeChunks.length; i++) {
-      emitted.push({
-        type: "data-chunk",
-        value: {
-          responseData: evt.completeChunks[i]
-        }
-      });
-    }
-
-    var event = evt.event;
-
-    if (event !== null && event.type === "data-chunk") {
-      var value = event.value;
-      emitted.push({
-        type: "progress",
-        value: {
-          duration: value.duration,
-          size: value.size,
-          totalSize: value.totalSize
-        }
-      });
-    } else if (event !== null && event.type === "data-complete") {
-      var _value = event.value;
-      emitted.push({
-        type: "data-chunk-complete",
-        value: {
-          duration: _value.duration,
-          receivedTime: _value.receivedTime,
-          sendingTime: _value.sendingTime,
-          size: _value.size,
-          url: _value.url
-        }
-      });
-    }
-
-    return of.of.apply(void 0, emitted);
-  }));
+  });
 }
 ;// CONCATENATED MODULE: ./src/transports/dash/segment_loader.ts
 /**
@@ -29149,40 +29339,49 @@ function lowLatencySegmentLoader(url, args) {
 
 /**
  * Segment loader triggered if there was no custom-defined one in the API.
- * @param {Object} opt
- * @returns {Observable}
+ * @param {string} uri
+ * @param {Object} content
+ * @param {boolean} lowLatencyMode
+ * @param {Object} callbacks
+ * @param {Object} cancelSignal
+ * @returns {Promise}
  */
 
-function regularSegmentLoader(url, args, lowLatencyMode) {
-  if (args.segment.isInit) {
-    return initSegmentLoader(url, args);
+function regularSegmentLoader(url, content, lowLatencyMode, callbacks, cancelSignal) {
+  if (content.segment.isInit) {
+    return initSegmentLoader(url, content.segment, cancelSignal, callbacks);
   }
 
-  var containerType = inferSegmentContainer(args.adaptation.type, args.representation);
+  var containerType = inferSegmentContainer(content.adaptation.type, content.representation);
 
   if (lowLatencyMode && (containerType === "mp4" || containerType === undefined)) {
     if (fetchIsSupported()) {
-      return lowLatencySegmentLoader(url, args);
+      return lowLatencySegmentLoader(url, content, callbacks, cancelSignal);
     } else {
       (0,warn_once/* default */.Z)("DASH: Your browser does not have the fetch API. You will have " + "a higher chance of rebuffering when playing close to the live edge");
     }
   }
 
-  var segment = args.segment;
+  var segment = content.segment;
   return (0,request/* default */.ZP)({
     url: url,
     responseType: "arraybuffer",
-    sendProgressEvents: true,
     headers: segment.range !== undefined ? {
       Range: (0,byte_range/* default */.Z)(segment.range)
-    } : undefined
+    } : undefined,
+    cancelSignal: cancelSignal,
+    onProgress: callbacks.onProgress
+  }).then(function (data) {
+    return {
+      resultType: "segment-loaded",
+      resultData: data
+    };
   });
 }
 /**
  * @param {Object} config
  * @returns {Function}
  */
-
 
 function generateSegmentLoader(_ref) {
   var lowLatencyMode = _ref.lowLatencyMode,
@@ -29194,20 +29393,16 @@ function generateSegmentLoader(_ref) {
    * @returns {Observable}
    */
 
-  function segmentLoader(content) {
-    var url = content.url;
-
+  function segmentLoader(url, content, cancelSignal, callbacks) {
     if (url == null) {
-      return (0,of.of)({
-        type: "data-created",
-        value: {
-          responseData: null
-        }
+      return pinkie_default().resolve({
+        resultType: "segment-created",
+        resultData: null
       });
     }
 
     if (lowLatencyMode || customSegmentLoader === undefined) {
-      return regularSegmentLoader(url, content, lowLatencyMode);
+      return regularSegmentLoader(url, content, lowLatencyMode, callbacks, cancelSignal);
     }
 
     var args = {
@@ -29219,27 +29414,29 @@ function generateSegmentLoader(_ref) {
       transport: "dash",
       url: url
     };
-    return new Observable/* Observable */.y(function (obs) {
+    return new Promise(function (res, rej) {
+      /** `true` when the custom segmentLoader should not be active anymore. */
       var hasFinished = false;
-      var hasFallbacked = false;
       /**
        * Callback triggered when the custom segment loader has a response.
        * @param {Object} args
        */
 
       var resolve = function resolve(_args) {
-        if (!hasFallbacked) {
-          hasFinished = true;
-          obs.next({
-            type: "data-loaded",
-            value: {
-              responseData: _args.data,
-              size: _args.size,
-              duration: _args.duration
-            }
-          });
-          obs.complete();
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
         }
+
+        hasFinished = true;
+        cancelSignal.deregister(abortCustomLoader);
+        res({
+          resultType: "segment-loaded",
+          resultData: {
+            responseData: _args.data,
+            size: _args.size,
+            duration: _args.duration
+          }
+        });
       };
       /**
        * Callback triggered when the custom segment loader fails
@@ -29254,27 +29451,29 @@ function generateSegmentLoader(_ref) {
 
         var _a, _b, _c;
 
-        if (!hasFallbacked) {
-          hasFinished = true; // Format error and send it
-
-          var castedErr = err;
-          var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching a DASH segment through a " + "custom segmentLoader.";
-          var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
-          obs.error(emittedErr);
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
         }
+
+        hasFinished = true;
+        cancelSignal.deregister(abortCustomLoader); // Format error and send it
+
+        var castedErr = err;
+        var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching a DASH segment through a " + "custom segmentLoader.";
+        var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
+        rej(emittedErr);
       };
 
       var progress = function progress(_args) {
-        if (!hasFallbacked) {
-          obs.next({
-            type: "progress",
-            value: {
-              duration: _args.duration,
-              size: _args.size,
-              totalSize: _args.totalSize
-            }
-          });
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
         }
+
+        callbacks.onProgress({
+          duration: _args.duration,
+          size: _args.size,
+          totalSize: _args.totalSize
+        });
       };
       /**
        * Callback triggered when the custom segment loader wants to fallback to
@@ -29283,32 +29482,41 @@ function generateSegmentLoader(_ref) {
 
 
       var fallback = function fallback() {
-        hasFallbacked = true;
-        var regular$ = regularSegmentLoader(url, content, lowLatencyMode); // HACK What is TypeScript/RxJS doing here??????
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
+        }
 
-        /* eslint-disable import/no-deprecated */
-
-        /* eslint-disable @typescript-eslint/ban-ts-comment */
-        // @ts-ignore
-
-        regular$.subscribe(obs);
-        /* eslint-enable import/no-deprecated */
-
-        /* eslint-enable @typescript-eslint/ban-ts-comment */
+        hasFinished = true;
+        cancelSignal.deregister(abortCustomLoader);
+        regularSegmentLoader(url, content, lowLatencyMode, callbacks, cancelSignal).then(res, rej);
       };
 
-      var callbacks = {
+      var customCallbacks = {
         reject: reject,
         resolve: resolve,
         progress: progress,
         fallback: fallback
       };
-      var abort = customSegmentLoader(args, callbacks);
-      return function () {
-        if (!hasFinished && !hasFallbacked && typeof abort === "function") {
+      var abort = customSegmentLoader(args, customCallbacks);
+      cancelSignal.register(abortCustomLoader);
+      /**
+       * The logic to run when the custom loader is cancelled while pending.
+       * @param {Error} err
+       */
+
+      function abortCustomLoader(err) {
+        if (hasFinished) {
+          return;
+        }
+
+        hasFinished = true;
+
+        if (typeof abort === "function") {
           abort();
         }
-      };
+
+        rej(err);
+      }
     });
   }
 }
@@ -29820,7 +30028,6 @@ function getEventsOutOfEMSGs(parsedEMSGs, manifestPublishTime) {
 
 
 
-
 /**
  * @param {Object} config
  * @returns {Function}
@@ -29828,41 +30035,34 @@ function getEventsOutOfEMSGs(parsedEMSGs, manifestPublishTime) {
 
 function generateAudioVideoSegmentParser(_ref) {
   var __priv_patchLastSegmentInSidx = _ref.__priv_patchLastSegmentInSidx;
-  return function audioVideoSegmentParser(_ref2) {
-    var content = _ref2.content,
-        response = _ref2.response,
-        initTimescale = _ref2.initTimescale;
+  return function audioVideoSegmentParser(loadedSegment, content, initTimescale) {
     var period = content.period,
         adaptation = content.adaptation,
         representation = content.representation,
         segment = content.segment,
         manifest = content.manifest;
-    var data = response.data,
-        isChunked = response.isChunked;
+    var data = loadedSegment.data,
+        isChunked = loadedSegment.isChunked;
     var appendWindow = [period.start, period.end];
 
     if (data === null) {
       if (segment.isInit) {
-        return (0,of.of)({
-          type: "parsed-init-segment",
-          value: {
-            initializationData: null,
-            protectionDataUpdate: false,
-            initTimescale: undefined
-          }
-        });
+        return {
+          segmentType: "init",
+          initializationData: null,
+          protectionDataUpdate: false,
+          initTimescale: undefined
+        };
       }
 
-      return (0,of.of)({
-        type: "parsed-segment",
-        value: {
-          chunkData: null,
-          chunkInfos: null,
-          chunkOffset: 0,
-          appendWindow: appendWindow,
-          protectionDataUpdate: false
-        }
-      });
+      return {
+        segmentType: "media",
+        chunkData: null,
+        chunkInfos: null,
+        chunkOffset: 0,
+        protectionDataUpdate: false,
+        appendWindow: appendWindow
+      };
     }
 
     var chunkData = data instanceof Uint8Array ? data : new Uint8Array(data);
@@ -29900,32 +30100,28 @@ function generateAudioVideoSegmentParser(_ref) {
           if (events !== undefined) {
             var needsManifestRefresh = events.needsManifestRefresh,
                 inbandEvents = events.inbandEvents;
-            return (0,of.of)({
-              type: "parsed-segment",
-              value: {
-                chunkData: chunkData,
-                chunkInfos: chunkInfos,
-                chunkOffset: chunkOffset,
-                appendWindow: appendWindow,
-                inbandEvents: inbandEvents,
-                needsManifestRefresh: needsManifestRefresh,
-                protectionDataUpdate: protectionDataUpdate
-              }
-            });
+            return {
+              segmentType: "media",
+              chunkData: chunkData,
+              chunkInfos: chunkInfos,
+              chunkOffset: chunkOffset,
+              appendWindow: appendWindow,
+              inbandEvents: inbandEvents,
+              protectionDataUpdate: protectionDataUpdate,
+              needsManifestRefresh: needsManifestRefresh
+            };
           }
         }
       }
 
-      return (0,of.of)({
-        type: "parsed-segment",
-        value: {
-          chunkData: chunkData,
-          chunkInfos: chunkInfos,
-          chunkOffset: chunkOffset,
-          appendWindow: appendWindow,
-          protectionDataUpdate: protectionDataUpdate
-        }
-      });
+      return {
+        segmentType: "media",
+        chunkData: chunkData,
+        chunkInfos: chunkInfos,
+        chunkOffset: chunkOffset,
+        protectionDataUpdate: protectionDataUpdate,
+        appendWindow: appendWindow
+      };
     } // we're handling an initialization segment
 
 
@@ -29958,14 +30154,12 @@ function generateAudioVideoSegmentParser(_ref) {
 
     var timescale = seemsToBeMP4 ? (0,utils/* getMDHDTimescale */.LD)(chunkData) : containerType === "webm" ? getTimeCodeScale(chunkData, 0) : undefined;
     var parsedTimescale = (0,is_null_or_undefined/* default */.Z)(timescale) ? undefined : timescale;
-    return (0,of.of)({
-      type: "parsed-init-segment",
-      value: {
-        initializationData: chunkData,
-        protectionDataUpdate: protectionDataUpdate,
-        initTimescale: parsedTimescale
-      }
-    });
+    return {
+      segmentType: "init",
+      initializationData: chunkData,
+      protectionDataUpdate: protectionDataUpdate,
+      initTimescale: parsedTimescale
+    };
   };
 }
 ;// CONCATENATED MODULE: ./src/transports/dash/text_loader.ts
@@ -30003,47 +30197,71 @@ function generateTextTrackLoader(_ref) {
       checkMediaSegmentIntegrity = _ref.checkMediaSegmentIntegrity;
   return checkMediaSegmentIntegrity !== true ? textTrackLoader : addSegmentIntegrityChecks(textTrackLoader);
   /**
-   * @param {Object} args
-   * @returns {Observable}
+   * @param {string|null} url
+   * @param {Object} content
+   * @param {Object} cancelSignal
+   * @param {Object} callbacks
+   * @returns {Promise}
    */
 
-  function textTrackLoader(args) {
-    var range = args.segment.range;
-    var url = args.url;
+  function textTrackLoader(url, content, cancelSignal, callbacks) {
+    var adaptation = content.adaptation,
+        representation = content.representation,
+        segment = content.segment;
+    var range = segment.range;
 
     if (url === null) {
-      return (0,of.of)({
-        type: "data-created",
-        value: {
-          responseData: null
-        }
+      return pinkie_default().resolve({
+        resultType: "segment-created",
+        resultData: null
       });
     }
 
-    if (args.segment.isInit) {
-      return initSegmentLoader(url, args);
+    if (segment.isInit) {
+      return initSegmentLoader(url, segment, cancelSignal, callbacks);
     }
 
-    var containerType = inferSegmentContainer(args.adaptation.type, args.representation);
+    var containerType = inferSegmentContainer(adaptation.type, representation);
     var seemsToBeMP4 = containerType === "mp4" || containerType === undefined;
 
     if (lowLatencyMode && seemsToBeMP4) {
       if (fetchIsSupported()) {
-        return lowLatencySegmentLoader(url, args);
+        return lowLatencySegmentLoader(url, content, callbacks, cancelSignal);
       } else {
         (0,warn_once/* default */.Z)("DASH: Your browser does not have the fetch API. You will have " + "a higher chance of rebuffering when playing close to the live edge");
       }
-    } // ArrayBuffer when in mp4 to parse isobmff manually, text otherwise
+    }
 
+    if (seemsToBeMP4) {
+      return (0,request/* default */.ZP)({
+        url: url,
+        responseType: "arraybuffer",
+        headers: Array.isArray(range) ? {
+          Range: (0,byte_range/* default */.Z)(range)
+        } : null,
+        onProgress: callbacks.onProgress,
+        cancelSignal: cancelSignal
+      }).then(function (data) {
+        return {
+          resultType: "segment-loaded",
+          resultData: data
+        };
+      });
+    }
 
-    var responseType = seemsToBeMP4 ? "arraybuffer" : "text";
     return (0,request/* default */.ZP)({
       url: url,
-      responseType: responseType,
+      responseType: "text",
       headers: Array.isArray(range) ? {
         Range: (0,byte_range/* default */.Z)(range)
       } : null,
-      sendProgressEvents: true
+      onProgress: callbacks.onProgress,
+      cancelSignal: cancelSignal
+    }).then(function (data) {
+      return {
+        resultType: "segment-loaded",
+        resultData: data
+      };
     });
   }
 }
@@ -30243,24 +30461,32 @@ function getPlainTextTrackData(_ref2, textTrackData, isChunked) {
 
 
 
-
 /**
  * Parse TextTrack data when it is embedded in an ISOBMFF file.
- * @param {Object} infos
+ *
+ * @param {ArrayBuffer|Uint8Array|string} data - The segment data.
+ * @param {boolean} isChunked - If `true`, the `data` may contain only a
+ * decodable subpart of the full data in the linked segment.
+ * @param {Object} content - Object describing the context of the given
+ * segment's data: of which segment, `Representation`, `Adaptation`, `Period`,
+ * `Manifest` it is a part of etc.
+ * @param {number|undefined} initTimescale - `timescale` value - encountered
+ * in this linked initialization segment (if it exists) - that may also apply
+ * to that segment if no new timescale is defined in it.
+ * Can be `undefined` if no timescale was defined, if it is not known, or if
+ * no linked initialization segment was yet parsed.
+ * @param {boolean} __priv_patchLastSegmentInSidx - Enable ugly Canal+-specific
+ * fix for an issue people on the content-packaging side could not fix.
+ * For more information on that, look at the code using it.
  * @returns {Observable.<Object>}
  */
 
-function parseISOBMFFEmbeddedTextTrack(_ref, __priv_patchLastSegmentInSidx) {
-  var response = _ref.response,
-      content = _ref.content,
-      initTimescale = _ref.initTimescale;
+function parseISOBMFFEmbeddedTextTrack(data, isChunked, content, initTimescale, __priv_patchLastSegmentInSidx) {
   var period = content.period,
       representation = content.representation,
       segment = content.segment;
   var isInit = segment.isInit,
       indexRange = segment.indexRange;
-  var data = response.data,
-      isChunked = response.isChunked;
   var chunkBytes = typeof data === "string" ? (0,string_parsing/* strToUtf8 */.tG)(data) : data instanceof Uint8Array ? data : new Uint8Array(data);
 
   if (isInit) {
@@ -30286,58 +30512,54 @@ function parseISOBMFFEmbeddedTextTrack(_ref, __priv_patchLastSegmentInSidx) {
       representation.index.initializeIndex(sidxSegments);
     }
 
-    return (0,of.of)({
-      type: "parsed-init-segment",
-      value: {
-        initializationData: null,
-        protectionDataUpdate: false,
-        initTimescale: mdhdTimescale
-      }
-    });
+    return {
+      segmentType: "init",
+      initializationData: null,
+      protectionDataUpdate: false,
+      initTimescale: mdhdTimescale
+    };
   }
 
   var chunkInfos = getISOBMFFTimingInfos(chunkBytes, isChunked, segment, initTimescale);
   var chunkData = getISOBMFFEmbeddedTextTrackData(content, chunkBytes, chunkInfos, isChunked);
   var chunkOffset = (0,take_first_set/* default */.Z)(segment.timestampOffset, 0);
-  return (0,of.of)({
-    type: "parsed-segment",
-    value: {
-      chunkData: chunkData,
-      chunkInfos: chunkInfos,
-      chunkOffset: chunkOffset,
-      appendWindow: [period.start, period.end],
-      protectionDataUpdate: false
-    }
-  });
+  return {
+    segmentType: "media",
+    chunkData: chunkData,
+    chunkInfos: chunkInfos,
+    chunkOffset: chunkOffset,
+    protectionDataUpdate: false,
+    appendWindow: [period.start, period.end]
+  };
 }
 /**
- * Parse TextTrack data in plain text form.
- * @param {Object} infos
+ * Parse TextTrack data when it is in plain text form.
+ *
+ * @param {ArrayBuffer|Uint8Array|string} data - The segment data.
+ * @param {boolean} isChunked - If `true`, the `data` may contain only a
+ * decodable subpart of the full data in the linked segment.
+ * @param {Object} content - Object describing the context of the given
+ * segment's data: of which segment, `Representation`, `Adaptation`, `Period`,
+ * `Manifest` it is a part of etc.
  * @returns {Observable.<Object>}
  */
 
 
-function parsePlainTextTrack(_ref2) {
-  var response = _ref2.response,
-      content = _ref2.content;
+function parsePlainTextTrack(data, isChunked, content) {
   var period = content.period,
       segment = content.segment;
   var _segment$timestampOff = segment.timestampOffset,
       timestampOffset = _segment$timestampOff === void 0 ? 0 : _segment$timestampOff;
 
   if (segment.isInit) {
-    return (0,of.of)({
-      type: "parsed-init-segment",
-      value: {
-        initializationData: null,
-        protectionDataUpdate: false,
-        initTimescale: undefined
-      }
-    });
+    return {
+      segmentType: "init",
+      initializationData: null,
+      protectionDataUpdate: false,
+      initTimescale: undefined
+    };
   }
 
-  var data = response.data,
-      isChunked = response.isChunked;
   var textTrackData;
 
   if (typeof data !== "string") {
@@ -30348,67 +30570,56 @@ function parsePlainTextTrack(_ref2) {
   }
 
   var chunkData = getPlainTextTrackData(content, textTrackData, isChunked);
-  return (0,of.of)({
-    type: "parsed-segment",
-    value: {
-      chunkData: chunkData,
-      chunkInfos: null,
-      chunkOffset: timestampOffset,
-      appendWindow: [period.start, period.end],
-      protectionDataUpdate: false
-    }
-  });
+  return {
+    segmentType: "media",
+    chunkData: chunkData,
+    chunkInfos: null,
+    chunkOffset: timestampOffset,
+    protectionDataUpdate: false,
+    appendWindow: [period.start, period.end]
+  };
 }
 /**
+ * Generate a "segment parser" for DASH text tracks.
+ *
  * @param {Object} config
  * @returns {Function}
  */
 
 
-function generateTextTrackParser(_ref3) {
-  var __priv_patchLastSegmentInSidx = _ref3.__priv_patchLastSegmentInSidx;
+function generateTextTrackParser(_ref) {
+  var __priv_patchLastSegmentInSidx = _ref.__priv_patchLastSegmentInSidx;
 
   /**
    * Parse TextTrack data.
    * @param {Object} infos
    * @returns {Observable.<Object>}
    */
-  return function textTrackParser(_ref4) {
-    var response = _ref4.response,
-        content = _ref4.content,
-        initTimescale = _ref4.initTimescale;
+  return function textTrackParser(loadedSegment, content, initTimescale) {
+    var _a;
+
     var period = content.period,
         adaptation = content.adaptation,
         representation = content.representation,
         segment = content.segment;
-    var _segment$timestampOff2 = segment.timestampOffset,
-        timestampOffset = _segment$timestampOff2 === void 0 ? 0 : _segment$timestampOff2;
-    var data = response.data,
-        isChunked = response.isChunked;
+    var data = loadedSegment.data,
+        isChunked = loadedSegment.isChunked;
 
     if (data === null) {
-      // No data, just return empty infos
-      if (segment.isInit) {
-        return (0,of.of)({
-          type: "parsed-init-segment",
-          value: {
-            initializationData: null,
-            protectionDataUpdate: false,
-            initTimescale: undefined
-          }
-        });
-      }
-
-      return (0,of.of)({
-        type: "parsed-segment",
-        value: {
-          chunkData: null,
-          chunkInfos: null,
-          chunkOffset: timestampOffset,
-          appendWindow: [period.start, period.end],
-          protectionDataUpdate: false
-        }
-      });
+      // No data, just return an empty placeholder object
+      return segment.isInit ? {
+        segmentType: "init",
+        initializationData: null,
+        protectionDataUpdate: false,
+        initTimescale: undefined
+      } : {
+        segmentType: "media",
+        chunkData: null,
+        chunkInfos: null,
+        chunkOffset: (_a = segment.timestampOffset) !== null && _a !== void 0 ? _a : 0,
+        protectionDataUpdate: false,
+        appendWindow: [period.start, period.end]
+      };
     }
 
     var containerType = inferSegmentContainer(adaptation.type, representation); // TODO take a look to check if this is an ISOBMFF/webm when undefined?
@@ -30417,22 +30628,9 @@ function generateTextTrackParser(_ref3) {
       // TODO Handle webm containers
       throw new Error("Text tracks with a WEBM container are not yet handled.");
     } else if (containerType === "mp4") {
-      return parseISOBMFFEmbeddedTextTrack({
-        response: {
-          data: data,
-          isChunked: isChunked
-        },
-        content: content,
-        initTimescale: initTimescale
-      }, __priv_patchLastSegmentInSidx);
+      return parseISOBMFFEmbeddedTextTrack(data, isChunked, content, initTimescale, __priv_patchLastSegmentInSidx);
     } else {
-      return parsePlainTextTrack({
-        response: {
-          data: data,
-          isChunked: isChunked
-        },
-        content: content
-      });
+      return parsePlainTextTrack(data, isChunked, content);
     }
   };
 }
@@ -30478,24 +30676,24 @@ function generateTextTrackParser(_ref3) {
   var textTrackParser = generateTextTrackParser(options);
   return {
     manifest: {
-      loader: manifestLoader,
-      parser: manifestParser
+      loadManifest: manifestLoader,
+      parseManifest: manifestParser
     },
     audio: {
-      loader: segmentLoader,
-      parser: audioVideoSegmentParser
+      loadSegment: segmentLoader,
+      parseSegment: audioVideoSegmentParser
     },
     video: {
-      loader: segmentLoader,
-      parser: audioVideoSegmentParser
+      loadSegment: segmentLoader,
+      parseSegment: audioVideoSegmentParser
     },
     text: {
-      loader: textTrackLoader,
-      parser: textTrackParser
+      loadSegment: textTrackLoader,
+      parseSegment: textTrackParser
     },
     image: {
-      loader: imageLoader,
-      parser: imageParser
+      loadSegment: imageLoader,
+      parseSegment: imageParser
     }
   };
 }
@@ -30544,12 +30742,9 @@ __webpack_require__.d(__webpack_exports__, {
   "Z": function() { return /* binding */ transports_smooth; }
 });
 
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
-var of = __webpack_require__(2817);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/map.js
-var map = __webpack_require__(9127);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/tap.js
-var tap = __webpack_require__(2006);
+// EXTERNAL MODULE: ./node_modules/pinkie/index.js
+var pinkie = __webpack_require__(8555);
+var pinkie_default = /*#__PURE__*/__webpack_require__.n(pinkie);
 // EXTERNAL MODULE: ./src/features/index.ts
 var features = __webpack_require__(7874);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
@@ -32281,8 +32476,6 @@ var warn_once = __webpack_require__(8806);
 var check_isobmff_integrity = __webpack_require__(4460);
 // EXTERNAL MODULE: ./src/transports/utils/generate_manifest_loader.ts + 1 modules
 var generate_manifest_loader = __webpack_require__(8791);
-// EXTERNAL MODULE: ./src/transports/utils/return_parsed_manifest.ts
-var return_parsed_manifest = __webpack_require__(7445);
 // EXTERNAL MODULE: ./src/parsers/containers/isobmff/utils.ts
 var utils = __webpack_require__(4644);
 // EXTERNAL MODULE: ./src/parsers/containers/isobmff/get_box.ts
@@ -33075,8 +33268,6 @@ function updateTrunDataOffset(oldTrunBox, initialDataOffset) {
   newTrunBox.set(oldTrunBox.subarray(initialDataOffset + 8, oldTrunBox.length), initialDataOffset + 12);
   return (0,utils/* updateBoxLength */.J6)(newTrunBox); // update the trun box's length
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
-var Observable = __webpack_require__(1480);
 // EXTERNAL MODULE: ./src/errors/custom_loader_error.ts
 var custom_loader_error = __webpack_require__(7839);
 // EXTERNAL MODULE: ./src/transports/utils/byte_range.ts
@@ -33314,237 +33505,6 @@ function createAudioInitSegment(timescale, channelsCount, sampleSize, packetSize
 
   return createInitSegment(timescale, "audio", stsd, createSMHDBox(), 0, 0);
 }
-;// CONCATENATED MODULE: ./src/transports/smooth/segment_loader.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-/**
- * Segment loader triggered if there was no custom-defined one in the API.
- * @param {Object} opt
- * @returns {Observable}
- */
-
-function regularSegmentLoader(_ref) {
-  var url = _ref.url,
-      segment = _ref.segment;
-  var headers;
-  var range = segment.range;
-
-  if (Array.isArray(range)) {
-    headers = {
-      Range: (0,byte_range/* default */.Z)(range)
-    };
-  }
-
-  return (0,request/* default */.ZP)({
-    url: url,
-    responseType: "arraybuffer",
-    headers: headers,
-    sendProgressEvents: true
-  });
-}
-/**
- * Defines the url for the request, load the right loader (custom/default
- * one).
- */
-
-
-var generateSegmentLoader = function generateSegmentLoader(customSegmentLoader) {
-  return function (_ref2) {
-    var segment = _ref2.segment,
-        representation = _ref2.representation,
-        adaptation = _ref2.adaptation,
-        period = _ref2.period,
-        manifest = _ref2.manifest,
-        url = _ref2.url;
-
-    if (segment.isInit) {
-      if (segment.privateInfos === undefined || segment.privateInfos.smoothInitSegment === undefined) {
-        throw new Error("Smooth: Invalid segment format");
-      }
-
-      var smoothInitPrivateInfos = segment.privateInfos.smoothInitSegment;
-      var responseData;
-      var codecPrivateData = smoothInitPrivateInfos.codecPrivateData,
-          timescale = smoothInitPrivateInfos.timescale,
-          _smoothInitPrivateInf = smoothInitPrivateInfos.protection,
-          protection = _smoothInitPrivateInf === void 0 ? {
-        keyId: undefined,
-        keySystems: undefined
-      } : _smoothInitPrivateInf;
-
-      if (codecPrivateData === undefined) {
-        throw new Error("Smooth: no codec private data.");
-      }
-
-      switch (adaptation.type) {
-        case "video":
-          {
-            var _representation$width = representation.width,
-                width = _representation$width === void 0 ? 0 : _representation$width,
-                _representation$heigh = representation.height,
-                height = _representation$heigh === void 0 ? 0 : _representation$heigh;
-            responseData = createVideoInitSegment(timescale, width, height, 72, 72, 4, // vRes, hRes, nal
-            codecPrivateData, protection.keyId);
-            break;
-          }
-
-        case "audio":
-          {
-            var _smoothInitPrivateInf2 = smoothInitPrivateInfos.channels,
-                channels = _smoothInitPrivateInf2 === void 0 ? 0 : _smoothInitPrivateInf2,
-                _smoothInitPrivateInf3 = smoothInitPrivateInfos.bitsPerSample,
-                bitsPerSample = _smoothInitPrivateInf3 === void 0 ? 0 : _smoothInitPrivateInf3,
-                _smoothInitPrivateInf4 = smoothInitPrivateInfos.packetSize,
-                packetSize = _smoothInitPrivateInf4 === void 0 ? 0 : _smoothInitPrivateInf4,
-                _smoothInitPrivateInf5 = smoothInitPrivateInfos.samplingRate,
-                samplingRate = _smoothInitPrivateInf5 === void 0 ? 0 : _smoothInitPrivateInf5;
-            responseData = createAudioInitSegment(timescale, channels, bitsPerSample, packetSize, samplingRate, codecPrivateData, protection.keyId);
-            break;
-          }
-
-        default:
-          if (false) {}
-
-          responseData = new Uint8Array(0);
-      }
-
-      return (0,of.of)({
-        type: "data-created",
-        value: {
-          responseData: responseData
-        }
-      });
-    } else if (url === null) {
-      return (0,of.of)({
-        type: "data-created",
-        value: {
-          responseData: null
-        }
-      });
-    } else {
-      var args = {
-        adaptation: adaptation,
-        manifest: manifest,
-        period: period,
-        representation: representation,
-        segment: segment,
-        transport: "smooth",
-        url: url
-      };
-
-      if (typeof customSegmentLoader !== "function") {
-        return regularSegmentLoader(args);
-      }
-
-      return new Observable/* Observable */.y(function (obs) {
-        var hasFinished = false;
-        var hasFallbacked = false;
-        /**
-         * Callback triggered when the custom segment loader has a response.
-         * @param {Object} args
-         */
-
-        var resolve = function resolve(_args) {
-          if (!hasFallbacked) {
-            hasFinished = true;
-            obs.next({
-              type: "data-loaded",
-              value: {
-                responseData: _args.data,
-                size: _args.size,
-                duration: _args.duration
-              }
-            });
-            obs.complete();
-          }
-        };
-        /**
-         * Callback triggered when the custom segment loader fails
-         * @param {*} err - The corresponding error encountered
-         */
-
-
-        var reject = function reject(err) {
-          if (err === void 0) {
-            err = {};
-          }
-
-          var _a, _b, _c;
-
-          if (!hasFallbacked) {
-            hasFinished = true; // Format error and send it
-
-            var castedErr = err;
-            var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching a Smooth segment through a " + "custom segmentLoader.";
-            var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
-            obs.error(emittedErr);
-          }
-        };
-
-        var progress = function progress(_args) {
-          if (!hasFallbacked) {
-            obs.next({
-              type: "progress",
-              value: {
-                duration: _args.duration,
-                size: _args.size,
-                totalSize: _args.totalSize
-              }
-            });
-          }
-        };
-
-        var fallback = function fallback() {
-          hasFallbacked = true; // HACK What is TypeScript/RxJS doing here??????
-
-          /* eslint-disable import/no-deprecated */
-
-          /* eslint-disable @typescript-eslint/ban-ts-comment */
-          // @ts-ignore
-
-          regularSegmentLoader(args).subscribe(obs);
-          /* eslint-enable import/no-deprecated */
-
-          /* eslint-enable @typescript-eslint/ban-ts-comment */
-        };
-
-        var callbacks = {
-          reject: reject,
-          resolve: resolve,
-          fallback: fallback,
-          progress: progress
-        };
-        var abort = customSegmentLoader(args, callbacks);
-        return function () {
-          if (!hasFinished && !hasFallbacked && typeof abort === "function") {
-            abort();
-          }
-        };
-      });
-    }
-  };
-};
-
-/* harmony default export */ var segment_loader = (generateSegmentLoader);
 ;// CONCATENATED MODULE: ./src/transports/smooth/utils.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -33624,9 +33584,20 @@ function resolveManifest(url) {
 
   return url;
 }
+/**
+ * Returns `true` if the given Representation refers to segments in an MP4
+ * container
+ * @param {Representation} representation
+ * @returns {Boolean}
+ */
 
 
-;// CONCATENATED MODULE: ./src/transports/smooth/pipelines.ts
+function isMP4EmbeddedTrack(representation) {
+  return typeof representation.mimeType === "string" && representation.mimeType.indexOf("mp4") >= 0;
+}
+
+
+;// CONCATENATED MODULE: ./src/transports/smooth/segment_loader.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -33644,6 +33615,284 @@ function resolveManifest(url) {
  */
 
 
+
+
+
+
+
+
+/**
+ * Segment loader triggered if there was no custom-defined one in the API.
+ * @param {string} uri
+ * @param {Object} content
+ * @param {Object} callbacks
+ * @param {Object} cancelSignal
+ * @param {boolean} checkMediaSegmentIntegrity
+ * @returns {Promise}
+ */
+
+function regularSegmentLoader(url, content, callbacks, cancelSignal, checkMediaSegmentIntegrity) {
+  var headers;
+  var range = content.segment.range;
+
+  if (Array.isArray(range)) {
+    headers = {
+      Range: (0,byte_range/* default */.Z)(range)
+    };
+  }
+
+  return (0,request/* default */.ZP)({
+    url: url,
+    responseType: "arraybuffer",
+    headers: headers,
+    cancelSignal: cancelSignal,
+    onProgress: callbacks.onProgress
+  }).then(function (data) {
+    var isMP4 = isMP4EmbeddedTrack(content.representation);
+
+    if (!isMP4 || checkMediaSegmentIntegrity !== true) {
+      return {
+        resultType: "segment-loaded",
+        resultData: data
+      };
+    }
+
+    var dataU8 = new Uint8Array(data.responseData);
+    (0,check_isobmff_integrity/* default */.Z)(dataU8, content.segment.isInit);
+    return {
+      resultType: "segment-loaded",
+      resultData: Object.assign(Object.assign({}, data), {
+        responseData: dataU8
+      })
+    };
+  });
+}
+/**
+ * Defines the url for the request, load the right loader (custom/default
+ * one).
+ */
+
+
+var generateSegmentLoader = function generateSegmentLoader(_ref) {
+  var checkMediaSegmentIntegrity = _ref.checkMediaSegmentIntegrity,
+      customSegmentLoader = _ref.customSegmentLoader;
+  return function (url, content, cancelSignal, callbacks) {
+    var segment = content.segment,
+        manifest = content.manifest,
+        period = content.period,
+        adaptation = content.adaptation,
+        representation = content.representation;
+
+    if (segment.isInit) {
+      if (segment.privateInfos === undefined || segment.privateInfos.smoothInitSegment === undefined) {
+        throw new Error("Smooth: Invalid segment format");
+      }
+
+      var smoothInitPrivateInfos = segment.privateInfos.smoothInitSegment;
+      var responseData;
+      var codecPrivateData = smoothInitPrivateInfos.codecPrivateData,
+          timescale = smoothInitPrivateInfos.timescale,
+          _smoothInitPrivateInf = smoothInitPrivateInfos.protection,
+          protection = _smoothInitPrivateInf === void 0 ? {
+        keyId: undefined,
+        keySystems: undefined
+      } : _smoothInitPrivateInf;
+
+      if (codecPrivateData === undefined) {
+        throw new Error("Smooth: no codec private data.");
+      }
+
+      switch (adaptation.type) {
+        case "video":
+          {
+            var _representation$width = representation.width,
+                width = _representation$width === void 0 ? 0 : _representation$width,
+                _representation$heigh = representation.height,
+                height = _representation$heigh === void 0 ? 0 : _representation$heigh;
+            responseData = createVideoInitSegment(timescale, width, height, 72, 72, 4, // vRes, hRes, nal
+            codecPrivateData, protection.keyId);
+            break;
+          }
+
+        case "audio":
+          {
+            var _smoothInitPrivateInf2 = smoothInitPrivateInfos.channels,
+                channels = _smoothInitPrivateInf2 === void 0 ? 0 : _smoothInitPrivateInf2,
+                _smoothInitPrivateInf3 = smoothInitPrivateInfos.bitsPerSample,
+                bitsPerSample = _smoothInitPrivateInf3 === void 0 ? 0 : _smoothInitPrivateInf3,
+                _smoothInitPrivateInf4 = smoothInitPrivateInfos.packetSize,
+                packetSize = _smoothInitPrivateInf4 === void 0 ? 0 : _smoothInitPrivateInf4,
+                _smoothInitPrivateInf5 = smoothInitPrivateInfos.samplingRate,
+                samplingRate = _smoothInitPrivateInf5 === void 0 ? 0 : _smoothInitPrivateInf5;
+            responseData = createAudioInitSegment(timescale, channels, bitsPerSample, packetSize, samplingRate, codecPrivateData, protection.keyId);
+            break;
+          }
+
+        default:
+          if (false) {}
+
+          responseData = new Uint8Array(0);
+      }
+
+      return pinkie_default().resolve({
+        resultType: "segment-created",
+        resultData: responseData
+      });
+    } else if (url === null) {
+      return pinkie_default().resolve({
+        resultType: "segment-created",
+        resultData: null
+      });
+    } else {
+      var args = {
+        adaptation: adaptation,
+        manifest: manifest,
+        period: period,
+        representation: representation,
+        segment: segment,
+        transport: "smooth",
+        url: url
+      };
+
+      if (typeof customSegmentLoader !== "function") {
+        return regularSegmentLoader(url, content, callbacks, cancelSignal, checkMediaSegmentIntegrity);
+      }
+
+      return new Promise(function (res, rej) {
+        /** `true` when the custom segmentLoader should not be active anymore. */
+        var hasFinished = false;
+        /**
+         * Callback triggered when the custom segment loader has a response.
+         * @param {Object} args
+         */
+
+        var resolve = function resolve(_args) {
+          if (hasFinished || cancelSignal.isCancelled) {
+            return;
+          }
+
+          hasFinished = true;
+          cancelSignal.deregister(abortCustomLoader);
+          var isMP4 = isMP4EmbeddedTrack(content.representation);
+
+          if (!isMP4 || checkMediaSegmentIntegrity !== true) {
+            res({
+              resultType: "segment-loaded",
+              resultData: {
+                responseData: _args.data,
+                size: _args.size,
+                duration: _args.duration
+              }
+            });
+          }
+
+          var dataU8 = _args.data instanceof Uint8Array ? _args.data : new Uint8Array(_args.data);
+          (0,check_isobmff_integrity/* default */.Z)(dataU8, content.segment.isInit);
+          res({
+            resultType: "segment-loaded",
+            resultData: {
+              responseData: dataU8,
+              size: _args.size,
+              duration: _args.duration
+            }
+          });
+        };
+        /**
+         * Callback triggered when the custom segment loader fails
+         * @param {*} err - The corresponding error encountered
+         */
+
+
+        var reject = function reject(err) {
+          if (err === void 0) {
+            err = {};
+          }
+
+          var _a, _b, _c;
+
+          if (hasFinished || cancelSignal.isCancelled) {
+            return;
+          }
+
+          hasFinished = true;
+          cancelSignal.deregister(abortCustomLoader); // Format error and send it
+
+          var castedErr = err;
+          var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching a Smooth segment through a " + "custom segmentLoader.";
+          var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
+          rej(emittedErr);
+        };
+
+        var progress = function progress(_args) {
+          if (hasFinished || cancelSignal.isCancelled) {
+            return;
+          }
+
+          callbacks.onProgress({
+            duration: _args.duration,
+            size: _args.size,
+            totalSize: _args.totalSize
+          });
+        };
+
+        var fallback = function fallback() {
+          if (hasFinished || cancelSignal.isCancelled) {
+            return;
+          }
+
+          hasFinished = true;
+          cancelSignal.deregister(abortCustomLoader);
+          regularSegmentLoader(url, content, callbacks, cancelSignal, checkMediaSegmentIntegrity).then(res, rej);
+        };
+
+        var customCallbacks = {
+          reject: reject,
+          resolve: resolve,
+          fallback: fallback,
+          progress: progress
+        };
+        var abort = customSegmentLoader(args, customCallbacks);
+        cancelSignal.register(abortCustomLoader);
+        /**
+         * The logic to run when the custom loader is cancelled while pending.
+         * @param {Error} err
+         */
+
+        function abortCustomLoader(err) {
+          if (hasFinished) {
+            return;
+          }
+
+          hasFinished = true;
+
+          if (!hasFinished && typeof abort === "function") {
+            abort();
+          }
+
+          rej(err);
+        }
+      });
+    }
+  };
+};
+
+/* harmony default export */ var segment_loader = (generateSegmentLoader);
+;// CONCATENATED MODULE: ./src/transports/smooth/pipelines.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 
 
@@ -33685,21 +33934,17 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
 
 /* harmony default export */ function pipelines(options) {
   var smoothManifestParser = smooth(options);
-  var segmentLoader = segment_loader(options.segmentLoader);
+  var segmentLoader = segment_loader(options);
   var manifestLoaderOptions = {
     customManifestLoader: options.manifestLoader
   };
   var manifestLoader = (0,generate_manifest_loader/* default */.Z)(manifestLoaderOptions, "text");
   var manifestPipeline = {
-    resolver: function resolver(_ref) {
-      var url = _ref.url;
-
+    // TODO (v4.x.x) Remove that function
+    resolveManifestUrl: function resolveManifestUrl(url, cancelSignal) {
       if (url === undefined) {
-        return (0,of.of)({
-          url: undefined
-        });
-      } // TODO Remove WSX logic
-
+        return pinkie_default().resolve(undefined);
+      }
 
       var resolving;
 
@@ -33707,9 +33952,9 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
         (0,warn_once/* default */.Z)("Giving WSX URL to loadVideo is deprecated." + " You should only give Manifest URLs.");
         resolving = (0,request/* default */.ZP)({
           url: replaceToken(url, ""),
-          responseType: "document"
-        }).pipe((0,map/* map */.U)(function (_ref2) {
-          var value = _ref2.value;
+          responseType: "document",
+          cancelSignal: cancelSignal
+        }).then(function (value) {
           var extractedURL = extractISML(value.responseData);
 
           if (extractedURL === null || extractedURL.length === 0) {
@@ -33717,98 +33962,95 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
           }
 
           return extractedURL;
-        }));
+        });
       } else {
-        resolving = (0,of.of)(url);
+        resolving = pinkie_default().resolve(url);
       }
 
       var token = extractToken(url);
-      return resolving.pipe((0,map/* map */.U)(function (_url) {
-        return {
-          url: replaceToken(resolveManifest(_url), token)
-        };
-      }));
+      return resolving.then(function (_url) {
+        return replaceToken(resolveManifest(_url), token);
+      });
     },
-    loader: manifestLoader,
-    parser: function parser(_ref3) {
-      var response = _ref3.response,
-          reqURL = _ref3.url;
-      var url = response.url === undefined ? reqURL : response.url;
-      var data = typeof response.responseData === "string" ? new DOMParser().parseFromString(response.responseData, "text/xml") : response.responseData; // TODO find a way to check if Document?
+    loadManifest: manifestLoader,
+    parseManifest: function parseManifest(manifestData, parserOptions) {
+      var _a;
 
-      var manifestReceivedTime = response.receivedTime;
-      var parserResult = smoothManifestParser(data, url, manifestReceivedTime);
+      var url = (_a = manifestData.url) !== null && _a !== void 0 ? _a : parserOptions.originalUrl;
+      var manifestReceivedTime = manifestData.receivedTime,
+          responseData = manifestData.responseData;
+      var documentData = typeof responseData === "string" ? new DOMParser().parseFromString(responseData, "text/xml") : responseData; // TODO find a way to check if Document?
+
+      var parserResult = smoothManifestParser(documentData, url, manifestReceivedTime);
       var manifest = new src_manifest/* default */.ZP(parserResult, {
         representationFilter: options.representationFilter,
         supplementaryImageTracks: options.supplementaryImageTracks,
         supplementaryTextTracks: options.supplementaryTextTracks
       });
-      return (0,return_parsed_manifest/* default */.Z)(manifest, url);
+      return {
+        manifest: manifest,
+        url: url
+      };
     }
   };
-  var segmentPipeline = {
-    loader: function loader(content) {
-      if (content.segment.isInit || options.checkMediaSegmentIntegrity !== true) {
-        return segmentLoader(content);
-      }
+  /**
+   * Export functions allowing to load and parse audio and video smooth
+   * segments.
+   */
 
-      return segmentLoader(content).pipe((0,tap/* tap */.b)(function (res) {
-        if ((res.type === "data-loaded" || res.type === "data-chunk") && res.value.responseData !== null) {
-          (0,check_isobmff_integrity/* default */.Z)(new Uint8Array(res.value.responseData), content.segment.isInit);
-        }
-      }));
+  var audioVideoPipeline = {
+    /**
+     * Load a Smooth audio/video segment.
+     * @param {string|null} url
+     * @param {Object} content
+     * @param {Object} cancelSignal
+     * @param {Object} callbacks
+     * @returns {Promise}
+     */
+    loadSegment: function loadSegment(url, content, cancelSignal, callbacks) {
+      return segmentLoader(url, content, cancelSignal, callbacks);
     },
-    parser: function parser(_ref4) {
-      var content = _ref4.content,
-          response = _ref4.response,
-          initTimescale = _ref4.initTimescale;
-
+    parseSegment: function parseSegment(loadedSegment, content, initTimescale) {
       var _a, _b;
 
       var segment = content.segment,
           adaptation = content.adaptation,
           manifest = content.manifest;
-      var data = response.data,
-          isChunked = response.isChunked;
+      var data = loadedSegment.data,
+          isChunked = loadedSegment.isChunked;
 
       if (data === null) {
         if (segment.isInit) {
-          return (0,of.of)({
-            type: "parsed-init-segment",
-            value: {
-              initializationData: null,
-              protectionDataUpdate: false,
-              initTimescale: undefined
-            }
-          });
+          return {
+            segmentType: "init",
+            initializationData: null,
+            protectionDataUpdate: false,
+            initTimescale: undefined
+          };
         }
 
-        return (0,of.of)({
-          type: "parsed-segment",
-          value: {
-            chunkData: null,
-            chunkInfos: null,
-            chunkOffset: 0,
-            appendWindow: [undefined, undefined],
-            protectionDataUpdate: false
-          }
-        });
+        return {
+          segmentType: "media",
+          chunkData: null,
+          chunkInfos: null,
+          chunkOffset: 0,
+          protectionDataUpdate: false,
+          appendWindow: [undefined, undefined]
+        };
       }
 
       var responseBuffer = data instanceof Uint8Array ? data : new Uint8Array(data);
 
       if (segment.isInit) {
         var timescale = (_b = (_a = segment.privateInfos) === null || _a === void 0 ? void 0 : _a.smoothInitSegment) === null || _b === void 0 ? void 0 : _b.timescale;
-        return (0,of.of)({
-          type: "parsed-init-segment",
-          value: {
-            initializationData: data,
-            // smooth init segments are crafted by hand.
-            // Their timescale is the one from the manifest.
-            initTimescale: timescale,
-            protectionDataUpdate: false
-          }
-        });
+        return {
+          segmentType: "init",
+          initializationData: data,
+          // smooth init segments are crafted by hand.
+          // Their timescale is the one from the manifest.
+          initTimescale: timescale,
+          protectionDataUpdate: false
+        };
       }
 
       var timingInfos = initTimescale !== undefined ? extractTimingsInfos(responseBuffer, isChunked, initTimescale, segment, manifest.isLive) : null;
@@ -33826,58 +34068,68 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
         addNextSegments(adaptation, nextSegments, segment);
       }
 
-      return (0,of.of)({
-        type: "parsed-segment",
-        value: {
-          chunkData: chunkData,
-          chunkInfos: chunkInfos,
-          chunkOffset: 0,
-          appendWindow: [undefined, undefined],
-          protectionDataUpdate: false
-        }
-      });
+      return {
+        segmentType: "media",
+        chunkData: chunkData,
+        chunkInfos: chunkInfos,
+        chunkOffset: 0,
+        protectionDataUpdate: false,
+        appendWindow: [undefined, undefined]
+      };
     }
   };
   var textTrackPipeline = {
-    loader: function loader(_ref5) {
-      var segment = _ref5.segment,
-          representation = _ref5.representation,
-          url = _ref5.url;
+    loadSegment: function loadSegment(url, content, cancelSignal, callbacks) {
+      var segment = content.segment,
+          representation = content.representation;
 
       if (segment.isInit || url === null) {
-        return (0,of.of)({
-          type: "data-created",
-          value: {
-            responseData: null
-          }
+        return pinkie_default().resolve({
+          resultType: "segment-created",
+          resultData: null
         });
       }
 
       var isMP4 = isMP4EmbeddedTrack(representation);
 
-      if (!isMP4 || options.checkMediaSegmentIntegrity !== true) {
+      if (!isMP4) {
         return (0,request/* default */.ZP)({
           url: url,
-          responseType: isMP4 ? "arraybuffer" : "text",
-          sendProgressEvents: true
+          responseType: "text",
+          cancelSignal: cancelSignal,
+          onProgress: callbacks.onProgress
+        }).then(function (data) {
+          return {
+            resultType: "segment-loaded",
+            resultData: data
+          };
+        });
+      } else {
+        return (0,request/* default */.ZP)({
+          url: url,
+          responseType: "arraybuffer",
+          cancelSignal: cancelSignal,
+          onProgress: callbacks.onProgress
+        }).then(function (data) {
+          if (options.checkMediaSegmentIntegrity !== true) {
+            return {
+              resultType: "segment-loaded",
+              resultData: data
+            };
+          }
+
+          var dataU8 = new Uint8Array(data.responseData);
+          (0,check_isobmff_integrity/* default */.Z)(dataU8, content.segment.isInit);
+          return {
+            resultType: "segment-loaded",
+            resultData: Object.assign(Object.assign({}, data), {
+              responseData: dataU8
+            })
+          };
         });
       }
-
-      return (0,request/* default */.ZP)({
-        url: url,
-        responseType: "arraybuffer",
-        sendProgressEvents: true
-      }).pipe((0,tap/* tap */.b)(function (res) {
-        if (res.type === "data-loaded") {
-          (0,check_isobmff_integrity/* default */.Z)(new Uint8Array(res.value.responseData), segment.isInit);
-        }
-      }));
     },
-    parser: function parser(_ref6) {
-      var content = _ref6.content,
-          response = _ref6.response,
-          initTimescale = _ref6.initTimescale;
-
+    parseSegment: function parseSegment(loadedSegment, content, initTimescale) {
       var _a;
 
       var manifest = content.manifest,
@@ -33890,32 +34142,28 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
           mimeType = _representation$mimeT === void 0 ? "" : _representation$mimeT,
           _representation$codec = representation.codec,
           codec = _representation$codec === void 0 ? "" : _representation$codec;
-      var data = response.data,
-          isChunked = response.isChunked;
+      var data = loadedSegment.data,
+          isChunked = loadedSegment.isChunked;
 
       if (segment.isInit) {
         // text init segment has no use in HSS
-        return (0,of.of)({
-          type: "parsed-init-segment",
-          value: {
-            initializationData: null,
-            protectionDataUpdate: false,
-            initTimescale: undefined
-          }
-        });
+        return {
+          segmentType: "init",
+          initializationData: null,
+          protectionDataUpdate: false,
+          initTimescale: undefined
+        };
       }
 
       if (data === null) {
-        return (0,of.of)({
-          type: "parsed-segment",
-          value: {
-            chunkData: null,
-            chunkInfos: null,
-            chunkOffset: 0,
-            appendWindow: [undefined, undefined],
-            protectionDataUpdate: false
-          }
-        });
+        return {
+          segmentType: "media",
+          chunkData: null,
+          chunkInfos: null,
+          chunkOffset: 0,
+          protectionDataUpdate: false,
+          appendWindow: [undefined, undefined]
+        };
       }
 
       var nextSegments;
@@ -34011,61 +34259,56 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
       }
 
       var chunkOffset = segmentStart !== null && segmentStart !== void 0 ? segmentStart : 0;
-      return (0,of.of)({
-        type: "parsed-segment",
-        value: {
-          chunkData: {
-            type: _sdType,
-            data: _sdData,
-            start: segmentStart,
-            end: segmentEnd,
-            language: language
-          },
-          chunkInfos: chunkInfos,
-          chunkOffset: chunkOffset,
-          appendWindow: [undefined, undefined],
-          protectionDataUpdate: false
-        }
-      });
+      return {
+        segmentType: "media",
+        chunkData: {
+          type: _sdType,
+          data: _sdData,
+          start: segmentStart,
+          end: segmentEnd,
+          language: language
+        },
+        chunkInfos: chunkInfos,
+        chunkOffset: chunkOffset,
+        protectionDataUpdate: false,
+        appendWindow: [undefined, undefined]
+      };
     }
   };
   var imageTrackPipeline = {
-    loader: function loader(_ref7) {
-      var segment = _ref7.segment,
-          url = _ref7.url;
-
-      if (segment.isInit || url === null) {
+    loadSegment: function loadSegment(url, content, cancelSignal, callbacks) {
+      if (content.segment.isInit || url === null) {
         // image do not need an init segment. Passthrough directly to the parser
-        return (0,of.of)({
-          type: "data-created",
-          value: {
-            responseData: null
-          }
+        return pinkie_default().resolve({
+          resultType: "segment-created",
+          resultData: null
         });
       }
 
       return (0,request/* default */.ZP)({
         url: url,
         responseType: "arraybuffer",
-        sendProgressEvents: true
+        onProgress: callbacks.onProgress,
+        cancelSignal: cancelSignal
+      }).then(function (data) {
+        return {
+          resultType: "segment-loaded",
+          resultData: data
+        };
       });
     },
-    parser: function parser(_ref8) {
-      var response = _ref8.response,
-          content = _ref8.content;
-      var data = response.data,
-          isChunked = response.isChunked;
+    parseSegment: function parseSegment(loadedSegment, content, _initTimescale) {
+      var data = loadedSegment.data,
+          isChunked = loadedSegment.isChunked;
 
       if (content.segment.isInit) {
         // image init segment has no use
-        return (0,of.of)({
-          type: "parsed-init-segment",
-          value: {
-            initializationData: null,
-            protectionDataUpdate: false,
-            initTimescale: undefined
-          }
-        });
+        return {
+          segmentType: "init",
+          initializationData: null,
+          protectionDataUpdate: false,
+          initTimescale: undefined
+        };
       }
 
       if (isChunked) {
@@ -34074,59 +34317,44 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
 
 
       if (data === null || features/* default.imageParser */.Z.imageParser === null) {
-        return (0,of.of)({
-          type: "parsed-segment",
-          value: {
-            chunkData: null,
-            chunkInfos: null,
-            chunkOffset: 0,
-            appendWindow: [undefined, undefined],
-            protectionDataUpdate: false
-          }
-        });
+        return {
+          segmentType: "media",
+          chunkData: null,
+          chunkInfos: null,
+          chunkOffset: 0,
+          protectionDataUpdate: false,
+          appendWindow: [undefined, undefined]
+        };
       }
 
       var bifObject = features/* default.imageParser */.Z.imageParser(new Uint8Array(data));
       var thumbsData = bifObject.thumbs;
-      return (0,of.of)({
-        type: "parsed-segment",
-        value: {
-          chunkData: {
-            data: thumbsData,
-            start: 0,
-            end: Number.MAX_VALUE,
-            timescale: 1,
-            type: "bif"
-          },
-          chunkInfos: {
-            time: 0,
-            duration: Number.MAX_VALUE,
-            timescale: bifObject.timescale
-          },
-          chunkOffset: 0,
-          protectionDataUpdate: false,
-          appendWindow: [undefined, undefined]
-        }
-      });
+      return {
+        segmentType: "media",
+        chunkData: {
+          data: thumbsData,
+          start: 0,
+          end: Number.MAX_VALUE,
+          timescale: 1,
+          type: "bif"
+        },
+        chunkInfos: {
+          time: 0,
+          duration: Number.MAX_VALUE
+        },
+        chunkOffset: 0,
+        protectionDataUpdate: false,
+        appendWindow: [undefined, undefined]
+      };
     }
   };
   return {
     manifest: manifestPipeline,
-    audio: segmentPipeline,
-    video: segmentPipeline,
+    audio: audioVideoPipeline,
+    video: audioVideoPipeline,
     text: textTrackPipeline,
     image: imageTrackPipeline
   };
-}
-/**
- * Returns true if the given texttrack segment represents a textrack embedded
- * in a mp4 file.
- * @param {Representation} representation
- * @returns {Boolean}
- */
-
-function isMP4EmbeddedTrack(representation) {
-  return typeof representation.mimeType === "string" && representation.mimeType.indexOf("mp4") >= 0;
 }
 ;// CONCATENATED MODULE: ./src/transports/smooth/index.ts
 /**
@@ -34346,12 +34574,13 @@ __webpack_require__.d(__webpack_exports__, {
   "Z": function() { return /* binding */ generateManifestLoader; }
 });
 
-// EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
-var is_null_or_undefined = __webpack_require__(1946);
+// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
+var assert_unreachable = __webpack_require__(8418);
 // EXTERNAL MODULE: ./src/utils/request/index.ts + 1 modules
 var request = __webpack_require__(4597);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
-var Observable = __webpack_require__(1480);
+// EXTERNAL MODULE: ./node_modules/pinkie/index.js
+var pinkie = __webpack_require__(8555);
+var pinkie_default = /*#__PURE__*/__webpack_require__.n(pinkie);
 // EXTERNAL MODULE: ./src/errors/custom_loader_error.ts
 var custom_loader_error = __webpack_require__(7839);
 ;// CONCATENATED MODULE: ./src/transports/utils/call_custom_manifest_loader.ts
@@ -34373,35 +34602,34 @@ var custom_loader_error = __webpack_require__(7839);
 
 
 function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) {
-  return function (args) {
-    return new Observable/* Observable */.y(function (obs) {
-      var url = args.url;
+  return function (url, cancelSignal) {
+    return new (pinkie_default())(function (res, rej) {
       var timeAPIsDelta = Date.now() - performance.now();
+      /** `true` when the custom segmentLoader should not be active anymore. */
+
       var hasFinished = false;
-      var hasFallbacked = false;
       /**
        * Callback triggered when the custom manifest loader has a response.
        * @param {Object} args
        */
 
       var resolve = function resolve(_args) {
-        if (!hasFallbacked) {
-          hasFinished = true;
-          var receivedTime = _args.receivingTime !== undefined ? _args.receivingTime - timeAPIsDelta : undefined;
-          var sendingTime = _args.sendingTime !== undefined ? _args.sendingTime - timeAPIsDelta : undefined;
-          obs.next({
-            type: "data-loaded",
-            value: {
-              responseData: _args.data,
-              size: _args.size,
-              duration: _args.duration,
-              url: _args.url,
-              receivedTime: receivedTime,
-              sendingTime: sendingTime
-            }
-          });
-          obs.complete();
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
         }
+
+        hasFinished = true;
+        cancelSignal.deregister(abortCustomLoader);
+        var receivedTime = _args.receivingTime !== undefined ? _args.receivingTime - timeAPIsDelta : undefined;
+        var sendingTime = _args.sendingTime !== undefined ? _args.sendingTime - timeAPIsDelta : undefined;
+        res({
+          responseData: _args.data,
+          size: _args.size,
+          duration: _args.duration,
+          url: _args.url,
+          receivedTime: receivedTime,
+          sendingTime: sendingTime
+        });
       };
       /**
        * Callback triggered when the custom manifest loader fails
@@ -34412,14 +34640,17 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
       var reject = function reject(err) {
         var _a, _b, _c;
 
-        if (!hasFallbacked) {
-          hasFinished = true; // Format error and send it
-
-          var castedErr = err;
-          var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching the Manifest through a " + "custom manifestLoader.";
-          var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
-          obs.error(emittedErr);
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
         }
+
+        hasFinished = true;
+        cancelSignal.deregister(abortCustomLoader); // Format error and send it
+
+        var castedErr = err;
+        var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching the Manifest through a " + "custom manifestLoader.";
+        var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
+        rej(emittedErr);
       };
       /**
        * Callback triggered when the custom manifest loader wants to fallback to
@@ -34428,8 +34659,13 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
 
 
       var fallback = function fallback() {
-        hasFallbacked = true;
-        fallbackManifestLoader(args).subscribe(obs);
+        if (hasFinished || cancelSignal.isCancelled) {
+          return;
+        }
+
+        hasFinished = true;
+        cancelSignal.deregister(abortCustomLoader);
+        fallbackManifestLoader(url, cancelSignal).then(res, rej);
       };
 
       var callbacks = {
@@ -34438,11 +34674,25 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
         fallback: fallback
       };
       var abort = customManifestLoader(url, callbacks);
-      return function () {
-        if (!hasFinished && !hasFallbacked && typeof abort === "function") {
+      cancelSignal.register(abortCustomLoader);
+      /**
+       * The logic to run when the custom loader is cancelled while pending.
+       * @param {Error} err
+       */
+
+      function abortCustomLoader(err) {
+        if (hasFinished) {
+          return;
+        }
+
+        hasFinished = true;
+
+        if (typeof abort === "function") {
           abort();
         }
-      };
+
+        rej(err);
+      }
     });
   };
 }
@@ -34472,17 +34722,39 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
  */
 
 function generateRegularManifestLoader(preferredType) {
-  return function regularManifestLoader(_ref) {
-    var url = _ref.url;
-
+  return function regularManifestLoader(url, cancelSignal) {
     if (url === undefined) {
       throw new Error("Cannot perform HTTP(s) request. URL not known");
-    }
+    } // What follows could be written in a single line, but TypeScript wouldn't
+    // shut up.
+    // So I wrote that instead, temporarily of course ;)
 
-    return (0,request/* default */.ZP)({
-      url: url,
-      responseType: preferredType
-    });
+
+    switch (preferredType) {
+      case "arraybuffer":
+        return (0,request/* default */.ZP)({
+          url: url,
+          responseType: "arraybuffer",
+          cancelSignal: cancelSignal
+        });
+
+      case "text":
+        return (0,request/* default */.ZP)({
+          url: url,
+          responseType: "text",
+          cancelSignal: cancelSignal
+        });
+
+      case "document":
+        return (0,request/* default */.ZP)({
+          url: url,
+          responseType: "document",
+          cancelSignal: cancelSignal
+        });
+
+      default:
+        (0,assert_unreachable/* default */.Z)(preferredType);
+    }
   };
 }
 /**
@@ -34492,67 +34764,15 @@ function generateRegularManifestLoader(preferredType) {
  */
 
 
-function generateManifestLoader(_ref2, preferredType) {
-  var customManifestLoader = _ref2.customManifestLoader;
+function generateManifestLoader(_ref, preferredType) {
+  var customManifestLoader = _ref.customManifestLoader;
   var regularManifestLoader = generateRegularManifestLoader(preferredType);
 
-  if ((0,is_null_or_undefined/* default */.Z)(customManifestLoader)) {
+  if (typeof customManifestLoader !== "function") {
     return regularManifestLoader;
   }
 
   return callCustomManifestLoader(customManifestLoader, regularManifestLoader);
-}
-
-/***/ }),
-
-/***/ 7445:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Z": function() { return /* binding */ returnParsedManifest; }
-/* harmony export */ });
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2817);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(6362);
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * As a Manifest instance is obtained, emit the right `warning` events
- * (according to the Manifest's `parsingErrors` property`) followed by the right
- * `parsed` event, as expected from a Manifest parser.
- * @param {Manifest} manifest
- * @param {string|undefined} url
- * @returns {Observable}
- */
-
-function returnParsedManifest(manifest, url) {
-  var warningEvts$ = rxjs__WEBPACK_IMPORTED_MODULE_0__.of.apply(void 0, manifest.parsingErrors.map(function (error) {
-    return {
-      type: "warning",
-      value: error
-    };
-  }));
-  return (0,rxjs__WEBPACK_IMPORTED_MODULE_1__/* .concat */ .z)(warningEvts$, (0,rxjs__WEBPACK_IMPORTED_MODULE_0__.of)({
-    type: "parsed",
-    value: {
-      manifest: manifest,
-      url: url
-    }
-  }));
 }
 
 /***/ }),
@@ -36020,7 +36240,8 @@ function hashBuffer(buffer) {
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 /**
- * Creates an ID generator which generates an ID each time you call it.
+ * Creates an ID generator which generates a number containing an incremented
+ * number each time you call it.
  * @returns {Function}
  */
 function idGenerator() {
@@ -37255,8 +37476,6 @@ __webpack_require__.d(__webpack_exports__, {
 
 // UNUSED EXPORTS: fetchIsSupported, fetchRequest, xhr
 
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
-var Observable = __webpack_require__(1480);
 // EXTERNAL MODULE: ./src/config.ts
 var config = __webpack_require__(944);
 // EXTERNAL MODULE: ./src/errors/request_error.ts
@@ -37285,22 +37504,8 @@ var is_null_or_undefined = __webpack_require__(1946);
 
 
 
-
 var DEFAULT_REQUEST_TIMEOUT = config/* default.DEFAULT_REQUEST_TIMEOUT */.Z.DEFAULT_REQUEST_TIMEOUT;
 var DEFAULT_RESPONSE_TYPE = "json";
-/**
- * @param {string} data
- * @returns {Object|null}
- */
-
-function toJSONForIE(data) {
-  try {
-    return JSON.parse(data);
-  } catch (e) {
-    return null;
-  }
-}
-
 function request(options) {
   var requestOptions = {
     url: options.url,
@@ -37308,7 +37513,9 @@ function request(options) {
     responseType: (0,is_null_or_undefined/* default */.Z)(options.responseType) ? DEFAULT_RESPONSE_TYPE : options.responseType,
     timeout: (0,is_null_or_undefined/* default */.Z)(options.timeout) ? DEFAULT_REQUEST_TIMEOUT : options.timeout
   };
-  return new Observable/* Observable */.y(function (obs) {
+  return new Promise(function (resolve, reject) {
+    var onProgress = options.onProgress,
+        cancelSignal = options.cancelSignal;
     var url = requestOptions.url,
         headers = requestOptions.headers,
         responseType = requestOptions.responseType,
@@ -37336,35 +37543,60 @@ function request(options) {
       }
     }
 
-    var sendingTime = performance.now();
+    var sendingTime = performance.now(); // Handle request cancellation
+
+    var deregisterCancellationListener = null;
+
+    if (cancelSignal !== undefined) {
+      deregisterCancellationListener = cancelSignal.register(function abortRequest(err) {
+        if (!(0,is_null_or_undefined/* default */.Z)(xhr) && xhr.readyState !== 4) {
+          xhr.abort();
+        }
+
+        reject(err);
+      });
+
+      if (cancelSignal.isCancelled) {
+        return;
+      }
+    }
 
     xhr.onerror = function onXHRError() {
-      obs.error(new request_error/* default */.Z(url, xhr.status, "ERROR_EVENT", xhr));
+      if (deregisterCancellationListener !== null) {
+        deregisterCancellationListener();
+      }
+
+      reject(new request_error/* default */.Z(url, xhr.status, "ERROR_EVENT", xhr));
     };
 
     xhr.ontimeout = function onXHRTimeout() {
-      obs.error(new request_error/* default */.Z(url, xhr.status, "TIMEOUT", xhr));
+      if (deregisterCancellationListener !== null) {
+        deregisterCancellationListener();
+      }
+
+      reject(new request_error/* default */.Z(url, xhr.status, "TIMEOUT", xhr));
     };
 
-    if (options.sendProgressEvents === true) {
+    if (onProgress !== undefined) {
       xhr.onprogress = function onXHRProgress(event) {
         var currentTime = performance.now();
-        obs.next({
-          type: "progress",
-          value: {
-            url: url,
-            duration: currentTime - sendingTime,
-            sendingTime: sendingTime,
-            currentTime: currentTime,
-            size: event.loaded,
-            totalSize: event.total
-          }
+        onProgress({
+          url: url,
+          duration: currentTime - sendingTime,
+          sendingTime: sendingTime,
+          currentTime: currentTime,
+          size: event.loaded,
+          totalSize: event.total
         });
       };
     }
 
     xhr.onload = function onXHRLoad(event) {
       if (xhr.readyState === 4) {
+        if (deregisterCancellationListener !== null) {
+          deregisterCancellationListener();
+        }
+
         if (xhr.status >= 200 && xhr.status < 300) {
           var receivedTime = performance.now();
           var totalSize = xhr.response instanceof ArrayBuffer ? xhr.response.byteLength : event.total;
@@ -37385,40 +37617,41 @@ function request(options) {
           }
 
           if ((0,is_null_or_undefined/* default */.Z)(responseData)) {
-            obs.error(new request_error/* default */.Z(url, xhr.status, "PARSE_ERROR", xhr));
+            reject(new request_error/* default */.Z(url, xhr.status, "PARSE_ERROR", xhr));
             return;
           }
 
-          obs.next({
-            type: "data-loaded",
-            value: {
-              status: status,
-              url: _url,
-              responseType: loadedResponseType,
-              sendingTime: sendingTime,
-              receivedTime: receivedTime,
-              duration: receivedTime - sendingTime,
-              size: totalSize,
-              responseData: responseData
-            }
+          resolve({
+            status: status,
+            url: _url,
+            responseType: loadedResponseType,
+            sendingTime: sendingTime,
+            receivedTime: receivedTime,
+            duration: receivedTime - sendingTime,
+            size: totalSize,
+            responseData: responseData
           });
-          obs.complete();
         } else {
-          obs.error(new request_error/* default */.Z(url, xhr.status, "ERROR_HTTP_CODE", xhr));
+          reject(new request_error/* default */.Z(url, xhr.status, "ERROR_HTTP_CODE", xhr));
         }
       }
     };
 
     xhr.send();
-    return function () {
-      if (!(0,is_null_or_undefined/* default */.Z)(xhr) && xhr.readyState !== 4) {
-        xhr.abort();
-      }
-    };
   });
 }
+/**
+ * @param {string} data
+ * @returns {Object|null}
+ */
 
-/* harmony default export */ var xhr = (request);
+function toJSONForIE(data) {
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return null;
+  }
+}
 ;// CONCATENATED MODULE: ./src/utils/request/index.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -37437,7 +37670,7 @@ function request(options) {
  */
 
 
-/* harmony default export */ var utils_request = (xhr);
+/* harmony default export */ var utils_request = (request);
 
 
 /***/ }),
@@ -38144,6 +38377,333 @@ function takeFirstSet() {
   }
 
   return undefined;
+}
+
+/***/ }),
+
+/***/ 288:
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ZP": function() { return /* binding */ TaskCanceller; }
+/* harmony export */ });
+/* unused harmony exports CancellationSignal, CancellationError */
+/* harmony import */ var _babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3349);
+/* harmony import */ var _babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1788);
+/* harmony import */ var _babel_runtime_helpers_wrapNativeSuper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(3786);
+/* harmony import */ var _assert__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(811);
+/* harmony import */ var _noop__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(8894);
+
+
+
+
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Class facilitating asynchronous task cancellation.
+ *
+ * This class can be used to notify some code running an asynchronous task (for
+ * example, a request) that is should abort what it is doing (for example, abort
+ * a request when it isn't needed anymore).
+ *
+ * To do that, the code which might ask for cancellation have to create a new
+ * `TaskCanceller`:
+ * ```js
+ * const canceller = new TaskCanceller();
+ * ```
+ *
+ * And has to provide its associated `CancellationSignal` to the code running
+ * the asynchronous task:
+ * ```js
+ * runAsyncTask(canceller.signal);
+ * ```
+ *
+ * In the asynchronous task, the signal can be listened to (see documentation
+ * on `CancellationSignal` for more information):
+ * ```js
+ * function runAsyncTask(cancellationSignal) {
+ *  // Let's say this function returns a Promise (this is not mandatory however)
+ *  return Promise((resolve, reject) => {
+ *    // In this example, we'll even catch the case where an asynchronous task
+ *    // was already cancelled before being called.
+ *    // This ensure that no code will run if that's the case.
+ *    if (cancellationSignal.isCancelled) {
+ *      // Here we're rejecting the CancellationError to notify the caller that
+ *      // this error was due to the task being aborted.
+ *      reject(cancellationSignal.cancellationError);
+ *      return;
+ *    }
+ *
+ *    // Example:
+ *    // performing asynchronous task and registering callbacks on success/failure.
+ *    const myCancellableTask = doSomeAsyncTasks()
+ *      .onFinished(onTaskFinished);
+ *      .onFailed(onTaskFailed);
+ *
+ *    // Run a callback when/if the corresponding `TaskCanceller` was triggered.
+ *    // Run immediately if the TaskCanceller was already triggered.
+ *    const deregisterSignal = cancellationSignal.register(onCancellation);
+ *
+ *    // Callback called on cancellation (if this task was cancelled while the
+ *    // cancellationSignal's listener is still registered).
+ *    // The `error` in argument is linked to that cancellation. It is usually
+ *    // expected that the same Error instance is used when rejecting Promises.
+ *    function onCancellation(error : CancellationError) {
+ *      // abort asynchronous task
+ *      myCancellableTask.cancel();
+ *
+ *      // In this example, reject the current pending Promise
+ *      reject(CancellationError);
+ *    }
+ *
+ *    // Callback called after the asynchronous task has finished with success.
+ *    function onTaskFinished() {
+ *      // Stop listening to the cancellationSignal
+ *      deregisterSignal();
+ *
+ *      // Resolve the Promise
+ *      resolve();
+ *    }
+ *
+ *    // Callback called after the asynchronous task has finished with failure.
+ *    function onTaskFailed(someError : Error) {
+ *      // Stop listening to the cancellationSignal
+ *      deregisterSignal();
+ *
+ *      // Resolve the Promise
+ *      reject(error);
+ *    }
+ *  });
+ * }
+ * ```
+ *
+ * The code asking for cancellation can then trigger a cancellation at any time
+ * (even before the signal was given) and listen to possible CancellationErrors
+ * to know when it was cancelled.
+ * ```js
+ * const canceller = new TaskCanceller();
+ *
+ * runAsyncTask(canceller.signal)
+ *   .then(() => { console.log("Task succeeded!"); )
+ *   .catch((err) => {
+ *      if (TaskCanceller.isCancellationError(err)) {
+ *        console.log("Task cancelled!");
+ *      } else {
+ *        console.log("Task failed:", err);
+ *      }
+ *   });
+ * canceller.cancel(); // Cancel the task, calling registered callbacks
+ * ```
+ * @class TaskCanceller
+ */
+
+var TaskCanceller = /*#__PURE__*/function () {
+  /**
+   * Creates a new `TaskCanceller`, with its own `CancellationSignal` created
+   * as its `signal` provide.
+   * You can then pass this property to async task you wish to be cancellable.
+   */
+  function TaskCanceller() {
+    var _createCancellationFu = createCancellationFunctions(),
+        trigger = _createCancellationFu[0],
+        register = _createCancellationFu[1];
+
+    this.isUsed = false;
+    this._trigger = trigger;
+    this.signal = new CancellationSignal(register);
+  }
+  /**
+   * "Trigger" the `TaskCanceller`, notify through its associated
+   * `CancellationSignal` (its `signal` property) that a task should be aborted.
+   *
+   * Once called the `TaskCanceller` is permanently triggered.
+   *
+   * An optional CancellationError can be given in argument for when this
+   * cancellation is actually triggered as a chain reaction from a previous
+   * cancellation.
+   * @param {Error} [originError]
+   */
+
+
+  var _proto = TaskCanceller.prototype;
+
+  _proto.cancel = function cancel(originError) {
+    if (this.isUsed) {
+      return;
+    }
+
+    this.isUsed = true;
+    var cancellationError = originError !== null && originError !== void 0 ? originError : new CancellationError();
+
+    this._trigger(cancellationError);
+  }
+  /**
+   * Check that the `error` in argument is a `CancellationError`, most likely
+   * meaning that the linked error is due to a task aborted via a
+   * `CancellationSignal`.
+   * @param {*} error
+   * @returns {boolean}
+   */
+  ;
+
+  TaskCanceller.isCancellationError = function isCancellationError(error) {
+    return error instanceof CancellationError;
+  };
+
+  return TaskCanceller;
+}();
+/**
+ * Class associated to a TaskCanceller allowing to be notified when a task
+ * needs to be aborted.
+ * @class
+ */
+
+
+
+var CancellationSignal = /*#__PURE__*/function () {
+  /**
+   * Creates a new CancellationSignal.
+   * /!\ Note: Only a `TaskCanceller` is supposed to be able to create one.
+   * @param {Function} registerToSource - Function called when the task is
+   * cancelled.
+   */
+  function CancellationSignal(registerToSource) {
+    var _this = this;
+
+    this.isCancelled = false;
+    this.cancellationError = null;
+    this._listeners = [];
+    registerToSource(function (cancellationError) {
+      _this.cancellationError = cancellationError;
+      _this.isCancelled = true;
+
+      while (_this._listeners.length > 0) {
+        var listener = _this._listeners.splice(_this._listeners.length - 1, 1)[0];
+
+        listener(cancellationError);
+      }
+    });
+  }
+  /**
+   * Registers a function that will be called when/if the current task is
+   * cancelled.
+   *
+   * Multiple calls to `register` can be performed to register multiple
+   * callbacks on cancellation associated to the same `CancellationSignal`.
+   *
+   * @param {Function} fn - This function should perform all logic allowing to
+   * abort everything the task is doing.
+   *
+   * It takes in argument the `CancellationError` which was created when the
+   * task was aborted.
+   * You can use this error to notify callers that the task has been aborted,
+   * for example through a rejected Promise.
+   *
+   * @return {Function} - Removes that cancellation listener. You can call this
+   * once you don't want the callback to be triggered anymore (e.g. after the
+   * task succeeded or failed).
+   * You don't need to call that function when cancellation has already been
+   * performed.
+   */
+
+
+  var _proto2 = CancellationSignal.prototype;
+
+  _proto2.register = function register(fn) {
+    var _this2 = this;
+
+    if (this.isCancelled) {
+      (0,_assert__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z)(this.cancellationError !== null);
+      fn(this.cancellationError);
+    }
+
+    this._listeners.push(fn);
+
+    return function () {
+      return _this2.deregister(fn);
+    };
+  }
+  /**
+   * De-register a function registered through the `register` function.
+   * Do nothing if that function wasn't registered.
+   *
+   * You can call this method when using the return value of `register` is not
+   * practical.
+   * @param {Function} fn
+   */
+  ;
+
+  _proto2.deregister = function deregister(fn) {
+    if (this.isCancelled) {
+      return;
+    }
+
+    for (var i = 0; i < this._listeners.length; i++) {
+      if (this._listeners[i] === fn) {
+        this._listeners.splice(i, 1);
+
+        return;
+      }
+    }
+  };
+
+  return CancellationSignal;
+}();
+/**
+ * Error created when a task is cancelled through the TaskCanceller.
+ *
+ * @class CancellationError
+ * @extends Error
+ */
+
+var CancellationError = /*#__PURE__*/function (_Error) {
+  (0,_babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_1__/* .default */ .Z)(CancellationError, _Error);
+
+  /**
+   * @param {string} message
+   */
+  function CancellationError() {
+    var _this3;
+
+    _this3 = _Error.call(this) || this; // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
+
+    Object.setPrototypeOf((0,_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_2__/* .default */ .Z)(_this3), CancellationError.prototype);
+    _this3.name = "CancellationError";
+    _this3.message = "This task was cancelled.";
+    return _this3;
+  }
+
+  return CancellationError;
+}( /*#__PURE__*/(0,_babel_runtime_helpers_wrapNativeSuper__WEBPACK_IMPORTED_MODULE_3__/* .default */ .Z)(Error));
+/**
+ * Helper function allowing communication between a `TaskCanceller` and a
+ * `CancellationSignal`.
+ * @returns {Array.<Function>}
+ */
+
+function createCancellationFunctions() {
+  var listener = _noop__WEBPACK_IMPORTED_MODULE_4__/* .default */ .Z;
+  return [function trigger(error) {
+    listener(error);
+  }, function register(newListener) {
+    listener = newListener;
+  }];
 }
 
 /***/ }),
@@ -41427,53 +41987,6 @@ function mergeMapTo(innerObservable, resultSelector, concurrent) {
 
 /***/ }),
 
-/***/ 3074:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-
-// EXPORTS
-__webpack_require__.d(__webpack_exports__, {
-  "R": function() { return /* binding */ scan; }
-});
-
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/lift.js
-var lift = __webpack_require__(6798);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/OperatorSubscriber.js
-var OperatorSubscriber = __webpack_require__(2566);
-;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/scanInternals.js
-
-function scanInternals(accumulator, seed, hasSeed, emitOnNext, emitBeforeComplete) {
-    return function (source, subscriber) {
-        var hasState = hasSeed;
-        var state = seed;
-        var index = 0;
-        source.subscribe(new OperatorSubscriber/* OperatorSubscriber */.Q(subscriber, function (value) {
-            var i = index++;
-            state = hasState
-                ?
-                    accumulator(state, value, i)
-                :
-                    ((hasState = true), value);
-            emitOnNext && subscriber.next(state);
-        }, emitBeforeComplete &&
-            (function () {
-                hasState && subscriber.next(state);
-                subscriber.complete();
-            })));
-    };
-}
-//# sourceMappingURL=scanInternals.js.map
-;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/scan.js
-
-
-function scan(accumulator, seed) {
-    return (0,lift/* operate */.e)(scanInternals(accumulator, seed, arguments.length >= 2, true));
-}
-//# sourceMappingURL=scan.js.map
-
-/***/ }),
-
 /***/ 5583:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
@@ -43253,25 +43766,18 @@ function clearEMESession(mediaElement) {
     return empty/* EMPTY */.E;
   });
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/catchError.js
-var catchError = __webpack_require__(9878);
-;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/finalize.js
-
-function finalize(callback) {
-    return (0,lift/* operate */.e)(function (source, subscriber) {
-        try {
-            source.subscribe(subscriber);
-        }
-        finally {
-            subscriber.add(callback);
-        }
-    });
-}
-//# sourceMappingURL=finalize.js.map
-// EXTERNAL MODULE: ./src/utils/rx-try_catch.ts
-var rx_try_catch = __webpack_require__(5561);
-// EXTERNAL MODULE: ./src/utils/filter_map.ts
-var filter_map = __webpack_require__(2793);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(2137);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
+var regenerator = __webpack_require__(7757);
+var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
+// EXTERNAL MODULE: ./node_modules/pinkie/index.js
+var pinkie = __webpack_require__(8555);
+var pinkie_default = /*#__PURE__*/__webpack_require__.n(pinkie);
+// EXTERNAL MODULE: ./src/utils/assert.ts
+var assert = __webpack_require__(811);
+// EXTERNAL MODULE: ./src/utils/task_canceller.ts
+var task_canceller = __webpack_require__(288);
 // EXTERNAL MODULE: ./src/errors/request_error.ts
 var request_error = __webpack_require__(9105);
 // EXTERNAL MODULE: ./src/errors/network_error.ts
@@ -43310,8 +43816,6 @@ function errorSelector(error) {
     defaultReason: "Unknown error when fetching the Manifest"
   });
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/timer.js
-var timer = __webpack_require__(6625);
 ;// CONCATENATED MODULE: ./src/compat/is_offline.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -43359,9 +43863,7 @@ function isOffline() {
 }
 // EXTERNAL MODULE: ./src/errors/custom_loader_error.ts
 var custom_loader_error = __webpack_require__(7839);
-// EXTERNAL MODULE: ./src/utils/get_fuzzed_delay.ts
-var get_fuzzed_delay = __webpack_require__(2572);
-;// CONCATENATED MODULE: ./src/core/fetchers/utils/try_urls_with_backoff.ts
+;// CONCATENATED MODULE: ./src/utils/cancellable_sleep.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -43377,6 +43879,55 @@ var get_fuzzed_delay = __webpack_require__(2572);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Wait the given `delay`, resolving the Promise when finished.
+ *
+ * The `cancellationSignal` given allows to cancel that timeout. In the case it
+ * is triggered before the timeout ended, this function will reject the
+ * corresponding `CancellationError` through the returned Promise.
+ *
+ * @param {number} delay - Delay to wait, in milliseconds
+ * @param {Object} cancellationSignal - `CancellationSignal` allowing to abort
+ * the timeout.
+ * @returns {Promise} - Resolve on timeout completion, rejects on timeout
+ * cancellation with the corresponding `CancellationError`.
+ */
+
+function cancellableSleep(delay, cancellationSignal) {
+  return new (pinkie_default())(function (res, rej) {
+    var timeout = setTimeout(function () {
+      unregisterCancelSignal();
+      res();
+    }, delay);
+    var unregisterCancelSignal = cancellationSignal.register(function onCancel(cancellationError) {
+      clearTimeout(timeout);
+      rej(cancellationError);
+    });
+  });
+}
+// EXTERNAL MODULE: ./src/utils/get_fuzzed_delay.ts
+var get_fuzzed_delay = __webpack_require__(2572);
+;// CONCATENATED MODULE: ./src/core/fetchers/utils/try_urls_with_backoff.ts
+
+
+
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 
 
@@ -43440,14 +43991,6 @@ function isOfflineRequestError(error) {
 
   return false; // under doubt, return false
 }
-
-var REQUEST_ERROR_TYPES;
-
-(function (REQUEST_ERROR_TYPES) {
-  REQUEST_ERROR_TYPES[REQUEST_ERROR_TYPES["None"] = 0] = "None";
-  REQUEST_ERROR_TYPES[REQUEST_ERROR_TYPES["Regular"] = 1] = "Regular";
-  REQUEST_ERROR_TYPES[REQUEST_ERROR_TYPES["Offline"] = 2] = "Offline";
-})(REQUEST_ERROR_TYPES || (REQUEST_ERROR_TYPES = {}));
 /**
  * Guess the type of error obtained.
  * @param {*} error
@@ -43456,19 +43999,26 @@ var REQUEST_ERROR_TYPES;
 
 
 function getRequestErrorType(error) {
-  return isOfflineRequestError(error) ? REQUEST_ERROR_TYPES.Offline : REQUEST_ERROR_TYPES.Regular;
+  return isOfflineRequestError(error) ? 2
+  /* Offline */
+  : 1
+  /* Regular */
+  ;
 }
 /**
  * Specific algorithm used to perform segment and manifest requests.
  *
  * Here how it works:
  *
- *   1. we give it one or multiple URLs available for the element we want to
- *      request, the request callback and some options
+ *   1. You give it one or multiple URLs available for the resource you want to
+ *      request (from the most important URL to the least important), the
+ *      request callback itself, and some options.
  *
  *   2. it tries to call the request callback with the first URL:
- *        - if it works as expected, it wrap the response in a `response` event.
- *        - if it fails, it emits a `retry` event and try with the next one.
+ *        - if it works as expected, it resolves the returned Promise with that
+ *          request's response.
+ *        - if it fails, it calls ther `onRetry` callback given with the
+ *          corresponding error and try with the next URL.
  *
  *   3. When all URLs have been tested (and failed), it decides - according to
  *      the error counters, configuration and errors received - if it can retry
@@ -43476,32 +44026,41 @@ function getRequestErrorType(error) {
  *        - If it can, it increments the corresponding error counter, wait a
  *          delay (based on an exponential backoff) and restart the same logic
  *          for all retry-able URL.
- *        - If it can't it just throws the error.
+ *        - If it can't it just reject the error through the returned Promise.
  *
  * Note that there are in fact two separate counters:
  *   - one for "offline" errors
  *   - one for other xhr errors
  * Both counters are resetted if the error type changes from an error to the
  * next.
- * @param {Array.<string} obs$
- * @param {Function} request$
+ *
+ * @param {Array.<string>} urls
+ * @param {Function} performRequest
  * @param {Object} options - Configuration options.
- * @returns {Observable}
+ * @param {Object} cancellationSignal
+ * @returns {Promise}
  */
 
 
-function tryURLsWithBackoff(urls, request$, options) {
+function tryURLsWithBackoff(urls, performRequest, options, cancellationSignal) {
+  if (cancellationSignal.isCancelled) {
+    return pinkie_default().reject(cancellationSignal.cancellationError);
+  }
+
   var baseDelay = options.baseDelay,
       maxDelay = options.maxDelay,
       maxRetryRegular = options.maxRetryRegular,
-      maxRetryOffline = options.maxRetryOffline;
+      maxRetryOffline = options.maxRetryOffline,
+      onRetry = options.onRetry;
   var retryCount = 0;
-  var lastError = REQUEST_ERROR_TYPES.None;
+  var lastError = 0
+  /* None */
+  ;
   var urlsToTry = urls.slice();
 
   if (urlsToTry.length === 0) {
     log/* default.warn */.Z.warn("Fetchers: no URL given to `tryURLsWithBackoff`.");
-    return empty/* EMPTY */.E;
+    return pinkie_default().reject(new Error("No URL to request"));
   }
 
   return tryURLsRecursively(urlsToTry[0], 0);
@@ -43519,82 +44078,160 @@ function tryURLsWithBackoff(urls, request$, options) {
    * @returns {Observable}
    */
 
-  function tryURLsRecursively(url, index) {
-    return request$(url).pipe((0,map/* map */.U)(function (res) {
-      return {
-        type: "response",
-        value: res
-      };
-    }), (0,catchError/* catchError */.K)(function (error) {
-      if (!shouldRetry(error)) {
-        // ban this URL
-        if (urlsToTry.length <= 1) {
-          // This was the last one, throw
-          throw error;
-        } // else, remove that element from the array and go the next URL
+  function tryURLsRecursively(_x, _x2) {
+    return _tryURLsRecursively.apply(this, arguments);
+  }
 
+  function _tryURLsRecursively() {
+    _tryURLsRecursively = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(url, index) {
+      var res, newIndex, currentError, maxRetry, _newIndex, delay, fuzzedDelay, nextURL;
 
-        urlsToTry.splice(index, 1);
-        var newIndex = index >= urlsToTry.length - 1 ? 0 : index;
-        return tryURLsRecursively(urlsToTry[newIndex], newIndex).pipe((0,startWith/* startWith */.O)({
-          type: "retry",
-          value: error
-        }));
-      }
+      return regenerator_default().wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.prev = 0;
+              _context.next = 3;
+              return performRequest(url, cancellationSignal);
 
-      var currentError = getRequestErrorType(error);
-      var maxRetry = currentError === REQUEST_ERROR_TYPES.Offline ? maxRetryOffline : maxRetryRegular;
+            case 3:
+              res = _context.sent;
+              return _context.abrupt("return", res);
 
-      if (currentError !== lastError) {
-        retryCount = 0;
-        lastError = currentError;
-      }
+            case 7:
+              _context.prev = 7;
+              _context.t0 = _context["catch"](0);
 
-      if (index < urlsToTry.length - 1) {
-        // there is still URLs to test
-        var _newIndex = index + 1;
+              if (!task_canceller/* default.isCancellationError */.ZP.isCancellationError(_context.t0)) {
+                _context.next = 11;
+                break;
+              }
 
-        return tryURLsRecursively(urlsToTry[_newIndex], _newIndex).pipe((0,startWith/* startWith */.O)({
-          type: "retry",
-          value: error
-        }));
-      } // Here, we were using the last element of the `urlsToTry` array.
-      // Increment counter and restart with the first URL
+              throw _context.t0;
 
+            case 11:
+              if (shouldRetry(_context.t0)) {
+                _context.next = 20;
+                break;
+              }
 
-      retryCount++;
+              if (!(urlsToTry.length <= 1)) {
+                _context.next = 14;
+                break;
+              }
 
-      if (retryCount > maxRetry) {
-        throw error;
-      }
+              throw _context.t0;
 
-      var delay = Math.min(baseDelay * Math.pow(2, retryCount - 1), maxDelay);
-      var fuzzedDelay = (0,get_fuzzed_delay/* default */.Z)(delay);
-      var nextURL = urlsToTry[0];
-      return (0,timer/* timer */.H)(fuzzedDelay).pipe((0,mergeMap/* mergeMap */.z)(function () {
-        return tryURLsRecursively(nextURL, 0);
-      }), (0,startWith/* startWith */.O)({
-        type: "retry",
-        value: error
-      }));
+            case 14:
+              // else, remove that element from the array and go the next URL
+              urlsToTry.splice(index, 1);
+              newIndex = index >= urlsToTry.length - 1 ? 0 : index;
+              onRetry(_context.t0);
+
+              if (!cancellationSignal.isCancelled) {
+                _context.next = 19;
+                break;
+              }
+
+              throw cancellationSignal.cancellationError;
+
+            case 19:
+              return _context.abrupt("return", tryURLsRecursively(urlsToTry[newIndex], newIndex));
+
+            case 20:
+              currentError = getRequestErrorType(_context.t0);
+              maxRetry = currentError === 2
+              /* Offline */
+              ? maxRetryOffline : maxRetryRegular;
+
+              if (currentError !== lastError) {
+                retryCount = 0;
+                lastError = currentError;
+              }
+
+              if (!(index < urlsToTry.length - 1)) {
+                _context.next = 29;
+                break;
+              }
+
+              // there is still URLs to test
+              _newIndex = index + 1;
+              onRetry(_context.t0);
+
+              if (!cancellationSignal.isCancelled) {
+                _context.next = 28;
+                break;
+              }
+
+              throw cancellationSignal.cancellationError;
+
+            case 28:
+              return _context.abrupt("return", tryURLsRecursively(urlsToTry[_newIndex], _newIndex));
+
+            case 29:
+              // Here, we were using the last element of the `urlsToTry` array.
+              // Increment counter and restart with the first URL
+              retryCount++;
+
+              if (!(retryCount > maxRetry)) {
+                _context.next = 32;
+                break;
+              }
+
+              throw _context.t0;
+
+            case 32:
+              delay = Math.min(baseDelay * Math.pow(2, retryCount - 1), maxDelay);
+              fuzzedDelay = (0,get_fuzzed_delay/* default */.Z)(delay);
+              nextURL = urlsToTry[0];
+              onRetry(_context.t0);
+
+              if (!cancellationSignal.isCancelled) {
+                _context.next = 38;
+                break;
+              }
+
+              throw cancellationSignal.cancellationError;
+
+            case 38:
+              _context.next = 40;
+              return cancellableSleep(fuzzedDelay, cancellationSignal);
+
+            case 40:
+              return _context.abrupt("return", tryURLsRecursively(nextURL, 0));
+
+            case 41:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, null, [[0, 7]]);
     }));
+    return _tryURLsRecursively.apply(this, arguments);
   }
 }
 /**
  * Lightweight version of the request algorithm, this time with only a simple
- * Observable given.
+ * Promise given.
  * @param {Function} request$
  * @param {Object} options
  * @returns {Observable}
  */
 
-function tryRequestObservableWithBackoff(request$, options) {
+function tryRequestPromiseWithBackoff(performRequest, options, cancellationSignal) {
   // same than for a single unknown URL
-  return tryURLsWithBackoff([null], function () {
-    return request$;
-  }, options);
+  return tryURLsWithBackoff([null], performRequest, options, cancellationSignal);
 }
-;// CONCATENATED MODULE: ./src/core/fetchers/utils/create_request_scheduler.ts
+;// CONCATENATED MODULE: ./src/core/fetchers/manifest/manifest_fetcher.ts
+
+
+
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -43615,90 +44252,14 @@ function tryRequestObservableWithBackoff(request$, options) {
 
 
 
-function createRequestScheduler(backoffOptions, warning$) {
-  /**
-   * Allow the parser to schedule a new request.
-   * @param {Function} request - Function performing the request.
-   * @returns {Function}
-   */
-  return function scheduleRequest(request) {
-    return tryRequestObservableWithBackoff((0,rx_try_catch/* default */.Z)(request, undefined), backoffOptions).pipe((0,filter_map/* default */.Z)(function (evt) {
-      if (evt.type === "retry") {
-        warning$.next(errorSelector(evt.value));
-        return null;
-      }
 
-      return evt.value;
-    }, null), (0,catchError/* catchError */.K)(function (error) {
-      throw errorSelector(error);
-    }));
-  };
-}
-;// CONCATENATED MODULE: ./src/core/fetchers/manifest/get_manifest_backoff_options.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
+
 
 var DEFAULT_MAX_MANIFEST_REQUEST_RETRY = config/* default.DEFAULT_MAX_MANIFEST_REQUEST_RETRY */.Z.DEFAULT_MAX_MANIFEST_REQUEST_RETRY,
     DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
     INITIAL_BACKOFF_DELAY_BASE = config/* default.INITIAL_BACKOFF_DELAY_BASE */.Z.INITIAL_BACKOFF_DELAY_BASE,
     MAX_BACKOFF_DELAY_BASE = config/* default.MAX_BACKOFF_DELAY_BASE */.Z.MAX_BACKOFF_DELAY_BASE;
-/**
- * Parse config to replace missing manifest backoff options.
- * @param {Object} backoffOptions
- * @returns {Object}
- */
-
-function getManifestBackoffOptions(_ref) {
-  var maxRetryRegular = _ref.maxRetryRegular,
-      maxRetryOffline = _ref.maxRetryOffline,
-      lowLatencyMode = _ref.lowLatencyMode;
-  var baseDelay = lowLatencyMode ? INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : INITIAL_BACKOFF_DELAY_BASE.REGULAR;
-  var maxDelay = lowLatencyMode ? MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : MAX_BACKOFF_DELAY_BASE.REGULAR;
-  return {
-    baseDelay: baseDelay,
-    maxDelay: maxDelay,
-    maxRetryRegular: maxRetryRegular !== undefined ? maxRetryRegular : DEFAULT_MAX_MANIFEST_REQUEST_RETRY,
-    maxRetryOffline: maxRetryOffline !== undefined ? maxRetryOffline : DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE
-  };
-}
-;// CONCATENATED MODULE: ./src/core/fetchers/manifest/manifest_fetcher.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-
-
-
 /**
  * Class allowing to facilitate the task of loading and parsing a Manifest.
  * @class ManifestFetcher
@@ -43720,21 +44281,29 @@ function getManifestBackoffOptions(_ref) {
 
 var ManifestFetcher = /*#__PURE__*/function () {
   /**
-   * @param {string | undefined} url
-   * @param {Object} pipelines
-   * @param {Object} backoffOptions
+   * Construct a new ManifestFetcher.
+   * @param {string | undefined} url - Default Manifest url, will be used when
+   * no URL is provided to the `fetch` function.
+   * `undefined` if unknown or if a Manifest should be retrieved through other
+   * means than an HTTP request.
+   * @param {Object} pipelines - Transport pipelines used to perform the
+   * Manifest loading and parsing operations.
+   * @param {Object} settings - Configure the `ManifestFetcher`.
    */
-  function ManifestFetcher(url, pipelines, backoffOptions) {
+  function ManifestFetcher(url, pipelines, settings) {
     this._manifestUrl = url;
     this._pipelines = pipelines.manifest;
-    this._backoffOptions = getManifestBackoffOptions(backoffOptions);
+    this._settings = settings;
   }
   /**
-   * (re-)Load the Manifest without yet parsing it.
+   * (re-)Load the Manifest.
+   * This method does not yet parse it, parsing will then be available through
+   * a callback available on the response.
    *
    * You can set an `url` on which that Manifest will be requested.
-   * If not set, the regular Manifest url - defined on the
-   * `ManifestFetcher` instanciation - will be used instead.
+   * If not set, the regular Manifest url - defined on the `ManifestFetcher`
+   * instanciation - will be used instead.
+   *
    * @param {string} [url]
    * @returns {Observable}
    */
@@ -43745,32 +44314,85 @@ var ManifestFetcher = /*#__PURE__*/function () {
   _proto.fetch = function fetch(url) {
     var _this = this;
 
-    var _a;
+    return new Observable/* Observable */.y(function (obs) {
+      var pipelines = _this._pipelines;
+      var requestUrl = url !== null && url !== void 0 ? url : _this._manifestUrl;
+      /** `true` if the loading pipeline is already completely executed. */
 
-    var requestUrl = url !== null && url !== void 0 ? url : this._manifestUrl; // TODO Remove the resolver completely in the next major version
+      var hasFinishedLoading = false;
+      /** Allows to cancel the loading operation. */
 
-    var resolver = (_a = this._pipelines.resolver) !== null && _a !== void 0 ? _a : of.of;
-    var loader = this._pipelines.loader;
-    return (0,rx_try_catch/* default */.Z)(resolver, {
-      url: requestUrl
-    }).pipe((0,catchError/* catchError */.K)(function (error) {
-      throw errorSelector(error);
-    }), (0,mergeMap/* mergeMap */.z)(function (loaderArgument) {
-      var loader$ = (0,rx_try_catch/* default */.Z)(loader, loaderArgument);
-      return tryRequestObservableWithBackoff(loader$, _this._backoffOptions).pipe((0,catchError/* catchError */.K)(function (error) {
-        throw errorSelector(error);
-      }), (0,map/* map */.U)(function (evt) {
-        return evt.type === "retry" ? {
+      var canceller = new task_canceller/* default */.ZP();
+
+      var backoffSettings = _this._getBackoffSetting(function (err) {
+        obs.next({
           type: "warning",
-          value: errorSelector(evt.value)
-        } : {
+          value: errorSelector(err)
+        });
+      });
+
+      var loadingPromise = pipelines.resolveManifestUrl === undefined ? callLoaderWithRetries(requestUrl) : callResolverWithRetries(requestUrl).then(callLoaderWithRetries);
+      loadingPromise.then(function (response) {
+        hasFinishedLoading = true;
+        obs.next({
           type: "response",
           parse: function parse(parserOptions) {
-            return _this._parseLoadedManifest(evt.value.value, parserOptions);
+            return _this._parseLoadedManifest(response, parserOptions);
           }
+        });
+        obs.complete();
+      })["catch"](function (err) {
+        if (canceller.isUsed) {
+          // Cancellation has already been handled by RxJS
+          return;
+        }
+
+        hasFinishedLoading = true;
+        obs.error(errorSelector(err));
+      });
+      return function () {
+        if (!hasFinishedLoading) {
+          canceller.cancel();
+        }
+      };
+      /**
+       * Call the resolver part of the pipeline, retrying if it fails according
+       * to the current settings.
+       * Returns the Promise of the last attempt.
+       * /!\ This pipeline should have a `resolveManifestUrl` function defined.
+       * @param {string | undefined}  resolverUrl
+       * @returns {Promise}
+       */
+
+      function callResolverWithRetries(resolverUrl) {
+        var resolveManifestUrl = pipelines.resolveManifestUrl;
+        (0,assert/* default */.Z)(resolveManifestUrl !== undefined);
+
+        var callResolver = function callResolver() {
+          return resolveManifestUrl(resolverUrl, canceller.signal);
         };
-      }));
-    }));
+
+        return tryRequestPromiseWithBackoff(callResolver, backoffSettings, canceller.signal);
+      }
+      /**
+       * Call the loader part of the pipeline, retrying if it fails according
+       * to the current settings.
+       * Returns the Promise of the last attempt.
+       * @param {string | undefined}  resolverUrl
+       * @returns {Promise}
+       */
+
+
+      function callLoaderWithRetries(manifestUrl) {
+        var loadManifest = pipelines.loadManifest;
+
+        var callLoader = function callLoader() {
+          return loadManifest(manifestUrl, canceller.signal);
+        };
+
+        return tryRequestPromiseWithBackoff(callLoader, backoffSettings, canceller.signal);
+      }
+    });
   }
   /**
    * Parse an already loaded Manifest.
@@ -43803,59 +44425,202 @@ var ManifestFetcher = /*#__PURE__*/function () {
   ;
 
   _proto._parseLoadedManifest = function _parseLoadedManifest(loaded, parserOptions) {
-    var sendingTime = loaded.sendingTime,
-        receivedTime = loaded.receivedTime;
-    var parsingTimeStart = performance.now();
-    var schedulerWarnings$ = new Subject/* Subject */.x();
-    var scheduleRequest = createRequestScheduler(this._backoffOptions, schedulerWarnings$);
-    return (0,merge/* merge */.T)(schedulerWarnings$.pipe((0,map/* map */.U)(function (err) {
-      return {
-        type: "warning",
-        value: err
-      };
-    })), this._pipelines.parser({
-      response: loaded,
-      url: this._manifestUrl,
-      externalClockOffset: parserOptions.externalClockOffset,
-      previousManifest: parserOptions.previousManifest,
-      scheduleRequest: scheduleRequest,
-      unsafeMode: parserOptions.unsafeMode
-    }).pipe((0,catchError/* catchError */.K)(function (error) {
-      throw formatError(error, {
-        defaultCode: "PIPELINE_PARSE_ERROR",
-        defaultReason: "Unknown error when parsing the Manifest"
+    var _this2 = this;
+
+    return new Observable/* Observable */.y(function (obs) {
+      var parsingTimeStart = performance.now();
+      var canceller = new task_canceller/* default */.ZP();
+      var sendingTime = loaded.sendingTime,
+          receivedTime = loaded.receivedTime;
+
+      var backoffSettings = _this2._getBackoffSetting(function (err) {
+        obs.next({
+          type: "warning",
+          value: errorSelector(err)
+        });
       });
-    }), (0,map/* map */.U)(function (parsingEvt) {
-      if (parsingEvt.type === "warning") {
-        var formatted = formatError(parsingEvt.value, {
+
+      var opts = {
+        externalClockOffset: parserOptions.externalClockOffset,
+        unsafeMode: parserOptions.unsafeMode,
+        previousManifest: parserOptions.previousManifest,
+        originalUrl: _this2._manifestUrl
+      };
+
+      try {
+        var res = _this2._pipelines.parseManifest(loaded, opts, onWarnings, canceller.signal, scheduleRequest);
+
+        if (!isPromise(res)) {
+          emitManifestAndComplete(res.manifest);
+        } else {
+          res.then(function (_ref) {
+            var manifest = _ref.manifest;
+            return emitManifestAndComplete(manifest);
+          })["catch"](function (err) {
+            if (canceller.isUsed) {
+              // Cancellation is already handled by RxJS
+              return;
+            }
+
+            emitError(err, true);
+          });
+        }
+      } catch (err) {
+        if (canceller.isUsed) {
+          // Cancellation is already handled by RxJS
+          return undefined;
+        }
+
+        emitError(err, true);
+      }
+
+      return function () {
+        canceller.cancel();
+      };
+      /**
+       * Perform a request with the same retry mechanisms and error handling
+       * than for a Manifest loader.
+       * @param {Function} performRequest
+       * @returns {Function}
+       */
+
+      function scheduleRequest(_x) {
+        return _scheduleRequest.apply(this, arguments);
+      }
+      /**
+       * Handle minor errors encountered by a Manifest parser.
+       * @param {Array.<Error>} warnings
+       */
+
+
+      function _scheduleRequest() {
+        _scheduleRequest = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(performRequest) {
+          var data;
+          return regenerator_default().wrap(function _callee$(_context) {
+            while (1) {
+              switch (_context.prev = _context.next) {
+                case 0:
+                  _context.prev = 0;
+                  _context.next = 3;
+                  return tryRequestPromiseWithBackoff(performRequest, backoffSettings, canceller.signal);
+
+                case 3:
+                  data = _context.sent;
+                  return _context.abrupt("return", data);
+
+                case 7:
+                  _context.prev = 7;
+                  _context.t0 = _context["catch"](0);
+                  throw errorSelector(_context.t0);
+
+                case 10:
+                case "end":
+                  return _context.stop();
+              }
+            }
+          }, _callee, null, [[0, 7]]);
+        }));
+        return _scheduleRequest.apply(this, arguments);
+      }
+
+      function onWarnings(warnings) {
+        for (var _iterator = _createForOfIteratorHelperLoose(warnings), _step; !(_step = _iterator()).done;) {
+          var warning = _step.value;
+
+          if (canceller.isUsed) {
+            return;
+          }
+
+          emitError(warning, false);
+        }
+      }
+      /**
+       * Emit a formatted "parsed" event through `obs`.
+       * To call once the Manifest has been parsed.
+       * @param {Object} manifest
+       */
+
+
+      function emitManifestAndComplete(manifest) {
+        onWarnings(manifest.parsingErrors);
+        var parsingTime = performance.now() - parsingTimeStart;
+        log/* default.info */.Z.info("MF: Manifest parsed in " + parsingTime + "ms");
+        obs.next({
+          type: "parsed",
+          manifest: manifest,
+          sendingTime: sendingTime,
+          receivedTime: receivedTime,
+          parsingTime: parsingTime
+        });
+        obs.complete();
+      }
+      /**
+       * Format the given Error and emit it through `obs`.
+       * Either through a `"warning"` event, if `isFatal` is `false`, or through
+       * a fatal Observable error, if `isFatal` is set to `true`.
+       * @param {*} err
+       * @param {boolean} isFatal
+       */
+
+
+      function emitError(err, isFatal) {
+        var formattedError = formatError(err, {
           defaultCode: "PIPELINE_PARSE_ERROR",
           defaultReason: "Unknown error when parsing the Manifest"
         });
-        return {
-          type: "warning",
-          value: formatted
-        };
-      } // 2 - send response
 
+        if (isFatal) {
+          obs.error(formattedError);
+        } else {
+          obs.next({
+            type: "warning",
+            value: formattedError
+          });
+        }
+      }
+    });
+  }
+  /**
+   * Construct "backoff settings" that can be used with a range of functions
+   * allowing to perform multiple request attempts
+   * @param {Function} onRetry
+   * @returns {Object}
+   */
+  ;
 
-      var parsingTime = performance.now() - parsingTimeStart;
-      log/* default.info */.Z.info("MF: Manifest parsed in " + parsingTime + "ms");
-      return {
-        type: "parsed",
-        manifest: parsingEvt.value.manifest,
-        sendingTime: sendingTime,
-        receivedTime: receivedTime,
-        parsingTime: parsingTime
-      };
-    }), finalize(function () {
-      schedulerWarnings$.complete();
-    })));
+  _proto._getBackoffSetting = function _getBackoffSetting(onRetry) {
+    var _this$_settings = this._settings,
+        lowLatencyMode = _this$_settings.lowLatencyMode,
+        ogRegular = _this$_settings.maxRetryRegular,
+        ogOffline = _this$_settings.maxRetryOffline;
+    var baseDelay = lowLatencyMode ? INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : INITIAL_BACKOFF_DELAY_BASE.REGULAR;
+    var maxDelay = lowLatencyMode ? MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : MAX_BACKOFF_DELAY_BASE.REGULAR;
+    var maxRetryRegular = ogRegular !== null && ogRegular !== void 0 ? ogRegular : DEFAULT_MAX_MANIFEST_REQUEST_RETRY;
+    var maxRetryOffline = ogOffline !== null && ogOffline !== void 0 ? ogOffline : DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE;
+    return {
+      onRetry: onRetry,
+      baseDelay: baseDelay,
+      maxDelay: maxDelay,
+      maxRetryRegular: maxRetryRegular,
+      maxRetryOffline: maxRetryOffline
+    };
   };
 
   return ManifestFetcher;
 }();
+/**
+ * Returns `true` when the returned value seems to be a Promise instance, as
+ * created by the RxPlayer.
+ * @param {*} val
+ * @returns {boolean}
+ */
 
 
+
+
+function isPromise(val) {
+  return val instanceof (pinkie_default()) || val instanceof Promise;
+}
 ;// CONCATENATED MODULE: ./src/core/fetchers/manifest/index.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -43874,44 +44639,6 @@ var ManifestFetcher = /*#__PURE__*/function () {
  */
 
 /* harmony default export */ var fetchers_manifest = (ManifestFetcher);
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/get_segment_backoff_options.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-var DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
-    get_segment_backoff_options_DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
-    get_segment_backoff_options_INITIAL_BACKOFF_DELAY_BASE = config/* default.INITIAL_BACKOFF_DELAY_BASE */.Z.INITIAL_BACKOFF_DELAY_BASE,
-    get_segment_backoff_options_MAX_BACKOFF_DELAY_BASE = config/* default.MAX_BACKOFF_DELAY_BASE */.Z.MAX_BACKOFF_DELAY_BASE;
-/**
- * @param {string} bufferType
- * @param {Object}
- * @returns {Object}
- */
-
-function getSegmentBackoffOptions(bufferType, _ref) {
-  var maxRetryRegular = _ref.maxRetryRegular,
-      maxRetryOffline = _ref.maxRetryOffline,
-      lowLatencyMode = _ref.lowLatencyMode;
-  return {
-    maxRetryRegular: bufferType === "image" ? 0 : maxRetryRegular !== null && maxRetryRegular !== void 0 ? maxRetryRegular : DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
-    maxRetryOffline: maxRetryOffline !== null && maxRetryOffline !== void 0 ? maxRetryOffline : get_segment_backoff_options_DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
-    baseDelay: lowLatencyMode ? get_segment_backoff_options_INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : get_segment_backoff_options_INITIAL_BACKOFF_DELAY_BASE.REGULAR,
-    maxDelay: lowLatencyMode ? get_segment_backoff_options_MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : get_segment_backoff_options_MAX_BACKOFF_DELAY_BASE.REGULAR
-  };
-}
 ;// CONCATENATED MODULE: ./src/core/fetchers/segment/prioritized_segment_fetcher.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -44515,12 +45242,8 @@ var ObservablePrioritizer = /*#__PURE__*/function () {
 }();
 
 
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/tap.js
-var tap = __webpack_require__(2006);
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
 var array_includes = __webpack_require__(7714);
-// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
-var assert_unreachable = __webpack_require__(8418);
 // EXTERNAL MODULE: ./src/utils/id_generator.ts
 var id_generator = __webpack_require__(908);
 ;// CONCATENATED MODULE: ./src/utils/initialization_segment_cache.ts
@@ -44590,169 +45313,6 @@ var InitializationSegmentCache = /*#__PURE__*/function () {
 }();
 
 /* harmony default export */ var initialization_segment_cache = (InitializationSegmentCache);
-// EXTERNAL MODULE: ./src/utils/cast_to_observable.ts
-var cast_to_observable = __webpack_require__(8117);
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/create_segment_loader.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-
-
-/**
- * Returns a function allowing to load any wanted segment.
- *
- * The function returned takes in argument information about the wanted segment
- * and returns an Observable which will emit various events related to the
- * segment request (see ISegmentLoaderEvent).
- *
- * This observable will throw if, following the options given, the request and
- * possible retry all failed.
- *
- * This observable will complete after emitting all the segment's data.
- *
- * Type parameters:
- *   - T: type of the data emitted
- *
- * @param {Function} loader
- * @param {Object | undefined} cache
- * @param {Object} options
- * @returns {Function}
- */
-
-function createSegmentLoader(loader, cache, backoffOptions) {
-  /**
-   * Try to retrieve the segment from the cache and if not found call the
-   * pipeline's loader (with possible retries) to load it.
-   * @param {Object} loaderArgument - Context for the wanted segment.
-   * @returns {Observable}
-   */
-  function loadData(wantedContent) {
-    /**
-     * Call the Pipeline's loader with an exponential Backoff.
-     * @returns {Observable}
-     */
-    function startLoaderWithBackoff() {
-      var _a;
-
-      var request$ = function request$(url) {
-        var loaderArgument = (0,object_assign/* default */.Z)({
-          url: url
-        }, wantedContent);
-        return (0,concat/* concat */.z)((0,of.of)({
-          type: "request",
-          value: loaderArgument
-        }), (0,rx_try_catch/* default */.Z)(loader, loaderArgument));
-      };
-
-      return tryURLsWithBackoff((_a = wantedContent.segment.mediaURLs) !== null && _a !== void 0 ? _a : [null], request$, backoffOptions).pipe((0,catchError/* catchError */.K)(function (error) {
-        throw errorSelector(error);
-      }), (0,map/* map */.U)(function (evt) {
-        if (evt.type === "retry") {
-          return {
-            type: "warning",
-            value: errorSelector(evt.value)
-          };
-        } else if (evt.value.type === "request") {
-          return evt.value;
-        }
-
-        var response = evt.value;
-
-        if (response.type === "data-loaded" && cache != null) {
-          cache.add(wantedContent, response.value);
-        }
-
-        return evt.value;
-      }));
-    }
-
-    var dataFromCache = cache != null ? cache.get(wantedContent) : null;
-
-    if (dataFromCache != null) {
-      return (0,cast_to_observable/* default */.Z)(dataFromCache).pipe((0,map/* map */.U)(function (response) {
-        return {
-          type: "cache",
-          value: response
-        };
-      }), (0,catchError/* catchError */.K)(startLoaderWithBackoff));
-    }
-
-    return startLoaderWithBackoff();
-  }
-  /**
-   * Load the corresponding segment.
-   * @param {Object} content
-   * @returns {Observable}
-   */
-
-
-  return function loadSegment(content) {
-    return loadData(content).pipe((0,mergeMap/* mergeMap */.z)(function (arg) {
-      var metrics$;
-
-      if ((arg.type === "data-chunk-complete" || arg.type === "data-loaded") && arg.value.size !== undefined && arg.value.duration !== undefined) {
-        metrics$ = (0,of.of)({
-          type: "metrics",
-          value: {
-            size: arg.value.size,
-            duration: arg.value.duration,
-            content: content
-          }
-        });
-      } else {
-        metrics$ = empty/* EMPTY */.E;
-      }
-
-      switch (arg.type) {
-        case "warning":
-        case "request":
-        case "progress":
-          return (0,of.of)(arg);
-
-        case "cache":
-        case "data-created":
-        case "data-loaded":
-          return (0,concat/* concat */.z)((0,of.of)({
-            type: "data",
-            value: arg.value
-          }), metrics$);
-
-        case "data-chunk":
-          return (0,of.of)({
-            type: "chunk",
-            value: arg.value
-          });
-
-        case "data-chunk-complete":
-          return (0,concat/* concat */.z)((0,of.of)({
-            type: "chunk-complete",
-            value: null
-          }), metrics$);
-
-        default:
-          (0,assert_unreachable/* default */.Z)(arg);
-      }
-    }));
-  };
-}
 ;// CONCATENATED MODULE: ./src/core/fetchers/segment/segment_fetcher.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -44777,6 +45337,12 @@ function createSegmentLoader(loader, cache, backoffOptions) {
 
 
 
+
+
+var DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
+    segment_fetcher_DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE = config/* default.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE */.Z.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
+    segment_fetcher_INITIAL_BACKOFF_DELAY_BASE = config/* default.INITIAL_BACKOFF_DELAY_BASE */.Z.INITIAL_BACKOFF_DELAY_BASE,
+    segment_fetcher_MAX_BACKOFF_DELAY_BASE = config/* default.MAX_BACKOFF_DELAY_BASE */.Z.MAX_BACKOFF_DELAY_BASE;
 var generateRequestID = (0,id_generator/* default */.Z)();
 /**
  * Create a function which will fetch and parse segments.
@@ -44787,160 +45353,230 @@ var generateRequestID = (0,id_generator/* default */.Z)();
  * @returns {Function}
  */
 
-function segment_fetcher_createSegmentFetcher(bufferType, transport, requests$, options) {
-  var cache = (0,array_includes/* default */.Z)(["audio", "video"], bufferType) ? new initialization_segment_cache() : undefined;
-  var segmentLoader = createSegmentLoader(transport[bufferType].loader, cache, options); // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-
-  var segmentParser = transport[bufferType].parser; // deal with it
-
+function segment_fetcher_createSegmentFetcher(bufferType, pipeline, requests$, options) {
   /**
-   * Process the segmentLoader observable to adapt it to the the rest of the
-   * code:
-   *   - use the requests subject for network requests and their progress
-   *   - use the warning$ subject for retries' error messages
-   *   - only emit the data
+   * Cache audio and video initialization segments.
+   * This allows to avoid doing too many requests for what are usually very
+   * small files.
+   */
+  var cache = (0,array_includes/* default */.Z)(["audio", "video"], bufferType) ? new initialization_segment_cache() : undefined;
+  var loadSegment = pipeline.loadSegment,
+      parseSegment = pipeline.parseSegment;
+  /**
+   * Fetch a specific segment.
+   *
+   * This function returns an Observable which will fetch the segment on
+   * subscription.
+   * This Observable will emit various events during that request lifecycle and
+   * throw if the segment request(s) (including potential retries) fail.
+   *
+   * The Observable will automatically complete once no events are left to be
+   * sent.
    * @param {Object} content
    * @returns {Observable}
    */
 
   return function fetchSegment(content) {
-    var id = generateRequestID();
-    var requestBeginSent = false;
-    return segmentLoader(content).pipe((0,tap/* tap */.b)(function (arg) {
-      switch (arg.type) {
-        case "metrics":
-          {
-            requests$.next(arg);
-            break;
-          }
+    var segment = content.segment;
+    return new Observable/* Observable */.y(function (obs) {
+      var _a; // Retrieve from cache if it exists
 
-        case "request":
-          {
-            var value = arg.value; // format it for ABR Handling
 
-            var segment = value.segment;
+      var cached = cache !== undefined ? cache.get(content) : null;
 
-            if (segment === undefined) {
-              return;
-            }
+      if (cached !== null) {
+        obs.next({
+          type: "chunk",
+          parse: generateParserFunction(cached, false)
+        });
+        obs.next({
+          type: "chunk-complete"
+        });
+        obs.complete();
+        return undefined;
+      }
 
-            requestBeginSent = true;
+      var id = generateRequestID();
+      requests$.next({
+        type: "requestBegin",
+        value: {
+          duration: segment.duration,
+          time: segment.time,
+          requestTimestamp: performance.now(),
+          id: id
+        }
+      });
+      var canceller = new task_canceller/* default */.ZP();
+      var hasRequestEnded = false;
+      var loaderCallbacks = {
+        /**
+         * Callback called when the segment loader has progress information on
+         * the request.
+         * @param {Object} info
+         */
+        onProgress: function onProgress(info) {
+          if (info.totalSize !== undefined && info.size < info.totalSize) {
             requests$.next({
-              type: "requestBegin",
+              type: "progress",
               value: {
-                duration: segment.duration,
-                time: segment.time,
-                requestTimestamp: performance.now(),
+                duration: info.duration,
+                size: info.size,
+                totalSize: info.totalSize,
+                timestamp: performance.now(),
                 id: id
               }
             });
-            break;
           }
-
-        case "progress":
-          {
-            var _value = arg.value;
-
-            if (_value.totalSize != null && _value.size < _value.totalSize) {
-              requests$.next({
-                type: "progress",
-                value: {
-                  duration: _value.duration,
-                  size: _value.size,
-                  totalSize: _value.totalSize,
-                  timestamp: performance.now(),
-                  id: id
-                }
-              });
-            }
-
-            break;
-          }
-      }
-    }), finalize(function () {
-      if (requestBeginSent) {
-        requests$.next({
-          type: "requestEnd",
-          value: {
-            id: id
-          }
-        });
-      }
-    }), (0,filter/* filter */.h)(function (e) {
-      switch (e.type) {
-        case "warning":
-        case "chunk":
-        case "chunk-complete":
-        case "data":
-          return true;
-
-        case "progress":
-        case "metrics":
-        case "request":
-          return false;
-
-        default:
-          (0,assert_unreachable/* default */.Z)(e);
-      }
-    }), (0,mergeMap/* mergeMap */.z)(function (evt) {
-      if (evt.type === "warning") {
-        return (0,of.of)(evt);
-      }
-
-      if (evt.type === "chunk-complete") {
-        return (0,of.of)({
-          type: "chunk-complete"
-        });
-      }
-
-      var isChunked = evt.type === "chunk";
-      var data = {
-        type: "chunk",
+        },
 
         /**
-         * Parse the loaded data.
-         * @param {Object} [initTimescale]
-         * @returns {Observable}
+         * Callback called when the segment is communicated by the loader
+         * through decodable sub-segment(s) called chunk(s), with a chunk in
+         * argument.
+         * @param {*} chunkData
          */
-        parse: function parse(initTimescale) {
-          var response = {
-            data: evt.value.responseData,
+        onNewChunk: function onNewChunk(chunkData) {
+          obs.next({
+            type: "chunk",
+            parse: generateParserFunction(chunkData, true)
+          });
+        }
+      };
+      tryURLsWithBackoff((_a = segment.mediaURLs) !== null && _a !== void 0 ? _a : [null], callLoaderWithUrl, (0,object_assign/* default */.Z)({
+        onRetry: onRetry
+      }, options), canceller.signal).then(function (res) {
+        if (res.resultType === "segment-loaded") {
+          var loadedData = res.resultData.responseData;
+
+          if (cache !== undefined) {
+            cache.add(content, res.resultData.responseData);
+          }
+
+          obs.next({
+            type: "chunk",
+            parse: generateParserFunction(loadedData, false)
+          });
+        } else if (res.resultType === "segment-created") {
+          obs.next({
+            type: "chunk",
+            parse: generateParserFunction(res.resultData, false)
+          });
+        }
+
+        hasRequestEnded = true;
+        obs.next({
+          type: "chunk-complete"
+        });
+
+        if ((res.resultType === "segment-loaded" || res.resultType === "chunk-complete") && res.resultData.size !== undefined && res.resultData.duration !== undefined) {
+          requests$.next({
+            type: "metrics",
+            value: {
+              size: res.resultData.size,
+              duration: res.resultData.duration,
+              content: content
+            }
+          });
+        }
+
+        if (!canceller.isUsed) {
+          // The current Observable could have been canceled as a result of one
+          // of the previous `next` calls. In that case, we don't want to send
+          // a "requestEnd" again as it has already been sent on cancellation.
+          //
+          // Note that we only perform this check for `"requestEnd"` on
+          // purpose. Observable's events should have been ignored by RxJS if
+          // the Observable has already been canceled and we don't care if
+          // `"metrics"` is sent there.
+          requests$.next({
+            type: "requestEnd",
+            value: {
+              id: id
+            }
+          });
+        }
+
+        obs.complete();
+      })["catch"](function (err) {
+        hasRequestEnded = true;
+        obs.error(errorSelector(err));
+      });
+      return function () {
+        if (!hasRequestEnded) {
+          canceller.cancel();
+          requests$.next({
+            type: "requestEnd",
+            value: {
+              id: id
+            }
+          });
+        }
+      };
+      /**
+       * Call a segment loader for the given URL with the right arguments.
+       * @param {string|null} url
+       * @param {Object} cancellationSignal
+       * @returns {Promise}
+       */
+
+      function callLoaderWithUrl(url, cancellationSignal) {
+        return loadSegment(url, content, cancellationSignal, loaderCallbacks);
+      }
+      /**
+       * Generate function allowing to parse a loaded segment.
+       * @param {*} data
+       * @param {Boolean} isChunked
+       * @returns {Function}
+       */
+
+
+      function generateParserFunction(data, isChunked) {
+        return function parse(initTimescale) {
+          var loaded = {
+            data: data,
             isChunked: isChunked
           };
-          /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-          /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-          /* eslint-disable @typescript-eslint/no-unsafe-return */
-
-          return segmentParser({
-            response: response,
-            initTimescale: initTimescale,
-            content: content
-          })
-          /* eslint-enable @typescript-eslint/no-unsafe-call */
-
-          /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-
-          /* eslint-enable @typescript-eslint/no-unsafe-return */
-          .pipe((0,catchError/* catchError */.K)(function (error) {
+          try {
+            return parseSegment(loaded, content, initTimescale);
+          } catch (error) {
             throw formatError(error, {
               defaultCode: "PIPELINE_PARSE_ERROR",
               defaultReason: "Unknown parsing error"
             });
-          }));
-        }
-      };
-
-      if (isChunked) {
-        return (0,of.of)(data);
+          }
+        };
       }
+      /**
+       * Function called when the function request is retried.
+       * @param {*} err
+       */
 
-      return (0,concat/* concat */.z)((0,of.of)(data), (0,of.of)({
-        type: "chunk-complete"
-      }));
-    }), (0,share/* share */.B)() // avoid multiple side effects if multiple subs
-    );
+
+      function onRetry(err) {
+        obs.next({
+          type: "warning",
+          value: errorSelector(err)
+        });
+      }
+    });
+  };
+}
+/**
+ * @param {string} bufferType
+ * @param {Object}
+ * @returns {Object}
+ */
+
+function getSegmentFetcherOptions(bufferType, _ref) {
+  var maxRetryRegular = _ref.maxRetryRegular,
+      maxRetryOffline = _ref.maxRetryOffline,
+      lowLatencyMode = _ref.lowLatencyMode;
+  return {
+    maxRetryRegular: bufferType === "image" ? 0 : maxRetryRegular !== null && maxRetryRegular !== void 0 ? maxRetryRegular : DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
+    maxRetryOffline: maxRetryOffline !== null && maxRetryOffline !== void 0 ? maxRetryOffline : segment_fetcher_DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
+    baseDelay: lowLatencyMode ? segment_fetcher_INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : segment_fetcher_INITIAL_BACKOFF_DELAY_BASE.REGULAR,
+    maxDelay: lowLatencyMode ? segment_fetcher_MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : segment_fetcher_MAX_BACKOFF_DELAY_BASE.REGULAR
   };
 }
 ;// CONCATENATED MODULE: ./src/core/fetchers/segment/segment_fetcher_creator.ts
@@ -44959,7 +45595,6 @@ function segment_fetcher_createSegmentFetcher(bufferType, transport, requests$, 
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -45021,9 +45656,11 @@ var SegmentFetcherCreator = /*#__PURE__*/function () {
   var _proto = SegmentFetcherCreator.prototype;
 
   _proto.createSegmentFetcher = function createSegmentFetcher(bufferType, requests$) {
-    var backoffOptions = getSegmentBackoffOptions(bufferType, this._backoffOptions);
+    var backoffOptions = getSegmentFetcherOptions(bufferType, this._backoffOptions);
+    var pipelines = this._transport[bufferType]; // Types are very complicated here as they are per-type of buffer.
+    // This is the reason why `any` is used instead.
 
-    var segmentFetcher = segment_fetcher_createSegmentFetcher(bufferType, this._transport, requests$, backoffOptions);
+    var segmentFetcher = segment_fetcher_createSegmentFetcher(bufferType, pipelines, requests$, backoffOptions);
 
     return applyPrioritizerToSegmentFetcher(this._prioritizer, segmentFetcher);
   };
@@ -45097,6 +45734,21 @@ function exhaustMap(project, resultSelector) {
     });
 }
 //# sourceMappingURL=exhaustMap.js.map
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/tap.js
+var tap = __webpack_require__(2006);
+;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/finalize.js
+
+function finalize(callback) {
+    return (0,lift/* operate */.e)(function (source, subscriber) {
+        try {
+            source.subscribe(subscriber);
+        }
+        finally {
+            subscriber.add(callback);
+        }
+    });
+}
+//# sourceMappingURL=finalize.js.map
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/switchMap.js
 var switchMap = __webpack_require__(4978);
 ;// CONCATENATED MODULE: ./src/compat/should_reload_media_source_on_decipherability_update.ts
@@ -45131,6 +45783,8 @@ function shouldReloadMediaSourceOnDecipherabilityUpdate(currentKeySystem) {
 }
 // EXTERNAL MODULE: ./src/utils/defer_subscriptions.ts + 6 modules
 var defer_subscriptions = __webpack_require__(4437);
+// EXTERNAL MODULE: ./src/utils/filter_map.ts
+var filter_map = __webpack_require__(2793);
 // EXTERNAL MODULE: ./src/utils/take_first_set.ts
 var take_first_set = __webpack_require__(5278);
 ;// CONCATENATED MODULE: ./src/core/abr/ewma.ts
@@ -47034,12 +47688,14 @@ function tryToChangeSourceBufferType(sourceBuffer, codec) {
 
   return false;
 }
+// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
+var assert_unreachable = __webpack_require__(8418);
 // EXTERNAL MODULE: ./src/utils/byte_parsing.ts
 var byte_parsing = __webpack_require__(6968);
 // EXTERNAL MODULE: ./src/utils/hash_buffer.ts
 var hash_buffer = __webpack_require__(2870);
-// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 1 modules
-var types = __webpack_require__(4123);
+// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 3 modules
+var types = __webpack_require__(4081);
 ;// CONCATENATED MODULE: ./src/core/segment_buffers/implementations/audio_video/audio_video_segment_buffer.ts
 
 
@@ -48583,6 +49239,8 @@ var EVENTS = {
   }
 };
 /* harmony default export */ var stream_events_generators = (EVENTS);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/catchError.js
+var catchError = __webpack_require__(9878);
 // EXTERNAL MODULE: ./node_modules/next-tick/index.js
 var next_tick = __webpack_require__(7473);
 var next_tick_default = /*#__PURE__*/__webpack_require__.n(next_tick);
@@ -48909,7 +49567,8 @@ function getNeededSegments(_ref) {
       fastSwitchThreshold = _ref.fastSwitchThreshold,
       neededRange = _ref.neededRange,
       segmentsBeingPushed = _ref.segmentsBeingPushed,
-      bufferedSegments = _ref.bufferedSegments;
+      bufferedSegments = _ref.bufferedSegments,
+      segmentBuffer = _ref.segmentBuffer;
   var representation = content.representation;
   var availableSegmentsForRange = representation.index.getSegments(neededRange.start, neededRange.end - neededRange.start); // Remove from `bufferedSegments` any segments we would prefer to replace:
   //   - segments in the wrong track / bad quality
@@ -48919,8 +49578,73 @@ function getNeededSegments(_ref) {
     return !shouldContentBeReplaced(bufferedSegment.infos, content, currentPlaybackTime, fastSwitchThreshold);
   }).filter(function (currentSeg, i, consideredSegments) {
     var prevSeg = i === 0 ? null : consideredSegments[i - 1];
-    var nextSeg = i >= consideredSegments.length - 1 ? null : consideredSegments[i + 1];
-    return !isStartGarbageCollected(currentSeg, prevSeg, neededRange.start) && !isEndGarbageCollected(currentSeg, nextSeg, neededRange.end);
+    var nextSeg = i >= consideredSegments.length - 1 ? null : consideredSegments[i + 1]; // return !isStartGarbageCollected(currentSeg, prevSeg, neededRange.start) &&
+    //        !isEndGarbageCollected(currentSeg, nextSeg, neededRange.end);
+
+    if (isStartGarbageCollected(currentSeg, prevSeg, neededRange.start)) {
+      var elements = segmentBuffer.getHistoryFor(currentSeg.infos);
+      var prevInitialBufferedStart = null;
+      var shouldIgnore = false;
+
+      for (var elementIdx = elements.length - 1; elementIdx >= 0; elementIdx--) {
+        var element = elements[elementIdx];
+
+        if (element.type === 0
+        /* InitialBufferedStart */
+        ) {
+            if (prevInitialBufferedStart !== null) {
+              var prevBufferedStart = prevInitialBufferedStart.bufferedStart;
+
+              if (Math.abs(prevBufferedStart - element.bufferedStart) <= 0.01) {
+                shouldIgnore = true;
+                break;
+              }
+            } else {
+              prevInitialBufferedStart = element;
+            }
+          }
+      }
+
+      if (!shouldIgnore) {
+        return false;
+      }
+
+      log/* default.debug */.Z.debug("Stream: skipping segment gc-ed at the start", currentSeg);
+    }
+
+    if (isEndGarbageCollected(currentSeg, nextSeg, neededRange.start)) {
+      var _elements = segmentBuffer.getHistoryFor(currentSeg.infos);
+
+      var prevInitialBufferedEnd = null;
+      var _shouldIgnore = false;
+
+      for (var _elementIdx = _elements.length - 1; _elementIdx >= 0; _elementIdx--) {
+        var _element = _elements[_elementIdx];
+
+        if (_element.type === 1
+        /* InitialBufferedEnd */
+        ) {
+            if (prevInitialBufferedEnd !== null) {
+              var prevBufferedEnd = prevInitialBufferedEnd.bufferedEnd;
+
+              if (Math.abs(prevBufferedEnd - _element.bufferedEnd) <= 0.01) {
+                _shouldIgnore = true;
+                break;
+              }
+            } else {
+              prevInitialBufferedEnd = _element;
+            }
+          }
+      }
+
+      if (!_shouldIgnore) {
+        return false;
+      }
+
+      log/* default.debug */.Z.debug("Stream: skipping segment gc-ed at the end", currentSeg);
+    }
+
+    return true;
   });
   var segmentsToDownload = availableSegmentsForRange.filter(function (segment) {
     var contentObject = (0,object_assign/* default */.Z)({
@@ -49053,7 +49777,20 @@ function shouldContentBeReplaced(oldContent, currentContent, currentPlaybackTime
   }
 
   return canFastSwitch(oldContent.representation, currentContent.representation, fastSwitchThreshold);
-}
+} // function () {
+//   let prevInitial = null;
+//   const elements = inventory.history.getHistoryFor(content);
+//   for (let i = elements.length - 1; i >= 0; i--) {
+//     const element = elements[i];
+//     if (element.operationType === "initial-buffered-start") {
+//       if (prevInitial !== null) {
+//       } else {
+//         prevInitial = element;
+//       }
+//     }
+//   }
+// }
+
 /**
  * Returns `true` if segments from the new Representation can replace
  * previously-loaded segments from the old Representation given.
@@ -49256,6 +49993,7 @@ function getBufferStatus(content, tick, fastSwitchThreshold, bufferGoal, segment
     fastSwitchThreshold: fastSwitchThreshold,
     neededRange: neededRange,
     bufferedSegments: bufferedSegments,
+    segmentBuffer: segmentBuffer,
     segmentsBeingPushed: segmentsBeingPushed
   }).map(function (segment) {
     return {
@@ -49730,6 +50468,7 @@ function RepresentationStream(_ref) {
    */
 
   var initSegmentObject = initSegment === null ? {
+    segmentType: "init",
     initializationData: null,
     protectionDataUpdate: false,
     initTimescale: undefined
@@ -49924,19 +50663,15 @@ function RepresentationStream(_ref) {
           case "warning":
             return (0,of.of)({
               type: "retry",
-              value: {
-                segment: segment,
-                error: evt.value
-              }
+              segment: segment,
+              error: evt.value
             });
 
           case "chunk-complete":
             currentSegmentRequest = null;
             return (0,of.of)({
               type: "end-of-segment",
-              value: {
-                segment: segment
-              }
+              segment: segment
             });
 
           case "interrupted":
@@ -49945,11 +50680,12 @@ function RepresentationStream(_ref) {
 
           case "chunk":
             var initTimescale = initSegmentObject === null || initSegmentObject === void 0 ? void 0 : initSegmentObject.initTimescale;
-            return evt.parse(initTimescale).pipe((0,map/* map */.U)(function (parserResponse) {
-              return (0,object_assign/* default */.Z)({
-                segment: segment
-              }, parserResponse);
-            }));
+            var parsed = evt.parse(initTimescale);
+            return (0,of.of)({
+              type: "parsed",
+              segment: segment,
+              payload: parsed
+            });
 
           case "ended":
             return requestNextSegment$;
@@ -49971,75 +50707,30 @@ function RepresentationStream(_ref) {
 
 
   function onLoaderEvent(evt) {
-    var _a;
-
     switch (evt.type) {
       case "retry":
         return (0,concat/* concat */.z)((0,of.of)({
           type: "warning",
-          value: evt.value.error
+          value: evt.error
         }), (0,defer/* defer */.P)(function () {
-          var retriedSegment = evt.value.segment;
+          var retriedSegment = evt.segment;
           var index = representation.index;
 
           if (index.isSegmentStillAvailable(retriedSegment) === false) {
             reCheckNeededSegments$.next();
-          } else if (index.canBeOutOfSyncError(evt.value.error, retriedSegment)) {
+          } else if (index.canBeOutOfSyncError(evt.error, retriedSegment)) {
             return (0,of.of)(stream_events_generators.manifestMightBeOufOfSync());
           }
 
           return empty/* EMPTY */.E; // else, ignore.
         }));
 
-      case "parsed-init-segment":
-        {
-          initSegmentObject = evt.value; // Now that the initialization segment has been parsed - which may have
-          // included encryption information - take care of the encryption event
-          // if not already done.
-
-          var allEncryptionData = representation.getAllEncryptionData();
-          var initEncEvt$ = !hasSentEncryptionData && allEncryptionData.length > 0 ? of.of.apply(void 0, allEncryptionData.map(function (p) {
-            return stream_events_generators.encryptionDataEncountered(p);
-          })) : empty/* EMPTY */.E;
-          var pushEvent$ = pushInitSegment({
-            clock$: clock$,
-            content: content,
-            segment: evt.segment,
-            segmentData: evt.value.initializationData,
-            segmentBuffer: segmentBuffer
-          });
-          return (0,merge/* merge */.T)(initEncEvt$, pushEvent$);
-        }
-
-      case "parsed-segment":
-        {
-          var initSegmentData = (_a = initSegmentObject === null || initSegmentObject === void 0 ? void 0 : initSegmentObject.initializationData) !== null && _a !== void 0 ? _a : null;
-          var _evt$value = evt.value,
-              inbandEvents = _evt$value.inbandEvents,
-              needsManifestRefresh = _evt$value.needsManifestRefresh; // TODO better handle use cases like key rotation by not always grouping
-          // every protection data together? To check.
-
-          var segmentEncryptionEvent = evt.value.protectionDataUpdate && !hasSentEncryptionData ? of.of.apply(void 0, representation.getAllEncryptionData().map(function (p) {
-            return stream_events_generators.encryptionDataEncountered(p);
-          })) : empty/* EMPTY */.E;
-          var manifestRefresh$ = needsManifestRefresh === true ? (0,of.of)(stream_events_generators.needsManifestRefresh()) : empty/* EMPTY */.E;
-          var inbandEvents$ = inbandEvents !== undefined && inbandEvents.length > 0 ? (0,of.of)({
-            type: "inband-events",
-            value: inbandEvents
-          }) : empty/* EMPTY */.E;
-          return (0,concat/* concat */.z)(segmentEncryptionEvent, manifestRefresh$, inbandEvents$, pushMediaSegment({
-            clock$: clock$,
-            content: content,
-            initSegmentData: initSegmentData,
-            parsedSegment: evt.value,
-            segment: evt.segment,
-            segmentBuffer: segmentBuffer
-          }));
-        }
+      case "parsed":
+        return onParsedChunk(evt);
 
       case "end-of-segment":
         {
-          var segment = evt.value.segment;
+          var segment = evt.segment;
           return segmentBuffer.endOfSegment((0,object_assign/* default */.Z)({
             segment: segment
           }, content)).pipe((0,ignoreElements/* ignoreElements */.l)());
@@ -50047,6 +50738,61 @@ function RepresentationStream(_ref) {
 
       default:
         (0,assert_unreachable/* default */.Z)(evt);
+    }
+  }
+  /**
+   * Process a chunk that has just been parsed by pushing it to the
+   * SegmentBuffer and emitting the right events.
+   * @param {Object} evt
+   * @returns {Observable}
+   */
+
+
+  function onParsedChunk(evt) {
+    var _a;
+
+    var parsed = evt.payload;
+
+    if (parsed.segmentType === "init") {
+      initSegmentObject = parsed; // Now that the initialization segment has been parsed - which may have
+      // included encryption information - take care of the encryption event
+      // if not already done.
+
+      var allEncryptionData = representation.getAllEncryptionData();
+      var initEncEvt$ = !hasSentEncryptionData && allEncryptionData.length > 0 ? of.of.apply(void 0, allEncryptionData.map(function (p) {
+        return stream_events_generators.encryptionDataEncountered(p);
+      })) : empty/* EMPTY */.E;
+      var pushEvent$ = pushInitSegment({
+        clock$: clock$,
+        content: content,
+        segment: evt.segment,
+        segmentData: parsed.initializationData,
+        segmentBuffer: segmentBuffer
+      });
+      return (0,merge/* merge */.T)(initEncEvt$, pushEvent$);
+    } else {
+      var initSegmentData = (_a = initSegmentObject === null || initSegmentObject === void 0 ? void 0 : initSegmentObject.initializationData) !== null && _a !== void 0 ? _a : null;
+      var inbandEvents = parsed.inbandEvents,
+          needsManifestRefresh = parsed.needsManifestRefresh,
+          protectionDataUpdate = parsed.protectionDataUpdate; // TODO better handle use cases like key rotation by not always grouping
+      // every protection data together? To check.
+
+      var segmentEncryptionEvent$ = protectionDataUpdate && !hasSentEncryptionData ? of.of.apply(void 0, representation.getAllEncryptionData().map(function (p) {
+        return stream_events_generators.encryptionDataEncountered(p);
+      })) : empty/* EMPTY */.E;
+      var manifestRefresh$ = needsManifestRefresh === true ? (0,of.of)(stream_events_generators.needsManifestRefresh()) : empty/* EMPTY */.E;
+      var inbandEvents$ = inbandEvents !== undefined && inbandEvents.length > 0 ? (0,of.of)({
+        type: "inband-events",
+        value: inbandEvents
+      }) : empty/* EMPTY */.E;
+      return (0,concat/* concat */.z)(segmentEncryptionEvent$, manifestRefresh$, inbandEvents$, pushMediaSegment({
+        clock$: clock$,
+        content: content,
+        initSegmentData: initSegmentData,
+        parsedSegment: parsed,
+        segment: evt.segment,
+        segmentBuffer: segmentBuffer
+      }));
     }
   }
 }
@@ -51112,8 +51858,36 @@ function getFirstDeclaredMimeType(adaptation) {
  */
 
 /* harmony default export */ var period = (PeriodStream);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/scan.js + 1 modules
-var scan = __webpack_require__(3074);
+;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/scanInternals.js
+
+function scanInternals(accumulator, seed, hasSeed, emitOnNext, emitBeforeComplete) {
+    return function (source, subscriber) {
+        var hasState = hasSeed;
+        var state = seed;
+        var index = 0;
+        source.subscribe(new OperatorSubscriber/* OperatorSubscriber */.Q(subscriber, function (value) {
+            var i = index++;
+            state = hasState
+                ?
+                    accumulator(state, value, i)
+                :
+                    ((hasState = true), value);
+            emitOnNext && subscriber.next(state);
+        }, emitBeforeComplete &&
+            (function () {
+                hasState && subscriber.next(state);
+                subscriber.complete();
+            })));
+    };
+}
+//# sourceMappingURL=scanInternals.js.map
+;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/scan.js
+
+
+function scan(accumulator, seed) {
+    return (0,lift/* operate */.e)(scanInternals(accumulator, seed, arguments.length >= 2, true));
+}
+//# sourceMappingURL=scan.js.map
 ;// CONCATENATED MODULE: ./src/core/stream/orchestrator/active_period_emitter.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -51177,7 +51951,7 @@ function ActivePeriodEmitter(buffers$) {
   (0,filter/* filter */.h)(function (_ref) {
     var type = _ref.type;
     return type === "periodStreamCleared" || type === "adaptationChange" || type === "representationChange";
-  }), (0,scan/* scan */.R)(function (acc, evt) {
+  }), scan(function (acc, evt) {
     switch (evt.type) {
       case "periodStreamCleared":
         {
@@ -52273,7 +53047,7 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, setC
    */
 
   var discontinuitiesStore$ = discontinuityUpdate$.pipe(withLatestFrom(clock$), // listen to clock to clean-up old discontinuities
-  (0,scan/* scan */.R)(function (discontinuitiesStore, _ref) {
+  scan(function (discontinuitiesStore, _ref) {
     var evt = _ref[0],
         tick = _ref[1];
     return updateDiscontinuitiesStore(discontinuitiesStore, evt, tick);
@@ -52717,7 +53491,7 @@ function isFiniteStreamEvent(evt) {
 function streamEventsEmitter(manifest, mediaElement, clock$) {
   var eventsBeingPlayed = new WeakMap();
   var lastScheduledEvents = [];
-  var scheduledEvents$ = (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,startWith/* startWith */.O)(null), (0,scan/* scan */.R)(function (oldScheduledEvents) {
+  var scheduledEvents$ = (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,startWith/* startWith */.O)(null), scan(function (oldScheduledEvents) {
     return refresh_scheduled_events_list(oldScheduledEvents, manifest);
   }, []));
   /**
@@ -53002,6 +53776,8 @@ function createMediaSourceLoader(_ref) {
     }));
   };
 }
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/timer.js
+var timer = __webpack_require__(6625);
 ;// CONCATENATED MODULE: ./src/utils/rx-throttle.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -54127,11 +54903,11 @@ function getLoadedContentState(mediaElement, isPlaying, stalledStatus) {
 // EXTERNAL MODULE: ./src/utils/languages/normalize.ts + 2 modules
 var normalize = __webpack_require__(5553);
 ;// CONCATENATED MODULE: ./src/core/api/option_utils.ts
-function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function option_utils_createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = option_utils_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function option_utils_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return option_utils_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return option_utils_arrayLikeToArray(o, minLen); }
 
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function option_utils_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 /**
  * Copyright 2015 CANAL+ Group
@@ -54458,7 +55234,7 @@ function parseLoadVideoOptions(options) {
   } else {
     keySystems = Array.isArray(options.keySystems) ? options.keySystems : [options.keySystems];
 
-    for (var _iterator = _createForOfIteratorHelperLoose(keySystems), _step; !(_step = _iterator()).done;) {
+    for (var _iterator = option_utils_createForOfIteratorHelperLoose(keySystems), _step; !(_step = _iterator()).done;) {
       var keySystem = _step.value;
 
       if (typeof keySystem.type !== "string" || typeof keySystem.getLicense !== "function") {
@@ -54501,7 +55277,7 @@ function parseLoadVideoOptions(options) {
     (0,warn_once/* default */.Z)("The `supplementaryTextTracks` loadVideo option is deprecated.\n" + "Please use the `TextTrackRenderer` tool instead.");
     var supplementaryTextTracks = Array.isArray(options.supplementaryTextTracks) ? options.supplementaryTextTracks : [options.supplementaryTextTracks];
 
-    for (var _iterator2 = _createForOfIteratorHelperLoose(supplementaryTextTracks), _step2; !(_step2 = _iterator2()).done;) {
+    for (var _iterator2 = option_utils_createForOfIteratorHelperLoose(supplementaryTextTracks), _step2; !(_step2 = _iterator2()).done;) {
       var supplementaryTextTrack = _step2.value;
 
       if (typeof supplementaryTextTrack.language !== "string" || typeof supplementaryTextTrack.mimeType !== "string" || typeof supplementaryTextTrack.url !== "string") {
@@ -54516,7 +55292,7 @@ function parseLoadVideoOptions(options) {
     (0,warn_once/* default */.Z)("The `supplementaryImageTracks` loadVideo option is deprecated.\n" + "Please use the `parseBifThumbnails` tool instead.");
     var supplementaryImageTracks = Array.isArray(options.supplementaryImageTracks) ? options.supplementaryImageTracks : [options.supplementaryImageTracks];
 
-    for (var _iterator3 = _createForOfIteratorHelperLoose(supplementaryImageTracks), _step3; !(_step3 = _iterator3()).done;) {
+    for (var _iterator3 = option_utils_createForOfIteratorHelperLoose(supplementaryImageTracks), _step3; !(_step3 = _iterator3()).done;) {
       var supplementaryImageTrack = _step3.value;
 
       if (typeof supplementaryImageTrack.mimeType !== "string" || typeof supplementaryImageTrack.url !== "string") {
@@ -58893,7 +59669,7 @@ function initializeFeaturesObject() {
   }
 
   if (true) {
-    features_object/* default.transports.dash */.Z.transports.dash = __webpack_require__(1732)/* .default */ .Z;
+    features_object/* default.transports.dash */.Z.transports.dash = __webpack_require__(5877)/* .default */ .Z;
     features_object/* default.dashParsers.js */.Z.dashParsers.js = __webpack_require__(148)/* .default */ .Z;
   }
 
