@@ -22,7 +22,7 @@ import arrayFindIndex from "../../utils/array_find_index";
 import BandwidthEstimator from "./bandwidth_estimator";
 import EWMA from "./ewma";
 import {
-  IProgressEventValue,
+  IPendingRequestStoreProgress,
   IRequestInfo,
 } from "./pending_requests_store";
 
@@ -62,12 +62,13 @@ function getConcernedRequests(
 ) : IRequestInfo[] {
   /** Index of the request for the next needed segment, in `requests`. */
   const nextSegmentIndex = arrayFindIndex(requests, (request) => {
-    if (request.segment.duration <= 0) {
+    const { content } = request;
+    if (content.segment.duration <= 0) {
       return false;
     }
-    const segmentEnd = request.segment.time + request.segment.duration;
+    const segmentEnd = content.segment.time + content.segment.duration;
     return segmentEnd > neededPosition &&
-           neededPosition - request.segment.time > -1.2;
+           neededPosition - content.segment.time > -1.2;
   });
 
   if (nextSegmentIndex < 0) { // Not found
@@ -75,12 +76,12 @@ function getConcernedRequests(
   }
 
   const nextRequest = requests[nextSegmentIndex];
-  const segmentTime = nextRequest.segment.time;
+  const segmentTime = nextRequest.content.segment.time;
   const filteredRequests = [nextRequest];
 
   // Get the possibly multiple requests for that segment's position
   for (let i = nextSegmentIndex + 1; i < requests.length; i++) {
-    if (requests[i].segment.time === segmentTime) {
+    if (requests[i].content.segment.time === segmentTime) {
       filteredRequests.push(requests[i]);
     } else {
       break;
@@ -96,7 +97,7 @@ function getConcernedRequests(
  * @param {Object} request
  * @returns {number|undefined}
  */
-function estimateRequestBandwidth(request : IRequestInfo) : number|undefined {
+export function estimateRequestBandwidth(request : IRequestInfo) : number|undefined {
   if (request.progress.length < 5) { // threshold from which we can consider
                                      // progress events reliably
     return undefined;
@@ -122,7 +123,7 @@ function estimateRequestBandwidth(request : IRequestInfo) : number|undefined {
  * @returns {number}
  */
 function estimateRemainingTime(
-  lastProgressEvent: IProgressEventValue,
+  lastProgressEvent: IPendingRequestStoreProgress,
   bandwidthEstimate : number
 ) : number {
   const remainingData = (lastProgressEvent.totalSize - lastProgressEvent.size) * 8;
@@ -158,7 +159,7 @@ function estimateStarvationModeBitrate(
   }
 
   const concernedRequest = concernedRequests[0];
-  const chunkDuration = concernedRequest.segment.duration;
+  const chunkDuration = concernedRequest.content.segment.duration;
   const now = performance.now();
   const lastProgressEvent = concernedRequest.progress.length > 0 ?
     concernedRequest.progress[concernedRequest.progress.length - 1] :
@@ -218,9 +219,9 @@ function shouldDirectlySwitchToLowBitrate(
   const realBufferGap = isFinite(playbackInfo.bufferGap) ? playbackInfo.bufferGap :
                                                            0;
   const nextNeededPosition = playbackInfo.position + realBufferGap;
-  const nextRequest = arrayFind(requests, (r) =>
-    r.segment.duration > 0 &&
-    (r.segment.time + r.segment.duration) > nextNeededPosition);
+  const nextRequest = arrayFind(requests, ({ content }) =>
+    content.segment.duration > 0 &&
+    (content.segment.time + content.segment.duration) > nextNeededPosition);
 
   if (nextRequest === undefined) {
     return true;
