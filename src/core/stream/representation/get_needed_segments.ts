@@ -25,7 +25,15 @@ import Manifest, {
   Representation,
 } from "../../../manifest";
 import objectAssign from "../../../utils/object_assign";
-import { IBufferedChunk } from "../../segment_buffers";
+import {
+  IBufferedChunk,
+  SegmentBuffer,
+} from "../../segment_buffers";
+import {
+  BufferedHistoryElementType,
+  IBufferedHistoryInitialBufferedEndElement,
+  IBufferedHistoryInitialBufferedStartElement,
+} from "../../segment_buffers/inventory";
 
 const { CONTENT_REPLACEMENT_PADDING,
         BITRATE_REBUFFERING_RATIO,
@@ -71,6 +79,9 @@ export interface IGetNeededSegmentsArguments {
    * re-requested.
    */
   bufferedSegments : IBufferedChunk[];
+
+  // XXX TODO NOT
+  segmentBuffer : SegmentBuffer<unknown>;
 }
 
 /**
@@ -96,6 +107,7 @@ export default function getNeededSegments({
   neededRange,
   segmentsBeingPushed,
   bufferedSegments,
+  segmentBuffer,
 } : IGetNeededSegmentsArguments) : ISegment[] {
   const { representation } = content;
 
@@ -115,8 +127,59 @@ export default function getNeededSegments({
                                 consideredSegments[i - 1];
       const nextSeg = i >= consideredSegments.length - 1 ? null :
                                                            consideredSegments[i + 1];
-      return !isStartGarbageCollected(currentSeg, prevSeg, neededRange.start) &&
-             !isEndGarbageCollected(currentSeg, nextSeg, neededRange.end);
+      // return !isStartGarbageCollected(currentSeg, prevSeg, neededRange.start) &&
+      //        !isEndGarbageCollected(currentSeg, nextSeg, neededRange.end);
+      if (isStartGarbageCollected(currentSeg, prevSeg, neededRange.start)) {
+        const elements = segmentBuffer.getHistoryFor(currentSeg.infos);
+
+        let prevInitialBufferedStart : IBufferedHistoryInitialBufferedStartElement |
+                                       null = null;
+        let shouldIgnore = false;
+        for (let elementIdx = elements.length - 1; elementIdx >= 0; elementIdx--) {
+          const element = elements[elementIdx];
+          if (element.type === BufferedHistoryElementType.InitialBufferedStart) {
+            if (prevInitialBufferedStart !== null) {
+              const prevBufferedStart = prevInitialBufferedStart.bufferedStart;
+              if (Math.abs(prevBufferedStart - element.bufferedStart) <= 0.01) {
+                shouldIgnore = true;
+                break;
+              }
+            } else {
+              prevInitialBufferedStart = element;
+            }
+          }
+        }
+        if (!shouldIgnore) {
+          return false;
+        }
+        log.debug("Stream: skipping segment gc-ed at the start", currentSeg);
+      }
+      if (isEndGarbageCollected(currentSeg, nextSeg, neededRange.start)) {
+        const elements = segmentBuffer.getHistoryFor(currentSeg.infos);
+
+        let prevInitialBufferedEnd : IBufferedHistoryInitialBufferedEndElement |
+                                       null = null;
+        let shouldIgnore = false;
+        for (let elementIdx = elements.length - 1; elementIdx >= 0; elementIdx--) {
+          const element = elements[elementIdx];
+          if (element.type === BufferedHistoryElementType.InitialBufferedEnd) {
+            if (prevInitialBufferedEnd !== null) {
+              const prevBufferedEnd = prevInitialBufferedEnd.bufferedEnd;
+              if (Math.abs(prevBufferedEnd - element.bufferedEnd) <= 0.01) {
+                shouldIgnore = true;
+                break;
+              }
+            } else {
+              prevInitialBufferedEnd = element;
+            }
+          }
+        }
+        if (!shouldIgnore) {
+          return false;
+        }
+        log.debug("Stream: skipping segment gc-ed at the end", currentSeg);
+      }
+      return true;
     });
 
   const segmentsToDownload = availableSegmentsForRange.filter(segment => {
@@ -261,6 +324,20 @@ function shouldContentBeReplaced(
                        currentContent.representation,
                        fastSwitchThreshold);
 }
+
+// function () {
+//   let prevInitial = null;
+//   const elements = inventory.history.getHistoryFor(content);
+//   for (let i = elements.length - 1; i >= 0; i--) {
+//     const element = elements[i];
+//     if (element.operationType === "initial-buffered-start") {
+//       if (prevInitial !== null) {
+//       } else {
+//         prevInitial = element;
+//       }
+//     }
+//   }
+// }
 
 /**
  * Returns `true` if segments from the new Representation can replace

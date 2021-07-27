@@ -122,6 +122,7 @@ export default function getBufferStatus(
                                              fastSwitchThreshold,
                                              neededRange,
                                              bufferedSegments,
+                                             segmentBuffer,
                                              segmentsBeingPushed })
     .map((segment) => ({ priority: getSegmentPriority(segment.time, tick),
                          segment }));

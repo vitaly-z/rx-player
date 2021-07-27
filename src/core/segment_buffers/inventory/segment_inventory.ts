@@ -14,32 +14,24 @@
  * limitations under the License.
  */
 
-import config from "../../config";
-import log from "../../log";
+import config from "../../../config";
+import log from "../../../log";
 import {
   Adaptation,
   areSameContent,
   ISegment,
   Period,
   Representation,
-} from "../../manifest";
-import takeFirstSet from "../../utils/take_first_set";
+} from "../../../manifest";
+import takeFirstSet from "../../../utils/take_first_set";
+import BufferedInfoHistory, {
+  IBufferedHistoryElement,
+} from "./inventory_buffered_history";
+import { IChunkContext } from "./types";
 
 const { MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE,
         MAX_MANIFEST_BUFFERED_DURATION_DIFFERENCE,
         MINIMUM_SEGMENT_SIZE } = config;
-
-/** Content information for a single buffered chunk */
-interface IBufferedChunkInfos {
-  /** Adaptation this chunk is related to. */
-  adaptation : Adaptation;
-  /** Period this chunk is related to. */
-  period : Period;
-  /** Representation this chunk is related to. */
-  representation : Representation;
-  /** Segment this chunk is related to. */
-  segment : ISegment;
-}
 
 /** Information stored on a single chunk by the SegmentInventory. */
 export interface IBufferedChunk {
@@ -89,7 +81,7 @@ export interface IBufferedChunk {
    */
   precizeStart : boolean;
   /** Information on what that chunk actually contains. */
-  infos : IBufferedChunkInfos;
+  infos : IChunkContext;
   /**
    * If `true`, this chunk is only a partial chunk of a whole segment.
    * In this condition, `start` and `end` may be ignored, as they may either
@@ -161,8 +153,11 @@ export default class SegmentInventory {
    */
   private _inventory : IBufferedChunk[];
 
+  private _bufferedInfoHistory : BufferedInfoHistory;
+
   constructor() {
     this._inventory = [];
+    this._bufferedInfoHistory = new BufferedInfoHistory(60000, 200);
   }
 
   /**
@@ -253,13 +248,29 @@ export default class SegmentInventory {
           takeFirstSet<number>(thisSegment.bufferedStart, thisSegment.start)
             >= MINIMUM_SEGMENT_SIZE
       ) {
+        const prevBufferedStart = thisSegment.bufferedStart;
         guessBufferedStartFromRangeStart(thisSegment,
                                          rangeStart,
                                          lastDeletedSegmentInfos,
                                          bufferType);
+        if (prevBufferedStart === undefined &&
+            thisSegment.bufferedStart !== undefined)
+        {
+          this._bufferedInfoHistory.setBufferedStart(thisSegment.infos,
+                                                     thisSegment.start,
+                                                     thisSegment.bufferedStart);
+        }
 
         if (inventoryIndex === inventory.length - 1) {
+          const prevBufferedEnd = thisSegment.bufferedEnd;
           guessBufferedEndFromRangeEnd(thisSegment, rangeEnd, bufferType);
+          if (prevBufferedEnd === undefined &&
+              thisSegment.bufferedEnd !== undefined)
+          {
+            this._bufferedInfoHistory.setBufferedEnd(thisSegment.infos,
+                                                     thisSegment.start,
+                                                     thisSegment.bufferedEnd);
+          }
           return;
         }
 
@@ -284,11 +295,22 @@ export default class SegmentInventory {
           if (prevSegment.bufferedEnd === undefined) {
             prevSegment.bufferedEnd = thisSegment.precizeStart ? thisSegment.start :
                                                                  prevSegment.end;
+            this._bufferedInfoHistory.setBufferedEnd(prevSegment.infos,
+                                                     prevSegment.end,
+                                                     prevSegment.bufferedEnd);
             log.debug("SI: calculating buffered end of contiguous segment",
                       bufferType, prevSegment.bufferedEnd, prevSegment.end);
           }
 
+          const _prevStart = thisSegment.bufferedStart;
           thisSegment.bufferedStart = prevSegment.bufferedEnd;
+          if (_prevStart === undefined &&
+              thisSegment.bufferedStart !== undefined)
+          {
+            this._bufferedInfoHistory.setBufferedStart(thisSegment.infos,
+                                                       thisSegment.start,
+                                                       thisSegment.bufferedStart);
+          }
           thisSegment = inventory[++inventoryIndex];
           if (thisSegment !== undefined) {
             thisSegmentStart = takeFirstSet<number>(thisSegment.bufferedStart,
@@ -302,7 +324,15 @@ export default class SegmentInventory {
       // update the bufferedEnd of the last segment in that range
       const lastSegmentInRange = inventory[inventoryIndex - 1];
       if (lastSegmentInRange !== undefined) {
+        const _prevEnd = lastSegmentInRange.bufferedEnd;
         guessBufferedEndFromRangeEnd(lastSegmentInRange, rangeEnd, bufferType);
+        if (_prevEnd === undefined &&
+            lastSegmentInRange.bufferedEnd !== undefined)
+        {
+          this._bufferedInfoHistory.setBufferedEnd(lastSegmentInRange.infos,
+                                                   lastSegmentInRange.end,
+                                                   lastSegmentInRange.bufferedEnd);
+        }
       }
     }
 
@@ -728,6 +758,10 @@ export default class SegmentInventory {
   public getInventory() : IBufferedChunk[] {
     return this._inventory;
   }
+
+  public getHistoryFor(context : IChunkContext) : IBufferedHistoryElement[] {
+    return this._bufferedInfoHistory.getHistoryFor(context);
+  }
 }
 
 /**
@@ -941,7 +975,7 @@ function prettyPrintInventory(inventory : IBufferedChunk[]) : string {
   let lastChunk : IBufferedChunk | null = null;
   let lastLetter : string | null = null;
 
-  function generateNewLetter(infos : IBufferedChunkInfos) : string {
+  function generateNewLetter(infos : IChunkContext) : string {
     const currentLetter = String.fromCharCode(letters.length + 65);
     letters.push({ letter: currentLetter,
                    periodId: infos.period.id,

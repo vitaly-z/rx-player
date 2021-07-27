@@ -23,8 +23,10 @@ import {
 } from "../../../manifest";
 import SegmentInventory, {
   IBufferedChunk,
+  IBufferedHistoryElement,
+  IChunkContext,
   IInsertedChunkInfos,
-} from "../segment_inventory";
+} from "../inventory";
 
 /**
  * Class allowing to push segments and remove data to a buffer to be able
@@ -175,6 +177,11 @@ export abstract class SegmentBuffer<T> {
     // Return no pending operation by default (for synchronous SegmentBuffers)
     return [];
   }
+
+  public getHistoryFor(context : IChunkContext) : IBufferedHistoryElement[] {
+    return this._segmentInventory.getHistoryFor(context);
+  }
+
 
   /**
    * Dispose of the resources used by this AudioVideoSegmentBuffer.
