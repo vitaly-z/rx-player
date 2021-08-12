@@ -52,10 +52,10 @@ class Representation {
   public frameRate? : string;
 
   /**
-   * A string describing the codec used for this Representation.
+   * A string describing the codecs used for this Representation.
    * undefined if we do not know.
    */
-  public codec? : string;
+  public codecs? : string;
 
   /**
    * A string describing the mime-type for this Representation.
@@ -101,10 +101,13 @@ class Representation {
   /**
    * @param {Object} args
    */
-  constructor(args : IParsedRepresentation, opts : { type : IAdaptationType }) {
+  constructor(
+    args : IParsedRepresentation,
+    opts : { type : IAdaptationType }
+  ) {
     this.id = args.id;
     this.bitrate = args.bitrate;
-    this.codec = args.codecs;
+    this.codecs = args.codecs;
 
     if (args.height !== undefined) {
       this.height = args.height;
@@ -143,7 +146,7 @@ class Representation {
    * @returns {string}
    */
   public getMimeTypeString() : string {
-    return `${this.mimeType ?? ""};codecs="${this.codec ?? ""}"`;
+    return `${this.mimeType ?? ""};codecs="${this.codecs ?? ""}"`;
   }
 
   /**

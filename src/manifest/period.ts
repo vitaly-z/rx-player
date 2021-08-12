@@ -15,7 +15,6 @@
  */
 import {
   ICustomError,
-  isKnownError,
   MediaError,
 } from "../errors";
 import {
@@ -23,11 +22,46 @@ import {
   IParsedPeriod,
 } from "../parsers/manifest";
 import arrayFind from "../utils/array_find";
+import arrayFindIndex from "../utils/array_find_index";
 import objectValues from "../utils/object_values";
 import Adaptation, {
   IRepresentationFilter,
 } from "./adaptation";
-import { IAdaptationType } from "./types";
+import {
+  IAdaptationType,
+  IHDRInformation,
+} from "./types";
+
+export interface ITrackOrganizerTrackInfo {
+  language? : string;
+  normalizedLanguage? : string;
+  isAudioDescription? : boolean;
+  isClosedCaption? : boolean;
+  isDub? : boolean;
+  isSignInterpreted?: boolean;
+  representations : ITrackOrganizerRepresentation[];
+}
+
+export interface ITrackOrganizerRepresentation {
+  id : string;
+  height? : number;
+  width? : number;
+  bitrate? : number;
+  frameRate? : string;
+  codecs? : string;
+  mimeType? : string;
+  hdrInfo? : IHDRInformation;
+}
+export interface ITrackOrganizerModifiers {
+  createNewTrackFor(representationIds : string[]) : void;
+  removeRepresentation(representationId : string) : void;
+}
+
+export type ITrackOrganizer = (
+  trackType : string,
+  trackInfo : ITrackOrganizerTrackInfo,
+  trackModifiers : ITrackOrganizerModifiers
+) => void;
 
 /** Structure listing every `Adaptation` in a Period. */
 export type IManifestAdaptations = Partial<Record<IAdaptationType, Adaptation[]>>;
@@ -75,7 +109,8 @@ export default class Period {
    */
   constructor(
     args : IParsedPeriod,
-    representationFilter? : IRepresentationFilter
+    representationFilter? : IRepresentationFilter,
+    trackOrganizer? : ITrackOrganizer
   ) {
     this.parsingErrors = [];
     this.id = args.id;
@@ -87,17 +122,69 @@ export default class Period {
         }
         const filteredAdaptations = adaptationsForType
           .map((adaptation) : Adaptation|null => {
-            let newAdaptation : Adaptation|null = null;
-            try {
-              newAdaptation = new Adaptation(adaptation, { representationFilter });
-            } catch (err) {
-              if (isKnownError(err) &&
-                  err.code === "MANIFEST_UNSUPPORTED_ADAPTATION_TYPE")
-              {
-                this.parsingErrors.push(err);
-                return null;
-              }
-              throw err;
+            const newAdaptation = new Adaptation(adaptation, { representationFilter });
+
+            const representations = newAdaptation.representations;
+            if (typeof trackOrganizer === "function") {
+              const formattedReps : ITrackOrganizerRepresentation[] =
+                representations.reduce((repAcc, rep) => {
+                  if (!rep.isSupported) {
+                    return repAcc;
+                  }
+                  repAcc.push({ id: rep.id,
+                                height: rep.height,
+                                width: rep.width,
+                                bitrate: rep.bitrate,
+                                frameRate : rep.frameRate,
+                                codecs: rep.codecs,
+                                mimeType: rep.mimeType,
+                                hdrInfo: rep.hdrInfo });
+                  return repAcc;
+                }, [] as ITrackOrganizerRepresentation[]);
+              const trackInfo = { language: newAdaptation.language,
+                                  normalizedLanguage: newAdaptation.normalizedLanguage,
+                                  isAudioDescription: newAdaptation.isAudioDescription,
+                                  isClosedCaption: newAdaptation.isClosedCaption,
+                                  isDub: newAdaptation.isDub,
+                                  isSignInterpreted: newAdaptation.isSignInterpreted,
+                                  representations: formattedReps };
+
+              let callFinished = false;
+              trackOrganizer(newAdaptation.type, trackInfo, {
+                createNewTrackFor(representationIds) {
+                  if (callFinished) {
+                    throw new Error(
+                      "`createNewTrackFor` modifier called after `trackOrganizer` call."
+                    );
+                  }
+                  const toMove = representationIds.map((representationId) => {
+                    const idx = arrayFindIndex(representations, ({ id }) => {
+                      return id === representationId;
+                    });
+                    if (idx < 0) {
+                      throw new Error("Wanted Representation to remove not found");
+                    }
+                    return representations.splice(idx, 1)[0];
+                  });
+                  // XXX TODO ID
+                  adaptation.representations = [];
+                  new Adaptation(adaptation, { baseRepresentations: toMove });
+                },
+                removeRepresentation(representationId) {
+                  if (callFinished) {
+                    throw new Error("`removeRepresentation` modifier called after " +
+                                    "`trackOrganizer` call.");
+                  }
+                  const idx = arrayFindIndex(representations, ({ id }) => {
+                    return id === representationId;
+                  });
+                  if (idx < 0) {
+                    throw new Error("Wanted Representation to remove not found");
+                  }
+                  representations.splice(idx, 1);
+                },
+              });
+              callFinished = true;
             }
             this.parsingErrors.push(...newAdaptation.parsingErrors);
             return newAdaptation;
