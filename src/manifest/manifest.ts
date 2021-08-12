@@ -21,18 +21,12 @@ import areArraysOfNumbersEqual from "../utils/are_arrays_of_numbers_equal";
 import arrayFind from "../utils/array_find";
 import EventEmitter from "../utils/event_emitter";
 import idGenerator from "../utils/id_generator";
-import warnOnce from "../utils/warn_once";
 import Adaptation, {
   IRepresentationFilter,
 } from "./adaptation";
-import Period, {
-  IManifestAdaptations,
-} from "./period";
+import Period from "./period";
 import Representation from "./representation";
-import {
-  IAdaptationType,
-  MANIFEST_UPDATE_TYPE,
-} from "./types";
+import { MANIFEST_UPDATE_TYPE } from "./types";
 import {
   replacePeriods,
   updatePeriods,
@@ -95,14 +89,6 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
   public readonly id : string;
 
   /**
-   * Type of transport used by this Manifest (e.g. `"dash"` or `"smooth"`).
-   *
-   * TODO This should never be needed as this structure is transport-agnostic.
-   * But it is specified in the Manifest API. Deprecate?
-   */
-  public transport : string;
-
-  /**
    * List every Period in that Manifest chronologically (from start to end).
    * A Period contains information about the content available for a specific
    * period of time.
@@ -114,12 +100,6 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * so it can be refreshed.
    */
   public expired : Promise<void> | null;
-
-  /**
-   * Deprecated. Equivalent to `manifest.periods[0].adaptations`.
-   * @deprecated
-   */
-  public adaptations : IManifestAdaptations;
 
   /**
    * If true, the Manifest can evolve over time:
@@ -153,6 +133,9 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
   /** Optional URL that points to a shorter version of the Manifest used
    * for updates only. */
   public updateUrl?: string;
+
+  /** Type of transport used by this Manifest (e.g. `"dash"` or `"smooth"`). */
+  public transport : string;
 
   /**
    * Suggested delay from the "live edge" (i.e. the position corresponding to
@@ -286,23 +269,14 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
     this.parsingErrors = [];
     this.id = generateNewManifestId();
     this.expired = parsedManifest.expired ?? null;
-    this.transport = parsedManifest.transportType;
     this.clockOffset = parsedManifest.clockOffset;
+    this.transport = parsedManifest.transportType;
 
     this.periods = parsedManifest.periods.map((parsedPeriod) => {
       const period = new Period(parsedPeriod, representationFilter);
       this.parsingErrors.push(...period.parsingErrors);
       return period;
     }).sort((a, b) => a.start - b.start);
-
-    /**
-     * @deprecated It is here to ensure compatibility with the way the
-     * v3.x.x manages adaptations at the Manifest level
-     */
-    /* eslint-disable import/no-deprecated */
-    this.adaptations = this.periods[0] === undefined ? {} :
-                                                       this.periods[0].adaptations;
-    /* eslint-enable import/no-deprecated */
 
     this._timeBounds = parsedManifest.timeBounds;
     this.isDynamic = parsedManifest.isDynamic;
@@ -522,57 +496,6 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
   }
 
   /**
-   * @deprecated only returns adaptations for the first period
-   * @returns {Array.<Object>}
-   */
-  public getAdaptations() : Adaptation[] {
-    warnOnce("manifest.getAdaptations() is deprecated." +
-             " Please use manifest.period[].getAdaptations() instead");
-    const firstPeriod = this.periods[0];
-    if (firstPeriod === undefined) {
-      return [];
-    }
-    const adaptationsByType = firstPeriod.adaptations;
-    const adaptationsList : Adaptation[] = [];
-    for (const adaptationType in adaptationsByType) {
-      if (adaptationsByType.hasOwnProperty(adaptationType)) {
-        const adaptations =
-          adaptationsByType[adaptationType as IAdaptationType] as Adaptation[];
-        adaptationsList.push(...adaptations);
-      }
-    }
-    return adaptationsList;
-  }
-
-  /**
-   * @deprecated only returns adaptations for the first period
-   * @returns {Array.<Object>}
-   */
-  public getAdaptationsForType(adaptationType : IAdaptationType) : Adaptation[] {
-    warnOnce("manifest.getAdaptationsForType(type) is deprecated." +
-             " Please use manifest.period[].getAdaptationsForType(type) instead");
-    const firstPeriod = this.periods[0];
-    if (firstPeriod === undefined) {
-      return [];
-    }
-    const adaptationsForType = firstPeriod.adaptations[adaptationType];
-    return adaptationsForType === undefined ? [] :
-                                              adaptationsForType;
-  }
-
-  /**
-   * @deprecated only returns adaptations for the first period
-   * @returns {Array.<Object>}
-   */
-  public getAdaptation(wantedId : number|string) : Adaptation|undefined {
-    warnOnce("manifest.getAdaptation(id) is deprecated." +
-             " Please use manifest.period[].getAdaptation(id) instead");
-    /* eslint-disable import/no-deprecated */
-    return arrayFind(this.getAdaptations(), ({ id }) => wantedId === id);
-    /* eslint-enable import/no-deprecated */
-  }
-
-  /**
    * @param {Object} newManifest
    * @param {number} type
    */
@@ -588,8 +511,8 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
     this.lifetime = newManifest.lifetime;
     this.parsingErrors = newManifest.parsingErrors;
     this.suggestedPresentationDelay = newManifest.suggestedPresentationDelay;
-    this.transport = newManifest.transport;
     this.publishTime = newManifest.publishTime;
+    this.transport = newManifest.transport;
 
     if (updateType === MANIFEST_UPDATE_TYPE.Full) {
       this._timeBounds = newManifest._timeBounds;
@@ -612,13 +535,6 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
         this.periods.shift();
       }
     }
-
-    // Re-set this.adaptations for retro-compatibility in v3.x.x
-    /* eslint-disable import/no-deprecated */
-    this.adaptations = this.periods[0] === undefined ?
-                         {} :
-                         this.periods[0].adaptations;
-    /* eslint-enable import/no-deprecated */
 
     // Let's trigger events at the end, as those can trigger side-effects.
     // We do not want the current Manifest object to be incomplete when those
