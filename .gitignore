@@ -16,7 +16,6 @@
 /tests/integration/coverage
 /coverage
 
-/dist/*.d.ts
 /dist/_esm5.raw
 
 /doc/generated
@@ -24,8 +23,5 @@
 /features
 /logger
 /minimal
-/experimental
-/types
-/tools
 
 /src/parsers/manifest/dash/wasm-parser/target
