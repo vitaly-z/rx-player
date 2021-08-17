@@ -458,7 +458,9 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer<BufferSource>
             this._flush();
             return;
           }
+          const whenPushedSegment = performance.now();
           this._sourceBuffer.appendBuffer(segmentData);
+          console.warn("appendBuffer() took: ", performance.now() - whenPushedSegment, "ms");
           break;
 
         case SegmentBufferOperation.Remove:
