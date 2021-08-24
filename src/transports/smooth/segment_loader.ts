@@ -16,6 +16,7 @@
 
 import PPromise from "pinkie";
 import { CustomLoaderError } from "../../errors";
+import log from "../../log";
 import assert from "../../utils/assert";
 import request from "../../utils/request";
 import {
@@ -120,6 +121,10 @@ const generateSegmentLoader = ({
                                               72, 72, 4, // vRes, hRes, nal
                                               codecPrivateData,
                                               protection.keyId);
+        if (log.getLevel() === "DEBUG") {
+          log.debug("Video smooth init segment created",
+                    uint8ArrToHex(responseData));
+        }
         break;
       }
       case "audio": {
@@ -134,6 +139,10 @@ const generateSegmentLoader = ({
                                               samplingRate,
                                               codecPrivateData,
                                               protection.keyId);
+        if (log.getLevel() === "DEBUG") {
+          log.debug("Audio smooth init segment created",
+                    uint8ArrToHex(responseData));
+        }
         break;
       }
       default:
@@ -277,5 +286,13 @@ const generateSegmentLoader = ({
     });
   }
 };
+
+function uint8ArrToHex(arr : Uint8Array) : string { // buffer is an ArrayBuffer
+  let str = "";
+  for (let i = 0; i < arr.length; i++) {
+    str += arr[i].toString(16).padStart(2, "0");
+  }
+  return str;
+}
 
 export default generateSegmentLoader;
