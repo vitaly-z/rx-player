@@ -207,9 +207,7 @@
     "Build the documentation pages": {
       "doc": "Generate the HTML documentation in doc/generated/pages",
       "docs:start": "Start Docusaurus website docs",
-      "docs:build": "Build Docusaurus website",
-      "docs:deploy": "Deploy Docusaurus to GitHub pages",
-      "docs:serve": "Serve Docusaurus website"
+      "docs:build": "Build Docusaurus website"
     },
     "Update the RxPlayer's version": {
       "update-version": "Update the version to the string given in argument (example: `npm run update-version 3.8.0`). Will update the codebase and perform every builds."
