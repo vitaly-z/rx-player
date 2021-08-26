@@ -5,7 +5,7 @@ use quick_xml::events::Event;
 mod attributes;
 mod s_element;
 
-use crate::{events::*, onTagOpen2};
+use crate::events::*;
 use crate::errors::ParsingError;
 use crate::reader::MPDReader;
 
@@ -41,98 +41,48 @@ impl MPDProcessor {
             match self.read_next_event() {
                 Ok(Event::Start(tag)) => match tag.name() {
                     b"MPD" => {
-                        attributes::get_mpd_attrs(&mut attr_list, &tag);
-                        // UNSAFE: XXX TODO
-                        unsafe { onTagOpen2(TagName::MPD, attr_list.as_ptr(), attr_list.len()) };
-
-                        // Clear it now that it has been handled so it can be
-                        // re-used for the next tag
-                        attr_list.clear();
+                        attributes::parse_mpd_attrs(&tag, &mut attr_list);
+                        attr_list.send_as(TagName::MPD);
                     },
                     b"Period" => {
-                        attributes::get_period_attrs(&mut attr_list, &tag);
-                        // UNSAFE: XXX TODO
-                        unsafe { onTagOpen2(TagName::Period, attr_list.as_ptr(), attr_list.len()) };
-
-                        // Clear it now that it has been handled so it can be
-                        // re-used for the next tag
-                        attr_list.clear();
+                        attributes::parse_period_attrs(&tag, &mut attr_list);
+                        attr_list.send_as(TagName::Period);
                     },
                     b"AdaptationSet" => {
-                        attributes::get_adaptation_set_attrs(&mut attr_list, &tag);
-                        // UNSAFE: XXX TODO
-                        unsafe { onTagOpen2(TagName::AdaptationSet, attr_list.as_ptr(), attr_list.len()) };
-
-                        // Clear it now that it has been handled so it can be
-                        // re-used for the next tag
-                        attr_list.clear();
+                        attributes::parse_adaptation_set_attrs(&tag, &mut attr_list);
+                        attr_list.send_as(TagName::AdaptationSet);
                     },
-                    // b"Representation" => {
-                    //     TagName::Representation.report_tag_open();
-                    //     attributes::report_representation_attrs(&tag);
-                    // },
+                    b"Representation" => {
+                        attributes::parse_representation_attrs(&tag, &mut attr_list);
+                        attr_list.send_as(TagName::Representation);
+                    },
                     b"Accessibility" => {
-                        attributes::get_scheme_attrs(&mut attr_list, &tag);
-                        // UNSAFE: XXX TODO
-                        unsafe { onTagOpen2(TagName::Accessibility, attr_list.as_ptr(), attr_list.len()) };
-
-                        // Clear it now that it has been handled so it can be
-                        // re-used for the next tag
-                        attr_list.clear();
+                        attributes::parse_scheme_attrs(&tag, &mut attr_list);
+                        attr_list.send_as(TagName::Accessibility);
                     },
                     b"ContentComponent" => {
-                        attributes::get_content_component_attrs(&mut attr_list, &tag);
-                        // UNSAFE: XXX TODO
-                        unsafe { onTagOpen2(TagName::ContentComponent, attr_list.as_ptr(), attr_list.len()) };
-
-                        // Clear it now that it has been handled so it can be
-                        // re-used for the next tag
-                        attr_list.clear();
+                        attributes::parse_content_component_attrs(&tag, &mut attr_list);
+                        attr_list.send_as(TagName::ContentComponent);
                     },
                     b"ContentProtection" => {
-                        attributes::get_content_protection_attrs(&mut attr_list, &tag);
-                        // UNSAFE: XXX TODO
-                        unsafe { onTagOpen2(TagName::ContentProtection, attr_list.as_ptr(), attr_list.len()) };
-
-                        // Clear it now that it has been handled so it can be
-                        // re-used for the next tag
-                        attr_list.clear();
+                        attributes::parse_content_protection_attrs(&tag, &mut attr_list);
+                        attr_list.send_as(TagName::ContentProtection);
                     },
                     b"EssentialProperty" => {
-                        attributes::get_scheme_attrs(&mut attr_list, &tag);
-                        // UNSAFE: XXX TODO
-                        unsafe { onTagOpen2(TagName::EssentialProperty, attr_list.as_ptr(), attr_list.len()) };
-
-                        // Clear it now that it has been handled so it can be
-                        // re-used for the next tag
-                        attr_list.clear();
+                        attributes::parse_scheme_attrs(&tag, &mut attr_list);
+                        attr_list.send_as(TagName::EssentialProperty);
                     },
                     b"InbandEventStream" => {
-                        attributes::get_scheme_attrs(&mut attr_list, &tag);
-                        // UNSAFE: XXX TODO
-                        unsafe { onTagOpen2(TagName::InbandEventStream, attr_list.as_ptr(), attr_list.len()) };
-
-                        // Clear it now that it has been handled so it can be
-                        // re-used for the next tag
-                        attr_list.clear();
+                        attributes::parse_scheme_attrs(&tag, &mut attr_list);
+                        attr_list.send_as(TagName::InbandEventStream);
                     },
                     b"Role" => {
-                        attributes::get_scheme_attrs(&mut attr_list, &tag);
-                        // UNSAFE: XXX TODO
-                        unsafe { onTagOpen2(TagName::Role, attr_list.as_ptr(), attr_list.len()) };
-
-                        // Clear it now that it has been handled so it can be
-                        // re-used for the next tag
-                        attr_list.clear();
+                        attributes::parse_scheme_attrs(&tag, &mut attr_list);
+                        attr_list.send_as(TagName::Role);
                     },
                     b"SupplementalProperty" => {
-                        attributes::get_scheme_attrs(&mut attr_list, &tag);
-                        // UNSAFE: XXX TODO
-                        unsafe { onTagOpen2(TagName::SupplementalProperty, attr_list.as_ptr(), attr_list.len()) };
-
-                        // Clear it now that it has been handled so it can be
-                        // re-used for the next tag
-                        attr_list.clear();
+                        attributes::parse_scheme_attrs(&tag, &mut attr_list);
+                        attr_list.send_as(TagName::SupplementalProperty);
                     },
                     // b"SegmentBase" => {
                     //     TagName::SegmentBase.report_tag_open();
@@ -154,24 +104,16 @@ impl MPDProcessor {
                     //     attributes::report_segment_url_attrs(&tag);
                     // },
                     b"UTCTiming" => {
-                        attributes::get_scheme_attrs(&mut attr_list, &tag);
-                        // UNSAFE: XXX TODO
-                        unsafe { onTagOpen2(TagName::UtcTiming, attr_list.as_ptr(), attr_list.len()) };
-
-                        // Clear it now that it has been handled so it can be
-                        // re-used for the next tag
-                        attr_list.clear();
+                        attributes::parse_scheme_attrs(&tag, &mut attr_list);
+                        attr_list.send_as(TagName::UtcTiming);
                     },
 
-                    // b"BaseURL" => {
-                    //     attributes::get_base_url_attrs(&mut attr_list, &tag);
-                    //     // UNSAFE: XXX TODO
-                    //     unsafe { onTagOpen2(TagName::BaseURL, attr_list.as_ptr(), attr_list.len()) };
-
-                    //     // Clear it now that it has been handled so it can be
-                    //     // re-used for the next tag
-                    //     attr_list.clear();
-                    // },
+                    b"BaseURL" => {
+                        attributes::parse_base_url_attrs(&tag, &mut attr_list);
+                        attr_list.send_as(TagName::BaseURL);
+                        // UNSAFE: XXX TODO
+                        // self.process_base_url_element();
+                    },
                     // b"cenc:pssh" => self.process_cenc_element(),
                     // b"Location" => self.process_location_element(),
                     // b"SegmentTimeline" =>

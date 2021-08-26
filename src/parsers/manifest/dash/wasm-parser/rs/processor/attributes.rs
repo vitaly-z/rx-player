@@ -1,30 +1,7 @@
 use crate::errors::ParsingError;
 use crate::events::AttributeName::{*, self};
-
-// pub fn report_representation_attrs(tag_bs : &quick_xml::events::BytesStart) {
-//     for res_attr in tag_bs.attributes() {
-//         match res_attr {
-//             Ok(attr) => match attr.key {
-//                 b"id" => Id.try_report_as_string(&attr),
-//                 b"audioSamplingRate" => AudioSamplingRate.try_report_as_string(&attr),
-//                 b"bandwidth" => Bitrate.try_report_as_u64(&attr),
-//                 b"codecs" => Codecs.try_report_as_string(&attr),
-//                 b"codingDependency" => CodingDependency.try_report_as_bool(&attr),
-//                 b"frameRate" => FrameRate.try_report_as_string(&attr),
-//                 b"height" => Height.try_report_as_u64(&attr),
-//                 b"width" => Width.try_report_as_u64(&attr),
-//                 b"maxPlayoutRate" => MaxPlayoutRate.try_report_as_f64(&attr),
-//                 b"maxSAPPeriod" => MaxSAPPeriod.try_report_as_f64(&attr),
-//                 b"mimeType" => MimeType.try_report_as_string(&attr),
-//                 b"profiles" => Profiles.try_report_as_string(&attr),
-//                 b"qualityRanking" => QualityRanking.try_report_as_u64(&attr),
-//                 b"segmentProfiles" => SegmentProfiles.try_report_as_string(&attr),
-//                 _ => {},
-//             },
-//             Err(err) => ParsingError::from(err).report_err(),
-//         };
-//     };
-// }
+use crate::events::TagName;
+use crate::onTagOpen2;
 
 // pub fn report_segment_template_attrs(tag_bs : &quick_xml::events::BytesStart) {
 //     for res_attr in tag_bs.attributes() {
@@ -190,34 +167,34 @@ use crate::events::AttributeName::{*, self};
 //    }
 //}
 
-pub fn get_mpd_attrs(
-    attr_vec : &mut AttributeList,
-    e : &quick_xml::events::BytesStart
+pub fn parse_mpd_attrs(
+    e : &quick_xml::events::BytesStart,
+    attr_list : &mut AttributeList
 ) {
     for res_attr in e.attributes() {
         match res_attr {
             Ok(attr) => match attr.key {
-                b"id" => attr_vec.push_str_attr(Id, &attr),
-                b"profiles" => attr_vec.push_str_attr(Profiles, &attr),
-                b"type" => attr_vec.push_str_attr(Type, &attr),
+                b"id" => attr_list.add_string(Id, &attr),
+                b"profiles" => attr_list.add_string(Profiles, &attr),
+                b"type" => attr_list.add_string(Type, &attr),
                 b"availabilityStartTime" =>
-                    attr_vec.push_str_attr(AvailabilityStartTime, &attr),
+                    attr_list.add_string(AvailabilityStartTime, &attr),
                 b"availabilityEndTime" =>
-                    attr_vec.push_str_attr(AvailabilityEndTime, &attr),
-                b"publishTime" => attr_vec.push_str_attr(PublishTime, &attr),
+                    attr_list.add_string(AvailabilityEndTime, &attr),
+                b"publishTime" => attr_list.add_string(PublishTime, &attr),
                 b"mediaPresentationDuration" =>
-                    attr_vec.push_iso_8601_duration_attr(MediaPresentationDuration, &attr),
+                    attr_list.add_iso_8601_duration(MediaPresentationDuration, &attr),
                 b"minimumUpdatePeriod" =>
-                    attr_vec.push_iso_8601_duration_attr(MinimumUpdatePeriod, &attr),
-                b"minBufferTime" => attr_vec.push_iso_8601_duration_attr(MinBufferTime, &attr),
+                    attr_list.add_iso_8601_duration(MinimumUpdatePeriod, &attr),
+                b"minBufferTime" => attr_list.add_iso_8601_duration(MinBufferTime, &attr),
                 b"timeShiftBufferDepth" =>
-                    attr_vec.push_iso_8601_duration_attr(TimeShiftBufferDepth, &attr),
+                    attr_list.add_iso_8601_duration(TimeShiftBufferDepth, &attr),
                 b"suggestedPresentationDelay" =>
-                    attr_vec.push_iso_8601_duration_attr(SuggestedPresentationDelay, &attr),
+                    attr_list.add_iso_8601_duration(SuggestedPresentationDelay, &attr),
                 b"maxSegmentDuration" =>
-                    attr_vec.push_iso_8601_duration_attr(MaxSegmentDuration, &attr),
+                    attr_list.add_iso_8601_duration(MaxSegmentDuration, &attr),
                 b"maxSubsegmentDuration" =>
-                    attr_vec.push_iso_8601_duration_attr(MaxSubsegmentDuration, &attr),
+                    attr_list.add_iso_8601_duration(MaxSubsegmentDuration, &attr),
                 _ => {},
             },
             Err(err) => ParsingError::from(err).report_err(),
@@ -225,19 +202,19 @@ pub fn get_mpd_attrs(
     };
 }
 
-pub fn get_period_attrs(
-    attr_vec : &mut AttributeList,
-    e : &quick_xml::events::BytesStart
+pub fn parse_period_attrs(
+    e : &quick_xml::events::BytesStart,
+    attr_list : &mut AttributeList
 ) {
     for res_attr in e.attributes() {
         match res_attr {
             Ok(attr) => match attr.key {
-                b"id" => attr_vec.push_str_attr(Id, &attr),
-                b"start" => attr_vec.push_iso_8601_duration_attr(Start, &attr),
-                b"duration" => attr_vec.push_iso_8601_duration_attr(Duration, &attr),
-                b"bitstreamSwitching" => attr_vec.push_bool_attr(BitstreamSwitching, &attr),
-                b"xlink:href" => attr_vec.push_str_attr(XLinkHref, &attr),
-                b"xlink:actuate" => attr_vec.push_str_attr(XLinkActuate, &attr),
+                b"id" => attr_list.add_string(Id, &attr),
+                b"start" => attr_list.add_iso_8601_duration(Start, &attr),
+                b"duration" => attr_list.add_iso_8601_duration(Duration, &attr),
+                b"bitstreamSwitching" => attr_list.add_bool(BitstreamSwitching, &attr),
+                b"xlink:href" => attr_list.add_string(XLinkHref, &attr),
+                b"xlink:actuate" => attr_list.add_string(XLinkActuate, &attr),
                 _ => {},
             },
             Err(err) => ParsingError::from(err).report_err(),
@@ -245,42 +222,42 @@ pub fn get_period_attrs(
     };
 }
 
-pub fn get_adaptation_set_attrs(
-    attr_vec : &mut AttributeList,
-    e : &quick_xml::events::BytesStart
+pub fn parse_adaptation_set_attrs(
+    e : &quick_xml::events::BytesStart,
+    attr_list : &mut AttributeList
 ) {
     for res_attr in e.attributes() {
         match res_attr {
             Ok(attr) => match attr.key {
-                b"id" => attr_vec.push_str_attr(Id, &attr),
-                b"group" => attr_vec.push_u64_attr(Group, &attr),
-                b"lang" => attr_vec.push_str_attr(Language, &attr),
-                b"contentType" => attr_vec.push_str_attr(ContentType, &attr),
-                b"par" => attr_vec.push_str_attr(Par, &attr),
-                b"minBandwidth" => attr_vec.push_u64_attr(MinBandwidth, &attr),
-                b"maxBandwidth" => attr_vec.push_u64_attr(MaxBandwidth, &attr),
-                b"minWidth" => attr_vec.push_u64_attr(MinWidth, &attr),
-                b"maxWidth" => attr_vec.push_u64_attr(MaxWidth, &attr),
-                b"minHeight" => attr_vec.push_u64_attr(MinHeight, &attr),
-                b"maxHeight" => attr_vec.push_u64_attr(MaxHeight, &attr),
-                b"minFrameRate" => attr_vec.push_str_attr(MinFrameRate, &attr),
-                b"maxFrameRate" => attr_vec.push_str_attr(MaxFrameRate, &attr),
-                b"selectionPriority" => attr_vec.push_u64_attr(SelectionPriority, &attr),
-                b"segmentAlignment" => attr_vec.push_u64_or_bool_attr(SegmentAlignment, &attr),
+                b"id" => attr_list.add_string(Id, &attr),
+                b"group" => attr_list.add_u64(Group, &attr),
+                b"lang" => attr_list.add_string(Language, &attr),
+                b"contentType" => attr_list.add_string(ContentType, &attr),
+                b"par" => attr_list.add_string(Par, &attr),
+                b"minBandwidth" => attr_list.add_u64(MinBandwidth, &attr),
+                b"maxBandwidth" => attr_list.add_u64(MaxBandwidth, &attr),
+                b"minWidth" => attr_list.add_u64(MinWidth, &attr),
+                b"maxWidth" => attr_list.add_u64(MaxWidth, &attr),
+                b"minHeight" => attr_list.add_u64(MinHeight, &attr),
+                b"maxHeight" => attr_list.add_u64(MaxHeight, &attr),
+                b"minFrameRate" => attr_list.add_string(MinFrameRate, &attr),
+                b"maxFrameRate" => attr_list.add_string(MaxFrameRate, &attr),
+                b"selectionPriority" => attr_list.add_u64(SelectionPriority, &attr),
+                b"segmentAlignment" => attr_list.add_u64_or_bool(SegmentAlignment, &attr),
                 b"subsegmentAlignment" =>
-                    attr_vec.push_u64_or_bool_attr(SubsegmentAlignment, &attr),
-                b"bitstreamSwitching" => attr_vec.push_bool_attr(BitstreamSwitching, &attr),
-                b"audioSamplingRate" => attr_vec.push_str_attr(AudioSamplingRate, &attr),
-                b"codecs" => attr_vec.push_str_attr(Codecs, &attr),
-                b"profiles" => attr_vec.push_str_attr(Profiles, &attr),
-                b"segmentProfiles" => attr_vec.push_str_attr(SegmentProfiles, &attr),
-                b"mimeType" => attr_vec.push_str_attr(MimeType, &attr),
-                b"codingDependency" => attr_vec.push_bool_attr(CodingDependency, &attr),
-                b"frameRate" => attr_vec.push_str_attr(FrameRate, &attr),
-                b"height" => attr_vec.push_u64_attr(Height, &attr),
-                b"width" => attr_vec.push_u64_attr(Width, &attr),
-                b"maxPlayoutRate" => attr_vec.push_f64_attr(MaxPlayoutRate, &attr),
-                b"maxSAPPeriod" => attr_vec.push_f64_attr(MaxSAPPeriod, &attr),
+                    attr_list.add_u64_or_bool(SubsegmentAlignment, &attr),
+                b"bitstreamSwitching" => attr_list.add_bool(BitstreamSwitching, &attr),
+                b"audioSamplingRate" => attr_list.add_string(AudioSamplingRate, &attr),
+                b"codecs" => attr_list.add_string(Codecs, &attr),
+                b"profiles" => attr_list.add_string(Profiles, &attr),
+                b"segmentProfiles" => attr_list.add_string(SegmentProfiles, &attr),
+                b"mimeType" => attr_list.add_string(MimeType, &attr),
+                b"codingDependency" => attr_list.add_bool(CodingDependency, &attr),
+                b"frameRate" => attr_list.add_string(FrameRate, &attr),
+                b"height" => attr_list.add_u64(Height, &attr),
+                b"width" => attr_list.add_u64(Width, &attr),
+                b"maxPlayoutRate" => attr_list.add_f64(MaxPlayoutRate, &attr),
+                b"maxSAPPeriod" => attr_list.add_f64(MaxSAPPeriod, &attr),
                 _ => {},
             },
             Err(err) => ParsingError::from(err).report_err(),
@@ -288,16 +265,16 @@ pub fn get_adaptation_set_attrs(
     };
 }
 
-pub fn get_base_url_attrs(
-    attr_vec : &mut AttributeList,
-    e : &quick_xml::events::BytesStart
+pub fn parse_base_url_attrs(
+    e : &quick_xml::events::BytesStart,
+    attr_list : &mut AttributeList
 ) {
     for res_attr in e.attributes() {
         match res_attr {
             Ok(attr) => if let b"availabilityTimeOffset" = attr.key {
                 match attr.value.as_ref() {
-                    b"INF" => attr_vec.push_raw_f64(AvailabilityTimeOffset, f64::INFINITY),
-                    _ => attr_vec.push_f64_attr(AvailabilityTimeOffset, &attr),
+                    b"INF" => attr_list.add_raw_f64(AvailabilityTimeOffset, f64::INFINITY),
+                    _ => attr_list.add_f64(AvailabilityTimeOffset, &attr),
                 }
             },
             Err(err) => ParsingError::from(err).report_err(),
@@ -305,15 +282,15 @@ pub fn get_base_url_attrs(
     };
 }
 
-pub fn get_scheme_attrs(
-    attr_vec : &mut AttributeList,
-    e : &quick_xml::events::BytesStart
+pub fn parse_scheme_attrs(
+    e : &quick_xml::events::BytesStart,
+    attr_list : &mut AttributeList
 ) {
     for res_attr in e.attributes() {
         match res_attr {
             Ok(attr) => match attr.key {
-                b"schemeIdUri" => attr_vec.push_str_attr(SchemeIdUri, &attr),
-                b"value" => attr_vec.push_str_attr(SchemeValue, &attr),
+                b"schemeIdUri" => attr_list.add_string(SchemeIdUri, &attr),
+                b"value" => attr_list.add_string(SchemeValue, &attr),
                 _ => {},
             },
             Err(err) => ParsingError::from(err).report_err(),
@@ -321,17 +298,17 @@ pub fn get_scheme_attrs(
     };
 }
 
-pub fn get_content_component_attrs(
-    attr_vec : &mut AttributeList,
-    e : &quick_xml::events::BytesStart
+pub fn parse_content_component_attrs(
+    e : &quick_xml::events::BytesStart,
+    attr_list : &mut AttributeList
 ) {
     for res_attr in e.attributes() {
         match res_attr {
             Ok(attr) => match attr.key {
-                b"id" => attr_vec.push_str_attr(Id, &attr),
-                b"lang" => attr_vec.push_str_attr(Language, &attr),
-                b"contentType" => attr_vec.push_str_attr(ContentType, &attr),
-                b"par" => attr_vec.push_str_attr(Par, &attr),
+                b"id" => attr_list.add_string(Id, &attr),
+                b"lang" => attr_list.add_string(Language, &attr),
+                b"contentType" => attr_list.add_string(ContentType, &attr),
+                b"par" => attr_list.add_string(Par, &attr),
                 _ => {},
             },
             Err(err) => ParsingError::from(err).report_err(),
@@ -339,18 +316,46 @@ pub fn get_content_component_attrs(
     };
 }
 
-pub fn get_content_protection_attrs(
-    attr_vec : &mut AttributeList,
-    e : &quick_xml::events::BytesStart
+pub fn parse_content_protection_attrs(
+    e : &quick_xml::events::BytesStart,
+    attr_list : &mut AttributeList
 ) {
     for res_attr in e.attributes() {
         match res_attr {
             Ok(attr) => match attr.key {
-                b"schemeIdUri" => attr_vec.push_str_attr(SchemeIdUri, &attr),
-                b"value" => attr_vec.push_str_attr(ContentProtectionValue, &attr),
+                b"schemeIdUri" => attr_list.add_string(SchemeIdUri, &attr),
+                b"value" => attr_list.add_string(ContentProtectionValue, &attr),
 
                 // TODO convert hex to bytes here?
-                b"cenc:default_KID" => attr_vec.push_str_attr(ContentProtectionKeyId, &attr),
+                b"cenc:default_KID" => attr_list.add_string(ContentProtectionKeyId, &attr),
+                _ => {},
+            },
+            Err(err) => ParsingError::from(err).report_err(),
+        };
+    };
+}
+
+pub fn parse_representation_attrs(
+    e : &quick_xml::events::BytesStart,
+    attr_list : &mut AttributeList
+) {
+    for res_attr in e.attributes() {
+        match res_attr {
+            Ok(attr) => match attr.key {
+                b"id" => attr_list.add_string(Id, &attr),
+                b"audioSamplingRate" => attr_list.add_string(AudioSamplingRate, &attr),
+                b"bandwidth" => attr_list.add_u64(Bitrate, &attr),
+                b"codecs" => attr_list.add_string(Codecs, &attr),
+                b"codingDependency" => attr_list.add_bool(CodingDependency, &attr),
+                b"frameRate" => attr_list.add_string(FrameRate, &attr),
+                b"height" => attr_list.add_u64(Height, &attr),
+                b"width" => attr_list.add_u64(Width, &attr),
+                b"maxPlayoutRate" => attr_list.add_f64(MaxPlayoutRate, &attr),
+                b"maxSAPPeriod" => attr_list.add_f64(MaxSAPPeriod, &attr),
+                b"mimeType" => attr_list.add_string(MimeType, &attr),
+                b"profiles" => attr_list.add_string(Profiles, &attr),
+                b"qualityRanking" => attr_list.add_u64(QualityRanking, &attr),
+                b"segmentProfiles" => attr_list.add_string(SegmentProfiles, &attr),
                 _ => {},
             },
             Err(err) => ParsingError::from(err).report_err(),
@@ -368,7 +373,7 @@ impl AttributeList {
         Self { inner: Vec::new() }
     }
 
-    pub fn push_str_attr(
+    pub fn add_string(
         &mut self,
         attr_name : AttributeName,
         attr : &quick_xml::events::attributes::Attribute
@@ -391,7 +396,6 @@ impl AttributeList {
                 self.inner.push(attr_name as u8);
                 self.inner.extend(len);
                 self.inner.extend(val.iter());
-                self.inner.as_ptr();
             },
             Err(_) =>
                 ParsingError("Could not escape original value".to_owned())
@@ -399,7 +403,7 @@ impl AttributeList {
         }
     }
 
-    pub fn push_iso_8601_duration_attr(
+    pub fn add_iso_8601_duration(
         &mut self,
         attr_name : AttributeName,
         attr : &quick_xml::events::attributes::Attribute
@@ -418,7 +422,7 @@ impl AttributeList {
         }
     }
 
-    pub fn push_f64_attr(
+    pub fn add_f64(
         &mut self,
         attr_name : AttributeName,
         attr : &quick_xml::events::attributes::Attribute
@@ -438,7 +442,7 @@ impl AttributeList {
     }
 
     // XXX TODO check DASH-IF
-    pub fn push_raw_f64(
+    pub fn add_raw_f64(
         &mut self,
         attr_name : AttributeName,
         val : f64
@@ -452,7 +456,7 @@ impl AttributeList {
         self.inner.extend(val);
     }
 
-    pub fn push_u64_attr(
+    pub fn add_u64(
         &mut self,
         attr_name : AttributeName,
         attr : &quick_xml::events::attributes::Attribute
@@ -471,7 +475,7 @@ impl AttributeList {
         }
     }
 
-    pub fn push_u64_or_bool_attr(
+    pub fn add_u64_or_bool(
         &mut self,
         attr_name : AttributeName,
         attr : &quick_xml::events::attributes::Attribute
@@ -490,7 +494,7 @@ impl AttributeList {
         }
     }
 
-    pub fn push_bool_attr(
+    pub fn add_bool(
         &mut self,
         attr_name : AttributeName,
         attr : &quick_xml::events::attributes::Attribute
@@ -521,5 +525,11 @@ impl AttributeList {
 
     pub fn clear(&mut self) {
         self.inner.clear()
+    }
+
+    pub fn send_as(&mut self, tag_name: TagName) {
+        // UNSAFE: XXX TODO
+        unsafe { onTagOpen2(tag_name, self.as_ptr(), self.len()) };
+        self.clear();
     }
 }
