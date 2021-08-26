@@ -46,10 +46,10 @@
     "demo:min": "cross-env RXP_METAPLAYLIST=true RXP_MINIFY=true node ./scripts/generate_full_demo.js",
     "demo:watch": "cross-env RXP_METAPLAYLIST=true node ./scripts/generate_full_demo.js --watch",
     "doc": "rm -rf doc/generated; node ./scripts/doc-generator/index.js doc/ doc/generated",
-    "start:docs": "docusaurus start docs/",
-    "build:docs": "docusaurus build docs/",
-    "deploy": "docusaurus deploy docs/",
-    "serve": "docusaurus serve docs/",
+    "docs:build": "docusaurus build docs/",
+    "docs:deploy": "docusaurus deploy docs/",
+    "docs:serve": "docusaurus serve docs/",
+    "docs:start": "docusaurus start docs/",
     "lint": "eslint src -c .eslintrc.js",
     "lint:demo": "eslint demo/full/scripts",
     "lint:tests": "eslint tests/**/*.js",
@@ -206,10 +206,10 @@
     },
     "Build the documentation pages": {
       "doc": "Generate the HTML documentation in doc/generated/pages",
-      "start:docs": "Start Docusaurus website docs",
-      "build:docs": "Build Docusaurus website",
-      "deploy": "Deploy Docusaurus to GitHub pages",
-      "serve": "Serve Docusaurus website"
+      "docs:start": "Start Docusaurus website docs",
+      "docs:build": "Build Docusaurus website",
+      "docs:deploy": "Deploy Docusaurus to GitHub pages",
+      "docs:serve": "Serve Docusaurus website"
     },
     "Update the RxPlayer's version": {
       "update-version": "Update the version to the string given in argument (example: `npm run update-version 3.8.0`). Will update the codebase and perform every builds."
