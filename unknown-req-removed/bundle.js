@@ -69257,9 +69257,6 @@ class PendingRequestsStore {
      */
     remove(id) {
         if (this._currentRequests[id] == null) {
-            if (true) {
-                throw new Error("ABR: can't remove unknown request");
-            }
             log/* default.warn */.Z.warn("ABR: can't remove unknown request");
         }
         delete this._currentRequests[id];
