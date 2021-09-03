@@ -83483,9 +83483,11 @@ var ContentList = /*#__PURE__*/function (_React$Component) {
         }
 
         this.setState(newState);
+        document.querySelector(".load-button").focus();
         return;
       }
     } // estimate first index which should be selected
+    document.querySelector(".load-button").focus();
 
 
     var contentList = this.state.contentsPerType[this.state.transportType];
