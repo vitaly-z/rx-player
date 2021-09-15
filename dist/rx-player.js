@@ -15028,7 +15028,6 @@ function fetchIsSupported() {
  * limitations under the License.
  */
 
-
 /**
  * Clear element's src attribute.
  * @param {HTMLMediaElement} element
@@ -15074,16 +15073,30 @@ function clearElementSrc(element) {
 
 "use strict";
 
-// UNUSED EXPORTS: areSameContent, Period, Adaptation, Representation, StaticRepresentationIndex, SUPPORTED_ADAPTATIONS_TYPE
 
-// EXTERNAL MODULE: ./src/utils/are_arrays_of_numbers_equal.ts
-var are_arrays_of_numbers_equal = __webpack_require__(44);
+/**
+ * Simulate TimeRanges as returned by SourceBuffer.prototype.buffered.
+ * Add an "insert" and "remove" methods to manually update it.
+ * @class ManualTimeRanges
+ */
 
 // EXTERNAL MODULE: ./src/utils/array_find.ts
 var array_find = __webpack_require__(14);
 
-// EXTERNAL MODULE: ./src/utils/byte_parsing.ts
-var byte_parsing = __webpack_require__(1);
+  var _proto = ManualTimeRanges.prototype;
+
+  _proto.insert = function insert(start, end) {
+    if (false) {}
+
+    (0,_utils_ranges__WEBPACK_IMPORTED_MODULE_0__/* .insertInto */ .kR)(this._ranges, {
+      start: start,
+      end: end
+    });
+    this.length = this._ranges.length;
+  };
+
+  _proto.remove = function remove(start, end) {
+    if (false) {}
 
     var rangesToIntersect = [];
 
@@ -15617,9 +15630,6 @@ var period_Period = /*#__PURE__*/function () {
     this.adaptations = Object.keys(args.adaptations).reduce(function (acc, type) {
       var adaptationsForType = args.adaptations[type];
 
-      if (adaptationsForType == null) {
-        return acc;
-      }
 
 
         var newAdaptation = null;
@@ -15645,9 +15655,25 @@ var period_Period = /*#__PURE__*/function () {
         return adaptation != null && adaptation.representations.length > 0;
       });
 
-      if (filteredAdaptations.length === 0 && adaptationsForType.length > 0 && (type === "video" || type === "audio")) {
-        throw new media_error["a" /* default */]("MANIFEST_PARSE_ERROR", "No supported " + type + " adaptations");
-      }
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Z": function() { return /* binding */ errorMessage; }
+/* harmony export */ });
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
       if (filteredAdaptations.length > 0) {
         acc[type] = filteredAdaptations;
@@ -15663,15 +15689,6 @@ var period_Period = /*#__PURE__*/function () {
     this.duration = args.duration;
     this.start = args.start;
 
-    if (this.duration != null && this.start != null) {
-      this.end = this.start + this.duration;
-    }
-  }
-  /**
-   * Returns every `Adaptations` (or `tracks`) linked to that Period, in an
-   * Array.
-   * @returns {Array.<Object>}
-   */
 
 
   var _proto = Period.prototype;
@@ -15692,16 +15709,6 @@ var period_Period = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getAdaptationsForType = function getAdaptationsForType(adaptationType) {
-    var adaptationsForType = this.adaptations[adaptationType];
-    return adaptationsForType == null ? [] : adaptationsForType;
-  }
-  /**
-   * Returns the Adaptation linked to the given ID.
-   * @param {number|string} wantedId
-   * @returns {Object|undefined}
-   */
-  ;
 
   _proto.getAdaptation = function getAdaptation(wantedId) {
     return Object(array_find["a" /* default */])(this.getAdaptations(), function (_ref) {
@@ -15824,15 +15831,13 @@ var static_StaticRepresentationIndex = /*#__PURE__*/function () {
    * Returns false as a static file never need to be refreshed.
    * @returns {Boolean}
    */
-  ;
 
-  _proto.shouldRefresh = function shouldRefresh() {
-    return false;
-  }
-  /**
-   * @returns {Number}
-   */
-  ;
+
+  var _proto = NetworkError.prototype;
+
+  _proto.isHttpError = function isHttpError(httpErrorCode) {
+    return this.errorType === _error_codes__WEBPACK_IMPORTED_MODULE_2__/* .NetworkErrorTypes.ERROR_HTTP_CODE */ .br.ERROR_HTTP_CODE && this.status === httpErrorCode;
+  };
 
   _proto.checkDiscontinuity = function checkDiscontinuity() {
     return -1;
@@ -16905,6 +16910,85 @@ var Representation = /*#__PURE__*/function () {
  * limitations under the License.
  */
 
+
+
+
+
+/** List in an array every possible value for the Adaptation's `type` property. */
+
+var SUPPORTED_ADAPTATIONS_TYPE = ["audio", "video", "text", "image"];
+/**
+ * Normalized Adaptation structure.
+ * An Adaptation describes a single `Track`. For example a specific audio
+ * track (in a given language) or a specific video track.
+ * It istelf can be represented in different qualities, which we call here
+ * `Representation`.
+ * @class Adaptation
+ */
+
+var Adaptation = /*#__PURE__*/function () {
+  /**
+   * @constructor
+   * @param {Object} parsedAdaptation
+   * @param {Object|undefined} [options]
+   */
+  function Adaptation(parsedAdaptation, options) {
+    if (options === void 0) {
+      options = {};
+    }
+
+    var trickModeTracks = parsedAdaptation.trickModeTracks;
+    var _options = options,
+        representationFilter = _options.representationFilter,
+        isManuallyAdded = _options.isManuallyAdded;
+    this.id = parsedAdaptation.id;
+    this.isTrickModeTrack = parsedAdaptation.isTrickModeTrack;
+    this.type = parsedAdaptation.type;
+
+    if (parsedAdaptation.language !== undefined) {
+      this.language = parsedAdaptation.language;
+      this.normalizedLanguage = (0,languages/* default */.ZP)(parsedAdaptation.language);
+    }
+
+    if (parsedAdaptation.closedCaption !== undefined) {
+      this.isClosedCaption = parsedAdaptation.closedCaption;
+    }
+
+    if (parsedAdaptation.audioDescription !== undefined) {
+      this.isAudioDescription = parsedAdaptation.audioDescription;
+    }
+
+    if (parsedAdaptation.isDub !== undefined) {
+      this.isDub = parsedAdaptation.isDub;
+    }
+
+    if (parsedAdaptation.isSignInterpreted !== undefined) {
+      this.isSignInterpreted = parsedAdaptation.isSignInterpreted;
+    }
+
+    if (trickModeTracks !== undefined && trickModeTracks.length > 0) {
+      this.trickModeTracks = trickModeTracks.map(function (track) {
+        return new Adaptation(track);
+      });
+    }
+
+    var argsRepresentations = parsedAdaptation.representations;
+    var representations = [];
+    var isSupported = false;
+
+    for (var i = 0; i < argsRepresentations.length; i++) {
+      var representation = new manifest_representation(argsRepresentations[i], {
+        type: this.type
+      });
+      var shouldAdd = (0,is_null_or_undefined/* default */.Z)(representationFilter) || representationFilter(representation, {
+        bufferType: this.type,
+        language: this.language,
+        normalizedLanguage: this.normalizedLanguage,
+        isClosedCaption: this.isClosedCaption,
+        isDub: this.isDub,
+        isAudioDescription: this.isAudioDescription,
+        isSignInterpreted: this.isSignInterpreted
+      });
 
 
 
@@ -19128,8 +19212,6 @@ function getDurationFromTrun(buffer) {
         cursor += 4;
       }
     }
-
-    completeDuration += duration;
   }
 
   return completeDuration;
@@ -20049,11 +20131,6 @@ function processFormatedToken(replacer) {
  * @returns {string}
  */
 
-      var contentLengthHeader = response.headers.get("Content-Length");
-      var contentLength = !Object(_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_5__[/* default */ "a"])(contentLengthHeader) && !isNaN(+contentLengthHeader) ? +contentLengthHeader : undefined;
-      var reader = response.body.getReader();
-      var size = 0;
-      return readBufferAndSendEvents();
 
 function createIndexURLs(baseURLs, media, id, bitrate) {
   if (baseURLs.length === 0) {
@@ -24106,9 +24183,8 @@ function clearEMESession(mediaElement) {
  * Free up all ressources taken by the EME management.
  */
 
-function disposeEME(mediaElement) {
-  Object(_dispose_media_keys__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"])(mediaElement).subscribe(_utils_noop__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"]);
-}
+
+ // eslint-disable-next-line max-len
 
 /***/ }),
 /* 153 */
@@ -24276,9 +24352,13 @@ function addTextTrack(mediaElement, hidden) {
   };
 }
 
-/***/ }),
-/* 157 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+  for (var i = periodsIR.length - 1; i >= 0; i--) {
+    _loop(i);
+  }
+
+  if (contextInfos.isDynamic && !manifestBoundsCalculator.lastPositionIsKnown()) {
+    // Guess a last time the last position
+    var guessedLastPositionFromClock = guessLastPositionFromClock(contextInfos, 0);
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return isVTTCue; });
@@ -27535,31 +27615,6 @@ function isSegmentStillAvailable(segment, timeline, timescale, indexTimeOffset) 
 }
 
 /***/ }),
-/* 178 */,
-/* 179 */,
-/* 180 */,
-/* 181 */,
-/* 182 */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || new Function("return this")();
-} catch (e) {
-	// This works if the window reference is available
-	if (typeof window === "object") g = window;
-}
-
-/* harmony default export */ __webpack_exports__["default"] = (parseSami);
-
-/***/ }),
 /* 183 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -27711,6 +27766,190 @@ __webpack_require__.r(__webpack_exports__);
  * /!\ This file is feature-switchable.
  * It always should be imported through the `features` object.
  */
+
+var HTML_ENTITIES = /&#([0-9]+);/g;
+var BR = /<br>/gi;
+var STYLE = /<style[^>]*>([\s\S]*?)<\/style[^>]*>/i;
+var PARAG = /\s*<p (?:class=([^>]+))?>(.*)/i;
+var START = /<sync[^>]+?start="?([0-9]*)"?[^0-9]/i;
+/**
+ * Returns classnames for every languages.
+ * @param {string} str
+ * @returns {Object}
+ */
+
+function getClassNameByLang(str) {
+  var ruleRe = /\.(\S+)\s*{([^}]*)}/gi;
+  var langs = {};
+  var m = ruleRe.exec(str);
+
+  while (m !== null) {
+    var name = m[1];
+    var lang = getCSSProperty(m[2], "lang");
+
+    if (name != null && lang != null) {
+      langs[lang] = name;
+    }
+
+    m = ruleRe.exec(str);
+  }
+
+  return langs;
+}
+/**
+ * Returns the rules defined for the P element.
+ * Empty string if not found.
+ * @param {string} str - The entire styling part.
+ * @returns {string}
+ */
+
+
+function getPCSSRules(str) {
+  var pRuleRegex = /p\s*{([^}]*)}/gi;
+  var rule = pRuleRegex.exec(str);
+
+  if (rule === null) {
+    return "";
+  }
+
+  return rule[1];
+}
+/**
+ * @param {string} str - entire CSS rule
+ * @param {string} name - name of the property
+ * @returns {string|null} - value of the property. Null if not found.
+ */
+
+
+function getCSSProperty(str, name) {
+  var matches = new RegExp("\\s*" + name + ":\\s*(\\S+);", "i").exec(str);
+  return Array.isArray(matches) ? matches[1] : null;
+}
+/**
+ * @param {string} text
+ * @returns {string}
+ */
+
+
+function decodeEntities(text) {
+  return text.replace(HTML_ENTITIES, function (_, $1) {
+    return String.fromCharCode($1);
+  });
+}
+/**
+ * Because sami is not really html... we have to use
+ * some kind of regular expressions to parse it...
+ * the cthulhu way :)
+ * The specification being quite clunky, this parser
+ * may not work for every sami input.
+ *
+ * @param {string} smi
+ * @param {Number} timeOffset
+ * @param {string} lang
+ */
+
+
+function parseSami(smi, timeOffset, lang) {
+  var syncOpen = /<sync[ >]/ig;
+  var syncClose = /<sync[ >]|<\/body>/ig;
+  var subs = [];
+  var styleMatches = STYLE.exec(smi);
+  var css = Array.isArray(styleMatches) ? styleMatches[1] : "";
+  var up;
+  var to; // FIXME Is that wanted?
+  // previously written as let to = SyncClose.exec(smi); but never used
+
+  syncClose.exec(smi);
+  var langs = getClassNameByLang(css);
+  var pCSS = getPCSSRules(css);
+  var klass;
+
+  if ((0,_utils_is_non_empty_string__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z)(lang)) {
+    klass = langs[lang];
+
+    if (klass === undefined) {
+      throw new Error("sami: could not find lang " + lang + " in CSS");
+    }
+  }
+
+  while (true) {
+    up = syncOpen.exec(smi);
+    to = syncClose.exec(smi);
+
+    if (up === null && to === null) {
+      break;
+    }
+
+    if (up === null || to === null || up.index >= to.index) {
+      throw new Error("parse error");
+    }
+
+    var str = smi.slice(up.index, to.index);
+    var tim = START.exec(str);
+
+    if (!Array.isArray(tim)) {
+      throw new Error("parse error (sync time attribute)");
+    }
+
+    var start = +tim[1];
+
+    if (isNaN(start)) {
+      throw new Error("parse error (sync time attribute NaN)");
+    }
+
+    appendToSubs(str.split("\n"), start / 1000);
+  }
+
+  return subs;
+
+  function appendToSubs(lines, start) {
+    var i = lines.length;
+
+    while (--i >= 0) {
+      var paragraphInfos = PARAG.exec(lines[i]);
+
+      if (!Array.isArray(paragraphInfos)) {
+        continue;
+      }
+
+      var className = paragraphInfos[1],
+          txt = paragraphInfos[2];
+
+      if (klass !== className) {
+        continue;
+      }
+
+      if (txt === "&nbsp;") {
+        subs[subs.length - 1].end = start;
+      } else {
+        var wrapperEl = document.createElement("DIV");
+        wrapperEl.className = "rxp-texttrack-region";
+        var divEl = document.createElement("DIV");
+        divEl.className = "rxp-texttrack-div";
+        divEl.style.position = "absolute";
+        divEl.style.bottom = "0";
+        divEl.style.width = "100%";
+        divEl.style.color = "#fff";
+        divEl.style.textShadow = "-1px -1px 0 #000," + "1px -1px 0 #000," + "-1px 1px 0 #000," + "1px 1px 0 #000";
+        var pEl = document.createElement("div");
+        pEl.className = "rxp-texttrack-p";
+
+        if ((0,_utils_is_non_empty_string__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z)(pCSS)) {
+          pEl.style.cssText = pCSS;
+        }
+
+        var textEls = txt.split(BR);
+
+        for (var j = 0; j < textEls.length; j++) {
+          if (j !== 0) {
+            pEl.appendChild(document.createElement("BR"));
+          }
+
+          var spanEl = document.createElement("SPAN");
+          spanEl.className = "rxp-texttrack-span";
+          spanEl.textContent = decodeEntities(textEls[j]);
+          pEl.appendChild(spanEl);
+        }
 
         divEl.appendChild(pEl);
         wrapperEl.appendChild(divEl);
@@ -28528,9 +28767,6 @@ function getParentElementsByTagName(element, tagName) {
  * limitations under the License.
  */
 
-  if (mdia === null) {
-    return -1;
-  }
 
 
   if (index === -1) {
@@ -33773,7 +34009,6 @@ var base = __webpack_require__(7403);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /**
  * Get precize start and duration of a chunk.
@@ -45013,6 +45248,17 @@ function scheduled(input, scheduler) {
 }
 //# sourceMappingURL=scheduled.js.map
 ;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/from.js
+
+
+
+
+
+
+
+
+
+
+
 
 
 function from(input, scheduler) {
@@ -56435,6 +56681,15 @@ var segment_loader_generateSegmentLoader = function generateSegmentLoader(custom
         throw new Error("Smooth: no codec private data.");
       }
 
+var APPEND_WINDOW_SECURITIES = config/* default.APPEND_WINDOW_SECURITIES */.Z.APPEND_WINDOW_SECURITIES;
+/**
+ * Push a given media segment (non-init segment) to a SegmentBuffer.
+ * The Observable returned:
+ *   - emit an event once the segment has been pushed.
+ *   - throws on Error.
+ * @param {Object} args
+ * @returns {Observable}
+ */
 
         case "audio":
           {
@@ -57788,8 +58043,19 @@ function createAdaptationStreamPlaybackObserver(initialPlaybackObserver, segment
 
 
 /**
- * @param {HTMLElement} element
- * @param {string} padding
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 function applyPadding(element, padding) {
@@ -58294,12 +58560,10 @@ function getBlacklistedRanges(segmentBuffer, contents) {
 
 
 
- // Styling which can be applied to <span> from any level upper.
-// Added here as an optimization
 
-var SPAN_LEVEL_ATTRIBUTES = ["color", "direction", "display", "fontFamily", "fontSize", "fontStyle", "fontWeight", "textDecoration", "textOutline", "unicodeBidi", "visibility", "wrapOption"]; // TODO
-// tts:showBackground (applies to region)
-// tts:zIndex (applies to region)
+
+
+
 
 /**
  * Create and manage the various Stream Observables needed for the content to
@@ -58647,17 +58911,6 @@ function StreamOrchestrator(content, playbackObserver, abrManager, segmentBuffer
             return (0,concat/* concat */.z)((0,of.of)(evt), (0,of.of)(stream_events_generators/* default.streamComplete */.Z.streamComplete(bufferType)));
           } // current Stream is full, create the next one if not
 
-      if (data === null || features["a" /* default */].imageParser === null) {
-        return Object(of["a" /* of */])({
-          type: "parsed-segment",
-          value: {
-            chunkData: null,
-            chunkInfos: null,
-            chunkOffset: 0,
-            appendWindow: [undefined, undefined]
-          }
-        });
-      }
 
           createNextPeriodStream$.next(nextPeriod);
         } else {
@@ -58830,10 +59083,11 @@ function applyExtent(element, extent) {
  * limitations under the License.
  */
 
+
 /**
- * Create PlaybackObserver for the `Stream` part of the code.
- * @param {Object} playbackObserver
- * @param {Object} args
+ * Create clock Observable for the `Stream` part of the code.
+ * @param {Observable} initClock$
+ * @param {Object} streamClockArgument
  * @returns {Observable}
  */
 
@@ -59011,10 +59265,6 @@ function whenSourceBuffersEndedUpdates$(sourceBuffers) {
  * @returns {Object}
  */
 
-/**
- * @param {Object} localManifest
- * @returns {Object}
- */
 
 function isMediaSourceOpened$(mediaSource) {
   return (0,merge/* merge */.T)((0,event_listeners/* onSourceOpen$ */.ym)(mediaSource).pipe((0,map/* map */.U)(function () {
@@ -59920,6 +60170,364 @@ function InitializeOnMediaSource(_ref) {
 ;// CONCATENATED MODULE: ./src/core/init/index.ts
 /**
  * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/* harmony default export */ var init = (InitializeOnMediaSource);
+;// CONCATENATED MODULE: ./src/core/api/clock.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * This file defines a global clock for the RxPlayer.
+ *
+ * Each clock tick also pass information about the current state of the
+ * media element to sub-parts of the player.
+ */
+
+
+
+
+
+
+var SAMPLING_INTERVAL_MEDIASOURCE = config/* default.SAMPLING_INTERVAL_MEDIASOURCE */.Z.SAMPLING_INTERVAL_MEDIASOURCE,
+    SAMPLING_INTERVAL_LOW_LATENCY = config/* default.SAMPLING_INTERVAL_LOW_LATENCY */.Z.SAMPLING_INTERVAL_LOW_LATENCY,
+    SAMPLING_INTERVAL_NO_MEDIASOURCE = config/* default.SAMPLING_INTERVAL_NO_MEDIASOURCE */.Z.SAMPLING_INTERVAL_NO_MEDIASOURCE,
+    RESUME_GAP_AFTER_SEEKING = config/* default.RESUME_GAP_AFTER_SEEKING */.Z.RESUME_GAP_AFTER_SEEKING,
+    RESUME_GAP_AFTER_NOT_ENOUGH_DATA = config/* default.RESUME_GAP_AFTER_NOT_ENOUGH_DATA */.Z.RESUME_GAP_AFTER_NOT_ENOUGH_DATA,
+    RESUME_GAP_AFTER_BUFFERING = config/* default.RESUME_GAP_AFTER_BUFFERING */.Z.RESUME_GAP_AFTER_BUFFERING,
+    REBUFFERING_GAP = config/* default.REBUFFERING_GAP */.Z.REBUFFERING_GAP,
+    MINIMUM_BUFFER_AMOUNT_BEFORE_FREEZING = config/* default.MINIMUM_BUFFER_AMOUNT_BEFORE_FREEZING */.Z.MINIMUM_BUFFER_AMOUNT_BEFORE_FREEZING;
+/**
+ * HTMLMediaElement Events for which timings are calculated and emitted.
+ * @type {Array.<string>}
+ */
+
+var SCANNED_MEDIA_ELEMENTS_EVENTS = ["canplay", "play", "seeking", "seeked", "loadedmetadata", "ratechange"];
+/**
+ * Returns the amount of time in seconds the buffer should have ahead of the
+ * current position before resuming playback. Based on the infos of the
+ * rebuffering status.
+ *
+ * Waiting time differs between a rebuffering happening after a "seek" or one
+ * happening after a buffer starvation occured.
+ * @param {Object|null} rebufferingStatus
+ * @param {Boolean} lowLatencyMode
+ * @returns {Number}
+ */
+
+function getRebufferingEndGap(rebufferingStatus, lowLatencyMode) {
+  if (rebufferingStatus === null) {
+    return 0;
+  }
+
+  var suffix = lowLatencyMode ? "LOW_LATENCY" : "DEFAULT";
+
+  switch (rebufferingStatus.reason) {
+    case "seeking":
+    case "internal-seek":
+      return RESUME_GAP_AFTER_SEEKING[suffix];
+
+    case "not-ready":
+      return RESUME_GAP_AFTER_NOT_ENOUGH_DATA[suffix];
+
+    case "buffering":
+      return RESUME_GAP_AFTER_BUFFERING[suffix];
+  }
+}
+/**
+ * @param {Object} currentRange
+ * @param {Number} duration
+ * @param {Boolean} lowLatencyMode
+ * @returns {Boolean}
+ */
+
+
+function hasLoadedUntilTheEnd(currentRange, duration, lowLatencyMode) {
+  var suffix = lowLatencyMode ? "LOW_LATENCY" : "DEFAULT";
+  return currentRange !== null && duration - currentRange.end <= REBUFFERING_GAP[suffix];
+}
+/**
+ * Generate a basic timings object from the media element and the eventName
+ * which triggered the request.
+ * @param {HTMLMediaElement} mediaElement
+ * @param {string} event
+ * @returns {Object}
+ */
+
+
+function getMediaInfos(mediaElement, event) {
+  var buffered = mediaElement.buffered,
+      currentTime = mediaElement.currentTime,
+      duration = mediaElement.duration,
+      ended = mediaElement.ended,
+      paused = mediaElement.paused,
+      playbackRate = mediaElement.playbackRate,
+      readyState = mediaElement.readyState,
+      seeking = mediaElement.seeking;
+  var currentRange = (0,ranges/* getRange */.rx)(buffered, currentTime);
+  return {
+    bufferGap: currentRange !== null ? currentRange.end - currentTime : // TODO null/0 would probably be
+    // more appropriate
+    Infinity,
+    buffered: buffered,
+    currentRange: currentRange,
+    position: currentTime,
+    duration: duration,
+    ended: ended,
+    paused: paused,
+    playbackRate: playbackRate,
+    readyState: readyState,
+    seeking: seeking,
+    event: event
+  };
+}
+/**
+ * Infer rebuffering status of the media based on:
+ *   - the return of the function getMediaInfos
+ *   - the previous timings object.
+ *
+ * @param {Object} prevTimings - Previous timings object. See function to know
+ * the different properties needed.
+ * @param {Object} currentTimings - Current timings object. This does not need
+ * to have every single infos, see function to know which properties are needed.
+ * @param {Object} options
+ * @returns {Object|null}
+ */
+
+
+function getRebufferingStatus(prevTimings, currentTimings, _ref) {
+  var withMediaSource = _ref.withMediaSource,
+      lowLatencyMode = _ref.lowLatencyMode;
+  var currentEvt = currentTimings.event,
+      currentTime = currentTimings.position,
+      bufferGap = currentTimings.bufferGap,
+      currentRange = currentTimings.currentRange,
+      duration = currentTimings.duration,
+      paused = currentTimings.paused,
+      readyState = currentTimings.readyState,
+      ended = currentTimings.ended;
+  var prevRebuffering = prevTimings.rebuffering,
+      prevEvt = prevTimings.event,
+      prevTime = prevTimings.position;
+  var fullyLoaded = hasLoadedUntilTheEnd(currentRange, duration, lowLatencyMode);
+  var canSwitchToRebuffering = readyState >= 1 && currentEvt !== "loadedmetadata" && prevRebuffering === null && !(fullyLoaded || ended);
+  var rebufferEndPosition = null;
+  var shouldRebuffer;
+  var shouldStopRebuffer;
+  var rebufferGap = lowLatencyMode ? REBUFFERING_GAP.LOW_LATENCY : REBUFFERING_GAP.DEFAULT;
+
+  if (withMediaSource) {
+    if (canSwitchToRebuffering) {
+      if (bufferGap <= rebufferGap) {
+        shouldRebuffer = true;
+        rebufferEndPosition = currentTime + bufferGap;
+      } else if (bufferGap === Infinity) {
+        shouldRebuffer = true;
+        rebufferEndPosition = currentTime;
+      }
+    } else if (prevRebuffering !== null) {
+      var resumeGap = getRebufferingEndGap(prevRebuffering, lowLatencyMode);
+
+      if (shouldRebuffer !== true && prevRebuffering !== null && readyState > 1 && (fullyLoaded || ended || bufferGap < Infinity && bufferGap > resumeGap)) {
+        shouldStopRebuffer = true;
+      } else if (bufferGap === Infinity || bufferGap <= resumeGap) {
+        rebufferEndPosition = bufferGap === Infinity ? currentTime : currentTime + bufferGap;
+      }
+    }
+  } // when using a direct file, the media will stall and unstall on its
+  // own, so we only try to detect when the media timestamp has not changed
+  // between two consecutive timeupdates
+  else {
+    if (canSwitchToRebuffering && (!paused && currentEvt === "timeupdate" && prevEvt === "timeupdate" && currentTime === prevTime || currentEvt === "seeking" && bufferGap === Infinity)) {
+      shouldRebuffer = true;
+    } else if (prevRebuffering !== null && (currentEvt !== "seeking" && currentTime !== prevTime || currentEvt === "canplay" || bufferGap < Infinity && (bufferGap > getRebufferingEndGap(prevRebuffering, lowLatencyMode) || fullyLoaded || ended))) {
+      shouldStopRebuffer = true;
+    }
+  }
+
+  if (shouldStopRebuffer === true) {
+    return null;
+  } else if (shouldRebuffer === true || prevRebuffering !== null) {
+    var reason;
+
+    if (currentEvt === "seeking" || prevRebuffering !== null && prevRebuffering.reason === "seeking") {
+      reason = "seeking";
+    } else if (currentTimings.seeking && (currentEvt === "internal-seeking" || prevRebuffering !== null && prevRebuffering.reason === "internal-seek")) {
+      reason = "internal-seek";
+    } else if (currentTimings.seeking) {
+      reason = "seeking";
+    } else if (readyState === 1) {
+      reason = "not-ready";
+    } else {
+      reason = "buffering";
+    }
+
+    if (prevRebuffering !== null && prevRebuffering.reason === reason) {
+      return {
+        reason: prevRebuffering.reason,
+        timestamp: prevRebuffering.timestamp,
+        position: rebufferEndPosition
+      };
+    }
+
+    return {
+      reason: reason,
+      timestamp: performance.now(),
+      position: rebufferEndPosition
+    };
+  }
+
+  return null;
+}
+/**
+ * Detect if the current media can be considered as "freezing" (i.e. not
+ * advancing for unknown reasons).
+ *
+ * Returns a corresponding `IFreezingStatus` object if that's the case and
+ * `null` if not.
+ * @param {Object} prevTimings
+ * @param {Object} currentTimings
+ * @returns {Object|null}
+ */
+
+
+function getFreezingStatus(prevTimings, currentTimings) {
+  if (prevTimings.freezing) {
+    if (currentTimings.ended || currentTimings.paused || currentTimings.readyState === 0 || currentTimings.playbackRate === 0 || prevTimings.position !== currentTimings.position) {
+      return null; // Quit freezing status
+    }
+
+    return prevTimings.freezing; // Stay in it
+  }
+
+  return currentTimings.event === "timeupdate" && currentTimings.bufferGap > MINIMUM_BUFFER_AMOUNT_BEFORE_FREEZING && !currentTimings.ended && !currentTimings.paused && currentTimings.readyState >= 1 && currentTimings.playbackRate !== 0 && currentTimings.position === prevTimings.position ? {
+    timestamp: performance.now()
+  } : null;
+}
+/**
+ * Timings observable.
+ *
+ * This Observable samples snapshots of player's current state:
+ *   * time position
+ *   * playback rate
+ *   * current buffered range
+ *   * gap with current buffered range ending
+ *   * media duration
+ *
+ * In addition to sampling, this Observable also reacts to "seeking" and "play"
+ * events.
+ *
+ * Observable is shared for performance reason: reduces the number of event
+ * listeners and intervals/timeouts but also limit access to the media element
+ * properties and gap calculations.
+ *
+ * The sampling is manual instead of based on "timeupdate" to reduce the
+ * number of events.
+ * @param {HTMLMediaElement} mediaElement
+ * @param {Object} options
+ * @returns {Observable}
+ */
+
+
+function createClock(mediaElement, options) {
+  // Allow us to identify seek performed internally by the player.
+  var internalSeekingComingCounter = 0;
+
+  function setCurrentTime(time) {
+    mediaElement.currentTime = time;
+    internalSeekingComingCounter += 1;
+  }
+
+  var clock$ = (0,defer/* defer */.P)(function () {
+    var lastTimings = (0,object_assign/* default */.Z)(getMediaInfos(mediaElement, "init"), {
+      rebuffering: null,
+      freezing: null,
+      getCurrentTime: function getCurrentTime() {
+        return mediaElement.currentTime;
+      }
+    });
+
+    function getCurrentClockTick(event) {
+      var tmpEvt = event;
+
+      if (tmpEvt === "seeking" && internalSeekingComingCounter > 0) {
+        tmpEvt = "internal-seeking";
+        internalSeekingComingCounter -= 1;
+      }
+
+      var mediaTimings = getMediaInfos(mediaElement, tmpEvt);
+      var rebufferingStatus = getRebufferingStatus(lastTimings, mediaTimings, options);
+      var freezingStatus = getFreezingStatus(lastTimings, mediaTimings);
+      var timings = (0,object_assign/* default */.Z)({}, {
+        rebuffering: rebufferingStatus,
+        freezing: freezingStatus,
+        getCurrentTime: function getCurrentTime() {
+          return mediaElement.currentTime;
+        }
+      }, mediaTimings);
+      log/* default.debug */.Z.debug("API: current media element state", timings);
+      return timings;
+    }
+
+    var eventObs = SCANNED_MEDIA_ELEMENTS_EVENTS.map(function (eventName) {
+      return (0,fromEvent/* fromEvent */.R)(mediaElement, eventName).pipe((0,mapTo/* mapTo */.h)(eventName));
+    });
+    var interval = options.lowLatencyMode ? SAMPLING_INTERVAL_LOW_LATENCY : options.withMediaSource ? SAMPLING_INTERVAL_MEDIASOURCE : SAMPLING_INTERVAL_NO_MEDIASOURCE;
+    var interval$ = (0,observable_interval/* interval */.F)(interval).pipe((0,mapTo/* mapTo */.h)("timeupdate"));
+    return merge/* merge.apply */.T.apply(void 0, [interval$].concat(eventObs)).pipe((0,map/* map */.U)(function (event) {
+      lastTimings = getCurrentClockTick(event);
+
+      if (log/* default.getLevel */.Z.getLevel() === "DEBUG") {
+        log/* default.debug */.Z.debug("API: current playback timeline:\n" + prettyPrintBuffered(lastTimings.buffered, lastTimings.position), "\n" + event);
+      }
+
+      return lastTimings;
+    }), (0,startWith/* startWith */.O)(lastTimings));
+  }).pipe( // Always emit the last tick when already subscribed
+  (0,shareReplay/* shareReplay */.d)({
+    bufferSize: 1,
+    refCount: true
+  }));
+  return {
+    clock$: clock$,
+    setCurrentTime: setCurrentTime
+  };
+}
+/**
+ * Pretty print a TimeRanges Object, to see the current content of it in a
+ * one-liner string.
+ *
+ * @example
+ * This function is called by giving it directly the TimeRanges, such as:
+ * ```js
+ * prettyPrintBuffered(document.getElementsByTagName("video")[0].buffered);
+ * ```
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
