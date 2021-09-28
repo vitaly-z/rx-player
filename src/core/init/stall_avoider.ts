@@ -44,7 +44,6 @@ import {
 
 const { BUFFER_DISCONTINUITY_THRESHOLD,
         FORCE_DISCONTINUITY_SEEK_DELAY,
-        FREEZING_STALLED_DELAY,
         UNFREEZING_SEEK_DELAY,
         UNFREEZING_DELTA_POSITION } = config;
 
@@ -233,11 +232,6 @@ export default function StallAvoider(
           log.warn("Init: trying to seek to un-freeze player");
           setCurrentTime(tick.getCurrentTime() + UNFREEZING_DELTA_POSITION);
           prevFreezingState = { attemptTimestamp: now };
-        }
-
-        if (now - freezing.timestamp > FREEZING_STALLED_DELAY) {
-          return { type: "stalled" as const,
-                   value: "freezing" as const };
         }
       } else {
         prevFreezingState = null;
