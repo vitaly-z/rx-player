@@ -21,7 +21,7 @@ import { MediaError } from "../../errors";
 import log from "../../log";
 import { getNextRangeGap } from "../../utils/ranges";
 import EVENTS from "../stream/events_generators";
-var BUFFER_DISCONTINUITY_THRESHOLD = config.BUFFER_DISCONTINUITY_THRESHOLD, FORCE_DISCONTINUITY_SEEK_DELAY = config.FORCE_DISCONTINUITY_SEEK_DELAY, FREEZING_STALLED_DELAY = config.FREEZING_STALLED_DELAY, UNFREEZING_SEEK_DELAY = config.UNFREEZING_SEEK_DELAY, UNFREEZING_DELTA_POSITION = config.UNFREEZING_DELTA_POSITION;
+var BUFFER_DISCONTINUITY_THRESHOLD = config.BUFFER_DISCONTINUITY_THRESHOLD, FORCE_DISCONTINUITY_SEEK_DELAY = config.FORCE_DISCONTINUITY_SEEK_DELAY, UNFREEZING_SEEK_DELAY = config.UNFREEZING_SEEK_DELAY, UNFREEZING_DELTA_POSITION = config.UNFREEZING_DELTA_POSITION;
 /**
  * Work-around rounding errors with floating points by setting an acceptable,
  * very short, deviation when checking equalities.
@@ -114,10 +114,6 @@ export default function StallAvoider(clock$, mediaElement, manifest, discontinui
                 log.warn("Init: trying to seek to un-freeze player");
                 setCurrentTime(tick.getCurrentTime() + UNFREEZING_DELTA_POSITION);
                 prevFreezingState = { attemptTimestamp: now };
-            }
-            if (now - freezing.timestamp > FREEZING_STALLED_DELAY) {
-                return { type: "stalled",
-                    value: "freezing" };
             }
         }
         else {

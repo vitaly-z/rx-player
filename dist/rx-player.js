@@ -9242,7 +9242,6 @@ var events_generators = __webpack_require__(8567);
 
 var BUFFER_DISCONTINUITY_THRESHOLD = config/* default.BUFFER_DISCONTINUITY_THRESHOLD */.Z.BUFFER_DISCONTINUITY_THRESHOLD,
     FORCE_DISCONTINUITY_SEEK_DELAY = config/* default.FORCE_DISCONTINUITY_SEEK_DELAY */.Z.FORCE_DISCONTINUITY_SEEK_DELAY,
-    FREEZING_STALLED_DELAY = config/* default.FREEZING_STALLED_DELAY */.Z.FREEZING_STALLED_DELAY,
     UNFREEZING_SEEK_DELAY = config/* default.UNFREEZING_SEEK_DELAY */.Z.UNFREEZING_SEEK_DELAY,
     UNFREEZING_DELTA_POSITION = config/* default.UNFREEZING_DELTA_POSITION */.Z.UNFREEZING_DELTA_POSITION;
 /**
@@ -9351,13 +9350,6 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
         setCurrentTime(tick.getCurrentTime() + UNFREEZING_DELTA_POSITION);
         prevFreezingState = {
           attemptTimestamp: now
-        };
-      }
-
-      if (now - freezing.timestamp > FREEZING_STALLED_DELAY) {
-        return {
-          type: "stalled",
-          value: "freezing"
         };
       }
     } else {
