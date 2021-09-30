@@ -6,6 +6,7 @@
  * application.
  */
 
+import startListening from "player-inspector/listener";
 import RxPlayer from "rx-player";
 import { linkPlayerEventsToState } from "./events.js";
 import { Subject } from "rxjs";
@@ -99,6 +100,7 @@ const PLAYER = ({ $destroy, state }, initOpts) => {
       state.set({ videoThumbnailsData: null });
     }
   }
+  let lastHandle;
   return {
     ATTACH_VIDEO_THUMBNAIL_LOADER: () => {
       const prevVideoThumbnailsData = state.get().videoThumbnailsData;
@@ -125,6 +127,16 @@ const PLAYER = ({ $destroy, state }, initOpts) => {
 
     LOAD: (arg) => {
       dettachVideoThumbnailLoader();
+      if (lastHandle !== undefined) {
+        lastHandle.finish();
+      }
+      lastHandle = startListening({
+        mediaElement: player.getVideoElement(),
+        finishAtEnd: true,
+      });
+      lastHandle.task.then((res) => {
+        console.warn("RESULT:", res);
+      });
       player.loadVideo(Object.assign({
         textTrackElement,
         transportOptions: { checkMediaSegmentIntegrity: true },
@@ -154,6 +166,9 @@ const PLAYER = ({ $destroy, state }, initOpts) => {
     },
 
     STOP: () => {
+      if (lastHandle !== undefined) {
+        lastHandle.finish();
+      }
       dettachVideoThumbnailLoader();
       player.stop();
     },

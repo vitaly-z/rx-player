@@ -1,5 +1,6 @@
 // import polyfills
 import "core-js/stable";
+import "player-inspector/automocks";
 
 // import runtime for generators and async/await
 import "regenerator-runtime/runtime";
