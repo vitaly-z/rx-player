@@ -1,13 +1,9 @@
 const { promisify } = require("util");
 const fs = require("fs");
 const path = require("path");
-const getFilesToConvert = require("./get_files_to_convert.js");
+const createDocumentationTree = require("./get_files_to_convert.js");
 const mkdirParent = require("./mkdir_parent.js");
 const createDocumentationPage = require("./create_page.js");
-const constructPageList = require("./construct_page_list.js");
-const constructTableOfContents = require("./construct_table_of_contents.js");
-const convertMDToHTML = require("./convert_MD_to_HMTL.js");
-const constructHTML = require("./construct_html.js");
 
 async function createDirIfDoesntExist(dir) {
   const doesCSSOutDirExists = await promisify(fs.exists)(dir);
@@ -27,11 +23,6 @@ async function createDirIfDoesntExist(dir) {
  * @param {Array.<string>} [options.css] - Optional CSS files which will be
  * linked to each generated page.
  * Should be the path to each of those.
- * @param {Function|undefined} [options.fileFilter] - Callback allowing to
- * filter out markdown pages from being converted to HTML.
- * Takes 2 arguments: the fileName and its path, both strings.
- * Return true if the file should be converted to HTML. False otherwise.
- * No markdown document is filtered out if this callback is not set.
  * @param {Function|undefined} [options.beforeParse] - Callback which will be
  * called on each markdown document just before transforming it into HTML.
  * Takes in argument the markdown content (as a string) and should return the
@@ -44,12 +35,9 @@ module.exports = async function createDocumentationForDir(
   baseOutDir,
   options = {},
 ) {
-  const { getPageTitle = t => t,
-          fileFilter,
-          beforeParse,
-          css = [] } = options;
+  const { css } = options;
 
-  // 1 - copy CSS files
+  // Copy CSS files
   const cssOutputDir = path.join(path.resolve(baseOutDir), "styles");
   const cssOutputPaths = css.map(cssFilepath => {
     return path.join(cssOutputDir, path.basename(cssFilepath));
@@ -62,60 +50,166 @@ module.exports = async function createDocumentationForDir(
     }));
   }
 
-  // 2 - Construct list of html files
-  const filesToConvert = await getFilesToConvert(baseInDir,
-                                                 baseOutDir,
-                                                 { fileFilter });
+  // Construct tree listing categories, pages, and relations between them.
+  const docTree = await createDocumentationTree(baseInDir, baseOutDir);
 
-  const [homeLink, listLink] = filesToConvert.length > 1 ?
-    [ path.join(path.resolve(baseOutDir), "pages", "index.html"),
-      path.join(path.resolve(baseOutDir), "list.html") ] :
-    [ null, null ];
-
-  // keys: inputFile; values: outputFile
-  const fileDict = filesToConvert.reduce((acc, entry) => {
-    acc[entry.inputFile] = entry.outputFile;
-    return acc;
+  // Construct a dictionary of markdown files to the corresponding output file.
+  // This can be useful to redirect links to other converted markdowns.
+  const fileDict = docTree.categories.reduce((acc, categoryInfo) => {
+    return categoryInfo.pages.reduce((acc2, pageInfo) => {
+      if (pageInfo.isPageGroup) {
+        return pageInfo.pages.reduce((acc3, subPageInfo) => {
+          acc3[subPageInfo.inputFile] = subPageInfo.outputFile;
+          return acc3;
+        }, acc2);
+      } else {
+        acc2[pageInfo.inputFile] = pageInfo.outputFile;
+      }
+      return acc2;
+    }, acc);
   }, {});
 
-  // 3 - Create documentation pages
-  for (let i = 0; i < filesToConvert.length; i++) {
-    const { inputFile, outputFile } = filesToConvert[i];
-    // Create output directory if it does not exist
-    const outDir = path.dirname(outputFile);
-    await createDirIfDoesntExist(outDir);
-    const cssRelativePaths =
-      cssOutputPaths.map(cssOutput => path.relative(outDir, cssOutput));
-
-    // add link translation to options
-    const linkTranslator = linkTranslatorFactory(inputFile, outDir, fileDict);
-    await createDocumentationPage(inputFile,
-                                  outputFile,
-                                  { linkTranslator,
-                                    getPageTitle,
-                                    beforeParse,
-                                    homeLink: path.relative(outDir, homeLink),
-                                    listLink: path.relative(outDir, listLink),
-                                    css: cssRelativePaths });
+  // Create documentation pages
+  for (let categoryIdx = 0; categoryIdx < docTree.categories.length; categoryIdx++) {
+    const currentCategory = docTree.categories[categoryIdx];
+    for (let pageIdx = 0; pageIdx < currentCategory.pages.length; pageIdx++) {
+      const currentPage = currentCategory.pages[pageIdx];
+      if (!currentPage.isPageGroup) {
+        const { inputFile, outputFile } = currentPage;
+        await generateDocumentationPage(
+          inputFile,
+          outputFile,
+          docTree.categories,
+          categoryIdx,
+          currentCategory.pages,
+          [pageIdx],
+          cssOutputPaths,
+          fileDict,
+          options
+        );
+      } else {
+        for (
+          let subPageIdx = 0;
+          subPageIdx < currentPage.pages.length;
+          subPageIdx++
+        ) {
+          const currentSubPage = currentPage.pages[subPageIdx];
+          const { inputFile, outputFile } = currentSubPage;
+          await generateDocumentationPage(
+            inputFile,
+            outputFile,
+            docTree.categories,
+            categoryIdx,
+            currentCategory.pages,
+            [pageIdx, subPageIdx],
+            cssOutputPaths,
+            fileDict,
+            options
+          );
+        }
+      }
+    }
   }
-
-  // 4 - Construct specific "Page List" page.
-  const pageListMD = await constructPageList(filesToConvert, baseOutDir);
-  const { content, toc } = constructTableOfContents(pageListMD);
-  const listPageCss =
-    cssOutputPaths.map(cssOutput => path.relative(baseOutDir, cssOutput));
-  const listHTML = constructHTML(getPageTitle("Page List"),
-                                 convertMDToHTML(content),
-                                 { css: listPageCss,
-                                   toc,
-                                   homeLink: path.relative(baseOutDir,
-                                                           homeLink),
-                                   listLink: path.relative(baseOutDir,
-                                                           listLink) });
-
-  const fileName = path.join(baseOutDir, "list.html");
-  await promisify(fs.writeFile)(fileName, listHTML);
 };
+
+async function generateDocumentationPage(
+  inputFile,
+  outputFile,
+  categories,
+  categoryIdx,
+  pages,
+  pageIdxs,
+  cssOutputPaths,
+  fileDict,
+  options
+) {
+  const { getPageTitle = t => t,
+          beforeParse } = options;
+  // Create output directory if it does not exist
+  const outDir = path.dirname(outputFile);
+  await createDirIfDoesntExist(outDir);
+
+  const navBarHtml = constructNavigationBar(
+    categories,
+    categoryIdx,
+    outputFile
+  );
+  const sidebarHtml = constructSidebar(
+    pages,
+    pageIdxs,
+    outputFile
+  );
+  const cssRelativePaths =
+    cssOutputPaths.map(cssOutput => path.relative(outDir, cssOutput));
+
+  // add link translation to options
+  const linkTranslator = linkTranslatorFactory(inputFile, outDir, fileDict);
+  await createDocumentationPage(inputFile,
+                                outputFile,
+                                { linkTranslator,
+                                  getPageTitle,
+                                  beforeParse,
+                                  navBarHtml,
+                                  sidebarHtml,
+                                  css: cssRelativePaths });
+}
+
+function constructNavigationBar(categories, currentCategoryIndex, currentPath) {
+  const links = categories.map((c, i) => {
+    let relativePath = path.relative(path.dirname(currentPath), c.firstPage);
+    if (relativePath[0] != ".") {
+      relativePath = "./" + relativePath;
+    }
+    const activeClass = i === currentCategoryIndex ? " navbar-active" : "";
+    // XXX TODO html-entities
+    return `<a class="navbar-item${activeClass}"` +
+      `href="${relativePath}">${c.displayName}</a>`;
+  }).join("\n      ");
+  return `<nav class="navbar-parent">
+  <div class="navbar-wrapper">
+    <div class="navbar-items">
+      ${links}
+    </div>
+  </div>
+</nav>`;
+};
+
+function constructSidebar(pages, currentPageIndexes, currentPath) {
+  const links = pages.map((p, i) => {
+    const isActive = i === currentPageIndexes[0];
+    if (!p.isPageGroup) {
+      return generateLiForPage(p, isActive);
+    } else {
+      const lis = p.pages.map((sp, j) => {
+        const isActiveSubPage = isActive && j === currentPageIndexes[1];
+        return generateLiForPage(sp, isActiveSubPage);
+      }).join("");
+      return `<li class="sidebar-item">` +
+        p.displayName +
+        `<ul>${lis}</ul>` +
+        "</li>";
+
+    }
+  }).join("");
+  return `<aside class="sidebar-parent">` +
+    `<div class="sidebar-wrapper">` +
+    `<div class="sidebar-items">${links}</div>` +
+    "</div>" +
+    "</aside>";
+
+  function generateLiForPage(p, isActive) {
+    let relativePath = path.relative(path.dirname(currentPath), p.outputFile);
+    if (relativePath[0] != ".") {
+      relativePath = "./" + relativePath;
+    }
+    const activeClass = isActive ? " sidebar-active" : "";
+    // XXX TODO html-entities
+    return `
+      <li class="sidebar-item">
+        <a class="sidebar-link${activeClass}" href="${relativePath}">${p.displayName}</a>
+      </li>`;
+  }
+}
 
 /**
  * Generate linkTranslator functions

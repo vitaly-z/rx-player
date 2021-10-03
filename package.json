@@ -83,7 +83,7 @@
     "demo": "cross-env RXP_METAPLAYLIST=true node ./scripts/generate_full_demo.js",
     "demo:min": "cross-env RXP_METAPLAYLIST=true RXP_MINIFY=true node ./scripts/generate_full_demo.js",
     "demo:watch": "cross-env RXP_METAPLAYLIST=true node ./scripts/generate_full_demo.js --watch",
-    "doc": "rm -rf doc/generated; node ./scripts/doc-generator/index.js doc/ doc/generated",
+    "doc": "rm -rf doc/generated; node ./scripts/doc-generator/index.js docs/docs/ doc/generated",
     "start:docs": "docusaurus start docs/",
     "build:docs": "docusaurus build docs/",
     "deploy": "docusaurus deploy docs/",

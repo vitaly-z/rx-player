@@ -80,6 +80,22 @@ function constructHTMLSidebar(toc, {
 }
 
 /**
+ * Construct Sidebar part of the HTML page, containing various links.
+ * @param {string|null|undefined} toc - Markdown for the table of contents
+ * (under a list form).
+ * `null` or `undefined` if your page has no table of contents.
+ * @returns {string} - sidebar div tag
+ */
+function constructTocBar(toc) {
+  const domSidebar = (toc && convertMDToHTML(toc)) || "";
+  return "<div class=\"sidebar2\">" +
+           "<div class=\"toc2\">" +
+             domSidebar +
+           "</div>" +
+         "</div>";
+}
+
+/**
  * Add links to CSS files
  * @param {Array.<string>} css - paths to CSS files
  * @returns {string}
@@ -106,13 +122,16 @@ function constructStylesHTML(css) {
 module.exports = function constructHTMLPage(
   title,
   domContent,
-  { homeLink,
-    listLink,
+  { navBarHtml,
+    sidebarHtml,
+    // homeLink,
+    // listLink,
     toc,
     css },
 ) {
-  const header = constructHTMLHeader({ homeLink, listLink });
-  const sidebar = constructHTMLSidebar(toc, { homeLink, listLink });
+  // const header = constructHTMLHeader({ homeLink, listLink });
+  // const sidebar = constructHTMLSidebar(toc, { homeLink, listLink });
+  const tocBar = constructTocBar(toc);
   const styles = constructStylesHTML(css);
 
   return "<head>" +
@@ -123,9 +142,10 @@ module.exports = function constructHTMLPage(
          "</head>" +
          "<body>" +
            "<div class=\"page-wrapper\">" +
-             sidebar +
+             navBarHtml +
+             sidebarHtml +
+             tocBar +
              "<div class=\"content-wrapper\">" +
-               header +
                "<div class=\"content\">" +
                  domContent +
                "</div>" +

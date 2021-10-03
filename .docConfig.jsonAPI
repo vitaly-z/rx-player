@@ -1,0 +1,24 @@
+{
+  "pages": [
+    {
+      "path": "./Player_Options.md",
+      "displayName": "Player Options",
+      "description": "Player constructor options"
+    },
+    {
+      "path": "./Basic_Methods",
+      "displayName": "Basic Methods",
+      "description": "Lorem"
+    },
+    {
+      "path": "./Player_Events.md",
+      "displayName": "Player Events",
+      "description": "RxPlayer emitted events"
+    },
+    {
+      "path": "./states.md",
+      "displayName": "Player States",
+      "description": "Lorem"
+    }
+  ]
+}

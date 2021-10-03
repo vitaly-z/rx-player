@@ -24,8 +24,10 @@ module.exports = async function createDocumentationPage(
           linkTranslator = (link) => link,
           getPageTitle = a => a,
           beforeParse,
-          homeLink,
-          listLink } = options;
+          // homeLink,
+          // listLink,
+          navBarHtml,
+          sidebarHtml } = options;
 
   const outputDir = path.dirname(outputFile);
   let data;
@@ -55,8 +57,10 @@ module.exports = async function createDocumentationPage(
                              domContent,
                              { css,
                                toc,
-                               homeLink,
-                               listLink });
+                               // homeLink,
+                               // listLink,
+                               navBarHtml,
+                               sidebarHtml });
   try {
     await promisify(fs.writeFile)(outputFile, html);
   } catch (err) {
