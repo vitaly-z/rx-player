@@ -20,7 +20,7 @@
 
 /features
 /logger
-/minimal
-/experimental
+# /minimal
+# /experimental
 /types
-/tools
+# /tools
