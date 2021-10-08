@@ -22,17 +22,9 @@
 /tests/performance/package.json
 /tests/performance/package-lock.json
 
-/dist/_esm5.processed
 /dist/_esm5.raw
 
 /doc/generated
-
-/features
-/logger
-/minimal
-/experimental
-/types
-/tools
 
 /src/parsers/manifest/dash/wasm-parser/target
 
