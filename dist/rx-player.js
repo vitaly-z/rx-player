@@ -5195,6 +5195,8 @@ function getSession(initializationData, stores, wantedSessionType, maxSessionCac
     }));
   });
 }
+// EXTERNAL MODULE: ./src/utils/reference.ts
+var reference = __webpack_require__(5095);
 // EXTERNAL MODULE: ./src/compat/eme/custom_media_keys/index.ts + 7 modules
 var custom_media_keys = __webpack_require__(6139);
 // EXTERNAL MODULE: ./src/core/eme/media_keys_infos_store.ts
@@ -7055,6 +7057,7 @@ function createMediaKeys(mediaKeySystemAccess) {
 
 
 
+
 /**
  * Get media keys infos from key system configs then attach media keys to media element.
  * @param {HTMLMediaElement} mediaElement
@@ -7084,7 +7087,7 @@ function initMediaKeys(mediaElement, keySystemsConfigs) {
       initializationDataSystemId = getDrmSystemId(mediaKeySystemAccess.keySystem);
     }
 
-    var attachMediaKeys$ = new ReplaySubject/* ReplaySubject */.t(1);
+    var canAttachMediaKeys = (0,reference/* default */.Z)(false);
     var shouldDisableOldMediaKeys = mediaElement.mediaKeys !== null && mediaElement.mediaKeys !== undefined && mediaKeys !== mediaElement.mediaKeys;
     var disableOldMediaKeys$ = (0,of.of)(null);
 
@@ -7095,7 +7098,9 @@ function initMediaKeys(mediaElement, keySystemsConfigs) {
 
     return disableOldMediaKeys$.pipe((0,mergeMap/* mergeMap */.z)(function () {
       log/* default.debug */.Z.debug("EME: Attaching current MediaKeys");
-      return attachMediaKeys$.pipe((0,mergeMap/* mergeMap */.z)(function () {
+      return canAttachMediaKeys.asObservable().pipe((0,filter/* filter */.h)(function (canAttach) {
+        return canAttach;
+      }), (0,mergeMap/* mergeMap */.z)(function () {
         var stateToAttatch = {
           loadedSessionsStore: stores.loadedSessionsStore,
           mediaKeySystemAccess: mediaKeySystemAccess,
@@ -7119,7 +7124,7 @@ function initMediaKeys(mediaElement, keySystemsConfigs) {
           mediaKeys: mediaKeys,
           stores: stores,
           options: options,
-          attachMediaKeys$: attachMediaKeys$
+          canAttachMediaKeys: canAttachMediaKeys
         }
       }));
     }));
@@ -8757,6 +8762,8 @@ var should_validate_metadata = __webpack_require__(1669);
 var media_error = __webpack_require__(3714);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
+// EXTERNAL MODULE: ./src/utils/reference.ts
+var reference = __webpack_require__(5095);
 // EXTERNAL MODULE: ./src/core/init/events_generators.ts
 var events_generators = __webpack_require__(8343);
 ;// CONCATENATED MODULE: ./src/core/init/initial_seek_and_play.ts
@@ -8775,6 +8782,7 @@ var events_generators = __webpack_require__(8343);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 
@@ -8818,23 +8826,8 @@ function autoPlay(mediaElement) {
   }));
 }
 /**
- * Returns two Observables:
- *
- *   - seek$: when subscribed, will seek to the wanted started time as soon as
- *     it can. Emit and complete when done.
- *
- *   - play$: when subscribed, will autoplay if and only if the `mustAutoPlay`
- *     option is set as soon as it can.
- *     Emit and complete when done.
- *     Might also emit some warning events if issues related to the initial
- *     playback arised
- *
- * Both Observables are `shareReplay`, meaning that they re-emit everything on
- * subscription.
- *
- * /!\ `play$` has a dependency on `seek$`, as such, the player will try to seek
- * as soon as either Observable is subscribed to.
- *
+ * Creates an Observable allowing to seek at the initially wanted position and
+ * to play if autoPlay is wanted.
  * @param {Object} args
  * @returns {Object}
  */
@@ -8846,14 +8839,18 @@ function initialSeekAndPlay(_ref2) {
       startTime = _ref2.startTime,
       mustAutoPlay = _ref2.mustAutoPlay,
       setCurrentTime = _ref2.setCurrentTime;
+  var initialSeekPerformed = (0,reference/* createSharedReference */.$)(false);
+  var initialPlayPerformed = (0,reference/* createSharedReference */.$)(false);
   var seek$ = whenLoadedMetadata$(mediaElement).pipe((0,take/* take */.q)(1), (0,tap/* tap */.b)(function () {
     log/* default.info */.Z.info("Init: Set initial time", startTime);
     var initialTime = typeof startTime === "function" ? startTime() : startTime;
     setCurrentTime(initialTime);
+    initialSeekPerformed.setValue(true);
+    initialSeekPerformed.finish();
   }), (0,shareReplay/* shareReplay */.d)({
     refCount: true
   }));
-  var play$ = seek$.pipe((0,mergeMap/* mergeMap */.z)(function () {
+  var seekAndPlay$ = seek$.pipe((0,mergeMap/* mergeMap */.z)(function () {
     if (!(0,should_validate_metadata/* default */.Z)() || mediaElement.duration > 0) {
       return waitUntilPlayable(clock$);
     } else {
@@ -8872,12 +8869,17 @@ function initialSeekAndPlay(_ref2) {
         log/* default.warn */.Z.warn("Init: autoplay is enabled on HTML media element. " + "Media will play as soon as possible.");
       }
 
+      initialPlayPerformed.setValue(true);
+      initialPlayPerformed.finish();
       return (0,of.of)({
         type: "skipped"
       });
     }
 
     return autoPlay(mediaElement).pipe((0,mergeMap/* mergeMap */.z)(function (autoplayEvt) {
+      initialPlayPerformed.setValue(true);
+      initialPlayPerformed.finish();
+
       if (autoplayEvt === "autoplay") {
         return (0,of.of)({
           type: "autoplay"
@@ -8893,8 +8895,9 @@ function initialSeekAndPlay(_ref2) {
     refCount: true
   }));
   return {
-    seek$: seek$,
-    play$: play$
+    seekAndPlay$: seekAndPlay$,
+    initialPlayPerformed: initialPlayPerformed,
+    initialSeekPerformed: initialSeekPerformed
   };
 }
 
@@ -9105,8 +9108,7 @@ function initializeDirectfileContent(_ref) {
     setCurrentTime: setCurrentTime,
     isDirectfile: true
   }),
-      seek$ = _initialSeekAndPlay.seek$,
-      play$ = _initialSeekAndPlay.play$; // Create EME Manager, an observable which will manage every EME-related
+      seekAndPlay$ = _initialSeekAndPlay.seekAndPlay$; // Create EME Manager, an observable which will manage every EME-related
   // issue.
 
 
@@ -9133,20 +9135,19 @@ function initializeDirectfileContent(_ref) {
 
   var loadingEvts$ = emeManager$.pipe((0,filter/* filter */.h)(function isEMEReady(evt) {
     if (evt.type === "created-media-keys") {
-      evt.value.attachMediaKeys$.next();
+      evt.value.canAttachMediaKeys.setValue(true);
       return true;
     }
 
     return evt.type === "eme-disabled" || evt.type === "attached-media-keys";
-  }), (0,take/* take */.q)(1), (0,mergeMapTo/* mergeMapTo */.j)(play$), (0,switchMap/* switchMap */.w)(function (evt) {
+  }), (0,take/* take */.q)(1), (0,mergeMapTo/* mergeMapTo */.j)(seekAndPlay$), (0,switchMap/* switchMap */.w)(function (evt) {
     if (evt.type === "warning") {
       return (0,of.of)(evt);
     }
 
     return (0,emit_loaded_event/* default */.Z)(clock$, mediaElement, null, true);
   }));
-  var initialSeek$ = seek$.pipe((0,ignoreElements/* ignoreElements */.l)());
-  return (0,merge/* merge */.T)(loadingEvts$, initialSeek$, emeManager$, mediaError$, playbackRate$, stallAvoider$);
+  return (0,merge/* merge */.T)(loadingEvts$, emeManager$, mediaError$, playbackRate$, stallAvoider$);
 }
 
 /***/ }),
@@ -9241,10 +9242,7 @@ var events_generators = __webpack_require__(8567);
 
 
 var BUFFER_DISCONTINUITY_THRESHOLD = config/* default.BUFFER_DISCONTINUITY_THRESHOLD */.Z.BUFFER_DISCONTINUITY_THRESHOLD,
-    FORCE_DISCONTINUITY_SEEK_DELAY = config/* default.FORCE_DISCONTINUITY_SEEK_DELAY */.Z.FORCE_DISCONTINUITY_SEEK_DELAY,
-    FREEZING_STALLED_DELAY = config/* default.FREEZING_STALLED_DELAY */.Z.FREEZING_STALLED_DELAY,
-    UNFREEZING_SEEK_DELAY = config/* default.UNFREEZING_SEEK_DELAY */.Z.UNFREEZING_SEEK_DELAY,
-    UNFREEZING_DELTA_POSITION = config/* default.UNFREEZING_DELTA_POSITION */.Z.UNFREEZING_DELTA_POSITION;
+    FORCE_DISCONTINUITY_SEEK_DELAY = config/* default.FORCE_DISCONTINUITY_SEEK_DELAY */.Z.FORCE_DISCONTINUITY_SEEK_DELAY;
 /**
  * Work-around rounding errors with floating points by setting an acceptable,
  * very short, deviation when checking equalities.
@@ -9306,7 +9304,6 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
    */
 
   var ignoredStallTimeStamp = null;
-  var prevFreezingState;
   /**
    * If we're rebuffering waiting on data of a "locked stream", seek into the
    * Period handled by that stream to unlock the situation.
@@ -9339,30 +9336,7 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
     var buffered = tick.buffered,
         position = tick.position,
         readyState = tick.readyState,
-        rebuffering = tick.rebuffering,
-        freezing = tick.freezing;
-
-    if (freezing !== null) {
-      var now = performance.now();
-      var referenceTimestamp = prevFreezingState === null ? freezing.timestamp : prevFreezingState.attemptTimestamp;
-
-      if (now - referenceTimestamp > UNFREEZING_SEEK_DELAY) {
-        log/* default.warn */.Z.warn("Init: trying to seek to un-freeze player");
-        setCurrentTime(tick.getCurrentTime() + UNFREEZING_DELTA_POSITION);
-        prevFreezingState = {
-          attemptTimestamp: now
-        };
-      }
-
-      if (now - freezing.timestamp > FREEZING_STALLED_DELAY) {
-        return {
-          type: "stalled",
-          value: "freezing"
-        };
-      }
-    } else {
-      prevFreezingState = null;
-    }
+        rebuffering = tick.rebuffering;
 
     if (rebuffering === null) {
       if (readyState === 1) {
@@ -9383,13 +9357,13 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
     if (tick.seeking) {
       lastSeekingPosition = tick.position;
     } else if (lastSeekingPosition !== null) {
-      var _now = performance.now();
+      var now = performance.now();
 
       if (ignoredStallTimeStamp === null) {
-        ignoredStallTimeStamp = _now;
+        ignoredStallTimeStamp = now;
       }
 
-      if (is_seeking_approximate && tick.position < lastSeekingPosition && _now - ignoredStallTimeStamp < FORCE_DISCONTINUITY_SEEK_DELAY) {
+      if (is_seeking_approximate && tick.position < lastSeekingPosition && now - ignoredStallTimeStamp < FORCE_DISCONTINUITY_SEEK_DELAY) {
         return {
           type: "stalled",
           value: rebuffering.reason
@@ -11099,7 +11073,7 @@ function assertChunkIsTextTrackSegmentData(chunk) {
     return;
   }
 
-  if (typeof chunk !== "object" || chunk === null || typeof chunk.data !== "string" || typeof chunk.type !== "string" || chunk.language !== undefined && typeof chunk.language !== "string" || chunk.start !== undefined && typeof chunk.start !== "string" || chunk.end !== undefined && typeof chunk.end !== "string") {
+  if (typeof chunk !== "object" || chunk === null || typeof chunk.data !== "string" || typeof chunk.type !== "string" || chunk.language !== undefined && typeof chunk.language !== "string" || chunk.start !== undefined && typeof chunk.start !== "number" || chunk.end !== undefined && typeof chunk.end !== "number") {
     throw new Error("Invalid format given to a NativeTextSegmentBuffer");
   }
 }
@@ -11624,7 +11598,7 @@ function assertChunkIsTextTrackSegmentData(chunk) {
     return;
   }
 
-  if (typeof chunk !== "object" || chunk === null || typeof chunk.data !== "string" || typeof chunk.type !== "string" || chunk.language !== undefined && typeof chunk.language !== "string" || chunk.start !== undefined && typeof chunk.start !== "string" || chunk.end !== undefined && typeof chunk.end !== "string") {
+  if (typeof chunk !== "object" || chunk === null || typeof chunk.data !== "string" || typeof chunk.type !== "string" || chunk.language !== undefined && typeof chunk.language !== "string" || chunk.start !== undefined && typeof chunk.start !== "number" || chunk.end !== undefined && typeof chunk.end !== "number") {
     throw new Error("Invalid format given to a NativeTextSegmentBuffer");
   }
 }
@@ -37964,6 +37938,173 @@ function isTimeInTimeRanges(ranges, time) {
 
 /***/ }),
 
+/***/ 5095:
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "$": function() { return /* binding */ createSharedReference; }
+/* harmony export */ });
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1480);
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3887);
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Create an `ISharedReference` object encapsulating the mutable `initialValue`
+ * value of type T.
+ *
+ * @see ISharedReference
+ * @param {*} initialValue
+ * @returns {Observable}
+ */
+
+function createSharedReference(initialValue) {
+  /** Current value referenced by this `ISharedReference`. */
+  var value = initialValue;
+  /**
+   * List of currently subscribed Observables which listen to the referenced
+   * value's updates.
+   *
+   * Contains two properties:
+   *   - `subscriber`: interface through which new value will be communicated.
+   *   - `hasBeenUnsubscribed`: becomes `true` when the Observable becomes
+   *     unsubscribed and thus when it is removed from the `subs` array.
+   *     Adding this property allows to detect when a previously-added
+   *     Observable has since been unsubscribed e.g. as a side-effect during a
+   *     function call.
+   */
+
+  var subs = [];
+  var isFinished = false;
+  return {
+    /**
+     * Returns the current value of this shared reference.
+     * @returns {*}
+     */
+    getValue: function getValue() {
+      return value;
+    },
+
+    /**
+     * Update the value of this shared reference.
+     * @param {*}
+     */
+    setValue: function setValue(newVal) {
+      if (isFinished) {
+        if (false) {} else {
+          _log__WEBPACK_IMPORTED_MODULE_0__/* ["default"].error */ .Z.error("Finished shared references cannot be updated");
+          return;
+        }
+      }
+
+      value = newVal;
+
+      if (subs.length === 0) {
+        return;
+      }
+
+      var clonedSubs = subs.slice();
+
+      for (var _iterator = _createForOfIteratorHelperLoose(clonedSubs), _step; !(_step = _iterator()).done;) {
+        var subObj = _step.value;
+
+        try {
+          if (!subObj.hasBeenUnsubscribed) {
+            subObj.subscriber.next(newVal);
+          }
+        } catch (_) {
+          /* nothing */
+        }
+      }
+    },
+
+    /**
+     * Returns an Observable which synchronously emits the current value (unless
+     * the `skipCurrentValue` argument has been set to `true`) and then each
+     * time a new value is set.
+     * @param {boolean} [skipCurrentValue]
+     * @returns {Observable}
+     */
+    asObservable: function asObservable(skipCurrentValue) {
+      return new rxjs__WEBPACK_IMPORTED_MODULE_1__/* .Observable */ .y(function (obs) {
+        if (skipCurrentValue !== true) {
+          obs.next(value);
+        }
+
+        if (isFinished) {
+          obs.complete();
+          return undefined;
+        }
+
+        var subObj = {
+          subscriber: obs,
+          hasBeenUnsubscribed: false
+        };
+        subs.push(subObj);
+        return function () {
+          /**
+           * Code in here can still be running while this is happening.
+           * Set `hasBeenUnsubscribed` to `true` to avoid still using the
+           * `subscriber` from this object.
+           */
+          subObj.hasBeenUnsubscribed = true;
+          var indexOf = subs.indexOf(subObj);
+
+          if (indexOf >= 0) {
+            subs.splice(indexOf, 1);
+          }
+        };
+      });
+    },
+
+    /**
+     * Indicate that no new values will be emitted.
+     * Allows to automatically close all Observables generated from this shared
+     * reference.
+     */
+    finish: function finish() {
+      isFinished = true;
+      var clonedSubs = subs.slice();
+
+      for (var _iterator2 = _createForOfIteratorHelperLoose(clonedSubs), _step2; !(_step2 = _iterator2()).done;) {
+        var subObj = _step2.value;
+
+        try {
+          if (!subObj.hasBeenUnsubscribed) {
+            subObj.subscriber.complete();
+          }
+        } catch (_) {
+          /* nothing */
+        }
+      }
+    }
+  };
+}
+/* harmony default export */ __webpack_exports__["Z"] = (createSharedReference);
+
+/***/ }),
+
 /***/ 4597:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
@@ -44075,45 +44216,6 @@ var inheritsLoose = __webpack_require__(4578);
 var Subject = __webpack_require__(6716);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/ReplaySubject.js
 var ReplaySubject = __webpack_require__(3);
-// EXTERNAL MODULE: ./node_modules/rxjs/node_modules/tslib/tslib.es6.js
-var tslib_es6 = __webpack_require__(5987);
-;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/BehaviorSubject.js
-
-
-var BehaviorSubject = (function (_super) {
-    (0,tslib_es6/* __extends */.ZT)(BehaviorSubject, _super);
-    function BehaviorSubject(_value) {
-        var _this = _super.call(this) || this;
-        _this._value = _value;
-        return _this;
-    }
-    Object.defineProperty(BehaviorSubject.prototype, "value", {
-        get: function () {
-            return this.getValue();
-        },
-        enumerable: false,
-        configurable: true
-    });
-    BehaviorSubject.prototype._subscribe = function (subscriber) {
-        var subscription = _super.prototype._subscribe.call(this, subscriber);
-        !subscription.closed && subscriber.next(this._value);
-        return subscription;
-    };
-    BehaviorSubject.prototype.getValue = function () {
-        var _a = this, hasError = _a.hasError, thrownError = _a.thrownError, _value = _a._value;
-        if (hasError) {
-            throw thrownError;
-        }
-        this._throwIfClosed();
-        return _value;
-    };
-    BehaviorSubject.prototype.next = function (value) {
-        _super.prototype.next.call(this, (this._value = value));
-    };
-    return BehaviorSubject;
-}(Subject/* Subject */.x));
-
-//# sourceMappingURL=BehaviorSubject.js.map
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
 var of = __webpack_require__(2817);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
@@ -44477,6 +44579,8 @@ var object_assign = __webpack_require__(8026);
 var promise = __webpack_require__(9589);
 // EXTERNAL MODULE: ./src/utils/ranges.ts
 var ranges = __webpack_require__(2829);
+// EXTERNAL MODULE: ./src/utils/reference.ts
+var reference = __webpack_require__(5095);
 // EXTERNAL MODULE: ./src/utils/warn_once.ts
 var warn_once = __webpack_require__(8806);
 // EXTERNAL MODULE: ./src/utils/noop.ts
@@ -48115,11 +48219,13 @@ var ABRManager = /*#__PURE__*/function () {
   var _proto = ABRManager.prototype;
 
   _proto.get$ = function get$(type, representations, clock$, streamEvents$) {
+    var _a, _b, _c;
+
     var bandwidthEstimator = this._getBandwidthEstimator(type);
 
-    var manualBitrate$ = (0,take_first_set/* default */.Z)(this._manualBitrates[type], (0,of.of)(-1));
-    var minAutoBitrate$ = (0,take_first_set/* default */.Z)(this._minAutoBitrates[type], (0,of.of)(0));
-    var maxAutoBitrate$ = (0,take_first_set/* default */.Z)(this._maxAutoBitrates[type], (0,of.of)(Infinity));
+    var manualBitrate$ = (0,take_first_set/* default */.Z)((_a = this._manualBitrates[type]) === null || _a === void 0 ? void 0 : _a.asObservable(), (0,of.of)(-1));
+    var minAutoBitrate$ = (0,take_first_set/* default */.Z)((_b = this._minAutoBitrates[type]) === null || _b === void 0 ? void 0 : _b.asObservable(), (0,of.of)(0));
+    var maxAutoBitrate$ = (0,take_first_set/* default */.Z)((_c = this._maxAutoBitrates[type]) === null || _c === void 0 ? void 0 : _c.asObservable(), (0,of.of)(Infinity));
     var initialBitrate = (0,take_first_set/* default */.Z)(this._initialBitrates[type], 0);
     var filters$ = createFilters(this._throttlers.limitWidth[type], this._throttlers.throttleBitrate[type], this._throttlers.throttle[type]);
     return RepresentationEstimator({
@@ -49959,8 +50065,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
    *
    * @param {Object} content - The context of the Representation you want to
    * load segments for.
-   * @param {BehaviorSubject} downloadQueue$ - Emit the queue of segments you
-   * want to load.
+   * @param {Object} downloadQueue - Queue of segments you want to load.
    * @param {Object} segmentFetcher - Interface to facilitate the download of
    * segments.
    * @param {boolean} hasInitSegment - Declare that an initialization segment
@@ -49976,10 +50081,10 @@ var DownloadingQueue = /*#__PURE__*/function () {
    * that it should not wait for an initialization segment before parsing a
    * media segment.
    */
-  function DownloadingQueue(content, downloadQueue$, segmentFetcher, hasInitSegment) {
+  function DownloadingQueue(content, downloadQueue, segmentFetcher, hasInitSegment) {
     this._content = content;
     this._currentObs$ = null;
-    this._downloadQueue$ = downloadQueue$;
+    this._downloadQueue = downloadQueue;
     this._initSegmentRequest = null;
     this._mediaSegmentRequest = null;
     this._segmentFetcher = segmentFetcher;
@@ -50029,7 +50134,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
     }
 
     var obs = (0,defer/* defer */.P)(function () {
-      var mediaQueue$ = _this._downloadQueue$.pipe((0,filter/* filter */.h)(function (_ref) {
+      var mediaQueue$ = _this._downloadQueue.asObservable().pipe((0,filter/* filter */.h)(function (_ref) {
         var segmentQueue = _ref.segmentQueue;
         // First, the first elements of the segmentQueue might be already
         // loaded but awaiting the initialization segment to be parsed.
@@ -50068,7 +50173,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
         return segmentQueue.length > 0 ? _this._requestMediaSegments() : empty/* EMPTY */.E;
       }));
 
-      var initSegmentPush$ = _this._downloadQueue$.pipe((0,filter/* filter */.h)(function (next) {
+      var initSegmentPush$ = _this._downloadQueue.asObservable().pipe((0,filter/* filter */.h)(function (next) {
         var initSegmentRequest = _this._initSegmentRequest;
 
         if (next.initSegment !== null && initSegmentRequest !== null) {
@@ -50102,7 +50207,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
   _proto._requestMediaSegments = function _requestMediaSegments() {
     var _this2 = this;
 
-    var _this$_downloadQueue$ = this._downloadQueue$.getValue(),
+    var _this$_downloadQueue$ = this._downloadQueue.getValue(),
         segmentQueue = _this$_downloadQueue$.segmentQueue;
 
     var currentNeededSegment = segmentQueue[0];
@@ -50146,7 +50251,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
           case "ended":
             _this2._mediaSegmentRequest = null;
 
-            var lastQueue = _this2._downloadQueue$.getValue().segmentQueue;
+            var lastQueue = _this2._downloadQueue.getValue().segmentQueue;
 
             if (lastQueue.length === 0) {
               return (0,of.of)({
@@ -51493,6 +51598,7 @@ function pushMediaSegment(_ref) {
 
 
 
+
 /**
  * Build up buffer for a single Representation.
  *
@@ -51532,14 +51638,14 @@ function RepresentationStream(_ref) {
   var reCheckNeededSegments$ = new Subject/* Subject */.x();
   /** Emit the last scheduled downloading queue for segments. */
 
-  var lastSegmentQueue$ = new BehaviorSubject({
+  var lastSegmentQueue = (0,reference/* createSharedReference */.$)({
     initSegment: null,
     segmentQueue: []
   });
   var hasInitSegment = initSegmentState.segment !== null;
-  /** Will load every segments in `lastSegmentQueue$` */
+  /** Will load every segments in `lastSegmentQueue` */
 
-  var downloadingQueue = new DownloadingQueue(content, lastSegmentQueue$, segmentFetcher, hasInitSegment);
+  var downloadingQueue = new DownloadingQueue(content, lastSegmentQueue, segmentFetcher, hasInitSegment);
 
   if (!hasInitSegment) {
     initSegmentState.segmentData = null;
@@ -51565,11 +51671,11 @@ function RepresentationStream(_ref) {
       hasSentEncryptionData = true;
     }
   }
-  /** Observable loading and pushing segments scheduled through `lastSegmentQueue$`. */
+  /** Observable loading and pushing segments scheduled through `lastSegmentQueue`. */
 
 
   var queue$ = downloadingQueue.start().pipe((0,mergeMap/* mergeMap */.z)(onQueueEvent));
-  /** Observable emitting the stream "status" and filling `lastSegmentQueue$`. */
+  /** Observable emitting the stream "status" and filling `lastSegmentQueue`. */
 
   var status$ = (0,combineLatest/* combineLatest */.a)([clock$, bufferGoal$, terminate$.pipe((0,take/* take */.q)(1), (0,startWith/* startWith */.O)(null)), reCheckNeededSegments$.pipe((0,startWith/* startWith */.O)(undefined))]).pipe((0,withLatestFrom/* withLatestFrom */.M)(fastSwitchThreshold$), (0,mergeMap/* mergeMap */.z)(function (_ref2) {
     var _ref2$ = _ref2[0],
@@ -51601,17 +51707,17 @@ function RepresentationStream(_ref) {
     }
 
     if (terminate === null) {
-      lastSegmentQueue$.next({
+      lastSegmentQueue.setValue({
         initSegment: neededInitSegment,
         segmentQueue: neededSegments
       });
     } else if (terminate.urgent) {
       log/* default.debug */.Z.debug("Stream: Urgent switch, terminate now.", bufferType);
-      lastSegmentQueue$.next({
+      lastSegmentQueue.setValue({
         initSegment: null,
         segmentQueue: []
       });
-      lastSegmentQueue$.complete();
+      lastSegmentQueue.finish();
       return (0,of.of)(stream_events_generators/* default.streamTerminating */.Z.streamTerminating());
     } else {
       // Non-urgent termination wanted:
@@ -51623,14 +51729,14 @@ function RepresentationStream(_ref) {
       var currentSegmentRequest = downloadingQueue.getRequestedMediaSegment();
       var nextQueue = currentSegmentRequest === null || mostNeededSegment === undefined || currentSegmentRequest.id !== mostNeededSegment.segment.id ? [] : [mostNeededSegment];
       var nextInit = initSegmentRequest === null ? null : neededInitSegment;
-      lastSegmentQueue$.next({
+      lastSegmentQueue.setValue({
         initSegment: nextInit,
         segmentQueue: nextQueue
       });
 
       if (nextQueue.length === 0 && nextInit === null) {
         log/* default.debug */.Z.debug("Stream: No request left, terminate", bufferType);
-        lastSegmentQueue$.complete();
+        lastSegmentQueue.finish();
         return (0,of.of)(stream_events_generators/* default.streamTerminating */.Z.streamTerminating());
       }
     }
@@ -51890,6 +51996,7 @@ function createRepresentationEstimator(_ref, abrManager, clock$) {
 
 
 
+
 var DELTA_POSITION_AFTER_RELOAD = config/* default.DELTA_POSITION_AFTER_RELOAD */.Z.DELTA_POSITION_AFTER_RELOAD;
 /**
  * Create new AdaptationStream Observable, which task will be to download the
@@ -51913,7 +52020,7 @@ function AdaptationStream(_ref) {
       options = _ref.options,
       segmentBuffer = _ref.segmentBuffer,
       segmentFetcherCreator = _ref.segmentFetcherCreator,
-      wantedBufferAhead$ = _ref.wantedBufferAhead$;
+      wantedBufferAhead = _ref.wantedBufferAhead;
   var directManualBitrateSwitching = options.manualBitrateSwitchingMode === "direct";
   var manifest = content.manifest,
       period = content.period,
@@ -51938,17 +52045,17 @@ function AdaptationStream(_ref) {
 
   var segmentFetcher = segmentFetcherCreator.createSegmentFetcher(adaptation.type, requestFeedback$);
   /**
-   * Emits each time an estimate is made through the `abrEstimate$` Observable,
-   * starting with the last one.
+   * Stores the last estimate emitted through the `abrEstimate$` Observable,
+   * starting with `null`.
    * This allows to easily rely on that value in inner Observables which might also
    * need the last already-considered value.
    */
 
-  var lastEstimate$ = new BehaviorSubject(null);
+  var lastEstimate = (0,reference/* createSharedReference */.$)(null);
   /** Emits abr estimates on Subscription. */
 
   var abrEstimate$ = estimator$.pipe((0,tap/* tap */.b)(function (estimate) {
-    lastEstimate$.next(estimate);
+    lastEstimate.setValue(estimate);
   }), (0,defer_subscriptions/* default */.Z)(), (0,share/* share */.B)());
   /** Emit at each bitrate estimate done by the ABRManager. */
 
@@ -51994,7 +52101,7 @@ function AdaptationStream(_ref) {
      */
 
 
-    var terminateCurrentStream$ = lastEstimate$.pipe((0,filter/* filter */.h)(function (newEstimate) {
+    var terminateCurrentStream$ = lastEstimate.asObservable().pipe((0,filter/* filter */.h)(function (newEstimate) {
       return newEstimate === null || newEstimate.representation.id !== representation.id || newEstimate.manual && !fromEstimate.manual;
     }), (0,take/* take */.q)(1), (0,map/* map */.U)(function (newEstimate) {
       if (newEstimate === null) {
@@ -52029,7 +52136,7 @@ function AdaptationStream(_ref) {
      */
 
     var fastSwitchThreshold$ = !options.enableFastSwitching ? (0,of.of)(0) : // Do not fast-switch anything
-    lastEstimate$.pipe((0,map/* map */.U)(function (estimate) {
+    lastEstimate.asObservable().pipe((0,map/* map */.U)(function (estimate) {
       return estimate === null ? undefined : estimate.knownStableBitrate;
     }), (0,distinctUntilChanged/* distinctUntilChanged */.x)());
     var representationChange$ = (0,of.of)(stream_events_generators/* default.representationChange */.Z.representationChange(adaptation.type, period, representation));
@@ -52039,13 +52146,13 @@ function AdaptationStream(_ref) {
       }
     }), (0,mergeMap/* mergeMap */.z)(function (evt) {
       if (evt.type === "stream-terminating") {
-        var lastEstimate = lastEstimate$.getValue();
+        var estimate = lastEstimate.getValue();
 
-        if (lastEstimate === null) {
+        if (estimate === null) {
           return empty/* EMPTY */.E;
         }
 
-        return recursivelyCreateRepresentationStreams(lastEstimate, false);
+        return recursivelyCreateRepresentationStreams(estimate, false);
       }
 
       return (0,of.of)(evt);
@@ -52064,7 +52171,7 @@ function AdaptationStream(_ref) {
       var oldBufferGoalRatio = bufferGoalRatioMap[representation.id];
       var bufferGoalRatio = oldBufferGoalRatio != null ? oldBufferGoalRatio : 1;
       bufferGoalRatioMap[representation.id] = bufferGoalRatio;
-      var bufferGoal$ = wantedBufferAhead$.pipe((0,map/* map */.U)(function (wba) {
+      var bufferGoal$ = wantedBufferAhead.asObservable().pipe((0,map/* map */.U)(function (wba) {
         return wba * bufferGoalRatio;
       }));
       log/* default.info */.Z.info("Stream: changing representation", adaptation.type, representation);
@@ -52091,10 +52198,10 @@ function AdaptationStream(_ref) {
         });
 
         if (formattedError.code === "BUFFER_FULL_ERROR") {
-          var wantedBufferAhead = wantedBufferAhead$.getValue();
+          var wba = wantedBufferAhead.getValue();
           var lastBufferGoalRatio = bufferGoalRatio;
 
-          if (lastBufferGoalRatio <= 0.25 || wantedBufferAhead * lastBufferGoalRatio <= 2) {
+          if (lastBufferGoalRatio <= 0.25 || wba * lastBufferGoalRatio <= 2) {
             throw formattedError;
           }
 
@@ -52150,21 +52257,22 @@ function AdaptationStream(_ref) {
  * This observable will never download any segment and just emit a "full"
  * event when reaching the end.
  * @param {Observable} streamClock$
- * @param {Observable} wantedBufferAhead$
+ * @param {Object} wantedBufferAhead
  * @param {string} bufferType
  * @param {Object} content
  * @returns {Observable}
  */
 
-function createEmptyAdaptationStream(streamClock$, wantedBufferAhead$, bufferType, content) {
+function createEmptyAdaptationStream(streamClock$, wantedBufferAhead, bufferType, content) {
   var period = content.period;
   var hasFinishedLoading = false;
+  var wantedBufferAhead$ = wantedBufferAhead.asObservable();
   return (0,combineLatest/* combineLatest */.a)([streamClock$, wantedBufferAhead$]).pipe((0,mergeMap/* mergeMap */.z)(function (_ref) {
     var clockTick = _ref[0],
-        wantedBufferAhead = _ref[1];
+        wba = _ref[1];
     var position = clockTick.position;
 
-    if (period.end !== undefined && position + wantedBufferAhead >= period.end) {
+    if (period.end !== undefined && position + wba >= period.end) {
       log/* default.debug */.Z.debug("Stream: full \"empty\" AdaptationStream", bufferType);
       hasFinishedLoading = true;
     }
@@ -52564,7 +52672,7 @@ function PeriodStream(_ref) {
       segmentFetcherCreator = _ref.segmentFetcherCreator,
       segmentBuffersStore = _ref.segmentBuffersStore,
       options = _ref.options,
-      wantedBufferAhead$ = _ref.wantedBufferAhead$;
+      wantedBufferAhead = _ref.wantedBufferAhead;
   var period = content.period; // Emits the chosen Adaptation for the current type.
   // `null` when no Adaptation is chosen (e.g. no subtitles)
 
@@ -52601,7 +52709,7 @@ function PeriodStream(_ref) {
         cleanBuffer$ = (0,of.of)(null);
       }
 
-      return (0,concat/* concat */.z)(cleanBuffer$.pipe((0,mapTo/* mapTo */.h)(stream_events_generators/* default.adaptationChange */.Z.adaptationChange(bufferType, null, period))), createEmptyAdaptationStream(clock$, wantedBufferAhead$, bufferType, {
+      return (0,concat/* concat */.z)(cleanBuffer$.pipe((0,mapTo/* mapTo */.h)(stream_events_generators/* default.adaptationChange */.Z.adaptationChange(bufferType, null, period))), createEmptyAdaptationStream(clock$, wantedBufferAhead, bufferType, {
         period: period
       }));
     }
@@ -52662,7 +52770,7 @@ function PeriodStream(_ref) {
       options: options,
       segmentBuffer: segmentBuffer,
       segmentFetcherCreator: segmentFetcherCreator,
-      wantedBufferAhead$: wantedBufferAhead$
+      wantedBufferAhead: wantedBufferAhead
     }).pipe((0,catchError/* catchError */.K)(function (error) {
       // Stream linked to a non-native media buffer should not impact the
       // stability of the player. ie: if a text buffer sends an error, we want
@@ -52674,7 +52782,7 @@ function PeriodStream(_ref) {
           defaultCode: "NONE",
           defaultReason: "Unknown `AdaptationStream` error"
         });
-        return (0,concat/* concat */.z)((0,of.of)(stream_events_generators/* default.warning */.Z.warning(formattedError)), createEmptyAdaptationStream(clock$, wantedBufferAhead$, bufferType, {
+        return (0,concat/* concat */.z)((0,of.of)(stream_events_generators/* default.warning */.Z.warning(formattedError)), createEmptyAdaptationStream(clock$, wantedBufferAhead, bufferType, {
           period: period
         }));
       }
@@ -53091,9 +53199,9 @@ var MAXIMUM_MAX_BUFFER_AHEAD = config/* default.MAXIMUM_MAX_BUFFER_AHEAD */.Z.MA
 function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, segmentFetcherCreator, options) {
   var manifest = content.manifest,
       initialPeriod = content.initialPeriod;
-  var maxBufferAhead$ = options.maxBufferAhead$,
-      maxBufferBehind$ = options.maxBufferBehind$,
-      wantedBufferAhead$ = options.wantedBufferAhead$; // Keep track of a unique BufferGarbageCollector created per
+  var maxBufferAhead = options.maxBufferAhead,
+      maxBufferBehind = options.maxBufferBehind,
+      wantedBufferAhead = options.wantedBufferAhead; // Keep track of a unique BufferGarbageCollector created per
   // SegmentBuffer.
 
   var garbageCollectors = new WeakMapMemory(function (segmentBuffer) {
@@ -53105,10 +53213,10 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
       clock$: clock$.pipe((0,map/* map */.U)(function (tick) {
         return tick.position + tick.wantedTimeOffset;
       })),
-      maxBufferBehind$: maxBufferBehind$.pipe((0,map/* map */.U)(function (val) {
+      maxBufferBehind$: maxBufferBehind.asObservable().pipe((0,map/* map */.U)(function (val) {
         return Math.min(val, defaultMaxBehind);
       })),
-      maxBufferAhead$: maxBufferAhead$.pipe((0,map/* map */.U)(function (val) {
+      maxBufferAhead$: maxBufferAhead.asObservable().pipe((0,map/* map */.U)(function (val) {
         return Math.min(val, defaultMaxAhead);
       }))
     });
@@ -53383,7 +53491,7 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
       segmentFetcherCreator: segmentFetcherCreator,
       segmentBuffersStore: segmentBuffersStore,
       options: options,
-      wantedBufferAhead$: wantedBufferAhead$
+      wantedBufferAhead: wantedBufferAhead
     }).pipe((0,mergeMap/* mergeMap */.z)(function (evt) {
       if (evt.type === "stream-status") {
         if (evt.value.hasFinishedLoading) {
@@ -53474,20 +53582,12 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
 
 function createStreamClock(initClock$, _ref) {
   var autoPlay = _ref.autoPlay,
-      initialPlay$ = _ref.initialPlay$,
-      initialSeek$ = _ref.initialSeek$,
+      initialPlayPerformed = _ref.initialPlayPerformed,
+      initialSeekPerformed = _ref.initialSeekPerformed,
       manifest = _ref.manifest,
       speed$ = _ref.speed$,
       startTime = _ref.startTime;
-  var initialPlayPerformed = false;
-  var initialSeekPerformed = false;
-  var updateIsPaused$ = initialPlay$.pipe((0,tap/* tap */.b)(function () {
-    initialPlayPerformed = true;
-  }), (0,ignoreElements/* ignoreElements */.l)());
-  var updateTimeOffset$ = initialSeek$.pipe((0,tap/* tap */.b)(function () {
-    initialSeekPerformed = true;
-  }), (0,ignoreElements/* ignoreElements */.l)());
-  var clock$ = (0,combineLatest/* combineLatest */.a)([initClock$, speed$]).pipe((0,map/* map */.U)(function (_ref2) {
+  return (0,combineLatest/* combineLatest */.a)([initClock$, speed$]).pipe((0,map/* map */.U)(function (_ref2) {
     var tick = _ref2[0],
         speed = _ref2[1];
     var isLive = manifest.isLive;
@@ -53495,7 +53595,7 @@ function createStreamClock(initClock$, _ref) {
       position: tick.position,
       getCurrentTime: tick.getCurrentTime,
       duration: tick.duration,
-      isPaused: initialPlayPerformed ? tick.paused : !autoPlay,
+      isPaused: initialPlayPerformed.getValue() ? tick.paused : !autoPlay,
       liveGap: isLive ? manifest.getMaximumPosition() - tick.position : Infinity,
       readyState: tick.readyState,
       speed: speed,
@@ -53505,10 +53605,9 @@ function createStreamClock(initClock$, _ref) {
       // initial position, the currentTime will most probably be 0 where the
       // effective starting position will be _startTime_.
       // Thus we initially set a wantedTimeOffset equal to startTime.
-      wantedTimeOffset: initialSeekPerformed ? 0 : startTime - tick.position
+      wantedTimeOffset: initialSeekPerformed.getValue() ? 0 : startTime - tick.position
     };
   }));
-  return (0,merge/* merge */.T)(updateIsPaused$, updateTimeOffset$, clock$);
 }
 ;// CONCATENATED MODULE: ./src/core/init/duration_updater.ts
 /**
@@ -53658,6 +53757,8 @@ function isMediaSourceOpened$(mediaSource) {
 var emit_loaded_event = __webpack_require__(5039);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/race.js + 1 modules
 var race = __webpack_require__(4181);
+// EXTERNAL MODULE: ./node_modules/rxjs/node_modules/tslib/tslib.es6.js
+var tslib_es6 = __webpack_require__(5987);
 ;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/takeLast.js
 
 
@@ -54161,19 +54262,19 @@ function createMediaSourceLoader(_ref) {
       setCurrentTime: setCurrentTime,
       isDirectfile: false
     }),
-        seek$ = _initialSeekAndPlay.seek$,
-        play$ = _initialSeekAndPlay.play$;
+        seekAndPlay$ = _initialSeekAndPlay.seekAndPlay$,
+        initialPlayPerformed = _initialSeekAndPlay.initialPlayPerformed,
+        initialSeekPerformed = _initialSeekAndPlay.initialSeekPerformed;
 
-    var playDone$ = play$.pipe((0,filter/* filter */.h)(function (evt) {
-      return evt.type !== "warning";
-    }));
-    var streamEvents$ = playDone$.pipe((0,mergeMap/* mergeMap */.z)(function () {
+    var streamEvents$ = initialPlayPerformed.asObservable().pipe((0,filter/* filter */.h)(function (hasPlayed) {
+      return hasPlayed;
+    }), (0,mergeMap/* mergeMap */.z)(function () {
       return init_stream_events_emitter(manifest, mediaElement, clock$);
     }));
     var streamClock$ = createStreamClock(clock$, {
       autoPlay: autoPlay,
-      initialPlay$: playDone$,
-      initialSeek$: seek$,
+      initialPlayPerformed: initialPlayPerformed,
+      initialSeekPerformed: initialSeekPerformed,
       manifest: manifest,
       speed$: speed$,
       startTime: initialTime
@@ -54243,12 +54344,8 @@ function createMediaSourceLoader(_ref) {
      * Also emits warning events if issues arise when doing so.
      */
 
-    var loadingEvts$ = play$.pipe((0,switchMap/* switchMap */.w)(function (evt) {
-      if (evt.type === "warning") {
-        return (0,of.of)(evt);
-      }
-
-      return (0,emit_loaded_event/* default */.Z)(clock$, mediaElement, segmentBuffersStore, false);
+    var loadingEvts$ = seekAndPlay$.pipe((0,switchMap/* switchMap */.w)(function (evt) {
+      return evt.type === "warning" ? (0,of.of)(evt) : (0,emit_loaded_event/* default */.Z)(clock$, mediaElement, segmentBuffersStore, false);
     }));
     return (0,merge/* merge */.T)(durationUpdater$, loadingEvts$, playbackRate$, stallAvoider$, streams$, streamEvents$).pipe(finalize(function () {
       // clean-up every created SegmentBuffers
@@ -54725,7 +54822,7 @@ function InitializeOnMediaSource(_ref) {
         return openMediaSource$.pipe((0,mergeMap/* mergeMap */.z)(function () {
           // Now that the MediaSource has been opened and linked to the media
           // element we can attach the MediaKeys instance to the latter.
-          evt.value.attachMediaKeys$.next(); // If the `disableMediaKeysAttachmentLock` option has been set to
+          evt.value.canAttachMediaKeys.setValue(true); // If the `disableMediaKeysAttachmentLock` option has been set to
           // `true`, we should not wait until the MediaKeys instance has been
           // attached to start loading the content.
 
@@ -57271,6 +57368,7 @@ function getRightVideoTrack(adaptation, isTrickModeEnabled) {
 
 
 
+
 /* eslint-disable @typescript-eslint/naming-convention */
 
 var DEFAULT_UNMUTED_VOLUME = config/* default.DEFAULT_UNMUTED_VOLUME */.Z.DEFAULT_UNMUTED_VOLUME;
@@ -57375,14 +57473,14 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     })).subscribe(function (x) {
       return _this._priv_onNativeTextTracksNext(x);
     });
-    _this._priv_playing$ = new ReplaySubject/* ReplaySubject */.t(1);
-    _this._priv_speed$ = new BehaviorSubject(videoElement.playbackRate);
+    _this._priv_isPlaying = (0,reference/* default */.Z)(false);
+    _this._priv_speed = (0,reference/* default */.Z)(videoElement.playbackRate);
     _this._priv_preferTrickModeTracks = false;
-    _this._priv_contentLock$ = new BehaviorSubject(false);
+    _this._priv_contentLock = (0,reference/* default */.Z)(false);
     _this._priv_bufferOptions = {
-      wantedBufferAhead$: new BehaviorSubject(wantedBufferAhead),
-      maxBufferAhead$: new BehaviorSubject(maxBufferAhead),
-      maxBufferBehind$: new BehaviorSubject(maxBufferBehind)
+      wantedBufferAhead: (0,reference/* default */.Z)(wantedBufferAhead),
+      maxBufferAhead: (0,reference/* default */.Z)(maxBufferAhead),
+      maxBufferBehind: (0,reference/* default */.Z)(maxBufferBehind)
     };
     _this._priv_bitrateInfos = {
       lastBitrates: {
@@ -57390,16 +57488,16 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         video: initialVideoBitrate
       },
       minAutoBitrates: {
-        audio: new BehaviorSubject(minAudioBitrate),
-        video: new BehaviorSubject(minVideoBitrate)
+        audio: (0,reference/* default */.Z)(minAudioBitrate),
+        video: (0,reference/* default */.Z)(minVideoBitrate)
       },
       maxAutoBitrates: {
-        audio: new BehaviorSubject(maxAudioBitrate),
-        video: new BehaviorSubject(maxVideoBitrate)
+        audio: (0,reference/* default */.Z)(maxAudioBitrate),
+        video: (0,reference/* default */.Z)(maxVideoBitrate)
       },
       manualBitrates: {
-        audio: new BehaviorSubject(-1),
-        video: new BehaviorSubject(-1)
+        audio: (0,reference/* default */.Z)(-1),
+        video: (0,reference/* default */.Z)(-1)
       }
     };
     _this._priv_throttleWhenHidden = throttleWhenHidden;
@@ -57460,34 +57558,34 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
     this._priv_destroy$.next();
 
-    this._priv_destroy$.complete(); // Complete all subjects
+    this._priv_destroy$.complete(); // Complete all subjects and references
 
-
-    this._priv_playing$.complete();
-
-    this._priv_speed$.complete();
-
-    this._priv_contentLock$.complete();
-
-    this._priv_bufferOptions.wantedBufferAhead$.complete();
-
-    this._priv_bufferOptions.maxBufferAhead$.complete();
-
-    this._priv_bufferOptions.maxBufferBehind$.complete();
 
     this._priv_pictureInPictureEvent$.complete();
 
-    this._priv_bitrateInfos.manualBitrates.video.complete();
+    this._priv_isPlaying.finish();
 
-    this._priv_bitrateInfos.manualBitrates.audio.complete();
+    this._priv_speed.finish();
 
-    this._priv_bitrateInfos.minAutoBitrates.video.complete();
+    this._priv_contentLock.finish();
 
-    this._priv_bitrateInfos.minAutoBitrates.audio.complete();
+    this._priv_bufferOptions.wantedBufferAhead.finish();
 
-    this._priv_bitrateInfos.maxAutoBitrates.video.complete();
+    this._priv_bufferOptions.maxBufferAhead.finish();
 
-    this._priv_bitrateInfos.maxAutoBitrates.audio.complete();
+    this._priv_bufferOptions.maxBufferBehind.finish();
+
+    this._priv_bitrateInfos.manualBitrates.video.finish();
+
+    this._priv_bitrateInfos.manualBitrates.audio.finish();
+
+    this._priv_bitrateInfos.minAutoBitrates.video.finish();
+
+    this._priv_bitrateInfos.minAutoBitrates.audio.finish();
+
+    this._priv_bitrateInfos.maxAutoBitrates.video.finish();
+
+    this._priv_bitrateInfos.maxAutoBitrates.audio.finish();
 
     this._priv_lastContentPlaybackInfos = {}; // un-attach video element
 
@@ -57624,7 +57722,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
     var playback$;
 
-    var speed$ = this._priv_speed$.pipe((0,distinctUntilChanged/* distinctUntilChanged */.x)());
+    var speed$ = this._priv_speed.asObservable().pipe((0,distinctUntilChanged/* distinctUntilChanged */.x)());
 
     if (!isDirectFile) {
       var transportFn = features/* default.transports */.Z.transports[transport];
@@ -57634,7 +57732,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         this.stop();
         this._priv_currentError = null;
 
-        this._priv_playing$.next(false);
+        this._priv_isPlaying.setValue(false);
 
         throw new Error("transport \"" + transport + "\" not supported");
       }
@@ -57691,7 +57789,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       this.stop();
       this._priv_currentError = null;
 
-      this._priv_playing$.next(false);
+      this._priv_isPlaying.setValue(false);
 
       this._priv_contentInfos = contentInfos;
       var relyOnVideoVisibilityAndSize = canRelyOnVideoVisibilityAndSize();
@@ -57789,7 +57887,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       this.stop();
       this._priv_currentError = null;
 
-      this._priv_playing$.next(false);
+      this._priv_isPlaying.setValue(false);
 
       if (features/* default.directfile */.Z.directfile === null) {
         throw new Error("DirectFile feature not activated in your build.");
@@ -57843,7 +57941,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         clock$: clock$,
         keySystems: keySystems,
         mediaElement: videoElement,
-        speed$: this._priv_speed$,
+        speed$: speed$,
         startAt: startAt,
         setCurrentTime: setCurrentTime,
         url: url
@@ -57883,7 +57981,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     var seekingEvent$ = onSeeking$(videoElement);
     /** Emit state updates once the content is considered "loaded". */
 
-    var loadedStateUpdates$ = (0,combineLatest/* combineLatest */.a)([this._priv_playing$, stalled$.pipe((0,startWith/* startWith */.O)(null)), endedEvent$.pipe((0,startWith/* startWith */.O)(null)), seekingEvent$.pipe((0,startWith/* startWith */.O)(null))]).pipe((0,takeUntil/* takeUntil */.R)(stopContent$), (0,map/* map */.U)(function (_ref) {
+    var loadedStateUpdates$ = (0,combineLatest/* combineLatest */.a)([this._priv_isPlaying.asObservable(), stalled$.pipe((0,startWith/* startWith */.O)(null)), endedEvent$.pipe((0,startWith/* startWith */.O)(null)), seekingEvent$.pipe((0,startWith/* startWith */.O)(null))]).pipe((0,takeUntil/* takeUntil */.R)(stopContent$), (0,map/* map */.U)(function (_ref) {
       var isPlaying = _ref[0],
           stalledStatus = _ref[1];
       return getLoadedContentState(videoElement, isPlaying, stalledStatus);
@@ -57941,7 +58039,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       }
     }); // initialize the content only when the lock is inactive
 
-    this._priv_contentLock$.pipe((0,filter/* filter */.h)(function (isLocked) {
+    this._priv_contentLock.asObservable().pipe((0,filter/* filter */.h)(function (isLocked) {
       return !isLocked;
     }), (0,take/* take */.q)(1), (0,takeUntil/* takeUntil */.R)(stopContent$)).subscribe(function () {
       // start playback!
@@ -58249,7 +58347,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.getPlaybackRate = function getPlaybackRate() {
-    return this._priv_speed$.getValue();
+    return this._priv_speed.getValue();
   }
   /**
    * Update the playback rate of the video.
@@ -58310,7 +58408,9 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.setPlaybackRate = function setPlaybackRate(rate, opts) {
-    this._priv_speed$.next(rate);
+    if (rate !== this._priv_speed.getValue()) {
+      this._priv_speed.setValue(rate);
+    }
 
     var preferTrickModeTracks = opts === null || opts === void 0 ? void 0 : opts.preferTrickModeTracks;
 
@@ -58683,7 +58783,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.setVideoBitrate = function setVideoBitrate(btr) {
-    this._priv_bitrateInfos.manualBitrates.video.next(btr);
+    this._priv_bitrateInfos.manualBitrates.video.setValue(btr);
   }
   /**
    * Force the audio bitrate to a given value. Act as a ceil.
@@ -58693,7 +58793,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.setAudioBitrate = function setAudioBitrate(btr) {
-    this._priv_bitrateInfos.manualBitrates.audio.next(btr);
+    this._priv_bitrateInfos.manualBitrates.audio.setValue(btr);
   }
   /**
    * Update the minimum video bitrate the user can switch to.
@@ -58708,7 +58808,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       throw new Error("Invalid minimum video bitrate given. " + ("Its value, \"" + btr + "\" is superior the current maximum ") + ("video birate, \"" + maxVideoBitrate + "\"."));
     }
 
-    this._priv_bitrateInfos.minAutoBitrates.video.next(btr);
+    this._priv_bitrateInfos.minAutoBitrates.video.setValue(btr);
   }
   /**
    * Update the minimum audio bitrate the user can switch to.
@@ -58723,7 +58823,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       throw new Error("Invalid minimum audio bitrate given. " + ("Its value, \"" + btr + "\" is superior the current maximum ") + ("audio birate, \"" + maxAudioBitrate + "\"."));
     }
 
-    this._priv_bitrateInfos.minAutoBitrates.audio.next(btr);
+    this._priv_bitrateInfos.minAutoBitrates.audio.setValue(btr);
   }
   /**
    * Update the maximum video bitrate the user can switch to.
@@ -58738,7 +58838,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       throw new Error("Invalid maximum video bitrate given. " + ("Its value, \"" + btr + "\" is inferior the current minimum ") + ("video birate, \"" + minVideoBitrate + "\"."));
     }
 
-    this._priv_bitrateInfos.maxAutoBitrates.video.next(btr);
+    this._priv_bitrateInfos.maxAutoBitrates.video.setValue(btr);
   }
   /**
    * Update the maximum audio bitrate the user can switch to.
@@ -58753,7 +58853,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       throw new Error("Invalid maximum audio bitrate given. " + ("Its value, \"" + btr + "\" is inferior the current minimum ") + ("audio birate, \"" + minAudioBitrate + "\"."));
     }
 
-    this._priv_bitrateInfos.maxAutoBitrates.audio.next(btr);
+    this._priv_bitrateInfos.maxAutoBitrates.audio.setValue(btr);
   }
   /**
    * Set the max buffer size for the buffer behind the current position.
@@ -58763,7 +58863,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.setMaxBufferBehind = function setMaxBufferBehind(depthInSeconds) {
-    this._priv_bufferOptions.maxBufferBehind$.next(depthInSeconds);
+    this._priv_bufferOptions.maxBufferBehind.setValue(depthInSeconds);
   }
   /**
    * Set the max buffer size for the buffer behind the current position.
@@ -58773,7 +58873,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.setMaxBufferAhead = function setMaxBufferAhead(depthInSeconds) {
-    this._priv_bufferOptions.maxBufferAhead$.next(depthInSeconds);
+    this._priv_bufferOptions.maxBufferAhead.setValue(depthInSeconds);
   }
   /**
    * Set the max buffer size for the buffer ahead of the current position.
@@ -58783,7 +58883,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.setWantedBufferAhead = function setWantedBufferAhead(sizeInSeconds) {
-    this._priv_bufferOptions.wantedBufferAhead$.next(sizeInSeconds);
+    this._priv_bufferOptions.wantedBufferAhead.setValue(sizeInSeconds);
   }
   /**
    * Returns the max buffer size for the buffer behind the current position.
@@ -58792,7 +58892,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.getMaxBufferBehind = function getMaxBufferBehind() {
-    return this._priv_bufferOptions.maxBufferBehind$.getValue();
+    return this._priv_bufferOptions.maxBufferBehind.getValue();
   }
   /**
    * Returns the max buffer size for the buffer behind the current position.
@@ -58801,7 +58901,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.getMaxBufferAhead = function getMaxBufferAhead() {
-    return this._priv_bufferOptions.maxBufferAhead$.getValue();
+    return this._priv_bufferOptions.maxBufferAhead.getValue();
   }
   /**
    * Returns the max buffer size for the buffer ahead of the current position.
@@ -58810,7 +58910,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.getWantedBufferAhead = function getWantedBufferAhead() {
-    return this._priv_bufferOptions.wantedBufferAhead$.getValue();
+    return this._priv_bufferOptions.wantedBufferAhead.getValue();
   }
   /**
    * Returns type of current keysystem (e.g. playready, widevine) if the content
@@ -59365,7 +59465,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
     log/* default.debug */.Z.debug("Locking `contentLock` to clean-up the current content."); // lock playback of new contents while cleaning up is pending
 
-    this._priv_contentLock$.next(true);
+    this._priv_contentLock.setValue(true);
 
     this._priv_contentInfos = null;
     this._priv_trackChoiceManager = null;
@@ -59376,7 +59476,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     var freeUpContentLock = function freeUpContentLock() {
       log/* default.debug */.Z.debug("Unlocking `contentLock`. Next content can begin.");
 
-      _this4._priv_contentLock$.next(false);
+      _this4._priv_contentLock.setValue(false);
     };
 
     if (!(0,is_null_or_undefined/* default */.Z)(this.videoElement)) {
@@ -59945,7 +60045,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       throw new Error("Disposed player");
     }
 
-    this._priv_playing$.next(isPlaying);
+    this._priv_isPlaying.setValue(isPlaying);
   }
   /**
    * Triggered each time a textTrack is added to the video DOM Element.
