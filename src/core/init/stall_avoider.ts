@@ -43,10 +43,7 @@ import {
 } from "./types";
 
 const { BUFFER_DISCONTINUITY_THRESHOLD,
-        FORCE_DISCONTINUITY_SEEK_DELAY,
-        FREEZING_STALLED_DELAY,
-        UNFREEZING_SEEK_DELAY,
-        UNFREEZING_DELTA_POSITION } = config;
+        FORCE_DISCONTINUITY_SEEK_DELAY } = config;
 
 /**
  * Work-around rounding errors with floating points by setting an acceptable,
@@ -180,8 +177,6 @@ export default function StallAvoider(
    */
   let ignoredStallTimeStamp : number | null = null;
 
-  let prevFreezingState : { attemptTimestamp : number } | null;
-
   /**
    * If we're rebuffering waiting on data of a "locked stream", seek into the
    * Period handled by that stream to unlock the situation.
@@ -220,29 +215,7 @@ export default function StallAvoider(
       const { buffered,
               position,
               readyState,
-              rebuffering,
-              freezing } = tick;
-      if (freezing !== null) {
-        const now = performance.now();
-
-        const referenceTimestamp = prevFreezingState === null ?
-          freezing.timestamp :
-          prevFreezingState.attemptTimestamp;
-
-        if (now - referenceTimestamp > UNFREEZING_SEEK_DELAY) {
-          log.warn("Init: trying to seek to un-freeze player");
-          setCurrentTime(tick.getCurrentTime() + UNFREEZING_DELTA_POSITION);
-          prevFreezingState = { attemptTimestamp: now };
-        }
-
-        if (now - freezing.timestamp > FREEZING_STALLED_DELAY) {
-          return { type: "stalled" as const,
-                   value: "freezing" as const };
-        }
-      } else {
-        prevFreezingState = null;
-      }
-
+              rebuffering } = tick;
       if (rebuffering === null) {
         if (readyState === 1) {
           // With a readyState set to 1, we should still be not able to play,
