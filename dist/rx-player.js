@@ -9366,11 +9366,19 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
 
     if (rebuffering === null) {
       if (readyState === 1) {
-        // With a readyState set to 1, we should still be not able to play,
-        // anounce that we're stalled due to an unknown "freezing" status.
+        // With a readyState set to 1, we should still not be able to play:
+        // Return that we're stalled
+        var reason;
+
+        if (tick.seeking) {
+          reason = tick.internalSeeking ? "internal-seek" : "seeking";
+        } else {
+          reason = "not-ready";
+        }
+
         return {
           type: "stalled",
-          value: "freezing"
+          value: reason
         };
       }
 
@@ -9378,7 +9386,11 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
         type: "unstalled",
         value: null
       };
-    }
+    } // We want to separate a stall situation when a seek is due to a seek done
+    // internally by the player to when its due to a regular user seek.
+
+
+    var stalledReason = rebuffering.reason === "seeking" && tick.internalSeeking ? "internal-seek" : rebuffering.reason;
 
     if (tick.seeking) {
       lastSeekingPosition = tick.position;
@@ -9392,7 +9404,7 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
       if (is_seeking_approximate && tick.position < lastSeekingPosition && _now - ignoredStallTimeStamp < FORCE_DISCONTINUITY_SEEK_DELAY) {
         return {
           type: "stalled",
-          value: rebuffering.reason
+          value: stalledReason
         };
       }
 
@@ -9404,7 +9416,7 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
     if (manifest === null) {
       return {
         type: "stalled",
-        value: rebuffering.reason
+        value: stalledReason
       };
     }
     /** Position at which data is awaited. */
@@ -9466,7 +9478,7 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
 
     return {
       type: "stalled",
-      value: rebuffering.reason
+      value: stalledReason
     };
   }));
   return (0,merge/* merge */.T)(unlock$, stall$);
@@ -54966,7 +54978,6 @@ function getRebufferingEndGap(rebufferingStatus, lowLatencyMode) {
 
   switch (rebufferingStatus.reason) {
     case "seeking":
-    case "internal-seek":
       return RESUME_GAP_AFTER_SEEKING[suffix];
 
     case "not-ready":
@@ -55094,8 +55105,6 @@ function getRebufferingStatus(prevTimings, currentTimings, _ref) {
 
     if (currentEvt === "seeking" || prevRebuffering !== null && prevRebuffering.reason === "seeking") {
       reason = "seeking";
-    } else if (currentTimings.seeking && (currentEvt === "internal-seeking" || prevRebuffering !== null && prevRebuffering.reason === "internal-seek")) {
-      reason = "internal-seek";
     } else if (currentTimings.seeking) {
       reason = "seeking";
     } else if (readyState === 1) {
@@ -55184,6 +55193,7 @@ function createClock(mediaElement, options) {
     var lastTimings = (0,object_assign/* default */.Z)(getMediaInfos(mediaElement, "init"), {
       rebuffering: null,
       freezing: null,
+      internalSeeking: false,
       getCurrentTime: function getCurrentTime() {
         return mediaElement.currentTime;
       }
@@ -55198,11 +55208,13 @@ function createClock(mediaElement, options) {
       }
 
       var mediaTimings = getMediaInfos(mediaElement, tmpEvt);
+      var internalSeeking = mediaTimings.seeking && (tmpEvt === "internal-seeking" || lastTimings.internalSeeking && tmpEvt !== "seeking");
       var rebufferingStatus = getRebufferingStatus(lastTimings, mediaTimings, options);
       var freezingStatus = getFreezingStatus(lastTimings, mediaTimings);
       var timings = (0,object_assign/* default */.Z)({}, {
         rebuffering: rebufferingStatus,
         freezing: freezingStatus,
+        internalSeeking: internalSeeking,
         getCurrentTime: function getCurrentTime() {
           return mediaElement.currentTime;
         }
@@ -55394,7 +55406,7 @@ function getLoadedContentState(mediaElement, isPlaying, stalledStatus) {
     return PLAYER_STATES.ENDED;
   }
 
-  if (stalledStatus !== null) {
+  if (stalledStatus !== null && stalledStatus !== "freezing") {
     // On some old browsers (e.g. Chrome 54), the browser does not
     // emit an 'ended' event in some conditions. Detect if we
     // reached the end by comparing the current position and the
