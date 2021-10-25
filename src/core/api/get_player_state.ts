@@ -60,7 +60,7 @@ export default function getLoadedContentState(
     return PLAYER_STATES.ENDED;
   }
 
-  if (stalledStatus !== null) {
+  if (stalledStatus !== null && stalledStatus !== "freezing") {
     // On some old browsers (e.g. Chrome 54), the browser does not
     // emit an 'ended' event in some conditions. Detect if we
     // reached the end by comparing the current position and the
