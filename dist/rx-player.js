@@ -9240,6 +9240,7 @@ var events_generators = __webpack_require__(8567);
 
 
 
+
 var BUFFER_DISCONTINUITY_THRESHOLD = config/* default.BUFFER_DISCONTINUITY_THRESHOLD */.Z.BUFFER_DISCONTINUITY_THRESHOLD,
     FORCE_DISCONTINUITY_SEEK_DELAY = config/* default.FORCE_DISCONTINUITY_SEEK_DELAY */.Z.FORCE_DISCONTINUITY_SEEK_DELAY,
     FREEZING_STALLED_DELAY = config/* default.FREEZING_STALLED_DELAY */.Z.FREEZING_STALLED_DELAY,
@@ -9346,7 +9347,7 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
       var now = performance.now();
       var referenceTimestamp = prevFreezingState === null ? freezing.timestamp : prevFreezingState.attemptTimestamp;
 
-      if (now - referenceTimestamp > UNFREEZING_SEEK_DELAY) {
+      if (!browser_detection/* isTizen */.yS && now - referenceTimestamp > UNFREEZING_SEEK_DELAY) {
         log/* default.warn */.Z.warn("Init: trying to seek to un-freeze player");
         setCurrentTime(tick.getCurrentTime() + UNFREEZING_DELTA_POSITION);
         prevFreezingState = {
