@@ -25,6 +25,7 @@ import {
   tap,
   withLatestFrom,
 } from "rxjs/operators";
+import { isTizen } from "../../compat/browser_detection";
 import isSeekingApproximate from "../../compat/is_seeking_approximate";
 import config from "../../config";
 import { MediaError } from "../../errors";
@@ -230,7 +231,7 @@ export default function StallAvoider(
           freezing.timestamp :
           prevFreezingState.attemptTimestamp;
 
-        if (now - referenceTimestamp > UNFREEZING_SEEK_DELAY) {
+        if (!isTizen && now - referenceTimestamp > UNFREEZING_SEEK_DELAY) {
           log.warn("Init: trying to seek to un-freeze player");
           setCurrentTime(tick.getCurrentTime() + UNFREEZING_DELTA_POSITION);
           prevFreezingState = { attemptTimestamp: now };
