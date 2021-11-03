@@ -160,7 +160,7 @@ export default function getNeededSegments({
       return true; // never skip initialization segments
     }
 
-    if (duration < MINIMUM_SEGMENT_SIZE) {
+    if (duration !== undefined && duration < MINIMUM_SEGMENT_SIZE) {
       return false; // too small, don't download
     }
 

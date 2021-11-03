@@ -135,14 +135,19 @@ export default class VideoThumbnailLoader {
 
     for (let j = 0; j < segments.length; j++) {
       const { time: stime, duration, timescale } = segments[j];
-      const start = stime / timescale;
-      const end = start + (duration / timescale);
-      for (let i = 0; i < this._videoElement.buffered.length; i++) {
-        if (this._videoElement.buffered.start(i) - + 0.001 <= start &&
-            this._videoElement.buffered.end(i) + 0.001 >= end) {
-          segments.splice(j, 1);
-          j--;
-          break;
+
+      // TODO maybe still handle the last segment if its duration is undefined
+      // and it is sufficiently close?
+      if (duration !== undefined) {
+        const start = stime / timescale;
+        const end = start + (duration / timescale);
+        for (let i = 0; i < this._videoElement.buffered.length; i++) {
+          if (this._videoElement.buffered.start(i) - + 0.001 <= start &&
+              this._videoElement.buffered.end(i) + 0.001 >= end) {
+            segments.splice(j, 1);
+            j--;
+            break;
+          }
         }
       }
     }
@@ -240,15 +245,19 @@ export default class VideoThumbnailLoader {
                     throw new Error("Unexpected initialization segment parsed.");
                   }
                   const start = segment.time / segment.timescale;
-                  const end = start + (segment.duration / segment.timescale);
-                  const inventoryInfos = objectAssign({ segment,
-                                                        start,
-                                                        end }, contentInfos);
-                  return pushData(inventoryInfos,
-                                  data,
+                  const inventoryInfos = segment.duration === undefined ?
+                    null :
+                    objectAssign({
+                      segment,
+                      start,
+                      end: start + (segment.duration / segment.timescale),
+                    }, contentInfos);
+                  return pushData(data,
+                                  inventoryInfos,
+                                  contentInfos.representation.getMimeTypeString(),
                                   videoSourceBuffer)
                     .pipe(tap(() => {
-                      freeRequest(getCompleteSegmentId(inventoryInfos, segment));
+                      freeRequest(getCompleteSegmentId(contentInfos, segment));
                       log.debug("VTL: Appended segment.", data);
                     }));
                 })

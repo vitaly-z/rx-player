@@ -62,7 +62,7 @@ function getConcernedRequests(
 ) : IRequestInfo[] {
   /** Index of the request for the next needed segment, in `requests`. */
   const nextSegmentIndex = arrayFindIndex(requests, (request) => {
-    if (request.duration <= 0) {
+    if (request.duration === undefined || request.duration <= 0) {
       return false;
     }
     const segmentEnd = request.time + request.duration;
@@ -183,6 +183,9 @@ function estimateStarvationModeBitrate(
   }
 
   const requestElapsedTime = (now - concernedRequest.requestTimestamp) / 1000;
+  if (chunkDuration === undefined) {
+    return undefined;
+  }
   const reasonableElapsedTime = requestElapsedTime <=
     ((chunkDuration * 1.5 + 2) / speed);
   if (currentRepresentation == null || reasonableElapsedTime) {

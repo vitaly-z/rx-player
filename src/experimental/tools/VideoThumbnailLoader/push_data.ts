@@ -1,13 +1,10 @@
 import {
   Observable,
 } from "rxjs";
-import { AudioVideoSegmentBuffer } from "../../../core/segment_buffers/implementations";
-import Manifest, {
-  Adaptation,
-  ISegment,
-  Period,
-  Representation,
-} from "../../../manifest";
+import {
+  AudioVideoSegmentBuffer,
+  IInsertedChunkInfos,
+} from "../../../core/segment_buffers/implementations";
 import { ISegmentParserParsedSegment } from "../../../transports";
 
 /**
@@ -19,14 +16,9 @@ import { ISegmentParserParsedSegment } from "../../../transports";
  * @returns
  */
 export default function pushData(
-  inventoryInfos: { manifest: Manifest;
-                    period: Period;
-                    adaptation: Adaptation;
-                    representation: Representation;
-                    segment: ISegment;
-                    start: number;
-                    end: number; },
   parsed: ISegmentParserParsedSegment<Uint8Array | ArrayBuffer>,
+  inventoryInfos: IInsertedChunkInfos | null ,
+  codec: string,
   videoSourceBuffer: AudioVideoSegmentBuffer
 ): Observable<void> {
   const { chunkData, appendWindow } = parsed;
@@ -37,7 +29,6 @@ export default function pushData(
                          timestampOffset: 0,
                          appendWindow,
                          initSegment: null,
-                         codec: inventoryInfos
-                           .representation.getMimeTypeString() },
+                         codec },
                  inventoryInfos });
 }

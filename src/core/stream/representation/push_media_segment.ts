@@ -90,6 +90,9 @@ export default function pushMediaSegment<T>(
 
     let estimatedStart = chunkInfos?.time ?? segment.time;
     const estimatedDuration = chunkInfos?.duration ?? segment.duration;
+    if (estimatedDuration === undefined) {
+      throw new Error("XXX TODO");
+    }
     let estimatedEnd = estimatedStart + estimatedDuration;
     if (safeAppendWindow[0] !== undefined) {
       estimatedStart = Math.max(estimatedStart, safeAppendWindow[0]);

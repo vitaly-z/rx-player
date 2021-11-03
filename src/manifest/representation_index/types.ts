@@ -193,7 +193,7 @@ export interface ISegment {
    *
    * `0` for initialization segments.
    */
-  duration : number;
+  duration? : number;
   /**
    * Always set to 1 for API compatibility with v3.X.X.
    * This was intended for conversion of the `time` and `duration` properties

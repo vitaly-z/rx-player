@@ -350,3 +350,5 @@ export interface IEndOfSegmentOperation {
   /** Arguments for that operation. */
   value : IEndOfSegmentInfos;
 }
+
+export { IInsertedChunkInfos };

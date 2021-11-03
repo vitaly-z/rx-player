@@ -185,7 +185,7 @@ export interface IABRRequestBeginEvent {
      * Difference between the presentation end time and start time of the
      * corresponding segment, in seconds.
      */
-    duration: number;
+    duration: number | undefined;
     /** Value of `performance.now` at the time the request began.  */
     requestTimestamp: number;
   };
@@ -425,11 +425,12 @@ export default function RepresentationEstimator({
 
     // calculate "maintainability score"
     const { segment } = content;
-    const requestDuration = duration / 1000;
-    const segmentDuration = segment.duration;
+    if (segment.duration !== undefined) {
+      const requestDuration = duration / 1000;
 
-    const { representation } = content;
-    scoreCalculator.addSample(representation, requestDuration, segmentDuration);
+      const { representation } = content;
+      scoreCalculator.addSample(representation, requestDuration, segment.duration);
+    }
   }
 
   const metrics$ = streamEvents$.pipe(

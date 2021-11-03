@@ -117,26 +117,37 @@ export default function extractTimingsInfos(
              scaledSegmentTime: undefined };
   }
 
-  const segmentDuration = segment.duration * initTimescale;
-
-  // we could always make a mistake when reading a container.
-  // If the estimate is too far from what the segment seems to imply, take
-  // the segment infos instead.
-  const maxDecodeTimeDelta = Math.min(initTimescale * 0.9,
-                                      segmentDuration / 4);
-
   const trunDuration = getDurationFromTrun(data);
   const scaledSegmentTime = segment.privateInfos?.smoothMediaSegment !== undefined ?
     segment.privateInfos.smoothMediaSegment.time :
     Math.round(segment.time * initTimescale);
-  if (trunDuration !== undefined &&
-      Math.abs(trunDuration - segmentDuration) <= maxDecodeTimeDelta)
-  {
-    chunkInfos = { time: segment.time,
-                   duration: trunDuration / initTimescale };
+
+  const segmentDuration = segment.duration !== undefined ?
+    segment.duration * initTimescale :
+    undefined;
+  if (segmentDuration === undefined) {
+    chunkInfos = {
+      time: segment.time,
+      duration: trunDuration !== undefined ?
+        trunDuration / initTimescale :
+        undefined,
+    };
   } else {
-    chunkInfos = { time: segment.time,
-                   duration: segment.duration };
+    // we could always make a mistake when reading a container.
+    // If the estimate is too far from what the segment seems to imply, take
+    // the segment infos instead.
+    const maxDecodeTimeDelta = Math.min(initTimescale * 0.9,
+                                        segmentDuration / 4);
+
+    if (trunDuration !== undefined &&
+        Math.abs(trunDuration - segmentDuration) <= maxDecodeTimeDelta)
+    {
+      chunkInfos = { time: segment.time,
+                     duration: trunDuration / initTimescale };
+    } else {
+      chunkInfos = { time: segment.time,
+                     duration: segment.duration };
+    }
   }
   return { nextSegments, chunkInfos, scaledSegmentTime };
 }

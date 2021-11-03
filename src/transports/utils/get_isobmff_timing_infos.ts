@@ -57,21 +57,27 @@ export default function getISOBMFFTimingInfos(
   }
 
   let duration : number | undefined;
-  const segmentDuration = segment.duration * initTimescale;
+  const segmentDuration = segment.duration !== undefined ?
+    segment.duration * initTimescale :
+    undefined;
 
-  // we could always make a mistake when reading a container.
-  // If the estimate is too far from what the segment seems to imply, take
-  // the segment infos instead.
-  const maxDecodeTimeDelta = Math.min(initTimescale * 0.9,
-                                      segmentDuration / 4);
-
-  if (trunDuration !== undefined &&
-      Math.abs(trunDuration - segmentDuration) <= maxDecodeTimeDelta)
-  {
+  if (segmentDuration === undefined) {
     duration = trunDuration;
+  } else {
+    // we could always make a mistake when reading a container.
+    // If the estimate is too far from what the segment seems to imply, take
+    // the segment infos instead.
+    const maxDecodeTimeDelta = Math.min(initTimescale * 0.9,
+                                        segmentDuration / 4);
+
+    if (trunDuration !== undefined &&
+        Math.abs(trunDuration - segmentDuration) <= maxDecodeTimeDelta)
+    {
+      duration = trunDuration;
+    }
   }
 
   return { time: startTime / initTimescale,
            duration: duration !== undefined ? duration / initTimescale :
-                                              duration };
+                                              undefined };
 }
