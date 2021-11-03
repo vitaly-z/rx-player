@@ -18,7 +18,6 @@ import config from "../../config";
 import log from "../../log";
 import { Representation } from "../../manifest";
 import arrayFind from "../../utils/array_find";
-import arrayFindIndex from "../../utils/array_find_index";
 import BandwidthEstimator from "./bandwidth_estimator";
 import {
   IPendingRequestStoreProgress,
@@ -52,7 +51,8 @@ interface IPlaybackConditionsInfo {
 
 /**
  * Get pending segment request(s) starting with the asked segment position.
- * @param {Object} requests
+ * @param {Object} requests - Every requests pending, in a chronological
+ * order in terms of segment time.
  * @param {number} position
  * @returns {Array.<Object>}
  */
@@ -61,15 +61,25 @@ function getConcernedRequests(
   neededPosition : number
 ) : IRequestInfo[] {
   /** Index of the request for the next needed segment, in `requests`. */
-  const nextSegmentIndex = arrayFindIndex(requests, (request) => {
-    const { content } = request;
+  let nextSegmentIndex = -1;
+  for (let i = 0; i < requests.length; i++) {
+    const { content } = requests[i];
     if (content.segment.duration <= 0) {
-      return false;
+      continue;
     }
-    const segmentEnd = content.segment.time + content.segment.duration;
-    return segmentEnd > neededPosition &&
-           neededPosition - content.segment.time > -1.2;
-  });
+    const { segment } = content;
+    const segmentEnd = segment.time + segment.duration;
+    if (!segment.complete) {
+      if (i === requests.length - 1 && neededPosition - segment.time > -1.2) {
+        nextSegmentIndex = i;
+        break;
+      }
+    }
+    if (segmentEnd > neededPosition && neededPosition - segment.time > -1.2) {
+      nextSegmentIndex = i;
+      break;
+    }
+  }
 
   if (nextSegmentIndex < 0) { // Not found
     return [];
@@ -134,10 +144,14 @@ function estimateRemainingTime(
  * Check if the request for the most needed segment is too slow.
  * If that's the case, re-calculate the bandwidth urgently based on
  * this single request.
- * @param {Object} pendingRequests - Current pending requests.
+ * @param {Object} pendingRequests - Every requests pending, in a chronological
+ * order in terms of segment time.
  * @param {Object} playbackInfo - Information on the current playback.
  * @param {Object|null} currentRepresentation - The Representation being
  * presently being loaded.
+ * @param {boolean} lowLatencyMode - If `true`, we're playing the content as a
+ * low latency content - where requests might be pending when the segment is
+ * still encoded.
  * @param {Number} lastEstimatedBitrate - Last bitrate estimate emitted.
  * @returns {Number|undefined}
  */
@@ -145,8 +159,13 @@ function estimateStarvationModeBitrate(
   pendingRequests : IRequestInfo[],
   playbackInfo : IPlaybackConditionsInfo,
   currentRepresentation : Representation | null,
+  lowLatencyMode : boolean,
   lastEstimatedBitrate : number|undefined
 ) : number|undefined {
+  if (lowLatencyMode) {
+    // TODO Skip only for newer segments?
+    return undefined;
+  }
   const { bufferGap, speed, position } = playbackInfo;
   const realBufferGap = isFinite(bufferGap) ? bufferGap :
                                               0;
@@ -159,7 +178,6 @@ function estimateStarvationModeBitrate(
   }
 
   const concernedRequest = concernedRequests[0];
-  const chunkDuration = concernedRequest.content.segment.duration;
   const now = performance.now();
   const lastProgressEvent = concernedRequest.progress.length > 0 ?
     concernedRequest.progress[concernedRequest.progress.length - 1] :
@@ -183,6 +201,11 @@ function estimateStarvationModeBitrate(
     }
   }
 
+  if (!concernedRequest.content.segment.complete) {
+    return undefined;
+  }
+
+  const chunkDuration = concernedRequest.content.segment.duration;
   const requestElapsedTime = (now - concernedRequest.requestTimestamp) / 1000;
   const reasonableElapsedTime = requestElapsedTime <=
     ((chunkDuration * 1.5 + 2) / speed);
@@ -205,17 +228,22 @@ function estimateStarvationModeBitrate(
  * switch immediately if a lower bitrate is more adapted.
  * Returns false if it estimates that you have time before switching to a lower
  * bitrate.
- * @param {Object} playbackInfo
+ * @param {Object} playbackInfo - Information on the current playback.
  * @param {Object} requests - Every requests pending, in a chronological
  * order in terms of segment time.
- * @param {number} abrStarvationGap - "Buffer gap" from which we enter a
- * "starvation mode".
+ * @param {boolean} lowLatencyMode - If `true`, we're playing the content as a
+ * low latency content, as close to the live edge as possible.
  * @returns {boolean}
  */
 function shouldDirectlySwitchToLowBitrate(
   playbackInfo : IPlaybackConditionsInfo,
-  requests : IRequestInfo[]
+  requests : IRequestInfo[],
+  lowLatencyMode : boolean
 ) : boolean {
+  if (lowLatencyMode) {
+    // TODO only when playing close to the live edge?
+    return true;
+  }
   const realBufferGap = isFinite(playbackInfo.bufferGap) ? playbackInfo.bufferGap :
                                                            0;
   const nextNeededPosition = playbackInfo.position + realBufferGap;
@@ -253,6 +281,7 @@ function shouldDirectlySwitchToLowBitrate(
  * @class NetworkAnalyzer
  */
 export default class NetworkAnalyzer {
+  private _lowLatencyMode : boolean;
   private _inStarvationMode : boolean;
   private _initialBitrate : number;
   private _config : { starvationGap : number;
@@ -263,6 +292,7 @@ export default class NetworkAnalyzer {
   constructor(initialBitrate: number, lowLatencyMode: boolean) {
     this._initialBitrate = initialBitrate;
     this._inStarvationMode = false;
+    this._lowLatencyMode = lowLatencyMode;
     if (lowLatencyMode) {
       this._config = { starvationGap: ABR_STARVATION_GAP.LOW_LATENCY,
                        outOfStarvationGap: OUT_OF_STARVATION_GAP.LOW_LATENCY,
@@ -280,11 +310,16 @@ export default class NetworkAnalyzer {
    * Gives an estimate of the current bandwidth and of the bitrate that should
    * be considered for chosing a `representation`.
    * This estimate is only based on network metrics.
-   * @param {Object} playbackInfo - Gives current information about playback
-   * @param {Object} bandwidthEstimator
-   * @param {Object|null} currentRepresentation
-   * @param {Array.<Object>} currentRequests
-   * @param {number|undefined} lastEstimatedBitrate
+   * @param {Object} playbackInfo - Gives current information about playback.
+   * @param {Object} bandwidthEstimator - `BandwidthEstimator` allowing to
+   * produce network bandwidth estimates.
+   * @param {Object|null} currentRepresentation - The Representation currently
+   * chosen.
+   * `null` if no Representation has been chosen yet.
+   * @param {Array.<Object>} currentRequests - All segment requests by segment's
+   * start chronological order
+   * @param {number|undefined} lastEstimatedBitrate - Bitrate emitted during the
+   * last estimate.
    * @returns {Object}
    */
   public getBandwidthEstimate(
@@ -326,6 +361,7 @@ export default class NetworkAnalyzer {
       bandwidthEstimate = estimateStarvationModeBitrate(currentRequests,
                                                         playbackInfo,
                                                         currentRepresentation,
+                                                        this._lowLatencyMode,
                                                         lastEstimatedBitrate);
 
       if (bandwidthEstimate != null) {
@@ -363,8 +399,12 @@ export default class NetworkAnalyzer {
 
   /**
    * For a given wanted bitrate, tells if should switch urgently.
-   * @param {number} bitrate
-   * @param {Object} playbackInfo
+   * @param {number} bitrate - The new estimated bitrate.
+   * @param {Object|null} currentRepresentation - The Representation being
+   * presently being loaded.
+   * @param {Array.<Object>} currentRequests - All segment requests by segment's
+   * start chronological order
+   * @param {Object} playbackInfo - Information on the current playback.
    * @returns {boolean}
    */
   public isUrgent(
@@ -380,6 +420,8 @@ export default class NetworkAnalyzer {
     } else if (bitrate > currentRepresentation.bitrate) {
       return !this._inStarvationMode;
     }
-    return shouldDirectlySwitchToLowBitrate(playbackInfo, currentRequests);
+    return shouldDirectlySwitchToLowBitrate(playbackInfo,
+                                            currentRequests,
+                                            this._lowLatencyMode);
   }
 }

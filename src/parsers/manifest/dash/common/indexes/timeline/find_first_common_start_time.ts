@@ -96,6 +96,7 @@ export default function findFirstCommonStartTime(
     let newElt = newElements[0];
     let currentTimeOffset = newInitialStart;
     while (true) {
+      // XXX TODO check file
       const dAttr = newElt.getAttribute("d");
       const duration = dAttr === null ? null :
                                         parseInt(dAttr, 10);

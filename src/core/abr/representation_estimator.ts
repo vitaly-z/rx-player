@@ -415,11 +415,10 @@ export default function RepresentationEstimator({
     bandwidthEstimator.addSample(duration, size);
 
     const { segment } = content;
-    if (!segment.isInit) {
+    if (!segment.isInit && segment.complete) {
       // calculate "maintainability score"
       const requestDuration = duration / 1000;
       const segmentDuration = segment.duration;
-
       const { representation } = content;
       scoreCalculator.addSample(representation, requestDuration, segmentDuration);
     }

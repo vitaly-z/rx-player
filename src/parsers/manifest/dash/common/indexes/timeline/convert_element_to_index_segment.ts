@@ -15,6 +15,7 @@
  */
 
 import log from "../../../../../../log";
+import isNullOrUndefined from "../../../../../../utils/is_null_or_undefined";
 import { IIndexSegment } from "../../../../utils/index_helpers";
 
 /**
@@ -37,13 +38,14 @@ export default function convertElementsToIndexSegment(
   nextItem : { start? : number; repeatCount? : number; duration? : number }|null,
   timelineStart : number
 ) : IIndexSegment|null {
+  // XXX TODO
   let start = item.start;
   let duration = item.duration;
   const repeatCount = item.repeatCount;
   if (start == null) {
     if (previousItem == null) {
       start = timelineStart;
-    } else if (previousItem.duration != null) {
+    } else if (!isNullOrUndefined(previousItem.duration)) {
       start = previousItem.start +
               (previousItem.duration * (previousItem.repeatCount + 1));
     }

@@ -51,8 +51,10 @@ function getWantedRepeatIndex(
  * @param {number|undefined} maximumTime
  * @returns {Array.<Object>}
  */
+// XXX TODO
 export default function getSegmentsFromTimeline(
-  index : { mediaURLs : string[] | null;
+  index : { availabilityTimeComplete? : boolean;
+            mediaURLs : string[] | null;
             startNumber? : number;
             timeline : IIndexSegment[];
             timescale : number;
@@ -85,6 +87,9 @@ export default function getSegmentsFromTimeline(
     maxEncounteredDuration = Math.max(maxEncounteredDuration, duration);
 
     const repeat = calculateRepeat(timelineItem, timeline[i + 1], maximumTime);
+    const complete = index.availabilityTimeComplete !== false ||
+                     i !== timelineLength - 1 &&
+                     repeat !== 0;
     let segmentNumberInCurrentRange = getWantedRepeatIndex(start, duration, scaledUp);
     let segmentTime = start + segmentNumberInCurrentRange * duration;
     while (segmentTime < scaledTo && segmentNumberInCurrentRange <= repeat) {
@@ -106,6 +111,7 @@ export default function getSegmentsFromTimeline(
                         mediaURLs: detokenizedURLs,
                         number: segmentNumber,
                         timestampOffset: -(index.indexTimeOffset / timescale),
+                        complete,
                         privateInfos: { isEMSGWhitelisted } };
       segments.push(segment);
 
