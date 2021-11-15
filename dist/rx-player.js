@@ -49926,359 +49926,6 @@ function takeWhile(predicate, inclusive) {
     });
 }
 //# sourceMappingURL=takeWhile.js.map
-;// CONCATENATED MODULE: ./src/core/stream/representation/downloading_queue.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-/**
- * Class scheduling segment downloads for a single Representation.
- * @class DownloadingQueue
- */
-
-var DownloadingQueue = /*#__PURE__*/function () {
-  /**
-   * Create a new `DownloadingQueue`.
-   *
-   * @param {Object} content - The context of the Representation you want to
-   * load segments for.
-   * @param {BehaviorSubject} downloadQueue$ - Emit the queue of segments you
-   * want to load.
-   * @param {Object} segmentFetcher - Interface to facilitate the download of
-   * segments.
-   * @param {boolean} hasInitSegment - Declare that an initialization segment
-   * will need to be downloaded.
-   *
-   * A `DownloadingQueue` ALWAYS wait for the initialization segment to be
-   * loaded and parsed before parsing a media segment.
-   *
-   * In cases where no initialization segment exist, this would lead to the
-   * `DownloadingQueue` waiting indefinitely for it.
-   *
-   * By setting that value to `false`, you anounce to the `DownloadingQueue`
-   * that it should not wait for an initialization segment before parsing a
-   * media segment.
-   */
-  function DownloadingQueue(content, downloadQueue$, segmentFetcher, hasInitSegment) {
-    this._content = content;
-    this._currentObs$ = null;
-    this._downloadQueue$ = downloadQueue$;
-    this._initSegmentRequest = null;
-    this._mediaSegmentRequest = null;
-    this._segmentFetcher = segmentFetcher;
-    this._initSegmentMetadata$ = new ReplaySubject/* ReplaySubject */.t(1);
-    this._mediaSegmentsAwaitingInitMetadata = new Set();
-
-    if (!hasInitSegment) {
-      this._initSegmentMetadata$.next(undefined);
-    }
-  }
-  /**
-   * Returns the initialization segment currently being requested.
-   * Returns `null` if no initialization segment request is pending.
-   * @returns {Object}
-   */
-
-
-  var _proto = DownloadingQueue.prototype;
-
-  _proto.getRequestedInitSegment = function getRequestedInitSegment() {
-    return this._initSegmentRequest === null ? null : this._initSegmentRequest.segment;
-  }
-  /**
-   * Returns the media segment currently being requested.
-   * Returns `null` if no media segment request is pending.
-   * @returns {Object}
-   */
-  ;
-
-  _proto.getRequestedMediaSegment = function getRequestedMediaSegment() {
-    return this._mediaSegmentRequest === null ? null : this._mediaSegmentRequest.segment;
-  }
-  /**
-   * Start the current downloading queue, emitting events as it loads and parses
-   * initialization and media segments.
-   *
-   * If it was already started, returns the same - shared - Observable.
-   * @returns {Observable}
-   */
-  ;
-
-  _proto.start = function start() {
-    var _this = this;
-
-    if (this._currentObs$ !== null) {
-      return this._currentObs$;
-    }
-
-    var obs = (0,defer/* defer */.P)(function () {
-      var mediaQueue$ = _this._downloadQueue$.pipe((0,filter/* filter */.h)(function (_ref) {
-        var segmentQueue = _ref.segmentQueue;
-        // First, the first elements of the segmentQueue might be already
-        // loaded but awaiting the initialization segment to be parsed.
-        // Filter those out.
-        var nextSegmentToLoadIdx = 0;
-
-        for (; nextSegmentToLoadIdx < segmentQueue.length; nextSegmentToLoadIdx++) {
-          var nextSegment = segmentQueue[nextSegmentToLoadIdx].segment;
-
-          if (!_this._mediaSegmentsAwaitingInitMetadata.has(nextSegment.id)) {
-            break;
-          }
-        }
-
-        var currentSegmentRequest = _this._mediaSegmentRequest;
-
-        if (nextSegmentToLoadIdx >= segmentQueue.length) {
-          return currentSegmentRequest !== null;
-        } else if (currentSegmentRequest === null) {
-          return true;
-        }
-
-        var nextItem = segmentQueue[nextSegmentToLoadIdx];
-
-        if (currentSegmentRequest.segment.id !== nextItem.segment.id) {
-          return true;
-        }
-
-        if (currentSegmentRequest.priority !== nextItem.priority) {
-          _this._segmentFetcher.updatePriority(currentSegmentRequest.request$, nextItem.priority);
-        }
-
-        return false;
-      }), (0,switchMap/* switchMap */.w)(function (_ref2) {
-        var segmentQueue = _ref2.segmentQueue;
-        return segmentQueue.length > 0 ? _this._requestMediaSegments() : empty/* EMPTY */.E;
-      }));
-
-      var initSegmentPush$ = _this._downloadQueue$.pipe((0,filter/* filter */.h)(function (next) {
-        var initSegmentRequest = _this._initSegmentRequest;
-
-        if (next.initSegment !== null && initSegmentRequest !== null) {
-          if (next.initSegment.priority !== initSegmentRequest.priority) {
-            _this._segmentFetcher.updatePriority(initSegmentRequest.request$, next.initSegment.priority);
-          }
-
-          return false;
-        } else {
-          return next.initSegment === null || initSegmentRequest === null;
-        }
-      }), (0,switchMap/* switchMap */.w)(function (nextQueue) {
-        if (nextQueue.initSegment === null) {
-          return empty/* EMPTY */.E;
-        }
-
-        return _this._requestInitSegment(nextQueue.initSegment);
-      }));
-
-      return (0,merge/* merge */.T)(initSegmentPush$, mediaQueue$);
-    }).pipe((0,share/* share */.B)());
-    this._currentObs$ = obs;
-    return obs;
-  }
-  /**
-   * Internal logic performing media segment requests.
-   * @returns {Observable}
-   */
-  ;
-
-  _proto._requestMediaSegments = function _requestMediaSegments() {
-    var _this2 = this;
-
-    var _this$_downloadQueue$ = this._downloadQueue$.getValue(),
-        segmentQueue = _this$_downloadQueue$.segmentQueue;
-
-    var currentNeededSegment = segmentQueue[0];
-
-    var recursivelyRequestSegments = function recursivelyRequestSegments(startingSegment) {
-      if (startingSegment === undefined) {
-        return (0,of.of)({
-          type: "end-of-queue",
-          value: null
-        });
-      }
-
-      var segment = startingSegment.segment,
-          priority = startingSegment.priority;
-      var context = (0,object_assign/* default */.Z)({
-        segment: segment
-      }, _this2._content);
-
-      var request$ = _this2._segmentFetcher.createRequest(context, priority);
-
-      _this2._mediaSegmentRequest = {
-        segment: segment,
-        priority: priority,
-        request$: request$
-      };
-      return request$.pipe((0,mergeMap/* mergeMap */.z)(function (evt) {
-        switch (evt.type) {
-          case "warning":
-            return (0,of.of)({
-              type: "retry",
-              value: {
-                segment: segment,
-                error: evt.value
-              }
-            });
-
-          case "interrupted":
-            log/* default.info */.Z.info("Stream: segment request interrupted temporarly.", segment);
-            return empty/* EMPTY */.E;
-
-          case "ended":
-            _this2._mediaSegmentRequest = null;
-
-            var lastQueue = _this2._downloadQueue$.getValue().segmentQueue;
-
-            if (lastQueue.length === 0) {
-              return (0,of.of)({
-                type: "end-of-queue",
-                value: null
-              });
-            } else if (lastQueue[0].segment.id === segment.id) {
-              lastQueue.shift();
-            }
-
-            return recursivelyRequestSegments(lastQueue[0]);
-
-          case "chunk":
-          case "chunk-complete":
-            _this2._mediaSegmentsAwaitingInitMetadata.add(segment.id);
-
-            return _this2._initSegmentMetadata$.pipe((0,take/* take */.q)(1), (0,map/* map */.U)(function (initTimescale) {
-              if (evt.type === "chunk-complete") {
-                return {
-                  type: "end-of-segment",
-                  value: {
-                    segment: segment
-                  }
-                };
-              }
-
-              var parsed = evt.parse(initTimescale);
-              (0,assert/* default */.Z)(parsed.segmentType === "media", "Should have loaded a media segment.");
-              return (0,object_assign/* default */.Z)({}, parsed, {
-                type: "parsed-media",
-                segment: segment
-              });
-            }), finalize(function () {
-              _this2._mediaSegmentsAwaitingInitMetadata["delete"](segment.id);
-            }));
-
-          default:
-            (0,assert_unreachable/* default */.Z)(evt);
-        }
-      }));
-    };
-
-    return (0,defer/* defer */.P)(function () {
-      return recursivelyRequestSegments(currentNeededSegment);
-    }).pipe(finalize(function () {
-      _this2._mediaSegmentRequest = null;
-    }));
-  }
-  /**
-   * Internal logic performing initialization segment requests.
-   * @param {Object} queuedInitSegment
-   * @returns {Observable}
-   */
-  ;
-
-  _proto._requestInitSegment = function _requestInitSegment(queuedInitSegment) {
-    var _this3 = this;
-
-    if (queuedInitSegment === null) {
-      this._initSegmentRequest = null;
-      return empty/* EMPTY */.E;
-    }
-
-    var segment = queuedInitSegment.segment,
-        priority = queuedInitSegment.priority;
-    var context = (0,object_assign/* default */.Z)({
-      segment: segment
-    }, this._content);
-
-    var request$ = this._segmentFetcher.createRequest(context, priority);
-
-    this._initSegmentRequest = {
-      segment: segment,
-      priority: priority,
-      request$: request$
-    };
-    return request$.pipe((0,mergeMap/* mergeMap */.z)(function (evt) {
-      switch (evt.type) {
-        case "warning":
-          return (0,of.of)({
-            type: "retry",
-            value: {
-              segment: segment,
-              error: evt.value
-            }
-          });
-
-        case "interrupted":
-          log/* default.info */.Z.info("Stream: init segment request interrupted temporarly.", segment);
-          return empty/* EMPTY */.E;
-
-        case "chunk":
-          var parsed = evt.parse(undefined);
-          (0,assert/* default */.Z)(parsed.segmentType === "init", "Should have loaded an init segment.");
-          return (0,concat/* concat */.z)((0,of.of)((0,object_assign/* default */.Z)({}, parsed, {
-            type: "parsed-init",
-            segment: segment
-          })), // We want to emit parsing information strictly AFTER the
-          // initialization segment is emitted. Hence why we perform this
-          // side-effect a posteriori in a concat operator
-          (0,defer/* defer */.P)(function () {
-            if (parsed.segmentType === "init") {
-              _this3._initSegmentMetadata$.next(parsed.initTimescale);
-            }
-
-            return empty/* EMPTY */.E;
-          }));
-
-        case "chunk-complete":
-          return (0,of.of)({
-            type: "end-of-segment",
-            value: {
-              segment: segment
-            }
-          });
-
-        case "ended":
-          return empty/* EMPTY */.E;
-        // Do nothing, just here to check every case
-
-        default:
-          (0,assert_unreachable/* default */.Z)(evt);
-      }
-    })).pipe(finalize(function () {
-      _this3._initSegmentRequest = null;
-    }));
-  };
-
-  return DownloadingQueue;
-}();
-
-
 ;// CONCATENATED MODULE: ./src/core/stream/representation/check_for_discontinuity.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -51492,7 +51139,6 @@ function pushMediaSegment(_ref) {
 
 
 
-
 /**
  * Build up buffer for a single Representation.
  *
@@ -51513,64 +51159,41 @@ function RepresentationStream(_ref) {
       segmentFetcher = _ref.segmentFetcher,
       terminate$ = _ref.terminate$,
       options = _ref.options;
-  var period = content.period,
+  var manifest = content.manifest,
+      period = content.period,
       adaptation = content.adaptation,
       representation = content.representation;
   var bufferGoal$ = options.bufferGoal$,
       drmSystemId = options.drmSystemId,
       fastSwitchThreshold$ = options.fastSwitchThreshold$;
   var bufferType = adaptation.type;
-  /** Saved initialization segment state for this representation. */
-
-  var initSegmentState = {
-    segment: representation.index.getInitSegment(),
-    segmentData: null,
-    isLoaded: false
-  };
-  /** Allows to manually re-check which segments are needed. */
-
-  var reCheckNeededSegments$ = new Subject/* Subject */.x();
-  /** Emit the last scheduled downloading queue for segments. */
-
-  var lastSegmentQueue$ = new BehaviorSubject({
-    initSegment: null,
-    segmentQueue: []
-  });
-  var hasInitSegment = initSegmentState.segment !== null;
-  /** Will load every segments in `lastSegmentQueue$` */
-
-  var downloadingQueue = new DownloadingQueue(content, lastSegmentQueue$, segmentFetcher, hasInitSegment);
-
-  if (!hasInitSegment) {
-    initSegmentState.segmentData = null;
-    initSegmentState.isLoaded = true;
-  }
+  var initSegment = representation.index.getInitSegment();
   /**
-   * `true` if the event notifying about encryption data has already been
-   * constructed.
-   * Allows to avoid sending multiple times protection events.
+   * Saved initialization segment state for this representation.
+   * `null` if the initialization segment hasn't been loaded yet.
    */
 
+  var initSegmentObject = initSegment === null ? {
+    segmentType: "init",
+    initializationData: null,
+    protectionDataUpdate: false,
+    initTimescale: undefined
+  } : null;
+  /** Segments queued for download in this RepresentationStream. */
 
-  var hasSentEncryptionData = false;
-  var encryptionEvent$ = empty/* EMPTY */.E;
+  var downloadQueue = [];
+  /** Emit to start/restart a downloading Queue. */
 
-  if (drmSystemId !== undefined) {
-    var encryptionData = representation.getEncryptionData(drmSystemId);
+  var startDownloadingQueue$ = new ReplaySubject/* ReplaySubject */.t(1);
+  /** Emit when the RepresentationStream asks to re-check which segments are needed. */
 
-    if (encryptionData.length > 0) {
-      encryptionEvent$ = of.of.apply(void 0, encryptionData.map(function (d) {
-        return stream_events_generators/* default.encryptionDataEncountered */.Z.encryptionDataEncountered(d);
-      }));
-      hasSentEncryptionData = true;
-    }
-  }
-  /** Observable loading and pushing segments scheduled through `lastSegmentQueue$`. */
+  var reCheckNeededSegments$ = new Subject/* Subject */.x();
+  /**
+   * Keep track of the information about the pending segment request.
+   * `null` if no segment request is pending in that RepresentationStream.
+   */
 
-
-  var queue$ = downloadingQueue.start().pipe((0,mergeMap/* mergeMap */.z)(onQueueEvent));
-  /** Observable emitting the stream "status" and filling `lastSegmentQueue$`. */
-
+  var currentSegmentRequest = null;
   var status$ = (0,combineLatest/* combineLatest */.a)([clock$, bufferGoal$, terminate$.pipe((0,take/* take */.q)(1), (0,startWith/* startWith */.O)(null)), reCheckNeededSegments$.pipe((0,startWith/* startWith */.O)(undefined))]).pipe((0,withLatestFrom/* withLatestFrom */.M)(fastSwitchThreshold$), (0,mergeMap/* mergeMap */.z)(function (_ref2) {
     var _ref2$ = _ref2[0],
         tick = _ref2$[0],
@@ -51578,61 +51201,81 @@ function RepresentationStream(_ref) {
         terminate = _ref2$[2],
         fastSwitchThreshold = _ref2[1];
     var status = getBufferStatus(content, tick, fastSwitchThreshold, bufferGoal, segmentBuffer);
-    var neededSegments = status.neededSegments;
-    var neededInitSegment = null; // Add initialization segment if required
+    var neededSegments = status.neededSegments; // Add initialization segment if required
 
     if (!representation.index.isInitialized()) {
-      if (initSegmentState.segment === null) {
+      if (initSegment === null) {
         log/* default.warn */.Z.warn("Stream: Uninitialized index without an initialization segment");
-      } else if (initSegmentState.isLoaded) {
+      } else if (initSegmentObject !== null) {
         log/* default.warn */.Z.warn("Stream: Uninitialized index with an already loaded " + "initialization segment");
       } else {
-        neededInitSegment = {
-          segment: initSegmentState.segment,
+        neededSegments.unshift({
+          segment: initSegment,
           priority: getSegmentPriority(period.start, tick)
-        };
+        });
       }
-    } else if (neededSegments.length > 0 && !initSegmentState.isLoaded && initSegmentState.segment !== null) {
+    } else if (neededSegments.length > 0 && initSegment !== null && initSegmentObject === null) {
+      // prepend initialization segment
       var initSegmentPriority = neededSegments[0].priority;
-      neededInitSegment = {
-        segment: initSegmentState.segment,
+      neededSegments.unshift({
+        segment: initSegment,
         priority: initSegmentPriority
-      };
+      });
     }
 
-    if (terminate === null) {
-      lastSegmentQueue$.next({
-        initSegment: neededInitSegment,
-        segmentQueue: neededSegments
-      });
-    } else if (terminate.urgent) {
-      log/* default.debug */.Z.debug("Stream: Urgent switch, terminate now.", bufferType);
-      lastSegmentQueue$.next({
-        initSegment: null,
-        segmentQueue: []
-      });
-      lastSegmentQueue$.complete();
-      return (0,of.of)(stream_events_generators/* default.streamTerminating */.Z.streamTerminating());
-    } else {
-      // Non-urgent termination wanted:
-      // End the download of the current media segment if pending and
-      // terminate once either that request is finished or another segment
-      // is wanted instead, whichever comes first.
-      var mostNeededSegment = neededSegments[0];
-      var initSegmentRequest = downloadingQueue.getRequestedInitSegment();
-      var currentSegmentRequest = downloadingQueue.getRequestedMediaSegment();
-      var nextQueue = currentSegmentRequest === null || mostNeededSegment === undefined || currentSegmentRequest.id !== mostNeededSegment.segment.id ? [] : [mostNeededSegment];
-      var nextInit = initSegmentRequest === null ? null : neededInitSegment;
-      lastSegmentQueue$.next({
-        initSegment: nextInit,
-        segmentQueue: nextQueue
-      });
+    var mostNeededSegment = neededSegments[0];
 
-      if (nextQueue.length === 0 && nextInit === null) {
-        log/* default.debug */.Z.debug("Stream: No request left, terminate", bufferType);
-        lastSegmentQueue$.complete();
+    if (terminate !== null) {
+      downloadQueue = [];
+
+      if (terminate.urgent) {
+        log/* default.debug */.Z.debug("Stream: urgent termination request, terminate.", bufferType);
+        startDownloadingQueue$.next(); // interrupt current requests
+
+        startDownloadingQueue$.complete(); // complete the downloading queue
+
         return (0,of.of)(stream_events_generators/* default.streamTerminating */.Z.streamTerminating());
+      } else if (currentSegmentRequest === null || mostNeededSegment === undefined || currentSegmentRequest.segment.id !== mostNeededSegment.segment.id) {
+        log/* default.debug */.Z.debug("Stream: cancel request and terminate.", currentSegmentRequest === null, bufferType);
+        startDownloadingQueue$.next(); // interrupt the current request
+
+        startDownloadingQueue$.complete(); // complete the downloading queue
+
+        return (0,of.of)(stream_events_generators/* default.streamTerminating */.Z.streamTerminating());
+      } else if (currentSegmentRequest.priority !== mostNeededSegment.priority) {
+        var _currentSegmentReques = currentSegmentRequest,
+            request$ = _currentSegmentReques.request$;
+        currentSegmentRequest.priority = mostNeededSegment.priority;
+        segmentFetcher.updatePriority(request$, mostNeededSegment.priority);
       }
+
+      log/* default.debug */.Z.debug("Stream: terminate after request.", bufferType);
+    } else if (mostNeededSegment === undefined) {
+      if (currentSegmentRequest !== null) {
+        log/* default.debug */.Z.debug("Stream: interrupt segment request.", bufferType);
+      }
+
+      downloadQueue = [];
+      startDownloadingQueue$.next(); // (re-)start with an empty queue
+    } else if (currentSegmentRequest === null) {
+      log/* default.debug */.Z.debug("Stream: start downloading queue.", bufferType);
+      downloadQueue = neededSegments;
+      startDownloadingQueue$.next(); // restart the queue
+    } else if (currentSegmentRequest.segment.id !== mostNeededSegment.segment.id) {
+      log/* default.debug */.Z.debug("Stream: restart download queue.", bufferType);
+      downloadQueue = neededSegments;
+      startDownloadingQueue$.next(); // restart the queue
+    } else if (currentSegmentRequest.priority !== mostNeededSegment.priority) {
+      log/* default.debug */.Z.debug("Stream: update request priority.", bufferType);
+      var _currentSegmentReques2 = currentSegmentRequest,
+          _request$ = _currentSegmentReques2.request$;
+      currentSegmentRequest.priority = mostNeededSegment.priority;
+      segmentFetcher.updatePriority(_request$, mostNeededSegment.priority);
+    } else {
+      log/* default.debug */.Z.debug("Stream: update downloading queue", bufferType); // Update the previous queue to be all needed segments but the first one,
+      // for which a request is already pending
+
+      downloadQueue = neededSegments.slice().splice(1, neededSegments.length);
     }
 
     var bufferStatusEvt = (0,of.of)({
@@ -51650,47 +51293,154 @@ function RepresentationStream(_ref) {
   }), takeWhile(function (e) {
     return e.type !== "stream-terminating";
   }, true));
-  return (0,merge/* merge */.T)(status$, queue$, encryptionEvent$).pipe((0,share/* share */.B)());
   /**
-   * React to event from the `DownloadingQueue`.
+   * `true` if the event notifying about encryption data has already been
+   * constructed.
+   * Allows to avoid sending multiple times protection events.
+   */
+
+  var hasSentEncryptionData = false;
+  var encryptionEvent$ = empty/* EMPTY */.E;
+
+  if (drmSystemId !== undefined) {
+    var encryptionData = representation.getEncryptionData(drmSystemId);
+
+    if (encryptionData.length > 0) {
+      encryptionEvent$ = of.of.apply(void 0, encryptionData.map(function (d) {
+        return stream_events_generators/* default.encryptionDataEncountered */.Z.encryptionDataEncountered(d);
+      }));
+      hasSentEncryptionData = true;
+    }
+  }
+  /**
+   * Stream Queue:
+   *   - download every segments queued sequentially
+   *   - when a segment is loaded, append it to the SegmentBuffer
+   */
+
+
+  var streamQueue$ = startDownloadingQueue$.pipe((0,switchMap/* switchMap */.w)(function () {
+    return downloadQueue.length > 0 ? loadSegmentsFromQueue() : empty/* EMPTY */.E;
+  }), (0,mergeMap/* mergeMap */.z)(onLoaderEvent));
+  return (0,concat/* concat */.z)(encryptionEvent$, (0,merge/* merge */.T)(status$, streamQueue$).pipe((0,share/* share */.B)()));
+  /**
+   * Request every Segment in the ``downloadQueue`` on subscription.
+   * Emit the data of a segment when a request succeeded.
+   *
+   * Important side-effects:
+   *   - Mutates `currentSegmentRequest` when doing and finishing a request.
+   *   - Will emit from reCheckNeededSegments$ Subject when it's done.
+   *
+   * Might emit warnings when a request is retried.
+   *
+   * Throws when the request will not be retried (configuration or un-retryable
+   * error).
+   * @returns {Observable}
+   */
+
+  function loadSegmentsFromQueue() {
+    var requestNextSegment$ = (0,defer/* defer */.P)(function () {
+      var currentNeededSegment = downloadQueue.shift();
+
+      if (currentNeededSegment === undefined) {
+        next_tick_default()(function () {
+          reCheckNeededSegments$.next();
+        });
+        return empty/* EMPTY */.E;
+      }
+
+      var segment = currentNeededSegment.segment,
+          priority = currentNeededSegment.priority;
+      var context = {
+        manifest: manifest,
+        period: period,
+        adaptation: adaptation,
+        representation: representation,
+        segment: segment
+      };
+      var request$ = segmentFetcher.createRequest(context, priority);
+      currentSegmentRequest = {
+        segment: segment,
+        priority: priority,
+        request$: request$
+      };
+      return request$.pipe((0,mergeMap/* mergeMap */.z)(function (evt) {
+        switch (evt.type) {
+          case "warning":
+            return (0,of.of)({
+              type: "retry",
+              segment: segment,
+              error: evt.value
+            });
+
+          case "chunk-complete":
+            currentSegmentRequest = null;
+            return (0,of.of)({
+              type: "end-of-segment",
+              segment: segment
+            });
+
+          case "interrupted":
+            log/* default.info */.Z.info("Stream: segment request interrupted temporarly.", segment);
+            return empty/* EMPTY */.E;
+
+          case "chunk":
+            var initTimescale = initSegmentObject === null || initSegmentObject === void 0 ? void 0 : initSegmentObject.initTimescale;
+            var parsed = evt.parse(initTimescale);
+            return (0,of.of)({
+              type: "parsed",
+              segment: segment,
+              payload: parsed
+            });
+
+          case "ended":
+            return requestNextSegment$;
+
+          default:
+            (0,assert_unreachable/* default */.Z)(evt);
+        }
+      }));
+    });
+    return requestNextSegment$.pipe(finalize(function () {
+      currentSegmentRequest = null;
+    }));
+  }
+  /**
+   * React to event from `loadSegmentsFromQueue`.
    * @param {Object} evt
    * @returns {Observable}
    */
 
-  function onQueueEvent(evt) {
+
+  function onLoaderEvent(evt) {
     switch (evt.type) {
       case "retry":
         return (0,concat/* concat */.z)((0,of.of)({
           type: "warning",
-          value: evt.value.error
+          value: evt.error
         }), (0,defer/* defer */.P)(function () {
-          var retriedSegment = evt.value.segment;
+          var retriedSegment = evt.segment;
           var index = representation.index;
 
           if (index.isSegmentStillAvailable(retriedSegment) === false) {
             reCheckNeededSegments$.next();
-          } else if (index.canBeOutOfSyncError(evt.value.error, retriedSegment)) {
+          } else if (index.canBeOutOfSyncError(evt.error, retriedSegment)) {
             return (0,of.of)(stream_events_generators/* default.manifestMightBeOufOfSync */.Z.manifestMightBeOufOfSync());
           }
 
           return empty/* EMPTY */.E; // else, ignore.
         }));
 
-      case "parsed-init":
-      case "parsed-media":
+      case "parsed":
         return onParsedChunk(evt);
 
       case "end-of-segment":
         {
-          var segment = evt.value.segment;
+          var segment = evt.segment;
           return segmentBuffer.endOfSegment((0,object_assign/* default */.Z)({
             segment: segment
           }, content)).pipe((0,ignoreElements/* ignoreElements */.l)());
         }
-
-      case "end-of-queue":
-        reCheckNeededSegments$.next();
-        return empty/* EMPTY */.E;
 
       default:
         (0,assert_unreachable/* default */.Z)(evt);
@@ -51705,12 +51455,12 @@ function RepresentationStream(_ref) {
 
 
   function onParsedChunk(evt) {
-    if (evt.segmentType === "init") {
-      next_tick_default()(function () {
-        reCheckNeededSegments$.next();
-      });
-      initSegmentState.segmentData = evt.initializationData;
-      initSegmentState.isLoaded = true; // Now that the initialization segment has been parsed - which may have
+    var _a;
+
+    var parsed = evt.payload;
+
+    if (parsed.segmentType === "init") {
+      initSegmentObject = parsed; // Now that the initialization segment has been parsed - which may have
       // included encryption information - take care of the encryption event
       // if not already done.
 
@@ -51722,14 +51472,15 @@ function RepresentationStream(_ref) {
         clock$: clock$,
         content: content,
         segment: evt.segment,
-        segmentData: evt.initializationData,
+        segmentData: parsed.initializationData,
         segmentBuffer: segmentBuffer
       });
       return (0,merge/* merge */.T)(initEncEvt$, pushEvent$);
     } else {
-      var inbandEvents = evt.inbandEvents,
-          needsManifestRefresh = evt.needsManifestRefresh,
-          protectionDataUpdate = evt.protectionDataUpdate; // TODO better handle use cases like key rotation by not always grouping
+      var initSegmentData = (_a = initSegmentObject === null || initSegmentObject === void 0 ? void 0 : initSegmentObject.initializationData) !== null && _a !== void 0 ? _a : null;
+      var inbandEvents = parsed.inbandEvents,
+          needsManifestRefresh = parsed.needsManifestRefresh,
+          protectionDataUpdate = parsed.protectionDataUpdate; // TODO better handle use cases like key rotation by not always grouping
       // every protection data together? To check.
 
       var segmentEncryptionEvent$ = protectionDataUpdate && !hasSentEncryptionData ? of.of.apply(void 0, representation.getAllEncryptionData().map(function (p) {
@@ -51740,16 +51491,14 @@ function RepresentationStream(_ref) {
         type: "inband-events",
         value: inbandEvents
       }) : empty/* EMPTY */.E;
-      var initSegmentData = initSegmentState.segmentData;
-      var pushMediaSegment$ = pushMediaSegment({
+      return (0,concat/* concat */.z)(segmentEncryptionEvent$, manifestRefresh$, inbandEvents$, pushMediaSegment({
         clock$: clock$,
         content: content,
         initSegmentData: initSegmentData,
-        parsedSegment: evt,
+        parsedSegment: parsed,
         segment: evt.segment,
         segmentBuffer: segmentBuffer
-      });
-      return (0,concat/* concat */.z)(segmentEncryptionEvent$, manifestRefresh$, inbandEvents$, pushMediaSegment$);
+      }));
     }
   }
 }
