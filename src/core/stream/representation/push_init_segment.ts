@@ -69,9 +69,13 @@ export default function pushInitSegment<T>(
                                          timestampOffset: 0,
                                          appendWindow: [ undefined, undefined ],
                                          codec };
+    const inventoryInfos = Object.assign({ segment,
+                                           start: 0,
+                                           end: 0 },
+                                         content);
     return appendSegmentToBuffer(playbackObserver,
                                  segmentBuffer,
-                                 { data, inventoryInfos: null }).pipe(map(() => {
+                                 { data, inventoryInfos }).pipe(map(() => {
       const buffered = segmentBuffer.getBufferedRanges();
       return EVENTS.addedSegment(content, segment, buffered, segmentData);
     }));
