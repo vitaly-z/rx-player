@@ -26,6 +26,7 @@ import Manifest, {
   Period,
   Representation,
 } from "../../../manifest";
+import objectAssign from "../../../utils/object_assign";
 import {
   IPushedChunkData,
   SegmentBuffer,
@@ -66,8 +67,11 @@ export default function pushInitSegment<T>(
                                          timestampOffset: 0,
                                          appendWindow: [ undefined, undefined ],
                                          codec };
-    return appendSegmentToBuffer(clock$, segmentBuffer, { data,
-                                                          inventoryInfos: null })
+    const inventoryInfos = objectAssign({ segment,
+                                          start: 0,
+                                          end: 0 },
+                                        content);
+    return appendSegmentToBuffer(clock$, segmentBuffer, { data, inventoryInfos })
       .pipe(map(() => {
         const buffered = segmentBuffer.getBufferedRanges();
         return EVENTS.addedSegment(content, segment, buffered, segmentData);
