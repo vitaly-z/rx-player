@@ -359,7 +359,6 @@ if (!is_node/* default */.Z) {
 
 
 
-
 var IE11MediaKeySession = /*#__PURE__*/function (_EventEmitter) {
   (0,inheritsLoose/* default */.Z)(IE11MediaKeySession, _EventEmitter);
 
@@ -616,7 +615,6 @@ var string_parsing = __webpack_require__(3635);
 
 
 
-
 /**
  * Returns true if the given media element has old webkit methods
  * corresponding to the IOldWebkitHTMLMediaElement interface.
@@ -863,7 +861,6 @@ var webkit_media_keys_constructor = __webpack_require__(158);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -1399,18 +1396,6 @@ function never() {
     return NEVER;
 }
 //# sourceMappingURL=never.js.map
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/fromEvent.js
-var fromEvent = __webpack_require__(2401);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
-var merge = __webpack_require__(3071);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/defer.js
-var defer = __webpack_require__(9917);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
-var of = __webpack_require__(2817);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/combineLatest.js + 2 modules
-var combineLatest = __webpack_require__(2334);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/interval.js
-var interval = __webpack_require__(6697);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/scheduler/async.js
 var scheduler_async = __webpack_require__(7991);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
@@ -1517,6 +1502,12 @@ function throttleTime(duration, scheduler, config) {
     return throttle(function () { return duration$; }, config);
 }
 //# sourceMappingURL=throttleTime.js.map
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/fromEvent.js
+var fromEvent = __webpack_require__(2401);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
+var merge = __webpack_require__(3071);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/defer.js
+var defer = __webpack_require__(9917);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/map.js
 var map = __webpack_require__(9127);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/startWith.js
@@ -1525,6 +1516,12 @@ var startWith = __webpack_require__(8430);
 var distinctUntilChanged = __webpack_require__(3741);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/switchMap.js
 var switchMap = __webpack_require__(4978);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
+var of = __webpack_require__(2817);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/combineLatest.js + 2 modules
+var combineLatest = __webpack_require__(2334);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/interval.js
+var interval = __webpack_require__(6697);
 // EXTERNAL MODULE: ./src/config.ts
 var config = __webpack_require__(944);
 // EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
@@ -1554,7 +1551,6 @@ var should_favour_custom_safari_EME = __webpack_require__(5059);
  * This file provides browser-agnostic event listeners under the form of
  * RxJS Observables
  */
-
 
 
 
@@ -2588,17 +2584,12 @@ function shouldValidateMetadata() {
   },
 
   /**
-   * Minimum interval at which timeupdate events will be "constructed". This
+   * Minimum interval at which playback information samples will be taken. This
    * variable is for the "regular" mediasource strategy (that is, not for the
    * directfile API.
    *
-   * Those events are the base of various important mechanisms in the player:
-   *   - set the clock used to regularly check which segments should be loaded
-   *   - set the clock for the ABR strategy.
-   *   - used to trigger positionUpdate events.
-   *
-   * This common logic is for performance reasons, as we call multiple browser's
-   * APIs which are useful for most of these.
+   * At each of these interval, various different modules in the RxPlayer will
+   * run based on the information communicated.
    *
    * Keep in mind this is the minimum interval. This logic will also be
    * triggered when various events of the media element are received.
@@ -4378,20 +4369,12 @@ __webpack_require__.d(__webpack_exports__, {
 
 // UNUSED EXPORTS: clearEMESession, disposeEME, getCurrentKeySystem
 
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/mergeMap.js
+var mergeMap = __webpack_require__(3994);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
 var of = __webpack_require__(2817);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
 var concat = __webpack_require__(6362);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
-var merge = __webpack_require__(3071);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/throwError.js
-var throwError = __webpack_require__(3610);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/ReplaySubject.js
-var ReplaySubject = __webpack_require__(3);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/empty.js
-var empty = __webpack_require__(1545);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/mergeMap.js
-var mergeMap = __webpack_require__(3994);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/shareReplay.js
 var shareReplay = __webpack_require__(8515);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/filter.js
@@ -4400,8 +4383,16 @@ var filter = __webpack_require__(4975);
 var take = __webpack_require__(4727);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/tap.js
 var tap = __webpack_require__(2006);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
+var merge = __webpack_require__(3071);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/map.js
 var map = __webpack_require__(9127);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/throwError.js
+var throwError = __webpack_require__(3610);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/ReplaySubject.js
+var ReplaySubject = __webpack_require__(3);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/empty.js
+var empty = __webpack_require__(1545);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/catchError.js
 var catchError = __webpack_require__(9878);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/ignoreElements.js
@@ -4605,7 +4596,6 @@ var cast_to_observable = __webpack_require__(8117);
 
 
 
-
 /**
  * Modify "initialization data" sent to a `generateKeyRequest` EME call to
  * improve the player's browser compatibility:
@@ -4732,8 +4722,8 @@ var config = __webpack_require__(944);
 var encrypted_media_error = __webpack_require__(5157);
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
 var array_includes = __webpack_require__(7714);
-// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
-var assert_unreachable = __webpack_require__(8418);
+// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts + 1 modules
+var assert_unreachable = __webpack_require__(7904);
 // EXTERNAL MODULE: ./src/utils/filter_map.ts
 var filter_map = __webpack_require__(2793);
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
@@ -4802,7 +4792,6 @@ var startWith = __webpack_require__(8430);
  * limitations under the License.
  */
 
-
 /**
  * Close sessions from the loadedSessionsStore to allow at maximum `limit`
  * stored MediaKeySessions in it.
@@ -4859,7 +4848,6 @@ var rx_try_catch = __webpack_require__(5561);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -4971,7 +4959,6 @@ function isSessionUsable(loadedSession) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -5133,7 +5120,6 @@ function createAndTryToRetrievePersistentSession(loadedSessionsStore, persistent
 
 
 
-
 /**
  * Handle MediaEncryptedEvents sent by a HTMLMediaElement:
  * Either create a MediaKeySession, recuperate a previous MediaKeySession or
@@ -5195,6 +5181,8 @@ function getSession(initializationData, stores, wantedSessionType, maxSessionCac
     }));
   });
 }
+// EXTERNAL MODULE: ./src/utils/reference.ts
+var reference = __webpack_require__(5095);
 // EXTERNAL MODULE: ./src/compat/eme/custom_media_keys/index.ts + 7 modules
 var custom_media_keys = __webpack_require__(6139);
 // EXTERNAL MODULE: ./src/core/eme/media_keys_infos_store.ts
@@ -5215,7 +5203,6 @@ var media_keys_infos_store = __webpack_require__(6033);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -5357,7 +5344,6 @@ var flat_map = __webpack_require__(9592);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -5791,7 +5777,6 @@ var serverCertificateHashesMap = new WeakMap();
  */
 
 
-
 /**
  * Close session and returns and observable that emits when
  * the session is closed.
@@ -5843,7 +5828,6 @@ function closeSession$(session) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -6353,7 +6337,6 @@ var InitDataStore = /*#__PURE__*/function () {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -6946,7 +6929,6 @@ var PersistentSessionsStore = /*#__PURE__*/function () {
 
 
 
-
 /**
  * @throws {EncryptedMediaError}
  * @param {Object} keySystemOptions
@@ -7084,7 +7066,7 @@ function initMediaKeys(mediaElement, keySystemsConfigs) {
       initializationDataSystemId = getDrmSystemId(mediaKeySystemAccess.keySystem);
     }
 
-    var attachMediaKeys$ = new ReplaySubject/* ReplaySubject */.t(1);
+    var canAttachMediaKeys = (0,reference/* default */.Z)(false);
     var shouldDisableOldMediaKeys = mediaElement.mediaKeys !== null && mediaElement.mediaKeys !== undefined && mediaKeys !== mediaElement.mediaKeys;
     var disableOldMediaKeys$ = (0,of.of)(null);
 
@@ -7095,7 +7077,9 @@ function initMediaKeys(mediaElement, keySystemsConfigs) {
 
     return disableOldMediaKeys$.pipe((0,mergeMap/* mergeMap */.z)(function () {
       log/* default.debug */.Z.debug("EME: Attaching current MediaKeys");
-      return attachMediaKeys$.pipe((0,mergeMap/* mergeMap */.z)(function () {
+      return canAttachMediaKeys.asObservable().pipe((0,filter/* filter */.h)(function (canAttach) {
+        return canAttach;
+      }), (0,mergeMap/* mergeMap */.z)(function () {
         var stateToAttatch = {
           loadedSessionsStore: stores.loadedSessionsStore,
           mediaKeySystemAccess: mediaKeySystemAccess,
@@ -7119,7 +7103,7 @@ function initMediaKeys(mediaElement, keySystemsConfigs) {
           mediaKeys: mediaKeys,
           stores: stores,
           options: options,
-          attachMediaKeys$: attachMediaKeys$
+          canAttachMediaKeys: canAttachMediaKeys
         }
       }));
     }));
@@ -7133,8 +7117,6 @@ var inheritsLoose = __webpack_require__(4578);
 var wrapNativeSuper = __webpack_require__(2146);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Subject.js + 1 modules
 var Subject = __webpack_require__(6716);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/identity.js
-var identity = __webpack_require__(278);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/scheduler/async.js
 var scheduler_async = __webpack_require__(7991);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/isDate.js
@@ -7208,6 +7190,8 @@ function timeoutErrorFactory(info) {
     throw new TimeoutError(info);
 }
 //# sourceMappingURL=timeout.js.map
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/identity.js
+var identity = __webpack_require__(278);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/isFunction.js
 var isFunction = __webpack_require__(8474);
 ;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/concatMap.js
@@ -7237,7 +7221,6 @@ var get_fuzzed_delay = __webpack_require__(2572);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -7466,7 +7449,6 @@ function checkKeyStatuses(session, options, keySystem) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -7758,7 +7740,6 @@ function getLicenseBackoffOptions(sessionWarningSubject$, numberOfRetry) {
 
 
 
-
 /**
  * Call the setServerCertificate API with the given certificate.
  * Complete observable on success, throw when failed.
@@ -7840,7 +7821,6 @@ function trySettingServerCertificate(mediaKeys, serverCertificate) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -8268,10 +8248,10 @@ __webpack_require__.d(__webpack_exports__, {
 
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
 var merge = __webpack_require__(3071);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
-var of = __webpack_require__(2817);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/map.js
 var map = __webpack_require__(9127);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
+var of = __webpack_require__(2817);
 // EXTERNAL MODULE: ./src/compat/eme/custom_media_keys/index.ts + 7 modules
 var custom_media_keys = __webpack_require__(6139);
 ;// CONCATENATED MODULE: ./src/compat/has_eme_apis.ts
@@ -8324,7 +8304,6 @@ var log = __webpack_require__(3887);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -8451,16 +8430,16 @@ var events_generators = __webpack_require__(8343);
 
 /**
  * Emit a `ILoadedEvent` once the content can be considered as loaded.
- * @param {Observable} clock$
+ * @param {Observable} observation$
  * @param {HTMLMediaElement} mediaElement
  * @param {Object|null} segmentBuffersStore
  * @param {boolean} isDirectfile - `true` if this is a directfile content
  * @returns {Observable}
  */
 
-function emitLoadedEvent(clock$, mediaElement, segmentBuffersStore, isDirectfile) {
-  return clock$.pipe((0,filter_map/* default */.Z)(function (tick) {
-    if (tick.rebuffering !== null || tick.freezing !== null || tick.readyState === 0) {
+function emitLoadedEvent(observation$, mediaElement, segmentBuffersStore, isDirectfile) {
+  return observation$.pipe((0,filter_map/* default */.Z)(function (observation) {
+    if (observation.rebuffering !== null || observation.freezing !== null || observation.readyState === 0) {
       return null;
     }
 
@@ -8468,7 +8447,7 @@ function emitLoadedEvent(clock$, mediaElement, segmentBuffersStore, isDirectfile
       return mediaElement.duration > 0 ? events_generators/* default.loaded */.Z.loaded(segmentBuffersStore) : null;
     }
 
-    if (tick.readyState >= 3 && tick.currentRange !== null) {
+    if (observation.readyState >= 3 && observation.currentRange !== null) {
       if (!(0,should_validate_metadata/* default */.Z)() || mediaElement.duration > 0) {
         return events_generators/* default.loaded */.Z.loaded(segmentBuffersStore);
       }
@@ -8650,10 +8629,6 @@ __webpack_require__.d(__webpack_exports__, {
 
 // UNUSED EXPORTS: waitUntilPlayable
 
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
-var of = __webpack_require__(2817);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
-var concat = __webpack_require__(6362);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/filter.js
 var filter = __webpack_require__(4975);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/take.js
@@ -8662,6 +8637,8 @@ var take = __webpack_require__(4727);
 var mapTo = __webpack_require__(3833);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/catchError.js
 var catchError = __webpack_require__(9878);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
+var of = __webpack_require__(2817);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/tap.js
 var tap = __webpack_require__(2006);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/shareReplay.js
@@ -8670,6 +8647,8 @@ var shareReplay = __webpack_require__(8515);
 var mergeMap = __webpack_require__(3994);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/startWith.js
 var startWith = __webpack_require__(8430);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
+var concat = __webpack_require__(6362);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/defer.js
 var defer = __webpack_require__(9917);
 // EXTERNAL MODULE: ./src/utils/cast_to_observable.ts
@@ -8736,7 +8715,6 @@ var event_listeners = __webpack_require__(8719);
 
 
 
-
 /**
  * Returns an observable emitting a single time, as soon as a seek is possible
  * (the metadata are loaded).
@@ -8757,6 +8735,8 @@ var should_validate_metadata = __webpack_require__(1669);
 var media_error = __webpack_require__(3714);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
+// EXTERNAL MODULE: ./src/utils/reference.ts
+var reference = __webpack_require__(5095);
 // EXTERNAL MODULE: ./src/core/init/events_generators.ts
 var events_generators = __webpack_require__(8343);
 ;// CONCATENATED MODULE: ./src/core/init/initial_seek_and_play.ts
@@ -8782,18 +8762,18 @@ var events_generators = __webpack_require__(8343);
 
 
 /**
- * Emit once as soon as the clock$ announce that the content can begin to be
- * played by calling the `play` method.
+ * Emit once as soon as the playback observation announces that the content can
+ * begin to be played by calling the `play` method.
  *
  * This depends on browser-defined criteria (e.g. the readyState status) as well
  * as RxPlayer-defined ones (e.g.) not rebuffering.
  *
- * @param {Observable} clock$
+ * @param {Observable} observation$
  * @returns {Observable.<undefined>}
  */
 
-function waitUntilPlayable(clock$) {
-  return clock$.pipe((0,filter/* filter */.h)(function (_ref) {
+function waitUntilPlayable(observation$) {
+  return observation$.pipe((0,filter/* filter */.h)(function (_ref) {
     var seeking = _ref.seeking,
         rebuffering = _ref.rebuffering,
         readyState = _ref.readyState;
@@ -8818,47 +8798,35 @@ function autoPlay(mediaElement) {
   }));
 }
 /**
- * Returns two Observables:
- *
- *   - seek$: when subscribed, will seek to the wanted started time as soon as
- *     it can. Emit and complete when done.
- *
- *   - play$: when subscribed, will autoplay if and only if the `mustAutoPlay`
- *     option is set as soon as it can.
- *     Emit and complete when done.
- *     Might also emit some warning events if issues related to the initial
- *     playback arised
- *
- * Both Observables are `shareReplay`, meaning that they re-emit everything on
- * subscription.
- *
- * /!\ `play$` has a dependency on `seek$`, as such, the player will try to seek
- * as soon as either Observable is subscribed to.
- *
+ * Creates an Observable allowing to seek at the initially wanted position and
+ * to play if autoPlay is wanted.
  * @param {Object} args
  * @returns {Object}
  */
 
 
 function initialSeekAndPlay(_ref2) {
-  var clock$ = _ref2.clock$,
-      mediaElement = _ref2.mediaElement,
+  var mediaElement = _ref2.mediaElement,
+      playbackObserver = _ref2.playbackObserver,
       startTime = _ref2.startTime,
-      mustAutoPlay = _ref2.mustAutoPlay,
-      setCurrentTime = _ref2.setCurrentTime;
+      mustAutoPlay = _ref2.mustAutoPlay;
+  var initialSeekPerformed = (0,reference/* createSharedReference */.$)(false);
+  var initialPlayPerformed = (0,reference/* createSharedReference */.$)(false);
   var seek$ = whenLoadedMetadata$(mediaElement).pipe((0,take/* take */.q)(1), (0,tap/* tap */.b)(function () {
     log/* default.info */.Z.info("Init: Set initial time", startTime);
     var initialTime = typeof startTime === "function" ? startTime() : startTime;
-    setCurrentTime(initialTime);
+    playbackObserver.setCurrentTime(initialTime);
+    initialSeekPerformed.setValue(true);
+    initialSeekPerformed.finish();
   }), (0,shareReplay/* shareReplay */.d)({
     refCount: true
   }));
-  var play$ = seek$.pipe((0,mergeMap/* mergeMap */.z)(function () {
+  var seekAndPlay$ = seek$.pipe((0,mergeMap/* mergeMap */.z)(function () {
     if (!(0,should_validate_metadata/* default */.Z)() || mediaElement.duration > 0) {
-      return waitUntilPlayable(clock$);
+      return waitUntilPlayable(playbackObserver.observe(true));
     } else {
       var error = new media_error/* default */.Z("MEDIA_ERR_NOT_LOADED_METADATA", "Cannot load automatically: your browser " + "falsely announced having loaded the content.");
-      return waitUntilPlayable(clock$).pipe((0,startWith/* startWith */.O)(events_generators/* default.warning */.Z.warning(error)));
+      return waitUntilPlayable(playbackObserver.observe(true)).pipe((0,startWith/* startWith */.O)(events_generators/* default.warning */.Z.warning(error)));
     }
   }), (0,mergeMap/* mergeMap */.z)(function (evt) {
     if (evt !== undefined) {
@@ -8872,12 +8840,17 @@ function initialSeekAndPlay(_ref2) {
         log/* default.warn */.Z.warn("Init: autoplay is enabled on HTML media element. " + "Media will play as soon as possible.");
       }
 
+      initialPlayPerformed.setValue(true);
+      initialPlayPerformed.finish();
       return (0,of.of)({
         type: "skipped"
       });
     }
 
     return autoPlay(mediaElement).pipe((0,mergeMap/* mergeMap */.z)(function (autoplayEvt) {
+      initialPlayPerformed.setValue(true);
+      initialPlayPerformed.finish();
+
       if (autoplayEvt === "autoplay") {
         return (0,of.of)({
           type: "autoplay"
@@ -8893,8 +8866,9 @@ function initialSeekAndPlay(_ref2) {
     refCount: true
   }));
   return {
-    seek$: seek$,
-    play$: play$
+    seekAndPlay$: seekAndPlay$,
+    initialPlayPerformed: initialPlayPerformed,
+    initialSeekPerformed: initialSeekPerformed
   };
 }
 
@@ -8910,14 +8884,10 @@ __webpack_require__.d(__webpack_exports__, {
   "Z": function() { return /* binding */ initializeDirectfileContent; }
 });
 
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/empty.js
-var empty = __webpack_require__(1545);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
-var of = __webpack_require__(2817);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
-var merge = __webpack_require__(3071);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/mergeMap.js
 var mergeMap = __webpack_require__(3994);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/empty.js
+var empty = __webpack_require__(1545);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/share.js
 var share = __webpack_require__(5583);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/ignoreElements.js
@@ -8930,6 +8900,10 @@ var take = __webpack_require__(4727);
 var mergeMapTo = __webpack_require__(8902);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/switchMap.js
 var switchMap = __webpack_require__(4978);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
+var of = __webpack_require__(2817);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
+var merge = __webpack_require__(3071);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
 var Observable = __webpack_require__(1480);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
@@ -9020,7 +8994,6 @@ var update_playback_rate = __webpack_require__(2983);
 
 
 
-
 /**
  * calculate initial time as a position in seconds.
  * @param {HTMLMediaElement} mediaElement
@@ -9074,11 +9047,10 @@ function getDirectFileInitialTime(mediaElement, startAt) {
 
 function initializeDirectfileContent(_ref) {
   var autoPlay = _ref.autoPlay,
-      clock$ = _ref.clock$,
       keySystems = _ref.keySystems,
       mediaElement = _ref.mediaElement,
-      speed$ = _ref.speed$,
-      setCurrentTime = _ref.setCurrentTime,
+      playbackObserver = _ref.playbackObserver,
+      speed = _ref.speed,
       startAt = _ref.startAt,
       url = _ref.url;
   (0,clear_element_src/* default */.Z)(mediaElement);
@@ -9098,15 +9070,12 @@ function initializeDirectfileContent(_ref) {
   log/* default.debug */.Z.debug("Init: Initial time calculated:", initialTime);
 
   var _initialSeekAndPlay = (0,initial_seek_and_play/* default */.Z)({
-    clock$: clock$,
     mediaElement: mediaElement,
+    playbackObserver: playbackObserver,
     startTime: initialTime,
-    mustAutoPlay: autoPlay,
-    setCurrentTime: setCurrentTime,
-    isDirectfile: true
+    mustAutoPlay: autoPlay
   }),
-      seek$ = _initialSeekAndPlay.seek$,
-      play$ = _initialSeekAndPlay.play$; // Create EME Manager, an observable which will manage every EME-related
+      seekAndPlay$ = _initialSeekAndPlay.seekAndPlay$; // Create EME Manager, an observable which will manage every EME-related
   // issue.
 
 
@@ -9115,16 +9084,17 @@ function initializeDirectfileContent(_ref) {
   }), (0,defer_subscriptions/* default */.Z)(), (0,share/* share */.B)()); // Translate errors coming from the media element into RxPlayer errors
   // through a throwing Observable.
 
-  var mediaError$ = (0,throw_on_media_error/* default */.Z)(mediaElement); // Set the speed set by the user on the media element while pausing a
+  var mediaError$ = (0,throw_on_media_error/* default */.Z)(mediaElement);
+  var observation$ = playbackObserver.observe(true); // Set the speed set by the user on the media element while pausing a
   // little longer while the buffer is empty.
 
-  var playbackRate$ = (0,update_playback_rate/* default */.Z)(mediaElement, speed$, clock$).pipe((0,ignoreElements/* ignoreElements */.l)());
+  var playbackRate$ = (0,update_playback_rate/* default */.Z)(mediaElement, speed, observation$).pipe((0,ignoreElements/* ignoreElements */.l)());
   /**
    * Observable trying to avoid various stalling situations, emitting "stalled"
    * events when it cannot, as well as "unstalled" events when it get out of one.
    */
 
-  var stallAvoider$ = (0,stall_avoider/* default */.Z)(clock$, mediaElement, null, empty/* EMPTY */.E, empty/* EMPTY */.E, setCurrentTime);
+  var stallAvoider$ = (0,stall_avoider/* default */.Z)(playbackObserver, null, empty/* EMPTY */.E, empty/* EMPTY */.E);
   /**
    * Emit a "loaded" events once the initial play has been performed and the
    * media can begin playback.
@@ -9133,20 +9103,19 @@ function initializeDirectfileContent(_ref) {
 
   var loadingEvts$ = emeManager$.pipe((0,filter/* filter */.h)(function isEMEReady(evt) {
     if (evt.type === "created-media-keys") {
-      evt.value.attachMediaKeys$.next();
+      evt.value.canAttachMediaKeys.setValue(true);
       return true;
     }
 
     return evt.type === "eme-disabled" || evt.type === "attached-media-keys";
-  }), (0,take/* take */.q)(1), (0,mergeMapTo/* mergeMapTo */.j)(play$), (0,switchMap/* switchMap */.w)(function (evt) {
+  }), (0,take/* take */.q)(1), (0,mergeMapTo/* mergeMapTo */.j)(seekAndPlay$), (0,switchMap/* switchMap */.w)(function (evt) {
     if (evt.type === "warning") {
       return (0,of.of)(evt);
     }
 
-    return (0,emit_loaded_event/* default */.Z)(clock$, mediaElement, null, true);
+    return (0,emit_loaded_event/* default */.Z)(observation$, mediaElement, null, true);
   }));
-  var initialSeek$ = seek$.pipe((0,ignoreElements/* ignoreElements */.l)());
-  return (0,merge/* merge */.T)(loadingEvts$, initialSeek$, emeManager$, mediaError$, playbackRate$, stallAvoider$);
+  return (0,merge/* merge */.T)(loadingEvts$, emeManager$, mediaError$, playbackRate$, stallAvoider$);
 }
 
 /***/ }),
@@ -9161,8 +9130,6 @@ __webpack_require__.d(__webpack_exports__, {
   "Z": function() { return /* binding */ StallAvoider; }
 });
 
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
-var merge = __webpack_require__(3071);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/withLatestFrom.js
 var withLatestFrom = __webpack_require__(3428);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/scan.js + 1 modules
@@ -9173,6 +9140,8 @@ var tap = __webpack_require__(2006);
 var ignoreElements = __webpack_require__(533);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/map.js
 var map = __webpack_require__(9127);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
+var merge = __webpack_require__(3071);
 // EXTERNAL MODULE: ./src/compat/browser_detection.ts
 var browser_detection = __webpack_require__(3666);
 ;// CONCATENATED MODULE: ./src/compat/is_seeking_approximate.ts
@@ -9239,7 +9208,6 @@ var events_generators = __webpack_require__(8567);
 
 
 
-
 var BUFFER_DISCONTINUITY_THRESHOLD = config/* default.BUFFER_DISCONTINUITY_THRESHOLD */.Z.BUFFER_DISCONTINUITY_THRESHOLD,
     FORCE_DISCONTINUITY_SEEK_DELAY = config/* default.FORCE_DISCONTINUITY_SEEK_DELAY */.Z.FORCE_DISCONTINUITY_SEEK_DELAY,
     FREEZING_STALLED_DELAY = config/* default.FREEZING_STALLED_DELAY */.Z.FREEZING_STALLED_DELAY,
@@ -9255,10 +9223,7 @@ var EPSILON = 1 / 60;
  * Monitor situations where playback is stalled and try to get out of those.
  * Emit "stalled" then "unstalled" respectively when an unavoidable stall is
  * encountered and exited.
- * @param {Observable} clock$ - Observable emitting the current playback
- * conditions.
- * @param {HTMLMediaElement} mediaElement - The HTMLMediaElement on which the
- * media is played.
+ * @param {object} playbackObserver - emit the current playback conditions.
  * @param {Object} manifest - The Manifest of the currently-played content.
  * @param {Observable} discontinuityUpdate$ - Observable emitting encountered
  * discontinuities for loaded Period and buffer types.
@@ -9266,18 +9231,17 @@ var EPSILON = 1 / 60;
  * @returns {Observable}
  */
 
-function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lockedStream$, setCurrentTime) {
+function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUpdate$) {
   var initialDiscontinuitiesStore = [];
   /**
    * Emit every known audio and video buffer discontinuities in chronological
    * order (first ordered by Period's start, then by bufferType in any order.
    */
 
-  var discontinuitiesStore$ = discontinuityUpdate$.pipe((0,withLatestFrom/* withLatestFrom */.M)(clock$), // listen to clock to clean-up old discontinuities
-  (0,scan/* scan */.R)(function (discontinuitiesStore, _ref) {
+  var discontinuitiesStore$ = discontinuityUpdate$.pipe((0,withLatestFrom/* withLatestFrom */.M)(playbackObserver.observe(true)), (0,scan/* scan */.R)(function (discontinuitiesStore, _ref) {
     var evt = _ref[0],
-        tick = _ref[1];
-    return updateDiscontinuitiesStore(discontinuitiesStore, evt, tick);
+        observation = _ref[1];
+    return updateDiscontinuitiesStore(discontinuitiesStore, evt, observation);
   }, initialDiscontinuitiesStore));
   /**
    * On some devices (right now only seen on Tizen), seeking through the
@@ -9312,35 +9276,35 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
    * Period handled by that stream to unlock the situation.
    */
 
-  var unlock$ = lockedStream$.pipe((0,withLatestFrom/* withLatestFrom */.M)(clock$), (0,tap/* tap */.b)(function (_ref2) {
+  var unlock$ = lockedStream$.pipe((0,withLatestFrom/* withLatestFrom */.M)(playbackObserver.observe(true)), (0,tap/* tap */.b)(function (_ref2) {
     var lockedStreamEvt = _ref2[0],
-        tick = _ref2[1];
+        observation = _ref2[1];
 
     var _a; // TODO(PaulB) also skip when the user's wanted speed is set to `0`, as we
     // might not want to seek in that case?
 
 
-    if (!tick.rebuffering || tick.paused || lockedStreamEvt.bufferType !== "audio" && lockedStreamEvt.bufferType !== "video") {
+    if (!observation.rebuffering || observation.paused || lockedStreamEvt.bufferType !== "audio" && lockedStreamEvt.bufferType !== "video") {
       return;
     }
 
-    var currPos = tick.position;
-    var rebufferingPos = (_a = tick.rebuffering.position) !== null && _a !== void 0 ? _a : currPos;
+    var currPos = observation.position;
+    var rebufferingPos = (_a = observation.rebuffering.position) !== null && _a !== void 0 ? _a : currPos;
     var lockedPeriodStart = lockedStreamEvt.period.start;
 
     if (currPos < lockedPeriodStart && Math.abs(rebufferingPos - lockedPeriodStart) < 1) {
       log/* default.warn */.Z.warn("Init: rebuffering because of a future locked stream.\n" + "Trying to unlock by seeking to the next Period");
-      setCurrentTime(lockedPeriodStart + 0.001);
+      playbackObserver.setCurrentTime(lockedPeriodStart + 0.001);
     }
   }), (0,ignoreElements/* ignoreElements */.l)());
-  var stall$ = clock$.pipe((0,withLatestFrom/* withLatestFrom */.M)(discontinuitiesStore$), (0,map/* map */.U)(function (_ref3) {
-    var tick = _ref3[0],
+  var stall$ = playbackObserver.observe(true).pipe((0,withLatestFrom/* withLatestFrom */.M)(discontinuitiesStore$), (0,map/* map */.U)(function (_ref3) {
+    var observation = _ref3[0],
         discontinuitiesStore = _ref3[1];
-    var buffered = tick.buffered,
-        position = tick.position,
-        readyState = tick.readyState,
-        rebuffering = tick.rebuffering,
-        freezing = tick.freezing;
+    var buffered = observation.buffered,
+        position = observation.position,
+        readyState = observation.readyState,
+        rebuffering = observation.rebuffering,
+        freezing = observation.freezing;
 
     if (freezing !== null) {
       var now = performance.now();
@@ -9348,7 +9312,7 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
 
       if (now - referenceTimestamp > UNFREEZING_SEEK_DELAY) {
         log/* default.warn */.Z.warn("Init: trying to seek to un-freeze player");
-        setCurrentTime(tick.getCurrentTime() + UNFREEZING_DELTA_POSITION);
+        playbackObserver.setCurrentTime(playbackObserver.getCurrentTime() + UNFREEZING_DELTA_POSITION);
         prevFreezingState = {
           attemptTimestamp: now
         };
@@ -9366,11 +9330,19 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
 
     if (rebuffering === null) {
       if (readyState === 1) {
-        // With a readyState set to 1, we should still be not able to play,
-        // anounce that we're stalled due to an unknown "freezing" status.
+        // With a readyState set to 1, we should still not be able to play:
+        // Return that we're stalled
+        var reason;
+
+        if (observation.seeking) {
+          reason = observation.internalSeeking ? "internal-seek" : "seeking";
+        } else {
+          reason = "not-ready";
+        }
+
         return {
           type: "stalled",
-          value: "freezing"
+          value: reason
         };
       }
 
@@ -9378,10 +9350,14 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
         type: "unstalled",
         value: null
       };
-    }
+    } // We want to separate a stall situation when a seek is due to a seek done
+    // internally by the player to when its due to a regular user seek.
 
-    if (tick.seeking) {
-      lastSeekingPosition = tick.position;
+
+    var stalledReason = rebuffering.reason === "seeking" && observation.internalSeeking ? "internal-seek" : rebuffering.reason;
+
+    if (observation.seeking) {
+      lastSeekingPosition = observation.position;
     } else if (lastSeekingPosition !== null) {
       var _now = performance.now();
 
@@ -9389,10 +9365,10 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
         ignoredStallTimeStamp = _now;
       }
 
-      if (is_seeking_approximate && tick.position < lastSeekingPosition && _now - ignoredStallTimeStamp < FORCE_DISCONTINUITY_SEEK_DELAY) {
+      if (is_seeking_approximate && observation.position < lastSeekingPosition && _now - ignoredStallTimeStamp < FORCE_DISCONTINUITY_SEEK_DELAY) {
         return {
           type: "stalled",
-          value: rebuffering.reason
+          value: stalledReason
         };
       }
 
@@ -9404,7 +9380,7 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
     if (manifest === null) {
       return {
         type: "stalled",
-        value: rebuffering.reason
+        value: stalledReason
       };
     }
     /** Position at which data is awaited. */
@@ -9418,11 +9394,11 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
       if (skippableDiscontinuity !== null) {
         var realSeekTime = skippableDiscontinuity + 0.001;
 
-        if (realSeekTime <= mediaElement.currentTime) {
-          log/* default.info */.Z.info("Init: position to seek already reached, no seeking", mediaElement.currentTime, realSeekTime);
+        if (realSeekTime <= playbackObserver.getCurrentTime()) {
+          log/* default.info */.Z.info("Init: position to seek already reached, no seeking", playbackObserver.getCurrentTime(), realSeekTime);
         } else {
           log/* default.warn */.Z.warn("SA: skippable discontinuity found in the stream", position, realSeekTime);
-          setCurrentTime(realSeekTime);
+          playbackObserver.setCurrentTime(realSeekTime);
           return events_generators/* default.warning */.Z.warning(generateDiscontinuityError(stalledPosition, realSeekTime));
         }
       }
@@ -9441,9 +9417,9 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
     if (nextBufferRangeGap < BUFFER_DISCONTINUITY_THRESHOLD) {
       var seekTo = freezePosition + nextBufferRangeGap + EPSILON;
 
-      if (mediaElement.currentTime < seekTo) {
+      if (playbackObserver.getCurrentTime() < seekTo) {
         log/* default.warn */.Z.warn("Init: discontinuity encountered inferior to the threshold", freezePosition, seekTo, BUFFER_DISCONTINUITY_THRESHOLD);
-        setCurrentTime(seekTo);
+        playbackObserver.setCurrentTime(seekTo);
         return events_generators/* default.warning */.Z.warning(generateDiscontinuityError(freezePosition, seekTo));
       }
     } // Are we in a discontinuity between periods ? -> Seek at the beginning of the
@@ -9454,9 +9430,9 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
       var period = manifest.periods[i];
 
       if (period.end !== undefined && period.end <= freezePosition) {
-        if (manifest.periods[i + 1].start > freezePosition && manifest.periods[i + 1].start > mediaElement.currentTime) {
+        if (manifest.periods[i + 1].start > freezePosition && manifest.periods[i + 1].start > playbackObserver.getCurrentTime()) {
           var nextPeriod = manifest.periods[i + 1];
-          setCurrentTime(nextPeriod.start);
+          playbackObserver.setCurrentTime(nextPeriod.start);
           return events_generators/* default.warning */.Z.warning(generateDiscontinuityError(freezePosition, nextPeriod.start));
         }
 
@@ -9466,7 +9442,7 @@ function StallAvoider(clock$, mediaElement, manifest, discontinuityUpdate$, lock
 
     return {
       type: "stalled",
-      value: rebuffering.reason
+      value: stalledReason
     };
   }));
   return (0,merge/* merge */.T)(unlock$, stall$);
@@ -9547,14 +9523,14 @@ function eventContainsDiscontinuity(evt) {
  *     store it in Period's chronological order in the Array.
  * @param {Array.<Object>} discontinuitiesStore
  * @param {Object} evt
- * @param {Object} tick
+ * @param {Object} observation
  * @returns {Array.<Object>}
  */
 
 
-function updateDiscontinuitiesStore(discontinuitiesStore, evt, tick) {
+function updateDiscontinuitiesStore(discontinuitiesStore, evt, observation) {
   // First, perform clean-up of old discontinuities
-  while (discontinuitiesStore.length > 0 && discontinuitiesStore[0].period.end !== undefined && discontinuitiesStore[0].period.end + 10 < tick.position) {
+  while (discontinuitiesStore.length > 0 && discontinuitiesStore[0].period.end !== undefined && discontinuitiesStore[0].period.end + 10 < observation.position) {
     discontinuitiesStore.shift();
   }
 
@@ -9613,7 +9589,7 @@ function generateDiscontinuityError(stalledPosition, seekTo) {
 /* harmony export */   "Z": function() { return /* binding */ throwOnMediaError; }
 /* harmony export */ });
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2401);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3994);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3994);
 /* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3714);
 /**
  * Copyright 2015 CANAL+ Group
@@ -9632,7 +9608,6 @@ function generateDiscontinuityError(stalledPosition, seekTo) {
  */
 
 
-
 /**
  * Returns an observable which throws the right MediaError as soon an "error"
  * event is received through the media element.
@@ -9641,7 +9616,7 @@ function generateDiscontinuityError(stalledPosition, seekTo) {
  */
 
 function throwOnMediaError(mediaElement) {
-  return (0,rxjs__WEBPACK_IMPORTED_MODULE_0__/* .fromEvent */ .R)(mediaElement, "error").pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_1__/* .mergeMap */ .z)(function () {
+  return (0,rxjs__WEBPACK_IMPORTED_MODULE_0__/* .fromEvent */ .R)(mediaElement, "error").pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_1__/* .mergeMap */ .z)(function () {
     var errorCode = mediaElement.error == null ? 0 : mediaElement.error.code;
 
     switch (errorCode) {
@@ -9672,13 +9647,13 @@ function throwOnMediaError(mediaElement) {
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Z": function() { return /* binding */ updatePlaybackRate; }
 /* harmony export */ });
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(9127);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8430);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3741);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(4978);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(9917);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(2817);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(9127);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8430);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3741);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(4978);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(2006);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(2006);
 /* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(3887);
 /**
  * Copyright 2015 CANAL+ Group
@@ -9697,23 +9672,22 @@ function throwOnMediaError(mediaElement) {
  */
 
 
-
 /**
  * Manage playback speed.
  * Set playback rate set by the user, pause playback when the player appear to
  * rebuffering and restore the speed once it appears to exit rebuffering status.
  *
  * @param {HTMLMediaElement} mediaElement
- * @param {Observable} speed$ - emit speed set by the user
- * @param {Observable} clock$ - Current playback conditions
+ * @param {Observable} speed - last speed set by the user
+ * @param {Observable} observation$ - Current playback conditions
  * @returns {Observable}
  */
 
-function updatePlaybackRate(mediaElement, speed$, clock$) {
-  var forcePause$ = clock$.pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_0__/* .map */ .U)(function (timing) {
-    return timing.rebuffering !== null;
-  }), (0,rxjs_operators__WEBPACK_IMPORTED_MODULE_1__/* .startWith */ .O)(false), (0,rxjs_operators__WEBPACK_IMPORTED_MODULE_2__/* .distinctUntilChanged */ .x)());
-  return forcePause$.pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_3__/* .switchMap */ .w)(function (shouldForcePause) {
+function updatePlaybackRate(mediaElement, speed, observation$) {
+  var forcePause$ = observation$.pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_0__/* .map */ .U)(function (observation) {
+    return observation.rebuffering !== null;
+  }), (0,rxjs__WEBPACK_IMPORTED_MODULE_1__/* .startWith */ .O)(false), (0,rxjs__WEBPACK_IMPORTED_MODULE_2__/* .distinctUntilChanged */ .x)());
+  return forcePause$.pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_3__/* .switchMap */ .w)(function (shouldForcePause) {
     if (shouldForcePause) {
       return (0,rxjs__WEBPACK_IMPORTED_MODULE_4__/* .defer */ .P)(function () {
         _log__WEBPACK_IMPORTED_MODULE_5__/* ["default"].info */ .Z.info("Init: Pause playback to build buffer");
@@ -9722,9 +9696,9 @@ function updatePlaybackRate(mediaElement, speed$, clock$) {
       });
     }
 
-    return speed$.pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_7__/* .tap */ .b)(function (speed) {
-      _log__WEBPACK_IMPORTED_MODULE_5__/* ["default"].info */ .Z.info("Init: Resume playback speed", speed);
-      mediaElement.playbackRate = speed;
+    return speed.asObservable().pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_7__/* .tap */ .b)(function (lastSpeed) {
+      _log__WEBPACK_IMPORTED_MODULE_5__/* ["default"].info */ .Z.info("Init: Resume playback speed", lastSpeed);
+      mediaElement.playbackRate = lastSpeed;
     }));
   }));
 }
@@ -9931,22 +9905,22 @@ var inheritsLoose = __webpack_require__(4578);
 var merge = __webpack_require__(3071);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/interval.js
 var observable_interval = __webpack_require__(6697);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/startWith.js
+var startWith = __webpack_require__(8430);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/switchMapTo.js
+var switchMapTo = __webpack_require__(8550);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
 var concat = __webpack_require__(6362);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/mapTo.js
+var mapTo = __webpack_require__(3833);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/takeUntil.js
+var takeUntil = __webpack_require__(3505);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
 var of = __webpack_require__(2817);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Subject.js + 1 modules
 var Subject = __webpack_require__(6716);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/defer.js
 var defer = __webpack_require__(9917);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/startWith.js
-var startWith = __webpack_require__(8430);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/switchMapTo.js
-var switchMapTo = __webpack_require__(8550);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/mapTo.js
-var mapTo = __webpack_require__(3833);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/takeUntil.js
-var takeUntil = __webpack_require__(3505);
 // EXTERNAL MODULE: ./src/compat/event_listeners.ts + 5 modules
 var event_listeners = __webpack_require__(8719);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
@@ -9975,7 +9949,6 @@ var is_node = __webpack_require__(2203);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -10697,19 +10670,18 @@ function updateProportionalElements(currentHeight, currentWidth, resolution, tex
 
 
 
-
 var onEnded$ = event_listeners/* onEnded$ */.C1,
     onSeeked$ = event_listeners/* onSeeked$ */.ik,
     onSeeking$ = event_listeners/* onSeeking$ */.d5;
 var MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL = config/* default.MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL */.Z.MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL,
     TEXT_TRACK_SIZE_CHECKS_INTERVAL = config/* default.TEXT_TRACK_SIZE_CHECKS_INTERVAL */.Z.TEXT_TRACK_SIZE_CHECKS_INTERVAL;
 /**
- * Generate the clock at which TextTrack HTML Cues should be refreshed.
+ * Generate the interval at which TextTrack HTML Cues should be refreshed.
  * @param {HTMLMediaElement} videoElement
  * @returns {Observable}
  */
 
-function generateClock(videoElement) {
+function generateRefreshInterval(videoElement) {
   var seeking$ = onSeeking$(videoElement);
   var seeked$ = onSeeked$(videoElement);
   var ended$ = onEnded$(videoElement);
@@ -10784,7 +10756,7 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
     _this._buffer = new TextTrackCuesStore();
     _this._currentCues = []; // update text tracks
 
-    generateClock(_this._videoElement).pipe((0,takeUntil/* takeUntil */.R)(_this._destroy$)).subscribe(function (shouldDisplay) {
+    generateRefreshInterval(_this._videoElement).pipe((0,takeUntil/* takeUntil */.R)(_this._destroy$)).subscribe(function (shouldDisplay) {
       if (!shouldDisplay) {
         _this._disableCurrentCues();
 
@@ -11099,7 +11071,7 @@ function assertChunkIsTextTrackSegmentData(chunk) {
     return;
   }
 
-  if (typeof chunk !== "object" || chunk === null || typeof chunk.data !== "string" || typeof chunk.type !== "string" || chunk.language !== undefined && typeof chunk.language !== "string" || chunk.start !== undefined && typeof chunk.start !== "string" || chunk.end !== undefined && typeof chunk.end !== "string") {
+  if (typeof chunk !== "object" || chunk === null || typeof chunk.data !== "string" || typeof chunk.type !== "string" || chunk.language !== undefined && typeof chunk.language !== "string" || chunk.start !== undefined && typeof chunk.start !== "number" || chunk.end !== undefined && typeof chunk.end !== "number") {
     throw new Error("Invalid format given to a NativeTextSegmentBuffer");
   }
 }
@@ -11624,7 +11596,7 @@ function assertChunkIsTextTrackSegmentData(chunk) {
     return;
   }
 
-  if (typeof chunk !== "object" || chunk === null || typeof chunk.data !== "string" || typeof chunk.type !== "string" || chunk.language !== undefined && typeof chunk.language !== "string" || chunk.start !== undefined && typeof chunk.start !== "string" || chunk.end !== undefined && typeof chunk.end !== "string") {
+  if (typeof chunk !== "object" || chunk === null || typeof chunk.data !== "string" || typeof chunk.type !== "string" || chunk.language !== undefined && typeof chunk.language !== "string" || chunk.start !== undefined && typeof chunk.start !== "number" || chunk.end !== undefined && typeof chunk.end !== "number") {
     throw new Error("Invalid format given to a NativeTextSegmentBuffer");
   }
 }
@@ -13126,68 +13098,6 @@ var EVENTS = {
   }
 };
 /* harmony default export */ __webpack_exports__["Z"] = (EVENTS);
-
-/***/ }),
-
-/***/ 3801:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Z": function() { return /* binding */ AssertionError; }
-/* harmony export */ });
-/* harmony import */ var _babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(7326);
-/* harmony import */ var _babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4578);
-/* harmony import */ var _babel_runtime_helpers_wrapNativeSuper__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2146);
-
-
-
-
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Error due to an abnormal assertion fails.
- *
- * This should be an internal error which is later transformed into a documented
- * (as part of the API) Error instance before being emitted to the application.
- * @class AssertionError
- * @extends Error
- */
-var AssertionError = /*#__PURE__*/function (_Error) {
-  (0,_babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z)(AssertionError, _Error);
-
-  /**
-   * @param {string} message
-   */
-  function AssertionError(message) {
-    var _this;
-
-    _this = _Error.call(this) || this; // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
-
-    Object.setPrototypeOf((0,_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .Z)(_this), AssertionError.prototype);
-    _this.name = "AssertionError";
-    _this.message = message;
-    return _this;
-  }
-
-  return AssertionError;
-}( /*#__PURE__*/(0,_babel_runtime_helpers_wrapNativeSuper__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z)(Error));
-
-
 
 /***/ }),
 
@@ -17522,8 +17432,8 @@ __webpack_require__.d(__webpack_exports__, {
   "Z": function() { return /* binding */ js_parser; }
 });
 
-// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
-var assert_unreachable = __webpack_require__(8418);
+// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts + 1 modules
+var assert_unreachable = __webpack_require__(7904);
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
 var is_null_or_undefined = __webpack_require__(1946);
 // EXTERNAL MODULE: ./src/config.ts
@@ -23825,7 +23735,7 @@ function clearTimelineFromPosition(timeline, firstAvailablePosition) {
       // we have a segment repetition
       var nextElt = timeline[1];
 
-      if (nextElt != null && nextElt.start <= firstAvailablePosition) {
+      if (nextElt !== undefined && nextElt.start <= firstAvailablePosition) {
         timeline.shift();
       } else {
         // no next segment or next segment is available
@@ -24084,10 +23994,6 @@ function isSegmentStillAvailable(segment, timeline, timescale, indexTimeOffset) 
     if (tSegmentTime > segment.time) {
       return false;
     } else if (tSegmentTime === segment.time) {
-      if (tSegment.duration / timescale !== segment.duration) {
-        return false;
-      }
-
       if (tSegment.range == null) {
         return segment.range == null;
       }
@@ -24095,7 +24001,7 @@ function isSegmentStillAvailable(segment, timeline, timescale, indexTimeOffset) 
       return segment.range != null && tSegment.range[0] === segment.range[0] && tSegment.range[1] === segment.range[1];
     } else {
       // tSegment.start < segment.time
-      if (tSegment.repeatCount >= 0 && tSegment.duration != null) {
+      if (tSegment.repeatCount >= 0 && tSegment.duration !== undefined) {
         var timeDiff = tSegmentTime - tSegment.start;
         var repeat = timeDiff / tSegment.duration - 1;
         return repeat % 1 === 0 && repeat <= tSegment.repeatCount;
@@ -25860,12 +25766,22 @@ function applyFontSize(element, fontSize) {
     return;
   }
 
-  if (firstFontSize[2] === "px" || firstFontSize[2] === "%" || firstFontSize[2] === "em") {
+  if (firstFontSize[2] === "px" || firstFontSize[2] === "em") {
     element.style.fontSize = firstFontSize[1] + firstFontSize[2];
   } else if (firstFontSize[2] === "c") {
     element.style.position = "relative";
     addClassName(element, "proportional-style");
     element.setAttribute("data-proportional-font-size", firstFontSize[1]);
+  } else if (firstFontSize[2] === "%") {
+    var toNum = Number(firstFontSize[1]);
+
+    if (isNaN(toNum)) {
+      log/* default.warn */.Z.warn("TTML Parser: could not parse fontSize value \"" + firstFontSize[1] + "\" into a number");
+    } else {
+      element.style.position = "relative";
+      addClassName(element, "proportional-style");
+      element.setAttribute("data-proportional-font-size", String(toNum / 100));
+    }
   } else {
     log/* default.warn */.Z.warn("TTML Parser: unhandled fontSize unit:", firstFontSize[2]);
   }
@@ -29357,7 +29273,7 @@ function fetchRequest(options) {
 
     function _readBufferAndSendEvents() {
       _readBufferAndSendEvents = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee() {
-        var data, currentTime, dataInfo, receivedTime, duration;
+        var data, currentTime, dataInfo, receivedTime, requestDuration;
         return regenerator_default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -29396,9 +29312,9 @@ function fetchRequest(options) {
 
                 deregisterCancelLstnr();
                 receivedTime = performance.now();
-                duration = receivedTime - sendingTime;
+                requestDuration = receivedTime - sendingTime;
                 return _context.abrupt("return", {
-                  duration: duration,
+                  requestDuration: requestDuration,
                   receivedTime: receivedTime,
                   sendingTime: sendingTime,
                   size: size,
@@ -29694,7 +29610,7 @@ function initSegmentLoader(url, segment, cancelSignal, callbacks) {
         url: url,
         responseData: data,
         size: initData.size + indexData.size,
-        duration: receivedTime - sendingTime,
+        requestDuration: receivedTime - sendingTime,
         sendingTime: sendingTime,
         receivedTime: receivedTime
       }
@@ -29981,7 +29897,7 @@ function generateSegmentLoader(_ref) {
           resultData: {
             responseData: _args.data,
             size: _args.size,
-            duration: _args.duration
+            requestDuration: _args.duration
           }
         });
       };
@@ -34315,7 +34231,7 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
               resultData: {
                 responseData: _args.data,
                 size: _args.size,
-                duration: _args.duration
+                requestDuration: _args.duration
               }
             });
           }
@@ -34327,7 +34243,7 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
             resultData: {
               responseData: dataU8,
               size: _args.size,
-              duration: _args.duration
+              requestDuration: _args.duration
             }
           });
         };
@@ -35104,8 +35020,8 @@ __webpack_require__.d(__webpack_exports__, {
   "Z": function() { return /* binding */ generateManifestLoader; }
 });
 
-// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
-var assert_unreachable = __webpack_require__(8418);
+// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts + 1 modules
+var assert_unreachable = __webpack_require__(7904);
 // EXTERNAL MODULE: ./src/utils/request/index.ts + 1 modules
 var request = __webpack_require__(4597);
 // EXTERNAL MODULE: ./node_modules/pinkie/index.js
@@ -35155,7 +35071,7 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
         res({
           responseData: _args.data,
           size: _args.size,
-          duration: _args.duration,
+          requestDuration: _args.duration,
           url: _args.url,
           receivedTime: receivedTime,
           sendingTime: sendingTime
@@ -35553,8 +35469,7 @@ function arrayIncludes(arr, searchElement, fromIndex) {
 /* harmony export */   "Z": function() { return /* binding */ assert; },
 /* harmony export */   "u": function() { return /* binding */ assertInterface; }
 /* harmony export */ });
-/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3801);
-/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1946);
+/* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1946);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -35580,9 +35495,7 @@ function arrayIncludes(arr, searchElement, fromIndex) {
  */
 
 function assert(assertion, message) {
-  if (!assertion) {
-    throw new _errors__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z(message === undefined ? "invalid assertion" : message);
-  }
+  if (false) {}
 }
 /**
  * Throws if the given Object does not respect the interface.
@@ -35599,7 +35512,7 @@ function assertInterface(o, iface, name) {
     name = "object";
   }
 
-  assert(!(0,_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .Z)(o), name + " should be an object");
+  assert(!(0,_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z)(o), name + " should be an object");
 
   for (var k in iface) {
     if (iface.hasOwnProperty(k)) {
@@ -35616,14 +35529,73 @@ function assertInterface(o, iface, name) {
 
 /***/ }),
 
-/***/ 8418:
+/***/ 7904:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Z": function() { return /* binding */ assertUnreachable; }
-/* harmony export */ });
-/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3801);
+
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, {
+  "Z": function() { return /* binding */ assertUnreachable; }
+});
+
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js
+var assertThisInitialized = __webpack_require__(7326);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inheritsLoose.js
+var inheritsLoose = __webpack_require__(4578);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/wrapNativeSuper.js + 4 modules
+var wrapNativeSuper = __webpack_require__(2146);
+;// CONCATENATED MODULE: ./src/errors/assertion_error.ts
+
+
+
+
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Error due to an abnormal assertion fails.
+ *
+ * This should be an internal error which is later transformed into a documented
+ * (as part of the API) Error instance before being emitted to the application.
+ * @class AssertionError
+ * @extends Error
+ */
+var AssertionError = /*#__PURE__*/function (_Error) {
+  (0,inheritsLoose/* default */.Z)(AssertionError, _Error);
+
+  /**
+   * @param {string} message
+   */
+  function AssertionError(message) {
+    var _this;
+
+    _this = _Error.call(this) || this; // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
+
+    Object.setPrototypeOf((0,assertThisInitialized/* default */.Z)(_this), AssertionError.prototype);
+    _this.name = "AssertionError";
+    _this.message = message;
+    return _this;
+  }
+
+  return AssertionError;
+}( /*#__PURE__*/(0,wrapNativeSuper/* default */.Z)(Error));
+
+
+;// CONCATENATED MODULE: ./src/utils/assert_unreachable.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -35666,7 +35638,7 @@ function assertInterface(o, iface, name) {
  */
 
 function assertUnreachable(_) {
-  throw new _errors__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z("Unreachable path taken");
+  throw new AssertionError("Unreachable path taken");
 }
 
 /***/ }),
@@ -36135,6 +36107,17 @@ __webpack_require__.d(__webpack_exports__, {
   "Z": function() { return /* binding */ deferSubscriptions; }
 });
 
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/lift.js
+var lift = __webpack_require__(6798);
+;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/subscribeOn.js
+
+function subscribeOn(scheduler, delay) {
+    if (delay === void 0) { delay = 0; }
+    return (0,lift/* operate */.e)(function (source, subscriber) {
+        subscriber.add(scheduler.schedule(function () { return source.subscribe(subscriber); }, delay));
+    });
+}
+//# sourceMappingURL=subscribeOn.js.map
 // EXTERNAL MODULE: ./node_modules/rxjs/node_modules/tslib/tslib.es6.js
 var tslib_es6 = __webpack_require__(5987);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/scheduler/AsyncAction.js + 2 modules
@@ -36266,17 +36249,6 @@ var AsapScheduler = (function (_super) {
 var asapScheduler = new AsapScheduler(AsapAction);
 var asap = (/* unused pure expression or super */ null && (asapScheduler));
 //# sourceMappingURL=asap.js.map
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/lift.js
-var lift = __webpack_require__(6798);
-;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/subscribeOn.js
-
-function subscribeOn(scheduler, delay) {
-    if (delay === void 0) { delay = 0; }
-    return (0,lift/* operate */.e)(function (source, subscriber) {
-        subscriber.add(scheduler.schedule(function () { return source.subscribe(subscriber); }, delay));
-    });
-}
-//# sourceMappingURL=subscribeOn.js.map
 ;// CONCATENATED MODULE: ./src/utils/defer_subscriptions.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -36293,7 +36265,6 @@ function subscribeOn(scheduler, delay) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /**
  * At subscription, instead of "running" the Observable right away, wait until
@@ -36528,8 +36499,8 @@ function fromEvent(target, eventName) {
 /* harmony export */   "Z": function() { return /* binding */ filterMap; }
 /* harmony export */ });
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(9917);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9127);
-/* harmony import */ var rxjs_operators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4975);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9127);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4975);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -36546,7 +36517,6 @@ function fromEvent(target, eventName) {
  * limitations under the License.
  */
 
-
 /**
  * Special kind of map which will ignore the result when the value emitted
  * corresponds to a given token.
@@ -36562,7 +36532,7 @@ function fromEvent(target, eventName) {
 function filterMap(callback, filteringToken) {
   return function (source) {
     return (0,rxjs__WEBPACK_IMPORTED_MODULE_0__/* .defer */ .P)(function () {
-      return source.pipe((0,rxjs_operators__WEBPACK_IMPORTED_MODULE_1__/* .map */ .U)(callback), (0,rxjs_operators__WEBPACK_IMPORTED_MODULE_2__/* .filter */ .h)(function (x) {
+      return source.pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_1__/* .map */ .U)(callback), (0,rxjs__WEBPACK_IMPORTED_MODULE_2__/* .filter */ .h)(function (x) {
         return x !== filteringToken;
       }));
     });
@@ -37964,6 +37934,173 @@ function isTimeInTimeRanges(ranges, time) {
 
 /***/ }),
 
+/***/ 5095:
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "$": function() { return /* binding */ createSharedReference; }
+/* harmony export */ });
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1480);
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3887);
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+/**
+ * Create an `ISharedReference` object encapsulating the mutable `initialValue`
+ * value of type T.
+ *
+ * @see ISharedReference
+ * @param {*} initialValue
+ * @returns {Observable}
+ */
+
+function createSharedReference(initialValue) {
+  /** Current value referenced by this `ISharedReference`. */
+  var value = initialValue;
+  /**
+   * List of currently subscribed Observables which listen to the referenced
+   * value's updates.
+   *
+   * Contains two properties:
+   *   - `subscriber`: interface through which new value will be communicated.
+   *   - `hasBeenUnsubscribed`: becomes `true` when the Observable becomes
+   *     unsubscribed and thus when it is removed from the `subs` array.
+   *     Adding this property allows to detect when a previously-added
+   *     Observable has since been unsubscribed e.g. as a side-effect during a
+   *     function call.
+   */
+
+  var subs = [];
+  var isFinished = false;
+  return {
+    /**
+     * Returns the current value of this shared reference.
+     * @returns {*}
+     */
+    getValue: function getValue() {
+      return value;
+    },
+
+    /**
+     * Update the value of this shared reference.
+     * @param {*}
+     */
+    setValue: function setValue(newVal) {
+      if (isFinished) {
+        if (false) {} else {
+          _log__WEBPACK_IMPORTED_MODULE_0__/* ["default"].error */ .Z.error("Finished shared references cannot be updated");
+          return;
+        }
+      }
+
+      value = newVal;
+
+      if (subs.length === 0) {
+        return;
+      }
+
+      var clonedSubs = subs.slice();
+
+      for (var _iterator = _createForOfIteratorHelperLoose(clonedSubs), _step; !(_step = _iterator()).done;) {
+        var subObj = _step.value;
+
+        try {
+          if (!subObj.hasBeenUnsubscribed) {
+            subObj.subscriber.next(newVal);
+          }
+        } catch (_) {
+          /* nothing */
+        }
+      }
+    },
+
+    /**
+     * Returns an Observable which synchronously emits the current value (unless
+     * the `skipCurrentValue` argument has been set to `true`) and then each
+     * time a new value is set.
+     * @param {boolean} [skipCurrentValue]
+     * @returns {Observable}
+     */
+    asObservable: function asObservable(skipCurrentValue) {
+      return new rxjs__WEBPACK_IMPORTED_MODULE_1__/* .Observable */ .y(function (obs) {
+        if (skipCurrentValue !== true) {
+          obs.next(value);
+        }
+
+        if (isFinished) {
+          obs.complete();
+          return undefined;
+        }
+
+        var subObj = {
+          subscriber: obs,
+          hasBeenUnsubscribed: false
+        };
+        subs.push(subObj);
+        return function () {
+          /**
+           * Code in here can still be running while this is happening.
+           * Set `hasBeenUnsubscribed` to `true` to avoid still using the
+           * `subscriber` from this object.
+           */
+          subObj.hasBeenUnsubscribed = true;
+          var indexOf = subs.indexOf(subObj);
+
+          if (indexOf >= 0) {
+            subs.splice(indexOf, 1);
+          }
+        };
+      });
+    },
+
+    /**
+     * Indicate that no new values will be emitted.
+     * Allows to automatically close all Observables generated from this shared
+     * reference.
+     */
+    finish: function finish() {
+      isFinished = true;
+      var clonedSubs = subs.slice();
+
+      for (var _iterator2 = _createForOfIteratorHelperLoose(clonedSubs), _step2; !(_step2 = _iterator2()).done;) {
+        var subObj = _step2.value;
+
+        try {
+          if (!subObj.hasBeenUnsubscribed) {
+            subObj.subscriber.complete();
+          }
+        } catch (_) {
+          /* nothing */
+        }
+      }
+    }
+  };
+}
+/* harmony default export */ __webpack_exports__["Z"] = (createSharedReference);
+
+/***/ }),
+
 /***/ 4597:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
@@ -38127,7 +38264,7 @@ function request(options) {
             responseType: loadedResponseType,
             sendingTime: sendingTime,
             receivedTime: receivedTime,
-            duration: receivedTime - sendingTime,
+            requestDuration: receivedTime - sendingTime,
             size: totalSize,
             responseData: responseData
           });
@@ -44075,47 +44212,18 @@ var inheritsLoose = __webpack_require__(4578);
 var Subject = __webpack_require__(6716);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/ReplaySubject.js
 var ReplaySubject = __webpack_require__(3);
-// EXTERNAL MODULE: ./node_modules/rxjs/node_modules/tslib/tslib.es6.js
-var tslib_es6 = __webpack_require__(5987);
-;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/BehaviorSubject.js
-
-
-var BehaviorSubject = (function (_super) {
-    (0,tslib_es6/* __extends */.ZT)(BehaviorSubject, _super);
-    function BehaviorSubject(_value) {
-        var _this = _super.call(this) || this;
-        _this._value = _value;
-        return _this;
-    }
-    Object.defineProperty(BehaviorSubject.prototype, "value", {
-        get: function () {
-            return this.getValue();
-        },
-        enumerable: false,
-        configurable: true
-    });
-    BehaviorSubject.prototype._subscribe = function (subscriber) {
-        var subscription = _super.prototype._subscribe.call(this, subscriber);
-        !subscription.closed && subscriber.next(this._value);
-        return subscription;
-    };
-    BehaviorSubject.prototype.getValue = function () {
-        var _a = this, hasError = _a.hasError, thrownError = _a.thrownError, _value = _a._value;
-        if (hasError) {
-            throw thrownError;
-        }
-        this._throwIfClosed();
-        return _value;
-    };
-    BehaviorSubject.prototype.next = function (value) {
-        _super.prototype.next.call(this, (this._value = value));
-    };
-    return BehaviorSubject;
-}(Subject/* Subject */.x));
-
-//# sourceMappingURL=BehaviorSubject.js.map
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/takeUntil.js
+var takeUntil = __webpack_require__(3505);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/map.js
+var map = __webpack_require__(9127);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/distinctUntilChanged.js
+var distinctUntilChanged = __webpack_require__(3741);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
 var of = __webpack_require__(2817);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/mergeMap.js
+var mergeMap = __webpack_require__(3994);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/shareReplay.js
+var shareReplay = __webpack_require__(8515);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
 var Observable = __webpack_require__(1480);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/defer.js
@@ -44148,34 +44256,22 @@ function connectable(source, config) {
     return result;
 }
 //# sourceMappingURL=connectable.js.map
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/combineLatest.js + 2 modules
-var combineLatest = __webpack_require__(2334);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
-var concat = __webpack_require__(6362);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
-var merge = __webpack_require__(3071);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/empty.js
-var empty = __webpack_require__(1545);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/takeUntil.js
-var takeUntil = __webpack_require__(3505);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/map.js
-var map = __webpack_require__(9127);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/distinctUntilChanged.js
-var distinctUntilChanged = __webpack_require__(3741);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/mergeMap.js
-var mergeMap = __webpack_require__(3994);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/shareReplay.js
-var shareReplay = __webpack_require__(8515);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/filter.js
 var filter = __webpack_require__(4975);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/share.js
 var share = __webpack_require__(5583);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/combineLatest.js + 2 modules
+var combineLatest = __webpack_require__(2334);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/startWith.js
 var startWith = __webpack_require__(8430);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
+var concat = __webpack_require__(6362);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/take.js
 var take = __webpack_require__(4727);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/mapTo.js
 var mapTo = __webpack_require__(3833);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
+var merge = __webpack_require__(3071);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/lift.js
 var lift = __webpack_require__(6798);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/OperatorSubscriber.js
@@ -44195,6 +44291,8 @@ function skipWhile(predicate) {
 var switchMapTo = __webpack_require__(8550);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/mergeMapTo.js
 var mergeMapTo = __webpack_require__(8902);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/empty.js
+var empty = __webpack_require__(1545);
 // EXTERNAL MODULE: ./src/compat/event_listeners.ts + 5 modules
 var event_listeners = __webpack_require__(8719);
 ;// CONCATENATED MODULE: ./src/compat/fullscreen.ts
@@ -44477,6 +44575,8 @@ var object_assign = __webpack_require__(8026);
 var promise = __webpack_require__(9589);
 // EXTERNAL MODULE: ./src/utils/ranges.ts
 var ranges = __webpack_require__(2829);
+// EXTERNAL MODULE: ./src/utils/reference.ts
+var reference = __webpack_require__(5095);
 // EXTERNAL MODULE: ./src/utils/warn_once.ts
 var warn_once = __webpack_require__(8806);
 // EXTERNAL MODULE: ./src/utils/noop.ts
@@ -44501,7 +44601,6 @@ var media_keys_infos_store = __webpack_require__(6033);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -44622,7 +44721,6 @@ function shouldUnsetMediaKeys() {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -45298,7 +45396,7 @@ var ManifestFetcher = /*#__PURE__*/function () {
     return this._parseLoadedManifest({
       responseData: manifest,
       size: undefined,
-      duration: undefined
+      requestDuration: undefined
     }, parserOptions);
   }
   /**
@@ -46231,6 +46329,10 @@ var DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR = config/* default.DEFAULT_MAX_REQUESTS_
     segment_fetcher_INITIAL_BACKOFF_DELAY_BASE = config/* default.INITIAL_BACKOFF_DELAY_BASE */.Z.INITIAL_BACKOFF_DELAY_BASE,
     segment_fetcher_MAX_BACKOFF_DELAY_BASE = config/* default.MAX_BACKOFF_DELAY_BASE */.Z.MAX_BACKOFF_DELAY_BASE;
 var generateRequestID = (0,id_generator/* default */.Z)();
+window.LAST_REQUESTS = {
+  audio: [],
+  video: []
+};
 /**
  * Create a function which will fetch and parse segments.
  * @param {string} bufferType
@@ -46264,14 +46366,35 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, requests$, o
    */
 
   return function fetchSegment(content) {
-    var segment = content.segment;
+    var segment = content.segment,
+        representation = content.representation,
+        period = content.period;
     return new Observable/* Observable */.y(function (obs) {
-      var _a; // Retrieve from cache if it exists
+      var _a;
 
+      function pushReq() {
+        if (content.adaptation.type === "audio" || content.adaptation.type === "video") {
+          window.LAST_REQUESTS[content.adaptation.type].push({
+            isInit: segment.isInit,
+            segmentTime: segment.time,
+            responseTimestamp: performance.now(),
+            repBit: representation.bitrate,
+            periodStart: period.start
+          });
+
+          while (window.LAST_REQUESTS[content.adaptation.type].length > 20) {
+            window.LAST_REQUESTS[content.adaptation.type].shift();
+          }
+        }
+      }
+
+      var hasRequestEnded = false; // Retrieve from cache if it exists
 
       var cached = cache !== undefined ? cache.get(content) : null;
 
       if (cached !== null) {
+        hasRequestEnded = true;
+        pushReq();
         obs.next({
           type: "chunk",
           parse: generateParserFunction(cached, false)
@@ -46287,14 +46410,12 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, requests$, o
       requests$.next({
         type: "requestBegin",
         value: {
-          duration: segment.duration,
-          time: segment.time,
+          segment: segment,
           requestTimestamp: performance.now(),
           id: id
         }
       });
       var canceller = new task_canceller/* default */.ZP();
-      var hasRequestEnded = false;
       var loaderCallbacks = {
         /**
          * Callback called when the segment loader has progress information on
@@ -46351,16 +46472,17 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, requests$, o
         }
 
         hasRequestEnded = true;
+        pushReq();
         obs.next({
           type: "chunk-complete"
         });
 
-        if ((res.resultType === "segment-loaded" || res.resultType === "chunk-complete") && res.resultData.size !== undefined && res.resultData.duration !== undefined) {
+        if ((res.resultType === "segment-loaded" || res.resultType === "chunk-complete") && res.resultData.size !== undefined && res.resultData.requestDuration !== undefined) {
           requests$.next({
             type: "metrics",
             value: {
               size: res.resultData.size,
-              duration: res.resultData.duration,
+              duration: res.resultData.requestDuration,
               content: content
             }
           });
@@ -46859,7 +46981,6 @@ var BandwidthEstimator = /*#__PURE__*/function () {
  */
 
 
-
 /**
  * Create Observable that merge several throttling Observables into one.
  * @param {Observable} limitWidth$ - Emit the width at which the chosen
@@ -46978,17 +47099,17 @@ function getBufferLevels(bitrates) {
 
 /**
  * From the buffer gap, choose a representation.
- * @param {Object} clockTick
+ * @param {Object} playbackObservation
  * @param {Array.<Number>} bitrates
  * @param {Array.<Number>} bufferLevels
  * @returns {Object|undefined}
  */
 
-function getEstimateFromBufferLevels(clockTick, bitrates, bufferLevels) {
-  var bufferGap = clockTick.bufferGap,
-      currentBitrate = clockTick.currentBitrate,
-      currentScore = clockTick.currentScore,
-      speed = clockTick.speed;
+function getEstimateFromBufferLevels(playbackObservation, bitrates, bufferLevels) {
+  var bufferGap = playbackObservation.bufferGap,
+      currentBitrate = playbackObservation.currentBitrate,
+      currentScore = playbackObservation.currentScore,
+      speed = playbackObservation.speed;
 
   if (currentBitrate == null) {
     return bitrates[0];
@@ -47089,8 +47210,8 @@ function BufferBasedChooser(update$, bitrates) {
       bitrate: bitrates[i]
     };
   }));
-  return update$.pipe((0,map/* map */.U)(function (clockTick) {
-    return getEstimateFromBufferLevels(clockTick, bitrates, levelsMap);
+  return update$.pipe((0,map/* map */.U)(function (playbackObservation) {
+    return getEstimateFromBufferLevels(playbackObservation, bitrates, levelsMap);
   }));
 }
 ;// CONCATENATED MODULE: ./src/core/abr/filter_by_bitrate.ts
@@ -47222,12 +47343,12 @@ var ABR_REGULAR_FACTOR = config/* default.ABR_REGULAR_FACTOR */.Z.ABR_REGULAR_FA
 function getConcernedRequests(requests, neededPosition) {
   /** Index of the request for the next needed segment, in `requests`. */
   var nextSegmentIndex = (0,array_find_index/* default */.Z)(requests, function (request) {
-    if (request.duration <= 0) {
+    if (request.segment.duration <= 0) {
       return false;
     }
 
-    var segmentEnd = request.time + request.duration;
-    return segmentEnd > neededPosition && neededPosition - request.time > -1.2;
+    var segmentEnd = request.segment.time + request.segment.duration;
+    return segmentEnd > neededPosition && neededPosition - request.segment.time > -1.2;
   });
 
   if (nextSegmentIndex < 0) {
@@ -47236,11 +47357,11 @@ function getConcernedRequests(requests, neededPosition) {
   }
 
   var nextRequest = requests[nextSegmentIndex];
-  var segmentTime = nextRequest.time;
+  var segmentTime = nextRequest.segment.time;
   var filteredRequests = [nextRequest]; // Get the possibly multiple requests for that segment's position
 
   for (var i = nextSegmentIndex + 1; i < requests.length; i++) {
-    if (requests[i].time === segmentTime) {
+    if (requests[i].segment.time === segmentTime) {
       filteredRequests.push(requests[i]);
     } else {
       break;
@@ -47319,7 +47440,7 @@ function estimateStarvationModeBitrate(pendingRequests, playbackInfo, currentRep
   }
 
   var concernedRequest = concernedRequests[0];
-  var chunkDuration = concernedRequest.duration;
+  var chunkDuration = concernedRequest.segment.duration;
   var now = performance.now();
   var lastProgressEvent = concernedRequest.progress.length > 0 ? concernedRequest.progress[concernedRequest.progress.length - 1] : undefined; // first, try to do a quick estimate from progress events
 
@@ -47371,7 +47492,7 @@ function shouldDirectlySwitchToLowBitrate(playbackInfo, requests) {
   var realBufferGap = isFinite(playbackInfo.bufferGap) ? playbackInfo.bufferGap : 0;
   var nextNeededPosition = playbackInfo.position + realBufferGap;
   var nextRequest = (0,array_find/* default */.Z)(requests, function (r) {
-    return r.duration > 0 && r.time + r.duration > nextNeededPosition;
+    return r.segment.duration > 0 && r.segment.time + r.segment.duration > nextNeededPosition;
   });
 
   if (nextRequest === undefined) {
@@ -47563,12 +47684,10 @@ var PendingRequestsStore = /*#__PURE__*/function () {
 
   _proto.add = function add(payload) {
     var id = payload.id,
-        time = payload.time,
-        duration = payload.duration,
+        segment = payload.segment,
         requestTimestamp = payload.requestTimestamp;
     this._currentRequests[id] = {
-      time: time,
-      duration: duration,
+      segment: segment,
       requestTimestamp: requestTimestamp,
       progress: []
     };
@@ -47617,7 +47736,7 @@ var PendingRequestsStore = /*#__PURE__*/function () {
     return (0,object_values/* default */.Z)(this._currentRequests).filter(function (x) {
       return x != null;
     }).sort(function (reqA, reqB) {
-      return reqA.time - reqB.time;
+      return reqA.segment.time - reqB.segment.time;
     });
   };
 
@@ -47836,7 +47955,6 @@ function selectOptimalRepresentation(representations, optimalBitrate, minBitrate
 
 
 
-
 /**
  * Filter representations given through filters options.
  * @param {Array.<Representation>} representations
@@ -47873,7 +47991,7 @@ function getFilteredRepresentations(representations, filters) {
 
 function RepresentationEstimator(_ref) {
   var bandwidthEstimator = _ref.bandwidthEstimator,
-      clock$ = _ref.clock$,
+      observation$ = _ref.observation$,
       filters$ = _ref.filters$,
       initialBitrate = _ref.initialBitrate,
       lowLatencyMode = _ref.lowLatencyMode,
@@ -47964,9 +48082,9 @@ function RepresentationEstimator(_ref) {
       var forceBandwidthMode = true; // Emit each time a buffer-based estimation should be actualized (each
       // time a segment is added).
 
-      var bufferBasedClock$ = streamEvents$.pipe((0,filter/* filter */.h)(function (e) {
+      var bufferBasedobservation$ = streamEvents$.pipe((0,filter/* filter */.h)(function (e) {
         return e.type === "added-segment";
-      }), (0,withLatestFrom/* withLatestFrom */.M)(clock$), (0,map/* map */.U)(function (_ref3) {
+      }), (0,withLatestFrom/* withLatestFrom */.M)(observation$), (0,map/* map */.U)(function (_ref3) {
         var evtValue = _ref3[0].value,
             _ref3$ = _ref3[1],
             speed = _ref3$.speed,
@@ -47986,10 +48104,10 @@ function RepresentationEstimator(_ref) {
       var bitrates = representations.map(function (r) {
         return r.bitrate;
       });
-      var bufferBasedEstimation$ = BufferBasedChooser(bufferBasedClock$, bitrates).pipe((0,startWith/* startWith */.O)(undefined));
-      return (0,combineLatest/* combineLatest */.a)([clock$, minAutoBitrate$, maxAutoBitrate$, filters$, bufferBasedEstimation$]).pipe((0,withLatestFrom/* withLatestFrom */.M)(currentRepresentation$), (0,map/* map */.U)(function (_ref4) {
+      var bufferBasedEstimation$ = BufferBasedChooser(bufferBasedobservation$, bitrates).pipe((0,startWith/* startWith */.O)(undefined));
+      return (0,combineLatest/* combineLatest */.a)([observation$, minAutoBitrate$, maxAutoBitrate$, filters$, bufferBasedEstimation$]).pipe((0,withLatestFrom/* withLatestFrom */.M)(currentRepresentation$), (0,map/* map */.U)(function (_ref4) {
         var _ref4$ = _ref4[0],
-            clock = _ref4$[0],
+            observation = _ref4$[0],
             minAutoBitrate = _ref4$[1],
             maxAutoBitrate = _ref4$[2],
             filters = _ref4$[3],
@@ -48000,14 +48118,14 @@ function RepresentationEstimator(_ref) {
 
         var requests = requestsStore.getRequests();
 
-        var _networkAnalyzer$getB = networkAnalyzer.getBandwidthEstimate(clock, bandwidthEstimator, currentRepresentation, requests, lastEstimatedBitrate),
+        var _networkAnalyzer$getB = networkAnalyzer.getBandwidthEstimate(observation, bandwidthEstimator, currentRepresentation, requests, lastEstimatedBitrate),
             bandwidthEstimate = _networkAnalyzer$getB.bandwidthEstimate,
             bitrateChosen = _networkAnalyzer$getB.bitrateChosen;
 
         lastEstimatedBitrate = bandwidthEstimate;
         var stableRepresentation = scoreCalculator.getLastStableRepresentation();
-        var knownStableBitrate = stableRepresentation == null ? undefined : stableRepresentation.bitrate / (clock.speed > 0 ? clock.speed : 1);
-        var bufferGap = clock.bufferGap;
+        var knownStableBitrate = stableRepresentation == null ? undefined : stableRepresentation.bitrate / (observation.speed > 0 ? observation.speed : 1);
+        var bufferGap = observation.bufferGap;
 
         if (!forceBandwidthMode && bufferGap <= 5) {
           forceBandwidthMode = true;
@@ -48022,7 +48140,7 @@ function RepresentationEstimator(_ref) {
           return {
             bitrate: bandwidthEstimate,
             representation: chosenRepFromBandwidth,
-            urgent: networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate, currentRepresentation, requests, clock),
+            urgent: networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate, currentRepresentation, requests, observation),
             manual: false,
             knownStableBitrate: knownStableBitrate
           };
@@ -48033,7 +48151,7 @@ function RepresentationEstimator(_ref) {
           return {
             bitrate: bandwidthEstimate,
             representation: chosenRepFromBandwidth,
-            urgent: networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate, currentRepresentation, requests, clock),
+            urgent: networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate, currentRepresentation, requests, observation),
             manual: false,
             knownStableBitrate: knownStableBitrate
           };
@@ -48048,7 +48166,7 @@ function RepresentationEstimator(_ref) {
         return {
           bitrate: bandwidthEstimate,
           representation: chosenRepresentation,
-          urgent: networkAnalyzer.isUrgent(bufferBasedBitrate, currentRepresentation, requests, clock),
+          urgent: networkAnalyzer.isUrgent(bufferBasedBitrate, currentRepresentation, requests, observation),
           manual: false,
           knownStableBitrate: knownStableBitrate
         };
@@ -48106,7 +48224,7 @@ var ABRManager = /*#__PURE__*/function () {
    * state).
    * @param {string} type
    * @param {Array.<Representation>} representations
-   * @param {Observable<Object>} clock$
+   * @param {Observable<Object>} observation$
    * @param {Observable<Object>} streamEvents$
    * @returns {Observable}
    */
@@ -48114,18 +48232,20 @@ var ABRManager = /*#__PURE__*/function () {
 
   var _proto = ABRManager.prototype;
 
-  _proto.get$ = function get$(type, representations, clock$, streamEvents$) {
+  _proto.get$ = function get$(type, representations, observation$, streamEvents$) {
+    var _a, _b, _c;
+
     var bandwidthEstimator = this._getBandwidthEstimator(type);
 
-    var manualBitrate$ = (0,take_first_set/* default */.Z)(this._manualBitrates[type], (0,of.of)(-1));
-    var minAutoBitrate$ = (0,take_first_set/* default */.Z)(this._minAutoBitrates[type], (0,of.of)(0));
-    var maxAutoBitrate$ = (0,take_first_set/* default */.Z)(this._maxAutoBitrates[type], (0,of.of)(Infinity));
+    var manualBitrate$ = (0,take_first_set/* default */.Z)((_a = this._manualBitrates[type]) === null || _a === void 0 ? void 0 : _a.asObservable(), (0,of.of)(-1));
+    var minAutoBitrate$ = (0,take_first_set/* default */.Z)((_b = this._minAutoBitrates[type]) === null || _b === void 0 ? void 0 : _b.asObservable(), (0,of.of)(0));
+    var maxAutoBitrate$ = (0,take_first_set/* default */.Z)((_c = this._maxAutoBitrates[type]) === null || _c === void 0 ? void 0 : _c.asObservable(), (0,of.of)(Infinity));
     var initialBitrate = (0,take_first_set/* default */.Z)(this._initialBitrates[type], 0);
     var filters$ = createFilters(this._throttlers.limitWidth[type], this._throttlers.throttleBitrate[type], this._throttlers.throttle[type]);
     return RepresentationEstimator({
       bandwidthEstimator: bandwidthEstimator,
       streamEvents$: streamEvents$,
-      clock$: clock$,
+      observation$: observation$,
       filters$: filters$,
       initialBitrate: initialBitrate,
       manualBitrate$: manualBitrate$,
@@ -48200,7 +48320,6 @@ var is_non_empty_string = __webpack_require__(6923);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -48452,8 +48571,8 @@ function tryToChangeSourceBufferType(sourceBuffer, codec) {
 
   return false;
 }
-// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts
-var assert_unreachable = __webpack_require__(8418);
+// EXTERNAL MODULE: ./src/utils/assert_unreachable.ts + 1 modules
+var assert_unreachable = __webpack_require__(7904);
 // EXTERNAL MODULE: ./src/utils/byte_parsing.ts
 var byte_parsing = __webpack_require__(6968);
 // EXTERNAL MODULE: ./src/utils/hash_buffer.ts
@@ -48488,8 +48607,16 @@ var types = __webpack_require__(9612);
 
 
 
-
 var SOURCE_BUFFER_FLUSHING_INTERVAL = config/* default.SOURCE_BUFFER_FLUSHING_INTERVAL */.Z.SOURCE_BUFFER_FLUSHING_INTERVAL;
+window.LAST_APPEND = {
+  audio: [],
+  video: []
+};
+var baei = localStorage.getItem("bae");
+
+if (baei === null) {
+  localStorage.setItem("bae", "[]");
+}
 /**
  * Allows to push and remove new segments to a SourceBuffer in a FIFO queue (not
  * doing so can lead to browser Errors) while keeping an inventory of what has
@@ -48500,6 +48627,7 @@ var SOURCE_BUFFER_FLUSHING_INTERVAL = config/* default.SOURCE_BUFFER_FLUSHING_IN
  *
  * @class AudioVideoSegmentBuffer
  */
+
 
 var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
   (0,inheritsLoose/* default */.Z)(AudioVideoSegmentBuffer, _SegmentBuffer);
@@ -48514,6 +48642,8 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
     var _this;
 
     _this = _SegmentBuffer.call(this) || this;
+    window.LAST_APPEND[bufferType] = [];
+    window.LAST_REQUESTS[bufferType] = [];
     var sourceBuffer = mediaSource.addSourceBuffer(codec);
     _this._destroy$ = new Subject/* Subject */.x();
     _this.bufferType = bufferType;
@@ -48707,6 +48837,22 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
     if (this._pendingTask !== null) {
       var error = err instanceof Error ? err : new Error("An unknown error occured when doing operations " + "on the SourceBuffer");
 
+      var _baei = localStorage.getItem("bae");
+
+      var parsed = JSON.parse(_baei !== null && _baei !== void 0 ? _baei : "[]");
+
+      while (parsed.length > 10) {
+        parsed.shift();
+      }
+
+      parsed.push({
+        errorType: "operationError",
+        lastRequests: window.LAST_REQUESTS,
+        lastAppends: window.LAST_APPEND,
+        timestamp: performance.now()
+      });
+      localStorage.setItem("bae", JSON.stringify(parsed));
+
       this._pendingTask.subject.error(error);
     }
   }
@@ -48821,6 +48967,22 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
             inventoryData: itemValue.inventoryInfos
           }, nextItem);
           var error = e instanceof Error ? e : new Error("An unknown error occured when preparing a push operation");
+
+          var _baei2 = localStorage.getItem("bae");
+
+          var parsed = JSON.parse(_baei2 !== null && _baei2 !== void 0 ? _baei2 : "[]");
+
+          while (parsed.length > 10) {
+            parsed.shift();
+          }
+
+          parsed.push({
+            errorType: "preparation-error",
+            lastRequests: window.LAST_REQUESTS,
+            lastAppends: window.LAST_APPEND,
+            timestamp: performance.now()
+          });
+          localStorage.setItem("bae", JSON.stringify(parsed));
           this._lastInitSegment = null; // initialize init segment as a security
 
           nextItem.subject.error(error);
@@ -48851,6 +49013,37 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
             this._flush();
 
             return;
+          }
+
+          if (this._pendingTask.inventoryData !== null) {
+            var _this$_pendingTask$in = this._pendingTask.inventoryData,
+                segment = _this$_pendingTask$in.segment,
+                adaptation = _this$_pendingTask$in.adaptation,
+                representation = _this$_pendingTask$in.representation,
+                period = _this$_pendingTask$in.period;
+            window.LAST_APPEND[adaptation.type].push({
+              isInit: segment.isInit,
+              segmentTime: segment.time,
+              repBit: representation.bitrate,
+              periodStart: period.start,
+              pushTimestamp: performance.now()
+            });
+
+            while (window.LAST_APPEND[adaptation.type].length > 20) {
+              window.LAST_APPEND[adaptation.type].shift();
+            }
+          } else if (this._pendingTask.value.data.initSegment !== null && segmentData === this._pendingTask.value.data.initSegment) {
+            window.LAST_APPEND[this.bufferType].push({
+              isInit: true,
+              segmentTime: 0,
+              repBit: undefined,
+              periodStart: undefined,
+              pushTimestamp: performance.now()
+            });
+
+            while (window.LAST_APPEND[this.bufferType].length > 20) {
+              window.LAST_APPEND[this.bufferType].shift();
+            }
           }
 
           this._sourceBuffer.appendBuffer(segmentData);
@@ -49002,6 +49195,21 @@ function assertPushedDataIsBufferSource(pushedData) {
       initSegment = _pushedData$data.initSegment;
 
   if (typeof chunk !== "object" || typeof initSegment !== "object" || chunk !== null && !(chunk instanceof ArrayBuffer) && !(chunk.buffer instanceof ArrayBuffer) || initSegment !== null && !(initSegment instanceof ArrayBuffer) && !(initSegment.buffer instanceof ArrayBuffer)) {
+    var _baei3 = localStorage.getItem("bae");
+
+    var parsed = JSON.parse(_baei3 !== null && _baei3 !== void 0 ? _baei3 : "[]");
+
+    while (parsed.length > 10) {
+      parsed.shift();
+    }
+
+    parsed.push({
+      errorType: "invalidData",
+      lastRequests: window.LAST_REQUESTS,
+      lastAppends: window.LAST_APPEND,
+      timestamp: performance.now()
+    });
+    localStorage.setItem("bae", JSON.stringify(parsed));
     throw new Error("Invalid data given to the AudioVideoSegmentBuffer");
   }
 }
@@ -49738,11 +49946,10 @@ var concatAll = __webpack_require__(9834);
 
 
 
-
 /**
  * Perform cleaning of the buffer according to the values set by the user
- * at each clock tick and each times the maxBufferBehind/maxBufferAhead values
- * change.
+ * each time `currentTime$` emits and each times the
+ * maxBufferBehind/maxBufferAhead values change.
  *
  * @param {Object} opt
  * @returns {Observable}
@@ -49750,10 +49957,10 @@ var concatAll = __webpack_require__(9834);
 
 function BufferGarbageCollector(_ref) {
   var segmentBuffer = _ref.segmentBuffer,
-      clock$ = _ref.clock$,
+      currentTime$ = _ref.currentTime$,
       maxBufferBehind$ = _ref.maxBufferBehind$,
       maxBufferAhead$ = _ref.maxBufferAhead$;
-  return (0,combineLatest/* combineLatest */.a)([clock$, maxBufferBehind$, maxBufferAhead$]).pipe((0,mergeMap/* mergeMap */.z)(function (_ref2) {
+  return (0,combineLatest/* combineLatest */.a)([currentTime$, maxBufferBehind$, maxBufferAhead$]).pipe((0,mergeMap/* mergeMap */.z)(function (_ref2) {
     var currentTime = _ref2[0],
         maxBufferBehind = _ref2[1],
         maxBufferAhead = _ref2[2];
@@ -49877,7 +50084,8 @@ var catchError = __webpack_require__(9878);
 
 
 /**
- * Regularly ask to reload the MediaSource on each `clock$` tick.
+ * Regularly ask to reload the MediaSource on each playback observation
+ * performed by the playback observer.
  *
  * If and only if the Period currently played corresponds to `Period`, applies
  * an offset to the reloaded position corresponding to `deltaPos`.
@@ -49887,7 +50095,7 @@ var catchError = __webpack_require__(9878);
  *
  * @param {Object} period - The Period linked to the Adaptation or
  * Representation that you want to switch to.
- * @param {Observable} clock$ - Observable emitting playback conditions.
+ * @param {Observable} playbackObserver - emit playback conditions.
  * Has to emit last playback conditions immediately on subscribe.
  * @param {number} deltaPos - If the concerned Period is playing at the time
  * this function is called, we will add this value, in seconds, to the current
@@ -49897,15 +50105,15 @@ var catchError = __webpack_require__(9878);
  * @returns {Observable}
  */
 
-function reloadAfterSwitch(period, bufferType, clock$, deltaPos) {
-  return clock$.pipe((0,map/* map */.U)(function (tick) {
+function reloadAfterSwitch(period, bufferType, playbackObserver, deltaPos) {
+  return playbackObserver.observe(true).pipe((0,map/* map */.U)(function (observation) {
     var _a;
 
-    var currentTime = tick.getCurrentTime();
+    var currentTime = playbackObserver.getCurrentTime();
     var pos = currentTime + deltaPos; // Bind to Period start and end
 
     var reloadAt = Math.min(Math.max(period.start, pos), (_a = period.end) !== null && _a !== void 0 ? _a : Infinity);
-    return stream_events_generators/* default.waitingMediaSourceReload */.Z.waitingMediaSourceReload(bufferType, period, reloadAt, !tick.isPaused);
+    return stream_events_generators/* default.waitingMediaSourceReload */.Z.waitingMediaSourceReload(bufferType, period, reloadAt, !observation.isPaused);
   }));
 }
 // EXTERNAL MODULE: ./node_modules/next-tick/index.js
@@ -49947,7 +50155,6 @@ function takeWhile(predicate, inclusive) {
 
 
 
-
 /**
  * Class scheduling segment downloads for a single Representation.
  * @class DownloadingQueue
@@ -49959,8 +50166,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
    *
    * @param {Object} content - The context of the Representation you want to
    * load segments for.
-   * @param {BehaviorSubject} downloadQueue$ - Emit the queue of segments you
-   * want to load.
+   * @param {Object} downloadQueue - Queue of segments you want to load.
    * @param {Object} segmentFetcher - Interface to facilitate the download of
    * segments.
    * @param {boolean} hasInitSegment - Declare that an initialization segment
@@ -49976,10 +50182,10 @@ var DownloadingQueue = /*#__PURE__*/function () {
    * that it should not wait for an initialization segment before parsing a
    * media segment.
    */
-  function DownloadingQueue(content, downloadQueue$, segmentFetcher, hasInitSegment) {
+  function DownloadingQueue(content, downloadQueue, segmentFetcher, hasInitSegment) {
     this._content = content;
     this._currentObs$ = null;
-    this._downloadQueue$ = downloadQueue$;
+    this._downloadQueue = downloadQueue;
     this._initSegmentRequest = null;
     this._mediaSegmentRequest = null;
     this._segmentFetcher = segmentFetcher;
@@ -50029,7 +50235,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
     }
 
     var obs = (0,defer/* defer */.P)(function () {
-      var mediaQueue$ = _this._downloadQueue$.pipe((0,filter/* filter */.h)(function (_ref) {
+      var mediaQueue$ = _this._downloadQueue.asObservable().pipe((0,filter/* filter */.h)(function (_ref) {
         var segmentQueue = _ref.segmentQueue;
         // First, the first elements of the segmentQueue might be already
         // loaded but awaiting the initialization segment to be parsed.
@@ -50068,7 +50274,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
         return segmentQueue.length > 0 ? _this._requestMediaSegments() : empty/* EMPTY */.E;
       }));
 
-      var initSegmentPush$ = _this._downloadQueue$.pipe((0,filter/* filter */.h)(function (next) {
+      var initSegmentPush$ = _this._downloadQueue.asObservable().pipe((0,filter/* filter */.h)(function (next) {
         var initSegmentRequest = _this._initSegmentRequest;
 
         if (next.initSegment !== null && initSegmentRequest !== null) {
@@ -50102,7 +50308,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
   _proto._requestMediaSegments = function _requestMediaSegments() {
     var _this2 = this;
 
-    var _this$_downloadQueue$ = this._downloadQueue$.getValue(),
+    var _this$_downloadQueue$ = this._downloadQueue.getValue(),
         segmentQueue = _this$_downloadQueue$.segmentQueue;
 
     var currentNeededSegment = segmentQueue[0];
@@ -50146,7 +50352,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
           case "ended":
             _this2._mediaSegmentRequest = null;
 
-            var lastQueue = _this2._downloadQueue$.getValue().segmentQueue;
+            var lastQueue = _this2._downloadQueue.getValue().segmentQueue;
 
             if (lastQueue.length === 0) {
               return (0,of.of)({
@@ -50952,21 +51158,20 @@ function shouldReloadSegmentGCedAtTheEnd(segmentEntries, currentBufferedEnd) {
 
 var SEGMENT_PRIORITIES_STEPS = config/* default.SEGMENT_PRIORITIES_STEPS */.Z.SEGMENT_PRIORITIES_STEPS;
 /**
- * Calculate the priority number for a given time, in function of the distance
- * with the current time.
+ * Calculate the priority number for a given segment start time, in function of
+ * the distance with the wanted starting timestamp.
  *
  * The lower is this number, the higher should be the priority of the request.
  *
- * Note that a `timeWanted` given behind the current time will always have the
+ * Note that a `segmentTime` given behind the current time will always have the
  * highest priority.
- * @param {number} timeWanted
- * @param {Object} clockTick
+ * @param {number} segmentTime
+ * @param {Object} wantedStartTimestamp
  * @returns {number}
  */
 
-function getSegmentPriority(timeWanted, clockTick) {
-  var currentTime = clockTick.position + clockTick.wantedTimeOffset;
-  var distance = timeWanted - currentTime;
+function getSegmentPriority(segmentTime, wantedStartTimestamp) {
+  var distance = segmentTime - wantedStartTimestamp;
 
   for (var priority = 0; priority < SEGMENT_PRIORITIES_STEPS.length; priority++) {
     if (distance < SEGMENT_PRIORITIES_STEPS[priority]) {
@@ -51006,20 +51211,19 @@ var get_buffer_status_MINIMUM_SEGMENT_SIZE = config/* default.MINIMUM_SEGMENT_SI
  * be filled by any segment, even in the future.
  *
  * @param {Object} content
- * @param {Object} tick
+ * @param {Object} playbackInfo
  * @param {number|undefined} fastSwitchThreshold
  * @param {number} bufferGoal
  * @param {Object} segmentBuffer
  * @returns {Object}
  */
 
-function getBufferStatus(content, tick, fastSwitchThreshold, bufferGoal, segmentBuffer) {
+function getBufferStatus(content, wantedStartPosition, playbackObserver, fastSwitchThreshold, bufferGoal, segmentBuffer) {
   var _a;
 
   var period = content.period,
       representation = content.representation;
   segmentBuffer.synchronizeInventory();
-  var wantedStartPosition = tick.position + tick.wantedTimeOffset;
   var wantedEndPosition = wantedStartPosition + bufferGoal;
   var neededRange = {
     start: Math.max(wantedStartPosition, period.start),
@@ -51042,6 +51246,7 @@ function getBufferStatus(content, tick, fastSwitchThreshold, bufferGoal, segment
     start: Math.max(neededRange.start - 0.5, 0),
     end: neededRange.end + 0.5
   }, segmentBuffer.getInventory());
+  var currentPlaybackTime = playbackObserver.getCurrentTime();
   /** Callback allowing to retrieve a segment's history in the buffer. */
 
   var getBufferedHistory = segmentBuffer.getSegmentHistory.bind(segmentBuffer);
@@ -51050,14 +51255,14 @@ function getBufferStatus(content, tick, fastSwitchThreshold, bufferGoal, segment
   var neededSegments = getNeededSegments({
     content: content,
     bufferedSegments: bufferedSegments,
-    currentPlaybackTime: tick.getCurrentTime(),
+    currentPlaybackTime: currentPlaybackTime,
     fastSwitchThreshold: fastSwitchThreshold,
     getBufferedHistory: getBufferedHistory,
     neededRange: neededRange,
     segmentsBeingPushed: segmentsBeingPushed
   }).map(function (segment) {
     return {
-      priority: getSegmentPriority(segment.time, tick),
+      priority: getSegmentPriority(segment.time, wantedStartPosition),
       segment: segment
     };
   });
@@ -51175,7 +51380,6 @@ function getPlayableBufferedSegments(neededRange, segmentInventory) {
 
 
 
-
 var GC_GAP_CALM = config/* default.BUFFER_GC_GAPS.CALM */.Z.BUFFER_GC_GAPS.CALM;
 var GC_GAP_BEEFY = config/* default.BUFFER_GC_GAPS.BEEFY */.Z.BUFFER_GC_GAPS.BEEFY;
 /**
@@ -51189,15 +51393,14 @@ var GC_GAP_BEEFY = config/* default.BUFFER_GC_GAPS.BEEFY */.Z.BUFFER_GC_GAPS.BEE
  * @returns {Observable}
  */
 
-function forceGarbageCollection(timings$, bufferingQueue) {
-  // wait for next timing event
-  return timings$.pipe((0,take/* take */.q)(1), (0,mergeMap/* mergeMap */.z)(function (timing) {
+function forceGarbageCollection(currentPosition, bufferingQueue) {
+  return (0,defer/* defer */.P)(function () {
     log/* default.warn */.Z.warn("Stream: Running garbage collector");
     var buffered = bufferingQueue.getBufferedRanges();
-    var cleanedupRanges = selectGCedRanges(timing.position, buffered, GC_GAP_CALM); // more aggressive GC if we could not find any range to clean
+    var cleanedupRanges = selectGCedRanges(currentPosition, buffered, GC_GAP_CALM); // more aggressive GC if we could not find any range to clean
 
     if (cleanedupRanges.length === 0) {
-      cleanedupRanges = selectGCedRanges(timing.position, buffered, GC_GAP_BEEFY);
+      cleanedupRanges = selectGCedRanges(currentPosition, buffered, GC_GAP_BEEFY);
     }
 
     log/* default.debug */.Z.debug("Stream: GC cleaning", cleanedupRanges);
@@ -51206,7 +51409,7 @@ function forceGarbageCollection(timings$, bufferingQueue) {
           end = _ref.end;
       return bufferingQueue.removeBuffer(start, end);
     })).pipe((0,concatAll/* concatAll */.u)());
-  }));
+  });
 }
 /**
  * Buffer garbage collector algorithm.
@@ -51285,19 +51488,18 @@ function selectGCedRanges(position, buffered, gcGap) {
 
 
 
-
 /**
  * Append a segment to the given segmentBuffer.
  * If it leads to a QuotaExceededError, try to run our custom range
  * _garbage collector_ then retry.
  *
- * @param {Observable} clock$
+ * @param {Observable} playbackObserver
  * @param {Object} segmentBuffer
  * @param {Object} dataInfos
  * @returns {Observable}
  */
 
-function appendSegmentToBuffer(clock$, segmentBuffer, dataInfos) {
+function appendSegmentToBuffer(playbackObserver, segmentBuffer, dataInfos) {
   var append$ = segmentBuffer.pushChunk(dataInfos);
   return append$.pipe((0,catchError/* catchError */.K)(function (appendError) {
     if (!(appendError instanceof Error) || appendError.name !== "QuotaExceededError") {
@@ -51305,9 +51507,12 @@ function appendSegmentToBuffer(clock$, segmentBuffer, dataInfos) {
       throw new media_error/* default */.Z("BUFFER_APPEND_ERROR", reason);
     }
 
-    return (0,concat/* concat */.z)(forceGarbageCollection(clock$, segmentBuffer).pipe((0,ignoreElements/* ignoreElements */.l)()), append$).pipe((0,catchError/* catchError */.K)(function (forcedGCError) {
-      var reason = forcedGCError instanceof Error ? forcedGCError.toString() : "Could not clean the buffer";
-      throw new media_error/* default */.Z("BUFFER_FULL_ERROR", reason);
+    return playbackObserver.observe(true).pipe((0,mergeMap/* mergeMap */.z)(function (observation) {
+      var currentPos = observation.position + observation.wantedTimeOffset;
+      return (0,concat/* concat */.z)(forceGarbageCollection(currentPos, segmentBuffer).pipe((0,ignoreElements/* ignoreElements */.l)()), append$).pipe((0,catchError/* catchError */.K)(function (forcedGCError) {
+        var reason = forcedGCError instanceof Error ? forcedGCError.toString() : "Could not clean the buffer";
+        throw new media_error/* default */.Z("BUFFER_FULL_ERROR", reason);
+      }));
     }));
   }));
 }
@@ -51330,7 +51535,6 @@ function appendSegmentToBuffer(clock$, segmentBuffer, dataInfos) {
 
 
 
-
 /**
  * Push the initialization segment to the SegmentBuffer.
  * The Observable returned:
@@ -51341,7 +51545,7 @@ function appendSegmentToBuffer(clock$, segmentBuffer, dataInfos) {
  */
 
 function pushInitSegment(_ref) {
-  var clock$ = _ref.clock$,
+  var playbackObserver = _ref.playbackObserver,
       content = _ref.content,
       segment = _ref.segment,
       segmentData = _ref.segmentData,
@@ -51359,9 +51563,14 @@ function pushInitSegment(_ref) {
       appendWindow: [undefined, undefined],
       codec: codec
     };
-    return appendSegmentToBuffer(clock$, segmentBuffer, {
+    var inventoryInfos = Object.assign({
+      segment: segment,
+      start: 0,
+      end: 0
+    }, content);
+    return appendSegmentToBuffer(playbackObserver, segmentBuffer, {
       data: data,
-      inventoryInfos: null
+      inventoryInfos: inventoryInfos
     }).pipe((0,map/* map */.U)(function () {
       var buffered = segmentBuffer.getBufferedRanges();
       return stream_events_generators/* default.addedSegment */.Z.addedSegment(content, segment, buffered, segmentData);
@@ -51389,7 +51598,6 @@ function pushInitSegment(_ref) {
 
 
 
-
 var APPEND_WINDOW_SECURITIES = config/* default.APPEND_WINDOW_SECURITIES */.Z.APPEND_WINDOW_SECURITIES;
 /**
  * Push a given media segment (non-init segment) to a SegmentBuffer.
@@ -51401,7 +51609,7 @@ var APPEND_WINDOW_SECURITIES = config/* default.APPEND_WINDOW_SECURITIES */.Z.AP
  */
 
 function pushMediaSegment(_ref) {
-  var clock$ = _ref.clock$,
+  var playbackObserver = _ref.playbackObserver,
       content = _ref.content,
       initSegmentData = _ref.initSegmentData,
       parsedSegment = _ref.parsedSegment,
@@ -51447,7 +51655,7 @@ function pushMediaSegment(_ref) {
       start: estimatedStart,
       end: estimatedEnd
     }, content);
-    return appendSegmentToBuffer(clock$, segmentBuffer, {
+    return appendSegmentToBuffer(playbackObserver, segmentBuffer, {
       data: data,
       inventoryInfos: inventoryInfos
     }).pipe((0,map/* map */.U)(function () {
@@ -51507,12 +51715,12 @@ function pushMediaSegment(_ref) {
  */
 
 function RepresentationStream(_ref) {
-  var clock$ = _ref.clock$,
-      content = _ref.content,
+  var content = _ref.content,
+      options = _ref.options,
+      playbackObserver = _ref.playbackObserver,
       segmentBuffer = _ref.segmentBuffer,
       segmentFetcher = _ref.segmentFetcher,
-      terminate$ = _ref.terminate$,
-      options = _ref.options;
+      terminate$ = _ref.terminate$;
   var period = content.period,
       adaptation = content.adaptation,
       representation = content.representation;
@@ -51532,14 +51740,14 @@ function RepresentationStream(_ref) {
   var reCheckNeededSegments$ = new Subject/* Subject */.x();
   /** Emit the last scheduled downloading queue for segments. */
 
-  var lastSegmentQueue$ = new BehaviorSubject({
+  var lastSegmentQueue = (0,reference/* createSharedReference */.$)({
     initSegment: null,
     segmentQueue: []
   });
   var hasInitSegment = initSegmentState.segment !== null;
-  /** Will load every segments in `lastSegmentQueue$` */
+  /** Will load every segments in `lastSegmentQueue` */
 
-  var downloadingQueue = new DownloadingQueue(content, lastSegmentQueue$, segmentFetcher, hasInitSegment);
+  var downloadingQueue = new DownloadingQueue(content, lastSegmentQueue, segmentFetcher, hasInitSegment);
 
   if (!hasInitSegment) {
     initSegmentState.segmentData = null;
@@ -51565,19 +51773,20 @@ function RepresentationStream(_ref) {
       hasSentEncryptionData = true;
     }
   }
-  /** Observable loading and pushing segments scheduled through `lastSegmentQueue$`. */
+  /** Observable loading and pushing segments scheduled through `lastSegmentQueue`. */
 
 
   var queue$ = downloadingQueue.start().pipe((0,mergeMap/* mergeMap */.z)(onQueueEvent));
-  /** Observable emitting the stream "status" and filling `lastSegmentQueue$`. */
+  /** Observable emitting the stream "status" and filling `lastSegmentQueue`. */
 
-  var status$ = (0,combineLatest/* combineLatest */.a)([clock$, bufferGoal$, terminate$.pipe((0,take/* take */.q)(1), (0,startWith/* startWith */.O)(null)), reCheckNeededSegments$.pipe((0,startWith/* startWith */.O)(undefined))]).pipe((0,withLatestFrom/* withLatestFrom */.M)(fastSwitchThreshold$), (0,mergeMap/* mergeMap */.z)(function (_ref2) {
+  var status$ = (0,combineLatest/* combineLatest */.a)([playbackObserver.observe(true), bufferGoal$, terminate$.pipe((0,take/* take */.q)(1), (0,startWith/* startWith */.O)(null)), reCheckNeededSegments$.pipe((0,startWith/* startWith */.O)(undefined))]).pipe((0,withLatestFrom/* withLatestFrom */.M)(fastSwitchThreshold$), (0,mergeMap/* mergeMap */.z)(function (_ref2) {
     var _ref2$ = _ref2[0],
-        tick = _ref2$[0],
+        observation = _ref2$[0],
         bufferGoal = _ref2$[1],
         terminate = _ref2$[2],
         fastSwitchThreshold = _ref2[1];
-    var status = getBufferStatus(content, tick, fastSwitchThreshold, bufferGoal, segmentBuffer);
+    var wantedStartPosition = observation.position + observation.wantedTimeOffset;
+    var status = getBufferStatus(content, wantedStartPosition, playbackObserver, fastSwitchThreshold, bufferGoal, segmentBuffer);
     var neededSegments = status.neededSegments;
     var neededInitSegment = null; // Add initialization segment if required
 
@@ -51587,9 +51796,10 @@ function RepresentationStream(_ref) {
       } else if (initSegmentState.isLoaded) {
         log/* default.warn */.Z.warn("Stream: Uninitialized index with an already loaded " + "initialization segment");
       } else {
+        var wantedStart = observation.position + observation.wantedTimeOffset;
         neededInitSegment = {
           segment: initSegmentState.segment,
-          priority: getSegmentPriority(period.start, tick)
+          priority: getSegmentPriority(period.start, wantedStart)
         };
       }
     } else if (neededSegments.length > 0 && !initSegmentState.isLoaded && initSegmentState.segment !== null) {
@@ -51601,17 +51811,17 @@ function RepresentationStream(_ref) {
     }
 
     if (terminate === null) {
-      lastSegmentQueue$.next({
+      lastSegmentQueue.setValue({
         initSegment: neededInitSegment,
         segmentQueue: neededSegments
       });
     } else if (terminate.urgent) {
       log/* default.debug */.Z.debug("Stream: Urgent switch, terminate now.", bufferType);
-      lastSegmentQueue$.next({
+      lastSegmentQueue.setValue({
         initSegment: null,
         segmentQueue: []
       });
-      lastSegmentQueue$.complete();
+      lastSegmentQueue.finish();
       return (0,of.of)(stream_events_generators/* default.streamTerminating */.Z.streamTerminating());
     } else {
       // Non-urgent termination wanted:
@@ -51623,14 +51833,14 @@ function RepresentationStream(_ref) {
       var currentSegmentRequest = downloadingQueue.getRequestedMediaSegment();
       var nextQueue = currentSegmentRequest === null || mostNeededSegment === undefined || currentSegmentRequest.id !== mostNeededSegment.segment.id ? [] : [mostNeededSegment];
       var nextInit = initSegmentRequest === null ? null : neededInitSegment;
-      lastSegmentQueue$.next({
+      lastSegmentQueue.setValue({
         initSegment: nextInit,
         segmentQueue: nextQueue
       });
 
       if (nextQueue.length === 0 && nextInit === null) {
         log/* default.debug */.Z.debug("Stream: No request left, terminate", bufferType);
-        lastSegmentQueue$.complete();
+        lastSegmentQueue.finish();
         return (0,of.of)(stream_events_generators/* default.streamTerminating */.Z.streamTerminating());
       }
     }
@@ -51639,7 +51849,7 @@ function RepresentationStream(_ref) {
       type: "stream-status",
       value: {
         period: period,
-        position: tick.position,
+        position: observation.position,
         bufferType: bufferType,
         imminentDiscontinuity: status.imminentDiscontinuity,
         hasFinishedLoading: status.hasFinishedLoading,
@@ -51719,7 +51929,7 @@ function RepresentationStream(_ref) {
         return stream_events_generators/* default.encryptionDataEncountered */.Z.encryptionDataEncountered(p);
       })) : empty/* EMPTY */.E;
       var pushEvent$ = pushInitSegment({
-        clock$: clock$,
+        playbackObserver: playbackObserver,
         content: content,
         segment: evt.segment,
         segmentData: evt.initializationData,
@@ -51742,7 +51952,7 @@ function RepresentationStream(_ref) {
       }) : empty/* EMPTY */.E;
       var initSegmentData = initSegmentState.segmentData;
       var pushMediaSegment$ = pushMediaSegment({
-        clock$: clock$,
+        playbackObserver: playbackObserver,
         content: content,
         initSegmentData: initSegmentData,
         parsedSegment: evt,
@@ -51790,7 +52000,6 @@ function RepresentationStream(_ref) {
 
 
 
-
 /**
  * Create an "estimator$" Observable which will emit which Representation (from
  * the given `Adaptation`) is the best fit (see `IABREstimate` type definition)
@@ -51811,11 +52020,11 @@ function RepresentationStream(_ref) {
  *
  * @param {Object} content
  * @param {Object} abrManager
- * @param {Observable} clock$
+ * @param {Observable} observation$
  * @returns {Object}
  */
 
-function createRepresentationEstimator(_ref, abrManager, clock$) {
+function createRepresentationEstimator(_ref, abrManager, observation$) {
   var manifest = _ref.manifest,
       adaptation = _ref.adaptation;
   var streamFeedback$ = new Subject/* Subject */.x();
@@ -51846,7 +52055,7 @@ function createRepresentationEstimator(_ref, abrManager, clock$) {
 
     return true;
   }), (0,switchMap/* switchMap */.w)(function (playableRepresentations) {
-    return abrManager.get$(adaptation.type, playableRepresentations, clock$, abrEvents$);
+    return abrManager.get$(adaptation.type, playableRepresentations, observation$, abrEvents$);
   }));
   return {
     estimator$: estimator$,
@@ -51908,12 +52117,12 @@ var DELTA_POSITION_AFTER_RELOAD = config/* default.DELTA_POSITION_AFTER_RELOAD *
 
 function AdaptationStream(_ref) {
   var abrManager = _ref.abrManager,
-      clock$ = _ref.clock$,
+      playbackObserver = _ref.playbackObserver,
       content = _ref.content,
       options = _ref.options,
       segmentBuffer = _ref.segmentBuffer,
       segmentFetcherCreator = _ref.segmentFetcherCreator,
-      wantedBufferAhead$ = _ref.wantedBufferAhead$;
+      wantedBufferAhead = _ref.wantedBufferAhead;
   var directManualBitrateSwitching = options.manualBitrateSwitchingMode === "direct";
   var manifest = content.manifest,
       period = content.period,
@@ -51929,7 +52138,7 @@ function AdaptationStream(_ref) {
 
   var bufferGoalRatioMap = {};
 
-  var _createRepresentation = createRepresentationEstimator(content, abrManager, clock$),
+  var _createRepresentation = createRepresentationEstimator(content, abrManager, playbackObserver.observe(true)),
       estimator$ = _createRepresentation.estimator$,
       requestFeedback$ = _createRepresentation.requestFeedback$,
       streamFeedback$ = _createRepresentation.streamFeedback$;
@@ -51938,17 +52147,17 @@ function AdaptationStream(_ref) {
 
   var segmentFetcher = segmentFetcherCreator.createSegmentFetcher(adaptation.type, requestFeedback$);
   /**
-   * Emits each time an estimate is made through the `abrEstimate$` Observable,
-   * starting with the last one.
+   * Stores the last estimate emitted through the `abrEstimate$` Observable,
+   * starting with `null`.
    * This allows to easily rely on that value in inner Observables which might also
    * need the last already-considered value.
    */
 
-  var lastEstimate$ = new BehaviorSubject(null);
+  var lastEstimate = (0,reference/* createSharedReference */.$)(null);
   /** Emits abr estimates on Subscription. */
 
   var abrEstimate$ = estimator$.pipe((0,tap/* tap */.b)(function (estimate) {
-    lastEstimate$.next(estimate);
+    lastEstimate.setValue(estimate);
   }), (0,defer_subscriptions/* default */.Z)(), (0,share/* share */.B)());
   /** Emit at each bitrate estimate done by the ABRManager. */
 
@@ -51986,7 +52195,7 @@ function AdaptationStream(_ref) {
     // To do that properly, we need to reload the MediaSource
 
     if (directManualBitrateSwitching && fromEstimate.manual && !isFirstEstimate) {
-      return reloadAfterSwitch(period, adaptation.type, clock$, DELTA_POSITION_AFTER_RELOAD.bitrateSwitch);
+      return reloadAfterSwitch(period, adaptation.type, playbackObserver, DELTA_POSITION_AFTER_RELOAD.bitrateSwitch);
     }
     /**
      * Emit when the current RepresentationStream should be terminated to make
@@ -51994,7 +52203,7 @@ function AdaptationStream(_ref) {
      */
 
 
-    var terminateCurrentStream$ = lastEstimate$.pipe((0,filter/* filter */.h)(function (newEstimate) {
+    var terminateCurrentStream$ = lastEstimate.asObservable().pipe((0,filter/* filter */.h)(function (newEstimate) {
       return newEstimate === null || newEstimate.representation.id !== representation.id || newEstimate.manual && !fromEstimate.manual;
     }), (0,take/* take */.q)(1), (0,map/* map */.U)(function (newEstimate) {
       if (newEstimate === null) {
@@ -52029,7 +52238,7 @@ function AdaptationStream(_ref) {
      */
 
     var fastSwitchThreshold$ = !options.enableFastSwitching ? (0,of.of)(0) : // Do not fast-switch anything
-    lastEstimate$.pipe((0,map/* map */.U)(function (estimate) {
+    lastEstimate.asObservable().pipe((0,map/* map */.U)(function (estimate) {
       return estimate === null ? undefined : estimate.knownStableBitrate;
     }), (0,distinctUntilChanged/* distinctUntilChanged */.x)());
     var representationChange$ = (0,of.of)(stream_events_generators/* default.representationChange */.Z.representationChange(adaptation.type, period, representation));
@@ -52039,13 +52248,13 @@ function AdaptationStream(_ref) {
       }
     }), (0,mergeMap/* mergeMap */.z)(function (evt) {
       if (evt.type === "stream-terminating") {
-        var lastEstimate = lastEstimate$.getValue();
+        var estimate = lastEstimate.getValue();
 
-        if (lastEstimate === null) {
+        if (estimate === null) {
           return empty/* EMPTY */.E;
         }
 
-        return recursivelyCreateRepresentationStreams(lastEstimate, false);
+        return recursivelyCreateRepresentationStreams(estimate, false);
       }
 
       return (0,of.of)(evt);
@@ -52064,12 +52273,12 @@ function AdaptationStream(_ref) {
       var oldBufferGoalRatio = bufferGoalRatioMap[representation.id];
       var bufferGoalRatio = oldBufferGoalRatio != null ? oldBufferGoalRatio : 1;
       bufferGoalRatioMap[representation.id] = bufferGoalRatio;
-      var bufferGoal$ = wantedBufferAhead$.pipe((0,map/* map */.U)(function (wba) {
+      var bufferGoal$ = wantedBufferAhead.asObservable().pipe((0,map/* map */.U)(function (wba) {
         return wba * bufferGoalRatio;
       }));
       log/* default.info */.Z.info("Stream: changing representation", adaptation.type, representation);
       return stream_representation({
-        clock$: clock$,
+        playbackObserver: playbackObserver,
         content: {
           representation: representation,
           adaptation: adaptation,
@@ -52091,10 +52300,10 @@ function AdaptationStream(_ref) {
         });
 
         if (formattedError.code === "BUFFER_FULL_ERROR") {
-          var wantedBufferAhead = wantedBufferAhead$.getValue();
+          var wba = wantedBufferAhead.getValue();
           var lastBufferGoalRatio = bufferGoalRatio;
 
-          if (lastBufferGoalRatio <= 0.25 || wantedBufferAhead * lastBufferGoalRatio <= 2) {
+          if (lastBufferGoalRatio <= 0.25 || wba * lastBufferGoalRatio <= 2) {
             throw formattedError;
           }
 
@@ -52143,28 +52352,29 @@ function AdaptationStream(_ref) {
  */
 
 
-
 /**
  * Create empty AdaptationStream Observable, linked to a Period.
  *
  * This observable will never download any segment and just emit a "full"
  * event when reaching the end.
- * @param {Observable} streamClock$
- * @param {Observable} wantedBufferAhead$
+ * @param {Observable} playbackObserver
+ * @param {Object} wantedBufferAhead
  * @param {string} bufferType
  * @param {Object} content
  * @returns {Observable}
  */
 
-function createEmptyAdaptationStream(streamClock$, wantedBufferAhead$, bufferType, content) {
+function createEmptyAdaptationStream(playbackObserver, wantedBufferAhead, bufferType, content) {
   var period = content.period;
   var hasFinishedLoading = false;
-  return (0,combineLatest/* combineLatest */.a)([streamClock$, wantedBufferAhead$]).pipe((0,mergeMap/* mergeMap */.z)(function (_ref) {
-    var clockTick = _ref[0],
-        wantedBufferAhead = _ref[1];
-    var position = clockTick.position;
+  var wantedBufferAhead$ = wantedBufferAhead.asObservable();
+  var observation$ = playbackObserver.observe(true);
+  return (0,combineLatest/* combineLatest */.a)([observation$, wantedBufferAhead$]).pipe((0,mergeMap/* mergeMap */.z)(function (_ref) {
+    var observation = _ref[0],
+        wba = _ref[1];
+    var position = observation.position;
 
-    if (period.end !== undefined && position + wantedBufferAhead >= period.end) {
+    if (period.end !== undefined && position + wba >= period.end) {
       log/* default.debug */.Z.debug("Stream: full \"empty\" AdaptationStream", bufferType);
       hasFinishedLoading = true;
     }
@@ -52174,7 +52384,7 @@ function createEmptyAdaptationStream(streamClock$, wantedBufferAhead$, bufferTyp
       value: {
         period: period,
         bufferType: bufferType,
-        position: clockTick.position,
+        position: observation.position,
         imminentDiscontinuity: null,
         hasFinishedLoading: hasFinishedLoading,
         neededSegments: [],
@@ -52542,7 +52752,6 @@ function getFirstSegmentAfterPeriod(inventory, period) {
 
 
 
-
 var period_stream_DELTA_POSITION_AFTER_RELOAD = config/* default.DELTA_POSITION_AFTER_RELOAD */.Z.DELTA_POSITION_AFTER_RELOAD;
 /**
  * Create single PeriodStream Observable:
@@ -52558,13 +52767,13 @@ var period_stream_DELTA_POSITION_AFTER_RELOAD = config/* default.DELTA_POSITION_
 function PeriodStream(_ref) {
   var abrManager = _ref.abrManager,
       bufferType = _ref.bufferType,
-      clock$ = _ref.clock$,
       content = _ref.content,
       garbageCollectors = _ref.garbageCollectors,
+      playbackObserver = _ref.playbackObserver,
       segmentFetcherCreator = _ref.segmentFetcherCreator,
       segmentBuffersStore = _ref.segmentBuffersStore,
       options = _ref.options,
-      wantedBufferAhead$ = _ref.wantedBufferAhead$;
+      wantedBufferAhead = _ref.wantedBufferAhead;
   var period = content.period; // Emits the chosen Adaptation for the current type.
   // `null` when no Adaptation is chosen (e.g. no subtitles)
 
@@ -52589,7 +52798,7 @@ function PeriodStream(_ref) {
         log/* default.info */.Z.info("Stream: Clearing previous " + bufferType + " SegmentBuffer");
 
         if (segment_buffers.isNative(bufferType)) {
-          return reloadAfterSwitch(period, bufferType, clock$, 0);
+          return reloadAfterSwitch(period, bufferType, playbackObserver, 0);
         }
 
         cleanBuffer$ = segmentBufferStatus.value.removeBuffer(period.start, period.end == null ? Infinity : period.end);
@@ -52601,26 +52810,27 @@ function PeriodStream(_ref) {
         cleanBuffer$ = (0,of.of)(null);
       }
 
-      return (0,concat/* concat */.z)(cleanBuffer$.pipe((0,mapTo/* mapTo */.h)(stream_events_generators/* default.adaptationChange */.Z.adaptationChange(bufferType, null, period))), createEmptyAdaptationStream(clock$, wantedBufferAhead$, bufferType, {
+      return (0,concat/* concat */.z)(cleanBuffer$.pipe((0,mapTo/* mapTo */.h)(stream_events_generators/* default.adaptationChange */.Z.adaptationChange(bufferType, null, period))), createEmptyAdaptationStream(playbackObserver, wantedBufferAhead, bufferType, {
         period: period
       }));
     }
 
     if (segment_buffers.isNative(bufferType) && segmentBuffersStore.getStatus(bufferType).type === "disabled") {
-      return reloadAfterSwitch(period, bufferType, clock$, relativePosAfterSwitch);
+      return reloadAfterSwitch(period, bufferType, playbackObserver, relativePosAfterSwitch);
     }
 
     log/* default.info */.Z.info("Stream: Updating " + bufferType + " adaptation", adaptation, period);
-    var newStream$ = clock$.pipe((0,take/* take */.q)(1), (0,mergeMap/* mergeMap */.z)(function (tick) {
+    var newStream$ = (0,defer/* defer */.P)(function () {
+      var readyState = playbackObserver.getReadyState();
       var segmentBuffer = createOrReuseSegmentBuffer(segmentBuffersStore, bufferType, adaptation, options);
       var playbackInfos = {
-        currentTime: tick.getCurrentTime(),
-        readyState: tick.readyState
+        currentTime: playbackObserver.getCurrentTime(),
+        readyState: readyState
       };
       var strategy = getAdaptationSwitchStrategy(segmentBuffer, period, adaptation, playbackInfos, options);
 
       if (strategy.type === "needs-reload") {
-        return reloadAfterSwitch(period, bufferType, clock$, relativePosAfterSwitch);
+        return reloadAfterSwitch(period, bufferType, playbackObserver, relativePosAfterSwitch);
       }
 
       var needsBufferFlush$ = strategy.type === "flush-buffer" ? (0,of.of)(stream_events_generators/* default.needsBufferFlush */.Z.needsBufferFlush()) : empty/* EMPTY */.E;
@@ -52634,7 +52844,7 @@ function PeriodStream(_ref) {
       return segmentBuffersStore.waitForUsableBuffers().pipe((0,mergeMap/* mergeMap */.z)(function () {
         return (0,concat/* concat */.z)(cleanBuffer$, needsBufferFlush$, (0,merge/* merge */.T)(adaptationStream$, bufferGarbageCollector$));
       }));
-    }));
+    });
     return (0,concat/* concat */.z)((0,of.of)(stream_events_generators/* default.adaptationChange */.Z.adaptationChange(bufferType, adaptation, period)), newStream$);
   }), (0,startWith/* startWith */.O)(stream_events_generators/* default.periodStreamReady */.Z.periodStreamReady(bufferType, period, adaptation$)));
   /**
@@ -52645,24 +52855,19 @@ function PeriodStream(_ref) {
 
   function createAdaptationStream(adaptation, segmentBuffer) {
     var manifest = content.manifest;
-    var adaptationStreamClock$ = clock$.pipe((0,map/* map */.U)(function (tick) {
-      var buffered = segmentBuffer.getBufferedRanges();
-      return (0,object_assign/* default */.Z)({}, tick, {
-        bufferGap: (0,ranges/* getLeftSizeOfRange */.L7)(buffered, tick.position)
-      });
-    }));
+    var adaptationPlaybackObserver = createAdaptationStreamPlaybackObserver(playbackObserver, segmentBuffer);
     return stream_adaptation({
       abrManager: abrManager,
-      clock$: adaptationStreamClock$,
       content: {
         manifest: manifest,
         period: period,
         adaptation: adaptation
       },
       options: options,
+      playbackObserver: adaptationPlaybackObserver,
       segmentBuffer: segmentBuffer,
       segmentFetcherCreator: segmentFetcherCreator,
-      wantedBufferAhead$: wantedBufferAhead$
+      wantedBufferAhead: wantedBufferAhead
     }).pipe((0,catchError/* catchError */.K)(function (error) {
       // Stream linked to a non-native media buffer should not impact the
       // stability of the player. ie: if a text buffer sends an error, we want
@@ -52674,7 +52879,7 @@ function PeriodStream(_ref) {
           defaultCode: "NONE",
           defaultReason: "Unknown `AdaptationStream` error"
         });
-        return (0,concat/* concat */.z)((0,of.of)(stream_events_generators/* default.warning */.Z.warning(formattedError)), createEmptyAdaptationStream(clock$, wantedBufferAhead$, bufferType, {
+        return (0,concat/* concat */.z)((0,of.of)(stream_events_generators/* default.warning */.Z.warning(formattedError)), createEmptyAdaptationStream(playbackObserver, wantedBufferAhead, bufferType, {
           period: period
         }));
       }
@@ -52721,6 +52926,26 @@ function getFirstDeclaredMimeType(adaptation) {
 
   return representations[0].getMimeTypeString();
 }
+/**
+ * Create AdaptationStream's version of a playback observer.
+ * @param {Object} initialPlaybackObserver
+ * @param {Object} segmentBuffer
+ * @returns {Object}
+ */
+
+
+function createAdaptationStreamPlaybackObserver(initialPlaybackObserver, segmentBuffer) {
+  return initialPlaybackObserver.deriveReadOnlyObserver(function (observation$) {
+    return observation$.pipe((0,map/* map */.U)(mapObservation));
+  }, mapObservation);
+
+  function mapObservation(baseObservation) {
+    var buffered = segmentBuffer.getBufferedRanges();
+    return (0,object_assign/* default */.Z)({}, baseObservation, {
+      bufferGap: (0,ranges/* getLeftSizeOfRange */.L7)(buffered, baseObservation.position)
+    });
+  }
+}
 ;// CONCATENATED MODULE: ./src/core/stream/period/index.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -52757,7 +52982,6 @@ var scan = __webpack_require__(3074);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /**
  * Emit the active Period each times it changes.
@@ -52846,15 +53070,15 @@ function ActivePeriodEmitter(buffers$) {
               _type = _evt$value2.type;
           var _currentInfos = acc[_period.id];
 
-          if (_currentInfos !== undefined && !_currentInfos.buffers.has(_type)) {
-            _currentInfos.buffers.add(_type);
-          } else {
+          if (_currentInfos === undefined) {
             var bufferSet = new Set();
             bufferSet.add(_type);
             acc[_period.id] = {
               period: _period,
               buffers: bufferSet
             };
+          } else if (!_currentInfos.buffers.has(_type)) {
+            _currentInfos.buffers.add(_type);
           }
         }
         break;
@@ -52900,7 +53124,6 @@ function ActivePeriodEmitter(buffers$) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /**
  * Returns an Observable which emits ``true`` when all PeriodStreams given are
@@ -53059,7 +53282,6 @@ function getBlacklistedRanges(segmentBuffer, contents) {
 
 
 
-
 var MAXIMUM_MAX_BUFFER_AHEAD = config/* default.MAXIMUM_MAX_BUFFER_AHEAD */.Z.MAXIMUM_MAX_BUFFER_AHEAD,
     MAXIMUM_MAX_BUFFER_BEHIND = config/* default.MAXIMUM_MAX_BUFFER_BEHIND */.Z.MAXIMUM_MAX_BUFFER_BEHIND;
 /**
@@ -53078,7 +53300,7 @@ var MAXIMUM_MAX_BUFFER_AHEAD = config/* default.MAXIMUM_MAX_BUFFER_AHEAD */.Z.MA
  *   - Emit various events to notify of its health and issues
  *
  * @param {Object} content
- * @param {Observable} clock$ - Emit position information
+ * @param {Observable} playbackObserver - Emit position information
  * @param {Object} abrManager - Emit bitrate estimates and best Representation
  * to play.
  * @param {Object} segmentBuffersStore - Will be used to lazily create
@@ -53088,12 +53310,12 @@ var MAXIMUM_MAX_BUFFER_AHEAD = config/* default.MAXIMUM_MAX_BUFFER_AHEAD */.Z.MA
  * @returns {Observable}
  */
 
-function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, segmentFetcherCreator, options) {
+function StreamOrchestrator(content, playbackObserver, abrManager, segmentBuffersStore, segmentFetcherCreator, options) {
   var manifest = content.manifest,
       initialPeriod = content.initialPeriod;
-  var maxBufferAhead$ = options.maxBufferAhead$,
-      maxBufferBehind$ = options.maxBufferBehind$,
-      wantedBufferAhead$ = options.wantedBufferAhead$; // Keep track of a unique BufferGarbageCollector created per
+  var maxBufferAhead = options.maxBufferAhead,
+      maxBufferBehind = options.maxBufferBehind,
+      wantedBufferAhead = options.wantedBufferAhead; // Keep track of a unique BufferGarbageCollector created per
   // SegmentBuffer.
 
   var garbageCollectors = new WeakMapMemory(function (segmentBuffer) {
@@ -53102,20 +53324,20 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
     var defaultMaxAhead = MAXIMUM_MAX_BUFFER_AHEAD[bufferType] != null ? MAXIMUM_MAX_BUFFER_AHEAD[bufferType] : Infinity;
     return BufferGarbageCollector({
       segmentBuffer: segmentBuffer,
-      clock$: clock$.pipe((0,map/* map */.U)(function (tick) {
-        return tick.position + tick.wantedTimeOffset;
+      currentTime$: playbackObserver.observe(true).pipe((0,map/* map */.U)(function (o) {
+        return o.position + o.wantedTimeOffset;
       })),
-      maxBufferBehind$: maxBufferBehind$.pipe((0,map/* map */.U)(function (val) {
+      maxBufferBehind$: maxBufferBehind.asObservable().pipe((0,map/* map */.U)(function (val) {
         return Math.min(val, defaultMaxBehind);
       })),
-      maxBufferAhead$: maxBufferAhead$.pipe((0,map/* map */.U)(function (val) {
+      maxBufferAhead$: maxBufferAhead.asObservable().pipe((0,map/* map */.U)(function (val) {
         return Math.min(val, defaultMaxAhead);
       }))
     });
   }); // trigger warnings when the wanted time is before or after the manifest's
   // segments
 
-  var outOfManifest$ = clock$.pipe((0,filter_map/* default */.Z)(function (_ref) {
+  var outOfManifest$ = playbackObserver.observe(true).pipe((0,filter_map/* default */.Z)(function (_ref) {
     var position = _ref.position,
         wantedTimeOffset = _ref.wantedTimeOffset;
     var offsetedPosition = wantedTimeOffset + position;
@@ -53160,8 +53382,8 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
    * Manage creation and removal of Streams for every Periods for a given type.
    *
    * Works by creating consecutive Streams through the
-   * `manageConsecutivePeriodStreams` function, and restarting it when the clock
-   * goes out of the bounds of these Streams.
+   * `manageConsecutivePeriodStreams` function, and restarting it when the
+   * current position goes out of the bounds of these Streams.
    * @param {string} bufferType - e.g. "audio" or "video"
    * @param {Period} basePeriod - Initial Period downloaded.
    * @returns {Observable}
@@ -53237,7 +53459,7 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
     // than the ones already considered
 
 
-    var restartStreamsWhenOutOfBounds$ = clock$.pipe((0,filter_map/* default */.Z)(function (_ref3) {
+    var restartStreamsWhenOutOfBounds$ = playbackObserver.observe(true).pipe((0,filter_map/* default */.Z)(function (_ref3) {
       var position = _ref3.position,
           wantedTimeOffset = _ref3.wantedTimeOffset;
 
@@ -53296,9 +53518,9 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
         var start = _ref4.start,
             end = _ref4.end;
         return segmentBuffer.removeBuffer(start, end).pipe((0,ignoreElements/* ignoreElements */.l)());
-      }).concat([clock$.pipe((0,take/* take */.q)(1), (0,mergeMap/* mergeMap */.z)(function (lastTick) {
-        return (0,concat/* concat */.z)((0,of.of)(stream_events_generators/* default.needsDecipherabilityFlush */.Z.needsDecipherabilityFlush(lastTick.position, !lastTick.isPaused, lastTick.duration)), (0,defer/* defer */.P)(function () {
-          var lastPosition = lastTick.position + lastTick.wantedTimeOffset;
+      }).concat([playbackObserver.observe(true).pipe((0,take/* take */.q)(1), (0,mergeMap/* mergeMap */.z)(function (observation) {
+        return (0,concat/* concat */.z)((0,of.of)(stream_events_generators/* default.needsDecipherabilityFlush */.Z.needsDecipherabilityFlush(observation.position, !observation.isPaused, observation.duration)), (0,defer/* defer */.P)(function () {
+          var lastPosition = observation.position + observation.wantedTimeOffset;
           var newInitialPeriod = manifest.getPeriodForTime(lastPosition);
 
           if (newInitialPeriod == null) {
@@ -53323,7 +53545,7 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
    * coming after it (from the last chronological one to the first).
    *
    * To clean-up PeriodStreams, each one of them are also automatically
-   * destroyed once the clock announces a time superior or equal to the end of
+   * destroyed once the current position is superior or equal to the end of
    * the concerned Period.
    *
    * A "periodStreamReady" event is sent each times a new PeriodStream is
@@ -53348,7 +53570,7 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
 
     var destroyNextStreams$ = new Subject/* Subject */.x(); // Emits when the current position goes over the end of the current Stream.
 
-    var endOfCurrentStream$ = clock$.pipe((0,filter/* filter */.h)(function (_ref5) {
+    var endOfCurrentStream$ = playbackObserver.observe(true).pipe((0,filter/* filter */.h)(function (_ref5) {
       var position = _ref5.position,
           wantedTimeOffset = _ref5.wantedTimeOffset;
       return basePeriod.end != null && position + wantedTimeOffset >= basePeriod.end;
@@ -53374,7 +53596,6 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
     var periodStream$ = period({
       abrManager: abrManager,
       bufferType: bufferType,
-      clock$: clock$,
       content: {
         manifest: manifest,
         period: basePeriod
@@ -53383,7 +53604,8 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
       segmentFetcherCreator: segmentFetcherCreator,
       segmentBuffersStore: segmentBuffersStore,
       options: options,
-      wantedBufferAhead$: wantedBufferAhead$
+      playbackObserver: playbackObserver,
+      wantedBufferAhead: wantedBufferAhead
     }).pipe((0,mergeMap/* mergeMap */.z)(function (evt) {
       if (evt.type === "stream-status") {
         if (evt.value.hasFinishedLoading) {
@@ -53447,7 +53669,7 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
 
 
 /* harmony default export */ var stream = (orchestrator);
-;// CONCATENATED MODULE: ./src/core/init/create_stream_clock.ts
+;// CONCATENATED MODULE: ./src/core/init/create_stream_playback_observer.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -53464,51 +53686,39 @@ function StreamOrchestrator(content, clock$, abrManager, segmentBuffersStore, se
  * limitations under the License.
  */
 
-
 /**
- * Create clock Observable for the `Stream` part of the code.
- * @param {Observable} initClock$
- * @param {Object} streamClockArgument
+ * Create PlaybackObserver for the `Stream` part of the code.
+ * @param {Object} playbackObserver
+ * @param {Object} args
  * @returns {Observable}
  */
 
-function createStreamClock(initClock$, _ref) {
+function createStreamPlaybackObserver(playbackObserver, _ref) {
   var autoPlay = _ref.autoPlay,
-      initialPlay$ = _ref.initialPlay$,
-      initialSeek$ = _ref.initialSeek$,
-      manifest = _ref.manifest,
-      speed$ = _ref.speed$,
+      initialPlayPerformed = _ref.initialPlayPerformed,
+      initialSeekPerformed = _ref.initialSeekPerformed,
+      speed = _ref.speed,
       startTime = _ref.startTime;
-  var initialPlayPerformed = false;
-  var initialSeekPerformed = false;
-  var updateIsPaused$ = initialPlay$.pipe((0,tap/* tap */.b)(function () {
-    initialPlayPerformed = true;
-  }), (0,ignoreElements/* ignoreElements */.l)());
-  var updateTimeOffset$ = initialSeek$.pipe((0,tap/* tap */.b)(function () {
-    initialSeekPerformed = true;
-  }), (0,ignoreElements/* ignoreElements */.l)());
-  var clock$ = (0,combineLatest/* combineLatest */.a)([initClock$, speed$]).pipe((0,map/* map */.U)(function (_ref2) {
-    var tick = _ref2[0],
-        speed = _ref2[1];
-    var isLive = manifest.isLive;
-    return {
-      position: tick.position,
-      getCurrentTime: tick.getCurrentTime,
-      duration: tick.duration,
-      isPaused: initialPlayPerformed ? tick.paused : !autoPlay,
-      liveGap: isLive ? manifest.getMaximumPosition() - tick.position : Infinity,
-      readyState: tick.readyState,
-      speed: speed,
-      // wantedTimeOffset is an offset to add to the timing's current time to have
-      // the "real" wanted position.
-      // For now, this is seen when the media element has not yet seeked to its
-      // initial position, the currentTime will most probably be 0 where the
-      // effective starting position will be _startTime_.
-      // Thus we initially set a wantedTimeOffset equal to startTime.
-      wantedTimeOffset: initialSeekPerformed ? 0 : startTime - tick.position
-    };
-  }));
-  return (0,merge/* merge */.T)(updateIsPaused$, updateTimeOffset$, clock$);
+  return playbackObserver.deriveReadOnlyObserver(function mapObservable(observation$) {
+    return (0,combineLatest/* combineLatest */.a)([observation$, speed.asObservable()]).pipe((0,map/* map */.U)(function (_ref2) {
+      var observation = _ref2[0],
+          lastSpeed = _ref2[1];
+      return {
+        position: observation.position,
+        duration: observation.duration,
+        isPaused: initialPlayPerformed.getValue() ? observation.paused : !autoPlay,
+        readyState: observation.readyState,
+        speed: lastSpeed,
+        // wantedTimeOffset is an offset to add to the timing's current time to have
+        // the "real" wanted position.
+        // For now, this is seen when the media element has not yet seeked to its
+        // initial position, the currentTime will most probably be 0 where the
+        // effective starting position will be _startTime_.
+        // Thus we initially set a wantedTimeOffset equal to startTime.
+        wantedTimeOffset: initialSeekPerformed.getValue() ? 0 : startTime - observation.position
+      };
+    }));
+  });
 }
 ;// CONCATENATED MODULE: ./src/core/init/duration_updater.ts
 /**
@@ -53526,7 +53736,6 @@ function createStreamClock(initClock$, _ref) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -53658,6 +53867,8 @@ function isMediaSourceOpened$(mediaSource) {
 var emit_loaded_event = __webpack_require__(5039);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/race.js + 1 modules
 var race = __webpack_require__(4181);
+// EXTERNAL MODULE: ./node_modules/rxjs/node_modules/tslib/tslib.es6.js
+var tslib_es6 = __webpack_require__(5987);
 ;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/takeLast.js
 
 
@@ -53709,7 +53920,6 @@ function takeLast(count) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -53943,7 +54153,6 @@ function refreshScheduledEventsList(oldScheduledEvents, manifest) {
 
 
 
-
 var STREAM_EVENT_EMITTER_POLL_INTERVAL = config/* default.STREAM_EVENT_EMITTER_POLL_INTERVAL */.Z.STREAM_EVENT_EMITTER_POLL_INTERVAL;
 /**
  * Tells if a stream event has a duration
@@ -53962,25 +54171,25 @@ function isFiniteStreamEvent(evt) {
  */
 
 
-function streamEventsEmitter(manifest, mediaElement, clock$) {
+function streamEventsEmitter(manifest, mediaElement, observation$) {
   var eventsBeingPlayed = new WeakMap();
   var lastScheduledEvents = [];
   var scheduledEvents$ = (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,startWith/* startWith */.O)(null), (0,scan/* scan */.R)(function (oldScheduledEvents) {
     return refresh_scheduled_events_list(oldScheduledEvents, manifest);
   }, []));
   /**
-   * Examine playback situation from clock ticks to emit stream events and
+   * Examine playback situation from playback observations to emit stream events and
    * prepare set onExit callbacks if needed.
    * @param {Array.<Object>} scheduledEvents
-   * @param {Object} oldTick
-   * @param {Object} newTick
+   * @param {Object} oldObservation
+   * @param {Object} newObservation
    * @returns {Observable}
    */
 
-  function emitStreamEvents$(scheduledEvents, oldClockTick, newClockTick) {
-    var previousTime = oldClockTick.currentTime;
-    var isSeeking = newClockTick.isSeeking,
-        currentTime = newClockTick.currentTime;
+  function emitStreamEvents$(scheduledEvents, oldObservation, newObservation) {
+    var previousTime = oldObservation.currentTime;
+    var isSeeking = newObservation.isSeeking,
+        currentTime = newObservation.currentTime;
     var eventsToSend = [];
     var eventsToExit = [];
 
@@ -54044,18 +54253,18 @@ function streamEventsEmitter(manifest, mediaElement, clock$) {
       return empty/* EMPTY */.E;
     }
 
-    return (0,combineLatest/* combineLatest */.a)([(0,observable_interval/* interval */.F)(STREAM_EVENT_EMITTER_POLL_INTERVAL).pipe((0,startWith/* startWith */.O)(null)), clock$]).pipe((0,map/* map */.U)(function (_ref) {
+    return (0,combineLatest/* combineLatest */.a)([(0,observable_interval/* interval */.F)(STREAM_EVENT_EMITTER_POLL_INTERVAL).pipe((0,startWith/* startWith */.O)(null)), observation$]).pipe((0,map/* map */.U)(function (_ref) {
       var _ = _ref[0],
-          clockTick = _ref[1];
-      var seeking = clockTick.seeking;
+          observation = _ref[1];
+      var seeking = observation.seeking;
       return {
         isSeeking: seeking,
         currentTime: mediaElement.currentTime
       };
     }), pairwise(), (0,mergeMap/* mergeMap */.z)(function (_ref2) {
-      var oldTick = _ref2[0],
-          newTick = _ref2[1];
-      return emitStreamEvents$(lastScheduledEvents, oldTick, newTick);
+      var oldObservation = _ref2[0],
+          newObservation = _ref2[1];
+      return emitStreamEvents$(lastScheduledEvents, oldObservation, newObservation);
     }));
   }));
 }
@@ -54110,7 +54319,6 @@ var update_playback_rate = __webpack_require__(2983);
 
 
 
-
 /**
  * Returns a function allowing to load or reload the content in arguments into
  * a single or multiple MediaSources.
@@ -54121,12 +54329,11 @@ var update_playback_rate = __webpack_require__(2983);
 function createMediaSourceLoader(_ref) {
   var mediaElement = _ref.mediaElement,
       manifest = _ref.manifest,
-      clock$ = _ref.clock$,
-      speed$ = _ref.speed$,
+      speed = _ref.speed,
       bufferOptions = _ref.bufferOptions,
       abrManager = _ref.abrManager,
-      segmentFetcherCreator = _ref.segmentFetcherCreator,
-      setCurrentTime = _ref.setCurrentTime;
+      playbackObserver = _ref.playbackObserver,
+      segmentFetcherCreator = _ref.segmentFetcherCreator;
 
   /**
    * Load the content on the given MediaSource.
@@ -54148,34 +54355,32 @@ function createMediaSourceLoader(_ref) {
         return error;
       });
     }
-    /** Interface to create media buffers for loaded segments. */
+    /** Interface to create media buffers. */
 
 
     var segmentBuffersStore = new segment_buffers(mediaElement, mediaSource);
 
     var _initialSeekAndPlay = (0,initial_seek_and_play/* default */.Z)({
-      clock$: clock$,
       mediaElement: mediaElement,
+      playbackObserver: playbackObserver,
       startTime: initialTime,
-      mustAutoPlay: autoPlay,
-      setCurrentTime: setCurrentTime,
-      isDirectfile: false
+      mustAutoPlay: autoPlay
     }),
-        seek$ = _initialSeekAndPlay.seek$,
-        play$ = _initialSeekAndPlay.play$;
+        seekAndPlay$ = _initialSeekAndPlay.seekAndPlay$,
+        initialPlayPerformed = _initialSeekAndPlay.initialPlayPerformed,
+        initialSeekPerformed = _initialSeekAndPlay.initialSeekPerformed;
 
-    var playDone$ = play$.pipe((0,filter/* filter */.h)(function (evt) {
-      return evt.type !== "warning";
+    var observation$ = playbackObserver.observe(true);
+    var streamEvents$ = initialPlayPerformed.asObservable().pipe((0,filter/* filter */.h)(function (hasPlayed) {
+      return hasPlayed;
+    }), (0,mergeMap/* mergeMap */.z)(function () {
+      return init_stream_events_emitter(manifest, mediaElement, observation$);
     }));
-    var streamEvents$ = playDone$.pipe((0,mergeMap/* mergeMap */.z)(function () {
-      return init_stream_events_emitter(manifest, mediaElement, clock$);
-    }));
-    var streamClock$ = createStreamClock(clock$, {
+    var streamObserver = createStreamPlaybackObserver(playbackObserver, {
       autoPlay: autoPlay,
-      initialPlay$: playDone$,
-      initialSeek$: seek$,
-      manifest: manifest,
-      speed$: speed$,
+      initialPlayPerformed: initialPlayPerformed,
+      initialSeekPerformed: initialSeekPerformed,
+      speed: speed,
       startTime: initialTime
     });
     /** Cancel endOfStream calls when streams become active again. */
@@ -54191,7 +54396,7 @@ function createMediaSourceLoader(_ref) {
     var streams$ = stream({
       manifest: manifest,
       initialPeriod: initialPeriod
-    }, streamClock$, abrManager, segmentBuffersStore, segmentFetcherCreator, bufferOptions).pipe((0,mergeMap/* mergeMap */.z)(function (evt) {
+    }, streamObserver, abrManager, segmentBuffersStore, segmentFetcherCreator, bufferOptions).pipe((0,mergeMap/* mergeMap */.z)(function (evt) {
       switch (evt.type) {
         case "end-of-stream":
           log/* default.debug */.Z.debug("Init: end-of-stream order received.");
@@ -54230,25 +54435,21 @@ function createMediaSourceLoader(_ref) {
      * empty, so it can build back buffer.
      */
 
-    var playbackRate$ = (0,update_playback_rate/* default */.Z)(mediaElement, speed$, clock$).pipe((0,ignoreElements/* ignoreElements */.l)());
+    var playbackRate$ = (0,update_playback_rate/* default */.Z)(mediaElement, speed, observation$).pipe((0,ignoreElements/* ignoreElements */.l)());
     /**
      * Observable trying to avoid various stalling situations, emitting "stalled"
      * events when it cannot, as well as "unstalled" events when it get out of one.
      */
 
-    var stallAvoider$ = (0,stall_avoider/* default */.Z)(clock$, mediaElement, manifest, discontinuityUpdate$, lockedStream$, setCurrentTime);
+    var stallAvoider$ = (0,stall_avoider/* default */.Z)(playbackObserver, manifest, lockedStream$, discontinuityUpdate$);
     /**
      * Emit a "loaded" events once the initial play has been performed and the
      * media can begin playback.
      * Also emits warning events if issues arise when doing so.
      */
 
-    var loadingEvts$ = play$.pipe((0,switchMap/* switchMap */.w)(function (evt) {
-      if (evt.type === "warning") {
-        return (0,of.of)(evt);
-      }
-
-      return (0,emit_loaded_event/* default */.Z)(clock$, mediaElement, segmentBuffersStore, false);
+    var loadingEvts$ = seekAndPlay$.pipe((0,switchMap/* switchMap */.w)(function (evt) {
+      return evt.type === "warning" ? (0,of.of)(evt) : (0,emit_loaded_event/* default */.Z)(observation$, mediaElement, segmentBuffersStore, false);
     }));
     return (0,merge/* merge */.T)(durationUpdater$, loadingEvts$, playbackRate$, stallAvoider$, streams$, streamEvents$).pipe(finalize(function () {
       // clean-up every created SegmentBuffers
@@ -54325,7 +54526,6 @@ function throttle(func) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -54615,7 +54815,6 @@ var throw_on_media_error = __webpack_require__(2447);
 
 
 
-
 var OUT_OF_SYNC_MANIFEST_REFRESH_DELAY = config/* default.OUT_OF_SYNC_MANIFEST_REFRESH_DELAY */.Z.OUT_OF_SYNC_MANIFEST_REFRESH_DELAY;
 /**
  * Begin content playback.
@@ -54653,16 +54852,15 @@ function InitializeOnMediaSource(_ref) {
   var adaptiveOptions = _ref.adaptiveOptions,
       autoPlay = _ref.autoPlay,
       bufferOptions = _ref.bufferOptions,
-      clock$ = _ref.clock$,
       keySystems = _ref.keySystems,
       lowLatencyMode = _ref.lowLatencyMode,
       manifest$ = _ref.manifest$,
       manifestFetcher = _ref.manifestFetcher,
       mediaElement = _ref.mediaElement,
       minimumManifestUpdateInterval = _ref.minimumManifestUpdateInterval,
+      playbackObserver = _ref.playbackObserver,
       segmentFetcherCreator = _ref.segmentFetcherCreator,
-      setCurrentTime = _ref.setCurrentTime,
-      speed$ = _ref.speed$,
+      speed = _ref.speed,
       startAt = _ref.startAt,
       textTrackOptions = _ref.textTrackOptions;
 
@@ -54725,7 +54923,7 @@ function InitializeOnMediaSource(_ref) {
         return openMediaSource$.pipe((0,mergeMap/* mergeMap */.z)(function () {
           // Now that the MediaSource has been opened and linked to the media
           // element we can attach the MediaKeys instance to the latter.
-          evt.value.attachMediaKeys$.next(); // If the `disableMediaKeysAttachmentLock` option has been set to
+          evt.value.canAttachMediaKeys.setValue(true); // If the `disableMediaKeysAttachmentLock` option has been set to
           // `true`, we should not wait until the MediaKeys instance has been
           // attached to start loading the content.
 
@@ -54778,12 +54976,11 @@ function InitializeOnMediaSource(_ref) {
         textTrackOptions: textTrackOptions,
         drmSystemId: drmSystemId
       }, bufferOptions),
-      clock$: clock$,
       manifest: manifest,
       mediaElement: mediaElement,
+      playbackObserver: playbackObserver,
       segmentFetcherCreator: segmentFetcherCreator,
-      speed$: speed$,
-      setCurrentTime: setCurrentTime
+      speed: speed
     }); // handle initial load and reloads
 
     var recursiveLoad$ = recursivelyLoadOnMediaSource(initialMediaSource, initialTime, autoPlay); // Emit when we want to manually update the manifest.
@@ -54854,9 +55051,9 @@ function InitializeOnMediaSource(_ref) {
             var position = evt.value.position;
 
             if (position + 0.001 < evt.value.duration) {
-              setCurrentTime(mediaElement.currentTime + 0.001);
+              playbackObserver.setCurrentTime(mediaElement.currentTime + 0.001);
             } else {
-              setCurrentTime(position);
+              playbackObserver.setCurrentTime(position);
             }
 
             return null;
@@ -54866,7 +55063,7 @@ function InitializeOnMediaSource(_ref) {
             return null;
 
           case "needs-buffer-flush":
-            setCurrentTime(mediaElement.currentTime + 0.001);
+            playbackObserver.setCurrentTime(mediaElement.currentTime + 0.001);
             return null;
         }
 
@@ -54902,408 +55099,6 @@ function InitializeOnMediaSource(_ref) {
 
 
 /* harmony default export */ var init = (InitializeOnMediaSource);
-;// CONCATENATED MODULE: ./src/core/api/clock.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * This file defines a global clock for the RxPlayer.
- *
- * Each clock tick also pass information about the current state of the
- * media element to sub-parts of the player.
- */
-
-
-
-
-
-
-var SAMPLING_INTERVAL_MEDIASOURCE = config/* default.SAMPLING_INTERVAL_MEDIASOURCE */.Z.SAMPLING_INTERVAL_MEDIASOURCE,
-    SAMPLING_INTERVAL_LOW_LATENCY = config/* default.SAMPLING_INTERVAL_LOW_LATENCY */.Z.SAMPLING_INTERVAL_LOW_LATENCY,
-    SAMPLING_INTERVAL_NO_MEDIASOURCE = config/* default.SAMPLING_INTERVAL_NO_MEDIASOURCE */.Z.SAMPLING_INTERVAL_NO_MEDIASOURCE,
-    RESUME_GAP_AFTER_SEEKING = config/* default.RESUME_GAP_AFTER_SEEKING */.Z.RESUME_GAP_AFTER_SEEKING,
-    RESUME_GAP_AFTER_NOT_ENOUGH_DATA = config/* default.RESUME_GAP_AFTER_NOT_ENOUGH_DATA */.Z.RESUME_GAP_AFTER_NOT_ENOUGH_DATA,
-    RESUME_GAP_AFTER_BUFFERING = config/* default.RESUME_GAP_AFTER_BUFFERING */.Z.RESUME_GAP_AFTER_BUFFERING,
-    REBUFFERING_GAP = config/* default.REBUFFERING_GAP */.Z.REBUFFERING_GAP,
-    MINIMUM_BUFFER_AMOUNT_BEFORE_FREEZING = config/* default.MINIMUM_BUFFER_AMOUNT_BEFORE_FREEZING */.Z.MINIMUM_BUFFER_AMOUNT_BEFORE_FREEZING;
-/**
- * HTMLMediaElement Events for which timings are calculated and emitted.
- * @type {Array.<string>}
- */
-
-var SCANNED_MEDIA_ELEMENTS_EVENTS = ["canplay", "play", "seeking", "seeked", "loadedmetadata", "ratechange"];
-/**
- * Returns the amount of time in seconds the buffer should have ahead of the
- * current position before resuming playback. Based on the infos of the
- * rebuffering status.
- *
- * Waiting time differs between a rebuffering happening after a "seek" or one
- * happening after a buffer starvation occured.
- * @param {Object|null} rebufferingStatus
- * @param {Boolean} lowLatencyMode
- * @returns {Number}
- */
-
-function getRebufferingEndGap(rebufferingStatus, lowLatencyMode) {
-  if (rebufferingStatus === null) {
-    return 0;
-  }
-
-  var suffix = lowLatencyMode ? "LOW_LATENCY" : "DEFAULT";
-
-  switch (rebufferingStatus.reason) {
-    case "seeking":
-    case "internal-seek":
-      return RESUME_GAP_AFTER_SEEKING[suffix];
-
-    case "not-ready":
-      return RESUME_GAP_AFTER_NOT_ENOUGH_DATA[suffix];
-
-    case "buffering":
-      return RESUME_GAP_AFTER_BUFFERING[suffix];
-  }
-}
-/**
- * @param {Object} currentRange
- * @param {Number} duration
- * @param {Boolean} lowLatencyMode
- * @returns {Boolean}
- */
-
-
-function hasLoadedUntilTheEnd(currentRange, duration, lowLatencyMode) {
-  var suffix = lowLatencyMode ? "LOW_LATENCY" : "DEFAULT";
-  return currentRange !== null && duration - currentRange.end <= REBUFFERING_GAP[suffix];
-}
-/**
- * Generate a basic timings object from the media element and the eventName
- * which triggered the request.
- * @param {HTMLMediaElement} mediaElement
- * @param {string} event
- * @returns {Object}
- */
-
-
-function getMediaInfos(mediaElement, event) {
-  var buffered = mediaElement.buffered,
-      currentTime = mediaElement.currentTime,
-      duration = mediaElement.duration,
-      ended = mediaElement.ended,
-      paused = mediaElement.paused,
-      playbackRate = mediaElement.playbackRate,
-      readyState = mediaElement.readyState,
-      seeking = mediaElement.seeking;
-  var currentRange = (0,ranges/* getRange */.rx)(buffered, currentTime);
-  return {
-    bufferGap: currentRange !== null ? currentRange.end - currentTime : // TODO null/0 would probably be
-    // more appropriate
-    Infinity,
-    buffered: buffered,
-    currentRange: currentRange,
-    position: currentTime,
-    duration: duration,
-    ended: ended,
-    paused: paused,
-    playbackRate: playbackRate,
-    readyState: readyState,
-    seeking: seeking,
-    event: event
-  };
-}
-/**
- * Infer rebuffering status of the media based on:
- *   - the return of the function getMediaInfos
- *   - the previous timings object.
- *
- * @param {Object} prevTimings - Previous timings object. See function to know
- * the different properties needed.
- * @param {Object} currentTimings - Current timings object. This does not need
- * to have every single infos, see function to know which properties are needed.
- * @param {Object} options
- * @returns {Object|null}
- */
-
-
-function getRebufferingStatus(prevTimings, currentTimings, _ref) {
-  var withMediaSource = _ref.withMediaSource,
-      lowLatencyMode = _ref.lowLatencyMode;
-  var currentEvt = currentTimings.event,
-      currentTime = currentTimings.position,
-      bufferGap = currentTimings.bufferGap,
-      currentRange = currentTimings.currentRange,
-      duration = currentTimings.duration,
-      paused = currentTimings.paused,
-      readyState = currentTimings.readyState,
-      ended = currentTimings.ended;
-  var prevRebuffering = prevTimings.rebuffering,
-      prevEvt = prevTimings.event,
-      prevTime = prevTimings.position;
-  var fullyLoaded = hasLoadedUntilTheEnd(currentRange, duration, lowLatencyMode);
-  var canSwitchToRebuffering = readyState >= 1 && currentEvt !== "loadedmetadata" && prevRebuffering === null && !(fullyLoaded || ended);
-  var rebufferEndPosition = null;
-  var shouldRebuffer;
-  var shouldStopRebuffer;
-  var rebufferGap = lowLatencyMode ? REBUFFERING_GAP.LOW_LATENCY : REBUFFERING_GAP.DEFAULT;
-
-  if (withMediaSource) {
-    if (canSwitchToRebuffering) {
-      if (bufferGap <= rebufferGap) {
-        shouldRebuffer = true;
-        rebufferEndPosition = currentTime + bufferGap;
-      } else if (bufferGap === Infinity) {
-        shouldRebuffer = true;
-        rebufferEndPosition = currentTime;
-      }
-    } else if (prevRebuffering !== null) {
-      var resumeGap = getRebufferingEndGap(prevRebuffering, lowLatencyMode);
-
-      if (shouldRebuffer !== true && prevRebuffering !== null && readyState > 1 && (fullyLoaded || ended || bufferGap < Infinity && bufferGap > resumeGap)) {
-        shouldStopRebuffer = true;
-      } else if (bufferGap === Infinity || bufferGap <= resumeGap) {
-        rebufferEndPosition = bufferGap === Infinity ? currentTime : currentTime + bufferGap;
-      }
-    }
-  } // when using a direct file, the media will stall and unstall on its
-  // own, so we only try to detect when the media timestamp has not changed
-  // between two consecutive timeupdates
-  else {
-    if (canSwitchToRebuffering && (!paused && currentEvt === "timeupdate" && prevEvt === "timeupdate" && currentTime === prevTime || currentEvt === "seeking" && bufferGap === Infinity)) {
-      shouldRebuffer = true;
-    } else if (prevRebuffering !== null && (currentEvt !== "seeking" && currentTime !== prevTime || currentEvt === "canplay" || bufferGap < Infinity && (bufferGap > getRebufferingEndGap(prevRebuffering, lowLatencyMode) || fullyLoaded || ended))) {
-      shouldStopRebuffer = true;
-    }
-  }
-
-  if (shouldStopRebuffer === true) {
-    return null;
-  } else if (shouldRebuffer === true || prevRebuffering !== null) {
-    var reason;
-
-    if (currentEvt === "seeking" || prevRebuffering !== null && prevRebuffering.reason === "seeking") {
-      reason = "seeking";
-    } else if (currentTimings.seeking && (currentEvt === "internal-seeking" || prevRebuffering !== null && prevRebuffering.reason === "internal-seek")) {
-      reason = "internal-seek";
-    } else if (currentTimings.seeking) {
-      reason = "seeking";
-    } else if (readyState === 1) {
-      reason = "not-ready";
-    } else {
-      reason = "buffering";
-    }
-
-    if (prevRebuffering !== null && prevRebuffering.reason === reason) {
-      return {
-        reason: prevRebuffering.reason,
-        timestamp: prevRebuffering.timestamp,
-        position: rebufferEndPosition
-      };
-    }
-
-    return {
-      reason: reason,
-      timestamp: performance.now(),
-      position: rebufferEndPosition
-    };
-  }
-
-  return null;
-}
-/**
- * Detect if the current media can be considered as "freezing" (i.e. not
- * advancing for unknown reasons).
- *
- * Returns a corresponding `IFreezingStatus` object if that's the case and
- * `null` if not.
- * @param {Object} prevTimings
- * @param {Object} currentTimings
- * @returns {Object|null}
- */
-
-
-function getFreezingStatus(prevTimings, currentTimings) {
-  if (prevTimings.freezing) {
-    if (currentTimings.ended || currentTimings.paused || currentTimings.readyState === 0 || currentTimings.playbackRate === 0 || prevTimings.position !== currentTimings.position) {
-      return null; // Quit freezing status
-    }
-
-    return prevTimings.freezing; // Stay in it
-  }
-
-  return currentTimings.event === "timeupdate" && currentTimings.bufferGap > MINIMUM_BUFFER_AMOUNT_BEFORE_FREEZING && !currentTimings.ended && !currentTimings.paused && currentTimings.readyState >= 1 && currentTimings.playbackRate !== 0 && currentTimings.position === prevTimings.position ? {
-    timestamp: performance.now()
-  } : null;
-}
-/**
- * Timings observable.
- *
- * This Observable samples snapshots of player's current state:
- *   * time position
- *   * playback rate
- *   * current buffered range
- *   * gap with current buffered range ending
- *   * media duration
- *
- * In addition to sampling, this Observable also reacts to "seeking" and "play"
- * events.
- *
- * Observable is shared for performance reason: reduces the number of event
- * listeners and intervals/timeouts but also limit access to the media element
- * properties and gap calculations.
- *
- * The sampling is manual instead of based on "timeupdate" to reduce the
- * number of events.
- * @param {HTMLMediaElement} mediaElement
- * @param {Object} options
- * @returns {Observable}
- */
-
-
-function createClock(mediaElement, options) {
-  // Allow us to identify seek performed internally by the player.
-  var internalSeekingComingCounter = 0;
-
-  function setCurrentTime(time) {
-    mediaElement.currentTime = time;
-    internalSeekingComingCounter += 1;
-  }
-
-  var clock$ = (0,defer/* defer */.P)(function () {
-    var lastTimings = (0,object_assign/* default */.Z)(getMediaInfos(mediaElement, "init"), {
-      rebuffering: null,
-      freezing: null,
-      getCurrentTime: function getCurrentTime() {
-        return mediaElement.currentTime;
-      }
-    });
-
-    function getCurrentClockTick(event) {
-      var tmpEvt = event;
-
-      if (tmpEvt === "seeking" && internalSeekingComingCounter > 0) {
-        tmpEvt = "internal-seeking";
-        internalSeekingComingCounter -= 1;
-      }
-
-      var mediaTimings = getMediaInfos(mediaElement, tmpEvt);
-      var rebufferingStatus = getRebufferingStatus(lastTimings, mediaTimings, options);
-      var freezingStatus = getFreezingStatus(lastTimings, mediaTimings);
-      var timings = (0,object_assign/* default */.Z)({}, {
-        rebuffering: rebufferingStatus,
-        freezing: freezingStatus,
-        getCurrentTime: function getCurrentTime() {
-          return mediaElement.currentTime;
-        }
-      }, mediaTimings);
-      log/* default.debug */.Z.debug("API: current media element state", timings);
-      return timings;
-    }
-
-    var eventObs = SCANNED_MEDIA_ELEMENTS_EVENTS.map(function (eventName) {
-      return (0,fromEvent/* fromEvent */.R)(mediaElement, eventName).pipe((0,mapTo/* mapTo */.h)(eventName));
-    });
-    var interval = options.lowLatencyMode ? SAMPLING_INTERVAL_LOW_LATENCY : options.withMediaSource ? SAMPLING_INTERVAL_MEDIASOURCE : SAMPLING_INTERVAL_NO_MEDIASOURCE;
-    var interval$ = (0,observable_interval/* interval */.F)(interval).pipe((0,mapTo/* mapTo */.h)("timeupdate"));
-    return merge/* merge.apply */.T.apply(void 0, [interval$].concat(eventObs)).pipe((0,map/* map */.U)(function (event) {
-      lastTimings = getCurrentClockTick(event);
-
-      if (log/* default.getLevel */.Z.getLevel() === "DEBUG") {
-        log/* default.debug */.Z.debug("API: current playback timeline:\n" + prettyPrintBuffered(lastTimings.buffered, lastTimings.position), "\n" + event);
-      }
-
-      return lastTimings;
-    }), (0,startWith/* startWith */.O)(lastTimings));
-  }).pipe( // Always emit the last tick when already subscribed
-  (0,shareReplay/* shareReplay */.d)({
-    bufferSize: 1,
-    refCount: true
-  }));
-  return {
-    clock$: clock$,
-    setCurrentTime: setCurrentTime
-  };
-}
-/**
- * Pretty print a TimeRanges Object, to see the current content of it in a
- * one-liner string.
- *
- * @example
- * This function is called by giving it directly the TimeRanges, such as:
- * ```js
- * prettyPrintBuffered(document.getElementsByTagName("video")[0].buffered);
- * ```
- *
- * Let's consider this possible return:
- *
- * ```
- * 0.00|==29.95==|29.95 ~30.05~ 60.00|==29.86==|89.86
- *          ^14
- * ```
- * This means that our video element has 29.95 seconds of buffer between 0 and
- * 29.95 seconds.
- * Then 30.05 seconds where no buffer is found.
- * Then 29.86 seconds of buffer between 60.00 and 89.86 seconds.
- *
- * A caret on the second line indicates the current time we're at.
- * The number coming after it is the current time.
- * @param {TimeRanges} buffered
- * @param {number} currentTime
- * @returns {string}
- */
-
-
-function prettyPrintBuffered(buffered, currentTime) {
-  var str = "";
-  var currentTimeStr = "";
-
-  for (var i = 0; i < buffered.length; i++) {
-    var start = buffered.start(i);
-    var end = buffered.end(i);
-    var fixedStart = start.toFixed(2);
-    var fixedEnd = end.toFixed(2);
-    var fixedDuration = (end - start).toFixed(2);
-    var newIntervalStr = fixedStart + "|==" + fixedDuration + "==|" + fixedEnd;
-    str += newIntervalStr;
-
-    if (currentTimeStr.length === 0 && end > currentTime) {
-      var padBefore = str.length - Math.floor(newIntervalStr.length / 2);
-      currentTimeStr = " ".repeat(padBefore) + ("^" + currentTime);
-    }
-
-    if (i < buffered.length - 1) {
-      var nextStart = buffered.start(i + 1);
-      var fixedDiff = (nextStart - end).toFixed(2);
-      var holeStr = " ~" + fixedDiff + "~ ";
-      str += holeStr;
-
-      if (currentTimeStr.length === 0 && currentTime < nextStart) {
-        var _padBefore = str.length - Math.floor(holeStr.length / 2);
-
-        currentTimeStr = " ".repeat(_padBefore) + ("^" + currentTime);
-      }
-    }
-  }
-
-  if (currentTimeStr.length === 0) {
-    currentTimeStr = " ".repeat(str.length) + ("^" + currentTime);
-  }
-
-  return str + "\n" + currentTimeStr;
-}
-
-/* harmony default export */ var clock = (createClock);
 ;// CONCATENATED MODULE: ./src/core/api/emit_seek_events.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -55321,28 +55116,27 @@ function prettyPrintBuffered(buffered, currentTime) {
  * limitations under the License.
  */
 
-
 /**
  * Returns Observable which will emit:
  *   - `"seeking"` when we are seeking in the given mediaElement
- *   - `"seeked"` when a seek is considered as finished by the given clock$
+ *   - `"seeked"` when a seek is considered as finished by the given observation$
  *     Observable.
  * @param {HTMLMediaElement} mediaElement
- * @param {Observable} clock$
+ * @param {Observable} observation$
  * @returns {Observable}
  */
 
-function emitSeekEvents(mediaElement, clock$) {
+function emitSeekEvents(mediaElement, observation$) {
   return (0,defer/* defer */.P)(function () {
     if (mediaElement === null) {
       return empty/* EMPTY */.E;
     }
 
-    var isSeeking$ = clock$.pipe((0,filter/* filter */.h)(function (tick) {
-      return tick.event === "seeking";
+    var isSeeking$ = observation$.pipe((0,filter/* filter */.h)(function (observation) {
+      return observation.event === "seeking";
     }), (0,mapTo/* mapTo */.h)("seeking"));
-    var hasSeeked$ = isSeeking$.pipe((0,switchMapTo/* switchMapTo */.c)(clock$.pipe((0,filter/* filter */.h)(function (tick) {
-      return tick.event === "seeked";
+    var hasSeeked$ = isSeeking$.pipe((0,switchMapTo/* switchMapTo */.c)(observation$.pipe((0,filter/* filter */.h)(function (observation) {
+      return observation.event === "seeked";
     }), (0,mapTo/* mapTo */.h)("seeked"), (0,take/* take */.q)(1))));
     var seekingEvents$ = (0,merge/* merge */.T)(isSeeking$, hasSeeked$);
     return mediaElement.seeking ? seekingEvents$.pipe((0,startWith/* startWith */.O)("seeking")) : seekingEvents$;
@@ -55902,6 +55696,521 @@ function parseLoadVideoOptions(options) {
 }
 
 
+;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/skip.js
+
+function skip(count) {
+    return (0,filter/* filter */.h)(function (_, index) { return count <= index; });
+}
+//# sourceMappingURL=skip.js.map
+;// CONCATENATED MODULE: ./src/core/api/playback_observer.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+var SAMPLING_INTERVAL_MEDIASOURCE = config/* default.SAMPLING_INTERVAL_MEDIASOURCE */.Z.SAMPLING_INTERVAL_MEDIASOURCE,
+    SAMPLING_INTERVAL_LOW_LATENCY = config/* default.SAMPLING_INTERVAL_LOW_LATENCY */.Z.SAMPLING_INTERVAL_LOW_LATENCY,
+    SAMPLING_INTERVAL_NO_MEDIASOURCE = config/* default.SAMPLING_INTERVAL_NO_MEDIASOURCE */.Z.SAMPLING_INTERVAL_NO_MEDIASOURCE,
+    RESUME_GAP_AFTER_SEEKING = config/* default.RESUME_GAP_AFTER_SEEKING */.Z.RESUME_GAP_AFTER_SEEKING,
+    RESUME_GAP_AFTER_NOT_ENOUGH_DATA = config/* default.RESUME_GAP_AFTER_NOT_ENOUGH_DATA */.Z.RESUME_GAP_AFTER_NOT_ENOUGH_DATA,
+    RESUME_GAP_AFTER_BUFFERING = config/* default.RESUME_GAP_AFTER_BUFFERING */.Z.RESUME_GAP_AFTER_BUFFERING,
+    REBUFFERING_GAP = config/* default.REBUFFERING_GAP */.Z.REBUFFERING_GAP,
+    MINIMUM_BUFFER_AMOUNT_BEFORE_FREEZING = config/* default.MINIMUM_BUFFER_AMOUNT_BEFORE_FREEZING */.Z.MINIMUM_BUFFER_AMOUNT_BEFORE_FREEZING;
+/**
+ * HTMLMediaElement Events for which playback observations are calculated and
+ * emitted.
+ * @type {Array.<string>}
+ */
+
+var SCANNED_MEDIA_ELEMENTS_EVENTS = ["canplay", "play", "seeking", "seeked", "loadedmetadata", "ratechange"];
+/**
+ * Class allowing to "observe" current playback conditions so the RxPlayer is
+ * then able to react upon them.
+ *
+ * This is a central class of the RxPlayer as many modules rely on the
+ * `PlaybackObserver` to know the current state of the media being played.
+ *
+ * You can use the PlaybackObserver to either get the last observation
+ * performed, get the current media state or subscribe to an Observable emitting
+ * regularly media conditions.
+ *
+ * @class {PlaybackObserver}
+ */
+
+var PlaybackObserver = /*#__PURE__*/function () {
+  /**
+   * @param {HTMLMediaElement} mediaElement
+   * @param {Object} options
+   */
+  function PlaybackObserver(mediaElement, options) {
+    this._internalSeekingEventsIncomingCounter = 0;
+    this._mediaElement = mediaElement;
+    this._withMediaSource = options.withMediaSource;
+    this._lowLatencyMode = options.lowLatencyMode;
+    this._lastObservation = null;
+    this._observation$ = null;
+  }
+  /**
+   * Returns the current position advertised by the `HTMLMediaElement`, in
+   * seconds.
+   * @returns {number}
+   */
+
+
+  var _proto = PlaybackObserver.prototype;
+
+  _proto.getCurrentTime = function getCurrentTime() {
+    return this._mediaElement.currentTime;
+  }
+  /**
+   * Update the current position (seek) on the `HTMLMediaElement`, by giving a
+   * new position in seconds.
+   *
+   * Note that seeks performed through this method are caracherized as
+   * "internal" seeks. They don't result into the exact same playback
+   * observation than regular seeks (which most likely comes from the outside,
+   * e.g. the user).
+   * @param {number}
+   */
+  ;
+
+  _proto.setCurrentTime = function setCurrentTime(time) {
+    this._internalSeekingEventsIncomingCounter += 1;
+    this._mediaElement.currentTime = time;
+  }
+  /**
+   * Returns the current `readyState` advertised by the `HTMLMediaElement`.
+   * @returns {number}
+   */
+  ;
+
+  _proto.getReadyState = function getReadyState() {
+    return this._mediaElement.readyState;
+  }
+  /**
+   * Returns an Observable regularly emitting playback observation, optionally
+   * starting with the last one.
+   *
+   * Note that this Observable is shared and unique, so that multiple `observe`
+   * call will return the exact same Observable and multiple concurrent
+   * `subscribe` will receive the same events at the same time.
+   * This was done for performance and simplicity reasons.
+   *
+   * @param {boolean} includeLastObservation
+   * @returns {Observable}
+   */
+  ;
+
+  _proto.observe = function observe(includeLastObservation) {
+    var _this = this;
+
+    return (0,defer/* defer */.P)(function () {
+      if (_this._observation$ === null || _this._lastObservation === null) {
+        _this._lastObservation = _this._generateInitialObservation();
+        _this._observation$ = _this._createInnerObservable().pipe((0,share/* share */.B)());
+        return _this.observe(includeLastObservation);
+      } else {
+        return includeLastObservation ? _this._observation$.pipe((0,startWith/* startWith */.O)(_this._lastObservation)) : _this._observation$;
+      }
+    });
+  }
+  /**
+   * Generate a new playback observer which can listen to other
+   * properties and which can only be accessed to read observations (e.g.
+   * it cannot ask to perform a seek).
+   *
+   * The object returned will respect the `IReadOnlyPlaybackObserver` interface
+   * and will inherit this `PlaybackObserver`'s lifecycle: it will emit when
+   * the latter emits.
+   *
+   * As argument, this method takes a function which will allow to produce
+   * the new set of properties to be present on each observation.
+   * @param {Function} mapObservable
+   * @returns {Object}
+   */
+  ;
+
+  _proto.deriveReadOnlyObserver = function deriveReadOnlyObserver(mapObservable) {
+    return generateReadOnlyObserver(this, mapObservable);
+  }
+  /**
+   * Creates the observable that will generate playback observations.
+   * @returns {Observable}
+   */
+  ;
+
+  _proto._createInnerObservable = function _createInnerObservable() {
+    var _this2 = this;
+
+    return (0,defer/* defer */.P)(function () {
+      var getCurrentObservation = function getCurrentObservation(event) {
+        var _a;
+
+        var tmpEvt = event;
+
+        if (tmpEvt === "seeking" && _this2._internalSeekingEventsIncomingCounter > 0) {
+          tmpEvt = "internal-seeking";
+          _this2._internalSeekingEventsIncomingCounter -= 1;
+        }
+
+        var lastObservation = (_a = _this2._lastObservation) !== null && _a !== void 0 ? _a : _this2._generateInitialObservation();
+        var mediaTimings = getMediaInfos(_this2._mediaElement, tmpEvt);
+        var internalSeeking = mediaTimings.seeking && (tmpEvt === "internal-seeking" || lastObservation.internalSeeking && tmpEvt !== "seeking");
+        var rebufferingStatus = getRebufferingStatus(lastObservation, mediaTimings, {
+          lowLatencyMode: _this2._lowLatencyMode,
+          withMediaSource: _this2._withMediaSource
+        });
+        var freezingStatus = getFreezingStatus(lastObservation, mediaTimings);
+        var timings = (0,object_assign/* default */.Z)({}, {
+          rebuffering: rebufferingStatus,
+          freezing: freezingStatus,
+          internalSeeking: internalSeeking
+        }, mediaTimings);
+        log/* default.debug */.Z.debug("API: current media element state", timings);
+        return timings;
+      };
+
+      var eventObs = SCANNED_MEDIA_ELEMENTS_EVENTS.map(function (eventName) {
+        return (0,fromEvent/* fromEvent */.R)(_this2._mediaElement, eventName).pipe((0,mapTo/* mapTo */.h)(eventName));
+      });
+      var interval = _this2._lowLatencyMode ? SAMPLING_INTERVAL_LOW_LATENCY : _this2._withMediaSource ? SAMPLING_INTERVAL_MEDIASOURCE : SAMPLING_INTERVAL_NO_MEDIASOURCE;
+      var interval$ = (0,observable_interval/* interval */.F)(interval).pipe((0,mapTo/* mapTo */.h)("timeupdate"));
+      return merge/* merge.apply */.T.apply(void 0, [interval$].concat(eventObs)).pipe((0,map/* map */.U)(function (event) {
+        var newObservation = getCurrentObservation(event);
+
+        if (log/* default.getLevel */.Z.getLevel() === "DEBUG") {
+          log/* default.debug */.Z.debug("API: current playback timeline:\n" + prettyPrintBuffered(newObservation.buffered, newObservation.position), "\n" + event);
+        }
+
+        _this2._lastObservation = newObservation;
+        return newObservation;
+      }));
+    });
+  };
+
+  _proto._generateInitialObservation = function _generateInitialObservation() {
+    return (0,object_assign/* default */.Z)(getMediaInfos(this._mediaElement, "init"), {
+      rebuffering: null,
+      freezing: null,
+      internalSeeking: false
+    });
+  };
+
+  return PlaybackObserver;
+}();
+/**
+ * Returns the amount of time in seconds the buffer should have ahead of the
+ * current position before resuming playback. Based on the infos of the
+ * rebuffering status.
+ *
+ * Waiting time differs between a rebuffering happening after a "seek" or one
+ * happening after a buffer starvation occured.
+ * @param {Object|null} rebufferingStatus
+ * @param {Boolean} lowLatencyMode
+ * @returns {Number}
+ */
+
+
+
+
+function getRebufferingEndGap(rebufferingStatus, lowLatencyMode) {
+  if (rebufferingStatus === null) {
+    return 0;
+  }
+
+  var suffix = lowLatencyMode ? "LOW_LATENCY" : "DEFAULT";
+
+  switch (rebufferingStatus.reason) {
+    case "seeking":
+      return RESUME_GAP_AFTER_SEEKING[suffix];
+
+    case "not-ready":
+      return RESUME_GAP_AFTER_NOT_ENOUGH_DATA[suffix];
+
+    case "buffering":
+      return RESUME_GAP_AFTER_BUFFERING[suffix];
+  }
+}
+/**
+ * @param {Object} currentRange
+ * @param {Number} duration
+ * @param {Boolean} lowLatencyMode
+ * @returns {Boolean}
+ */
+
+
+function hasLoadedUntilTheEnd(currentRange, duration, lowLatencyMode) {
+  var suffix = lowLatencyMode ? "LOW_LATENCY" : "DEFAULT";
+  return currentRange !== null && duration - currentRange.end <= REBUFFERING_GAP[suffix];
+}
+/**
+ * Get basic playback information.
+ * @param {HTMLMediaElement} mediaElement
+ * @param {string} event
+ * @returns {Object}
+ */
+
+
+function getMediaInfos(mediaElement, event) {
+  var buffered = mediaElement.buffered,
+      currentTime = mediaElement.currentTime,
+      duration = mediaElement.duration,
+      ended = mediaElement.ended,
+      paused = mediaElement.paused,
+      playbackRate = mediaElement.playbackRate,
+      readyState = mediaElement.readyState,
+      seeking = mediaElement.seeking;
+  var currentRange = (0,ranges/* getRange */.rx)(buffered, currentTime);
+  return {
+    bufferGap: currentRange !== null ? currentRange.end - currentTime : // TODO null/0 would probably be
+    // more appropriate
+    Infinity,
+    buffered: buffered,
+    currentRange: currentRange,
+    position: currentTime,
+    duration: duration,
+    ended: ended,
+    paused: paused,
+    playbackRate: playbackRate,
+    readyState: readyState,
+    seeking: seeking,
+    event: event
+  };
+}
+/**
+ * Infer rebuffering status of the media based on:
+ *   - the return of the function getMediaInfos
+ *   - the previous observation object.
+ *
+ * @param {Object} prevObservation - Previous playback observation object.
+ * @param {Object} currentInfo - Current set of basic information on the
+ * `HTMLMediaElement`. This does not need every single property from a regular
+ * playback observation.
+ * @param {Object} options
+ * @returns {Object|null}
+ */
+
+
+function getRebufferingStatus(prevObservation, currentInfo, _ref) {
+  var withMediaSource = _ref.withMediaSource,
+      lowLatencyMode = _ref.lowLatencyMode;
+  var currentEvt = currentInfo.event,
+      currentTime = currentInfo.position,
+      bufferGap = currentInfo.bufferGap,
+      currentRange = currentInfo.currentRange,
+      duration = currentInfo.duration,
+      paused = currentInfo.paused,
+      readyState = currentInfo.readyState,
+      ended = currentInfo.ended;
+  var prevRebuffering = prevObservation.rebuffering,
+      prevEvt = prevObservation.event,
+      prevTime = prevObservation.position;
+  var fullyLoaded = hasLoadedUntilTheEnd(currentRange, duration, lowLatencyMode);
+  var canSwitchToRebuffering = readyState >= 1 && currentEvt !== "loadedmetadata" && prevRebuffering === null && !(fullyLoaded || ended);
+  var rebufferEndPosition = null;
+  var shouldRebuffer;
+  var shouldStopRebuffer;
+  var rebufferGap = lowLatencyMode ? REBUFFERING_GAP.LOW_LATENCY : REBUFFERING_GAP.DEFAULT;
+
+  if (withMediaSource) {
+    if (canSwitchToRebuffering) {
+      if (bufferGap <= rebufferGap) {
+        shouldRebuffer = true;
+        rebufferEndPosition = currentTime + bufferGap;
+      } else if (bufferGap === Infinity) {
+        shouldRebuffer = true;
+        rebufferEndPosition = currentTime;
+      }
+    } else if (prevRebuffering !== null) {
+      var resumeGap = getRebufferingEndGap(prevRebuffering, lowLatencyMode);
+
+      if (shouldRebuffer !== true && prevRebuffering !== null && readyState > 1 && (fullyLoaded || ended || bufferGap < Infinity && bufferGap > resumeGap)) {
+        shouldStopRebuffer = true;
+      } else if (bufferGap === Infinity || bufferGap <= resumeGap) {
+        rebufferEndPosition = bufferGap === Infinity ? currentTime : currentTime + bufferGap;
+      }
+    }
+  } // when using a direct file, the media will stall and unstall on its
+  // own, so we only try to detect when the media timestamp has not changed
+  // between two consecutive timeupdates
+  else {
+    if (canSwitchToRebuffering && (!paused && currentEvt === "timeupdate" && prevEvt === "timeupdate" && currentTime === prevTime || currentEvt === "seeking" && bufferGap === Infinity)) {
+      shouldRebuffer = true;
+    } else if (prevRebuffering !== null && (currentEvt !== "seeking" && currentTime !== prevTime || currentEvt === "canplay" || bufferGap < Infinity && (bufferGap > getRebufferingEndGap(prevRebuffering, lowLatencyMode) || fullyLoaded || ended))) {
+      shouldStopRebuffer = true;
+    }
+  }
+
+  if (shouldStopRebuffer === true) {
+    return null;
+  } else if (shouldRebuffer === true || prevRebuffering !== null) {
+    var reason;
+
+    if (currentEvt === "seeking" || prevRebuffering !== null && prevRebuffering.reason === "seeking") {
+      reason = "seeking";
+    } else if (currentInfo.seeking) {
+      reason = "seeking";
+    } else if (readyState === 1) {
+      reason = "not-ready";
+    } else {
+      reason = "buffering";
+    }
+
+    if (prevRebuffering !== null && prevRebuffering.reason === reason) {
+      return {
+        reason: prevRebuffering.reason,
+        timestamp: prevRebuffering.timestamp,
+        position: rebufferEndPosition
+      };
+    }
+
+    return {
+      reason: reason,
+      timestamp: performance.now(),
+      position: rebufferEndPosition
+    };
+  }
+
+  return null;
+}
+/**
+ * Detect if the current media can be considered as "freezing" (i.e. not
+ * advancing for unknown reasons).
+ *
+ * Returns a corresponding `IFreezingStatus` object if that's the case and
+ * `null` if not.
+ * @param {Object} prevObservation
+ * @param {Object} currentInfo
+ * @returns {Object|null}
+ */
+
+
+function getFreezingStatus(prevObservation, currentInfo) {
+  if (prevObservation.freezing) {
+    if (currentInfo.ended || currentInfo.paused || currentInfo.readyState === 0 || currentInfo.playbackRate === 0 || prevObservation.position !== currentInfo.position) {
+      return null; // Quit freezing status
+    }
+
+    return prevObservation.freezing; // Stay in it
+  }
+
+  return currentInfo.event === "timeupdate" && currentInfo.bufferGap > MINIMUM_BUFFER_AMOUNT_BEFORE_FREEZING && !currentInfo.ended && !currentInfo.paused && currentInfo.readyState >= 1 && currentInfo.playbackRate !== 0 && currentInfo.position === prevObservation.position ? {
+    timestamp: performance.now()
+  } : null;
+}
+/**
+ * Pretty print a TimeRanges Object, to see the current content of it in a
+ * one-liner string.
+ *
+ * @example
+ * This function is called by giving it directly the TimeRanges, such as:
+ * ```js
+ * prettyPrintBuffered(document.getElementsByTagName("video")[0].buffered);
+ * ```
+ *
+ * Let's consider this possible return:
+ *
+ * ```
+ * 0.00|==29.95==|29.95 ~30.05~ 60.00|==29.86==|89.86
+ *          ^14
+ * ```
+ * This means that our video element has 29.95 seconds of buffer between 0 and
+ * 29.95 seconds.
+ * Then 30.05 seconds where no buffer is found.
+ * Then 29.86 seconds of buffer between 60.00 and 89.86 seconds.
+ *
+ * A caret on the second line indicates the current time we're at.
+ * The number coming after it is the current time.
+ * @param {TimeRanges} buffered
+ * @param {number} currentTime
+ * @returns {string}
+ */
+
+
+function prettyPrintBuffered(buffered, currentTime) {
+  var str = "";
+  var currentTimeStr = "";
+
+  for (var i = 0; i < buffered.length; i++) {
+    var start = buffered.start(i);
+    var end = buffered.end(i);
+    var fixedStart = start.toFixed(2);
+    var fixedEnd = end.toFixed(2);
+    var fixedDuration = (end - start).toFixed(2);
+    var newIntervalStr = fixedStart + "|==" + fixedDuration + "==|" + fixedEnd;
+    str += newIntervalStr;
+
+    if (currentTimeStr.length === 0 && end > currentTime) {
+      var padBefore = str.length - Math.floor(newIntervalStr.length / 2);
+      currentTimeStr = " ".repeat(padBefore) + ("^" + currentTime);
+    }
+
+    if (i < buffered.length - 1) {
+      var nextStart = buffered.start(i + 1);
+      var fixedDiff = (nextStart - end).toFixed(2);
+      var holeStr = " ~" + fixedDiff + "~ ";
+      str += holeStr;
+
+      if (currentTimeStr.length === 0 && currentTime < nextStart) {
+        var _padBefore = str.length - Math.floor(holeStr.length / 2);
+
+        currentTimeStr = " ".repeat(_padBefore) + ("^" + currentTime);
+      }
+    }
+  }
+
+  if (currentTimeStr.length === 0) {
+    currentTimeStr = " ".repeat(str.length) + ("^" + currentTime);
+  }
+
+  return str + "\n" + currentTimeStr;
+}
+/**
+ * Create `IReadOnlyPlaybackObserver` from a source `IReadOnlyPlaybackObserver`
+ * and a mapping function.
+ * @param {Object} src
+ * @param {Function} mapObservable
+ * @returns {Object}
+ */
+
+
+function generateReadOnlyObserver(src, mapObservable) {
+  var newObs = (0,defer/* defer */.P)(function () {
+    return mapObservable(src.observe(true));
+  }).pipe((0,shareReplay/* shareReplay */.d)({
+    bufferSize: 1,
+    refCount: true
+  }));
+  return {
+    getCurrentTime: function getCurrentTime() {
+      return src.getCurrentTime();
+    },
+    getReadyState: function getReadyState() {
+      return src.getReadyState();
+    },
+    observe: function observe(includeLastObservation) {
+      return includeLastObservation ? newObs : newObs.pipe(skip(1));
+    },
+    deriveReadOnlyObserver: function deriveReadOnlyObserver(newUdateObserver) {
+      return generateReadOnlyObserver(this, newUdateObserver);
+    }
+  };
+}
 // EXTERNAL MODULE: ./src/utils/languages/index.ts
 var languages = __webpack_require__(7829);
 ;// CONCATENATED MODULE: ./src/core/api/track_choice_manager.ts
@@ -57247,8 +57556,8 @@ function getRightVideoTrack(adaptation, isTrickModeEnabled) {
  */
 
 
-
 /* eslint-disable-next-line max-len */
+
 
 
 
@@ -57375,14 +57684,14 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     })).subscribe(function (x) {
       return _this._priv_onNativeTextTracksNext(x);
     });
-    _this._priv_playing$ = new ReplaySubject/* ReplaySubject */.t(1);
-    _this._priv_speed$ = new BehaviorSubject(videoElement.playbackRate);
+    _this._priv_isPlaying = (0,reference/* default */.Z)(false);
+    _this._priv_speed = (0,reference/* default */.Z)(videoElement.playbackRate);
     _this._priv_preferTrickModeTracks = false;
-    _this._priv_contentLock$ = new BehaviorSubject(false);
+    _this._priv_contentLock = (0,reference/* default */.Z)(false);
     _this._priv_bufferOptions = {
-      wantedBufferAhead$: new BehaviorSubject(wantedBufferAhead),
-      maxBufferAhead$: new BehaviorSubject(maxBufferAhead),
-      maxBufferBehind$: new BehaviorSubject(maxBufferBehind)
+      wantedBufferAhead: (0,reference/* default */.Z)(wantedBufferAhead),
+      maxBufferAhead: (0,reference/* default */.Z)(maxBufferAhead),
+      maxBufferBehind: (0,reference/* default */.Z)(maxBufferBehind)
     };
     _this._priv_bitrateInfos = {
       lastBitrates: {
@@ -57390,16 +57699,16 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         video: initialVideoBitrate
       },
       minAutoBitrates: {
-        audio: new BehaviorSubject(minAudioBitrate),
-        video: new BehaviorSubject(minVideoBitrate)
+        audio: (0,reference/* default */.Z)(minAudioBitrate),
+        video: (0,reference/* default */.Z)(minVideoBitrate)
       },
       maxAutoBitrates: {
-        audio: new BehaviorSubject(maxAudioBitrate),
-        video: new BehaviorSubject(maxVideoBitrate)
+        audio: (0,reference/* default */.Z)(maxAudioBitrate),
+        video: (0,reference/* default */.Z)(maxVideoBitrate)
       },
       manualBitrates: {
-        audio: new BehaviorSubject(-1),
-        video: new BehaviorSubject(-1)
+        audio: (0,reference/* default */.Z)(-1),
+        video: (0,reference/* default */.Z)(-1)
       }
     };
     _this._priv_throttleWhenHidden = throttleWhenHidden;
@@ -57460,34 +57769,34 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
     this._priv_destroy$.next();
 
-    this._priv_destroy$.complete(); // Complete all subjects
+    this._priv_destroy$.complete(); // Complete all subjects and references
 
-
-    this._priv_playing$.complete();
-
-    this._priv_speed$.complete();
-
-    this._priv_contentLock$.complete();
-
-    this._priv_bufferOptions.wantedBufferAhead$.complete();
-
-    this._priv_bufferOptions.maxBufferAhead$.complete();
-
-    this._priv_bufferOptions.maxBufferBehind$.complete();
 
     this._priv_pictureInPictureEvent$.complete();
 
-    this._priv_bitrateInfos.manualBitrates.video.complete();
+    this._priv_isPlaying.finish();
 
-    this._priv_bitrateInfos.manualBitrates.audio.complete();
+    this._priv_speed.finish();
 
-    this._priv_bitrateInfos.minAutoBitrates.video.complete();
+    this._priv_contentLock.finish();
 
-    this._priv_bitrateInfos.minAutoBitrates.audio.complete();
+    this._priv_bufferOptions.wantedBufferAhead.finish();
 
-    this._priv_bitrateInfos.maxAutoBitrates.video.complete();
+    this._priv_bufferOptions.maxBufferAhead.finish();
 
-    this._priv_bitrateInfos.maxAutoBitrates.audio.complete();
+    this._priv_bufferOptions.maxBufferBehind.finish();
+
+    this._priv_bitrateInfos.manualBitrates.video.finish();
+
+    this._priv_bitrateInfos.manualBitrates.audio.finish();
+
+    this._priv_bitrateInfos.minAutoBitrates.video.finish();
+
+    this._priv_bitrateInfos.minAutoBitrates.audio.finish();
+
+    this._priv_bitrateInfos.maxAutoBitrates.video.finish();
+
+    this._priv_bitrateInfos.maxAutoBitrates.audio.finish();
 
     this._priv_lastContentPlaybackInfos = {}; // un-attach video element
 
@@ -57611,20 +57920,15 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       initialTextTrack: defaultTextTrack
     };
     var videoElement = this.videoElement;
-    /** Global "clock" used for content playback */
+    /** Global "playback observer" which will emit playback conditions */
 
-    var _createClock = clock(videoElement, {
+    var playbackObserver = new PlaybackObserver(videoElement, {
       withMediaSource: !isDirectFile,
       lowLatencyMode: lowLatencyMode
-    }),
-        setCurrentTime = _createClock.setCurrentTime,
-        clock$ = _createClock.clock$;
+    });
     /** Emit playback events. */
 
-
     var playback$;
-
-    var speed$ = this._priv_speed$.pipe((0,distinctUntilChanged/* distinctUntilChanged */.x)());
 
     if (!isDirectFile) {
       var transportFn = features/* default.transports */.Z.transports[transport];
@@ -57634,7 +57938,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         this.stop();
         this._priv_currentError = null;
 
-        this._priv_playing$.next(false);
+        this._priv_isPlaying.setValue(false);
 
         throw new Error("transport \"" + transport + "\" not supported");
       }
@@ -57691,7 +57995,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       this.stop();
       this._priv_currentError = null;
 
-      this._priv_playing$.next(false);
+      this._priv_isPlaying.setValue(false);
 
       this._priv_contentInfos = contentInfos;
       var relyOnVideoVisibilityAndSize = canRelyOnVideoVisibilityAndSize();
@@ -57765,7 +58069,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         adaptiveOptions: adaptiveOptions,
         autoPlay: autoPlay,
         bufferOptions: bufferOptions,
-        clock$: clock$,
+        playbackObserver: playbackObserver,
         keySystems: keySystems,
         lowLatencyMode: lowLatencyMode,
         manifest$: manifest$,
@@ -57773,8 +58077,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         mediaElement: videoElement,
         minimumManifestUpdateInterval: minimumManifestUpdateInterval,
         segmentFetcherCreator: segmentFetcherCreator,
-        setCurrentTime: setCurrentTime,
-        speed$: speed$,
+        speed: this._priv_speed,
         startAt: startAt,
         textTrackOptions: textTrackOptions
       }).pipe((0,takeUntil/* takeUntil */.R)(stopContent$));
@@ -57789,7 +58092,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       this.stop();
       this._priv_currentError = null;
 
-      this._priv_playing$.next(false);
+      this._priv_isPlaying.setValue(false);
 
       if (features/* default.directfile */.Z.directfile === null) {
         throw new Error("DirectFile feature not activated in your build.");
@@ -57840,12 +58143,11 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
       var directfileInit$ = features/* default.directfile.initDirectFile */.Z.directfile.initDirectFile({
         autoPlay: autoPlay,
-        clock$: clock$,
         keySystems: keySystems,
         mediaElement: videoElement,
-        speed$: this._priv_speed$,
+        speed: this._priv_speed,
+        playbackObserver: playbackObserver,
         startAt: startAt,
-        setCurrentTime: setCurrentTime,
         url: url
       }).pipe((0,takeUntil/* takeUntil */.R)(stopContent$));
       playback$ = connectable(directfileInit$, {
@@ -57883,7 +58185,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     var seekingEvent$ = onSeeking$(videoElement);
     /** Emit state updates once the content is considered "loaded". */
 
-    var loadedStateUpdates$ = (0,combineLatest/* combineLatest */.a)([this._priv_playing$, stalled$.pipe((0,startWith/* startWith */.O)(null)), endedEvent$.pipe((0,startWith/* startWith */.O)(null)), seekingEvent$.pipe((0,startWith/* startWith */.O)(null))]).pipe((0,takeUntil/* takeUntil */.R)(stopContent$), (0,map/* map */.U)(function (_ref) {
+    var loadedStateUpdates$ = (0,combineLatest/* combineLatest */.a)([this._priv_isPlaying.asObservable(), stalled$.pipe((0,startWith/* startWith */.O)(null)), endedEvent$.pipe((0,startWith/* startWith */.O)(null)), seekingEvent$.pipe((0,startWith/* startWith */.O)(null))]).pipe((0,takeUntil/* takeUntil */.R)(stopContent$), (0,map/* map */.U)(function (_ref) {
       var isPlaying = _ref[0],
           stalledStatus = _ref[1];
       return getLoadedContentState(videoElement, isPlaying, stalledStatus);
@@ -57909,13 +58211,14 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
     onPlayPause$(videoElement).pipe((0,takeUntil/* takeUntil */.R)(stopContent$)).subscribe(function (e) {
       return _this2._priv_onPlayPauseNext(e.type === "play");
-    }); // Link "positionUpdate" events to the clock
+    });
+    var observation$ = playbackObserver.observe(true); // Link "positionUpdate" events to the PlaybackObserver
 
-    clock$.pipe((0,takeUntil/* takeUntil */.R)(stopContent$)).subscribe(function (x) {
-      return _this2._priv_triggerPositionUpdate(x);
+    observation$.pipe((0,takeUntil/* takeUntil */.R)(stopContent$)).subscribe(function (o) {
+      return _this2._priv_triggerPositionUpdate(o);
     }); // Link "seeking" and "seeked" events (once the content is loaded)
 
-    loaded$.pipe((0,switchMapTo/* switchMapTo */.c)(emitSeekEvents(this.videoElement, clock$)), (0,takeUntil/* takeUntil */.R)(stopContent$)).subscribe(function (evt) {
+    loaded$.pipe((0,switchMapTo/* switchMapTo */.c)(emitSeekEvents(this.videoElement, observation$)), (0,takeUntil/* takeUntil */.R)(stopContent$)).subscribe(function (evt) {
       log/* default.info */.Z.info("API: Triggering \"" + evt + "\" event");
 
       _this2.trigger(evt, null);
@@ -57941,7 +58244,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       }
     }); // initialize the content only when the lock is inactive
 
-    this._priv_contentLock$.pipe((0,filter/* filter */.h)(function (isLocked) {
+    this._priv_contentLock.asObservable().pipe((0,filter/* filter */.h)(function (isLocked) {
       return !isLocked;
     }), (0,take/* take */.q)(1), (0,takeUntil/* takeUntil */.R)(stopContent$)).subscribe(function () {
       // start playback!
@@ -58249,7 +58552,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.getPlaybackRate = function getPlaybackRate() {
-    return this._priv_speed$.getValue();
+    return this._priv_speed.getValue();
   }
   /**
    * Update the playback rate of the video.
@@ -58310,7 +58613,9 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.setPlaybackRate = function setPlaybackRate(rate, opts) {
-    this._priv_speed$.next(rate);
+    if (rate !== this._priv_speed.getValue()) {
+      this._priv_speed.setValue(rate);
+    }
 
     var preferTrickModeTracks = opts === null || opts === void 0 ? void 0 : opts.preferTrickModeTracks;
 
@@ -58683,7 +58988,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.setVideoBitrate = function setVideoBitrate(btr) {
-    this._priv_bitrateInfos.manualBitrates.video.next(btr);
+    this._priv_bitrateInfos.manualBitrates.video.setValue(btr);
   }
   /**
    * Force the audio bitrate to a given value. Act as a ceil.
@@ -58693,7 +58998,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.setAudioBitrate = function setAudioBitrate(btr) {
-    this._priv_bitrateInfos.manualBitrates.audio.next(btr);
+    this._priv_bitrateInfos.manualBitrates.audio.setValue(btr);
   }
   /**
    * Update the minimum video bitrate the user can switch to.
@@ -58708,7 +59013,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       throw new Error("Invalid minimum video bitrate given. " + ("Its value, \"" + btr + "\" is superior the current maximum ") + ("video birate, \"" + maxVideoBitrate + "\"."));
     }
 
-    this._priv_bitrateInfos.minAutoBitrates.video.next(btr);
+    this._priv_bitrateInfos.minAutoBitrates.video.setValue(btr);
   }
   /**
    * Update the minimum audio bitrate the user can switch to.
@@ -58723,7 +59028,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       throw new Error("Invalid minimum audio bitrate given. " + ("Its value, \"" + btr + "\" is superior the current maximum ") + ("audio birate, \"" + maxAudioBitrate + "\"."));
     }
 
-    this._priv_bitrateInfos.minAutoBitrates.audio.next(btr);
+    this._priv_bitrateInfos.minAutoBitrates.audio.setValue(btr);
   }
   /**
    * Update the maximum video bitrate the user can switch to.
@@ -58738,7 +59043,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       throw new Error("Invalid maximum video bitrate given. " + ("Its value, \"" + btr + "\" is inferior the current minimum ") + ("video birate, \"" + minVideoBitrate + "\"."));
     }
 
-    this._priv_bitrateInfos.maxAutoBitrates.video.next(btr);
+    this._priv_bitrateInfos.maxAutoBitrates.video.setValue(btr);
   }
   /**
    * Update the maximum audio bitrate the user can switch to.
@@ -58753,7 +59058,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       throw new Error("Invalid maximum audio bitrate given. " + ("Its value, \"" + btr + "\" is inferior the current minimum ") + ("audio birate, \"" + minAudioBitrate + "\"."));
     }
 
-    this._priv_bitrateInfos.maxAutoBitrates.audio.next(btr);
+    this._priv_bitrateInfos.maxAutoBitrates.audio.setValue(btr);
   }
   /**
    * Set the max buffer size for the buffer behind the current position.
@@ -58763,7 +59068,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.setMaxBufferBehind = function setMaxBufferBehind(depthInSeconds) {
-    this._priv_bufferOptions.maxBufferBehind$.next(depthInSeconds);
+    this._priv_bufferOptions.maxBufferBehind.setValue(depthInSeconds);
   }
   /**
    * Set the max buffer size for the buffer behind the current position.
@@ -58773,7 +59078,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.setMaxBufferAhead = function setMaxBufferAhead(depthInSeconds) {
-    this._priv_bufferOptions.maxBufferAhead$.next(depthInSeconds);
+    this._priv_bufferOptions.maxBufferAhead.setValue(depthInSeconds);
   }
   /**
    * Set the max buffer size for the buffer ahead of the current position.
@@ -58783,7 +59088,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.setWantedBufferAhead = function setWantedBufferAhead(sizeInSeconds) {
-    this._priv_bufferOptions.wantedBufferAhead$.next(sizeInSeconds);
+    this._priv_bufferOptions.wantedBufferAhead.setValue(sizeInSeconds);
   }
   /**
    * Returns the max buffer size for the buffer behind the current position.
@@ -58792,7 +59097,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.getMaxBufferBehind = function getMaxBufferBehind() {
-    return this._priv_bufferOptions.maxBufferBehind$.getValue();
+    return this._priv_bufferOptions.maxBufferBehind.getValue();
   }
   /**
    * Returns the max buffer size for the buffer behind the current position.
@@ -58801,7 +59106,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.getMaxBufferAhead = function getMaxBufferAhead() {
-    return this._priv_bufferOptions.maxBufferAhead$.getValue();
+    return this._priv_bufferOptions.maxBufferAhead.getValue();
   }
   /**
    * Returns the max buffer size for the buffer ahead of the current position.
@@ -58810,7 +59115,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.getWantedBufferAhead = function getWantedBufferAhead() {
-    return this._priv_bufferOptions.wantedBufferAhead$.getValue();
+    return this._priv_bufferOptions.wantedBufferAhead.getValue();
   }
   /**
    * Returns type of current keysystem (e.g. playready, widevine) if the content
@@ -59365,7 +59670,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
     log/* default.debug */.Z.debug("Locking `contentLock` to clean-up the current content."); // lock playback of new contents while cleaning up is pending
 
-    this._priv_contentLock$.next(true);
+    this._priv_contentLock.setValue(true);
 
     this._priv_contentInfos = null;
     this._priv_trackChoiceManager = null;
@@ -59376,7 +59681,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     var freeUpContentLock = function freeUpContentLock() {
       log/* default.debug */.Z.debug("Unlocking `contentLock`. Next content can begin.");
 
-      _this4._priv_contentLock$.next(false);
+      _this4._priv_contentLock.setValue(false);
     };
 
     if (!(0,is_null_or_undefined/* default */.Z)(this.videoElement)) {
@@ -59945,7 +60250,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       throw new Error("Disposed player");
     }
 
-    this._priv_playing$.next(isPlaying);
+    this._priv_isPlaying.setValue(isPlaying);
   }
   /**
    * Triggered each time a textTrack is added to the video DOM Element.
@@ -59976,15 +60281,15 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     }
   }
   /**
-   * Triggered each time a new clock tick object is emitted.
+   * Triggered each time a playback observation.
    *
    * Trigger the right Player Event
    *
-   * @param {Object} clockTick
+   * @param {Object} observation
    */
   ;
 
-  _proto._priv_triggerPositionUpdate = function _priv_triggerPositionUpdate(clockTick) {
+  _proto._priv_triggerPositionUpdate = function _priv_triggerPositionUpdate(observation) {
     var _a;
 
     if (this._priv_contentInfos === null) {
@@ -60000,25 +60305,25 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         isDirectFile = _this$_priv_contentIn23.isDirectFile,
         manifest = _this$_priv_contentIn23.manifest;
 
-    if (!isDirectFile && manifest === null || (0,is_null_or_undefined/* default */.Z)(clockTick)) {
+    if (!isDirectFile && manifest === null || (0,is_null_or_undefined/* default */.Z)(observation)) {
       return;
     }
 
-    this._priv_lastContentPlaybackInfos.lastPlaybackPosition = clockTick.position;
+    this._priv_lastContentPlaybackInfos.lastPlaybackPosition = observation.position;
     var maximumPosition = manifest !== null ? manifest.getMaximumPosition() : undefined;
     var positionData = {
-      position: clockTick.position,
-      duration: clockTick.duration,
-      playbackRate: clockTick.playbackRate,
+      position: observation.position,
+      duration: observation.duration,
+      playbackRate: observation.playbackRate,
       maximumBufferTime: maximumPosition,
       // TODO fix higher up?
-      bufferGap: isFinite(clockTick.bufferGap) ? clockTick.bufferGap : 0
+      bufferGap: isFinite(observation.bufferGap) ? observation.bufferGap : 0
     };
 
-    if (manifest !== null && maximumPosition !== undefined && manifest.isLive && clockTick.position > 0) {
+    if (manifest !== null && maximumPosition !== undefined && manifest.isLive && observation.position > 0) {
       var ast = (_a = manifest.availabilityStartTime) !== null && _a !== void 0 ? _a : 0;
-      positionData.wallClockTime = clockTick.position + ast;
-      positionData.liveGap = maximumPosition - clockTick.position;
+      positionData.wallClockTime = observation.position + ast;
+      positionData.liveGap = maximumPosition - observation.position;
     }
 
     this.trigger("positionUpdate", positionData);
@@ -60127,6 +60432,8 @@ Player.version =
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 
 /* harmony default export */ var api = (public_api);
 // EXTERNAL MODULE: ./src/features/features_object.ts
