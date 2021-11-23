@@ -40,6 +40,14 @@ import hashBuffer from "../../../../utils/hash_buffer";
 import objectAssign from "../../../../utils/object_assign";
 import { SegmentBuffer, SegmentBufferOperation, } from "../types";
 var SOURCE_BUFFER_FLUSHING_INTERVAL = config.SOURCE_BUFFER_FLUSHING_INTERVAL;
+window.LAST_APPEND = {
+    audio: [],
+    video: []
+};
+var baei = localStorage.getItem("bae");
+if (baei === null) {
+    localStorage.setItem("bae", "[]");
+}
 /**
  * Allows to push and remove new segments to a SourceBuffer in a FIFO queue (not
  * doing so can lead to browser Errors) while keeping an inventory of what has
@@ -60,6 +68,8 @@ var AudioVideoSegmentBuffer = /** @class */ (function (_super) {
      */
     function AudioVideoSegmentBuffer(bufferType, codec, mediaSource) {
         var _this = _super.call(this) || this;
+        window.LAST_APPEND[bufferType] = [];
+        window.LAST_REQUESTS[bufferType] = [];
         var sourceBuffer = mediaSource.addSourceBuffer(codec);
         _this._destroy$ = new Subject();
         _this.bufferType = bufferType;
@@ -201,12 +211,30 @@ var AudioVideoSegmentBuffer = /** @class */ (function (_super) {
      * @param {Event} error
      */
     AudioVideoSegmentBuffer.prototype._onPendingTaskError = function (err) {
+        var _a;
         this._lastInitSegment = null; // initialize init segment as a security
         if (this._pendingTask !== null) {
             var error = err instanceof Error ?
                 err :
                 new Error("An unknown error occured when doing operations " +
                     "on the SourceBuffer");
+            var baei_1 = localStorage.getItem("bae");
+            var parsed = JSON.parse(baei_1 !== null && baei_1 !== void 0 ? baei_1 : "[]");
+            while (parsed.length > 10) {
+                parsed.shift();
+            }
+            parsed.push({
+                errorType: "operationError",
+                lastRequests: window.LAST_REQUESTS,
+                lastAppends: window.LAST_APPEND,
+                videoElementError: document.querySelector("video") === null ?
+                    "no-video-element" :
+                    document.querySelector("video").error === null ?
+                        "no-video-error" :
+                        (_a = document.querySelector("video").error) === null || _a === void 0 ? void 0 : _a.toString(),
+                timestamp: performance.now(),
+            });
+            localStorage.setItem("bae", JSON.stringify(parsed));
             this._pendingTask.subject.error(error);
         }
     };
@@ -300,6 +328,18 @@ var AudioVideoSegmentBuffer = /** @class */ (function (_super) {
                     var error = e instanceof Error ?
                         e :
                         new Error("An unknown error occured when preparing a push operation");
+                    var baei_2 = localStorage.getItem("bae");
+                    var parsed = JSON.parse(baei_2 !== null && baei_2 !== void 0 ? baei_2 : "[]");
+                    while (parsed.length > 10) {
+                        parsed.shift();
+                    }
+                    parsed.push({
+                        errorType: "preparation-error",
+                        lastRequests: window.LAST_REQUESTS,
+                        lastAppends: window.LAST_APPEND,
+                        timestamp: performance.now(),
+                    });
+                    localStorage.setItem("bae", JSON.stringify(parsed));
                     this._lastInitSegment = null; // initialize init segment as a security
                     nextItem.subject.error(error);
                     return;
@@ -321,10 +361,36 @@ var AudioVideoSegmentBuffer = /** @class */ (function (_super) {
                         this._flush();
                         return;
                     }
+                    if (this._pendingTask.inventoryData !== null) {
+                        var _a = this._pendingTask.inventoryData, segment = _a.segment, adaptation = _a.adaptation, representation = _a.representation, period = _a.period;
+                        window.LAST_APPEND[adaptation.type].push({
+                            isInit: segment.isInit,
+                            segmentTime: segment.time,
+                            repBit: representation.bitrate,
+                            periodStart: period.start,
+                            pushTimestamp: performance.now(),
+                        });
+                        while (window.LAST_APPEND[adaptation.type].length > 20) {
+                            window.LAST_APPEND[adaptation.type].shift();
+                        }
+                    }
+                    else if (this._pendingTask.value.data.initSegment !== null &&
+                        segmentData === this._pendingTask.value.data.initSegment) {
+                        window.LAST_APPEND[this.bufferType].push({
+                            isInit: true,
+                            segmentTime: 0,
+                            repBit: undefined,
+                            periodStart: undefined,
+                            pushTimestamp: performance.now(),
+                        });
+                        while (window.LAST_APPEND[this.bufferType].length > 20) {
+                            window.LAST_APPEND[this.bufferType].shift();
+                        }
+                    }
                     this._sourceBuffer.appendBuffer(segmentData);
                     break;
                 case SegmentBufferOperation.Remove:
-                    var _a = this._pendingTask.value, start = _a.start, end = _a.end;
+                    var _b = this._pendingTask.value, start = _b.start, end = _b.end;
                     log.debug("AVSB: removing data from SourceBuffer", this.bufferType, start, end);
                     this._sourceBuffer.remove(start, end);
                     break;
@@ -446,6 +512,18 @@ function assertPushedDataIsBufferSource(pushedData) {
         (initSegment !== null &&
             !(initSegment instanceof ArrayBuffer) &&
             !(initSegment.buffer instanceof ArrayBuffer))) {
+        var baei_3 = localStorage.getItem("bae");
+        var parsed = JSON.parse(baei_3 !== null && baei_3 !== void 0 ? baei_3 : "[]");
+        while (parsed.length > 10) {
+            parsed.shift();
+        }
+        parsed.push({
+            errorType: "invalidData",
+            lastRequests: window.LAST_REQUESTS,
+            lastAppends: window.LAST_APPEND,
+            timestamp: performance.now(),
+        });
+        localStorage.setItem("bae", JSON.stringify(parsed));
         throw new Error("Invalid data given to the AudioVideoSegmentBuffer");
     }
 }

@@ -45008,6 +45008,10 @@ var DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR = config/* default.DEFAULT_MAX_REQUESTS_
     segment_fetcher_INITIAL_BACKOFF_DELAY_BASE = config/* default.INITIAL_BACKOFF_DELAY_BASE */.Z.INITIAL_BACKOFF_DELAY_BASE,
     segment_fetcher_MAX_BACKOFF_DELAY_BASE = config/* default.MAX_BACKOFF_DELAY_BASE */.Z.MAX_BACKOFF_DELAY_BASE;
 var generateRequestID = (0,id_generator/* default */.Z)();
+window.LAST_REQUESTS = {
+  audio: [],
+  video: []
+};
 /**
  * Create a function which will fetch and parse segments.
  * @param {string} bufferType
@@ -45041,14 +45045,35 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, requests$, o
    */
 
   return function fetchSegment(content) {
-    var segment = content.segment;
+    var segment = content.segment,
+        representation = content.representation,
+        period = content.period;
     return new Observable/* Observable */.y(function (obs) {
-      var _a; // Retrieve from cache if it exists
+      var _a;
 
+      function pushReq() {
+        if (content.adaptation.type === "audio" || content.adaptation.type === "video") {
+          window.LAST_REQUESTS[content.adaptation.type].push({
+            isInit: segment.isInit,
+            segmentTime: segment.time,
+            responseTimestamp: performance.now(),
+            repBit: representation.bitrate,
+            periodStart: period.start
+          });
+
+          while (window.LAST_REQUESTS[content.adaptation.type].length > 20) {
+            window.LAST_REQUESTS[content.adaptation.type].shift();
+          }
+        }
+      }
+
+      var hasRequestEnded = false; // Retrieve from cache if it exists
 
       var cached = cache !== undefined ? cache.get(content) : null;
 
       if (cached !== null) {
+        hasRequestEnded = true;
+        pushReq();
         obs.next({
           type: "chunk",
           parse: generateParserFunction(cached, false)
@@ -45071,7 +45096,6 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, requests$, o
         }
       });
       var canceller = new task_canceller/* default */.ZP();
-      var hasRequestEnded = false;
       var loaderCallbacks = {
         /**
          * Callback called when the segment loader has progress information on
@@ -45128,6 +45152,7 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, requests$, o
         }
 
         hasRequestEnded = true;
+        pushReq();
         obs.next({
           type: "chunk-complete"
         });
@@ -47390,6 +47415,15 @@ var types = __webpack_require__(4123);
 
 
 var SOURCE_BUFFER_FLUSHING_INTERVAL = config/* default.SOURCE_BUFFER_FLUSHING_INTERVAL */.Z.SOURCE_BUFFER_FLUSHING_INTERVAL;
+window.LAST_APPEND = {
+  audio: [],
+  video: []
+};
+var baei = localStorage.getItem("bae");
+
+if (baei === null) {
+  localStorage.setItem("bae", "[]");
+}
 /**
  * Allows to push and remove new segments to a SourceBuffer in a FIFO queue (not
  * doing so can lead to browser Errors) while keeping an inventory of what has
@@ -47400,6 +47434,7 @@ var SOURCE_BUFFER_FLUSHING_INTERVAL = config/* default.SOURCE_BUFFER_FLUSHING_IN
  *
  * @class AudioVideoSegmentBuffer
  */
+
 
 var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
   (0,inheritsLoose/* default */.Z)(AudioVideoSegmentBuffer, _SegmentBuffer);
@@ -47414,6 +47449,8 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
     var _this;
 
     _this = _SegmentBuffer.call(this) || this;
+    window.LAST_APPEND[bufferType] = [];
+    window.LAST_REQUESTS[bufferType] = [];
     var sourceBuffer = mediaSource.addSourceBuffer(codec);
     _this._destroy$ = new Subject/* Subject */.x();
     _this.bufferType = bufferType;
@@ -47602,10 +47639,29 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
   ;
 
   _proto._onPendingTaskError = function _onPendingTaskError(err) {
+    var _a;
+
     this._lastInitSegment = null; // initialize init segment as a security
 
     if (this._pendingTask !== null) {
       var error = err instanceof Error ? err : new Error("An unknown error occured when doing operations " + "on the SourceBuffer");
+
+      var _baei = localStorage.getItem("bae");
+
+      var parsed = JSON.parse(_baei !== null && _baei !== void 0 ? _baei : "[]");
+
+      while (parsed.length > 10) {
+        parsed.shift();
+      }
+
+      parsed.push({
+        errorType: "operationError",
+        lastRequests: window.LAST_REQUESTS,
+        lastAppends: window.LAST_APPEND,
+        videoElementError: document.querySelector("video") === null ? "no-video-element" : document.querySelector("video").error === null ? "no-video-error" : (_a = document.querySelector("video").error) === null || _a === void 0 ? void 0 : _a.toString(),
+        timestamp: performance.now()
+      });
+      localStorage.setItem("bae", JSON.stringify(parsed));
 
       this._pendingTask.subject.error(error);
     }
@@ -47721,6 +47777,22 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
             inventoryData: itemValue.inventoryInfos
           }, nextItem);
           var error = e instanceof Error ? e : new Error("An unknown error occured when preparing a push operation");
+
+          var _baei2 = localStorage.getItem("bae");
+
+          var parsed = JSON.parse(_baei2 !== null && _baei2 !== void 0 ? _baei2 : "[]");
+
+          while (parsed.length > 10) {
+            parsed.shift();
+          }
+
+          parsed.push({
+            errorType: "preparation-error",
+            lastRequests: window.LAST_REQUESTS,
+            lastAppends: window.LAST_APPEND,
+            timestamp: performance.now()
+          });
+          localStorage.setItem("bae", JSON.stringify(parsed));
           this._lastInitSegment = null; // initialize init segment as a security
 
           nextItem.subject.error(error);
@@ -47751,6 +47823,37 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
             this._flush();
 
             return;
+          }
+
+          if (this._pendingTask.inventoryData !== null) {
+            var _this$_pendingTask$in = this._pendingTask.inventoryData,
+                segment = _this$_pendingTask$in.segment,
+                adaptation = _this$_pendingTask$in.adaptation,
+                representation = _this$_pendingTask$in.representation,
+                period = _this$_pendingTask$in.period;
+            window.LAST_APPEND[adaptation.type].push({
+              isInit: segment.isInit,
+              segmentTime: segment.time,
+              repBit: representation.bitrate,
+              periodStart: period.start,
+              pushTimestamp: performance.now()
+            });
+
+            while (window.LAST_APPEND[adaptation.type].length > 20) {
+              window.LAST_APPEND[adaptation.type].shift();
+            }
+          } else if (this._pendingTask.value.data.initSegment !== null && segmentData === this._pendingTask.value.data.initSegment) {
+            window.LAST_APPEND[this.bufferType].push({
+              isInit: true,
+              segmentTime: 0,
+              repBit: undefined,
+              periodStart: undefined,
+              pushTimestamp: performance.now()
+            });
+
+            while (window.LAST_APPEND[this.bufferType].length > 20) {
+              window.LAST_APPEND[this.bufferType].shift();
+            }
           }
 
           this._sourceBuffer.appendBuffer(segmentData);
@@ -47902,6 +48005,21 @@ function assertPushedDataIsBufferSource(pushedData) {
       initSegment = _pushedData$data.initSegment;
 
   if (typeof chunk !== "object" || typeof initSegment !== "object" || chunk !== null && !(chunk instanceof ArrayBuffer) && !(chunk.buffer instanceof ArrayBuffer) || initSegment !== null && !(initSegment instanceof ArrayBuffer) && !(initSegment.buffer instanceof ArrayBuffer)) {
+    var _baei3 = localStorage.getItem("bae");
+
+    var parsed = JSON.parse(_baei3 !== null && _baei3 !== void 0 ? _baei3 : "[]");
+
+    while (parsed.length > 10) {
+      parsed.shift();
+    }
+
+    parsed.push({
+      errorType: "invalidData",
+      lastRequests: window.LAST_REQUESTS,
+      lastAppends: window.LAST_APPEND,
+      timestamp: performance.now()
+    });
+    localStorage.setItem("bae", JSON.stringify(parsed));
     throw new Error("Invalid data given to the AudioVideoSegmentBuffer");
   }
 }
@@ -49936,6 +50054,7 @@ function appendSegmentToBuffer(clock$, segmentBuffer, dataInfos) {
 
 
 
+
 /**
  * Push the initialization segment to the SegmentBuffer.
  * The Observable returned:
@@ -49964,9 +50083,14 @@ function pushInitSegment(_ref) {
       appendWindow: [undefined, undefined],
       codec: codec
     };
+    var inventoryInfos = (0,object_assign/* default */.Z)({
+      segment: segment,
+      start: 0,
+      end: 0
+    }, content);
     return appendSegmentToBuffer(clock$, segmentBuffer, {
       data: data,
-      inventoryInfos: null
+      inventoryInfos: inventoryInfos
     }).pipe((0,map/* map */.U)(function () {
       var buffered = segmentBuffer.getBufferedRanges();
       return stream_events_generators.addedSegment(content, segment, buffered, segmentData);

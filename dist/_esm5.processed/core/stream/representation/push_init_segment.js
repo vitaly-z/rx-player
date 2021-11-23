@@ -15,6 +15,7 @@
  */
 import { defer as observableDefer, EMPTY, } from "rxjs";
 import { map } from "rxjs/operators";
+import objectAssign from "../../../utils/object_assign";
 import EVENTS from "../events_generators";
 import appendSegmentToBuffer from "./append_segment_to_buffer";
 /**
@@ -37,8 +38,10 @@ export default function pushInitSegment(_a) {
             timestampOffset: 0,
             appendWindow: [undefined, undefined],
             codec: codec };
-        return appendSegmentToBuffer(clock$, segmentBuffer, { data: data,
-            inventoryInfos: null })
+        var inventoryInfos = objectAssign({ segment: segment,
+            start: 0,
+            end: 0 }, content);
+        return appendSegmentToBuffer(clock$, segmentBuffer, { data: data, inventoryInfos: inventoryInfos })
             .pipe(map(function () {
             var buffered = segmentBuffer.getBufferedRanges();
             return EVENTS.addedSegment(content, segment, buffered, segmentData);
