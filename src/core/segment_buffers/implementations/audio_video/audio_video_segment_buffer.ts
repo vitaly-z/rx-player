@@ -354,15 +354,19 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer {
       while (parsed.length > 10) {
         parsed.shift();
       }
+      const vidElt = document.querySelector("video") as HTMLMediaElement;
+      const vidErr = vidElt.error;
       parsed.push({
         errorType: "operationError",
         lastRequests: (window as any).LAST_REQUESTS,
         lastAppends: (window as any).LAST_APPEND,
-        videoElementError: document.querySelector("video") === null ?
-        "no-video-element" :
-        (document.querySelector("video") as HTMLMediaElement).error === null ?
-        "no-video-error" :
-        (document.querySelector("video") as HTMLMediaElement).error?.toString(),
+        bufferAppendErrorMsg: (err as any)?.message ?? null,
+        videoElementErrorMsg: vidErr === null ?
+          null :
+          vidErr.message,
+        videoElementErrorName: vidErr === null ?
+          null :
+          vidErr.code,
         timestamp: performance.now(),
       });
       localStorage.setItem("bae", JSON.stringify(parsed));
