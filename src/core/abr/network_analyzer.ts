@@ -20,11 +20,11 @@ import { Representation } from "../../manifest";
 import arrayFind from "../../utils/array_find";
 import arrayFindIndex from "../../utils/array_find_index";
 import BandwidthEstimator from "./bandwidth_estimator";
-import EWMA from "./ewma";
 import {
   IPendingRequestStoreProgress,
   IRequestInfo,
 } from "./pending_requests_store";
+import EWMA from "./utils/ewma";
 
 const { ABR_REGULAR_FACTOR,
         ABR_STARVATION_DURATION_DELTA,
