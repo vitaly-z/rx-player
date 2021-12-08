@@ -264,7 +264,7 @@ export default function RepresentationStream<TSegmentDataType>({
     const encryptionData = representation.getEncryptionData(drmSystemId);
     if (encryptionData.length > 0) {
       encryptionEvent$ = observableOf(...encryptionData.map(d =>
-        EVENTS.encryptionDataEncountered(d)));
+        EVENTS.encryptionDataEncountered(d, content)));
       hasSentEncryptionData = true;
     }
   }
@@ -453,7 +453,7 @@ export default function RepresentationStream<TSegmentDataType>({
       const initEncEvt$ = !hasSentEncryptionData &&
                           allEncryptionData.length > 0 ?
         observableOf(...allEncryptionData.map(p =>
-          EVENTS.encryptionDataEncountered(p))) :
+          EVENTS.encryptionDataEncountered(p, content))) :
         EMPTY;
       const pushEvent$ = pushInitSegment({ playbackObserver,
                                            content,
@@ -471,7 +471,7 @@ export default function RepresentationStream<TSegmentDataType>({
       const segmentEncryptionEvent$ = protectionDataUpdate &&
                                      !hasSentEncryptionData ?
         observableOf(...representation.getAllEncryptionData().map(p =>
-          EVENTS.encryptionDataEncountered(p))) :
+          EVENTS.encryptionDataEncountered(p, content))) :
         EMPTY;
 
       const manifestRefresh$ =  needsManifestRefresh === true ?

@@ -20,6 +20,11 @@ import {
   ICustomMediaKeySystemAccess,
 } from "../../compat";
 import { ICustomError } from "../../errors";
+import Manifest, {
+  Adaptation,
+  Period,
+  Representation,
+} from "../../manifest";
 import { ISharedReference } from "../../utils/reference";
 import LoadedSessionsStore from "./utils/loaded_sessions_store";
 import PersistentSessionsStore from "./utils/persistent_sessions_store";
@@ -283,6 +288,8 @@ export type ILicense = BufferSource |
 
 /** Segment protection sent by the RxPlayer to the EMEManager. */
 export interface IContentProtection {
+  /** The content linked to that segment protection data. */
+  content : IContent | undefined;
   /**
    * Initialization data type.
    * String describing the format of the initialization data sent through this
@@ -298,7 +305,7 @@ export interface IContentProtection {
    * `undefined` when not known (different from an empty array - which would
    * just mean that there's no key id involved).
    */
-  keyIds? : Uint8Array[];
+  keyIds : Uint8Array[] | undefined;
   /** Every initialization data for that type. */
   values: Array<{
     /**
@@ -313,6 +320,18 @@ export interface IContentProtection {
      */
      data: Uint8Array;
   }>;
+}
+
+/** Content linked to protection data. */
+export interface IContent {
+  /** Manifest object associated to the protection data. */
+  manifest : Manifest;
+  /** Period object associated to the protection data. */
+  period : Period;
+  /** Adaptation object associated to the protection data. */
+  adaptation : Adaptation;
+  /** Representation object associated to the protection data. */
+  representation : Representation;
 }
 
 // Emitted after the `onKeyStatusesChange` callback has been called

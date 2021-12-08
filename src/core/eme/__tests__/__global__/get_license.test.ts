@@ -337,7 +337,10 @@ function checkGetLicense(
   let licenseReceived = false;
   const initDataSubject = new Subject<IContentProtection>();
   const initData = new Uint8Array([54, 55, 75]);
-  const initDataEvent = { type: "cenc", values: [ { systemId: "15", data: initData } ] };
+  const initDataEvent = { type: "cenc",
+                          content: undefined,
+                          keyIds: undefined,
+                          values: [ { systemId: "15", data: initData } ] };
   const kill$ = new Subject<void>();
   const challenge = formatFakeChallengeFromInitData(initData, "cenc");
   function checkKeyLoadError(error : unknown) {

@@ -94,6 +94,8 @@ describe("core - eme - global tests - server certificate", () => {
             expect(serverCertificateSpy).toHaveBeenCalledTimes(1);
             expect(serverCertificateSpy).toHaveBeenCalledWith(serverCertificate);
             initDataSubject.next({ type: "cenc",
+                                   content: undefined,
+                                   keyIds: undefined,
                                    values: [ { systemId: "15", data: initData } ] });
             break;
           case 3:
@@ -105,6 +107,8 @@ describe("core - eme - global tests - server certificate", () => {
               expect(serverCertificateSpy).toHaveBeenCalledTimes(1);
               expect(createSessionSpy).toHaveBeenCalledTimes(1);
               initDataSubject.next({ type: "cenc2",
+                                     content: undefined,
+                                     keyIds: undefined,
                                      values: [ { systemId: "15", data: initData } ] });
             }, 10);
             break;
@@ -175,6 +179,8 @@ describe("core - eme - global tests - server certificate", () => {
             expect(createSessionSpy).not.toHaveBeenCalled();
             expect(serverCertificateSpy).toHaveBeenCalledTimes(1);
             initDataSubject.next({ type: "cenc",
+                                   content: undefined,
+                                   keyIds: undefined,
                                    values: [ { systemId: "15", data: initData } ] });
             break;
           case 4:
@@ -186,6 +192,8 @@ describe("core - eme - global tests - server certificate", () => {
               expect(serverCertificateSpy).toHaveBeenCalledTimes(1);
               expect(createSessionSpy).toHaveBeenCalledTimes(1);
               initDataSubject.next({ type: "cenc2",
+                                     content: undefined,
+                                     keyIds: undefined,
                                      values: [ { systemId: "15", data: initData } ] });
             }, 10);
             break;
@@ -255,6 +263,8 @@ describe("core - eme - global tests - server certificate", () => {
             expect(createSessionSpy).not.toHaveBeenCalled();
             expect(serverCertificateSpy).toHaveBeenCalledTimes(1);
             initDataSubject.next({ type: "cenc",
+                                   content: undefined,
+                                   keyIds: undefined,
                                    values: [ { systemId: "15", data: initData } ] });
             break;
           case 4:
@@ -266,6 +276,8 @@ describe("core - eme - global tests - server certificate", () => {
               expect(serverCertificateSpy).toHaveBeenCalledTimes(1);
               expect(createSessionSpy).toHaveBeenCalledTimes(1);
               initDataSubject.next({ type: "cenc2",
+                                     content: undefined,
+                                     keyIds: undefined,
                                      values: [ { systemId: "15", data: initData } ] });
             }, 10);
             break;
@@ -330,6 +342,8 @@ describe("core - eme - global tests - server certificate", () => {
             expect(createSessionSpy).not.toHaveBeenCalled();
             expect(serverCertificateSpy).toHaveBeenCalledTimes(0);
             initDataSubject.next({ type: "cenc",
+                                   content: undefined,
+                                   keyIds: undefined,
                                    values: [ { systemId: "15", data: initData } ] });
             break;
           case 3:
@@ -341,6 +355,8 @@ describe("core - eme - global tests - server certificate", () => {
               expect(serverCertificateSpy).toHaveBeenCalledTimes(0);
               expect(createSessionSpy).toHaveBeenCalledTimes(1);
               initDataSubject.next({ type: "cenc2",
+                                     content: undefined,
+                                     keyIds: undefined,
                                      values: [ { systemId: "15", data: initData } ] });
             }, 10);
             break;

@@ -106,6 +106,8 @@ describe("core - eme - global tests - init data", () => {
         }
       });
     initDataSubject.next({ type: "cenc",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData } ] });
   });
 
@@ -168,12 +170,20 @@ describe("core - eme - global tests - init data", () => {
         }
       });
     initDataSubject.next({ type: "cenc",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData } ] });
     initDataSubject.next({ type: "cenc",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData } ] });
     initDataSubject.next({ type: "cenc",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData } ] });
     initDataSubject.next({ type: "cenc",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData } ] });
   });
 
@@ -259,14 +269,24 @@ describe("core - eme - global tests - init data", () => {
         }
       });
     initDataSubject.next({ type: "cenc",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData1 } ] });
     initDataSubject.next({ type: "cenc",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData1 } ] });
     initDataSubject.next({ type: "cenc",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData2 } ] });
     initDataSubject.next({ type: "cenc",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData1 } ] });
     initDataSubject.next({ type: "cenc",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData2 } ] });
   });
 
@@ -353,12 +373,20 @@ describe("core - eme - global tests - init data", () => {
         }
       });
     initDataSubject.next({ type: "cenc",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData1 } ] });
     initDataSubject.next({ type: "cenc2",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData1 } ] });
     initDataSubject.next({ type: "cenc",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData2 } ] });
     initDataSubject.next({ type: "cenc2",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData2 } ] });
   });
 
@@ -436,6 +464,8 @@ describe("core - eme - global tests - init data", () => {
     let eventsReceived = 0;
     const initData = new Uint8Array([54, 55, 75]);
     const initDataEvent = { type: "cenc",
+                            content: undefined,
+                            keyIds: undefined,
                             values: [ { systemId: "15",
                                         data: initData } ] };
     const kill$ = new Subject<void>();
@@ -891,15 +921,23 @@ describe("core - eme - global tests - init data", () => {
       });
     triggerEncrypted.next(initDataEvent1);
     initDataSubject.next({ type: "cenc",
+                           content: undefined,
+                           keyIds: undefined,
                            values: [ { systemId: "15", data: initData1 } ] });
     setTimeout(() => {
       initDataSubject.next({ type: "cenc2",
+                             content: undefined,
+                             keyIds: undefined,
                              values: [ { systemId: "15", data: initData1 } ] });
       triggerEncrypted.next(initDataEvent2);
       initDataSubject.next({ type: "cenc",
+                             content: undefined,
+                             keyIds: undefined,
                              values: [ { systemId: "15", data: initData1 } ] });
       triggerEncrypted.next(initDataEvent3);
       initDataSubject.next({ type: "cenc",
+                             content: undefined,
+                             keyIds: undefined,
                              values: [ { systemId: "15", data: initData2 } ] });
       triggerEncrypted.next(initDataEvent4);
     }, 5);
