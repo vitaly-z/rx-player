@@ -20403,8 +20403,14 @@ function parseRepresentations(representationsIR, adaptation, adaptationInfos) {
       parsedRepresentation.width = adaptation.attributes.width;
     }
 
-    if (adaptation.children.contentProtections != null) {
-      var contentProtections = adaptation.children.contentProtections.reduce(function (acc, cp) {
+    var contentProtectionsIr = adaptation.children.contentProtections !== undefined ? adaptation.children.contentProtections : [];
+
+    if (representation.children.contentProtections !== undefined) {
+      contentProtectionsIr.push.apply(contentProtectionsIr, representation.children.contentProtections);
+    }
+
+    if (contentProtectionsIr.length > 0) {
+      var contentProtections = contentProtectionsIr.reduce(function (acc, cp) {
         var systemId;
 
         if (cp.attributes.schemeIdUri !== undefined && cp.attributes.schemeIdUri.substring(0, 9) === "urn:uuid:") {
@@ -22527,6 +22533,7 @@ function parseSegmentTemplate(root) {
 
 
 
+
 /**
  * @param {NodeList} representationChildren
  * @returns {Object}
@@ -22536,6 +22543,7 @@ function parseRepresentationChildren(representationChildren) {
   var children = {
     baseURLs: []
   };
+  var contentProtections = [];
   var warnings = [];
 
   for (var i = 0; i < representationChildren.length; i++) {
@@ -22593,8 +22601,27 @@ function parseRepresentationChildren(representationChildren) {
           warnings = warnings.concat(segmentTemplateWarnings);
           children.segmentTemplate = segmentTemplate;
           break;
+
+        case "ContentProtection":
+          var _parseContentProtecti = parseContentProtection(currentElement),
+              contentProtection = _parseContentProtecti[0],
+              contentProtectionWarnings = _parseContentProtecti[1];
+
+          if (contentProtectionWarnings.length > 0) {
+            warnings = warnings.concat(contentProtectionWarnings);
+          }
+
+          if (contentProtection !== undefined) {
+            contentProtections.push(contentProtection);
+          }
+
+          break;
       }
     }
+  }
+
+  if (contentProtections.length > 0) {
+    children.contentProtections = contentProtections;
   }
 
   return [children, warnings];
