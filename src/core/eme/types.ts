@@ -504,7 +504,7 @@ export interface IPersistentSessionInfoV0 {
 /** Persistent MediaKeySession storage interface. */
 export interface IPersistentSessionStorage {
   /** Load persistent MediaKeySessions previously saved through the `save` callback. */
-  load() : IPersistentSessionInfo[];
+  load() : IPersistentSessionInfo[] | undefined | null;
   /**
    * Save new persistent MediaKeySession information.
    * The given argument should be returned by the next `load` call.

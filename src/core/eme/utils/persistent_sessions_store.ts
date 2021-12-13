@@ -101,10 +101,11 @@ export default class PersistentSessionsStore {
     this._entries = [];
     this._storage = storage;
     try {
-      this._entries = this._storage.load();
-      if (!Array.isArray(this._entries)) {
-        this._entries = [];
+      let entries = this._storage.load();
+      if (!Array.isArray(entries)) {
+        entries = [];
       }
+      this._entries = entries;
     } catch (e) {
       log.warn("EME-PSS: Could not get entries from license storage", e);
       this.dispose();
