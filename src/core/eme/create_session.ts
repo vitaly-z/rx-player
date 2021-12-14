@@ -27,48 +27,29 @@ import {
   loadSession,
 } from "../../compat";
 import log from "../../log";
-import {
-  IInitializationDataInfo,
-  IMediaKeySessionStores,
-} from "./types";
+import { IMediaKeySessionStores } from "./types";
 import isSessionUsable from "./utils/is_session_usable";
 import LoadedSessionsStore from "./utils/loaded_sessions_store";
 import PersistentSessionsStore from "./utils/persistent_sessions_store";
-
-export interface INewSessionCreatedEvent {
-  type : "created-session";
-  value : { mediaKeySession : MediaKeySession |
-                              ICustomMediaKeySession;
-            sessionType : MediaKeySessionType; };
-}
-
-export interface IPersistentSessionRecoveryEvent {
-  type : "loaded-persistent-session";
-  value : { mediaKeySession : MediaKeySession |
-                              ICustomMediaKeySession;
-            sessionType : MediaKeySessionType; };
-}
-
-export type ICreateSessionEvent = INewSessionCreatedEvent |
-                                  IPersistentSessionRecoveryEvent;
+import ProcessedInitDataRecord from "./utils/processed_init_data_record";
 
 /**
- * Create a new Session on the given MediaKeys, corresponding to the given
- * initializationData.
+ * Create a new Session or load a persistent one on the given MediaKeys,
+ * according to wanted settings and what is currently stored.
+ *
  * If session creating fails, remove the oldest MediaKeySession loaded and
  * retry.
- *
  * /!\ This only creates new sessions.
  * It will fail if loadedSessionsStore already has a MediaKeySession with
- * the given initializationData.
- * @param {Uint8Array} initData
- * @param {string|undefined} initDataType
- * @param {Object} mediaKeysInfos
+ * the given InitDataRecord.
+ * @param {Object} stores
+ * @param {Object} initDataRecord
+ * @param {string} wantedSessionType
  * @returns {Observable}
  */
 export default function createSession(
   stores : IMediaKeySessionStores,
-  initializationData : IInitializationDataInfo,
+  initDataRecord : ProcessedInitDataRecord,
   wantedSessionType : MediaKeySessionType
 ) : Observable<ICreateSessionEvent> {
   return observableDefer(() => {
@@ -76,15 +57,15 @@ export default function createSession(
             persistentSessionsStore } = stores;
 
     if (wantedSessionType === "temporary") {
-      return createTemporarySession(loadedSessionsStore, initializationData);
+      return createTemporarySession(loadedSessionsStore, initDataRecord);
     } else if (persistentSessionsStore === null) {
       log.warn("EME: Cannot create persistent MediaKeySession, " +
                "PersistentSessionsStore not created.");
-      return createTemporarySession(loadedSessionsStore, initializationData);
+      return createTemporarySession(loadedSessionsStore, initDataRecord);
     }
     return createAndTryToRetrievePersistentSession(loadedSessionsStore,
                                                    persistentSessionsStore,
-                                                   initializationData);
+                                                   initDataRecord);
   });
 }
 
@@ -97,41 +78,39 @@ export default function createSession(
  */
 function createTemporarySession(
   loadedSessionsStore : LoadedSessionsStore,
-  initData : IInitializationDataInfo
+  initDataRecord : ProcessedInitDataRecord
 ) : Observable<INewSessionCreatedEvent> {
   return observableDefer(() => {
     log.info("EME: Creating a new temporary session");
-    const session = loadedSessionsStore.createSession(initData, "temporary");
+    const entry = loadedSessionsStore.createSession(initDataRecord, "temporary");
     return observableOf({ type: "created-session" as const,
-                          value: { mediaKeySession: session,
-                                   sessionType: "temporary" as const } });
+                          value: entry });
   });
 }
 
 /**
  * Create a persistent MediaKeySession and try to load on it a previous
- * MediaKeySession linked to the same initData and initDataType.
+ * MediaKeySession linked to the same InitDataRecord.
  * @param {Object} loadedSessionsStore
  * @param {Object} persistentSessionsStore
- * @param {Object} initData
+ * @param {Object} initDataRecord
  * @returns {Observable}
  */
 function createAndTryToRetrievePersistentSession(
   loadedSessionsStore : LoadedSessionsStore,
   persistentSessionsStore : PersistentSessionsStore,
-  initData : IInitializationDataInfo
+  initDataRecord : ProcessedInitDataRecord
 ) : Observable<INewSessionCreatedEvent | IPersistentSessionRecoveryEvent> {
   return observableDefer(() => {
     log.info("EME: Creating persistent MediaKeySession");
 
-    const session = loadedSessionsStore
-      .createSession(initData, "persistent-license");
-    const storedEntry = persistentSessionsStore.getAndReuse(initData);
+    const entry = loadedSessionsStore
+      .createSession(initDataRecord, "persistent-license");
+    const storedEntry = persistentSessionsStore.getAndReuse(entry.initDataRecord);
 
     if (storedEntry === null) {
       return observableOf({ type: "created-session" as const,
-                            value: { mediaKeySession: session,
-                                     sessionType: "persistent-license" as const } });
+                            value: entry });
     }
 
     /**
@@ -141,35 +120,32 @@ function createAndTryToRetrievePersistentSession(
      */
     const recreatePersistentSession = () : Observable<INewSessionCreatedEvent> => {
       log.info("EME: Removing previous persistent session.");
-      if (persistentSessionsStore.get(initData) !== null) {
-        persistentSessionsStore.delete(initData);
+      if (persistentSessionsStore.get(initDataRecord) !== null) {
+        persistentSessionsStore.delete(initDataRecord);
       }
-      return loadedSessionsStore.closeSession(initData)
+      return loadedSessionsStore.closeSession(entry.mediaKeySession)
         .pipe(map(() => {
-          const newSession = loadedSessionsStore.createSession(initData,
-                                                               "persistent-license");
+          const newEntry = loadedSessionsStore.createSession(initDataRecord,
+                                                             "persistent-license");
           return { type: "created-session" as const,
-                   value: { mediaKeySession: newSession,
-                            sessionType: "persistent-license" } };
+                   value: newEntry };
         }));
     };
 
-    return loadSession(session, storedEntry.sessionId).pipe(
+    return loadSession(entry.mediaKeySession, storedEntry.sessionId).pipe(
       mergeMap((hasLoadedSession) : Observable<ICreateSessionEvent> => {
         if (!hasLoadedSession) {
           log.warn("EME: No data stored for the loaded session");
-          persistentSessionsStore.delete(initData);
+          persistentSessionsStore.delete(initDataRecord);
           return observableOf({ type: "created-session" as const,
-                                value: { mediaKeySession: session,
-                                         sessionType: "persistent-license" } });
+                                value: entry });
         }
 
-        if (hasLoadedSession && isSessionUsable(session)) {
-          persistentSessionsStore.add(initData, session);
+        if (hasLoadedSession && isSessionUsable(entry.mediaKeySession)) {
+          persistentSessionsStore.add(initDataRecord, entry.mediaKeySession);
           log.info("EME: Succeeded to load persistent session.");
           return observableOf({ type: "loaded-persistent-session" as const,
-                                value: { mediaKeySession: session,
-                                         sessionType: "persistent-license" } });
+                                value: entry });
         }
 
         // Unusable persistent session: recreate a new session from scratch.
@@ -185,3 +161,26 @@ function createAndTryToRetrievePersistentSession(
     );
   });
 }
+
+export interface INewSessionCreatedEvent {
+  type : "created-session";
+  value : {
+    mediaKeySession : MediaKeySession |
+                      ICustomMediaKeySession;
+    sessionType : MediaKeySessionType;
+    initDataRecord : ProcessedInitDataRecord;
+  };
+}
+
+export interface IPersistentSessionRecoveryEvent {
+  type : "loaded-persistent-session";
+  value : {
+    mediaKeySession : MediaKeySession |
+                      ICustomMediaKeySession;
+    sessionType : MediaKeySessionType;
+    initDataRecord : ProcessedInitDataRecord;
+  };
+}
+
+export type ICreateSessionEvent = INewSessionCreatedEvent |
+                                  IPersistentSessionRecoveryEvent;

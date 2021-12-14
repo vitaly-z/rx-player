@@ -113,29 +113,13 @@ function checkEntriesCleaned(
 ) {
   const closeSessionSpy = jest.spyOn(loadedSessionsStore, "closeSession");
   let itemNb = 0;
-  const pendingEntries : unknown[] = [];
   cleanOldLoadedSessions(loadedSessionsStore, limit).subscribe({
-    next: (evt) => {
-      if (evt.type === "cleaning-old-session") {
-        pendingEntries.push(evt.value);
-      }
+    next: () => {
       itemNb++;
-      if (itemNb <= entries.length) {
-        expect(evt).toEqual({ type: "cleaning-old-session",
-                              value: entries[itemNb - 1] });
-      } else if (itemNb > entries.length * 2) {
-        throw new Error("Too many received items: " + String(itemNb));
-      } else {
-        expect(evt.type).toEqual("cleaned-old-session");
-        expect(pendingEntries).not.toHaveLength(0);
-        expect(pendingEntries).toContainEqual(evt.value);
-        pendingEntries.splice(pendingEntries.indexOf(evt.value), 1);
-      }
     },
     error: () => { throw new Error("The Observable should not throw"); },
     complete: () => {
-      expect(pendingEntries).toEqual([]);
-      expect(itemNb).toEqual(entries.length * 2);
+      expect(itemNb).toEqual(0);
       done();
     },
   });

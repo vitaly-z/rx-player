@@ -46,6 +46,8 @@ export interface IInitializationDataInfo {
    * just mean that there's no key id involved).
    */
   keyIds? : Uint8Array[];
+  /** The content linked to that segment protection data. */
+  content? : IContent;
   /** Every initialization data for that type. */
   values: Array<{
     /**
@@ -273,15 +275,11 @@ export interface IBlacklistProtectionDataEvent { type: "blacklist-protection-dat
 
 // Every event sent by the EMEManager
 export type IEMEManagerEvent = IEMEWarningEvent | // minor error
-                               IEncryptedEvent | // browser's "encrypted" event
                                ICreatedMediaKeysEvent |
                                IAttachedMediaKeysEvent |
-                               IInitDataIgnoredEvent | // initData already handled
                                ISessionMessageEvent | // MediaKeySession event
                                INoUpdateEvent | // `getLicense` returned `null`
-                               IKeysUpdateEvent | // Status of keys changed
-                               ISessionUpdatedEvent | // `update` call resolved
-                               IBlacklistProtectionDataEvent; // initData undecipherable
+                               ISessionUpdatedEvent; // `update` call resolved
 
 export type ILicense = BufferSource |
                        ArrayBuffer;
@@ -289,7 +287,7 @@ export type ILicense = BufferSource |
 /** Segment protection sent by the RxPlayer to the EMEManager. */
 export interface IContentProtection {
   /** The content linked to that segment protection data. */
-  content : IContent | undefined;
+  content : IContent;
   /**
    * Initialization data type.
    * String describing the format of the initialization data sent through this

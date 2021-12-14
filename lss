@@ -1,0 +1,8 @@
+1. closeAllSessions quand change
+
+2. getAndReuse(initializationData) -> MediaKeySession si existe déjà
+
+   Si utilisable Reuse et quit
+   Sinon, close session persistante et enlève la session
+
+   TODO? getAndReuse(initializationData, keyIds)
