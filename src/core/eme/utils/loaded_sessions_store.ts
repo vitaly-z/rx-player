@@ -31,7 +31,7 @@ import log from "../../../log";
 import isNullOrUndefined from "../../../utils/is_null_or_undefined";
 import { IInitializationDataInfo } from "../types";
 import safelyCloseMediaKeySession from "./close_session";
-import ProcessedInitDataRecord from "./processed_init_data_record";
+import KeySessionRecord from "./processed_init_data_record";
 
 /**
  * Create and store MediaKeySessions linked to a single MediaKeys
@@ -60,21 +60,21 @@ export default class LoadedSessionsStore {
 
   /**
    * Create a new MediaKeySession and store it in this store.
-   * @throws {EncryptedMediaError}
-   * @param {Object} initializationData
+   * @param {Object} initData
    * @param {string} sessionType
-   * @returns {MediaKeySession}
+   * @returns {Object}
    */
   public createSession(
-    initDataRecord : ProcessedInitDataRecord,
+    initData : IInitializationDataInfo,
     sessionType : MediaKeySessionType
   ) : IStoredSessionEntry {
+    const keySessionRecord = new KeySessionRecord(initData);
     const mediaKeySession = this._mediaKeys.createSession(sessionType);
-    const entry = { mediaKeySession, sessionType, initDataRecord };
+    const entry = { mediaKeySession, sessionType, keySessionRecord };
     if (!isNullOrUndefined(mediaKeySession.closed)) {
       mediaKeySession.closed
         .then(() => {
-          const index = this.getIndex(initDataRecord);
+          const index = this.getIndex(keySessionRecord);
           if (index >= 0 &&
               this._storage[index].mediaKeySession === mediaKeySession)
           {
@@ -88,7 +88,7 @@ export default class LoadedSessionsStore {
     }
 
     log.debug("EME-LSS: Add MediaKeySession", entry);
-    this._storage.push({ initDataRecord, mediaKeySession, sessionType });
+    this._storage.push({ keySessionRecord, mediaKeySession, sessionType });
     return entry;
   }
 
@@ -109,10 +109,10 @@ export default class LoadedSessionsStore {
   ) : IStoredSessionData | null {
     for (let i = this._storage.length; i >= 0; i--) {
       const stored = this._storage[i];
-      if (stored.initDataRecord.isCompatibleWith(initializationData)) {
+      if (stored.keySessionRecord.isCompatibleWith(initializationData)) {
         this._storage.splice(i, 1);
         this._storage.push(stored);
-        return { initDataRecord: stored.initDataRecord,
+        return { keySessionRecord: stored.keySessionRecord,
                  mediaKeySession: stored.mediaKeySession,
                  sessionType: stored.sessionType };
       }
@@ -186,10 +186,10 @@ export default class LoadedSessionsStore {
     });
   }
 
-  private getIndex(record : ProcessedInitDataRecord) : number {
+  private getIndex(record : KeySessionRecord) : number {
     for (let i = 0; i < this._storage.length; i++) {
       const stored = this._storage[i];
-      if (stored.initDataRecord === record) {
+      if (stored.keySessionRecord === record) {
         return i;
       }
     }
@@ -200,7 +200,7 @@ export default class LoadedSessionsStore {
 /** Stored MediaKeySession data assiociated to an initialization data. */
 interface IStoredSessionEntry {
   /** The initialization data linked to the MediaKeySession. */
-  initDataRecord : ProcessedInitDataRecord;
+  keySessionRecord : KeySessionRecord;
   /** The MediaKeySession created. */
   mediaKeySession : MediaKeySession |
                     ICustomMediaKeySession;
@@ -215,6 +215,6 @@ export interface IStoredSessionData {
                     ICustomMediaKeySession;
   /** The MediaKeySessionType (e.g. "temporary" or "persistent-license"). */
   sessionType : MediaKeySessionType;
-  /** The `ProcessedInitDataRecord` linked to the MediaKeySession. */
-  initDataRecord : ProcessedInitDataRecord;
+  /** The `KeySessionRecord` linked to the MediaKeySession. */
+  keySessionRecord : KeySessionRecord;
 }

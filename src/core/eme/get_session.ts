@@ -29,9 +29,10 @@ import createSession from "./create_session";
 import {
   IInitializationDataInfo,
   IMediaKeySessionStores,
+  MediaKeySessionLoadingType,
 } from "./types";
 import isSessionUsable from "./utils/is_session_usable";
-import ProcessedInitDataRecord from "./utils/processed_init_data_record";
+import KeySessionRecord from "./utils/processed_init_data_record";
 
 /**
  * Handle MediaEncryptedEvents sent by a HTMLMediaElement:
@@ -52,7 +53,6 @@ import ProcessedInitDataRecord from "./utils/processed_init_data_record";
  */
 export default function createOrLoadSession(
   initializationData : IInitializationDataInfo,
-  initDataRecord : ProcessedInitDataRecord,
   stores : IMediaKeySessionStores,
   wantedSessionType : MediaKeySessionType,
   maxSessionCacheSize : number
@@ -69,15 +69,15 @@ export default function createOrLoadSession(
       previousLoadedSession = entry.mediaKeySession;
       if (isSessionUsable(previousLoadedSession)) {
         log.info("EME: Reuse loaded session", previousLoadedSession.sessionId);
-        return observableOf({ type: "loaded-open-session" as const,
+        return observableOf({ type: MediaKeySessionLoadingType.LoadedOpenSession,
                               value: { mediaKeySession: previousLoadedSession,
                                        sessionType: entry.sessionType,
-                                       initDataRecord: entry.initDataRecord } });
+                                       keySessionRecord: entry.keySessionRecord } });
       } else if (persistentSessionsStore !== null) {
         // If the session is not usable anymore, we can also remove it from the
         // PersistentSessionsStore.
         // TODO Are we sure this is always what we want?
-        persistentSessionsStore.delete(entry.initDataRecord);
+        persistentSessionsStore.delete(entry.keySessionRecord);
       }
     }
 
@@ -87,11 +87,12 @@ export default function createOrLoadSession(
     ).pipe(mergeMap(() => {
       return observableConcat(
         cleanOldLoadedSessions(loadedSessionsStore, maxSessionCacheSize),
-        createSession(stores, initDataRecord, wantedSessionType)
-          .pipe(map((evt) => ({ type: evt.type,
-                                value: { mediaKeySession: evt.value.mediaKeySession,
-                                         sessionType: evt.value.sessionType,
-                                         initDataRecord: evt.value.initDataRecord } })))
+        createSession(stores, initializationData, wantedSessionType)
+          .pipe(map((evt) =>
+            ({ type: evt.type,
+               value: { mediaKeySession: evt.value.mediaKeySession,
+                        sessionType: evt.value.sessionType,
+                        keySessionRecord: evt.value.keySessionRecord } })))
       );
     }));
   });
@@ -104,25 +105,25 @@ export interface IMediaKeySessionContext {
                     ICustomMediaKeySession;
   /** The type of MediaKeySession (e.g. "temporary"). */
   sessionType : MediaKeySessionType;
-  /** `ProcessedInitDataRecord` assiociated to this MediaKeySession. */
-  initDataRecord : ProcessedInitDataRecord;
+  /** `KeySessionRecord` assiociated to this MediaKeySession. */
+  keySessionRecord : KeySessionRecord;
 }
 
 /** Event emitted when a new MediaKeySession has been created. */
 export interface ICreatedSession {
-  type : "created-session";
+  type : MediaKeySessionLoadingType.Created;
   value : IMediaKeySessionContext;
 }
 
 /** Event emitted when an already-loaded MediaKeySession is used. */
 export interface ILoadedOpenSession {
-  type : "loaded-open-session";
+  type : MediaKeySessionLoadingType.LoadedOpenSession;
   value : IMediaKeySessionContext;
 }
 
 /** Event emitted when a persistent MediaKeySession has been loaded. */
 export interface ILoadedPersistentSessionEvent {
-  type : "loaded-persistent-session";
+  type : MediaKeySessionLoadingType.LoadedPersistentSession;
   value : IMediaKeySessionContext;
 }
 
@@ -130,4 +131,3 @@ export interface ILoadedPersistentSessionEvent {
 export type ICreateOrLoadSessionEvent = ICreatedSession |
                                         ILoadedOpenSession |
                                         ILoadedPersistentSessionEvent;
-

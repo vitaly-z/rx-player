@@ -62,8 +62,9 @@ import {
   IEMEWarningEvent,
   IInitializationDataInfo,
   IKeySystemOption,
+  MediaKeySessionLoadingType,
 } from "./types";
-import ProcessedInitDataRecord, {
+import KeySessionRecord, {
   areAllKeyIdContainedIn,
   areSomeKeyIdContainedIn,
 } from "./utils/processed_init_data_record";
@@ -98,7 +99,15 @@ export default function EMEManager(
    * Allows to prevent unnecessary initialization data processing (e.g. avoid
    * unneeded license requests, unnecessary CDM negociations etc.).
    */
-  const processedInitData : IProcessedDataItem[] = [];
+  // XXX TODO
+
+  /**
+   * Contains information about all key sessions loaded for this current
+   * content.
+   * This object is most notably used to check which keys are already obtained,
+   * thus avoiding to perform new unnecessary license requests and CDM interactions.
+   */
+  const currentSessions : IActiveSessionInfo[] = [];
 
   /**
    * When `true`, wait before processing newly-received initialization data.
@@ -153,32 +162,19 @@ export default function EMEManager(
 
     mergeMap(([initializationData, mediaKeysEvent]) => {
       /**
-       * If set, previously-processed initialization data in the current
-       * content is already compatible to this new initialization data.
+       * If set, a currently-used key session is already compatible to this
+       * initialization data.
        */
-      const compatibleEntry = arrayFind(processedInitData, (x) => {
-        return x.sessionInfo === null ?
-          // XXX TODO
-          x.record.isCompatibleWith(initializationData) :
-          x.sessionInfo.record.isCompatibleWith(initializationData);
+      const compatibleSessionInfo = arrayFind(currentSessions, (x) => {
+        return x.record.isCompatibleWith(initializationData);
       });
 
       const { mediaKeySystemAccess, stores, options } = mediaKeysEvent.value;
       const { loadedSessionsStore } = mediaKeysEvent.value.stores;
 
-      if (compatibleEntry !== undefined) {
-        // We're already handling that initialization data in some way
-
-        const { sessionInfo } = compatibleEntry;
-        if (sessionInfo === null) {
-          // A MediaKeySession is still in the process of being created for that
-          // entry, ignore for now.
-          // XXX TODO await before?
-          return EMPTY;
-        }
-
-        // Check if the compatible initialization data is blacklisted
-        const blacklistedSessionError = sessionInfo.blacklistedSessionError;
+      if (compatibleSessionInfo !== undefined) {
+        // Check if the compatible session is blacklisted
+        const blacklistedSessionError = compatibleSessionInfo.blacklistedSessionError;
         if (!isNullOrUndefined(blacklistedSessionError)) {
           if (initializationData.type === undefined ||
               initializationData.content === undefined)
@@ -195,42 +191,46 @@ export default function EMEManager(
           }
         }
 
-        // Check if the current key id(s) is blacklisted
-        if (sessionInfo.keyStatuses !== undefined &&
+        // Check if the current key id(s) has been blacklisted by this session
+        if (compatibleSessionInfo.keyStatuses !== undefined &&
             initializationData.keyIds !== undefined)
         {
           /**
            * If set to `true`, the Representation(s) linked to this
-           * initialization data's key id should be "blacklisted".
+           * initialization data's key id should be marked as "not decipherable".
            */
-          let shouldBlacklist;
+          let isUndecipherable;
 
           if (options.singleLicensePer === "init-data") {
-            // Note: In the default "init-data" mode, we only blacklist a
+            // Note: In the default "init-data" mode, we only avoid a
             // Representation if the key id was originally explicitely
-            // blacklisted (i.e. and not if its key id was just not present).
+            // blacklisted (and not e.g. if its key was just not present in
+            // the license).
             //
             // This is to enforce v3.x.x retro-compatibility: we cannot
-            // blacklist Representations unless some RxPlayer options
-            // documentating this behavior have been set.
-            const { blacklisted } = sessionInfo.keyStatuses;
-            shouldBlacklist = areSomeKeyIdContainedIn(initializationData.keyIds,
-                                                      blacklisted);
+            // fallback from a Representation unless some RxPlayer option
+            // documentating this behavior has been set.
+            const { blacklisted } = compatibleSessionInfo.keyStatuses;
+            isUndecipherable = areSomeKeyIdContainedIn(initializationData.keyIds,
+                                                       blacklisted);
           } else {
-            // In any other mode, we just blacklist as soon as not all of this
-            // initialization data's linked key ids are explicitely whitelisted,
-            // because we've no such retro-compatibility guarantee to make there.
-            const { whitelisted } = sessionInfo.keyStatuses;
-            shouldBlacklist = !areAllKeyIdContainedIn(initializationData.keyIds,
-                                                      whitelisted);
+            // In any other mode, as soon as not all of this initialization
+            // data's linked key ids are explicitely whitelisted, we can mark
+            // the corresponding Representation as "not decipherable".
+            // This is because we've no such retro-compatibility guarantee to
+            // make there.
+            const { whitelisted } = compatibleSessionInfo.keyStatuses;
+            isUndecipherable = !areAllKeyIdContainedIn(initializationData.keyIds,
+                                                       whitelisted);
           }
 
-          if (shouldBlacklist) {
+          if (isUndecipherable) {
             if (initializationData.content === undefined) {
-              log.error("EME: Cannot blacklist key id, the content is unknown.");
+              log.error("EME: Cannot forbid key id, the content is unknown.");
               return EMPTY;
             }
-            log.info("EME: The encountered key id has been blacklisted.");
+            log.info("EME: Current initialization data is linked to blacklisted keys. " +
+                     "Marking Representations as not decipherable");
             initializationData.content.manifest.updateDeciperabilitiesBasedOnKeyIds({
               blacklistedKeyIDs: initializationData.keyIds,
               whitelistedKeyIds: [],
@@ -250,14 +250,14 @@ export default function EMEManager(
 
         // Session not found in `loadedSessionsStore`, it might have been closed
         // since.
-        // Remove from `processedInitData` and start again.
-        const indexOf = processedInitData.indexOf(compatibleEntry);
+        // Remove from `currentSessions` and start again.
+        const indexOf = currentSessions.indexOf(compatibleSessionInfo);
         if (indexOf === -1) {
           log.error("EME: Unable to remove processed init data: not found.");
         } else {
           log.debug("EME: A session from a processed init data is not available " +
                     "anymore. Re-processing it.");
-          processedInitData.splice(indexOf, 1);
+          currentSessions.splice(indexOf, 1);
         }
       }
 
@@ -265,8 +265,8 @@ export default function EMEManager(
       // the current content.
 
       if (options.singleLicensePer === "content") {
-        const firstCreatedSession = arrayFind(processedInitData, (x) =>
-          x.sessionInfo?.source === "new-session");
+        const firstCreatedSession = arrayFind(currentSessions, (x) =>
+          x.source === "created-session");
 
         if (firstCreatedSession !== undefined) {
           // We already fetched a `singleLicensePer: "content"` license, yet the
@@ -288,20 +288,14 @@ export default function EMEManager(
           }
           return EMPTY;
         }
-
-        // Because we typically only want to create a single new session in a
-        // `singleLicensePer: "content"` mode, we will temprarily lock new
-        // initialization data from being processed while we're still
-        // processing that one.
-        initDataLock.setValue(true);
       }
 
-      /** `IProcessedDataItem` linked to that initialization data. */
-      const currentInitItem : IProcessedDataItem = {
-        record: new ProcessedInitDataRecord(initializationData),
-        sessionInfo: null,
-      };
-      processedInitData.push(currentInitItem);
+      // Because we typically only want to create a single new session in a
+      // `singleLicensePer: "content"` mode, we will temprarily lock new
+      // initialization data from being processed while we're still
+      // processing that one.
+      // XXX TODO
+      initDataLock.setValue(true);
 
       let wantedSessionType : MediaKeySessionType;
       if (options.persistentLicense !== true) {
@@ -317,56 +311,49 @@ export default function EMEManager(
         options.maxSessionCacheSize :
         EME_DEFAULT_MAX_SIMULTANEOUS_MEDIA_KEY_SESSIONS;
       return createOrLoadSession(initializationData,
-                                 currentInitItem.record,
                                  stores,
                                  wantedSessionType,
                                  maxSessionCacheSize)
         .pipe(mergeMap((sessionEvt) =>  {
-          let generateRequest$ = EMPTY;
-          let sessionInfo : IProcessedDataItemSessionInfo;
-
+          // Trick to use TypeScript to explicitely check all possible event types
           switch (sessionEvt.type) {
-            case "created-session":
-              sessionInfo = {
-                record: sessionEvt.value.initDataRecord,
-                source: "new-session" as const,
-                keyStatuses: undefined,
-                blacklistedSessionError: null,
-              };
-
-              // `generateKeyRequest` awaits a single Uint8Array containing all
-              // initialization data.
-              const concatInitData =
-                concat(...initializationData.values.map(i => i.data));
-              generateRequest$ = generateKeyRequest(sessionEvt.value.mediaKeySession,
-                                                    initializationData.type,
-                                                    concatInitData).pipe(
-                catchError((error: unknown) => {
-                  throw new EncryptedMediaError(
-                    "KEY_GENERATE_REQUEST_ERROR",
-                    error instanceof Error ? error.toString() :
-                    "Unknown error");
-                }),
-                ignoreElements());
+            case MediaKeySessionLoadingType.Created:
+            case MediaKeySessionLoadingType.LoadedOpenSession:
+            case MediaKeySessionLoadingType.LoadedPersistentSession:
               break;
-            case "loaded-open-session":
-              sessionInfo = { record: sessionEvt.value.initDataRecord,
-                              source: "from-cache" as const,
-                              keyStatuses: undefined,
-                              blacklistedSessionError: null };
-              break;
-            case "loaded-persistent-session":
-              sessionInfo = { record: sessionEvt.value.initDataRecord,
-                              source: "from-persisted" as const,
-                              keyStatuses: undefined,
-                              blacklistedSessionError: null };
-              break;
-
-            default: // Use TypeScript to check if all possibilities have been checked
+            default:
               assertUnreachable(sessionEvt);
           }
 
-          currentInitItem.sessionInfo = sessionInfo;
+          const sessionInfo : IActiveSessionInfo = {
+            record: sessionEvt.value.keySessionRecord,
+            source: sessionEvt.type,
+            keyStatuses: undefined,
+            blacklistedSessionError: null,
+          };
+          currentSessions.push(sessionInfo);
+
+          if (options.singleLicensePer === "init-data") {
+            initDataLock.setValue(false);
+          }
+
+          let generateRequest$ = EMPTY;
+          if (sessionEvt.type === "created-session") {
+            // `generateKeyRequest` awaits a single Uint8Array containing all
+            // initialization data.
+            const concatInitData =
+              concat(...initializationData.values.map(i => i.data));
+            generateRequest$ = generateKeyRequest(sessionEvt.value.mediaKeySession,
+                                                  initializationData.type,
+                                                  concatInitData).pipe(
+              catchError((error: unknown) => {
+                throw new EncryptedMediaError(
+                  "KEY_GENERATE_REQUEST_ERROR",
+                  error instanceof Error ? error.toString() :
+                  "Unknown error");
+              }),
+              ignoreElements());
+          }
 
           const { mediaKeySession,
                   sessionType } = sessionEvt.value;
@@ -437,8 +424,7 @@ export default function EMEManager(
                   cleanOldStoredPersistentInfo(
                     persistentSessionsStore,
                     EME_MAX_STORED_PERSISTENT_SESSION_INFORMATION - 1);
-                  persistentSessionsStore.add(currentInitItem.record,
-                                              mediaKeySession);
+                  persistentSessionsStore.add(sessionInfo.record, mediaKeySession);
                   isSessionPersisted = true;
                 }
                 if (initializationData.content !== undefined) {
@@ -524,44 +510,32 @@ function initMediaKeysAndSetServerCertificate(
   }));
 }
 
-/**
- * Data relative to encryption initialization data already handled for the
- * current content.
- */
-interface IProcessedDataItem {
-  /**
-   * Linked ProcessedInitDataRecord.
-   * Allows to check for compatibility with future incoming initialization
-   * data.
-   */
-  // XXX TODO
-  record : ProcessedInitDataRecord;
+// /**
+//  * Data relative to encryption initialization data already handled for the
+//  * current content.
+//  */
+// interface IProcessedDataItem {
+//   /**
+//    * Linked KeySessionRecord.
+//    * Allows to check for compatibility with future incoming initialization
+//    * data.
+//    */
+//   // XXX TODO
+//   initData : IInitializationDataInfo;
 
-  sessionInfo : null | IProcessedDataItemSessionInfo;
-}
+//   sessionInfo : null | IActiveSessionInfo;
+// }
 
-interface IProcessedDataItemSessionInfo {
-  record : ProcessedInitDataRecord;
+interface IActiveSessionInfo {
+  record : KeySessionRecord;
 
   keyStatuses : undefined | {
     whitelisted : Uint8Array[];
     blacklisted : Uint8Array[];
   };
 
-  /**
-   * Source of the MediaKeySession linked to that record:
-   *   - `undefined`: No MediaKeySession linked to that initialization data
-   *     has been created or its `sessionSource` is not known yet.
-   *   - `"new-session"`: A new MediaKeySession, necessitating a license
-   *     request, has been created in the process of treating this
-   *     initialization data.
-   *   - `"from-cache"`: A MediaKeySession retreived from a cache has been
-   *     reused to handle that initialization data, thus preventing the need
-   *     to perform a new license request.
-   *   - `"from-persisted"`: A persisted MediaKeySession was loaded to handle
-   *     that initialization data.
-   */
-  source : "from-cache" | "new-session" | "from-persisted";
+  /** Source of the MediaKeySession linked to that record. */
+  source : MediaKeySessionLoadingType;
 
   /**
    * If different than `null`, all initialization data compatible with this

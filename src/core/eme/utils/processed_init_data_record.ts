@@ -22,18 +22,14 @@ import areInitializationValuesCompatible from "./are_init_values_compatible";
 /**
  * Class storing key-related information linked to a created `MediaKeySession`.
  *
- * XXX TODO
- * This class allows to store
- * This class allows both to uniquely refer to the effects of received
- * initialization data and to check if actions needed after receiving future
- * incoming `IInitializationDataInfo` objects are already taken care of by this
- * one.
+ * This class allows to compare a MediaKeySession's associated encryption
+ * initialization data to other initialization data enabling potential
+ * compatibility checks between them.
  *
- * This class also allows associating originally-unrelated key ids to that
- * initialization data.
- * This allows to better handle cases where a fetched license, requested after
- * communicating the initialization data, contains keys not initially linked to
- * this original initialization data.
+ * This class also allows associating originally-unrelated key ids to the linked
+ * MediaKeySession and its initialization data.
+ * This allows to better handle cases where a fetched license contains keys not
+ * initially linked to this original initialization data.
  * After this association, new initialization data linked with such key ids will
  * now be anounced as compatible.
  *
@@ -41,7 +37,8 @@ import areInitializationValuesCompatible from "./are_init_values_compatible";
  * ```js
  * const record = new KeySessionRecord(initData);
  *
- * // Create a MediaKeySession linked to receive that initialization Data
+ * // Create a MediaKeySession linked to that initialization data and fetch the
+ * // license
  * // ...
  *
  * // Once the license has been loaded to the MediaKeySession linked to that
@@ -63,6 +60,11 @@ export default class KeySessionRecord {
   private readonly _initializationData : IInitializationDataInfo;
   private _keyIds : Uint8Array[] | null;
 
+  /**
+   * Create a new `KeySessionRecord`, linked to its corresponding initialization
+   * data,
+   * @param {Object} initializationData
+   */
   constructor(initializationData : IInitializationDataInfo) {
     this._initializationData = initializationData;
     this._keyIds = null;
@@ -70,8 +72,12 @@ export default class KeySessionRecord {
 
   /**
    * Associate supplementary key ids to this `KeySessionRecord` so it becomes
-   * "compatible" to new initialization data linked to it (calls to
-   * `isCompatibleWith` with the corresponding data will return `true`).
+   * "compatible" to them.
+   *
+   * After this call, new initialization data linked to subsets of those key
+   * ids will be considered compatible  to this `KeySessionRecord` (calls to
+   * `isCompatibleWith` with the corresponding initialization data will return
+   * `true`).
    * @param {Array.<Uint8Array>} keyIds
    */
   public associateKeyIds(keyIds : Uint8Array[]) : void {

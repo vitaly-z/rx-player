@@ -360,6 +360,28 @@ export interface IMediaKeySessionStores {
                             null;
 }
 
+/** Enum identifying the way a new MediaKeySession has been loaded. */
+export const enum MediaKeySessionLoadingType {
+  /**
+   * This MediaKeySession has just been created.
+   * This means that it will necessitate a new license request to be generated
+   * and performed.
+   */
+  Created = "created-session",
+  /**
+   * This MediaKeySession was an already-opened one that is being reused.
+   * Such session had already their license loaded and pushed.
+   */
+  LoadedOpenSession = "loaded-open-session",
+  /**
+   * This MediaKeySession was a persistent MediaKeySession that has been
+   * re-loaded.
+   * Such session are linked to a persistent license which should have already
+   * been fetched.
+   */
+  LoadedPersistentSession = "loaded-persistent-session",
+}
+
 /**
  * Data stored in a persistent MediaKeySession storage.
  * Has to be versioned to be able to play MediaKeySessions persisted in an old
