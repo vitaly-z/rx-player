@@ -48420,7 +48420,7 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
   ;
 
   _proto._onPendingTaskError = function _onPendingTaskError(err) {
-    var _a;
+    var _a, _b;
 
     this._lastInitSegment = null; // initialize init segment as a security
 
@@ -48435,11 +48435,15 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
         parsed.shift();
       }
 
+      var vidElt = document.querySelector("video");
+      var vidErr = vidElt.error;
       parsed.push({
         errorType: "operationError",
         lastRequests: window.LAST_REQUESTS,
         lastAppends: window.LAST_APPEND,
-        videoElementError: document.querySelector("video") === null ? "no-video-element" : document.querySelector("video").error === null ? "no-video-error" : (_a = document.querySelector("video").error) === null || _a === void 0 ? void 0 : _a.toString(),
+        bufferAppendErrorMsg: (_b = (_a = err) === null || _a === void 0 ? void 0 : _a.message) !== null && _b !== void 0 ? _b : null,
+        videoElementErrorMsg: vidErr === null ? null : vidErr.message,
+        videoElementErrorName: vidErr === null ? null : vidErr.code,
         timestamp: performance.now()
       });
       localStorage.setItem("bae", JSON.stringify(parsed));
@@ -56760,7 +56764,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     videoElement.preload = "auto";
     _this.version =
     /* PLAYER_VERSION */
-    "3.26.1";
+    "3.26.1+bisect2";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -59538,7 +59542,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.26.1";
+"3.26.1+bisect2";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**

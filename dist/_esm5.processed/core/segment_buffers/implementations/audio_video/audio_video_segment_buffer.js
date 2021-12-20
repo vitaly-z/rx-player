@@ -211,7 +211,7 @@ var AudioVideoSegmentBuffer = /** @class */ (function (_super) {
      * @param {Event} error
      */
     AudioVideoSegmentBuffer.prototype._onPendingTaskError = function (err) {
-        var _a;
+        var _a, _b;
         this._lastInitSegment = null; // initialize init segment as a security
         if (this._pendingTask !== null) {
             var error = err instanceof Error ?
@@ -223,15 +223,19 @@ var AudioVideoSegmentBuffer = /** @class */ (function (_super) {
             while (parsed.length > 10) {
                 parsed.shift();
             }
+            var vidElt = document.querySelector("video");
+            var vidErr = vidElt.error;
             parsed.push({
                 errorType: "operationError",
                 lastRequests: window.LAST_REQUESTS,
                 lastAppends: window.LAST_APPEND,
-                videoElementError: document.querySelector("video") === null ?
-                    "no-video-element" :
-                    document.querySelector("video").error === null ?
-                        "no-video-error" :
-                        (_a = document.querySelector("video").error) === null || _a === void 0 ? void 0 : _a.toString(),
+                bufferAppendErrorMsg: (_b = (_a = err) === null || _a === void 0 ? void 0 : _a.message) !== null && _b !== void 0 ? _b : null,
+                videoElementErrorMsg: vidErr === null ?
+                    null :
+                    vidErr.message,
+                videoElementErrorName: vidErr === null ?
+                    null :
+                    vidErr.code,
                 timestamp: performance.now(),
             });
             localStorage.setItem("bae", JSON.stringify(parsed));
