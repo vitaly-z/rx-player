@@ -1462,10 +1462,9 @@ var defaultThrottleConfig = {
     leading: true,
     trailing: false,
 };
-function throttle(durationSelector, config) {
-    if (config === void 0) { config = defaultThrottleConfig; }
+function throttle(durationSelector, _a) {
+    var _b = _a === void 0 ? defaultThrottleConfig : _a, leading = _b.leading, trailing = _b.trailing;
     return (0,lift/* operate */.e)(function (source, subscriber) {
-        var leading = config.leading, trailing = config.trailing;
         var hasValue = false;
         var sendValue = null;
         var throttled = null;
@@ -26026,7 +26025,13 @@ function applyExtent(element, extent) {
     }
 
     if (secondExtent[2] === "px" || secondExtent[2] === "%" || secondExtent[2] === "em") {
-      element.style.height = secondExtent[1] + secondExtent[2];
+      var toNum = Number(secondExtent[1]);
+
+      if (secondExtent[2] === "%" && !isNaN(toNum) && (toNum < 0 || toNum > 100)) {
+        element.style.width = "80%";
+      } else {
+        element.style.height = secondExtent[1] + secondExtent[2];
+      }
     } else if (secondExtent[2] === "c") {
       addClassName(element, "proportional-style");
       element.setAttribute("data-proportional-height", secondExtent[1]);
@@ -26191,7 +26196,14 @@ function applyOrigin(element, origin) {
     }
 
     if (secondOrigin[2] === "px" || secondOrigin[2] === "%" || secondOrigin[2] === "em") {
-      element.style.top = secondOrigin[1] + secondOrigin[2];
+      var toNum = Number(secondOrigin[1]);
+
+      if (secondOrigin[2] === "%" && !isNaN(toNum) && (toNum < 0 || toNum > 100)) {
+        element.style.bottom = "5%";
+        element.style.left = "10%";
+      } else {
+        element.style.top = secondOrigin[1] + secondOrigin[2];
+      }
     } else if (secondOrigin[2] === "c") {
       addClassName(element, "proportional-style");
       element.setAttribute("data-proportional-top", secondOrigin[1]);
@@ -36592,7 +36604,7 @@ var AsapAction = (function (_super) {
         if ((delay != null && delay > 0) || (delay == null && this.delay > 0)) {
             return _super.prototype.recycleAsyncId.call(this, scheduler, id, delay);
         }
-        if (!scheduler.actions.some(function (action) { return action.id === id; })) {
+        if (scheduler.actions.length === 0) {
             immediateProvider.clearImmediate(id);
             scheduler._scheduled = undefined;
         }
@@ -36614,19 +36626,20 @@ var AsapScheduler = (function (_super) {
     }
     AsapScheduler.prototype.flush = function (action) {
         this._active = true;
-        var flushId = this._scheduled;
         this._scheduled = undefined;
         var actions = this.actions;
         var error;
+        var index = -1;
         action = action || actions.shift();
+        var count = actions.length;
         do {
             if ((error = action.execute(action.state, action.delay))) {
                 break;
             }
-        } while ((action = actions[0]) && action.id === flushId && actions.shift());
+        } while (++index < count && (action = actions.shift()));
         this._active = false;
         if (error) {
-            while ((action = actions[0]) && action.id === flushId && actions.shift()) {
+            while (++index < count && (action = actions.shift())) {
                 action.unsubscribe();
             }
             throw error;
@@ -41019,20 +41032,16 @@ var Observable = (function () {
         var _this = this;
         promiseCtor = getPromiseCtor(promiseCtor);
         return new promiseCtor(function (resolve, reject) {
-            var subscriber = new Subscriber/* SafeSubscriber */.Hp({
-                next: function (value) {
-                    try {
-                        next(value);
-                    }
-                    catch (err) {
-                        reject(err);
-                        subscriber.unsubscribe();
-                    }
-                },
-                error: reject,
-                complete: resolve,
-            });
-            _this.subscribe(subscriber);
+            var subscription;
+            subscription = _this.subscribe(function (value) {
+                try {
+                    next(value);
+                }
+                catch (err) {
+                    reject(err);
+                    subscription === null || subscription === void 0 ? void 0 : subscription.unsubscribe();
+                }
+            }, reject, resolve);
         });
     };
     Observable.prototype._subscribe = function (subscriber) {

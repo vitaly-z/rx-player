@@ -47,7 +47,15 @@ export default function applyOrigin(element, origin) {
         if (secondOrigin[2] === "px" ||
             secondOrigin[2] === "%" ||
             secondOrigin[2] === "em") {
-            element.style.top = secondOrigin[1] + secondOrigin[2];
+            var toNum = Number(secondOrigin[1]);
+            if (secondOrigin[2] === "%" && !isNaN(toNum) &&
+                (toNum < 0 || toNum > 100)) {
+                element.style.bottom = "5%";
+                element.style.left = "10%";
+            }
+            else {
+                element.style.top = secondOrigin[1] + secondOrigin[2];
+            }
         }
         else if (secondOrigin[2] === "c") {
             addClassName(element, "proportional-style");
