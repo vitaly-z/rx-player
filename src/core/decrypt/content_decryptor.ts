@@ -163,7 +163,9 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
     this._wasAttachCalled = false;
     this._initDataQueue = [];
     this._stateData = { state: ContentDecryptorState.Initializing,
-                        data: { isInitDataQueueLocked: true } };
+                        isMediaKeysAttached: false,
+                        isInitDataQueueLocked: true,
+                        data: null };
     this.error = null;
 
     const listenerSub = onEncrypted$(mediaElement).subscribe(evt => {
@@ -200,8 +202,9 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
         this.systemId = systemId;
         if (this._stateData.state === ContentDecryptorState.Initializing) {
           this._stateData = { state: ContentDecryptorState.WaitingForAttachment,
-                              data: { isInitDataQueueLocked: true,
-                                      mediaKeysInfo,
+                              isInitDataQueueLocked: true,
+                              isMediaKeysAttached: false,
+                              data: { mediaKeysInfo,
                                       mediaElement } };
 
           this.trigger("stateChange", this._stateData.state);
@@ -250,8 +253,9 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
     const shouldDisableLock = options.disableMediaKeysAttachmentLock === true;
     if (shouldDisableLock) {
       this._stateData = { state: ContentDecryptorState.ReadyForContent,
-                          data: { isAttached: false,
-                                  isInitDataQueueLocked: true } };
+                          isInitDataQueueLocked: true,
+                          isMediaKeysAttached: false,
+                          data: null };
       this.trigger("stateChange", this._stateData.state);
       if (this._isStopped()) {
         return ;
@@ -276,13 +280,15 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
 
         const prevState = this._stateData.state;
         this._stateData = { state: ContentDecryptorState.ReadyForContent,
-                            data: { isAttached: true,
-                                    isInitDataQueueLocked: false,
-                                    mediaKeysData: mediaKeysInfo } };
+                            isMediaKeysAttached: true,
+                            isInitDataQueueLocked: false,
+                            data: { mediaKeysData: mediaKeysInfo } };
         if (prevState !== ContentDecryptorState.ReadyForContent) {
           this.trigger("stateChange", ContentDecryptorState.ReadyForContent);
         }
-        this._processCurrentInitDataQueue();
+        if (!this._isStopped()) {
+          this._processCurrentInitDataQueue();
+        }
       })
 
       .catch((err) => {
@@ -300,7 +306,9 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
   public dispose() {
     this.removeEventListener();
     this._stateData = { state: ContentDecryptorState.Disposed,
-                        data: { isInitDataQueueLocked: true } };
+                        isMediaKeysAttached: undefined,
+                        isInitDataQueueLocked: undefined,
+                        data: null };
     this._canceller.cancel();
     this.trigger("stateChange", this._stateData.state);
   }
@@ -317,7 +325,7 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
   public onInitializationData(
     initializationData : IInitializationDataInfo
   ) : void {
-    if (this._stateData.data.isInitDataQueueLocked) {
+    if (this._stateData.isInitDataQueueLocked !== false) {
       if (this._isStopped()) {
         throw new Error("ContentDecryptor either disposed or stopped.");
       }
@@ -470,13 +478,6 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
             manifest.addUndecipherableProtectionData(initializationData);
           }
 
-          // Now that key ids update have been processed, we can remove
-          // the lock if it was active.
-          if (this._stateData.state !== ContentDecryptorState.ReadyForContent ||
-              !this._stateData.data.isAttached)
-          {
-            return;
-          }
           this._unlockInitDataQueue();
 
           // XXX TODO No warning yet for blacklisted session?
@@ -624,7 +625,9 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
       new OtherError("NONE", "Unknown encryption error");
     this.error = formattedErr;
     this._stateData = { state: ContentDecryptorState.Error,
-                        data: { isInitDataQueueLocked: true } };
+                        isMediaKeysAttached: undefined,
+                        isInitDataQueueLocked: undefined,
+                        data: null };
     this._canceller.cancel();
     this.trigger("error", formattedErr);
 
@@ -645,7 +648,7 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
   }
 
   private _processCurrentInitDataQueue() {
-    while (!this._stateData.data.isInitDataQueueLocked) {
+    while (this._stateData.isInitDataQueueLocked === false) {
       const initData = this._initDataQueue.shift();
       if (initData === undefined) {
         return;
@@ -655,19 +658,19 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
   }
 
   private _lockInitDataQueue() {
-    this._stateData.data.isInitDataQueueLocked = true;
+    if (this._stateData.isInitDataQueueLocked === false) {
+      this._stateData.isInitDataQueueLocked = true;
+    }
   }
 
   private _unlockInitDataQueue() {
-    if (this._stateData.state !== ContentDecryptorState.ReadyForContent ||
-        !this._stateData.data.isAttached)
-    {
+    if (this._stateData.isMediaKeysAttached !== true) {
       if (!this._isStopped()) {
         log.error("DRM: Trying to unlock in the wrong state");
       }
       return;
     }
-    this._stateData.data.isInitDataQueueLocked = false;
+    this._stateData.isInitDataQueueLocked = false;
     this._processCurrentInitDataQueue();
   }
 }
@@ -780,36 +783,37 @@ type IContentDecryptorStateData = IInitializingStateData |
 /** ContentDecryptor's internal data when in the `Initializing` state. */
 interface IInitializingStateData {
   state: ContentDecryptorState.Initializing;
-  data: {
-    /**
-     * When `true`, the `ContentDecryptor` will wait before processing
-     * newly-received initialization data.
-     *
-     * In certain cases where licenses might contain multiple keys, we might want
-     * to avoid loading multiple licenses with keys in common. Setting
-     * `isInitDataQueueLocked` to `true` will prevent multiple parallel license requests,
-     * TODO this way of doing-it is very error-prone for now. A more readable
-     * solution could be found.
-     */
-    isInitDataQueueLocked: true;
-  };
+  /**
+   * When `true`, the `ContentDecryptor` will wait before processing
+   * newly-received initialization data.
+   *
+   * In certain cases where licenses might contain multiple keys, we might want
+   * to avoid loading multiple licenses with keys in common. Setting
+   * `isInitDataQueueLocked` to `true` will prevent multiple parallel license requests,
+   * TODO this way of doing-it is very error-prone for now. A more readable
+   * solution could be found.
+   */
+  isInitDataQueueLocked: true;
+  isMediaKeysAttached: false;
+  data: null;
 }
 
 /** ContentDecryptor's internal data when in the `WaitingForAttachment` state. */
 interface IWaitingForAttachmentStateData {
   state: ContentDecryptorState.WaitingForAttachment;
+  /**
+   * When `true`, the `ContentDecryptor` will wait before processing
+   * newly-received initialization data.
+   *
+   * In certain cases where licenses might contain multiple keys, we might want
+   * to avoid loading multiple licenses with keys in common. Setting
+   * `isInitDataQueueLocked` to `true` will prevent multiple parallel license requests,
+   * TODO this way of doing-it is very error-prone for now. A more readable
+   * solution could be found.
+   */
+  isInitDataQueueLocked: true;
+  isMediaKeysAttached: false;
   data: {
-    /**
-     * When `true`, the `ContentDecryptor` will wait before processing
-     * newly-received initialization data.
-     *
-     * In certain cases where licenses might contain multiple keys, we might want
-     * to avoid loading multiple licenses with keys in common. Setting
-     * `isInitDataQueueLocked` to `true` will prevent multiple parallel license requests,
-     * TODO this way of doing-it is very error-prone for now. A more readable
-     * solution could be found.
-     */
-    isInitDataQueueLocked: true;
     mediaKeysInfo : IMediaKeysInfos;
     mediaElement : HTMLMediaElement;
   };
@@ -821,20 +825,19 @@ interface IWaitingForAttachmentStateData {
  */
 interface IReadyForContentStateDataUnattached {
   state: ContentDecryptorState.ReadyForContent;
-  data: {
-    /**
-     * When `true`, the `ContentDecryptor` will wait before processing
-     * newly-received initialization data.
-     *
-     * In certain cases where licenses might contain multiple keys, we might want
-     * to avoid loading multiple licenses with keys in common. Setting
-     * `isInitDataQueueLocked` to `true` will prevent multiple parallel license requests,
-     * TODO this way of doing-it is very error-prone for now. A more readable
-     * solution could be found.
-     */
-    isInitDataQueueLocked: true;
-    isAttached: false;
-  };
+  /**
+   * When `true`, the `ContentDecryptor` will wait before processing
+   * newly-received initialization data.
+   *
+   * In certain cases where licenses might contain multiple keys, we might want
+   * to avoid loading multiple licenses with keys in common. Setting
+   * `isInitDataQueueLocked` to `true` will prevent multiple parallel license requests,
+   * TODO this way of doing-it is very error-prone for now. A more readable
+   * solution could be found.
+   */
+  isInitDataQueueLocked: true;
+  isMediaKeysAttached: false;
+  data: null;
 }
 
 /**
@@ -843,21 +846,19 @@ interface IReadyForContentStateDataUnattached {
  */
 interface IReadyForContentStateDataAttached {
   state: ContentDecryptorState.ReadyForContent;
+  /**
+   * When `true`, the `ContentDecryptor` will wait before processing
+   * newly-received initialization data.
+   *
+   * In certain cases where licenses might contain multiple keys, we might want
+   * to avoid loading multiple licenses with keys in common. Setting
+   * `isInitDataQueueLocked` to `true` will prevent multiple parallel license requests,
+   * TODO this way of doing-it is very error-prone for now. A more readable
+   * solution could be found.
+   */
+  isInitDataQueueLocked: boolean;
+  isMediaKeysAttached: true;
   data: {
-    isAttached: true;
-
-    /**
-     * When `true`, the `ContentDecryptor` will wait before processing
-     * newly-received initialization data.
-     *
-     * In certain cases where licenses might contain multiple keys, we might want
-     * to avoid loading multiple licenses with keys in common. Setting
-     * `isInitDataQueueLocked` to `true` will prevent multiple parallel license requests,
-     * TODO this way of doing-it is very error-prone for now. A more readable
-     * solution could be found.
-     */
-    isInitDataQueueLocked: boolean;
-
     /**
      * MediaKeys-related information linked to this instance of the
      * `ContentDecryptor`.
@@ -872,37 +873,37 @@ interface IReadyForContentStateDataAttached {
 /** ContentDecryptor's internal data when in the `ReadyForContent` state. */
 interface IDisposeStateData {
   state: ContentDecryptorState.Disposed;
-  data: {
-    /**
-     * When `true`, the `ContentDecryptor` will wait before processing
-     * newly-received initialization data.
-     *
-     * In certain cases where licenses might contain multiple keys, we might want
-     * to avoid loading multiple licenses with keys in common. Setting
-     * `isInitDataQueueLocked` to `true` will prevent multiple parallel license requests,
-     * TODO this way of doing-it is very error-prone for now. A more readable
-     * solution could be found.
-     */
-    isInitDataQueueLocked: true;
-  };
+  /**
+   * When `true`, the `ContentDecryptor` will wait before processing
+   * newly-received initialization data.
+   *
+   * In certain cases where licenses might contain multiple keys, we might want
+   * to avoid loading multiple licenses with keys in common. Setting
+   * `isInitDataQueueLocked` to `true` will prevent multiple parallel license requests,
+   * TODO this way of doing-it is very error-prone for now. A more readable
+   * solution could be found.
+   */
+  isInitDataQueueLocked: undefined;
+  isMediaKeysAttached: undefined;
+  data: null;
 }
 
 /** ContentDecryptor's internal data when in the `Error` state. */
 interface IErrorStateData {
   state: ContentDecryptorState.Error;
-  data: {
-    /**
-     * When `true`, the `ContentDecryptor` will wait before processing
-     * newly-received initialization data.
-     *
-     * In certain cases where licenses might contain multiple keys, we might want
-     * to avoid loading multiple licenses with keys in common. Setting
-     * `isInitDataQueueLocked` to `true` will prevent multiple parallel license requests,
-     * TODO this way of doing-it is very error-prone for now. A more readable
-     * solution could be found.
-     */
-    isInitDataQueueLocked: true;
-  };
+  /**
+   * When `true`, the `ContentDecryptor` will wait before processing
+   * newly-received initialization data.
+   *
+   * In certain cases where licenses might contain multiple keys, we might want
+   * to avoid loading multiple licenses with keys in common. Setting
+   * `isInitDataQueueLocked` to `true` will prevent multiple parallel license requests,
+   * TODO this way of doing-it is very error-prone for now. A more readable
+   * solution could be found.
+   */
+  isInitDataQueueLocked: undefined;
+  isMediaKeysAttached: undefined;
+  data: null;
 }
 
 interface IActiveSessionInfo {
