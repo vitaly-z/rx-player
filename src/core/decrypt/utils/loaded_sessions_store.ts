@@ -99,7 +99,7 @@ export default class LoadedSessionsStore {
   public reuse(
     initializationData : IInitializationDataInfo
   ) : IStoredSessionEntry | null {
-    for (let i = this._storage.length; i >= 0; i--) {
+    for (let i = this._storage.length - 1; i >= 0; i--) {
       const stored = this._storage[i];
       if (stored.keySessionRecord.isCompatibleWith(initializationData)) {
         this._storage.splice(i, 1);
