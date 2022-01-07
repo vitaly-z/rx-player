@@ -33,9 +33,6 @@ import arrayIncludes from "../../utils/array_includes";
 import { concat } from "../../utils/byte_parsing";
 import EventEmitter from "../../utils/event_emitter";
 import isNullOrUndefined from "../../utils/is_null_or_undefined";
-import createSharedReference, {
-  ISharedReference,
-} from "../../utils/reference";
 import TaskCanceller from "../../utils/task_canceller";
 import attachMediaKeys from "./attach_media_keys";
 import cleanOldStoredPersistentInfo from "./clean_old_stored_persistent_info";
@@ -117,18 +114,6 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
   private _currentSessions : IActiveSessionInfo[];
 
   /**
-   * When `true`, wait before processing newly-received initialization data.
-   *
-   * In certain cases where licenses might contain multiple keys, we might want
-   * to avoid loading multiple licenses with keys in common. Using this lock to
-   * prevent multiple parallel license requests allows to prevent that situation
-   * from happening.
-   * TODO this way of doing-it is very error-prone for now. A more readable
-   * solution has to be found.
-   */
-  private _initDataLock : ISharedReference<boolean>;
-
-  /**
    * Allows to dispose the resources taken by the current instance of the
    * ContentDecryptor.
    */
@@ -160,7 +145,6 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
 
     const canceller = new TaskCanceller();
     this._currentSessions = [];
-    this._initDataLock = createSharedReference<boolean>(false);
     this._canceller = canceller;
     this._wasAttachCalled = false;
     this._stateData = { state: ContentDecryptorState.Initializing,
@@ -277,40 +261,17 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
           return;
         }
 
+        const initDataQueue = this._getCurrentInitDataQueue();
         const prevState = this._stateData.state;
-        let initDataQueue : IInitializationDataInfo[];
-        switch (prevState) {
-          case ContentDecryptorState.Initializing:
-          case ContentDecryptorState.WaitingForAttachment:
-            initDataQueue = this._stateData.data.initDataQueue;
-            break;
-          case ContentDecryptorState.ReadyForContent:
-            initDataQueue = this._stateData.data.isAttached ?
-              [] :
-              this._stateData.data.initDataQueue;
-            break;
-          default:
-            initDataQueue = [];
-        }
-
         this._stateData = { state: ContentDecryptorState.ReadyForContent,
                             data: { isAttached: true,
-                                    mediaKeysData: mediaKeysInfo } };
+                                    isInitDataQueueLocked: false,
+                                    mediaKeysData: mediaKeysInfo,
+                                    initDataQueue } };
         if (prevState !== ContentDecryptorState.ReadyForContent) {
           this.trigger("stateChange", ContentDecryptorState.ReadyForContent);
         }
-
-        while (true) {
-          // Side-effects might have provoked a stop/dispose
-          if (this._isStopped()) {
-            return;
-          }
-          const initData = initDataQueue.shift();
-          if (initData === undefined) {
-            return;
-          }
-          this.onInitializationData(initData);
-        }
+        this._processCurrentInitDataQueue();
       })
 
       .catch((err) => {
@@ -344,20 +305,22 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
   public onInitializationData(
     initializationData : IInitializationDataInfo
   ) : void {
-    // XXX TODO Plain ugly
-    const cancelUpdateListening = new TaskCanceller();
-    const unregisterGlobalSignal = this._canceller.signal.register(() => {
-      cancelUpdateListening.cancel();
-    });
-    this._initDataLock.onUpdate((isLocked) => {
-      if (isLocked) {
-        return;
+    if (this._stateData.state !== ContentDecryptorState.ReadyForContent ||
+        !this._stateData.data.isAttached ||
+        this._stateData.data.isInitDataQueueLocked)
+    {
+      if (this._stateData.state === ContentDecryptorState.Disposed ||
+          this._stateData.state === ContentDecryptorState.Error)
+      {
+        throw new Error("ContentDecryptor either disposed or stopped.");
       }
-      unregisterGlobalSignal();
-      cancelUpdateListening.cancel();
-      this._processInitializationData(initializationData)
-        .catch(err => { this._onFatalError(err); });
-    }, { clearSignal: cancelUpdateListening.signal, emitCurrentValue: true });
+      this._stateData.data.initDataQueue.push(initializationData);
+      return;
+    }
+
+    const { mediaKeysData } = this._stateData.data;
+    this._processInitializationData(initializationData, mediaKeysData)
+      .catch(err => { this._onFatalError(err); });
   }
 
   /**
@@ -370,22 +333,9 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
    * @returns {Promise.<void>}
    */
   private async _processInitializationData(
-    initializationData: IInitializationDataInfo
+    initializationData: IInitializationDataInfo,
+    mediaKeysData: IAttachedMediaKeysData
   ) : Promise<void> {
-    if (this._stateData.state !== ContentDecryptorState.ReadyForContent) {
-      if (this._stateData.state === ContentDecryptorState.Disposed ||
-          this._stateData.state === ContentDecryptorState.Error)
-      {
-        throw new Error("ContentDecryptor either disposed or stopped.");
-      }
-      this._stateData.data.initDataQueue.push(initializationData);
-      return ;
-    } else if (!this._stateData.data.isAttached) {
-      this._stateData.data.initDataQueue.push(initializationData);
-      return ;
-    }
-
-    const mediaKeysData = this._stateData.data.mediaKeysData;
     const { mediaKeySystemAccess, stores, options } = mediaKeysData;
 
     if (this._tryToUseAlreadyCreatedSession(initializationData, mediaKeysData) ||
@@ -419,12 +369,8 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
       }
     }
 
-    // Because we typically only want to create a single new session in a
-    // `singleLicensePer: "content"` mode, we will temprarily lock new
-    // initialization data from being processed while we're still
-    // processing that one.
-    // XXX TODO
-    this._initDataLock.setValue(true);
+    // /!\ Do not forget to unlock when done
+    this._lockInitDataQueue();
 
     let wantedSessionType : MediaKeySessionType;
     if (options.persistentLicense !== true) {
@@ -453,10 +399,6 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
       blacklistedSessionError: null,
     };
     this._currentSessions.push(sessionInfo);
-
-    if (options.singleLicensePer === "init-data") {
-      this._initDataLock.setValue(false);
-    }
 
     const { mediaKeySession, sessionType } = sessionRes.value;
 
@@ -504,10 +446,7 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
               .updateDeciperabilitiesBasedOnKeyIds(evt.value);
           }
 
-          // Now that key ids update have been processed, we can remove
-          // the lock if it was active.
-          this._initDataLock.setValue(false);
-          return ;
+          this._unlockInitDataQueue();
         },
         error: (err) => {
           if (!(err instanceof BlacklistedSessionError)) {
@@ -524,7 +463,14 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
             manifest.addUndecipherableProtectionData(initializationData);
           }
 
-          this._initDataLock.setValue(false);
+          // Now that key ids update have been processed, we can remove
+          // the lock if it was active.
+          if (this._stateData.state !== ContentDecryptorState.ReadyForContent ||
+              !this._stateData.data.isAttached)
+          {
+            return;
+          }
+          this._unlockInitDataQueue();
 
           // XXX TODO No warning yet for blacklisted session?
           // this.trigger("warning", err);
@@ -549,6 +495,9 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
       }
     }
 
+    if (options.singleLicensePer === "init-data") {
+      this._unlockInitDataQueue();
+    }
     return PPromise.resolve();
   }
 
@@ -685,6 +634,60 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
   private _isStopped() : boolean {
     return this._stateData.state === ContentDecryptorState.Disposed ||
            this._stateData.state === ContentDecryptorState.Error;
+  }
+
+  private _getCurrentInitDataQueue() : IInitializationDataInfo[] {
+    switch (this._stateData.state) {
+      case ContentDecryptorState.Initializing:
+      case ContentDecryptorState.WaitingForAttachment:
+      case ContentDecryptorState.ReadyForContent:
+        return this._stateData.data.initDataQueue;
+      default:
+        return [];
+    }
+  }
+
+  private _processCurrentInitDataQueue() {
+    while (this._stateData.state === ContentDecryptorState.ReadyForContent &&
+           this._stateData.data.isAttached &&
+           !this._stateData.data.isInitDataQueueLocked)
+    {
+      const initData = this._stateData.data.initDataQueue.shift();
+      if (initData === undefined) {
+        return;
+      }
+      this.onInitializationData(initData);
+    }
+  }
+
+  private _lockInitDataQueue() {
+    // Now that key ids update have been processed, we can remove
+    // the lock if it was active.
+    if (this._stateData.state !== ContentDecryptorState.ReadyForContent ||
+        !this._stateData.data.isAttached)
+    {
+      if (!this._isStopped()) {
+        log.error("DRM: Trying to lock in the wrong state");
+      }
+      return;
+    }
+    this._stateData.data.isInitDataQueueLocked = true;
+  }
+
+  private _unlockInitDataQueue() {
+    // Now that key ids update have been processed, we can remove
+    // the lock if it was active.
+    if (this._stateData.state !== ContentDecryptorState.ReadyForContent ||
+        !this._stateData.data.isAttached ||
+        !this._stateData.data.isInitDataQueueLocked)
+    {
+      if (!this._isStopped()) {
+        log.error("DRM: Trying to unlock in the wrong state");
+      }
+      return;
+    }
+    this._stateData.data.isInitDataQueueLocked = false;
+    this._processCurrentInitDataQueue();
   }
 }
 
@@ -852,6 +855,25 @@ interface IReadyForContentStateDataAttached {
   state: ContentDecryptorState.ReadyForContent;
   data: {
     isAttached: true;
+    /**
+     * When `true`, the `ContentDecryptor` will wait before processing
+     * newly-received initialization data.
+     *
+     * In certain cases where licenses might contain multiple keys, we might want
+     * to avoid loading multiple licenses with keys in common. Setting
+     * `isInitDataQueueLocked` to `true` will prevent multiple parallel license requests,
+     * TODO this way of doing-it is very error-prone for now. A more readable
+     * solution could be found.
+     */
+    isInitDataQueueLocked: boolean;
+
+    /**
+     * This queue stores initialization data either communicated while
+     * `isInitDataQueueLocked` is set to `true` or inherited from a previous
+     * state.
+     */
+    initDataQueue : IInitializationDataInfo[];
+
     /**
      * MediaKeys-related information linked to this instance of the
      * `ContentDecryptor`.
