@@ -78,11 +78,7 @@ async function checkNothingHappen(
   limit : number
 ) : Promise<void> {
   const closeSessionSpy = jest.spyOn(loadedSessionsStore, "closeSession");
-  let itemNb = 0;
-  await cleanOldLoadedSessions(loadedSessionsStore, limit, () => {
-    itemNb++;
-  });
-  expect(itemNb).toEqual(0);
+  await cleanOldLoadedSessions(loadedSessionsStore, limit);
   expect(closeSessionSpy).not.toHaveBeenCalled();
   closeSessionSpy.mockRestore();
 }
@@ -91,25 +87,20 @@ async function checkNothingHappen(
  * Call `cleanOldLoadedSessions` with the given loadedSessionsStore, limit and
  * entries and make sure that:
  *   - closeSession is called on the specific entries a single time
- *   - all right events are received in the right order each a single time
  *   - it completes without an error
  * Call `done` when done.
  * @param {Object} loadedSessionsStore
  * @param {number} limit
  * @param {Array.<Object>} entries
  */
-function checkEntriesCleaned(
+async function checkEntriesCleaned(
   loadedSessionsStore : LoadedSessionsStore,
   limit : number,
   entries : Array<{ initializationData: unknown }>
 ) : Promise<void> {
   const closeSessionSpy = jest.spyOn(loadedSessionsStore, "closeSession");
-  let itemNb = 0;
-  const prom = cleanOldLoadedSessions(loadedSessionsStore, limit, (evt) => {
-    itemNb++;
-    expect(evt).toEqual(entries[itemNb - 1]);
-  }).then(() => {
-    expect(itemNb).toEqual(entries.length);
+  const prom = cleanOldLoadedSessions(loadedSessionsStore, limit).then(() => {
+    expect(closeSessionSpy).toHaveBeenCalledTimes(entries.length);
   });
   expect(closeSessionSpy).toHaveBeenCalledTimes(entries.length);
   for (let i = 0; i < entries.length; i++) {

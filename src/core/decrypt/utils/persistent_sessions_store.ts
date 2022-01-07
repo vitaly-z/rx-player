@@ -27,11 +27,11 @@ import hashBuffer from "../../../utils/hash_buffer";
 import isNonEmptyString from "../../../utils/is_non_empty_string";
 import isNullOrUndefined from "../../../utils/is_null_or_undefined";
 import {
-  IInitializationDataInfo,
   IPersistentSessionInfo,
   IPersistentSessionStorage,
 } from "../types";
 import areInitializationValuesCompatible from "./are_init_values_compatible";
+import ProcessedInitDataRecord from "./processed_init_data_record";
 
 /**
  * Throw if the given storage does not respect the right interface.
@@ -101,10 +101,11 @@ export default class PersistentSessionsStore {
     this._entries = [];
     this._storage = storage;
     try {
-      this._entries = this._storage.load();
-      if (!Array.isArray(this._entries)) {
-        this._entries = [];
+      let entries = this._storage.load();
+      if (!Array.isArray(entries)) {
+        entries = [];
       }
+      this._entries = entries;
     } catch (e) {
       log.warn("DRM-PSS: Could not get entries from license storage", e);
       this.dispose();
@@ -129,12 +130,12 @@ export default class PersistentSessionsStore {
   }
 
   /**
-   * Retrieve an entry based on its initialization data.
-   * @param {Uint8Array}  initData
+   * Retrieve an entry based on its InitDataRecord.
+   * @param {Object}  initData
    * @param {string|undefined} initDataType
    * @returns {Object|null}
    */
-  public get(initData : IInitializationDataInfo) : IPersistentSessionInfo | null {
+  public get(initData : ProcessedInitDataRecord) : IPersistentSessionInfo | null {
     const index = this._getIndex(initData);
     return index === -1 ? null :
                           this._entries[index];
@@ -151,7 +152,7 @@ export default class PersistentSessionsStore {
    * @param {string|undefined} initDataType
    * @returns {*}
    */
-  public getAndReuse(initData : IInitializationDataInfo) : IPersistentSessionInfo | null {
+  public getAndReuse(initData : ProcessedInitDataRecord) : IPersistentSessionInfo | null {
     const index = this._getIndex(initData);
     if (index === -1) {
       return null;
@@ -168,7 +169,7 @@ export default class PersistentSessionsStore {
    * @param {MediaKeySession} session
    */
   public add(
-    initData : IInitializationDataInfo,
+    initData : ProcessedInitDataRecord,
     session : MediaKeySession|ICustomMediaKeySession
   ) : void {
     if (isNullOrUndefined(session) || !isNonEmptyString(session.sessionId)) {
@@ -198,7 +199,7 @@ export default class PersistentSessionsStore {
    * @param {Uint8Array}  initData
    * @param {string|undefined} initDataType
    */
-  public delete(initData : IInitializationDataInfo) : void {
+  public delete(initData : ProcessedInitDataRecord) : void {
     const index = this._getIndex(initData);
     if (index === -1) {
       log.warn("DRM-PSS: initData to delete not found.");
@@ -237,11 +238,10 @@ export default class PersistentSessionsStore {
   /**
    * Retrieve index of an entry.
    * Returns `-1` if not found.
-   * @param {Uint8Array}  initData
-   * @param {string|undefined} initDataType
+   * @param {Object} initDataRecord
    * @returns {number}
    */
-  private _getIndex(initData : IInitializationDataInfo) : number {
+  private _getIndex(initDataRecord : ProcessedInitDataRecord) : number {
     const formatted = this._formatValuesForStore(initData.values);
 
     // Older versions of the format include a concatenation of all

@@ -1,0 +1,37 @@
+  // initializationData déja géré contenu en cours ?
+  //   => ignore. Si MediaKeySession créé, réhausse
+  //
+  // initialization déjà géré ancien contenu ?
+  //   => Reprends (re-link events) et réhausse MediaKeySession
+  //
+  // keyId déjà géré contenu en cours ?
+  //   => ignore. Si MediaKeySession créé, réhausse
+  //
+  // keyId déjà géré ancien contenu ?
+  //   => Reprends (re-link events) et réhausse MediaKeySession
+  //
+  // ni initializationData, ni keyId géré
+  //   => singleLicensePer "init-data" ? Continue
+  //   => singleLicensePer "content" ?
+  //      => Si licence téléchargé pour le contenu en cours, réhausse
+  //      MediaKeySession et ignore.
+  //      => Sinon, continue
+  //   => singleLicensePer "periods" ?
+  //      => Si keyId en commun avec une des MediaKeySession avec licence
+  //      téléchargés en cours, réhausse MediaKeySession et ignore
+  //      => Sinon, continue
+
+  // Lock:
+  //   => singleLicensePer "init-data" ? Pas de lock.
+  //   => singleLicensePer "content" ? Lock jusqu'a licence obtenue.
+  //   => singleLicensePer "periods" ? Lock jusqu'a licence obtenue.
+
+  // Structures:
+  //
+  //   Contenu en cours:
+  //     - initializationData => MediaKeySession
+  //     - keyId => MediaKeySession
+  //     - liste des keyIds des MediaKeySession _téléchargés_
+  //
+
+  // Si dec

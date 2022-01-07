@@ -20,6 +20,11 @@ import {
   ICustomMediaKeySystemAccess,
 } from "../../compat";
 import { ICustomError } from "../../errors";
+import Manifest, {
+  Adaptation,
+  Period,
+  Representation,
+} from "../../manifest";
 import { ISharedReference } from "../../utils/reference";
 import LoadedSessionsStore from "./utils/loaded_sessions_store";
 import PersistentSessionsStore from "./utils/persistent_sessions_store";
@@ -41,6 +46,8 @@ export interface IInitializationDataInfo {
    * just mean that there's no key id involved).
    */
   keyIds? : Uint8Array[];
+  /** The content linked to that segment protection data. */
+  content? : IContent;
   /** Every initialization data for that type. */
   values: Array<{
     /**
@@ -151,7 +158,6 @@ export interface IAttachedMediaKeysData {
   options : IKeySystemOption;
 }
 
-
 /**
  * Some key ids have updated their status.
  *
@@ -202,6 +208,8 @@ export type ILicense = BufferSource |
 
 /** Segment protection sent by the RxPlayer to the `ContentDecryptor`. */
 export interface IContentProtection {
+  /** The content linked to that segment protection data. */
+  content : IContent;
   /**
    * Initialization data type.
    * String describing the format of the initialization data sent through this
@@ -217,7 +225,7 @@ export interface IContentProtection {
    * `undefined` when not known (different from an empty array - which would
    * just mean that there's no key id involved).
    */
-  keyIds? : Uint8Array[];
+  keyIds : Uint8Array[] | undefined;
   /** Every initialization data for that type. */
   values: Array<{
     /**
@@ -232,6 +240,18 @@ export interface IContentProtection {
      */
      data: Uint8Array;
   }>;
+}
+
+/** Content linked to protection data. */
+export interface IContent {
+  /** Manifest object associated to the protection data. */
+  manifest : Manifest;
+  /** Period object associated to the protection data. */
+  period : Period;
+  /** Adaptation object associated to the protection data. */
+  adaptation : Adaptation;
+  /** Representation object associated to the protection data. */
+  representation : Representation;
 }
 
 // Emitted after the `onKeyStatusesChange` callback has been called
@@ -260,6 +280,28 @@ export interface IMediaKeySessionStores {
   /** Retrieve persistent MediaKeySessions already created. */
   persistentSessionsStore : PersistentSessionsStore |
                             null;
+}
+
+/** Enum identifying the way a new MediaKeySession has been loaded. */
+export const enum MediaKeySessionLoadingType {
+  /**
+   * This MediaKeySession has just been created.
+   * This means that it will necessitate a new license request to be generated
+   * and performed.
+   */
+  Created = "created-session",
+  /**
+   * This MediaKeySession was an already-opened one that is being reused.
+   * Such session had already their license loaded and pushed.
+   */
+  LoadedOpenSession = "loaded-open-session",
+  /**
+   * This MediaKeySession was a persistent MediaKeySession that has been
+   * re-loaded.
+   * Such session are linked to a persistent license which should have already
+   * been fetched.
+   */
+  LoadedPersistentSession = "loaded-persistent-session",
 }
 
 /**
@@ -404,7 +446,7 @@ export interface IPersistentSessionInfoV0 {
 /** Persistent MediaKeySession storage interface. */
 export interface IPersistentSessionStorage {
   /** Load persistent MediaKeySessions previously saved through the `save` callback. */
-  load() : IPersistentSessionInfo[];
+  load() : IPersistentSessionInfo[] | undefined | null;
   /**
    * Save new persistent MediaKeySession information.
    * The given argument should be returned by the next `load` call.
