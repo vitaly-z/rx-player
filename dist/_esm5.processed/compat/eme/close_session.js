@@ -22,7 +22,7 @@ import castToObservable from "../../utils/cast_to_observable";
  * @returns {Observable}
  */
 export default function closeSession$(session) {
-    return observableRace(castToObservable(session.close()), 
+    return observableRace(castToObservable(session.remove().then(function () { return session.close(); }, function () { return session.close(); })), 
     // If the session is not closed after 1000ms, try
     // to call another method on session to guess if
     // session is closed or not.

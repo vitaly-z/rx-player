@@ -5797,7 +5797,11 @@ var serverCertificateHashesMap = new WeakMap();
  */
 
 function closeSession$(session) {
-  return (0,race/* race */.S)((0,cast_to_observable/* default */.Z)(session.close()), // If the session is not closed after 1000ms, try
+  return (0,race/* race */.S)((0,cast_to_observable/* default */.Z)(session.remove().then(function () {
+    return session.close();
+  }, function () {
+    return session.close();
+  })), // If the session is not closed after 1000ms, try
   // to call another method on session to guess if
   // session is closed or not.
   (0,timer/* timer */.H)(1000).pipe((0,mergeMap/* mergeMap */.z)(function () {
