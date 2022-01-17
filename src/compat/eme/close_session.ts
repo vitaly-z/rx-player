@@ -36,7 +36,9 @@ export default function closeSession$(
   session: MediaKeySession|ICustomMediaKeySession
 ): Observable<unknown> {
   return observableRace(
-    castToObservable(session.close()),
+    castToObservable(
+      session.remove().then(() => session.close(),
+                            () => session.close())),
     // If the session is not closed after 1000ms, try
     // to call another method on session to guess if
     // session is closed or not.
