@@ -23,6 +23,7 @@ import {
   race as observableRace,
   timer as observableTimer,
 } from "rxjs";
+import logger from "../../log";
 import castToObservable from "../../utils/cast_to_observable";
 import { ICustomMediaKeySession } from "./custom_media_keys";
 
@@ -35,10 +36,21 @@ import { ICustomMediaKeySession } from "./custom_media_keys";
 export default function closeSession$(
   session: MediaKeySession|ICustomMediaKeySession
 ): Observable<unknown> {
+  const sessionId = session.sessionId;
+  logger.warn("Removing session", sessionId);
   return observableRace(
     castToObservable(
-      session.remove().then(() => session.close(),
-                            () => session.close())),
+      session.remove().then(
+        () => {
+          logger.warn("Session removed with success, closing...", sessionId);
+          return session.close()
+            .then(() => { logger.warn("Session closed with success!", sessionId); });
+        },
+        () => {
+          logger.warn("Session removed with failure, closing...", sessionId);
+          return session.close()
+            .then(() => { logger.warn("Session closed with success!", sessionId); });
+        })),
     // If the session is not closed after 1000ms, try
     // to call another method on session to guess if
     // session is closed or not.
