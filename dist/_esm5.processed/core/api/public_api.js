@@ -88,7 +88,7 @@ var Player = /** @class */ (function (_super) {
         // Workaround to support Firefox autoplay on FF 42.
         // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1194624
         videoElement.preload = "auto";
-        _this.version = /* PLAYER_VERSION */ "3.26.2+fixed_ttml_subs+session_remove_before_close-3";
+        _this.version = /* PLAYER_VERSION */ "3.26.2-cestlaversiondutiret5";
         _this.log = log;
         _this.state = "STOPPED";
         _this.videoElement = videoElement;
@@ -2264,5 +2264,5 @@ var Player = /** @class */ (function (_super) {
     };
     return Player;
 }(EventEmitter));
-Player.version = /* PLAYER_VERSION */ "3.26.2+fixed_ttml_subs+session_remove_before_close-3";
+Player.version = /* PLAYER_VERSION */ "3.26.2-cestlaversiondutiret5";
 export default Player;
