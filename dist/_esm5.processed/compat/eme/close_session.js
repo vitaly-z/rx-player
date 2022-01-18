@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import { catchError, map, mergeMap, of as observableOf, race as observableRace, timer as observableTimer, } from "rxjs";
+import logger from "../../log";
 import castToObservable from "../../utils/cast_to_observable";
 /**
  * Close session and returns and observable that emits when
@@ -22,7 +23,17 @@ import castToObservable from "../../utils/cast_to_observable";
  * @returns {Observable}
  */
 export default function closeSession$(session) {
-    return observableRace(castToObservable(session.remove().then(function () { return session.close(); }, function () { return session.close(); })), 
+    var sessionId = session.sessionId;
+    logger.warn("Removing session", sessionId);
+    return observableRace(castToObservable(session.remove().then(function () {
+        logger.warn("Session removed with success, closing...", sessionId);
+        return session.close()
+            .then(function () { logger.warn("Session closed with success!", sessionId); });
+    }, function () {
+        logger.warn("Session removed with failure, closing...", sessionId);
+        return session.close()
+            .then(function () { logger.warn("Session closed with success!", sessionId); });
+    })), 
     // If the session is not closed after 1000ms, try
     // to call another method on session to guess if
     // session is closed or not.

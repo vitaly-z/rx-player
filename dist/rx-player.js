@@ -5789,6 +5789,7 @@ var serverCertificateHashesMap = new WeakMap();
  */
 
 
+
 /**
  * Close session and returns and observable that emits when
  * the session is closed.
@@ -5797,10 +5798,18 @@ var serverCertificateHashesMap = new WeakMap();
  */
 
 function closeSession$(session) {
+  var sessionId = session.sessionId;
+  log/* default.warn */.Z.warn("Removing session", sessionId);
   return (0,race/* race */.S)((0,cast_to_observable/* default */.Z)(session.remove().then(function () {
-    return session.close();
+    log/* default.warn */.Z.warn("Session removed with success, closing...", sessionId);
+    return session.close().then(function () {
+      log/* default.warn */.Z.warn("Session closed with success!", sessionId);
+    });
   }, function () {
-    return session.close();
+    log/* default.warn */.Z.warn("Session removed with failure, closing...", sessionId);
+    return session.close().then(function () {
+      log/* default.warn */.Z.warn("Session closed with success!", sessionId);
+    });
   })), // If the session is not closed after 1000ms, try
   // to call another method on session to guess if
   // session is closed or not.
