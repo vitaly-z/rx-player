@@ -25,7 +25,7 @@ import {
   MediaKeySessionLoadingType,
 } from "./types";
 import isSessionUsable from "./utils/is_session_usable";
-import KeySessionRecord from "./utils/processed_init_data_record";
+import KeySessionRecord from "./utils/key_session_record";
 
 /**
  * Handle MediaEncryptedEvents sent by a HTMLMediaElement:
@@ -70,7 +70,9 @@ export default async function createOrLoadSession(
       // If the session is not usable anymore, we can also remove it from the
       // PersistentSessionsStore.
       // TODO Are we sure this is always what we want?
-      persistentSessionsStore.delete(entry.keySessionRecord);
+      if (entry.mediaKeySession.sessionId !== "") {
+        persistentSessionsStore.delete(entry.mediaKeySession.sessionId);
+      }
     }
   }
 

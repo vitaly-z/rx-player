@@ -26,9 +26,9 @@ import {
   MediaKeySessionLoadingType,
 } from "./types";
 import isSessionUsable from "./utils/is_session_usable";
+import KeySessionRecord from "./utils/key_session_record";
 import LoadedSessionsStore from "./utils/loaded_sessions_store";
 import PersistentSessionsStore from "./utils/persistent_sessions_store";
-import KeySessionRecord from "./utils/processed_init_data_record";
 
 /**
  * Create a new Session or load a persistent one on the given MediaKeys,
@@ -98,7 +98,7 @@ async function createAndTryToRetrievePersistentSession(
   log.info("DRM: Creating persistent MediaKeySession");
 
   const entry = loadedSessionsStore.createSession(initData, "persistent-license");
-  const storedEntry = persistentSessionsStore.getAndReuse(entry.keySessionRecord);
+  const storedEntry = persistentSessionsStore.getAndReuse(initData);
   if (storedEntry === null) {
     return { type: MediaKeySessionLoadingType.Created,
              value: entry };
@@ -109,13 +109,13 @@ async function createAndTryToRetrievePersistentSession(
                                                storedEntry.sessionId);
     if (!hasLoadedSession) {
       log.warn("DRM: No data stored for the loaded session");
-      persistentSessionsStore.delete(entry.keySessionRecord);
+      persistentSessionsStore.delete(storedEntry.sessionId);
       return { type: MediaKeySessionLoadingType.Created,
                value: entry };
     }
 
     if (hasLoadedSession && isSessionUsable(entry.mediaKeySession)) {
-      persistentSessionsStore.add(entry.keySessionRecord, entry.mediaKeySession);
+      persistentSessionsStore.add(initData, initData.keyIds, entry.mediaKeySession);
       log.info("DRM: Succeeded to load persistent session.");
       return { type: MediaKeySessionLoadingType.LoadedPersistentSession,
                value: entry };
@@ -138,8 +138,9 @@ async function createAndTryToRetrievePersistentSession(
    */
   async function recreatePersistentSession() : Promise<INewSessionCreatedEvent> {
     log.info("DRM: Removing previous persistent session.");
-    if (persistentSessionsStore.get(entry.keySessionRecord) !== null) {
-      persistentSessionsStore.delete(entry.keySessionRecord);
+    const persistentEntry = persistentSessionsStore.get(initData);
+    if (persistentEntry !== null) {
+      persistentSessionsStore.delete(persistentEntry.sessionId);
     }
 
     await loadedSessionsStore.closeSession(entry.mediaKeySession);

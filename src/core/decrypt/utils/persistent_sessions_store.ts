@@ -27,11 +27,11 @@ import hashBuffer from "../../../utils/hash_buffer";
 import isNonEmptyString from "../../../utils/is_non_empty_string";
 import isNullOrUndefined from "../../../utils/is_null_or_undefined";
 import {
+  IInitializationDataInfo,
   IPersistentSessionInfo,
   IPersistentSessionStorage,
 } from "../types";
 import areInitializationValuesCompatible from "./are_init_values_compatible";
-import ProcessedInitDataRecord from "./processed_init_data_record";
 
 /**
  * Throw if the given storage does not respect the right interface.
@@ -130,12 +130,12 @@ export default class PersistentSessionsStore {
   }
 
   /**
-   * Retrieve an entry based on its InitDataRecord.
+   * Retrieve an entry based on its initialization data.
    * @param {Object}  initData
    * @param {string|undefined} initDataType
    * @returns {Object|null}
    */
-  public get(initData : ProcessedInitDataRecord) : IPersistentSessionInfo | null {
+  public get(initData : IInitializationDataInfo) : IPersistentSessionInfo | null {
     const index = this._getIndex(initData);
     return index === -1 ? null :
                           this._entries[index];
@@ -152,7 +152,7 @@ export default class PersistentSessionsStore {
    * @param {string|undefined} initDataType
    * @returns {*}
    */
-  public getAndReuse(initData : ProcessedInitDataRecord) : IPersistentSessionInfo | null {
+  public getAndReuse(initData : IInitializationDataInfo) : IPersistentSessionInfo | null {
     const index = this._getIndex(initData);
     if (index === -1) {
       return null;
@@ -169,7 +169,9 @@ export default class PersistentSessionsStore {
    * @param {MediaKeySession} session
    */
   public add(
-    initData : ProcessedInitDataRecord,
+    initData : IInitializationDataInfo,
+    // XXX TODO
+    _keyIds : Uint8Array[] | undefined,
     session : MediaKeySession|ICustomMediaKeySession
   ) : void {
     if (isNullOrUndefined(session) || !isNonEmptyString(session.sessionId)) {
@@ -181,7 +183,7 @@ export default class PersistentSessionsStore {
     if (currentEntry !== null && currentEntry.sessionId === sessionId) {
       return;
     } else if (currentEntry !== null) { // currentEntry has a different sessionId
-      this.delete(initData);
+      this.delete(currentEntry.sessionId);
     }
 
     log.info("DRM-PSS: Add new session", sessionId, session);
@@ -194,13 +196,19 @@ export default class PersistentSessionsStore {
   }
 
   /**
-   * Delete stored MediaKeySession information based on its initialization
-   * data.
+   * Delete stored MediaKeySession information based on its session id.
    * @param {Uint8Array}  initData
    * @param {string|undefined} initDataType
    */
-  public delete(initData : ProcessedInitDataRecord) : void {
-    const index = this._getIndex(initData);
+  public delete(sessionId : string) : void {
+    let index = -1;
+    for (let i = 0; i < this._entries.length; i++) {
+      const entry = this._entries[i];
+      if (entry.sessionId === sessionId) {
+        index = i;
+        break;
+      }
+    }
     if (index === -1) {
       log.warn("DRM-PSS: initData to delete not found.");
       return;
@@ -238,10 +246,10 @@ export default class PersistentSessionsStore {
   /**
    * Retrieve index of an entry.
    * Returns `-1` if not found.
-   * @param {Object} initDataRecord
+   * @param {Object} initData
    * @returns {number}
    */
-  private _getIndex(initDataRecord : ProcessedInitDataRecord) : number {
+  private _getIndex(initData : IInitializationDataInfo) : number {
     const formatted = this._formatValuesForStore(initData.values);
 
     // Older versions of the format include a concatenation of all
@@ -253,6 +261,8 @@ export default class PersistentSessionsStore {
       const entry = this._entries[i];
       if (entry.initDataType === initData.type) {
         switch (entry.version) {
+          case 4:
+            throw new Error("XXX TODO");
 
           case 3:
             if (areInitializationValuesCompatible(formatted, entry.values)) {

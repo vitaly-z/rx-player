@@ -23,7 +23,7 @@ import log from "../../../log";
 import isNullOrUndefined from "../../../utils/is_null_or_undefined";
 import { IInitializationDataInfo } from "../types";
 import safelyCloseMediaKeySession from "./close_session";
-import KeySessionRecord from "./processed_init_data_record";
+import KeySessionRecord from "./key_session_record";
 
 /**
  * Create and store MediaKeySessions linked to a single MediaKeys
