@@ -19072,7 +19072,7 @@ function constructTimelineFromElements(elements, scaledPeriodStart) {
     var nextItem = initialTimeline[_i + 1] === undefined ? null : initialTimeline[_i + 1];
     var timelineElement = convertElementsToIndexSegment(item, previousItem, nextItem, scaledPeriodStart);
 
-    if (timelineElement != null) {
+    if (timelineElement !== null) {
       timeline.push(timelineElement);
     }
   }
@@ -19609,7 +19609,12 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
       newIndex._index.timeline = newIndex._getTimeline();
     }
 
-    (0,update_segment_timeline/* default */.Z)(this._index.timeline, newIndex._index.timeline);
+    var hasReplaced = (0,update_segment_timeline/* default */.Z)(this._index.timeline, newIndex._index.timeline);
+
+    if (hasReplaced) {
+      this._index.startNumber = newIndex._index.startNumber;
+    }
+
     this._isDynamic = newIndex._isDynamic;
     this._scaledPeriodStart = newIndex._scaledPeriodStart;
     this._scaledPeriodEnd = newIndex._scaledPeriodEnd;
@@ -19679,7 +19684,11 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
     }
 
     var scaledFirstPosition = (0,index_helpers/* toIndexTime */.gT)(firstPosition, this._index);
-    (0,clear_timeline_from_position/* default */.Z)(this._index.timeline, scaledFirstPosition);
+    var nbEltsRemoved = (0,clear_timeline_from_position/* default */.Z)(this._index.timeline, scaledFirstPosition);
+
+    if (this._index.startNumber !== undefined) {
+      this._index.startNumber += nbEltsRemoved;
+    }
   };
 
   TimelineRepresentationIndex.getIndexEnd = function getIndexEnd(timeline, scaledPeriodEnd) {
@@ -24026,28 +24035,35 @@ function parseFromDocument(document, args) {
  * Remove segments which starts before the given `firstAvailablePosition` from
  * the timeline. `firstAvailablePosition` has to be time scaled.
  * @param {Array.<Object>}
- * @returns {number}
+ * @returns {number} - Returns the number of removed segments. This includes
+ * potential implicit segment from decremented `repeatCount` attributes.
  */
 function clearTimelineFromPosition(timeline, firstAvailablePosition) {
+  var nbEltsRemoved = 0;
+
   while (timeline.length > 0) {
     var firstElt = timeline[0];
 
     if (firstElt.start >= firstAvailablePosition) {
-      return; // all clear
+      return nbEltsRemoved; // all clear
     }
 
-    if (firstElt.repeatCount <= 0) {
+    if (firstElt.repeatCount === -1) {
+      return nbEltsRemoved;
+    } else if (firstElt.repeatCount === 0) {
       timeline.shift();
+      nbEltsRemoved += 1;
     } else {
       // we have a segment repetition
       var nextElt = timeline[1];
 
       if (nextElt !== undefined && nextElt.start <= firstAvailablePosition) {
         timeline.shift();
+        nbEltsRemoved += 1;
       } else {
         // no next segment or next segment is available
         if (firstElt.duration <= 0) {
-          return;
+          return nbEltsRemoved;
         }
 
         var nextStart = firstElt.start + firstElt.duration;
@@ -24061,16 +24077,20 @@ function clearTimelineFromPosition(timeline, firstAvailablePosition) {
         if (nextRepeat > firstElt.repeatCount) {
           // every start is before
           timeline.shift();
+          nbEltsRemoved = firstElt.repeatCount + 1;
         } else {
           // some repetitions start after and some before
           var newRepeat = firstElt.repeatCount - nextRepeat;
           firstElt.start = nextStart;
           firstElt.repeatCount = newRepeat;
-          return;
+          nbEltsRemoved += nextRepeat;
+          return nbEltsRemoved;
         }
       }
     }
   }
+
+  return nbEltsRemoved;
 }
 
 /***/ }),
@@ -24353,22 +24373,29 @@ function isSegmentStillAvailable(segment, timeline, timescale, indexTimeOffset) 
 /**
  * Update a complete array of segments in a given timeline with a [generally]
  * smaller but [generally] newer set of segments.
+ *
+ * Returns a boolean:
+ *   - If set to `true`, the old timeline was emptied and completely replaced by
+ *     the content of the newer timeline.
+ *     This could happen either if a problem happened while trying to update or
+ *     when the update is actually bigger than what it is updating.
+ *   - If set to `false`, the older timeline was either updated to add the newer
+ *     segments, or untouched.
+ *
  * @param {Array.<Object>} oldTimeline
  * @param {Array.<Object>} newTimeline
+ * @returns {boolean}
  */
 
 function updateSegmentTimeline(oldTimeline, newTimeline) {
-  var prevTimelineLength = oldTimeline.length;
-
   if (oldTimeline.length === 0) {
-    oldTimeline.splice.apply(oldTimeline, [0, prevTimelineLength].concat(newTimeline));
-    return;
+    oldTimeline.push.apply(oldTimeline, newTimeline);
+    return true;
+  } else if (newTimeline.length === 0) {
+    return false;
   }
 
-  if (newTimeline.length === 0) {
-    return;
-  }
-
+  var prevTimelineLength = oldTimeline.length;
   var newIndexStart = newTimeline[0].start;
   var oldLastElt = oldTimeline[prevTimelineLength - 1];
   var oldIndexEnd = (0,_index_helpers__WEBPACK_IMPORTED_MODULE_0__/* .getIndexSegmentEnd */ .jH)(oldLastElt, newTimeline[0]);
@@ -24382,24 +24409,26 @@ function updateSegmentTimeline(oldTimeline, newTimeline) {
 
     if (currStart === newIndexStart) {
       // replace that one and those after it
-      oldTimeline.splice.apply(oldTimeline, [i, prevTimelineLength - i].concat(newTimeline));
-      return;
+      var nbEltsToRemove = prevTimelineLength - i;
+      oldTimeline.splice.apply(oldTimeline, [i, nbEltsToRemove].concat(newTimeline));
+      return false;
     } else if (currStart < newIndexStart) {
       // first to be before
       var currElt = oldTimeline[i];
 
       if (currElt.start + currElt.duration > newIndexStart) {
-        // the new Manifest overlaps a previous segment (weird). Remove the latter.
-        _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: Manifest update removed previous segments");
-        oldTimeline.splice.apply(oldTimeline, [i, prevTimelineLength - i].concat(newTimeline));
-        return;
+        // The new Manifest overlaps a previous segment (weird)
+        // In that improbable case, we'll just completely replace segments
+        _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: Manifest update removed all previous segments");
+        oldTimeline.splice.apply(oldTimeline, [0, prevTimelineLength].concat(newTimeline));
+        return true;
       } else if (currElt.repeatCount === undefined || currElt.repeatCount <= 0) {
         if (currElt.repeatCount < 0) {
           currElt.repeatCount = Math.floor((newIndexStart - currElt.start) / currElt.duration) - 1;
         }
 
         oldTimeline.splice.apply(oldTimeline, [i + 1, prevTimelineLength - (i + 1)].concat(newTimeline));
-        return;
+        return false;
       } // else, there is a positive repeat we might want to update
 
 
@@ -24409,7 +24438,7 @@ function updateSegmentTimeline(oldTimeline, newTimeline) {
         // our new index comes directly after
         // put it after this one
         oldTimeline.splice.apply(oldTimeline, [i + 1, prevTimelineLength - (i + 1)].concat(newTimeline));
-        return;
+        return false;
       }
 
       var newCurrRepeat = (newIndexStart - currElt.start) / currElt.duration - 1;
@@ -24421,14 +24450,14 @@ function updateSegmentTimeline(oldTimeline, newTimeline) {
         oldTimeline.splice.apply(oldTimeline, [i, prevTimelineLength - i].concat(newTimeline));
         oldTimeline[i].start = currElt.start;
         oldTimeline[i].repeatCount = newRepeatCount;
-        return;
+        return false;
       }
 
       _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: Manifest update removed previous segments");
       oldTimeline[i].repeatCount = Math.floor(newCurrRepeat); // put it after this one
 
       oldTimeline.splice.apply(oldTimeline, [i + 1, prevTimelineLength - (i + 1)].concat(newTimeline));
-      return;
+      return false;
     }
   } // if we got here, it means that every segments in the previous manifest are
   // after the new one. This is unusual.
@@ -24441,12 +24470,12 @@ function updateSegmentTimeline(oldTimeline, newTimeline) {
   if (prevLastElt.repeatCount !== undefined && prevLastElt.repeatCount < 0) {
     if (prevLastElt.start > newLastElt.start) {
       _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: The new index is older than the previous one");
-      return; // the old comes after
+      return false;
     } else {
       // the new has more depth
       _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: The new index is \"bigger\" than the previous one");
       oldTimeline.splice.apply(oldTimeline, [0, prevTimelineLength].concat(newTimeline));
-      return;
+      return true;
     }
   }
 
@@ -24455,13 +24484,13 @@ function updateSegmentTimeline(oldTimeline, newTimeline) {
 
   if (prevLastTime >= newLastTime) {
     _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: The new index is older than the previous one");
-    return; // the old comes after
+    return false;
   } // the new one has more depth. full update
 
 
   _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: The new index is \"bigger\" than the previous one");
   oldTimeline.splice.apply(oldTimeline, [0, prevTimelineLength].concat(newTimeline));
-  return;
+  return true;
 }
 
 /***/ }),
@@ -46780,7 +46809,8 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, callbacks, o
       /**
        * If the request succeeded, set to the corresponding
        * `IChunkCompleteInformation` object.
-       * If the request failed or was cancelled, set to `null`.
+       * For any other completion cases: if the request either failed, was
+       * cancelled or just if no request was needed, set to `null`.
        *
        * Stays to `undefined` when the request is still pending.
        */
@@ -46895,6 +46925,8 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, callbacks, o
         if (res.resultType !== "segment-created") {
           requestInfo = res.resultData;
           sendNetworkMetricsIfAvailable();
+        } else {
+          requestInfo = null;
         }
 
         if (!canceller.isUsed) {
@@ -47467,93 +47499,6 @@ function getBufferLevels(bitrates) {
     return Vp * (gp + (bitrates[boundedIndex] * utilities[boundedIndex - 1] - bitrates[boundedIndex - 1] * utilities[boundedIndex]) / (bitrates[boundedIndex] - bitrates[boundedIndex - 1])) + 4;
   }
 }
-;// CONCATENATED MODULE: ./src/core/abr/get_estimate_from_buffer_levels.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * From the buffer gap, choose a representation.
- * @param {Object} playbackObservation
- * @param {Array.<Number>} bitrates
- * @param {Array.<Number>} bufferLevels
- * @returns {Object|undefined}
- */
-
-function getEstimateFromBufferLevels(playbackObservation, bitrates, bufferLevels) {
-  var bufferGap = playbackObservation.bufferGap,
-      currentBitrate = playbackObservation.currentBitrate,
-      currentScore = playbackObservation.currentScore,
-      speed = playbackObservation.speed;
-
-  if (currentBitrate == null) {
-    return bitrates[0];
-  }
-
-  var currentBitrateIndex = (0,array_find_index/* default */.Z)(bitrates, function (b) {
-    return b === currentBitrate;
-  });
-
-  if (currentBitrateIndex < 0 || bitrates.length !== bufferLevels.length) {
-    log/* default.error */.Z.error("ABR: Current Bitrate not found in the calculated levels");
-    return bitrates[0];
-  }
-
-  var scaledScore;
-
-  if (currentScore != null) {
-    scaledScore = speed === 0 ? currentScore : currentScore / speed;
-  }
-
-  if (scaledScore != null && scaledScore > 1) {
-    var currentBufferLevel = bufferLevels[currentBitrateIndex];
-
-    var nextIndex = function () {
-      for (var i = currentBitrateIndex + 1; i < bufferLevels.length; i++) {
-        if (bufferLevels[i] > currentBufferLevel) {
-          return i;
-        }
-      }
-    }();
-
-    if (nextIndex != null) {
-      var nextBufferLevel = bufferLevels[nextIndex];
-
-      if (bufferGap >= nextBufferLevel) {
-        return bitrates[nextIndex];
-      }
-    }
-  }
-
-  if (scaledScore == null || scaledScore < 1.15) {
-    var _currentBufferLevel = bufferLevels[currentBitrateIndex];
-
-    if (bufferGap < _currentBufferLevel) {
-      for (var i = currentBitrateIndex - 1; i >= 0; i--) {
-        if (bitrates[i] < currentBitrate) {
-          return bitrates[i];
-        }
-      }
-
-      return currentBitrate;
-    }
-  }
-
-  return currentBitrate;
-}
 ;// CONCATENATED MODULE: ./src/core/abr/buffer_based_chooser.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -47573,7 +47518,6 @@ function getEstimateFromBufferLevels(playbackObservation, bitrates, bufferLevels
 
 
 
-
 /**
  * Choose a bitrate based on the currently available buffer.
  *
@@ -47585,23 +47529,99 @@ function getEstimateFromBufferLevels(playbackObservation, bitrates, bufferLevels
  * "maintanable" or not.
  * If so, we may switch to a better quality, or conversely to a worse quality.
  *
- * @param {Observable} update$
- * @param {Array.<number>} bitrates
- * @returns {Observable}
+ * @class BufferBasedChooser
  */
 
-function BufferBasedChooser(update$, bitrates) {
-  var levelsMap = getBufferLevels(bitrates);
-  log/* default.debug */.Z.debug("ABR: Steps for buffer based chooser.", levelsMap.map(function (l, i) {
-    return {
-      bufferLevel: l,
-      bitrate: bitrates[i]
-    };
-  }));
-  return update$.pipe((0,map/* map */.U)(function (playbackObservation) {
-    return getEstimateFromBufferLevels(playbackObservation, bitrates, levelsMap);
-  }));
-}
+var BufferBasedChooser = /*#__PURE__*/function () {
+  /**
+   * @param {Array.<number>} number;
+   */
+  function BufferBasedChooser(bitrates) {
+    this._levelsMap = getBufferLevels(bitrates);
+    this._bitrates = bitrates;
+    log/* default.debug */.Z.debug("ABR: Steps for buffer based chooser.", this._levelsMap.map(function (l, i) {
+      return {
+        bufferLevel: l,
+        bitrate: bitrates[i]
+      };
+    }));
+  }
+  /**
+   * @param {Object} playbackObservation
+   * @returns {number|undefined}
+   */
+
+
+  var _proto = BufferBasedChooser.prototype;
+
+  _proto.getEstimate = function getEstimate(playbackObservation) {
+    var bufferLevels = this._levelsMap;
+    var bitrates = this._bitrates;
+    var bufferGap = playbackObservation.bufferGap,
+        currentBitrate = playbackObservation.currentBitrate,
+        currentScore = playbackObservation.currentScore,
+        speed = playbackObservation.speed;
+
+    if (currentBitrate == null) {
+      return bitrates[0];
+    }
+
+    var currentBitrateIndex = (0,array_find_index/* default */.Z)(bitrates, function (b) {
+      return b === currentBitrate;
+    });
+
+    if (currentBitrateIndex < 0 || bitrates.length !== bufferLevels.length) {
+      log/* default.error */.Z.error("ABR: Current Bitrate not found in the calculated levels");
+      return bitrates[0];
+    }
+
+    var scaledScore;
+
+    if (currentScore != null) {
+      scaledScore = speed === 0 ? currentScore : currentScore / speed;
+    }
+
+    if (scaledScore != null && scaledScore > 1) {
+      var currentBufferLevel = bufferLevels[currentBitrateIndex];
+
+      var nextIndex = function () {
+        for (var i = currentBitrateIndex + 1; i < bufferLevels.length; i++) {
+          if (bufferLevels[i] > currentBufferLevel) {
+            return i;
+          }
+        }
+      }();
+
+      if (nextIndex != null) {
+        var nextBufferLevel = bufferLevels[nextIndex];
+
+        if (bufferGap >= nextBufferLevel) {
+          return bitrates[nextIndex];
+        }
+      }
+    }
+
+    if (scaledScore == null || scaledScore < 1.15) {
+      var _currentBufferLevel = bufferLevels[currentBitrateIndex];
+
+      if (bufferGap < _currentBufferLevel) {
+        for (var i = currentBitrateIndex - 1; i >= 0; i--) {
+          if (bitrates[i] < currentBitrate) {
+            return bitrates[i];
+          }
+        }
+
+        return currentBitrate;
+      }
+    }
+
+    return currentBitrate;
+  };
+
+  return BufferBasedChooser;
+}();
+
+
 // EXTERNAL MODULE: ./src/utils/array_find.ts
 var array_find = __webpack_require__(3274);
 ;// CONCATENATED MODULE: ./src/core/abr/network_analyzer.ts
@@ -48396,11 +48416,8 @@ var PendingRequestsStore = /*#__PURE__*/function () {
 
   _proto.remove = function remove(id) {
     if (this._currentRequests[id] == null) {
-      // TODO This breaks github actions.
-      // Find why
-      // if (__ENVIRONMENT__.CURRENT_ENV === __ENVIRONMENT__.DEV as number) {
-      //   throw new Error("ABR: can't remove unknown request");
-      // }
+      if (false) {}
+
       log/* default.warn */.Z.warn("ABR: can't remove unknown request");
     }
 
@@ -48888,7 +48905,10 @@ function RepresentationEstimator(_ref) {
       var bitrates = representations.map(function (r) {
         return r.bitrate;
       });
-      var bufferBasedEstimation$ = BufferBasedChooser(bufferBasedobservation$, bitrates).pipe((0,startWith/* startWith */.O)(undefined));
+      var bufferBasedChooser = new BufferBasedChooser(bitrates);
+      var bufferBasedEstimation$ = bufferBasedobservation$.pipe((0,map/* map */.U)(function (bbo) {
+        return bufferBasedChooser.getEstimate(bbo);
+      }), (0,startWith/* startWith */.O)(undefined));
       return (0,combineLatest/* combineLatest */.a)([observation$, minAutoBitrate$, maxAutoBitrate$, filters$, bufferBasedEstimation$]).pipe((0,withLatestFrom/* withLatestFrom */.M)(currentRepresentation$), (0,map/* map */.U)(function (_ref4) {
         var _ref4$ = _ref4[0],
             observation = _ref4$[0],
