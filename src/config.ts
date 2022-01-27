@@ -1221,5 +1221,5 @@ export default {
    * The `BUFFERED_HISTORY_RETENTION_TIME` is the maximum number of entries
    * there can be in that history.
    */
-  BUFFERED_HISTORY_MAXIMUM_ENTRIES: 200,
+  BUFFERED_HISTORY_MAXIMUM_ENTRIES: 0,
 };
