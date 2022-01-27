@@ -116,12 +116,12 @@ export default class BufferedHistory {
       }
     }
     if (firstKeptIndex > 0) {
-      this._history = this._history.splice(firstKeptIndex);
+      this._history.splice(firstKeptIndex);
     }
 
     if (this._history.length > this._maxHistoryLength) {
       const toRemove = this._history.length - this._maxHistoryLength;
-      this._history = this._history.splice(toRemove);
+      this._history.splice(toRemove);
     }
   }
 }
