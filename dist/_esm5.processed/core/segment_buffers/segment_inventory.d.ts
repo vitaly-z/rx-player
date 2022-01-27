@@ -13,9 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Adaptation, ISegment, Period, Representation } from "../../../manifest";
-import { IBufferedHistoryEntry } from "./buffered_history";
-import { IChunkContext } from "./types";
+import { Adaptation, ISegment, Period, Representation } from "../../manifest";
+/** Content information for a single buffered chunk */
+interface IBufferedChunkInfos {
+    /** Adaptation this chunk is related to. */
+    adaptation: Adaptation;
+    /** Period this chunk is related to. */
+    period: Period;
+    /** Representation this chunk is related to. */
+    representation: Representation;
+    /** Segment this chunk is related to. */
+    segment: ISegment;
+}
 /** Information stored on a single chunk by the SegmentInventory. */
 export interface IBufferedChunk {
     /**
@@ -53,7 +62,7 @@ export interface IBufferedChunk {
      */
     precizeStart: boolean;
     /** Information on what that chunk actually contains. */
-    infos: IChunkContext;
+    infos: IBufferedChunkInfos;
     /**
      * If `true`, this chunk is only a partial chunk of a whole segment.
      *
@@ -64,23 +73,16 @@ export interface IBufferedChunk {
      */
     partiallyPushed: boolean;
     /**
-     * If `true`, the segment as a whole is divided into multiple parts in the
-     * buffer, with other segment(s) between them.
-     * If `false`, it is contiguous.
-     *
-     * Splitted segments are a rare occurence that is more complicated to handle
-     * than contiguous ones.
-     */
-    splitted: boolean;
-    /**
      * Supposed start, in seconds, the chunk is expected to start at.
      *
-     * If the current `chunk` is part of a "partially pushed" segment (see
-     * `partiallyPushed`), the definition of this property is flexible in the way
-     * that it can correspond either to the start of the chunk or to the start of
-     * the whole segment the chunk is linked to.
-     * As such, this property should not be relied on until the segment has been
-     * fully-pushed.
+     * It can correspond either to the start of the chunk or to the start of the
+     * whole segment the chunk is linked to. This should not matter as chunks
+     * linked to the same segment will all be merged once all chunks have been
+     * pushed and the `completeSegment` API call is done. Until then, this
+     * property should not be relied on.
+     *
+     * You can know whether the `completeSegment` API has been called by checking
+     * the `partiallyPushed` property.
      */
     start: number;
 }
@@ -127,15 +129,14 @@ export default class SegmentInventory {
      * chunk or segment which is at least partially added in the media buffer.
      */
     private _inventory;
-    private _bufferedHistory;
     constructor();
     /**
      * Reset the whole inventory.
      */
     reset(): void;
     /**
-     * Infer each segment's `bufferedStart` and `bufferedEnd` properties from the
-     * TimeRanges given.
+     * Infer each segment's bufferedStart and bufferedEnd from the TimeRanges
+     * given.
      *
      * The TimeRanges object given should come from the media buffer linked to
      * that SegmentInventory.
@@ -165,7 +166,7 @@ export default class SegmentInventory {
         adaptation: Adaptation;
         representation: Representation;
         segment: ISegment;
-    }, newBuffered: TimeRanges): void;
+    }): void;
     /**
      * Returns the whole inventory.
      *
@@ -174,18 +175,5 @@ export default class SegmentInventory {
      * @returns {Array.<Object>}
      */
     getInventory(): IBufferedChunk[];
-    /**
-     * Returns a recent history of registered operations performed and event
-     * received linked to the segment given in argument.
-     *
-     * Not all operations and events are registered in the returned history.
-     * Please check the return type for more information on what is available.
-     *
-     * Note that history is short-lived for memory usage and performance reasons.
-     * You may not receive any information on operations that happened too long
-     * ago.
-     * @param {Object} context
-     * @returns {Array.<Object>}
-     */
-    getHistoryFor(context: IChunkContext): IBufferedHistoryEntry[];
 }
+export {};

@@ -163,7 +163,7 @@ var HTMLTextSegmentBuffer = /** @class */ (function (_super) {
     HTMLTextSegmentBuffer.prototype.endOfSegment = function (_infos) {
         var _this = this;
         return observableDefer(function () {
-            _this._segmentInventory.completeSegment(_infos, _this._buffered);
+            _this._segmentInventory.completeSegment(_infos);
             return observableOf(undefined);
         });
     };

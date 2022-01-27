@@ -3340,29 +3340,7 @@ function shouldValidateMetadata() {
    * It is much more than max rounding errors when seen into practice,
    * and not significant from the media loss perspective.
    */
-  DEFAULT_MAXIMUM_TIME_ROUNDING_ERROR: 1 / 1000,
-
-  /**
-   * RxPlayer's media buffers have a linked history registering recent events
-   * that happened on those.
-   * The reason is to implement various heuristics in case of weird browser
-   * behavior.
-   *
-   * The `BUFFERED_HISTORY_RETENTION_TIME` is the minimum age an entry of
-   * that history can have before being removed from the history.
-   */
-  BUFFERED_HISTORY_RETENTION_TIME: 60000,
-
-  /**
-   * RxPlayer's media buffers have a linked history registering recent events
-   * that happened on those.
-   * The reason is to implement various heuristics in case of weird browser
-   * behavior.
-   *
-   * The `BUFFERED_HISTORY_RETENTION_TIME` is the maximum number of entries
-   * there can be in that history.
-   */
-  BUFFERED_HISTORY_MAXIMUM_ENTRIES: 200
+  DEFAULT_MAXIMUM_TIME_ROUNDING_ERROR: 1 / 1000
 });
 
 /***/ }),
@@ -9765,8 +9743,8 @@ var defer = __webpack_require__(9917);
 var of = __webpack_require__(2817);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
-// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 3 modules
-var types = __webpack_require__(9612);
+// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 1 modules
+var types = __webpack_require__(4123);
 // EXTERNAL MODULE: ./src/core/segment_buffers/implementations/utils/manual_time_ranges.ts
 var manual_time_ranges = __webpack_require__(4309);
 ;// CONCATENATED MODULE: ./src/core/segment_buffers/implementations/image/image_segment_buffer.ts
@@ -9885,7 +9863,7 @@ var ImageSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
     var _this3 = this;
 
     return (0,defer/* defer */.P)(function () {
-      _this3._segmentInventory.completeSegment(_infos, _this3._buffered);
+      _this3._segmentInventory.completeSegment(_infos);
 
       return (0,of.of)(undefined);
     });
@@ -10063,8 +10041,8 @@ function onHeightWidthChange(element, interval) {
 }
 // EXTERNAL MODULE: ./src/config.ts
 var config = __webpack_require__(944);
-// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 3 modules
-var types = __webpack_require__(9612);
+// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 1 modules
+var types = __webpack_require__(4123);
 // EXTERNAL MODULE: ./src/core/segment_buffers/implementations/utils/manual_time_ranges.ts
 var manual_time_ranges = __webpack_require__(4309);
 // EXTERNAL MODULE: ./src/features/index.ts
@@ -10870,7 +10848,7 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
     var _this4 = this;
 
     return (0,defer/* defer */.P)(function () {
-      _this4._segmentInventory.completeSegment(_infos, _this4._buffered);
+      _this4._segmentInventory.completeSegment(_infos);
 
       return (0,of.of)(undefined);
     });
@@ -11303,8 +11281,8 @@ function removeCue(track, cue) {
     log/* default.warn */.Z.warn("Compat: Could not remove cue from text track.");
   }
 }
-// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 3 modules
-var types = __webpack_require__(9612);
+// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 1 modules
+var types = __webpack_require__(4123);
 // EXTERNAL MODULE: ./src/core/segment_buffers/implementations/utils/manual_time_ranges.ts
 var manual_time_ranges = __webpack_require__(4309);
 // EXTERNAL MODULE: ./src/features/index.ts
@@ -11565,7 +11543,7 @@ var NativeTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
     var _this4 = this;
 
     return (0,defer/* defer */.P)(function () {
-      _this4._segmentInventory.completeSegment(_infos, _this4._buffered);
+      _this4._segmentInventory.completeSegment(_infos);
 
       return (0,of.of)(undefined);
     });
@@ -11677,7 +11655,7 @@ if (false) { var _checkType; }
 
 /***/ }),
 
-/***/ 9612:
+/***/ 4123:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -11696,134 +11674,7 @@ var log = __webpack_require__(3887);
 var utils = __webpack_require__(520);
 // EXTERNAL MODULE: ./src/utils/take_first_set.ts
 var take_first_set = __webpack_require__(5278);
-;// CONCATENATED MODULE: ./src/core/segment_buffers/inventory/buffered_history.ts
-function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Register a short-lived history of buffer information.
- *
- * This class can be useful to develop heuristics based on short-term buffer
- * history, such as knowing the real start and end of a buffered segment once
- * it has been pushed in a buffer.
- *
- * By storing in a history important recent actions and events, the
- * `BufferedHistory` can help other RxPlayer modules detect and work-around
- * unusual behavior.
- *
- * @class BufferedHistory
- */
-
-var BufferedHistory = /*#__PURE__*/function () {
-  /**
-   * @param {number} lifetime - Maximum time a history entry should be retained.
-   * @param {number} maxHistoryLength - Maximum number of entries the history
-   * should have.
-   */
-  function BufferedHistory(lifetime, maxHistoryLength) {
-    this._history = [];
-    this._lifetime = lifetime;
-    this._maxHistoryLength = maxHistoryLength;
-  }
-  /**
-   * Add an entry to the `BufferedHistory`'s history indicating the buffered
-   * range of a pushed segment.
-   *
-   * To call when the full range of a given segment becomes known.
-   *
-   * @param {Object} context
-   * @param {number} bufferedStart
-   * @param {number} bufferedEnd
-   */
-
-
-  var _proto = BufferedHistory.prototype;
-
-  _proto.addBufferedSegment = function addBufferedSegment(context, bufferedStart, bufferedEnd) {
-    var now = performance.now();
-
-    this._history.push({
-      date: now,
-      bufferedStart: bufferedStart,
-      bufferedEnd: bufferedEnd,
-      context: context
-    });
-
-    this._cleanHistory(now);
-  }
-  /**
-   * Returns all entries linked to the given segment.
-   * @param {Object} context
-   * @returns {Array.<Object>}
-   */
-  ;
-
-  _proto.getHistoryFor = function getHistoryFor(context) {
-    return this._history.filter(function (el) {
-      return (0,utils/* areSameContent */.z)(el.context, context);
-    });
-  }
-  /**
-   * If the current history does not satisfy `_lifetime` or `_maxHistoryLength`,
-   * clear older entries until it does.
-   * @param {number} now - Current `performance.now()` result.
-   */
-  ;
-
-  _proto._cleanHistory = function _cleanHistory(now) {
-    var historyEarliestLimit = now - this._lifetime;
-    var firstKeptIndex = 0;
-
-    for (var _iterator = _createForOfIteratorHelperLoose(this._history), _step; !(_step = _iterator()).done;) {
-      var event = _step.value;
-
-      if (event.date < historyEarliestLimit) {
-        firstKeptIndex++;
-      } else {
-        break;
-      }
-    }
-
-    if (firstKeptIndex > 0) {
-      this._history = this._history.splice(firstKeptIndex);
-    }
-
-    if (this._history.length > this._maxHistoryLength) {
-      var toRemove = this._history.length - this._maxHistoryLength;
-      this._history = this._history.splice(toRemove);
-    }
-  };
-
-  return BufferedHistory;
-}();
-
-
-;// CONCATENATED MODULE: ./src/core/segment_buffers/inventory/segment_inventory.ts
-function segment_inventory_createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = segment_inventory_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function segment_inventory_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return segment_inventory_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return segment_inventory_arrayLikeToArray(o, minLen); }
-
-function segment_inventory_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
+;// CONCATENATED MODULE: ./src/core/segment_buffers/segment_inventory.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -11843,10 +11694,7 @@ function segment_inventory_arrayLikeToArray(arr, len) { if (len == null || len >
 
 
 
-
-var BUFFERED_HISTORY_RETENTION_TIME = config/* default.BUFFERED_HISTORY_RETENTION_TIME */.Z.BUFFERED_HISTORY_RETENTION_TIME,
-    BUFFERED_HISTORY_MAXIMUM_ENTRIES = config/* default.BUFFERED_HISTORY_MAXIMUM_ENTRIES */.Z.BUFFERED_HISTORY_MAXIMUM_ENTRIES,
-    MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE = config/* default.MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE */.Z.MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE,
+var MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE = config/* default.MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE */.Z.MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE,
     MAX_MANIFEST_BUFFERED_DURATION_DIFFERENCE = config/* default.MAX_MANIFEST_BUFFERED_DURATION_DIFFERENCE */.Z.MAX_MANIFEST_BUFFERED_DURATION_DIFFERENCE,
     MINIMUM_SEGMENT_SIZE = config/* default.MINIMUM_SEGMENT_SIZE */.Z.MINIMUM_SEGMENT_SIZE;
 /**
@@ -11862,7 +11710,6 @@ var BUFFERED_HISTORY_RETENTION_TIME = config/* default.BUFFERED_HISTORY_RETENTIO
 var SegmentInventory = /*#__PURE__*/function () {
   function SegmentInventory() {
     this._inventory = [];
-    this._bufferedHistory = new BufferedHistory(BUFFERED_HISTORY_RETENTION_TIME, BUFFERED_HISTORY_MAXIMUM_ENTRIES);
   }
   /**
    * Reset the whole inventory.
@@ -11875,8 +11722,8 @@ var SegmentInventory = /*#__PURE__*/function () {
     this._inventory.length = 0;
   }
   /**
-   * Infer each segment's `bufferedStart` and `bufferedEnd` properties from the
-   * TimeRanges given.
+   * Infer each segment's bufferedStart and bufferedEnd from the TimeRanges
+   * given.
    *
    * The TimeRanges object given should come from the media buffer linked to
    * that SegmentInventory.
@@ -11927,7 +11774,7 @@ var SegmentInventory = /*#__PURE__*/function () {
 
 
       var lastDeletedSegmentInfos = null; // remove garbage-collected segments
-      // (Those not in that TimeRange nor in the previous one)
+      // (not in that TimeRange nor in the previous one)
 
       var numberOfSegmentToDelete = inventoryIndex - indexBefore;
 
@@ -11953,8 +11800,6 @@ var SegmentInventory = /*#__PURE__*/function () {
         guessBufferedStartFromRangeStart(thisSegment, rangeStart, lastDeletedSegmentInfos, bufferType);
 
         if (inventoryIndex === inventory.length - 1) {
-          // This is the last segment in the inventory.
-          // We can directly update the end as the end of the current range.
           guessBufferedEndFromRangeEnd(thisSegment, rangeEnd, bufferType);
           return;
         }
@@ -12034,7 +11879,6 @@ var SegmentInventory = /*#__PURE__*/function () {
     var inventory = this._inventory;
     var newSegment = {
       partiallyPushed: true,
-      splitted: false,
       start: start,
       end: end,
       precizeStart: false,
@@ -12245,7 +12089,6 @@ var SegmentInventory = /*#__PURE__*/function () {
               log/* default.debug */.Z.debug("SI: Segment pushed is contained in a previous one", bufferType, start, end, segmentI.start, segmentI.end);
               var nextSegment = {
                 partiallyPushed: segmentI.partiallyPushed,
-                splitted: true,
                 start: newSegment.end,
                 end: segmentI.end,
                 precizeStart: segmentI.precizeStart && segmentI.precizeEnd && newSegment.precizeEnd,
@@ -12255,7 +12098,6 @@ var SegmentInventory = /*#__PURE__*/function () {
                 infos: segmentI.infos
               };
               segmentI.end = newSegment.start;
-              segmentI.splitted = true;
               segmentI.bufferedEnd = undefined;
               segmentI.precizeEnd = segmentI.precizeEnd && newSegment.precizeStart;
               inventory.splice(i + 1, 0, newSegment);
@@ -12370,27 +12212,21 @@ var SegmentInventory = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.completeSegment = function completeSegment(content, newBuffered) {
+  _proto.completeSegment = function completeSegment(content) {
     if (content.segment.isInit) {
       return;
     }
 
     var inventory = this._inventory;
-    var resSegments = [];
+    var foundIt = false;
 
     for (var i = 0; i < inventory.length; i++) {
       if ((0,utils/* areSameContent */.z)(inventory[i].infos, content)) {
-        var splitted = false;
-
-        if (resSegments.length > 0) {
-          splitted = true;
-
-          if (resSegments.length === 1) {
-            log/* default.warn */.Z.warn("SI: Completed Segment is splitted.", content);
-            resSegments[0].splitted = true;
-          }
+        if (foundIt) {
+          log/* default.warn */.Z.warn("SI: Completed Segment is splitted.", content);
         }
 
+        foundIt = true;
         var firstI = i;
         i += 1;
 
@@ -12412,25 +12248,11 @@ var SegmentInventory = /*#__PURE__*/function () {
         this._inventory[firstI].partiallyPushed = false;
         this._inventory[firstI].end = lastEnd;
         this._inventory[firstI].bufferedEnd = lastBufferedEnd;
-        this._inventory[firstI].splitted = splitted;
-        resSegments.push(this._inventory[firstI]);
       }
     }
 
-    if (resSegments.length === 0) {
+    if (!foundIt) {
       log/* default.warn */.Z.warn("SI: Completed Segment not found", content);
-    } else {
-      this.synchronizeBuffered(newBuffered);
-
-      for (var _iterator = segment_inventory_createForOfIteratorHelperLoose(resSegments), _step; !(_step = _iterator()).done;) {
-        var seg = _step.value;
-
-        if (seg.bufferedStart !== undefined && seg.bufferedEnd !== undefined) {
-          this._bufferedHistory.addBufferedSegment(seg.infos, seg.bufferedStart, seg.bufferedEnd);
-        } else {
-          log/* default.debug */.Z.debug("SI: buffered range not known after sync. Skipping history.", seg);
-        }
-      }
     }
   }
   /**
@@ -12444,24 +12266,6 @@ var SegmentInventory = /*#__PURE__*/function () {
 
   _proto.getInventory = function getInventory() {
     return this._inventory;
-  }
-  /**
-   * Returns a recent history of registered operations performed and event
-   * received linked to the segment given in argument.
-   *
-   * Not all operations and events are registered in the returned history.
-   * Please check the return type for more information on what is available.
-   *
-   * Note that history is short-lived for memory usage and performance reasons.
-   * You may not receive any information on operations that happened too long
-   * ago.
-   * @param {Object} context
-   * @returns {Array.<Object>}
-   */
-  ;
-
-  _proto.getHistoryFor = function getHistoryFor(context) {
-    return this._bufferedHistory.getHistoryFor(context);
   };
 
   return SegmentInventory;
@@ -12690,24 +12494,6 @@ function prettyPrintInventory(inventory) {
   });
   return str;
 }
-;// CONCATENATED MODULE: ./src/core/segment_buffers/inventory/index.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/* harmony default export */ var inventory = (SegmentInventory);
 ;// CONCATENATED MODULE: ./src/core/segment_buffers/implementations/types.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -12766,7 +12552,7 @@ function prettyPrintInventory(inventory) {
 var SegmentBuffer = /*#__PURE__*/function () {
   function SegmentBuffer() {
     // Use SegmentInventory by default for inventory purposes
-    this._segmentInventory = new inventory();
+    this._segmentInventory = new SegmentInventory();
   }
   /**
    * The maintained inventory can fall out of sync from garbage collection or
@@ -12809,24 +12595,6 @@ var SegmentBuffer = /*#__PURE__*/function () {
   _proto.getPendingOperations = function getPendingOperations() {
     // Return no pending operation by default (for synchronous SegmentBuffers)
     return [];
-  }
-  /**
-   * Returns a recent history of registered operations performed and event
-   * received linked to the segment given in argument.
-   *
-   * Not all operations and events are registered in the returned history.
-   * Please check the return type for more information on what is available.
-   *
-   * Note that history is short-lived for memory usage and performance reasons.
-   * You may not receive any information on operations that happened too long
-   * ago.
-   * @param {Object} context
-   * @returns {Array.<Object>}
-   */
-  ;
-
-  _proto.getSegmentHistory = function getSegmentHistory(context) {
-    return this._segmentInventory.getHistoryFor(context);
   };
 
   return SegmentBuffer;
@@ -25411,7 +25179,7 @@ function parseCueBlock(cueLines, timeOffset) {
 
 /***/ }),
 
-/***/ 4123:
+/***/ 1318:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -25967,7 +25735,7 @@ var is_non_empty_string = __webpack_require__(6923);
 // EXTERNAL MODULE: ./src/utils/object_assign.ts
 var object_assign = __webpack_require__(8026);
 // EXTERNAL MODULE: ./src/parsers/texttracks/ttml/get_parent_elements_by_tag_name.ts
-var get_parent_elements_by_tag_name = __webpack_require__(4123);
+var get_parent_elements_by_tag_name = __webpack_require__(1318);
 // EXTERNAL MODULE: ./src/parsers/texttracks/ttml/get_styling.ts
 var get_styling = __webpack_require__(3791);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
@@ -27494,7 +27262,7 @@ function getParameters(tt) {
   };
 }
 // EXTERNAL MODULE: ./src/parsers/texttracks/ttml/get_parent_elements_by_tag_name.ts
-var get_parent_elements_by_tag_name = __webpack_require__(4123);
+var get_parent_elements_by_tag_name = __webpack_require__(1318);
 // EXTERNAL MODULE: ./src/parsers/texttracks/ttml/get_styling.ts
 var get_styling = __webpack_require__(3791);
 ;// CONCATENATED MODULE: ./src/parsers/texttracks/ttml/nodes.ts
@@ -49465,8 +49233,8 @@ var assert_unreachable = __webpack_require__(7904);
 var byte_parsing = __webpack_require__(6968);
 // EXTERNAL MODULE: ./src/utils/hash_buffer.ts
 var hash_buffer = __webpack_require__(2870);
-// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 3 modules
-var types = __webpack_require__(9612);
+// EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 1 modules
+var types = __webpack_require__(4123);
 ;// CONCATENATED MODULE: ./src/core/segment_buffers/implementations/audio_video/audio_video_segment_buffer.ts
 
 
@@ -49786,7 +49554,7 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
             break;
 
           case types/* SegmentBufferOperation.EndOfSegment */.f.EndOfSegment:
-            this._segmentInventory.completeSegment(task.value, this.getBufferedRanges());
+            this._segmentInventory.completeSegment(task.value);
 
             break;
 
@@ -51595,13 +51363,12 @@ var ROUNDING_ERROR = Math.min(1 / 60, MINIMUM_SEGMENT_SIZE);
  */
 
 function getNeededSegments(_ref) {
-  var bufferedSegments = _ref.bufferedSegments,
-      content = _ref.content,
+  var content = _ref.content,
       currentPlaybackTime = _ref.currentPlaybackTime,
       fastSwitchThreshold = _ref.fastSwitchThreshold,
-      getBufferedHistory = _ref.getBufferedHistory,
       neededRange = _ref.neededRange,
-      segmentsBeingPushed = _ref.segmentsBeingPushed;
+      segmentsBeingPushed = _ref.segmentsBeingPushed,
+      bufferedSegments = _ref.bufferedSegments;
   var representation = content.representation;
   var availableSegmentsForRange = representation.index.getSegments(neededRange.start, neededRange.end - neededRange.start); // Remove from `bufferedSegments` any segments we would prefer to replace:
   //   - segments in the wrong track / bad quality
@@ -51612,29 +51379,7 @@ function getNeededSegments(_ref) {
   }).filter(function (currentSeg, i, consideredSegments) {
     var prevSeg = i === 0 ? null : consideredSegments[i - 1];
     var nextSeg = i >= consideredSegments.length - 1 ? null : consideredSegments[i + 1];
-    var lazySegmentHistory = null;
-
-    if (doesStartSeemGarbageCollected(currentSeg, prevSeg, neededRange.start)) {
-      lazySegmentHistory = getBufferedHistory(currentSeg.infos);
-
-      if (shouldReloadSegmentGCedAtTheStart(lazySegmentHistory, currentSeg.bufferedStart)) {
-        return false;
-      }
-
-      log/* default.debug */.Z.debug("Stream: skipping segment gc-ed at the start", currentSeg);
-    }
-
-    if (doesEndSeemGarbageCollected(currentSeg, nextSeg, neededRange.start)) {
-      lazySegmentHistory = lazySegmentHistory !== null && lazySegmentHistory !== void 0 ? lazySegmentHistory : getBufferedHistory(currentSeg.infos);
-
-      if (shouldReloadSegmentGCedAtTheEnd(lazySegmentHistory, currentSeg.bufferedEnd)) {
-        return false;
-      }
-
-      log/* default.debug */.Z.debug("Stream: skipping segment gc-ed at the end", currentSeg);
-    }
-
-    return true;
+    return !isStartGarbageCollected(currentSeg, prevSeg, neededRange.start) && !isEndGarbageCollected(currentSeg, nextSeg, neededRange.end);
   });
   var segmentsToDownload = availableSegmentsForRange.filter(function (segment) {
     var contentObject = (0,object_assign/* default */.Z)({
@@ -51805,7 +51550,7 @@ function canFastSwitch(oldSegmentRepresentation, newSegmentRepresentation, fastS
  */
 
 
-function doesStartSeemGarbageCollected(currentSeg, prevSeg, maximumStartTime) {
+function isStartGarbageCollected(currentSeg, prevSeg, maximumStartTime) {
   if (currentSeg.bufferedStart === undefined) {
     log/* default.warn */.Z.warn("Stream: Start of a segment unknown. " + "Assuming it is garbage collected by default.", currentSeg);
     return true;
@@ -51836,7 +51581,7 @@ function doesStartSeemGarbageCollected(currentSeg, prevSeg, maximumStartTime) {
  */
 
 
-function doesEndSeemGarbageCollected(currentSeg, nextSeg, minimumEndTime) {
+function isEndGarbageCollected(currentSeg, nextSeg, minimumEndTime) {
   if (currentSeg.bufferedEnd === undefined) {
     log/* default.warn */.Z.warn("Stream: End of a segment unknown. " + "Assuming it is garbage collected by default.", currentSeg);
     return true;
@@ -51852,100 +51597,6 @@ function doesEndSeemGarbageCollected(currentSeg, nextSeg, minimumEndTime) {
   }
 
   return false;
-}
-/**
- * Returns `true` if a segment that has been garbage-collected at the start
- * might profit from being re-loaded.
- *
- * Returns `false` if we have a high chance of staying in the same situation
- * after re-loading the segment.
- *
- * This function takes in argument the entries of a SegmentBuffer's history
- * related to the corresponding segment and check if the segment appeared
- * garbage-collected at the start directly after the last few times it was
- * pushed, indicating that the issue might be sourced at a browser issue instead
- * of classical garbage collection.
- *
- * @param {Array.<Object>} segmentEntries
- * @param {number|undefined} currentBufferedStart
- * @returns {boolean}
- */
-
-
-function shouldReloadSegmentGCedAtTheStart(segmentEntries, currentBufferedStart) {
-  if (segmentEntries.length < 2) {
-    return true;
-  }
-
-  var lastEntry = segmentEntries[segmentEntries.length - 1];
-  var lastBufferedStart = lastEntry.bufferedStart; // If the current segment's buffered start is much higher than what it
-  // initially was when we pushed it, the segment has a very high chance of
-  // having been truly garbage-collected.
-
-  if (currentBufferedStart !== undefined && currentBufferedStart - lastBufferedStart > 0.05) {
-    return true;
-  }
-
-  var prevEntry = segmentEntries[segmentEntries.length - 2];
-  var prevBufferedStart = prevEntry.bufferedStart; // Compare `bufferedStart` from the last time this segment was pushed
-  // (`entry.bufferedStart`) to the previous time it was pushed
-  // (`prevSegEntry.bufferedStart`).
-  //
-  // If in both cases, we notice that their initial `bufferedStart` are close,
-  // it means that in recent history the same segment has been accused to be
-  // garbage collected two times at roughly the same positions just after being
-  // pushed.
-  // This is very unlikely and might be linked to either a content or browser
-  // issue. In that case, don't try to reload.
-
-  return Math.abs(prevBufferedStart - lastBufferedStart) > 0.01;
-}
-/**
- * Returns `true` if a segment that has been garbage-collected at the end
- * might profit from being re-loaded.
- *
- * Returns `false` if we have a high chance of staying in the same situation
- * after re-loading the segment.
- *
- * This function takes in argument the entries of a SegmentBuffer's history
- * related to the corresponding segment and check if the segment appeared
- * garbage-collected at the end directly after the last few times it was
- * pushed, indicating that the issue might be sourced at a browser issue instead
- * of classical garbage collection.
- *
- * @param {Array.<Object>} segmentEntries
- * @param {number|undefined} currentBufferedStart
- * @returns {boolean}
- */
-
-
-function shouldReloadSegmentGCedAtTheEnd(segmentEntries, currentBufferedEnd) {
-  if (segmentEntries.length < 2) {
-    return true;
-  }
-
-  var lastEntry = segmentEntries[segmentEntries.length - 1];
-  var lastBufferedEnd = lastEntry.bufferedEnd; // If the current segment's buffered end is much lower than what it
-  // initially was when we pushed it, the segment has a very high chance of
-  // having been truly garbage-collected.
-
-  if (currentBufferedEnd !== undefined && lastBufferedEnd - currentBufferedEnd > 0.05) {
-    return true;
-  }
-
-  var prevEntry = segmentEntries[segmentEntries.length - 2];
-  var prevBufferedEnd = prevEntry.bufferedEnd; // Compare `bufferedEnd` from the last time this segment was pushed
-  // (`entry.bufferedEnd`) to the previous time it was pushed
-  // (`prevSegEntry.bufferedEnd`).
-  //
-  // If in both cases, we notice that their initial `bufferedEnd` are close,
-  // it means that in recent history the same segment has been accused to be
-  // garbage collected two times at roughly the same positions just after being
-  // pushed.
-  // This is very unlikely and might be linked to either a content or browser
-  // issue. In that case, don't try to reload.
-
-  return Math.abs(prevBufferedEnd - lastBufferedEnd) > 0.01;
 }
 ;// CONCATENATED MODULE: ./src/core/stream/representation/get_segment_priority.ts
 /**
@@ -52055,9 +51706,6 @@ function getBufferStatus(content, wantedStartPosition, playbackObserver, fastSwi
     end: neededRange.end + 0.5
   }, segmentBuffer.getInventory());
   var currentPlaybackTime = playbackObserver.getCurrentTime();
-  /** Callback allowing to retrieve a segment's history in the buffer. */
-
-  var getBufferedHistory = segmentBuffer.getSegmentHistory.bind(segmentBuffer);
   /** List of segments we will need to download. */
 
   var neededSegments = getNeededSegments({
@@ -52065,7 +51713,6 @@ function getBufferStatus(content, wantedStartPosition, playbackObserver, fastSwi
     bufferedSegments: bufferedSegments,
     currentPlaybackTime: currentPlaybackTime,
     fastSwitchThreshold: fastSwitchThreshold,
-    getBufferedHistory: getBufferedHistory,
     neededRange: neededRange,
     segmentsBeingPushed: segmentsBeingPushed
   }).map(function (segment) {

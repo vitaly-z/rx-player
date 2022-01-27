@@ -1070,26 +1070,6 @@ declare const _default: {
      * and not significant from the media loss perspective.
      */
     DEFAULT_MAXIMUM_TIME_ROUNDING_ERROR: number;
-    /**
-     * RxPlayer's media buffers have a linked history registering recent events
-     * that happened on those.
-     * The reason is to implement various heuristics in case of weird browser
-     * behavior.
-     *
-     * The `BUFFERED_HISTORY_RETENTION_TIME` is the minimum age an entry of
-     * that history can have before being removed from the history.
-     */
-    BUFFERED_HISTORY_RETENTION_TIME: number;
-    /**
-     * RxPlayer's media buffers have a linked history registering recent events
-     * that happened on those.
-     * The reason is to implement various heuristics in case of weird browser
-     * behavior.
-     *
-     * The `BUFFERED_HISTORY_RETENTION_TIME` is the maximum number of entries
-     * there can be in that history.
-     */
-    BUFFERED_HISTORY_MAXIMUM_ENTRIES: number;
 };
 /**
  * Configuration file for the whole player.

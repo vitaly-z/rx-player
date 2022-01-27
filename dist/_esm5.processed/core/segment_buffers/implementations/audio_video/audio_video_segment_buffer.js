@@ -264,7 +264,7 @@ var AudioVideoSegmentBuffer = /** @class */ (function (_super) {
                         }
                         break;
                     case SegmentBufferOperation.EndOfSegment:
-                        this._segmentInventory.completeSegment(task.value, this.getBufferedRanges());
+                        this._segmentInventory.completeSegment(task.value);
                         break;
                     case SegmentBufferOperation.Remove:
                         this.synchronizeInventory();

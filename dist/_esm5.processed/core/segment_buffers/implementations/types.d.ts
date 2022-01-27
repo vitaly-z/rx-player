@@ -15,7 +15,7 @@
  */
 import { Observable } from "rxjs";
 import { Adaptation, ISegment, Period, Representation } from "../../../manifest";
-import SegmentInventory, { IBufferedChunk, IBufferedHistoryEntry, IChunkContext, IInsertedChunkInfos } from "../inventory";
+import SegmentInventory, { IBufferedChunk, IInsertedChunkInfos } from "../segment_inventory";
 /**
  * Class allowing to push segments and remove data to a buffer to be able
  * to decode them in the future as well as retrieving information about which
@@ -143,20 +143,6 @@ export declare abstract class SegmentBuffer {
      * @returns {Array.<Object>}
      */
     getPendingOperations(): Array<ISBOperation<unknown>>;
-    /**
-     * Returns a recent history of registered operations performed and event
-     * received linked to the segment given in argument.
-     *
-     * Not all operations and events are registered in the returned history.
-     * Please check the return type for more information on what is available.
-     *
-     * Note that history is short-lived for memory usage and performance reasons.
-     * You may not receive any information on operations that happened too long
-     * ago.
-     * @param {Object} context
-     * @returns {Array.<Object>}
-     */
-    getSegmentHistory(context: IChunkContext): IBufferedHistoryEntry[];
     /**
      * Dispose of the resources used by this AudioVideoSegmentBuffer.
      * /!\ You won't be able to use the SegmentBuffer after calling this

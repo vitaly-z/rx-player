@@ -53,10 +53,8 @@ export default function getBufferStatus(content, wantedStartPosition, playbackOb
     var bufferedSegments = getPlayableBufferedSegments({ start: Math.max(neededRange.start - 0.5, 0),
         end: neededRange.end + 0.5 }, segmentBuffer.getInventory());
     var currentPlaybackTime = playbackObserver.getCurrentTime();
-    /** Callback allowing to retrieve a segment's history in the buffer. */
-    var getBufferedHistory = segmentBuffer.getSegmentHistory.bind(segmentBuffer);
     /** List of segments we will need to download. */
-    var neededSegments = getNeededSegments({ content: content, bufferedSegments: bufferedSegments, currentPlaybackTime: currentPlaybackTime, fastSwitchThreshold: fastSwitchThreshold, getBufferedHistory: getBufferedHistory, neededRange: neededRange, segmentsBeingPushed: segmentsBeingPushed })
+    var neededSegments = getNeededSegments({ content: content, bufferedSegments: bufferedSegments, currentPlaybackTime: currentPlaybackTime, fastSwitchThreshold: fastSwitchThreshold, neededRange: neededRange, segmentsBeingPushed: segmentsBeingPushed })
         .map(function (segment) { return ({ priority: getSegmentPriority(segment.time, wantedStartPosition), segment: segment }); });
     /**
      * `true` if the current `RepresentationStream` has loaded all the

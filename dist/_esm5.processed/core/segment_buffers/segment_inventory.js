@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import config from "../../../config";
-import log from "../../../log";
-import { areSameContent, } from "../../../manifest";
-import takeFirstSet from "../../../utils/take_first_set";
-import BufferedHistory from "./buffered_history";
-var BUFFERED_HISTORY_RETENTION_TIME = config.BUFFERED_HISTORY_RETENTION_TIME, BUFFERED_HISTORY_MAXIMUM_ENTRIES = config.BUFFERED_HISTORY_MAXIMUM_ENTRIES, MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE = config.MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE, MAX_MANIFEST_BUFFERED_DURATION_DIFFERENCE = config.MAX_MANIFEST_BUFFERED_DURATION_DIFFERENCE, MINIMUM_SEGMENT_SIZE = config.MINIMUM_SEGMENT_SIZE;
+import config from "../../config";
+import log from "../../log";
+import { areSameContent, } from "../../manifest";
+import takeFirstSet from "../../utils/take_first_set";
+var MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE = config.MAX_MANIFEST_BUFFERED_START_END_DIFFERENCE, MAX_MANIFEST_BUFFERED_DURATION_DIFFERENCE = config.MAX_MANIFEST_BUFFERED_DURATION_DIFFERENCE, MINIMUM_SEGMENT_SIZE = config.MINIMUM_SEGMENT_SIZE;
 /**
  * Keep track of every chunk downloaded and currently in the linked media
  * buffer.
@@ -31,7 +30,6 @@ var BUFFERED_HISTORY_RETENTION_TIME = config.BUFFERED_HISTORY_RETENTION_TIME, BU
 var SegmentInventory = /** @class */ (function () {
     function SegmentInventory() {
         this._inventory = [];
-        this._bufferedHistory = new BufferedHistory(BUFFERED_HISTORY_RETENTION_TIME, BUFFERED_HISTORY_MAXIMUM_ENTRIES);
     }
     /**
      * Reset the whole inventory.
@@ -40,8 +38,8 @@ var SegmentInventory = /** @class */ (function () {
         this._inventory.length = 0;
     };
     /**
-     * Infer each segment's `bufferedStart` and `bufferedEnd` properties from the
-     * TimeRanges given.
+     * Infer each segment's bufferedStart and bufferedEnd from the TimeRanges
+     * given.
      *
      * The TimeRanges object given should come from the media buffer linked to
      * that SegmentInventory.
@@ -83,7 +81,7 @@ var SegmentInventory = /** @class */ (function () {
             // `thisSegment`.
             var lastDeletedSegmentInfos = null;
             // remove garbage-collected segments
-            // (Those not in that TimeRange nor in the previous one)
+            // (not in that TimeRange nor in the previous one)
             var numberOfSegmentToDelete = inventoryIndex - indexBefore;
             if (numberOfSegmentToDelete > 0) {
                 var lastDeletedSegment = // last garbage-collected segment
@@ -106,8 +104,6 @@ var SegmentInventory = /** @class */ (function () {
                 >= MINIMUM_SEGMENT_SIZE) {
                 guessBufferedStartFromRangeStart(thisSegment, rangeStart, lastDeletedSegmentInfos, bufferType);
                 if (inventoryIndex === inventory.length - 1) {
-                    // This is the last segment in the inventory.
-                    // We can directly update the end as the end of the current range.
                     guessBufferedEndFromRangeEnd(thisSegment, rangeEnd, bufferType);
                     return;
                 }
@@ -172,8 +168,7 @@ var SegmentInventory = /** @class */ (function () {
             return;
         }
         var inventory = this._inventory;
-        var newSegment = { partiallyPushed: true,
-            splitted: false, start: start, end: end, precizeStart: false,
+        var newSegment = { partiallyPushed: true, start: start, end: end, precizeStart: false,
             precizeEnd: false,
             bufferedStart: undefined,
             bufferedEnd: undefined,
@@ -367,7 +362,6 @@ var SegmentInventory = /** @class */ (function () {
                             //  ===>         : |--|====|-|
                             log.debug("SI: Segment pushed is contained in a previous one", bufferType, start, end, segmentI.start, segmentI.end);
                             var nextSegment = { partiallyPushed: segmentI.partiallyPushed,
-                                splitted: true,
                                 start: newSegment.end,
                                 end: segmentI.end,
                                 precizeStart: segmentI.precizeStart &&
@@ -378,7 +372,6 @@ var SegmentInventory = /** @class */ (function () {
                                 bufferedEnd: segmentI.end,
                                 infos: segmentI.infos };
                             segmentI.end = newSegment.start;
-                            segmentI.splitted = true;
                             segmentI.bufferedEnd = undefined;
                             segmentI.precizeEnd = segmentI.precizeEnd &&
                                 newSegment.precizeStart;
@@ -482,22 +475,18 @@ var SegmentInventory = /** @class */ (function () {
      * the corresponding chunks.
      * @param {Object} content
      */
-    SegmentInventory.prototype.completeSegment = function (content, newBuffered) {
+    SegmentInventory.prototype.completeSegment = function (content) {
         if (content.segment.isInit) {
             return;
         }
         var inventory = this._inventory;
-        var resSegments = [];
+        var foundIt = false;
         for (var i = 0; i < inventory.length; i++) {
             if (areSameContent(inventory[i].infos, content)) {
-                var splitted = false;
-                if (resSegments.length > 0) {
-                    splitted = true;
-                    if (resSegments.length === 1) {
-                        log.warn("SI: Completed Segment is splitted.", content);
-                        resSegments[0].splitted = true;
-                    }
+                if (foundIt) {
+                    log.warn("SI: Completed Segment is splitted.", content);
                 }
+                foundIt = true;
                 var firstI = i;
                 i += 1;
                 while (i < inventory.length &&
@@ -515,24 +504,10 @@ var SegmentInventory = /** @class */ (function () {
                 this._inventory[firstI].partiallyPushed = false;
                 this._inventory[firstI].end = lastEnd;
                 this._inventory[firstI].bufferedEnd = lastBufferedEnd;
-                this._inventory[firstI].splitted = splitted;
-                resSegments.push(this._inventory[firstI]);
             }
         }
-        if (resSegments.length === 0) {
+        if (!foundIt) {
             log.warn("SI: Completed Segment not found", content);
-        }
-        else {
-            this.synchronizeBuffered(newBuffered);
-            for (var _i = 0, resSegments_1 = resSegments; _i < resSegments_1.length; _i++) {
-                var seg = resSegments_1[_i];
-                if (seg.bufferedStart !== undefined && seg.bufferedEnd !== undefined) {
-                    this._bufferedHistory.addBufferedSegment(seg.infos, seg.bufferedStart, seg.bufferedEnd);
-                }
-                else {
-                    log.debug("SI: buffered range not known after sync. Skipping history.", seg);
-                }
-            }
         }
     };
     /**
@@ -544,22 +519,6 @@ var SegmentInventory = /** @class */ (function () {
      */
     SegmentInventory.prototype.getInventory = function () {
         return this._inventory;
-    };
-    /**
-     * Returns a recent history of registered operations performed and event
-     * received linked to the segment given in argument.
-     *
-     * Not all operations and events are registered in the returned history.
-     * Please check the return type for more information on what is available.
-     *
-     * Note that history is short-lived for memory usage and performance reasons.
-     * You may not receive any information on operations that happened too long
-     * ago.
-     * @param {Object} context
-     * @returns {Array.<Object>}
-     */
-    SegmentInventory.prototype.getHistoryFor = function (context) {
-        return this._bufferedHistory.getHistoryFor(context);
     };
     return SegmentInventory;
 }());

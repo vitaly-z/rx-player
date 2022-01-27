@@ -15,7 +15,6 @@
  */
 import Manifest, { Adaptation, ISegment, Period, Representation } from "../../../manifest";
 import { IBufferedChunk } from "../../segment_buffers";
-import { IBufferedHistoryEntry, IChunkContext } from "../../segment_buffers/inventory";
 /** Arguments for `getNeededSegments`. */
 export interface IGetNeededSegmentsArguments {
     /** The content we want to load segments for */
@@ -62,7 +61,6 @@ export interface IGetNeededSegmentsArguments {
      * re-requested.
      */
     bufferedSegments: IBufferedChunk[];
-    getBufferedHistory: (context: IChunkContext) => IBufferedHistoryEntry[];
 }
 /**
  * Return the list of segments that can currently be downloaded to fill holes
@@ -74,4 +72,4 @@ export interface IGetNeededSegmentsArguments {
  * @param {Object} args
  * @returns {Array.<Object>}
  */
-export default function getNeededSegments({ bufferedSegments, content, currentPlaybackTime, fastSwitchThreshold, getBufferedHistory, neededRange, segmentsBeingPushed, }: IGetNeededSegmentsArguments): ISegment[];
+export default function getNeededSegments({ content, currentPlaybackTime, fastSwitchThreshold, neededRange, segmentsBeingPushed, bufferedSegments, }: IGetNeededSegmentsArguments): ISegment[];
