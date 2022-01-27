@@ -115,15 +115,11 @@ export default function getBufferStatus(
                                 segmentBuffer.getInventory());
   const currentPlaybackTime = playbackObserver.getCurrentTime();
 
-  /** Callback allowing to retrieve a segment's history in the buffer. */
-  const getBufferedHistory = segmentBuffer.getSegmentHistory.bind(segmentBuffer);
-
   /** List of segments we will need to download. */
   const neededSegments = getNeededSegments({ content,
                                              bufferedSegments,
                                              currentPlaybackTime,
                                              fastSwitchThreshold,
-                                             getBufferedHistory,
                                              neededRange,
                                              segmentsBeingPushed })
     .map((segment) => ({ priority: getSegmentPriority(segment.time, wantedStartPosition),
