@@ -67,10 +67,7 @@ export default function initMediaKeys(
       }
 
       const canAttachMediaKeys = createSharedReference(false);
-      const shouldDisableOldMediaKeys =
-        mediaElement.mediaKeys !== null &&
-        mediaElement.mediaKeys !== undefined &&
-        mediaKeys !== mediaElement.mediaKeys;
+      const shouldDisableOldMediaKeys = true;
 
       let disableOldMediaKeys$ : Observable<unknown> = observableOf(null);
       if (shouldDisableOldMediaKeys) {
