@@ -5651,126 +5651,6 @@ function getMediaKeySystemAccess(mediaElement, keySystemsConfigs) {
     }
   });
 }
-// EXTERNAL MODULE: ./src/utils/hash_buffer.ts
-var hash_buffer = __webpack_require__(2870);
-;// CONCATENATED MODULE: ./src/core/eme/server_certificate_store.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Keep track of server certificate which have been set for a MediaKeys.
- * As it is impossible for a MediaKeys to have his server certificate reset
- * or updated, we consider that once it has been set, it will remain set until
- * the MediaKeys instance is killed.
- *
- * So, a WeakMap helps keeping a trace of which server certificate (identified
- * with a unique hash) is set on a MediaKeys.
- * `null` indicate that we don't know (and not `undefined`, because this is the
- * default value for when a WeakMap has no value for a key) which server
- * certificate is attached to a MediaKeys instance (most likely because related
- * EME APIs failed or had an unexpected behavior).
- */
-
-var serverCertificateHashesMap = new WeakMap();
-/** ServerCertificateStore */
-
-/* harmony default export */ var server_certificate_store = ({
-  /**
-   * Tells the ServerCertificateStore that you begin to call the APIs to set a
-   * ServerCertificate on `mediaKeys`.
-   *
-   * Calling this function is necessary due to how server certificate work
-   * currently in EME APIs:
-   * Because right now, it is impossible to tell if a MediaKeys instance has an
-   * attached ServerCertificate or not when the corresponding API fails or if it
-   * never answers, we prefer to announce through this function that the current
-   * server certificate attached to this MediaKeys is for now invalid.
-   * @param {MediaKeys | Object} mediaKeys
-   */
-  prepare: function prepare(mediaKeys) {
-    serverCertificateHashesMap.set(mediaKeys, null);
-  },
-
-  /**
-   * Attach a new server certificate to a MediaKeys in the
-   * ServerCertificateStore.
-   *
-   * Only one server certificate should ever be attached to a MediaKeys
-   * instance and the `prepare` function should have been called before any
-   * action to update the server certificate took place (this function does not
-   * enforce either of those behaviors).
-   * @param {MediaKeys | Object} mediaKeys
-   * @param {ArrayBufferView | BufferSource} serverCertificate
-   */
-  set: function set(mediaKeys, serverCertificate) {
-    var formattedServerCertificate = serverCertificate instanceof Uint8Array ? serverCertificate : new Uint8Array(serverCertificate instanceof ArrayBuffer ? serverCertificate : serverCertificate.buffer);
-    var hash = (0,hash_buffer/* default */.Z)(formattedServerCertificate);
-    serverCertificateHashesMap.set(mediaKeys, {
-      hash: hash,
-      serverCertificate: formattedServerCertificate
-    });
-  },
-
-  /**
-   * Returns `true` if the MediaKeys instance has an attached ServerCertificate.
-   * Returns `false` if it doesn't.
-   *
-   * Returns `undefined` if we cannot know, most likely because related EME APIs
-   * failed or had an unexpected behavior.
-   * @param {MediaKeys} mediaKeys
-   * @returns {Boolean|undefined}
-   */
-  hasOne: function hasOne(mediaKeys) {
-    var currentServerCertificate = serverCertificateHashesMap.get(mediaKeys);
-    return currentServerCertificate === undefined ? false : currentServerCertificate === null ? undefined : true;
-  },
-
-  /**
-   * Returns `true` if the given `mediaKeys` has `serverCertificate` attached to
-   * it.
-   * Returns `false` either if it doesn't of if we doesn't know if it does.
-   * @param {MediaKeys | Object} mediaKeys
-   * @param {ArrayBufferView | BufferSource} serverCertificate
-   * @returns {boolean}
-   */
-  has: function has(mediaKeys, serverCertificate) {
-    var serverCertificateHash = serverCertificateHashesMap.get(mediaKeys);
-
-    if (serverCertificateHash === undefined || serverCertificateHash === null) {
-      return false;
-    }
-
-    var oldHash = serverCertificateHash.hash,
-        oldServerCertificate = serverCertificateHash.serverCertificate;
-    var newServerCertificate = serverCertificate instanceof Uint8Array ? serverCertificate : new Uint8Array(serverCertificate instanceof ArrayBuffer ? serverCertificate : serverCertificate.buffer);
-    var newHash = (0,hash_buffer/* default */.Z)(newServerCertificate);
-
-    if (newHash !== oldHash || oldServerCertificate.length !== newServerCertificate.length) {
-      return false;
-    }
-
-    for (var i = 0; i < oldServerCertificate.length; i++) {
-      if (oldServerCertificate[i] !== newServerCertificate[i]) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-});
 ;// CONCATENATED MODULE: ./src/compat/eme/close_session.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -5912,6 +5792,8 @@ function safelyCloseMediaKeySession(mediaKeySession) {
     return (0,of.of)(null);
   }
 }
+// EXTERNAL MODULE: ./src/utils/hash_buffer.ts
+var hash_buffer = __webpack_require__(2870);
 // EXTERNAL MODULE: ./src/utils/base64.ts
 var utils_base64 = __webpack_require__(9689);
 ;// CONCATENATED MODULE: ./src/core/eme/utils/init_data_container.ts
@@ -6938,9 +6820,6 @@ var PersistentSessionsStore = /*#__PURE__*/function () {
 
 
 
-
-
-
 /**
  * @throws {EncryptedMediaError}
  * @param {Object} keySystemOptions
@@ -6973,28 +6852,7 @@ function getMediaKeysInfos(mediaElement, keySystemsConfigs) {
     var _evt$value = evt.value,
         options = _evt$value.options,
         mediaKeySystemAccess = _evt$value.mediaKeySystemAccess;
-    var currentState = media_keys_infos_store/* default.getState */.Z.getState(mediaElement);
     var persistentSessionsStore = createPersistentSessionsStorage(options);
-
-    if (currentState !== null && evt.type === "reuse-media-key-system-access") {
-      var mediaKeys = currentState.mediaKeys,
-          loadedSessionsStore = currentState.loadedSessionsStore; // We might just rely on the currently attached MediaKeys instance.
-      // First check if server certificate parameters are the same than in the
-      // current MediaKeys instance. If not, re-create MediaKeys from scratch.
-
-      if (server_certificate_store.hasOne(mediaKeys) === false || !(0,is_null_or_undefined/* default */.Z)(options.serverCertificate) && server_certificate_store.has(mediaKeys, options.serverCertificate)) {
-        return (0,of.of)({
-          mediaKeys: mediaKeys,
-          mediaKeySystemAccess: mediaKeySystemAccess,
-          stores: {
-            loadedSessionsStore: loadedSessionsStore,
-            persistentSessionsStore: persistentSessionsStore
-          },
-          options: options
-        });
-      }
-    }
-
     return createMediaKeys(mediaKeySystemAccess).pipe((0,map/* map */.U)(function (mediaKeys) {
       log/* default.info */.Z.info("EME: MediaKeys created with success");
       var loadedSessionsStore = new LoadedSessionsStore(mediaKeys);
@@ -7738,6 +7596,124 @@ function getLicenseBackoffOptions(sessionWarningSubject$, numberOfRetry) {
     }
   };
 }
+;// CONCATENATED MODULE: ./src/core/eme/server_certificate_store.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Keep track of server certificate which have been set for a MediaKeys.
+ * As it is impossible for a MediaKeys to have his server certificate reset
+ * or updated, we consider that once it has been set, it will remain set until
+ * the MediaKeys instance is killed.
+ *
+ * So, a WeakMap helps keeping a trace of which server certificate (identified
+ * with a unique hash) is set on a MediaKeys.
+ * `null` indicate that we don't know (and not `undefined`, because this is the
+ * default value for when a WeakMap has no value for a key) which server
+ * certificate is attached to a MediaKeys instance (most likely because related
+ * EME APIs failed or had an unexpected behavior).
+ */
+
+var serverCertificateHashesMap = new WeakMap();
+/** ServerCertificateStore */
+
+/* harmony default export */ var server_certificate_store = ({
+  /**
+   * Tells the ServerCertificateStore that you begin to call the APIs to set a
+   * ServerCertificate on `mediaKeys`.
+   *
+   * Calling this function is necessary due to how server certificate work
+   * currently in EME APIs:
+   * Because right now, it is impossible to tell if a MediaKeys instance has an
+   * attached ServerCertificate or not when the corresponding API fails or if it
+   * never answers, we prefer to announce through this function that the current
+   * server certificate attached to this MediaKeys is for now invalid.
+   * @param {MediaKeys | Object} mediaKeys
+   */
+  prepare: function prepare(mediaKeys) {
+    serverCertificateHashesMap.set(mediaKeys, null);
+  },
+
+  /**
+   * Attach a new server certificate to a MediaKeys in the
+   * ServerCertificateStore.
+   *
+   * Only one server certificate should ever be attached to a MediaKeys
+   * instance and the `prepare` function should have been called before any
+   * action to update the server certificate took place (this function does not
+   * enforce either of those behaviors).
+   * @param {MediaKeys | Object} mediaKeys
+   * @param {ArrayBufferView | BufferSource} serverCertificate
+   */
+  set: function set(mediaKeys, serverCertificate) {
+    var formattedServerCertificate = serverCertificate instanceof Uint8Array ? serverCertificate : new Uint8Array(serverCertificate instanceof ArrayBuffer ? serverCertificate : serverCertificate.buffer);
+    var hash = (0,hash_buffer/* default */.Z)(formattedServerCertificate);
+    serverCertificateHashesMap.set(mediaKeys, {
+      hash: hash,
+      serverCertificate: formattedServerCertificate
+    });
+  },
+
+  /**
+   * Returns `true` if the MediaKeys instance has an attached ServerCertificate.
+   * Returns `false` if it doesn't.
+   *
+   * Returns `undefined` if we cannot know, most likely because related EME APIs
+   * failed or had an unexpected behavior.
+   * @param {MediaKeys} mediaKeys
+   * @returns {Boolean|undefined}
+   */
+  hasOne: function hasOne(mediaKeys) {
+    var currentServerCertificate = serverCertificateHashesMap.get(mediaKeys);
+    return currentServerCertificate === undefined ? false : currentServerCertificate === null ? undefined : true;
+  },
+
+  /**
+   * Returns `true` if the given `mediaKeys` has `serverCertificate` attached to
+   * it.
+   * Returns `false` either if it doesn't of if we doesn't know if it does.
+   * @param {MediaKeys | Object} mediaKeys
+   * @param {ArrayBufferView | BufferSource} serverCertificate
+   * @returns {boolean}
+   */
+  has: function has(mediaKeys, serverCertificate) {
+    var serverCertificateHash = serverCertificateHashesMap.get(mediaKeys);
+
+    if (serverCertificateHash === undefined || serverCertificateHash === null) {
+      return false;
+    }
+
+    var oldHash = serverCertificateHash.hash,
+        oldServerCertificate = serverCertificateHash.serverCertificate;
+    var newServerCertificate = serverCertificate instanceof Uint8Array ? serverCertificate : new Uint8Array(serverCertificate instanceof ArrayBuffer ? serverCertificate : serverCertificate.buffer);
+    var newHash = (0,hash_buffer/* default */.Z)(newServerCertificate);
+
+    if (newHash !== oldHash || oldServerCertificate.length !== newServerCertificate.length) {
+      return false;
+    }
+
+    for (var i = 0; i < oldServerCertificate.length; i++) {
+      if (oldServerCertificate[i] !== newServerCertificate[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+});
 ;// CONCATENATED MODULE: ./src/core/eme/set_server_certificate.ts
 /**
  * Copyright 2015 CANAL+ Group

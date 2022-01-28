@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { catchError, map, mergeMap, of as observableOf, } from "rxjs";
+import { catchError, map, mergeMap, } from "rxjs";
 import { EncryptedMediaError } from "../../errors";
 import log from "../../log";
 import castToObservable from "../../utils/cast_to_observable";
-import isNullOrUndefined from "../../utils/is_null_or_undefined";
 import tryCatch from "../../utils/rx-try_catch";
 import getMediaKeySystemAccess from "./find_key_system";
-import MediaKeysInfosStore from "./media_keys_infos_store";
-import ServerCertificateStore from "./server_certificate_store";
 import LoadedSessionsStore from "./utils/loaded_sessions_store";
 import PersistentSessionsStore from "./utils/persistent_sessions_store";
 /**
@@ -48,19 +45,7 @@ function createPersistentSessionsStorage(keySystemOptions) {
 export default function getMediaKeysInfos(mediaElement, keySystemsConfigs) {
     return getMediaKeySystemAccess(mediaElement, keySystemsConfigs).pipe(mergeMap(function (evt) {
         var _a = evt.value, options = _a.options, mediaKeySystemAccess = _a.mediaKeySystemAccess;
-        var currentState = MediaKeysInfosStore.getState(mediaElement);
         var persistentSessionsStore = createPersistentSessionsStorage(options);
-        if (currentState !== null && evt.type === "reuse-media-key-system-access") {
-            var mediaKeys = currentState.mediaKeys, loadedSessionsStore = currentState.loadedSessionsStore;
-            // We might just rely on the currently attached MediaKeys instance.
-            // First check if server certificate parameters are the same than in the
-            // current MediaKeys instance. If not, re-create MediaKeys from scratch.
-            if (ServerCertificateStore.hasOne(mediaKeys) === false ||
-                (!isNullOrUndefined(options.serverCertificate) &&
-                    ServerCertificateStore.has(mediaKeys, options.serverCertificate))) {
-                return observableOf({ mediaKeys: mediaKeys, mediaKeySystemAccess: mediaKeySystemAccess, stores: { loadedSessionsStore: loadedSessionsStore, persistentSessionsStore: persistentSessionsStore }, options: options });
-            }
-        }
         return createMediaKeys(mediaKeySystemAccess).pipe(map(function (mediaKeys) {
             log.info("EME: MediaKeys created with success");
             var loadedSessionsStore = new LoadedSessionsStore(mediaKeys);
