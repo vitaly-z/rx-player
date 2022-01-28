@@ -45,9 +45,7 @@ export default function initMediaKeys(mediaElement, keySystemsConfigs) {
             initializationDataSystemId = getDrmSystemId(mediaKeySystemAccess.keySystem);
         }
         var canAttachMediaKeys = createSharedReference(false);
-        var shouldDisableOldMediaKeys = mediaElement.mediaKeys !== null &&
-            mediaElement.mediaKeys !== undefined &&
-            mediaKeys !== mediaElement.mediaKeys;
+        var shouldDisableOldMediaKeys = true;
         var disableOldMediaKeys$ = observableOf(null);
         if (shouldDisableOldMediaKeys) {
             log.debug("EME: Disabling old MediaKeys");
