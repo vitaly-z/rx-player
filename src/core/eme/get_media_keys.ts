@@ -19,7 +19,6 @@ import {
   map,
   mergeMap,
   Observable,
-  of as observableOf,
 } from "rxjs";
 import {
   ICustomMediaKeys,
@@ -28,11 +27,8 @@ import {
 import { EncryptedMediaError } from "../../errors";
 import log from "../../log";
 import castToObservable from "../../utils/cast_to_observable";
-import isNullOrUndefined from "../../utils/is_null_or_undefined";
 import tryCatch from "../../utils/rx-try_catch";
 import getMediaKeySystemAccess from "./find_key_system";
-import MediaKeysInfosStore from "./media_keys_infos_store";
-import ServerCertificateStore from "./server_certificate_store";
 import {
   IKeySystemOption,
   IMediaKeySessionStores,
@@ -88,26 +84,7 @@ export default function getMediaKeysInfos(
   return getMediaKeySystemAccess(mediaElement, keySystemsConfigs).pipe(
     mergeMap((evt) => {
       const { options, mediaKeySystemAccess } = evt.value;
-      const currentState = MediaKeysInfosStore.getState(mediaElement);
       const persistentSessionsStore = createPersistentSessionsStorage(options);
-
-      if (currentState !== null && evt.type === "reuse-media-key-system-access") {
-        const { mediaKeys, loadedSessionsStore } = currentState;
-
-        // We might just rely on the currently attached MediaKeys instance.
-        // First check if server certificate parameters are the same than in the
-        // current MediaKeys instance. If not, re-create MediaKeys from scratch.
-        if (ServerCertificateStore.hasOne(mediaKeys) === false ||
-            (!isNullOrUndefined(options.serverCertificate) &&
-             ServerCertificateStore.has(mediaKeys, options.serverCertificate)))
-        {
-          return observableOf({ mediaKeys,
-                                mediaKeySystemAccess,
-                                stores: { loadedSessionsStore, persistentSessionsStore },
-                                options });
-
-        }
-      }
 
       return createMediaKeys(mediaKeySystemAccess).pipe(map((mediaKeys) => {
         log.info("EME: MediaKeys created with success");
