@@ -25,10 +25,6 @@ import errorSelector from "../utils/error_selector";
 import { tryURLsWithBackoff } from "../utils/try_urls_with_backoff";
 var DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR = config.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR, DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE = config.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE, INITIAL_BACKOFF_DELAY_BASE = config.INITIAL_BACKOFF_DELAY_BASE, MAX_BACKOFF_DELAY_BASE = config.MAX_BACKOFF_DELAY_BASE;
 var generateRequestID = idGenerator();
-window.LAST_REQUESTS = {
-    audio: [],
-    video: []
-};
 /**
  * Create a function which will fetch and parse segments.
  * @param {string} bufferType
@@ -61,30 +57,13 @@ export default function createSegmentFetcher(bufferType, pipeline, requests$, op
      * @returns {Observable}
      */
     return function fetchSegment(content) {
-        var segment = content.segment, representation = content.representation, period = content.period;
+        var segment = content.segment;
         return new Observable(function (obs) {
             var _a;
-            function pushReq() {
-                if (content.adaptation.type === "audio" || content.adaptation.type === "video") {
-                    window.LAST_REQUESTS[content.adaptation.type].push({
-                        isInit: segment.isInit,
-                        segmentTime: segment.time,
-                        responseTimestamp: performance.now(),
-                        repBit: representation.bitrate,
-                        periodStart: period.start,
-                    });
-                    while (window.LAST_REQUESTS[content.adaptation.type].length > 20) {
-                        window.LAST_REQUESTS[content.adaptation.type].shift();
-                    }
-                }
-            }
-            var hasRequestEnded = false;
             // Retrieve from cache if it exists
             var cached = cache !== undefined ? cache.get(content) :
                 null;
             if (cached !== null) {
-                hasRequestEnded = true;
-                pushReq();
                 obs.next({ type: "chunk",
                     parse: generateParserFunction(cached, false) });
                 obs.next({ type: "chunk-complete" });
@@ -97,6 +76,7 @@ export default function createSegmentFetcher(bufferType, pipeline, requests$, op
                     time: segment.time,
                     requestTimestamp: performance.now(), id: id } });
             var canceller = new TaskCanceller();
+            var hasRequestEnded = false;
             var loaderCallbacks = {
                 /**
                  * Callback called when the segment loader has progress information on
@@ -138,7 +118,6 @@ export default function createSegmentFetcher(bufferType, pipeline, requests$, op
                         parse: generateParserFunction(res.resultData, false) });
                 }
                 hasRequestEnded = true;
-                pushReq();
                 obs.next({ type: "chunk-complete" });
                 if ((res.resultType === "segment-loaded" ||
                     res.resultType === "chunk-complete") &&
