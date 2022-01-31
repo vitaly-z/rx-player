@@ -56,11 +56,6 @@ const { DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
 
 const generateRequestID = idGenerator();
 
-(window as any).LAST_REQUESTS = {
-  audio: [],
-  video: []
-}
-
 /**
  * Create a function which will fetch and parse segments.
  * @param {string} bufferType
@@ -109,31 +104,12 @@ export default function createSegmentFetcher<
   return function fetchSegment(
     content : ISegmentLoaderContent
   ) : Observable<ISegmentFetcherEvent<TSegmentDataType>> {
-    const { segment, representation, period } = content;
+    const { segment } = content;
     return new Observable((obs) => {
-      function pushReq() {
-        if (content.adaptation.type === "audio" || content.adaptation.type === "video") {
-          (window as any).LAST_REQUESTS[content.adaptation.type].push({
-            isInit: segment.isInit,
-            segmentTime: segment.time,
-            responseTimestamp: performance.now(),
-            repBit: representation.bitrate,
-            periodStart: period.start,
-          });
-          while ((window as any).LAST_REQUESTS[content.adaptation.type].length > 20) {
-            (window as any).LAST_REQUESTS[content.adaptation.type].shift();
-          }
-        }
-      }
-
-      let hasRequestEnded = false;
-
       // Retrieve from cache if it exists
       const cached = cache !== undefined ? cache.get(content) :
                                            null;
       if (cached !== null) {
-        hasRequestEnded = true;
-        pushReq();
         obs.next({ type: "chunk" as const,
                    parse: generateParserFunction(cached, false) });
         obs.next({ type: "chunk-complete" as const });
@@ -149,6 +125,7 @@ export default function createSegmentFetcher<
                                 id } });
 
       const canceller = new TaskCanceller();
+      let hasRequestEnded = false;
 
       const loaderCallbacks = {
         /**
@@ -198,7 +175,6 @@ export default function createSegmentFetcher<
           }
 
           hasRequestEnded = true;
-          pushReq();
           obs.next({ type: "chunk-complete" as const });
 
           if ((res.resultType === "segment-loaded" ||
