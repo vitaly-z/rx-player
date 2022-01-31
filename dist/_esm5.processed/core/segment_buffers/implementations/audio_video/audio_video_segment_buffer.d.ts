@@ -60,6 +60,8 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer {
      * `AudioVideoSegmentBuffer` yet.
      */
     private _lastInitSegment;
+    private _isDisposed;
+    private _isLocking;
     /**
      * @constructor
      * @param {string} bufferType

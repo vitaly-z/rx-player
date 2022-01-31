@@ -49522,6 +49522,8 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
 
     _this = _SegmentBuffer.call(this) || this;
     var sourceBuffer = mediaSource.addSourceBuffer(codec);
+    _this._isDisposed = false;
+    _this._isLocking = false;
     _this._destroy$ = new Subject/* Subject */.x();
     _this.bufferType = bufferType;
     _this._mediaSource = mediaSource;
@@ -49676,6 +49678,8 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
   ;
 
   _proto.dispose = function dispose() {
+    this._isDisposed = true;
+
     this._destroy$.next();
 
     this._destroy$.complete();
@@ -49768,120 +49772,132 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
   ;
 
   _proto._flush = function _flush() {
-    if (this._sourceBuffer.updating) {
+    var _this3 = this;
+
+    if (this._sourceBuffer.updating || this._isLocking) {
       return; // still processing `this._pendingTask`
     }
 
-    if (this._pendingTask !== null) {
-      var task = this._pendingTask;
+    this._isLocking = true;
+    setTimeout(function () {
+      _this3._isLocking = false;
 
-      if (task.type !== types/* SegmentBufferOperation.Push */.f.Push || task.data.length === 0) {
-        // If we're here, we've finished processing the task
-        switch (task.type) {
+      if (_this3._isDisposed) {
+        return;
+      }
+
+      if (_this3._pendingTask !== null) {
+        var task = _this3._pendingTask;
+
+        if (task.type !== types/* SegmentBufferOperation.Push */.f.Push || task.data.length === 0) {
+          // If we're here, we've finished processing the task
+          switch (task.type) {
+            case types/* SegmentBufferOperation.Push */.f.Push:
+              if (task.inventoryData !== null) {
+                _this3._segmentInventory.insertChunk(task.inventoryData);
+              }
+
+              break;
+
+            case types/* SegmentBufferOperation.EndOfSegment */.f.EndOfSegment:
+              _this3._segmentInventory.completeSegment(task.value, _this3.getBufferedRanges());
+
+              break;
+
+            case types/* SegmentBufferOperation.Remove */.f.Remove:
+              _this3.synchronizeInventory();
+
+              break;
+
+            default:
+              (0,assert_unreachable/* default */.Z)(task);
+          }
+
+          var subject = task.subject;
+          _this3._pendingTask = null;
+          subject.next();
+          subject.complete();
+
+          _this3._flush(); // Go to next item in queue
+
+
+          return;
+        }
+      } else {
+        // if this._pendingTask is null, go to next item in queue
+        var nextItem = _this3._queue.shift();
+
+        if (nextItem === undefined) {
+          return; // we have nothing left to do
+        } else if (nextItem.type !== types/* SegmentBufferOperation.Push */.f.Push) {
+          _this3._pendingTask = nextItem;
+        } else {
+          var itemValue = nextItem.value;
+          var dataToPush;
+
+          try {
+            dataToPush = _this3._preparePushOperation(itemValue.data);
+          } catch (e) {
+            _this3._pendingTask = (0,object_assign/* default */.Z)({
+              data: [],
+              inventoryData: itemValue.inventoryInfos
+            }, nextItem);
+            var error = e instanceof Error ? e : new Error("An unknown error occured when preparing a push operation");
+            _this3._lastInitSegment = null; // initialize init segment as a security
+
+            nextItem.subject.error(error);
+            return;
+          }
+
+          _this3._pendingTask = (0,object_assign/* default */.Z)({
+            data: dataToPush,
+            inventoryData: itemValue.inventoryInfos
+          }, nextItem);
+        }
+      }
+
+      try {
+        switch (_this3._pendingTask.type) {
+          case types/* SegmentBufferOperation.EndOfSegment */.f.EndOfSegment:
+            // nothing to do, we will just acknowledge the segment.
+            log/* default.debug */.Z.debug("AVSB: Acknowledging complete segment", (0,utils/* getLoggableSegmentId */.K)(_this3._pendingTask.value));
+
+            _this3._flush();
+
+            return;
+
           case types/* SegmentBufferOperation.Push */.f.Push:
-            if (task.inventoryData !== null) {
-              this._segmentInventory.insertChunk(task.inventoryData);
+            var segmentData = _this3._pendingTask.data.shift();
+
+            if (segmentData === undefined) {
+              _this3._flush();
+
+              return;
             }
 
-            break;
+            log/* default.debug */.Z.debug("AVSB: pushing segment", _this3.bufferType, (0,utils/* getLoggableSegmentId */.K)(_this3._pendingTask.inventoryData));
 
-          case types/* SegmentBufferOperation.EndOfSegment */.f.EndOfSegment:
-            this._segmentInventory.completeSegment(task.value, this.getBufferedRanges());
+            _this3._sourceBuffer.appendBuffer(segmentData);
 
             break;
 
           case types/* SegmentBufferOperation.Remove */.f.Remove:
-            this.synchronizeInventory();
+            var _this3$_pendingTask$v = _this3._pendingTask.value,
+                start = _this3$_pendingTask$v.start,
+                end = _this3$_pendingTask$v.end;
+            log/* default.debug */.Z.debug("AVSB: removing data from SourceBuffer", _this3.bufferType, start, end);
+
+            _this3._sourceBuffer.remove(start, end);
+
             break;
 
           default:
-            (0,assert_unreachable/* default */.Z)(task);
+            (0,assert_unreachable/* default */.Z)(_this3._pendingTask);
         }
-
-        var subject = task.subject;
-        this._pendingTask = null;
-        subject.next();
-        subject.complete();
-
-        this._flush(); // Go to next item in queue
-
-
-        return;
+      } catch (e) {
+        _this3._onPendingTaskError(e);
       }
-    } else {
-      // if this._pendingTask is null, go to next item in queue
-      var nextItem = this._queue.shift();
-
-      if (nextItem === undefined) {
-        return; // we have nothing left to do
-      } else if (nextItem.type !== types/* SegmentBufferOperation.Push */.f.Push) {
-        this._pendingTask = nextItem;
-      } else {
-        var itemValue = nextItem.value;
-        var dataToPush;
-
-        try {
-          dataToPush = this._preparePushOperation(itemValue.data);
-        } catch (e) {
-          this._pendingTask = (0,object_assign/* default */.Z)({
-            data: [],
-            inventoryData: itemValue.inventoryInfos
-          }, nextItem);
-          var error = e instanceof Error ? e : new Error("An unknown error occured when preparing a push operation");
-          this._lastInitSegment = null; // initialize init segment as a security
-
-          nextItem.subject.error(error);
-          return;
-        }
-
-        this._pendingTask = (0,object_assign/* default */.Z)({
-          data: dataToPush,
-          inventoryData: itemValue.inventoryInfos
-        }, nextItem);
-      }
-    }
-
-    try {
-      switch (this._pendingTask.type) {
-        case types/* SegmentBufferOperation.EndOfSegment */.f.EndOfSegment:
-          // nothing to do, we will just acknowledge the segment.
-          log/* default.debug */.Z.debug("AVSB: Acknowledging complete segment", (0,utils/* getLoggableSegmentId */.K)(this._pendingTask.value));
-
-          this._flush();
-
-          return;
-
-        case types/* SegmentBufferOperation.Push */.f.Push:
-          var segmentData = this._pendingTask.data.shift();
-
-          if (segmentData === undefined) {
-            this._flush();
-
-            return;
-          }
-
-          log/* default.debug */.Z.debug("AVSB: pushing segment", this.bufferType, (0,utils/* getLoggableSegmentId */.K)(this._pendingTask.inventoryData));
-
-          this._sourceBuffer.appendBuffer(segmentData);
-
-          break;
-
-        case types/* SegmentBufferOperation.Remove */.f.Remove:
-          var _this$_pendingTask$va = this._pendingTask.value,
-              start = _this$_pendingTask$va.start,
-              end = _this$_pendingTask$va.end;
-          log/* default.debug */.Z.debug("AVSB: removing data from SourceBuffer", this.bufferType, start, end);
-
-          this._sourceBuffer.remove(start, end);
-
-          break;
-
-        default:
-          (0,assert_unreachable/* default */.Z)(this._pendingTask);
-      }
-    } catch (e) {
-      this._onPendingTaskError(e);
-    }
+    }, 50);
   }
   /**
    * A push Operation might necessitate to mutate some `SourceBuffer` and/or
