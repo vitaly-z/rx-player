@@ -1,7 +1,7 @@
 {
   "name": "rx-player",
   "author": "Canal+",
-  "version": "3.26.2-fix_ttml_and_audiotracks",
+  "version": "3.26.2-fix.ttml.and.audiotracks",
   "description": "Canal+ HTML5 Video Player",
   "main": "./dist/rx-player.js",
   "keywords": [
