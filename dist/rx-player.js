@@ -3375,7 +3375,8 @@ function shouldValidateMetadata() {
 /* harmony export */   "Z": function() { return /* binding */ MediaElementTrackChoiceManager; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4578);
-/* harmony import */ var _utils_event_emitter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1959);
+/* harmony import */ var _utils_assert__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(811);
+/* harmony import */ var _utils_event_emitter__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(1959);
 /* harmony import */ var _utils_languages__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7829);
 
 
@@ -3394,6 +3395,7 @@ function shouldValidateMetadata() {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 /**
@@ -3615,7 +3617,8 @@ var MediaElementTrackChoiceManager = /*#__PURE__*/function (_EventEmitter) {
           nativeTrack = _this$_audioTracks$i.nativeTrack;
 
       if (track.id === id) {
-        nativeTrack.enabled = true;
+        this._enableAudioTrackFromIndex(i);
+
         this._audioTrackLockedOn = nativeTrack;
         return;
       }
@@ -3910,7 +3913,8 @@ var MediaElementTrackChoiceManager = /*#__PURE__*/function (_EventEmitter) {
         var nativeTrack = this._audioTracks[i].nativeTrack;
 
         if (nativeTrack === this._audioTrackLockedOn) {
-          nativeTrack.enabled = true;
+          this._enableAudioTrackFromIndex(i);
+
           return;
         }
       }
@@ -3940,7 +3944,8 @@ var MediaElementTrackChoiceManager = /*#__PURE__*/function (_EventEmitter) {
           var audioTrack = this._audioTracks[j];
 
           if (audioTrack.track.normalized === normalized && audioTrack.track.audioDescription === track.audioDescription) {
-            audioTrack.nativeTrack.enabled = true;
+            this._enableAudioTrackFromIndex(j);
+
             return;
           }
         }
@@ -4316,10 +4321,29 @@ var MediaElementTrackChoiceManager = /*#__PURE__*/function (_EventEmitter) {
         return;
       };
     }
+  }
+  /**
+   * Enable an audio track (and disable all others), based on its index in the
+   * `this._audioTracks` array.
+   * @param {number} index}
+   */
+  ;
+
+  _proto._enableAudioTrackFromIndex = function _enableAudioTrackFromIndex(index) {
+    (0,_utils_assert__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z)(index < this._audioTracks.length);
+
+    for (var i = 0; i < this._audioTracks.length; i++) {
+      if (i !== index) {
+        this._audioTracks[i].nativeTrack.enabled = false;
+      }
+    }
+
+    this._audioTracks[index].nativeTrack.enabled = true;
+    return;
   };
 
   return MediaElementTrackChoiceManager;
-}(_utils_event_emitter__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z);
+}(_utils_event_emitter__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .Z);
 /**
  * Disable all text track elements in the given array from showing.
  * @param {Array.<Object>} textTracks
@@ -58531,7 +58555,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     videoElement.preload = "auto";
     _this.version =
     /* PLAYER_VERSION */
-    "3.26.2";
+    "3.26.2-fix_ttml_and_audiotracks";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -61316,7 +61340,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.26.2";
+"3.26.2-fix_ttml_and_audiotracks";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**

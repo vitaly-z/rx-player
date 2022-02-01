@@ -28,6 +28,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+import assert from "../../utils/assert";
 import EventEmitter from "../../utils/event_emitter";
 import normalizeLanguage from "../../utils/languages";
 /**
@@ -205,7 +206,7 @@ var MediaElementTrackChoiceManager = /** @class */ (function (_super) {
         for (var i = 0; i < this._audioTracks.length; i++) {
             var _a = this._audioTracks[i], track = _a.track, nativeTrack = _a.nativeTrack;
             if (track.id === id) {
-                nativeTrack.enabled = true;
+                this._enableAudioTrackFromIndex(i);
                 this._audioTrackLockedOn = nativeTrack;
                 return;
             }
@@ -433,7 +434,7 @@ var MediaElementTrackChoiceManager = /** @class */ (function (_super) {
             for (var i = 0; i < this._audioTracks.length; i++) {
                 var nativeTrack = this._audioTracks[i].nativeTrack;
                 if (nativeTrack === this._audioTrackLockedOn) {
-                    nativeTrack.enabled = true;
+                    this._enableAudioTrackFromIndex(i);
                     return;
                 }
             }
@@ -457,7 +458,7 @@ var MediaElementTrackChoiceManager = /** @class */ (function (_super) {
                     var audioTrack = this._audioTracks[j];
                     if (audioTrack.track.normalized === normalized &&
                         audioTrack.track.audioDescription === track.audioDescription) {
-                        audioTrack.nativeTrack.enabled = true;
+                        this._enableAudioTrackFromIndex(j);
                         return;
                     }
                 }
@@ -735,6 +736,21 @@ var MediaElementTrackChoiceManager = /** @class */ (function (_super) {
                 return;
             };
         }
+    };
+    /**
+     * Enable an audio track (and disable all others), based on its index in the
+     * `this._audioTracks` array.
+     * @param {number} index}
+     */
+    MediaElementTrackChoiceManager.prototype._enableAudioTrackFromIndex = function (index) {
+        assert(index < this._audioTracks.length);
+        for (var i = 0; i < this._audioTracks.length; i++) {
+            if (i !== index) {
+                this._audioTracks[i].nativeTrack.enabled = false;
+            }
+        }
+        this._audioTracks[index].nativeTrack.enabled = true;
+        return;
     };
     return MediaElementTrackChoiceManager;
 }(EventEmitter));

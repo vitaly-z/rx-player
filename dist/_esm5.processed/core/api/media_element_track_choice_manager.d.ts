@@ -247,5 +247,11 @@ export default class MediaElementTrackChoiceManager extends EventEmitter<IMediaE
      * change events.
      */
     private _handleNativeTracksCallbacks;
+    /**
+     * Enable an audio track (and disable all others), based on its index in the
+     * `this._audioTracks` array.
+     * @param {number} index}
+     */
+    private _enableAudioTrackFromIndex;
 }
 export {};
