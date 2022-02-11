@@ -911,13 +911,13 @@ export default class MediaElementTrackChoiceManager
    */
   private _enableAudioTrackFromIndex(index : number) : void {
     assert(index < this._audioTracks.length);
+    this._audioTracks[index].nativeTrack.enabled = true;
     for (let i = 0; i < this._audioTracks.length; i++) {
       if (i !== index) {
         this._audioTracks[i].nativeTrack.enabled = false;
       }
     }
 
-    this._audioTracks[index].nativeTrack.enabled = true;
     return;
   }
 }

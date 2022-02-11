@@ -744,12 +744,12 @@ var MediaElementTrackChoiceManager = /** @class */ (function (_super) {
      */
     MediaElementTrackChoiceManager.prototype._enableAudioTrackFromIndex = function (index) {
         assert(index < this._audioTracks.length);
+        this._audioTracks[index].nativeTrack.enabled = true;
         for (var i = 0; i < this._audioTracks.length; i++) {
             if (i !== index) {
                 this._audioTracks[i].nativeTrack.enabled = false;
             }
         }
-        this._audioTracks[index].nativeTrack.enabled = true;
         return;
     };
     return MediaElementTrackChoiceManager;

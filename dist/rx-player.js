@@ -4331,6 +4331,7 @@ var MediaElementTrackChoiceManager = /*#__PURE__*/function (_EventEmitter) {
 
   _proto._enableAudioTrackFromIndex = function _enableAudioTrackFromIndex(index) {
     (0,_utils_assert__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z)(index < this._audioTracks.length);
+    this._audioTracks[index].nativeTrack.enabled = true;
 
     for (var i = 0; i < this._audioTracks.length; i++) {
       if (i !== index) {
@@ -4338,7 +4339,6 @@ var MediaElementTrackChoiceManager = /*#__PURE__*/function (_EventEmitter) {
       }
     }
 
-    this._audioTracks[index].nativeTrack.enabled = true;
     return;
   };
 
@@ -58555,7 +58555,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     videoElement.preload = "auto";
     _this.version =
     /* PLAYER_VERSION */
-    "3.26.2-fix.ttml.and.audiotracks";
+    "3.26.2-testsafari2";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -61340,7 +61340,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.26.2-fix.ttml.and.audiotracks";
+"3.26.2-testsafari2";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
