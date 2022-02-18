@@ -67,18 +67,20 @@ export interface IAdaptationSwitchOptions {
  * @param {Object} playbackInfo
  * @returns {Object}
  */
-export default function getAdaptationSwitchStrategy(
+export default async function getAdaptationSwitchStrategy(
   segmentBuffer : SegmentBuffer,
   period : Period,
   adaptation : Adaptation,
   playbackInfo : { currentTime : number; readyState : number },
   options : IAdaptationSwitchOptions
-) : IAdaptationSwitchStrategy {
+) : Promise<IAdaptationSwitchStrategy> {
   if (segmentBuffer.codec !== undefined &&
-      options.onCodecSwitch === "reload" &&
-      !hasCompatibleCodec(adaptation, segmentBuffer.codec))
+      options.onCodecSwitch === "reload")
   {
-    return { type: "needs-reload", value: undefined };
+    const isCompat  = await hasCompatibleCodec(adaptation, segmentBuffer.codec);
+    if (!isCompat) {
+      return { type: "needs-reload", value: undefined };
+    }
   }
 
   const buffered = segmentBuffer.getBufferedRanges();
@@ -122,15 +124,19 @@ export default function getAdaptationSwitchStrategy(
   const { currentTime } = playbackInfo;
   if (adaptation.type === "video" &&
       // We're playing the current Period
-      isTimeInRange({ start, end }, currentTime) &&
-      // There is data for the current position or the codecs are differents
-      (playbackInfo.readyState > 1 || !adaptation.getPlayableRepresentations()
-        .some(rep =>
-          areCodecsCompatible(rep.getMimeTypeString(), segmentBuffer.codec ?? ""))) &&
-      // We're not playing the current wanted video Adaptation
-      !isTimeInRanges(adaptationInBuffer, currentTime))
+      isTimeInRange({ start, end }, currentTime))
   {
-    return { type: "needs-reload", value: undefined };
+    const isCurrentlyPlayingIt = isTimeInRanges(adaptationInBuffer, currentTime);
+    if (!isCurrentlyPlayingIt) {
+      if (playbackInfo.readyState > 1) {
+        return { type: "needs-reload", value: undefined };
+      }
+      const isCompat  = await hasCompatibleCodec(adaptation,
+                                                 segmentBuffer.codec ?? "");
+      if (!isCompat) {
+        return { type: "needs-reload", value: undefined };
+      }
+    }
   }
 
   // From here, clean-up data from the previous Adaptation, if one
@@ -207,9 +213,12 @@ export default function getAdaptationSwitchStrategy(
 function hasCompatibleCodec(
   adaptation : Adaptation,
   segmentBufferCodec : string
-) : boolean {
-  return adaptation.getPlayableRepresentations().some(rep =>
-    areCodecsCompatible(rep.getMimeTypeString(), segmentBufferCodec));
+) : Promise<boolean> {
+  return adaptation.getPlayableRepresentations()
+    .then((playableRepresentations) =>
+      playableRepresentations
+        .some(rep => areCodecsCompatible(rep.getMimeTypeString(),
+                                         segmentBufferCodec)));
 }
 
 /**

@@ -648,12 +648,13 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
                                                  media: url,
                                                }) }] },
                                            { isManuallyAdded: true });
-      if (newAdaptation.representations.length > 0 && !newAdaptation.isSupported) {
-        const error =
-          new MediaError("MANIFEST_INCOMPATIBLE_CODECS_ERROR",
-                         "An Adaptation contains only incompatible codecs.");
-        this.contentWarnings.push(error);
-      }
+      // XXX TODO
+      // if (newAdaptation.representations.length > 0 && newAdaptation.isSupported) {
+      //   const error =
+      //     new MediaError("MANIFEST_INCOMPATIBLE_CODECS_ERROR",
+      //                    "An Adaptation contains only incompatible codecs.");
+      //   this.contentWarnings.push(error);
+      // }
       return newAdaptation;
     });
 
@@ -706,12 +707,14 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
                                                    media: url,
                                                  }) }] },
                                              { isManuallyAdded: true });
-        if (newAdaptation.representations.length > 0 && !newAdaptation.isSupported) {
-          const error =
-            new MediaError("MANIFEST_INCOMPATIBLE_CODECS_ERROR",
-                           "An Adaptation contains only incompatible codecs.");
-          this.contentWarnings.push(error);
-        }
+
+        // XXX TODO
+        // if (newAdaptation.representations.length > 0 && !newAdaptation.isSupported) {
+        //   const error =
+        //     new MediaError("MANIFEST_INCOMPATIBLE_CODECS_ERROR",
+        //                    "An Adaptation contains only incompatible codecs.");
+        //   this.contentWarnings.push(error);
+        // }
         return newAdaptation;
       }));
     }, []);

@@ -220,6 +220,7 @@ function getPlayableBufferedSegments(
     const eltInventory = segmentInventory[i];
 
     const { representation } = eltInventory.infos;
+    const isSupported = await representation.isSupported;
     if (!eltInventory.partiallyPushed &&
         representation.decipherable !== false &&
         representation.isSupported)

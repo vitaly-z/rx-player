@@ -18,6 +18,7 @@ import { IParsedAdaptation } from "../parsers/manifest";
 import arrayFind from "../utils/array_find";
 import isNullOrUndefined from "../utils/is_null_or_undefined";
 import normalizeLanguage from "../utils/languages";
+import PPromise from "../utils/promise";
 import uniq from "../utils/uniq";
 import Representation from "./representation";
 import {
@@ -96,7 +97,7 @@ export default class Adaptation {
   public manuallyAdded? : boolean;
 
   /** `true` if at least one Representation is in a supported codec. `false` otherwise. */
-  public isSupported : boolean;
+  public isSupported : Promise<boolean>;
 
   /** Tells if the track is a trick mode track. */
   public isTrickModeTrack? : boolean;
@@ -146,7 +147,6 @@ export default class Adaptation {
 
     const argsRepresentations = parsedAdaptation.representations;
     const representations : Representation[] = [];
-    let isSupported : boolean = false;
     for (let i = 0; i < argsRepresentations.length; i++) {
       const representation = new Representation(argsRepresentations[i],
                                                 { type: this.type });
@@ -162,15 +162,13 @@ export default class Adaptation {
                                isSignInterpreted: this.isSignInterpreted });
       if (shouldAdd) {
         representations.push(representation);
-        if (!isSupported && representation.isSupported) {
-          isSupported = true;
-        }
       }
     }
     representations.sort((a, b) => a.bitrate - b.bitrate);
     this.representations = representations;
 
-    this.isSupported = isSupported;
+    this.isSupported = PPromise.all(representations.map(r => r.isSupported))
+      .then((supportArr) => supportArr.some((isSupported) => isSupported));
 
     // for manuallyAdded adaptations (not in the manifest)
     this.manuallyAdded = isManuallyAdded === true;
@@ -196,10 +194,15 @@ export default class Adaptation {
    * not undecipherable and with a supported codec).
    * @returns {Array.<Representation>}
    */
-  getPlayableRepresentations() : Representation[] {
-    return this.representations.filter(rep => {
-      return rep.isSupported && rep.decipherable !== false;
-    });
+  async getPlayableRepresentations() : Promise<Representation[]> {
+    const playableRepresentations = [];
+    for (const rep of this.representations) {
+      const isSupported = await rep.isSupported;
+      if (isSupported && rep.decipherable !== false) {
+        playableRepresentations.push(rep);
+      }
+    }
+    return playableRepresentations;
   }
 
   /**

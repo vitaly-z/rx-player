@@ -22,6 +22,7 @@ import {
   IParsedRepresentation,
 } from "../parsers/manifest";
 import areArraysOfNumbersEqual from "../utils/are_arrays_of_numbers_equal";
+import PPromise from "../utils/promise";
 import { IRepresentationIndex } from "./representation_index";
 import {
   IAdaptationType,
@@ -96,7 +97,7 @@ class Representation {
   public decipherable? : boolean  | undefined;
 
   /** `true` if the Representation is in a supported codec, false otherwise. */
-  public isSupported : boolean;
+  public isSupported : Promise<boolean>;
 
   /**
    * @param {Object} args
@@ -131,10 +132,15 @@ class Representation {
     }
 
     this.index = args.index;
+
+    // Set first to default `false` value, to have a valid Representation object
+    // before calling `isCodecSupported`.
+    this.isSupported = PPromise.resolve(false);
+
     this.isSupported = opts.type === "audio" ||
                        opts.type === "video" ?
-      isCodecSupported(this.getMimeTypeString()) :
-      true; // TODO for other types
+      isCodecSupported(this, opts.type) :
+      PPromise.resolve(true); // TODO for other types
   }
 
   /**

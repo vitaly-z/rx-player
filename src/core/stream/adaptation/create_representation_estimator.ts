@@ -15,18 +15,19 @@
  */
 
 import {
+  from as observableFrom,
   Observable,
   Subject,
   distinctUntilChanged,
-  map,
   merge as observableMerge,
+  mergeMap,
   of as observableOf,
   switchMap,
+  map,
 } from "rxjs";
 import { MediaError } from "../../../errors";
 import Manifest, {
   Adaptation,
-  Representation,
 } from "../../../manifest";
 import { fromEvent } from "../../../utils/event_emitter";
 import ABRManager, {
@@ -67,9 +68,8 @@ export default function createRepresentationEstimator(
     // Emit directly a first time on subscription (after subscribing to event)
     observableOf(null)
   ).pipe(
-    map(() : Representation[] => {
-      /** Representations for which a `RepresentationStream` can be created. */
-      const playableRepresentations = adaptation.getPlayableRepresentations();
+    mergeMap(() =>  observableFrom(adaptation.getPlayableRepresentations())),
+    map((playableRepresentations) => {
       if (playableRepresentations.length <= 0) {
         const noRepErr = new MediaError("NO_PLAYABLE_REPRESENTATION",
                                         "No Representation in the chosen " +

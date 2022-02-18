@@ -17,8 +17,8 @@
 import {
   catchError,
   concat as observableConcat,
-  defer as observableDefer,
   EMPTY,
+  from as observableFrom,
   ignoreElements,
   map,
   merge as observableMerge,
@@ -207,51 +207,51 @@ export default function PeriodStream({
                `A: ${adaptation.id}`,
                `P: ${period.start}`);
 
-      const newStream$ = observableDefer(() => {
-        const readyState = playbackObserver.getReadyState();
-        const segmentBuffer = createOrReuseSegmentBuffer(segmentBuffersStore,
-                                                         bufferType,
-                                                         adaptation,
-                                                         options);
-        const playbackInfos = { currentTime: playbackObserver.getCurrentTime(),
-                                readyState };
-        const strategy = getAdaptationSwitchStrategy(segmentBuffer,
-                                                     period,
-                                                     adaptation,
-                                                     playbackInfos,
-                                                     options);
-        if (strategy.type === "needs-reload") {
-          return reloadAfterSwitch(period,
-                                   bufferType,
-                                   playbackObserver,
-                                   relativePosAfterSwitch);
-        }
+      const readyState = playbackObserver.getReadyState();
+      const segmentBuffer = createOrReuseSegmentBuffer(segmentBuffersStore,
+                                                       bufferType,
+                                                       adaptation,
+                                                       options);
+      const playbackInfos = { currentTime: playbackObserver.getCurrentTime(),
+                              readyState };
+      const newStream$ = observableFrom(getAdaptationSwitchStrategy(segmentBuffer,
+                                                                    period,
+                                                                    adaptation,
+                                                                    playbackInfos,
+                                                                    options))
+        .pipe(mergeMap((strategy) => {
+          if (strategy.type === "needs-reload") {
+            return reloadAfterSwitch(period,
+                                     bufferType,
+                                     playbackObserver,
+                                     relativePosAfterSwitch);
+          }
 
-        const needsBufferFlush$ = strategy.type === "flush-buffer"
-          ? observableOf(EVENTS.needsBufferFlush())
-          : EMPTY;
+          const needsBufferFlush$ = strategy.type === "flush-buffer"
+            ? observableOf(EVENTS.needsBufferFlush())
+            : EMPTY;
 
-        const cleanBuffer$ =
-          strategy.type === "clean-buffer" || strategy.type === "flush-buffer" ?
-            observableConcat(...strategy.value.map(({ start, end }) =>
-              segmentBuffer.removeBuffer(start, end))
-            // NOTE As of now (RxJS 7.4.0), RxJS defines `ignoreElements` default
-            // first type parameter as `any` instead of the perfectly fine `unknown`,
-            // leading to linter issues, as it forbids the usage of `any`.
-            // This is why we're disabling the eslint rule.
-            /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
-            ).pipe(ignoreElements()) : EMPTY;
+          const cleanBuffer$ =
+            strategy.type === "clean-buffer" || strategy.type === "flush-buffer" ?
+              observableConcat(...strategy.value.map(({ start, end }) =>
+                segmentBuffer.removeBuffer(start, end))
+              // NOTE As of now (RxJS 7.4.0), RxJS defines `ignoreElements` default
+              // first type parameter as `any` instead of the perfectly fine `unknown`,
+              // leading to linter issues, as it forbids the usage of `any`.
+              // This is why we're disabling the eslint rule.
+              /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
+              ).pipe(ignoreElements()) : EMPTY;
 
-        const bufferGarbageCollector$ = garbageCollectors.get(segmentBuffer);
-        const adaptationStream$ = createAdaptationStream(adaptation, segmentBuffer);
+          const bufferGarbageCollector$ = garbageCollectors.get(segmentBuffer);
+          const adaptationStream$ = createAdaptationStream(adaptation, segmentBuffer);
 
-        return segmentBuffersStore.waitForUsableBuffers().pipe(mergeMap(() => {
-          return observableConcat(cleanBuffer$,
-                                  needsBufferFlush$,
-                                  observableMerge(adaptationStream$,
-                                                  bufferGarbageCollector$));
+          return segmentBuffersStore.waitForUsableBuffers().pipe(mergeMap(() => {
+            return observableConcat(cleanBuffer$,
+                                    needsBufferFlush$,
+                                    observableMerge(adaptationStream$,
+                                                    bufferGarbageCollector$));
+          }));
         }));
-      });
 
       return observableConcat(
         observableOf(EVENTS.adaptationChange(bufferType, adaptation, period)),

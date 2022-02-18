@@ -98,6 +98,8 @@ export default class Period {
           .filter((adaptation) : adaptation is Adaptation =>
             adaptation.representations.length > 0
           );
+
+        // XXX TODO
         if (filteredAdaptations.every(adaptation => !adaptation.isSupported) &&
             adaptationsForType.length > 0 &&
             (type === "video" || type === "audio")
