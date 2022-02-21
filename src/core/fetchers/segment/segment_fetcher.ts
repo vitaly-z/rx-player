@@ -22,11 +22,11 @@ import {
 } from "../../../errors";
 import log from "../../../log";
 import Manifest, {
-  Adaptation,
+  IAdaptation,
   getLoggableSegmentId,
   ISegment,
-  Period,
-  Representation,
+  IPeriod,
+  IRepresentation,
 } from "../../../manifest";
 import {
   IChunkCompleteInformation,
@@ -373,9 +373,9 @@ export interface ISegmentFetcherChunkCompleteEvent { type: "chunk-complete" }
 
 /** Content used by the segment loader as a context to load a new segment. */
 export interface ISegmentLoaderContent { manifest : Manifest;
-                                         period : Period;
-                                         adaptation : Adaptation;
-                                         representation : Representation;
+                                         period : IPeriod;
+                                         adaptation : IAdaptation;
+                                         representation : IRepresentation;
                                          segment : ISegment; }
 
 /**

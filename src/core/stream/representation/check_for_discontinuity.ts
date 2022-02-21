@@ -16,9 +16,9 @@
 
 import log from "../../../log";
 import Manifest, {
-  Adaptation,
-  Period,
-  Representation,
+  IAdaptation,
+  IPeriod,
+  IRepresentation,
 } from "../../../manifest";
 import { IBufferedChunk } from "../../segment_buffers";
 import { IBufferDiscontinuity } from "../types";
@@ -50,10 +50,10 @@ import { IBufferDiscontinuity } from "../types";
  * though the array given can be larger.
  */
 export default function checkForDiscontinuity(
-  content : { adaptation : Adaptation;
+  content : { adaptation : IAdaptation;
               manifest : Manifest;
-              period : Period;
-              representation : Representation; },
+              period : IPeriod;
+              representation : IRepresentation; },
   checkedRange : { start : number; end : number },
   nextSegmentStart : number | null,
   hasFinishedLoading : boolean,

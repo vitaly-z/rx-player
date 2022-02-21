@@ -22,10 +22,10 @@ import {
 } from "rxjs";
 import config from "../../../config";
 import Manifest, {
-  Adaptation,
+  IAdaptation,
   ISegment,
-  Period,
-  Representation,
+  IPeriod,
+  IRepresentation,
 } from "../../../manifest";
 import { ISegmentParserParsedMediaChunk } from "../../../transports";
 import objectAssign from "../../../utils/object_assign";
@@ -54,10 +54,10 @@ export default function pushMediaSegment<T>(
     segmentBuffer } :
   { playbackObserver : IReadOnlyPlaybackObserver<{ position : number;
                                                    wantedTimeOffset : number; }>;
-    content: { adaptation : Adaptation;
+    content: { adaptation : IAdaptation;
                manifest : Manifest;
-               period : Period;
-               representation : Representation; };
+               period : IPeriod;
+               representation : IRepresentation; };
     initSegmentData : T | null;
     parsedSegment : ISegmentParserParsedMediaChunk<T>;
     segment : ISegment;

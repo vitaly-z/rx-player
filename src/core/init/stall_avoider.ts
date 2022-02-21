@@ -28,7 +28,7 @@ import config from "../../config";
 import { MediaError } from "../../errors";
 import log from "../../log";
 import Manifest, {
-  Period,
+  IPeriod,
 } from "../../manifest";
 import { getNextRangeGap } from "../../utils/ranges";
 import {
@@ -60,7 +60,7 @@ export interface ILockedStreamEvent {
   /** Buffer type for which no segment will currently load. */
   bufferType : IBufferType;
   /** Period for which no segment will currently load. */
-  period : Period;
+  period : IPeriod;
 }
 
 /**
@@ -72,7 +72,7 @@ export interface IDiscontinuityEvent {
   /** Buffer type concerned by the discontinuity. */
   bufferType : IBufferType;
   /** Period concerned by the discontinuity. */
-  period : Period;
+  period : IPeriod;
   /**
    * Close discontinuity time information.
    * `null` if no discontinuity has been detected currently for that buffer
@@ -110,7 +110,7 @@ interface IDiscontinuityStoredInfo {
   /** Buffer type concerned by the discontinuity. */
   bufferType : IBufferType;
   /** Period concerned by the discontinuity. */
-  period : Period;
+  period : IPeriod;
   /** Discontinuity time information. */
   discontinuity : IDiscontinuityTimeInfo;
   /**

@@ -18,7 +18,6 @@ import {
   catchError,
   concat as observableConcat,
   EMPTY,
-  from as observableFrom,
   ignoreElements,
   map,
   merge as observableMerge,
@@ -33,8 +32,8 @@ import config from "../../../config";
 import { formatError } from "../../../errors";
 import log from "../../../log";
 import Manifest, {
-  Adaptation,
-  Period,
+  IAdaptation,
+  IPeriod,
 } from "../../../manifest";
 import objectAssign from "../../../utils/object_assign";
 import { getLeftSizeOfRange } from "../../../utils/ranges";
@@ -92,7 +91,7 @@ export interface IPeriodStreamArguments {
   abrManager : ABRManager;
   bufferType : IBufferType;
   content : { manifest : Manifest;
-              period : Period; };
+              period : IPeriod; };
   garbageCollectors : WeakMapMemory<SegmentBuffer, Observable<never>>;
   segmentFetcherCreator : SegmentFetcherCreator;
   segmentBuffersStore : SegmentBuffersStore;
@@ -148,10 +147,10 @@ export default function PeriodStream({
 
   // Emits the chosen Adaptation for the current type.
   // `null` when no Adaptation is chosen (e.g. no subtitles)
-  const adaptation$ = new ReplaySubject<Adaptation|null>(1);
+  const adaptation$ = new ReplaySubject<IAdaptation|null>(1);
   return adaptation$.pipe(
     switchMap((
-      adaptation : Adaptation | null,
+      adaptation : IAdaptation | null,
       switchNb : number
     ) : Observable<IPeriodStreamEvent> => {
       /**
@@ -214,11 +213,11 @@ export default function PeriodStream({
                                                        options);
       const playbackInfos = { currentTime: playbackObserver.getCurrentTime(),
                               readyState };
-      const newStream$ = observableFrom(getAdaptationSwitchStrategy(segmentBuffer,
-                                                                    period,
-                                                                    adaptation,
-                                                                    playbackInfos,
-                                                                    options))
+      const newStream$ = observableOf(getAdaptationSwitchStrategy(segmentBuffer,
+                                                                  period,
+                                                                  adaptation,
+                                                                  playbackInfos,
+                                                                  options))
         .pipe(mergeMap((strategy) => {
           if (strategy.type === "needs-reload") {
             return reloadAfterSwitch(period,
@@ -267,7 +266,7 @@ export default function PeriodStream({
    * @returns {Observable}
    */
   function createAdaptationStream(
-    adaptation : Adaptation,
+    adaptation : IAdaptation,
     segmentBuffer : SegmentBuffer
   ) : Observable<IAdaptationStreamEvent|IStreamWarningEvent> {
     const { manifest } = content;
@@ -311,7 +310,7 @@ export default function PeriodStream({
 function createOrReuseSegmentBuffer(
   segmentBuffersStore : SegmentBuffersStore,
   bufferType : IBufferType,
-  adaptation : Adaptation,
+  adaptation : IAdaptation,
   options: { textTrackOptions? : ITextTrackSegmentBufferOptions }
 ) : SegmentBuffer {
   const segmentBufferStatus = segmentBuffersStore.getStatus(bufferType);
@@ -332,7 +331,7 @@ function createOrReuseSegmentBuffer(
  * @param {Adaptation} adaptation
  * @returns {string}
  */
-function getFirstDeclaredMimeType(adaptation : Adaptation) : string {
+function getFirstDeclaredMimeType(adaptation : IAdaptation) : string {
   const { representations } = adaptation;
   if (representations[0] == null) {
     return "";

@@ -24,7 +24,7 @@
 import {
   IRepresentationInfos,
 } from "../adaptation";
-import Representation from "../representation";
+import { type IRepresentation } from "../types";
 
 const minimalRepresentationIndex = {
   getInitSegment() { return null; },
@@ -191,7 +191,7 @@ describe("Manifest - Adaptation", () => {
     const representations = [rep1, rep2, rep3, rep4, rep5, rep6];
 
     const representationFilter = jest.fn((
-      representation : Representation,
+      representation : IRepresentation,
       adaptationInfos : IRepresentationInfos
     ) => {
       if (adaptationInfos.language === "fr" && representation.bitrate < 40) {

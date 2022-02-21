@@ -15,10 +15,10 @@
  */
 
 import config from "../../../config";
-import Manifest, {
-  Adaptation,
-  Period,
-  Representation,
+import IManifest, {
+  IAdaptation,
+  IPeriod,
+  IRepresentation,
 } from "../../../manifest";
 import { IReadOnlyPlaybackObserver } from "../../api";
 import {
@@ -79,10 +79,10 @@ export interface IBufferStatus {
  * @returns {Object}
  */
 export default function getBufferStatus(
-  content: { adaptation : Adaptation;
-             manifest : Manifest;
-             period : Period;
-             representation : Representation; },
+  content: { adaptation : IAdaptation;
+             manifest : IManifest;
+             period : IPeriod;
+             representation : IRepresentation; },
   wantedStartPosition : number,
   playbackObserver : IReadOnlyPlaybackObserver<unknown>,
   fastSwitchThreshold : number | undefined,
@@ -220,10 +220,9 @@ function getPlayableBufferedSegments(
     const eltInventory = segmentInventory[i];
 
     const { representation } = eltInventory.infos;
-    const isSupported = await representation.isSupported;
     if (!eltInventory.partiallyPushed &&
         representation.decipherable !== false &&
-        representation.isSupported)
+        representation.isCodecSupported)
     {
       const inventorySegment = eltInventory.infos.segment;
       const eltInventoryStart = inventorySegment.time /

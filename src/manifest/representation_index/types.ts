@@ -16,9 +16,9 @@
 
 import { ICustomError } from "../../errors";
 import Manifest, {
-  Adaptation,
-  Period,
-  Representation,
+  IAdaptation,
+  IPeriod,
+  IRepresentation,
 } from "../../manifest";
 import { IEMSG } from "../../parsers/containers/isobmff";
 import {
@@ -65,9 +65,9 @@ export interface ISmoothSegmentPrivateInfos {
 
 /** Describes a given "real" Manifest for MetaPlaylist's segments. */
 export interface IBaseContentInfos { manifest: Manifest;
-                                     period: Period;
-                                     adaptation: Adaptation;
-                                     representation: Representation; }
+                                     period: IPeriod;
+                                     adaptation: IAdaptation;
+                                     representation: IRepresentation; }
 
 /** Supplementary information needed for segments in the "metaplaylist" transport. */
 export interface IMetaPlaylistPrivateInfos {

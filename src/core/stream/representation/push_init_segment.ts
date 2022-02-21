@@ -21,10 +21,10 @@ import {
   Observable,
 } from "rxjs";
 import Manifest, {
-  Adaptation,
+  IAdaptation,
   ISegment,
-  Period,
-  Representation,
+  IPeriod,
+  IRepresentation,
 } from "../../../manifest";
 import { IReadOnlyPlaybackObserver } from "../../api";
 import {
@@ -51,10 +51,10 @@ export default function pushInitSegment<T>(
     segmentBuffer } :
   { playbackObserver : IReadOnlyPlaybackObserver<{ position : number;
                                                    wantedTimeOffset : number; }>;
-    content: { adaptation : Adaptation;
+    content: { adaptation : IAdaptation;
                manifest : Manifest;
-               period : Period;
-               representation : Representation; };
+               period : IPeriod;
+               representation : IRepresentation; };
     segmentData : T | null;
     segment : ISegment;
     segmentBuffer : SegmentBuffer; }

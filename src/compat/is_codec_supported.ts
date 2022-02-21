@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-import log from "../log";
-import { Representation } from "../manifest";
 import { MediaSource_ } from "./browser_compatibility_types";
-
-// XXX TODO
-function canUseMediaCapabilitiesApi() : boolean {
-  return true;
-}
 
 /**
  * Returns true if the given codec is supported by the browser's MediaSource
@@ -32,68 +25,14 @@ function canUseMediaCapabilitiesApi() : boolean {
  * codecs used within the file.
  * @returns {Boolean}
  */
-export default async function isCodecSupported(
-  representation : Representation,
-  adaptationType : "audio" | "video"
-) : Promise<boolean> {
-  if (canUseMediaCapabilitiesApi() && adaptationType === "video") {
-    const mimeTypeStr = representation.getMimeTypeString();
-    const width = representation.width ?? 1;
-    const height = representation.height ?? 1;
-    const bitrate = representation.bitrate;
-
-    let framerate = 1;
-    if (representation.frameRate !== undefined) {
-      const tmpFrameRate = parseMaybeDividedNumber(representation.frameRate);
-      if (tmpFrameRate !== null && isFinite(tmpFrameRate)) {
-        framerate = tmpFrameRate;
-      }
-    }
-
-    try {
-      const supportObj = await navigator.mediaCapabilities.decodingInfo({
-        type: "media-source",
-        video: {
-          contentType: mimeTypeStr,
-          width,
-          height,
-          bitrate,
-          framerate,
-        },
-      });
-      return supportObj.supported;
-    } catch (err) {
-      log.warn("Compat: mediaCapabilities.decodingInfo API failed for video content",
-               err);
-    }
-  }
-
+export default function isCodecSupported(mimeTypeStr : string) : boolean {
   if (MediaSource_ == null) {
     return false;
   }
 
   /* eslint-disable-next-line @typescript-eslint/unbound-method */
   if (typeof MediaSource_.isTypeSupported === "function") {
-    const mimeTypeStr = representation.getMimeTypeString();
     return MediaSource_.isTypeSupported(mimeTypeStr);
   }
-
   return true;
-}
-
-/**
- * Frame rates can be expressed as divisions of integers.
- * This function tries to convert it to a floating point value.
- * TODO in v4, declares `frameRate` as number directly
- * @param {string} val
- * @param {string} displayName
- * @returns {Array.<number | Error | null>}
- */
-function parseMaybeDividedNumber(val : string) : number | null {
-  const matches = /^(\d+)\/(\d+)$/.exec(val);
-  if (matches !== null) {
-    // No need to check, we know both are numbers
-    return +matches[1] / +matches[2];
-  }
-  return Number.parseFloat(val);
 }

@@ -39,7 +39,7 @@ import config from "../../../config";
 import { MediaError } from "../../../errors";
 import log from "../../../log";
 import Manifest, {
-  Period,
+  IPeriod,
 } from "../../../manifest";
 import deferSubscriptions from "../../../utils/defer_subscriptions";
 import { fromEvent } from "../../../utils/event_emitter";
@@ -115,7 +115,7 @@ export type IStreamOrchestratorOptions =
  */
 export default function StreamOrchestrator(
   content : { manifest : Manifest;
-              initialPeriod : Period; },
+              initialPeriod : IPeriod; },
   playbackObserver : IReadOnlyPlaybackObserver<IStreamOrchestratorPlaybackObservation>,
   abrManager : ABRManager,
   segmentBuffersStore : SegmentBuffersStore,
@@ -178,7 +178,7 @@ export default function StreamOrchestrator(
 
   // Emits the activePeriodChanged events every time the active Period changes.
   const activePeriodChanged$ = ActivePeriodEmitter(streamsArray).pipe(
-    filter((period) : period is Period => period !== null),
+    filter((period) : period is IPeriod => period !== null),
     map(period => {
       log.info("Stream: New active period", period.start);
       return EVENTS.activePeriodChanged(period);
@@ -216,10 +216,10 @@ export default function StreamOrchestrator(
    */
   function manageEveryStreams(
     bufferType : IBufferType,
-    basePeriod : Period
+    basePeriod : IPeriod
   ) : Observable<IStreamOrchestratorEvent> {
     // Each Period for which there is currently a Stream, chronologically
-    const periodList = new SortedList<Period>((a, b) => a.start - b.start);
+    const periodList = new SortedList<IPeriod>((a, b) => a.start - b.start);
     const destroyStreams$ = new Subject<void>();
 
     // When set to `true`, all the currently active PeriodStream will be destroyed
@@ -234,7 +234,7 @@ export default function StreamOrchestrator(
      * @returns {Observable}
      */
     function launchConsecutiveStreamsForPeriod(
-      period : Period
+      period : IPeriod
     ) : Observable<IStreamOrchestratorEvent> {
       return manageConsecutivePeriodStreams(bufferType, period, destroyStreams$).pipe(
         map((message) => {
@@ -289,7 +289,7 @@ export default function StreamOrchestrator(
     const restartStreamsWhenOutOfBounds$ = playbackObserver.observe(true).pipe(
       filterMap<
         IStreamOrchestratorPlaybackObservation,
-        Period,
+        IPeriod,
         null
       >(({ position, wantedTimeOffset }) => {
         const time = wantedTimeOffset + position;
@@ -400,13 +400,13 @@ export default function StreamOrchestrator(
    */
   function manageConsecutivePeriodStreams(
     bufferType : IBufferType,
-    basePeriod : Period,
+    basePeriod : IPeriod,
     destroy$ : Observable<void>
   ) : Observable<IMultiplePeriodStreamsEvent> {
     log.info("SO: Creating new Stream for", bufferType, basePeriod.start);
 
     // Emits the Period of the next Period Stream when it can be created.
-    const createNextPeriodStream$ = new Subject<Period>();
+    const createNextPeriodStream$ = new Subject<IPeriod>();
 
     // Emits when the Streams for the next Periods should be destroyed, if
     // created.

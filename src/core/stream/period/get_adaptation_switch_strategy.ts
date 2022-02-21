@@ -16,8 +16,8 @@
 
 import config from "../../../config";
 import {
-  Adaptation,
-  Period,
+  IAdaptation,
+  IPeriod,
 } from "../../../manifest";
 import areCodecsCompatible from "../../../utils/are_codecs_compatible";
 import {
@@ -67,18 +67,17 @@ export interface IAdaptationSwitchOptions {
  * @param {Object} playbackInfo
  * @returns {Object}
  */
-export default async function getAdaptationSwitchStrategy(
+export default function getAdaptationSwitchStrategy(
   segmentBuffer : SegmentBuffer,
-  period : Period,
-  adaptation : Adaptation,
+  period : IPeriod,
+  adaptation : IAdaptation,
   playbackInfo : { currentTime : number; readyState : number },
   options : IAdaptationSwitchOptions
-) : Promise<IAdaptationSwitchStrategy> {
+) : IAdaptationSwitchStrategy {
   if (segmentBuffer.codec !== undefined &&
       options.onCodecSwitch === "reload")
   {
-    const isCompat  = await hasCompatibleCodec(adaptation, segmentBuffer.codec);
-    if (!isCompat) {
+    if (!hasCompatibleCodec(adaptation, segmentBuffer.codec)) {
       return { type: "needs-reload", value: undefined };
     }
   }
@@ -131,8 +130,8 @@ export default async function getAdaptationSwitchStrategy(
       if (playbackInfo.readyState > 1) {
         return { type: "needs-reload", value: undefined };
       }
-      const isCompat  = await hasCompatibleCodec(adaptation,
-                                                 segmentBuffer.codec ?? "");
+      const isCompat  = hasCompatibleCodec(adaptation,
+                                           segmentBuffer.codec ?? "");
       if (!isCompat) {
         return { type: "needs-reload", value: undefined };
       }
@@ -211,14 +210,12 @@ export default async function getAdaptationSwitchStrategy(
  * @returns {boolean}
  */
 function hasCompatibleCodec(
-  adaptation : Adaptation,
+  adaptation : IAdaptation,
   segmentBufferCodec : string
-) : Promise<boolean> {
+) : boolean {
   return adaptation.getPlayableRepresentations()
-    .then((playableRepresentations) =>
-      playableRepresentations
-        .some(rep => areCodecsCompatible(rep.getMimeTypeString(),
-                                         segmentBufferCodec)));
+    .some(rep => areCodecsCompatible(rep.getMimeTypeString(),
+                                     segmentBufferCodec));
 }
 
 /**
@@ -231,8 +228,8 @@ function hasCompatibleCodec(
  */
 function getBufferedRangesFromAdaptation(
   inventory : IBufferedChunk[],
-  period : Period,
-  adaptation : Adaptation
+  period : IPeriod,
+  adaptation : IAdaptation
 ) : IRange[] {
   return inventory.reduce<IRange[]>((acc : IRange[], chunk) : IRange[] => {
     if (chunk.infos.period.id !== period.id ||
@@ -258,7 +255,7 @@ function getBufferedRangesFromAdaptation(
  */
 function getLastSegmentBeforePeriod(
   inventory : IBufferedChunk[],
-  period : Period
+  period : IPeriod
 ) : IBufferedChunk | null {
   for (let i = 0; i < inventory.length; i++) {
     if (inventory[i].infos.period.start >= period.start) {
@@ -281,7 +278,7 @@ function getLastSegmentBeforePeriod(
  */
 function getFirstSegmentAfterPeriod(
   inventory : IBufferedChunk[],
-  period : Period
+  period : IPeriod
 ) : IBufferedChunk | null {
   for (let i = 0; i < inventory.length; i++) {
     if (inventory[i].infos.period.start > period.start) {

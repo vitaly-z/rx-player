@@ -16,18 +16,18 @@
  */
 
 import Manifest, {
-  Adaptation,
-  Period,
-  Representation,
+  IAdaptation,
+  IPeriod,
+  IRepresentation,
 } from "../../../manifest";
 import {
   ISegmentParser,
   ITransportPipelines,
 } from "../../../transports";
 export interface IContentInfos { manifest: Manifest;
-                                 period: Period;
-                                 adaptation: Adaptation;
-                                 representation: Representation; }
+                                 period: IPeriod;
+                                 adaptation: IAdaptation;
+                                 representation: IRepresentation; }
 
 export type ILoaders = Partial<Record<string, ITransportPipelines>>;
 

@@ -16,9 +16,9 @@
 
 import { ICustomError } from "../../errors";
 import Manifest, {
-  Adaptation,
-  Period,
-  Representation,
+  IAdaptation,
+  IPeriod,
+  IRepresentation,
 } from "../../manifest";
 import SegmentBuffersStore, {
   IBufferType,
@@ -68,9 +68,9 @@ function unstalled() : IUnstalledEvent {
  */
 function decipherabilityUpdate(
   arg : Array<{ manifest : Manifest;
-                period : Period;
-                adaptation : Adaptation;
-                representation : Representation; }>
+                period : IPeriod;
+                adaptation : IAdaptation;
+                representation : IRepresentation; }>
 ) : IDecipherabilityUpdateEvent {
   return { type: "decipherabilityUpdate", value: arg };
 }
@@ -102,7 +102,7 @@ function manifestUpdate() : IManifestUpdateEvent {
  */
 function nullRepresentation(
   type : IBufferType,
-  period : Period
+  period : IPeriod
 ) : IRepresentationChangeEvent {
   return { type: "representationChange",
            value: { type,

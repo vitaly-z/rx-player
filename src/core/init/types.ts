@@ -16,9 +16,9 @@
 
 import { ICustomError } from "../../errors";
 import Manifest, {
-  Adaptation,
-  Period,
-  Representation,
+  IAdaptation,
+  IPeriod,
+  IRepresentation,
 } from "../../manifest";
 import {
   IAttachedMediaKeysEvent,
@@ -77,9 +77,9 @@ export interface IManifestUpdateEvent { type: "manifestUpdate";
 export interface IDecipherabilityUpdateEvent {
   type: "decipherabilityUpdate";
   value: Array<{ manifest : Manifest;
-                 period : Period;
-                 adaptation : Adaptation;
-                 representation : Representation; }>; }
+                 period : IPeriod;
+                 adaptation : IAdaptation;
+                 representation : IRepresentation; }>; }
 
 /** Event sent when a minor happened. */
 export interface IWarningEvent { type : "warning";
