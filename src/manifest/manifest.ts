@@ -56,22 +56,25 @@ const generateNewManifestId = idGenerator();
  * about a media content, regardless of the streaming protocol.
  * @param {Object} parsedAdaptation
  * @param {Object} options
- * @returns {Object}
+ * @returns {Array.<Object>} Tuple of two values:
+ *   1. The parsed Manifest as an object
+ *   2. Array containing every minor errors that happened when the Manifest has
+ *      been created, in the order they have happened..
  */
 export function createManifestObject(
   parsedManifest : IParsedManifest,
   options : IManifestParsingOptions
-) : IManifest {
+) : [IManifest, ICustomError[]] {
   const eventEmitter = new EventEmitter<IManifestEvents>();
   const { supplementaryTextTracks = [],
           supplementaryImageTracks = [],
           representationFilter } = options;
 
-  const contentWarnings : ICustomError[] = [];
+  const warnings : ICustomError[] = [];
 
   const _periods = parsedManifest.periods.map((parsedPeriod) => {
-    const period = createPeriodObject(parsedPeriod, representationFilter);
-    contentWarnings.push(...period.contentWarnings);
+    const [period, pWarnings] = createPeriodObject(parsedPeriod, representationFilter);
+    warnings.push(...pWarnings);
     return period;
   }).sort((a, b) => a.start - b.start);
 
@@ -83,7 +86,6 @@ export function createManifestObject(
   }
 
   const manifestObject : IManifest = {
-    contentWarnings,
     id: generateNewManifestId(),
     expired: parsedManifest.expired ?? null,
     transport: parsedManifest.transportType,
@@ -119,7 +121,7 @@ export function createManifestObject(
     removeEventListener: eventEmitter.removeEventListener.bind(eventEmitter),
   };
 
-  return manifestObject;
+  return [manifestObject, warnings];
 
   /** @link IManifest */
   function getPeriod(periodId : string) : IPeriod | undefined {
@@ -337,7 +339,7 @@ export function createManifestObject(
         const error =
           new MediaError("MANIFEST_INCOMPATIBLE_CODECS_ERROR",
                          "An Adaptation contains only incompatible codecs.");
-        contentWarnings.push(error);
+        warnings.push(error);
       }
       return newAdaptation;
     });
@@ -395,7 +397,7 @@ export function createManifestObject(
           const error =
             new MediaError("MANIFEST_INCOMPATIBLE_CODECS_ERROR",
                            "An Adaptation contains only incompatible codecs.");
-          contentWarnings.push(error);
+          warnings.push(error);
         }
         return newAdaptation;
       }));
@@ -423,7 +425,6 @@ export function createManifestObject(
     manifestObject.isLive = newManifest.isLive;
     manifestObject.isLastPeriodKnown = newManifest.isLastPeriodKnown;
     manifestObject.lifetime = newManifest.lifetime;
-    manifestObject.contentWarnings = newManifest.contentWarnings;
     manifestObject.suggestedPresentationDelay = newManifest.suggestedPresentationDelay;
     manifestObject.transport = newManifest.transport;
     manifestObject.publishTime = newManifest.publishTime;
