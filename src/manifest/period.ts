@@ -41,49 +41,47 @@ import {
  *   2. Array containing every minor errors that happened when the Manifest has
  *      been created, in the order they have happened..
  */
-export function createPeriodObject(
+export async function createPeriodObject(
   args : IParsedPeriod,
   representationFilter? : IRepresentationFilter | undefined
-) : [IPeriod, ICustomError[]] {
+) : Promise<[IPeriod, ICustomError[]]> {
   const warnings : ICustomError[] = [];
-  const adaptations = (Object.keys(args.adaptations) as IAdaptationType[])
-    .reduce<IManifestAdaptations>((acc, type) => {
-      const adaptationsForType = args.adaptations[type];
-      if (adaptationsForType == null) {
-        return acc;
-      }
-      const filteredAdaptations = adaptationsForType
-        .map((adaptation) : IAdaptation => {
-          const newAdaptation = createAdaptationObject(adaptation,
-                                                       { representationFilter });
-          if (newAdaptation.representations.length > 0 &&
-              !newAdaptation.isCodecSupported)
-          {
-            const error =
-              new MediaError("MANIFEST_INCOMPATIBLE_CODECS_ERROR",
-                             "An Adaptation contains only incompatible codecs.");
-            warnings.push(error);
-          }
-          return newAdaptation;
-        })
-        .filter((adaptation) : adaptation is IAdaptation =>
-          adaptation.representations.length > 0
-        );
-
-      if (
-        filteredAdaptations.every(adaptation => !adaptation.isCodecSupported) &&
-        adaptationsForType.length > 0 &&
-        (type === "video" || type === "audio"))
+  const adaptations : IManifestAdaptations = {};
+  for (const type of Object.keys(args.adaptations) as IAdaptationType[]) {
+    const adaptationsForType = args.adaptations[type];
+    if (adaptationsForType == null) {
+      continue;
+    }
+    const filteredAdaptations : IAdaptation[] = [];
+    for (const adaptation of adaptationsForType) {
+      const newAdaptation = await createAdaptationObject(adaptation,
+                                                         { representationFilter });
+      if (newAdaptation.representations.length > 0 &&
+          !newAdaptation.isCodecSupported)
       {
-        throw new MediaError("MANIFEST_PARSE_ERROR",
-                             "No supported " + type + " adaptations");
+        const error =
+          new MediaError("MANIFEST_INCOMPATIBLE_CODECS_ERROR",
+                         "An Adaptation contains only incompatible codecs.");
+        warnings.push(error);
       }
+      if (newAdaptation.representations.length > 0) {
+        filteredAdaptations.push(newAdaptation);
+      }
+    }
 
-      if (filteredAdaptations.length > 0) {
-        acc[type] = filteredAdaptations;
-      }
-      return acc;
-    }, {});
+    if (
+      filteredAdaptations.every(adaptation => !adaptation.isCodecSupported) &&
+      adaptationsForType.length > 0 &&
+      (type === "video" || type === "audio"))
+    {
+      throw new MediaError("MANIFEST_PARSE_ERROR",
+                           "No supported " + type + " adaptations");
+    }
+
+    if (filteredAdaptations.length > 0) {
+      adaptations[type] = filteredAdaptations;
+    }
+  }
 
   if (!Array.isArray(adaptations.video) &&
       !Array.isArray(adaptations.audio))

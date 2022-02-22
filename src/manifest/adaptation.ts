@@ -40,11 +40,11 @@ export const SUPPORTED_ADAPTATIONS_TYPE: IAdaptationType[] = [ "audio",
  * @param {Object|undefined} [options]
  * @returns {Object}
  */
-export function createAdaptationObject(
+export async function createAdaptationObject(
   parsedAdaptation : IParsedAdaptation,
   options : { representationFilter? : IRepresentationFilter | undefined;
               isManuallyAdded? : boolean | undefined; } = {}
-) : IAdaptation {
+) : Promise<IAdaptation> {
   const { trickModeTracks } = parsedAdaptation;
   const { representationFilter, isManuallyAdded } = options;
 
@@ -82,16 +82,18 @@ export function createAdaptationObject(
 
   if (trickModeTracks !== undefined &&
       trickModeTracks.length > 0) {
-    adaptationObj.trickModeTracks = trickModeTracks
-      .map((track) => createAdaptationObject(track));
+    adaptationObj.trickModeTracks = [];
+    for (const track of trickModeTracks) {
+      adaptationObj.trickModeTracks.push(await createAdaptationObject(track));
+    }
   }
 
   const argsRepresentations = parsedAdaptation.representations;
   const representations : IRepresentation[] = [];
   let isCodecSupported : boolean = false;
   for (let i = 0; i < argsRepresentations.length; i++) {
-    const representation = createRepresentationObject(argsRepresentations[i],
-                                                      { type: adaptationObj.type });
+    const representation = await createRepresentationObject(argsRepresentations[i],
+                                                            { type: adaptationObj.type });
     const shouldAdd =
       isNullOrUndefined(representationFilter) ||
       representationFilter(representation,

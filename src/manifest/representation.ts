@@ -31,10 +31,10 @@ import {
  * @param {Object} opts
  * @returns {Object}
  */
-export function createRepresentationObject(
+export async function createRepresentationObject(
   args : IParsedRepresentation,
   opts : { type : IAdaptationType }
-) : IRepresentation {
+) : Promise<IRepresentation> {
   const representationObj : IRepresentation = {
     id: args.id,
     bitrate: args.bitrate,
@@ -74,10 +74,12 @@ export function createRepresentationObject(
     representationObj.hdrInfo = args.hdrInfo;
   }
 
-  representationObj.isCodecSupported = opts.type === "audio" ||
-                                       opts.type === "video" ?
-    isCodecSupported(getMimeTypeString()) :
-    true; // TODO for other types
+  if (opts.type === "audio" || opts.type === "video") {
+    representationObj.isCodecSupported =
+      await isCodecSupported(representationObj, opts.type);
+  } else {
+    representationObj.isCodecSupported = true; // TODO for other types
+  }
   return representationObj;
 
   /** @link IRepresentation */

@@ -61,10 +61,10 @@ const generateNewManifestId = idGenerator();
  *   2. Array containing every minor errors that happened when the Manifest has
  *      been created, in the order they have happened..
  */
-export function createManifestObject(
+export async function createManifestObject(
   parsedManifest : IParsedManifest,
   options : IManifestParsingOptions
-) : [IManifest, ICustomError[]] {
+) : Promise<[IManifest, ICustomError[]]> {
   const eventEmitter = new EventEmitter<IManifestEvents>();
   const { supplementaryTextTracks = [],
           supplementaryImageTracks = [],
@@ -72,17 +72,20 @@ export function createManifestObject(
 
   const warnings : ICustomError[] = [];
 
-  const _periods = parsedManifest.periods.map((parsedPeriod) => {
-    const [period, pWarnings] = createPeriodObject(parsedPeriod, representationFilter);
+  const _periods : IPeriod[] = [];
+  for (const parsedPeriod of parsedManifest.periods) {
+    const [period, pWarnings] = await createPeriodObject(parsedPeriod,
+                                                         representationFilter);
     warnings.push(...pWarnings);
-    return period;
-  }).sort((a, b) => a.start - b.start);
+    _periods.push(period);
+  }
+  _periods.sort((a, b) => a.start - b.start);
 
   if (supplementaryImageTracks.length > 0) {
-    _addSupplementaryImageAdaptations(supplementaryImageTracks);
+    await _addSupplementaryImageAdaptations(supplementaryImageTracks);
   }
   if (supplementaryTextTracks.length > 0) {
-    _addSupplementaryTextAdaptations(supplementaryTextTracks);
+    await _addSupplementaryTextAdaptations(supplementaryTextTracks);
   }
 
   const manifestObject : IManifest = {
@@ -315,15 +318,16 @@ export function createManifestObject(
    * Add supplementary image Adaptation(s) to the manifest.
    * @param {Object|Array.<Object>} imageTracks
    */
-  function _addSupplementaryImageAdaptations(
+  async function _addSupplementaryImageAdaptations(
     /* eslint-disable-next-line import/no-deprecated */
     imageTracks : ISupplementaryImageTrack | ISupplementaryImageTrack[]
-  ) : void {
+  ) : Promise<void> {
     const _imageTracks = Array.isArray(imageTracks) ? imageTracks : [imageTracks];
-    const newImageTracks = _imageTracks.map(({ mimeType, url }) => {
+    const newImageTracks : IAdaptation[] = [];
+    for (const { mimeType, url } of _imageTracks) {
       const adaptationID = "gen-image-ada-" + generateSupplementaryTrackID();
       const representationID = "gen-image-rep-" + generateSupplementaryTrackID();
-      const newAdaptation = createAdaptationObject({
+      const newAdaptation = await createAdaptationObject({
         id: adaptationID,
         type: "image",
         representations: [{
@@ -341,8 +345,8 @@ export function createManifestObject(
                          "An Adaptation contains only incompatible codecs.");
         warnings.push(error);
       }
-      return newAdaptation;
-    });
+      newImageTracks.push(newAdaptation);
+    }
 
     if (newImageTracks.length > 0 && manifestObject.periods.length > 0) {
       const { adaptations } = manifestObject.periods[0];
@@ -356,28 +360,28 @@ export function createManifestObject(
    * Add supplementary text Adaptation(s) to the manifest.
    * @param {Object|Array.<Object>} textTracks
    */
-  function _addSupplementaryTextAdaptations(
+  async function _addSupplementaryTextAdaptations(
     /* eslint-disable-next-line import/no-deprecated */
     textTracks : ISupplementaryTextTrack|ISupplementaryTextTrack[]
-  ) : void {
+  ) : Promise<void> {
     const _textTracks = Array.isArray(textTracks) ? textTracks : [textTracks];
-    const newTextAdaptations = _textTracks.reduce((allSubs : IAdaptation[], {
-      mimeType,
-      codecs,
-      url,
-      language,
-      /* eslint-disable-next-line import/no-deprecated */
-      languages,
-      closedCaption,
-    }) => {
+    const newTextAdaptations : IAdaptation[] = [];
+    for (const textTrack of _textTracks) {
+      const { mimeType,
+              codecs,
+              url,
+              language,
+              /* eslint-disable-next-line import/no-deprecated */
+              languages,
+              closedCaption } = textTrack;
       const langsToMapOn : string[] = language != null ? [language] :
                                       languages != null ? languages :
                                                           [];
 
-      return allSubs.concat(langsToMapOn.map((_language) => {
+      for (const _language of langsToMapOn) {
         const adaptationID = "gen-text-ada-" + generateSupplementaryTrackID();
         const representationID = "gen-text-rep-" + generateSupplementaryTrackID();
-        const newAdaptation = createAdaptationObject({
+        const newAdaptation = await createAdaptationObject({
           id: adaptationID,
           type: "text",
           language: _language,
@@ -399,9 +403,9 @@ export function createManifestObject(
                            "An Adaptation contains only incompatible codecs.");
           warnings.push(error);
         }
-        return newAdaptation;
-      }));
-    }, []);
+        newTextAdaptations.push(newAdaptation);
+      }
+    }
 
     if (newTextAdaptations.length > 0 && manifestObject.periods.length > 0) {
       const { adaptations } = manifestObject.periods[0];
