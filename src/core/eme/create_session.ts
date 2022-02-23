@@ -160,10 +160,7 @@ function createAndTryToRetrievePersistentSession(
       mergeMap((hasLoadedSession) : Observable<ICreateSessionEvent> => {
         if (!hasLoadedSession) {
           log.warn("EME: No data stored for the loaded session");
-          persistentSessionsStore.delete(initData);
-          return observableOf({ type: "created-session" as const,
-                                value: { mediaKeySession: session,
-                                         sessionType: "persistent-license" } });
+          return recreatePersistentSession();
         }
 
         if (hasLoadedSession && isSessionUsable(session)) {
