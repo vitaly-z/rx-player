@@ -5285,14 +5285,7 @@ function createAndTryToRetrievePersistentSession(loadedSessionsStore, persistent
     return loadSession(session, storedEntry.sessionId).pipe((0,mergeMap/* mergeMap */.z)(function (hasLoadedSession) {
       if (!hasLoadedSession) {
         log/* default.warn */.Z.warn("EME: No data stored for the loaded session");
-        persistentSessionsStore["delete"](initData);
-        return (0,of.of)({
-          type: "created-session",
-          value: {
-            mediaKeySession: session,
-            sessionType: "persistent-license"
-          }
-        });
+        return recreatePersistentSession();
       }
 
       if (hasLoadedSession && isSessionUsable(session)) {
@@ -56046,7 +56039,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     videoElement.preload = "auto";
     _this.version =
     /* PLAYER_VERSION */
-    "3.26.0";
+    "3.26.0-recreatesessiononloadfalse";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -58824,7 +58817,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.26.0";
+"3.26.0-recreatesessiononloadfalse";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
