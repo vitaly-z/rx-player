@@ -68,11 +68,12 @@ var READY_STATES = {
 
 "use strict";
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "zP": function() { return /* binding */ isChromeCast; },
 /* harmony export */   "kD": function() { return /* binding */ isEdgeChromium; },
 /* harmony export */   "fq": function() { return /* binding */ isIE11; },
 /* harmony export */   "YM": function() { return /* binding */ isIEOrEdge; },
 /* harmony export */   "vU": function() { return /* binding */ isFirefox; },
-/* harmony export */   "G6": function() { return /* binding */ isSafari; },
+/* harmony export */   "vS": function() { return /* binding */ isSafariDesktop; },
 /* harmony export */   "SB": function() { return /* binding */ isSafariMobile; },
 /* harmony export */   "op": function() { return /* binding */ isSamsungBrowser; },
 /* harmony export */   "yS": function() { return /* binding */ isTizen; }
@@ -105,7 +106,12 @@ var isEdgeChromium = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z 
 var isFirefox = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z && navigator.userAgent.toLowerCase().indexOf("firefox") !== -1;
 var isSamsungBrowser = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z && /SamsungBrowser/.test(navigator.userAgent);
 var isTizen = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z && /Tizen/.test(navigator.userAgent);
-var isSafari = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z && (Object.prototype.toString.call(window.HTMLElement).indexOf("Constructor") >= 0 || ((_b = (_a = window.safari) === null || _a === void 0 ? void 0 : _a.pushNotification) === null || _b === void 0 ? void 0 : _b.toString()) === "[object SafariRemoteNotification]");
+var isChromeCast = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z && /CrKey/.test(navigator.userAgent);
+/** `true` on Safari on a PC platform (i.e. not iPhone / iPad etc.) */
+
+var isSafariDesktop = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z && (Object.prototype.toString.call(window.HTMLElement).indexOf("Constructor") >= 0 || ((_b = (_a = window.safari) === null || _a === void 0 ? void 0 : _a.pushNotification) === null || _b === void 0 ? void 0 : _b.toString()) === "[object SafariRemoteNotification]");
+/** `true` on Safari on an iPhone, iPad & iPod platform */
+
 var isSafariMobile = !_is_node__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z && typeof navigator.platform === "string" && /iPad|iPhone|iPod/.test(navigator.platform);
 
 
@@ -1284,13 +1290,20 @@ if (is_node/* default */.Z || navigator.requestMediaKeySystemAccess != null && !
 
       if (supported) {
         var keySystemConfigurationResponse = {
-          videoCapabilities: videoCapabilities,
-          audioCapabilities: audioCapabilities,
           initDataTypes: ["cenc"],
           distinctiveIdentifier: "not-allowed",
           persistentState: "required",
           sessionTypes: ["temporary", "persistent-license"]
-        }; // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        };
+
+        if (videoCapabilities !== undefined) {
+          keySystemConfigurationResponse.videoCapabilities = videoCapabilities;
+        }
+
+        if (audioCapabilities !== undefined) {
+          keySystemConfigurationResponse.audioCapabilities = audioCapabilities;
+        } // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
 
         var customMediaKeys = createCustomMediaKeys(keyType);
         return (0,of.of)(new CustomMediaKeySystemAccess(keyType, customMediaKeys, keySystemConfigurationResponse));
@@ -2079,7 +2092,7 @@ function makeCue(startTime, endTime, payload) {
  */
 
 function shouldFavourCustomSafariEME() {
-  return _browser_detection__WEBPACK_IMPORTED_MODULE_0__/* .isSafari */ .G6 && _eme_custom_media_keys_webkit_media_keys_constructor__WEBPACK_IMPORTED_MODULE_1__/* .WebKitMediaKeysConstructor */ .t !== undefined;
+  return (_browser_detection__WEBPACK_IMPORTED_MODULE_0__/* .isSafariDesktop */ .vS || _browser_detection__WEBPACK_IMPORTED_MODULE_0__/* .isSafariMobile */ .SB) && _eme_custom_media_keys_webkit_media_keys_constructor__WEBPACK_IMPORTED_MODULE_1__/* .WebKitMediaKeysConstructor */ .t !== undefined;
 }
 
 /***/ }),
@@ -3375,9 +3388,16 @@ function shouldValidateMetadata() {
 /* harmony export */   "Z": function() { return /* binding */ MediaElementTrackChoiceManager; }
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4578);
-/* harmony import */ var _utils_event_emitter__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1959);
+/* harmony import */ var _utils_assert__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(811);
+/* harmony import */ var _utils_event_emitter__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(1959);
 /* harmony import */ var _utils_languages__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7829);
 
+
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 /**
  * Copyright 2015 CANAL+ Group
@@ -3394,6 +3414,7 @@ function shouldValidateMetadata() {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 /**
@@ -3615,7 +3636,8 @@ var MediaElementTrackChoiceManager = /*#__PURE__*/function (_EventEmitter) {
           nativeTrack = _this$_audioTracks$i.nativeTrack;
 
       if (track.id === id) {
-        nativeTrack.enabled = true;
+        this._enableAudioTrackFromIndex(i);
+
         this._audioTrackLockedOn = nativeTrack;
         return;
       }
@@ -3910,7 +3932,8 @@ var MediaElementTrackChoiceManager = /*#__PURE__*/function (_EventEmitter) {
         var nativeTrack = this._audioTracks[i].nativeTrack;
 
         if (nativeTrack === this._audioTrackLockedOn) {
-          nativeTrack.enabled = true;
+          this._enableAudioTrackFromIndex(i);
+
           return;
         }
       }
@@ -3940,7 +3963,8 @@ var MediaElementTrackChoiceManager = /*#__PURE__*/function (_EventEmitter) {
           var audioTrack = this._audioTracks[j];
 
           if (audioTrack.track.normalized === normalized && audioTrack.track.audioDescription === track.audioDescription) {
-            audioTrack.nativeTrack.enabled = true;
+            this._enableAudioTrackFromIndex(j);
+
             return;
           }
         }
@@ -4316,10 +4340,29 @@ var MediaElementTrackChoiceManager = /*#__PURE__*/function (_EventEmitter) {
         return;
       };
     }
+  }
+  /**
+   * Enable an audio track (and disable all others), based on its index in the
+   * `this._audioTracks` array.
+   * @param {number} index}
+   */
+  ;
+
+  _proto._enableAudioTrackFromIndex = function _enableAudioTrackFromIndex(index) {
+    (0,_utils_assert__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z)(index < this._audioTracks.length); // Seen on Safari MacOS only (2022-02-14), not disabling ALL audio tracks
+    // first (even the wanted one), can lead to the media not playing.
+
+    for (var _iterator = _createForOfIteratorHelperLoose(this._audioTracks), _step; !(_step = _iterator()).done;) {
+      var audioTrack = _step.value;
+      audioTrack.nativeTrack.enabled = false;
+    }
+
+    this._audioTracks[index].nativeTrack.enabled = true;
+    return;
   };
 
   return MediaElementTrackChoiceManager;
-}(_utils_event_emitter__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z);
+}(_utils_event_emitter__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .Z);
 /**
  * Disable all text track elements in the given array from showing.
  * @param {Array.<Object>} textTracks
@@ -5480,26 +5523,25 @@ function buildKeySystemConfigurations(ksName, keySystem) {
   // https://www.w3.org/TR/encrypted-media/#get-supported-configuration-and-consent
 
 
-  var videoCapabilities = (0,flat_map/* default */.Z)(videoRobustnesses, function (robustness) {
-    return [{
-      contentType: "video/mp4;codecs=\"avc1.4d401e\"",
-      robustness: robustness
-    }, {
-      contentType: "video/mp4;codecs=\"avc1.42e01e\"",
-      robustness: robustness
-    }, {
-      contentType: "video/webm;codecs=\"vp8\"",
-      robustness: robustness
-    }];
+  var videoCapabilities = (0,flat_map/* default */.Z)(audioRobustnesses, function (robustness) {
+    return ["video/mp4;codecs=\"avc1.4d401e\"", "video/mp4;codecs=\"avc1.42e01e\"", "video/webm;codecs=\"vp8\""].map(function (contentType) {
+      return robustness !== undefined ? {
+        contentType: contentType,
+        robustness: robustness
+      } : {
+        contentType: contentType
+      };
+    });
   });
   var audioCapabilities = (0,flat_map/* default */.Z)(audioRobustnesses, function (robustness) {
-    return [{
-      contentType: "audio/mp4;codecs=\"mp4a.40.2\"",
-      robustness: robustness
-    }, {
-      contentType: "audio/webm;codecs=opus",
-      robustness: robustness
-    }];
+    return ["audio/mp4;codecs=\"mp4a.40.2\"", "audio/webm;codecs=opus"].map(function (contentType) {
+      return robustness !== undefined ? {
+        contentType: contentType,
+        robustness: robustness
+      } : {
+        contentType: contentType
+      };
+    });
   }); // TODO Re-test with a set contentType but an undefined robustness on the
   // STBs on which this problem was found.
   //
@@ -10287,8 +10329,8 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
     var ret = []; // begins at the end as most of the time the player will ask for the last
     // CuesGroup
 
-    for (var i = cuesBuffer.length - 1; i >= 0; i--) {
-      var segment = cuesBuffer[i];
+    for (var cueIdx = cuesBuffer.length - 1; cueIdx >= 0; cueIdx--) {
+      var segment = cuesBuffer[cueIdx];
 
       if (time < segment.end && time >= segment.start) {
         var cues = segment.cues;
@@ -10318,10 +10360,10 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
     var to = Math.max(from, _to);
     var cuesBuffer = this._cuesBuffer;
 
-    for (var i = 0; i < cuesBuffer.length; i++) {
-      if (cuesBuffer[i].end > from) {
+    for (var cueIdx = 0; cueIdx < cuesBuffer.length; cueIdx++) {
+      if (cuesBuffer[cueIdx].end > from) {
         // this cuesInfos is concerned by the remove
-        var startCuesInfos = cuesBuffer[i];
+        var startCuesInfos = cuesBuffer[cueIdx];
 
         if (startCuesInfos.start >= to) {
           // our cuesInfos is strictly after this interval, we have nothing to do
@@ -10340,8 +10382,8 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
                 cuesInfos1 = _removeCuesInfosBetwe[0],
                 cuesInfos2 = _removeCuesInfosBetwe[1];
 
-            this._cuesBuffer[i] = cuesInfos1;
-            cuesBuffer.splice(i + 1, 0, cuesInfos2);
+            this._cuesBuffer[cueIdx] = cuesInfos1;
+            cuesBuffer.splice(cueIdx + 1, 0, cuesInfos2);
           } // No cuesInfos can be concerned after this one, we can quit
 
 
@@ -10351,8 +10393,8 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
 
         if (startCuesInfos.start >= from) {
           // all the segment is concerned
-          cuesBuffer.splice(i, 1);
-          i--; // one less element, we have to decrement the loop
+          cuesBuffer.splice(cueIdx, 1);
+          cueIdx--; // one less element, we have to decrement the loop
         } else {
           // only the end is concerned
           startCuesInfos.cues = getCuesBefore(startCuesInfos.cues, from);
@@ -10442,8 +10484,8 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
       }
     }
 
-    for (var i = 0; i < cuesBuffer.length; i++) {
-      var cuesInfos = cuesBuffer[i];
+    for (var cueIdx = 0; cueIdx < cuesBuffer.length; cueIdx++) {
+      var cuesInfos = cuesBuffer[cueIdx];
 
       if (start < cuesInfos.end) {
         if (areNearlyEqual(start, cuesInfos.start)) {
@@ -10454,7 +10496,7 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
             //   Result:          |AAAAA|
             // Which means:
             //   1. replace the current cue with ours
-            cuesBuffer[i] = cuesInfosToInsert;
+            cuesBuffer[cueIdx] = cuesInfosToInsert;
             return;
           } else if (end < cuesInfos.end) {
             // our cue overlaps with the current one:
@@ -10467,7 +10509,7 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
             //   3. add ours before the current one
             cuesInfos.cues = getCuesAfter(cuesInfos.cues, end);
             cuesInfos.start = end;
-            cuesBuffer.splice(i, 0, cuesInfosToInsert);
+            cuesBuffer.splice(cueIdx, 0, cuesInfosToInsert);
             return;
           } // our cue goes beyond the current one:
           //   ours:            |AAAAAAA|
@@ -10478,11 +10520,11 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
 
 
           do {
-            cuesBuffer.splice(i, 1);
-            cuesInfos = cuesBuffer[i];
+            cuesBuffer.splice(cueIdx, 1);
+            cuesInfos = cuesBuffer[cueIdx];
           } while (cuesInfos !== undefined && end > cuesInfos.end);
 
-          onIndexOfNextCueFound(i);
+          onIndexOfNextCueFound(cueIdx);
           return;
         } else if (start < cuesInfos.start) {
           if (end < cuesInfos.start) {
@@ -10492,7 +10534,7 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
             //   Result:          |AAAAAAA| |BBBB|
             // Which means:
             //   - add ours before the current one
-            cuesBuffer.splice(i, 0, cuesInfosToInsert);
+            cuesBuffer.splice(cueIdx, 0, cuesInfosToInsert);
             return;
           } else if (areNearlyEqual(end, cuesInfos.start)) {
             // our cue goes just before the current one:
@@ -10503,14 +10545,14 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
             //   - update start time of the current one to be sure
             //   - add ours before the current one
             cuesInfos.start = end;
-            cuesBuffer.splice(i, 0, cuesInfosToInsert);
+            cuesBuffer.splice(cueIdx, 0, cuesInfosToInsert);
             return;
           } else if (areNearlyEqual(end, cuesInfos.end)) {
             //   ours:            |AAAAAAA|
             //   the current one:    |BBBB|
             //   Result:          |AAAAAAA|
             // Replace
-            cuesBuffer.splice(i, 1, cuesInfosToInsert);
+            cuesBuffer.splice(cueIdx, 1, cuesInfosToInsert);
             return;
           } else if (end < cuesInfos.end) {
             //   ours:            |AAAAAAA|
@@ -10518,7 +10560,7 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
             //   Result:          |AAAAAAABB|
             cuesInfos.cues = getCuesAfter(cuesInfos.cues, end);
             cuesInfos.start = end;
-            cuesBuffer.splice(i, 0, cuesInfosToInsert);
+            cuesBuffer.splice(cueIdx, 0, cuesInfosToInsert);
             return;
           } //   ours:            |AAAAAAA|
           //   the current one:   |BBB|...
@@ -10526,11 +10568,11 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
 
 
           do {
-            cuesBuffer.splice(i, 1);
-            cuesInfos = cuesBuffer[i];
+            cuesBuffer.splice(cueIdx, 1);
+            cuesInfos = cuesBuffer[cueIdx];
           } while (cuesInfos !== undefined && end > cuesInfos.end);
 
-          onIndexOfNextCueFound(i);
+          onIndexOfNextCueFound(cueIdx);
           return;
         } // else -> start > cuesInfos.start
 
@@ -10541,7 +10583,7 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
           //   Result:          |BBAAAAAA|
           cuesInfos.cues = getCuesBefore(cuesInfos.cues, start);
           cuesInfos.end = start;
-          cuesBuffer.splice(i + 1, 0, cuesInfosToInsert);
+          cuesBuffer.splice(cueIdx + 1, 0, cuesInfosToInsert);
           return;
         } else if (cuesInfos.end > end) {
           //   ours:              |AAAAAA|
@@ -10551,9 +10593,9 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
               cuesInfos1 = _removeCuesInfosBetwe2[0],
               cuesInfos2 = _removeCuesInfosBetwe2[1];
 
-          this._cuesBuffer[i] = cuesInfos1;
-          cuesBuffer.splice(i + 1, 0, cuesInfosToInsert);
-          cuesBuffer.splice(i + 2, 0, cuesInfos2);
+          this._cuesBuffer[cueIdx] = cuesInfos1;
+          cuesBuffer.splice(cueIdx + 1, 0, cuesInfosToInsert);
+          cuesBuffer.splice(cueIdx + 2, 0, cuesInfos2);
           return;
         } else {
           //   ours:              |AAAAAA|
@@ -10561,14 +10603,15 @@ var TextTrackCuesStore = /*#__PURE__*/function () {
           //   Result:          |BBAAAAAA|...
           cuesInfos.cues = getCuesBefore(cuesInfos.cues, start);
           cuesInfos.end = start;
-          cuesInfos = cuesBuffer[i + 1];
+          var nextCueIdx = cueIdx + 1;
+          cuesInfos = cuesBuffer[nextCueIdx];
 
           while (cuesInfos !== undefined && end > cuesInfos.end) {
-            cuesBuffer.splice(i, 1);
-            cuesInfos = cuesBuffer[i];
+            cuesBuffer.splice(nextCueIdx, 1);
+            cuesInfos = cuesBuffer[nextCueIdx];
           }
 
-          onIndexOfNextCueFound(i);
+          onIndexOfNextCueFound(nextCueIdx);
           return;
         }
       }
@@ -13765,7 +13808,11 @@ var RequestError = /*#__PURE__*/function (_Error) {
     Object.setPrototypeOf((0,_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .Z)(_this), RequestError.prototype);
     _this.name = "RequestError";
     _this.url = url;
-    _this.xhr = xhr;
+
+    if (xhr !== undefined) {
+      _this.xhr = xhr;
+    }
+
     _this.status = status;
     _this.type = type;
     _this.message = type;
@@ -13982,7 +14029,7 @@ var logger = new Logger();
 
 /***/ }),
 
-/***/ 8999:
+/***/ 3089:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -13990,15 +14037,22 @@ var logger = new Logger();
 // EXPORTS
 __webpack_require__.d(__webpack_exports__, {
   "r": function() { return /* binding */ SUPPORTED_ADAPTATIONS_TYPE; },
-  "Z": function() { return /* binding */ Adaptation; }
+  "K": function() { return /* binding */ createAdaptationObject; }
 });
 
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(5861);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
+var regenerator = __webpack_require__(7757);
+var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 // EXTERNAL MODULE: ./src/utils/array_find.ts
 var array_find = __webpack_require__(3274);
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
 var is_null_or_undefined = __webpack_require__(1946);
 // EXTERNAL MODULE: ./src/utils/languages/index.ts
 var languages = __webpack_require__(7829);
+// EXTERNAL MODULE: ./src/utils/promise.ts
+var promise = __webpack_require__(9589);
 ;// CONCATENATED MODULE: ./src/utils/uniq.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -14076,25 +14130,237 @@ var browser_compatibility_types = __webpack_require__(3774);
  * @returns {Boolean}
  */
 
-function isCodecSupported(mimeType) {
+function isCodecSupported(mimeTypeStr) {
   if (browser_compatibility_types/* MediaSource_ */.J == null) {
     return false;
   }
-  /* eslint-disable @typescript-eslint/unbound-method */
+  /* eslint-disable-next-line @typescript-eslint/unbound-method */
 
 
   if (typeof browser_compatibility_types/* MediaSource_.isTypeSupported */.J.isTypeSupported === "function") {
-    /* eslint-enable @typescript-eslint/unbound-method */
-    return browser_compatibility_types/* MediaSource_.isTypeSupported */.J.isTypeSupported(mimeType);
+    return browser_compatibility_types/* MediaSource_.isTypeSupported */.J.isTypeSupported(mimeTypeStr);
   }
 
   return true;
 }
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
+// EXTERNAL MODULE: ./src/utils/object_assign.ts
+var object_assign = __webpack_require__(8026);
+// EXTERNAL MODULE: ./src/compat/browser_detection.ts
+var browser_detection = __webpack_require__(3666);
+// EXTERNAL MODULE: ./src/compat/is_node.ts
+var is_node = __webpack_require__(2203);
+;// CONCATENATED MODULE: ./src/compat/check_decoding_capabilities_support.ts
+
+
+
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+/**
+ * Object allowing to store short-term information on decoding capabilities, to
+ * avoid calling multiple times the same API when video characteristics are
+ * similar.
+ */
+
+var VideoDecodingInfoMemory = {};
+/**
+ * Contains the timeout id of the timer used to clear `VideoDecodingInfoMemory`.
+ */
+
+var VideoCapabilitiesTimeout;
+/**
+ * If `false`, MediaCapability APIs cannot be relied on.
+ * Most of the exception here are set due to Shaka-Player also avoiding to use
+ * the API on them.
+ */
+
+var CanUseMediaCapabilitiesApi = !is_node/* default */.Z && !browser_detection/* isChromeCast */.zP && !browser_detection/* isSafariMobile */.SB && !browser_detection/* isSafariDesktop */.vS && typeof navigator.mediaCapabilities === "object";
+/**
+ * Use the `MediaCapabilities` web APIs to detect if the given Representation is
+ * supported or not.
+ * Returns `true` if it is supported, false it is not and `undefined if it
+ * cannot tell.
+ * @param {Object} representation
+ * @param {string} adaptationType
+ * @returns {Promise.<boolean|undefined>}
+ */
+
+function checkDecodingCapabilitiesSupport(_x, _x2) {
+  return _checkDecodingCapabilitiesSupport.apply(this, arguments);
+}
+/**
+ * Frame rates can be expressed as divisions of integers.
+ * This function tries to convert it to a floating point value.
+ * TODO in v4, declares `frameRate` as number directly
+ * @param {string} val
+ * @param {string} displayName
+ * @returns {Array.<number | Error | null>}
+ */
+
+function _checkDecodingCapabilitiesSupport() {
+  _checkDecodingCapabilitiesSupport = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee2(representation, adaptationType) {
+    var _a, _b, _c, mimeTypeStr, tmpFrameRate, framerate, width, height, bitrate, decodingForMimeType, _iterator, _step, characteristics, runCheck, _runCheck;
+
+    return regenerator_default().wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            _runCheck = function _runCheck3() {
+              _runCheck = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee() {
+                var videoCharacs, supportObj;
+                return regenerator_default().wrap(function _callee$(_context) {
+                  while (1) {
+                    switch (_context.prev = _context.next) {
+                      case 0:
+                        _context.prev = 0;
+                        videoCharacs = {
+                          contentType: mimeTypeStr,
+                          width: width,
+                          height: height,
+                          bitrate: bitrate,
+                          framerate: framerate
+                        };
+                        _context.next = 4;
+                        return navigator.mediaCapabilities.decodingInfo({
+                          type: "media-source",
+                          video: videoCharacs
+                        });
+
+                      case 4:
+                        supportObj = _context.sent;
+
+                        if (VideoDecodingInfoMemory[mimeTypeStr] === undefined) {
+                          VideoDecodingInfoMemory[mimeTypeStr] = [];
+                        }
+
+                        VideoDecodingInfoMemory[mimeTypeStr].push((0,object_assign/* default */.Z)({
+                          result: supportObj
+                        }, videoCharacs));
+
+                        if (VideoCapabilitiesTimeout === undefined) {
+                          VideoCapabilitiesTimeout = window.setTimeout(function () {
+                            VideoCapabilitiesTimeout = undefined;
+                            VideoDecodingInfoMemory = {};
+                          }, 0);
+                        }
+
+                        return _context.abrupt("return", supportObj.supported);
+
+                      case 11:
+                        _context.prev = 11;
+                        _context.t0 = _context["catch"](0);
+                        log/* default.warn */.Z.warn("Compat: mediaCapabilities.decodingInfo API failed for video content", _context.t0);
+                        throw _context.t0;
+
+                      case 15:
+                      case "end":
+                        return _context.stop();
+                    }
+                  }
+                }, _callee, null, [[0, 11]]);
+              }));
+              return _runCheck.apply(this, arguments);
+            };
+
+            runCheck = function _runCheck2() {
+              return _runCheck.apply(this, arguments);
+            };
+
+            if (!(!CanUseMediaCapabilitiesApi || adaptationType !== "video")) {
+              _context2.next = 4;
+              break;
+            }
+
+            return _context2.abrupt("return", undefined);
+
+          case 4:
+            mimeTypeStr = representation.getMimeTypeString();
+            tmpFrameRate = representation.frameRate !== undefined ? parseMaybeDividedNumber(representation.frameRate) : null;
+            framerate = tmpFrameRate !== null && !isNaN(tmpFrameRate) && isFinite(tmpFrameRate) ? tmpFrameRate : 1;
+            width = (_a = representation.width) !== null && _a !== void 0 ? _a : 1;
+            height = (_b = representation.height) !== null && _b !== void 0 ? _b : 1;
+            bitrate = (_c = representation.bitrate) !== null && _c !== void 0 ? _c : 1;
+            decodingForMimeType = VideoDecodingInfoMemory[mimeTypeStr];
+
+            if (!(decodingForMimeType === undefined)) {
+              _context2.next = 13;
+              break;
+            }
+
+            return _context2.abrupt("return", runCheck());
+
+          case 13:
+            _iterator = _createForOfIteratorHelperLoose(decodingForMimeType);
+
+          case 14:
+            if ((_step = _iterator()).done) {
+              _context2.next = 20;
+              break;
+            }
+
+            characteristics = _step.value;
+
+            if (!(characteristics.bitrate === bitrate && characteristics.width === width && characteristics.height === height && characteristics.framerate === framerate)) {
+              _context2.next = 18;
+              break;
+            }
+
+            return _context2.abrupt("return", characteristics.result.supported);
+
+          case 18:
+            _context2.next = 14;
+            break;
+
+          case 20:
+          case "end":
+            return _context2.stop();
+        }
+      }
+    }, _callee2);
+  }));
+  return _checkDecodingCapabilitiesSupport.apply(this, arguments);
+}
+
+function parseMaybeDividedNumber(val) {
+  var matches = /^(\d+)\/(\d+)$/.exec(val);
+
+  if (matches !== null) {
+    // No need to check, we know both are numbers
+    return +matches[1] / +matches[2];
+  }
+
+  return Number.parseFloat(val);
+}
 // EXTERNAL MODULE: ./src/utils/are_arrays_of_numbers_equal.ts
 var are_arrays_of_numbers_equal = __webpack_require__(4791);
 ;// CONCATENATED MODULE: ./src/manifest/representation.ts
+
+
+
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -14114,237 +14380,217 @@ var are_arrays_of_numbers_equal = __webpack_require__(4791);
 
 
 /**
- * Normalized Representation structure.
- * @class Representation
+ * Create an `IRepresentation`-compatible object, which will declare a single
+ * "Representation" (i.e. quality) of a track.
+ * @param {Object} args
+ * @param {Object} opts
+ * @returns {Object}
  */
 
-var Representation = /*#__PURE__*/function () {
-  /**
-   * @param {Object} args
-   */
-  function Representation(args, opts) {
-    this.id = args.id;
-    this.bitrate = args.bitrate;
-    this.codec = args.codecs;
+function createRepresentationObject(_x, _x2) {
+  return _createRepresentationObject.apply(this, arguments);
+}
 
-    if (args.height !== undefined) {
-      this.height = args.height;
-    }
+function _createRepresentationObject() {
+  _createRepresentationObject = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(args, opts) {
+    var _a, representationObj, getMimeTypeString, getEncryptionData, getAllEncryptionData, _addProtectionData;
 
-    if (args.width !== undefined) {
-      this.width = args.width;
-    }
+    return regenerator_default().wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            _addProtectionData = function _addProtectionData2(initDataType, data) {
+              var contentProtections = representationObj.contentProtections;
+              var hasUpdatedProtectionData = false;
 
-    if (args.mimeType !== undefined) {
-      this.mimeType = args.mimeType;
-    }
-
-    if (args.contentProtections !== undefined) {
-      this.contentProtections = args.contentProtections;
-    }
-
-    if (args.frameRate !== undefined) {
-      this.frameRate = args.frameRate;
-    }
-
-    if (args.hdrInfo !== undefined) {
-      this.hdrInfo = args.hdrInfo;
-    }
-
-    this.index = args.index;
-    this.isSupported = opts.type === "audio" || opts.type === "video" ? isCodecSupported(this.getMimeTypeString()) : true; // TODO for other types
-  }
-  /**
-   * Returns "mime-type string" which includes both the mime-type and the codec,
-   * which is often needed when interacting with the browser's APIs.
-   * @returns {string}
-   */
-
-
-  var _proto = Representation.prototype;
-
-  _proto.getMimeTypeString = function getMimeTypeString() {
-    var _a, _b;
-
-    return ((_a = this.mimeType) !== null && _a !== void 0 ? _a : "") + ";codecs=\"" + ((_b = this.codec) !== null && _b !== void 0 ? _b : "") + "\"";
-  }
-  /**
-   * Returns encryption initialization data linked to the given DRM's system ID.
-   * This data may be useful to decrypt encrypted media segments.
-   *
-   * Returns an empty array if there is no data found for that system ID at the
-   * moment.
-   *
-   * When you know that all encryption data has been added to this
-   * Representation, you can also call the `getAllEncryptionData` method.
-   * This second function will return all encryption initialization data
-   * regardless of the DRM system, and might thus be used in all cases.
-   *
-   * /!\ Note that encryption initialization data may be progressively added to
-   * this Representation after `_addProtectionData` calls or Manifest updates.
-   * Because of this, the return value of this function might change after those
-   * events.
-   *
-   * @param {string} drmSystemId - The hexa-encoded DRM system ID
-   * @returns {Array.<Object>}
-   */
-  ;
-
-  _proto.getEncryptionData = function getEncryptionData(drmSystemId) {
-    var _a;
-
-    var allInitData = this.getAllEncryptionData();
-    var filtered = [];
-
-    for (var i = 0; i < allInitData.length; i++) {
-      var createdObjForType = false;
-      var initData = allInitData[i];
-
-      for (var j = 0; j < initData.values.length; j++) {
-        if (initData.values[j].systemId.toLowerCase() === drmSystemId.toLowerCase()) {
-          if (!createdObjForType) {
-            var keyIds = (_a = this.contentProtections) === null || _a === void 0 ? void 0 : _a.keyIds.map(function (val) {
-              return val.keyId;
-            });
-            filtered.push({
-              type: initData.type,
-              keyIds: keyIds,
-              values: [initData.values[j]]
-            });
-            createdObjForType = true;
-          } else {
-            filtered[filtered.length - 1].values.push(initData.values[j]);
-          }
-        }
-      }
-    }
-
-    return filtered;
-  }
-  /**
-   * Returns all currently-known encryption initialization data linked to this
-   * Representation.
-   * Encryption initialization data is generally required to be able to decrypt
-   * those Representation's media segments.
-   *
-   * Unlike `getEncryptionData`, this method will return all available
-   * encryption data.
-   * It might as such might be used when either the current drm's system id is
-   * not known or when no encryption data specific to it was found. In that
-   * case, providing every encryption data linked to this Representation might
-   * still allow decryption.
-   *
-   * Returns an empty array in two cases:
-   *   - the content is not encrypted.
-   *   - We don't have any decryption data yet.
-   *
-   * /!\ Note that new encryption initialization data can be added progressively
-   * through the `_addProtectionData` method or through Manifest updates.
-   * It is thus highly advised to only rely on this method once every protection
-   * data related to this Representation has been known to be added.
-   *
-   * The main situation where new encryption initialization data is added is
-   * after parsing this Representation's initialization segment, if one exists.
-   * @returns {Array.<Object>}
-   */
-  ;
-
-  _proto.getAllEncryptionData = function getAllEncryptionData() {
-    var _a;
-
-    if (this.contentProtections === undefined || this.contentProtections.initData.length === 0) {
-      return [];
-    }
-
-    var keyIds = (_a = this.contentProtections) === null || _a === void 0 ? void 0 : _a.keyIds.map(function (val) {
-      return val.keyId;
-    });
-    return this.contentProtections.initData.map(function (x) {
-      return {
-        type: x.type,
-        keyIds: keyIds,
-        values: x.values
-      };
-    });
-  }
-  /**
-   * Add new encryption initialization data to this Representation if it was not
-   * already included.
-   *
-   * Returns `true` if new encryption initialization data has been added.
-   * Returns `false` if none has been added (e.g. because it was already known).
-   *
-   * /!\ Mutates the current Representation
-   *
-   * TODO better handle use cases like key rotation by not always grouping
-   * every protection data together? To check.
-   * @param {string} initDataArr
-   * @param {string} systemId
-   * @param {Uint8Array} data
-   * @returns {boolean}
-   */
-  ;
-
-  _proto._addProtectionData = function _addProtectionData(initDataType, data) {
-    var hasUpdatedProtectionData = false;
-
-    if (this.contentProtections === undefined) {
-      this.contentProtections = {
-        keyIds: [],
-        initData: [{
-          type: initDataType,
-          values: data
-        }]
-      };
-      return true;
-    }
-
-    var cInitData = this.contentProtections.initData;
-
-    for (var i = 0; i < cInitData.length; i++) {
-      if (cInitData[i].type === initDataType) {
-        var cValues = cInitData[i].values; // loop through data
-
-        for (var dataI = 0; dataI < data.length; dataI++) {
-          var dataToAdd = data[dataI];
-          var cValuesIdx = void 0;
-
-          for (cValuesIdx = 0; cValuesIdx < cValues.length; cValuesIdx++) {
-            if (dataToAdd.systemId === cValues[cValuesIdx].systemId) {
-              if ((0,are_arrays_of_numbers_equal/* default */.Z)(dataToAdd.data, cValues[cValuesIdx].data)) {
-                // go to next dataToAdd
-                break;
-              } else {
-                log/* default.warn */.Z.warn("Manifest: different init data for the same system ID");
+              if (contentProtections === undefined) {
+                representationObj.contentProtections = {
+                  keyIds: [],
+                  initData: [{
+                    type: initDataType,
+                    values: data
+                  }]
+                };
+                return true;
               }
+
+              var cInitData = contentProtections.initData;
+
+              for (var i = 0; i < cInitData.length; i++) {
+                if (cInitData[i].type === initDataType) {
+                  var cValues = cInitData[i].values; // loop through data
+
+                  for (var dataI = 0; dataI < data.length; dataI++) {
+                    var dataToAdd = data[dataI];
+                    var cValuesIdx = void 0;
+
+                    for (cValuesIdx = 0; cValuesIdx < cValues.length; cValuesIdx++) {
+                      if (dataToAdd.systemId === cValues[cValuesIdx].systemId) {
+                        if ((0,are_arrays_of_numbers_equal/* default */.Z)(dataToAdd.data, cValues[cValuesIdx].data)) {
+                          // go to next dataToAdd
+                          break;
+                        } else {
+                          log/* default.warn */.Z.warn("Manifest: different init data for the same system ID");
+                        }
+                      }
+                    }
+
+                    if (cValuesIdx === cValues.length) {
+                      // we didn't break the loop === we didn't already find that value
+                      cValues.push(dataToAdd);
+                      hasUpdatedProtectionData = true;
+                    }
+                  }
+
+                  return hasUpdatedProtectionData;
+                }
+              } // If we are here, this means that we didn't find the corresponding
+              // init data type in this.contentProtections.initData.
+
+
+              contentProtections.initData.push({
+                type: initDataType,
+                values: data
+              });
+              return true;
+            };
+
+            getAllEncryptionData = function _getAllEncryptionData() {
+              var contentProtections = representationObj.contentProtections;
+
+              if (contentProtections === undefined || contentProtections.initData.length === 0) {
+                return [];
+              }
+
+              var keyIds = contentProtections === null || contentProtections === void 0 ? void 0 : contentProtections.keyIds.map(function (val) {
+                return val.keyId;
+              });
+              return contentProtections.initData.map(function (x) {
+                return {
+                  type: x.type,
+                  keyIds: keyIds,
+                  values: x.values
+                };
+              });
+            };
+
+            getEncryptionData = function _getEncryptionData(drmSystemId) {
+              var _a;
+
+              var allInitData = getAllEncryptionData();
+              var filtered = [];
+
+              for (var i = 0; i < allInitData.length; i++) {
+                var createdObjForType = false;
+                var initData = allInitData[i];
+
+                for (var j = 0; j < initData.values.length; j++) {
+                  if (initData.values[j].systemId.toLowerCase() === drmSystemId.toLowerCase()) {
+                    if (!createdObjForType) {
+                      var keyIds = (_a = representationObj.contentProtections) === null || _a === void 0 ? void 0 : _a.keyIds.map(function (val) {
+                        return val.keyId;
+                      });
+                      filtered.push({
+                        type: initData.type,
+                        keyIds: keyIds,
+                        values: [initData.values[j]]
+                      });
+                      createdObjForType = true;
+                    } else {
+                      filtered[filtered.length - 1].values.push(initData.values[j]);
+                    }
+                  }
+                }
+              }
+
+              return filtered;
+            };
+
+            getMimeTypeString = function _getMimeTypeString() {
+              var _a, _b;
+
+              return ((_a = representationObj.mimeType) !== null && _a !== void 0 ? _a : "") + ";" + ("codecs=\"" + ((_b = representationObj.codec) !== null && _b !== void 0 ? _b : "") + "\"");
+            };
+
+            representationObj = {
+              id: args.id,
+              bitrate: args.bitrate,
+              codec: args.codecs,
+              index: args.index,
+              getMimeTypeString: getMimeTypeString,
+              getEncryptionData: getEncryptionData,
+              getAllEncryptionData: getAllEncryptionData,
+              _addProtectionData: _addProtectionData,
+              // Set first to default `false` value, to have a valid Representation object
+              isCodecSupported: false,
+              isSupported: false
+            };
+
+            if (args.height !== undefined) {
+              representationObj.height = args.height;
             }
-          }
 
-          if (cValuesIdx === cValues.length) {
-            // we didn't break the loop === we didn't already find that value
-            cValues.push(dataToAdd);
-            hasUpdatedProtectionData = true;
-          }
+            if (args.width !== undefined) {
+              representationObj.width = args.width;
+            }
+
+            if (args.mimeType !== undefined) {
+              representationObj.mimeType = args.mimeType;
+            }
+
+            if (args.contentProtections !== undefined) {
+              representationObj.contentProtections = args.contentProtections;
+            }
+
+            if (args.frameRate !== undefined) {
+              representationObj.frameRate = args.frameRate;
+            }
+
+            if (args.hdrInfo !== undefined) {
+              representationObj.hdrInfo = args.hdrInfo;
+            }
+
+            if (!(opts.type === "audio" || opts.type === "video")) {
+              _context.next = 18;
+              break;
+            }
+
+            representationObj.isCodecSupported = isCodecSupported((_a = representationObj.getMimeTypeString()) !== null && _a !== void 0 ? _a : "");
+            _context.next = 15;
+            return checkDecodingCapabilitiesSupport(representationObj, opts.type);
+
+          case 15:
+            representationObj.isSupported = _context.sent;
+            _context.next = 20;
+            break;
+
+          case 18:
+            representationObj.isCodecSupported = true; // TODO for other types
+
+            representationObj.isSupported = true;
+
+          case 20:
+            return _context.abrupt("return", representationObj);
+
+          case 21:
+          case "end":
+            return _context.stop();
         }
-
-        return hasUpdatedProtectionData;
       }
-    } // If we are here, this means that we didn't find the corresponding
-    // init data type in this.contentProtections.initData.
-
-
-    this.contentProtections.initData.push({
-      type: initDataType,
-      values: data
-    });
-    return true;
-  };
-
-  return Representation;
-}();
-
-/* harmony default export */ var manifest_representation = (Representation);
+    }, _callee);
+  }));
+  return _createRepresentationObject.apply(this, arguments);
+}
 ;// CONCATENATED MODULE: ./src/manifest/adaptation.ts
+
+
+
+function adaptation_createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = adaptation_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function adaptation_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return adaptation_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return adaptation_arrayLikeToArray(o, minLen); }
+
+function adaptation_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -14360,6 +14606,7 @@ var Representation = /*#__PURE__*/function () {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 
@@ -14369,163 +14616,196 @@ var Representation = /*#__PURE__*/function () {
 
 var SUPPORTED_ADAPTATIONS_TYPE = ["audio", "video", "text", "image"];
 /**
- * Normalized Adaptation structure.
- * An Adaptation describes a single `Track`. For example a specific audio
- * track (in a given language) or a specific video track.
- * It istelf can be represented in different qualities, which we call here
- * `Representation`.
- * @class Adaptation
+ * Create an `IAdaptation`-compatible object, which will declare a single
+ * "Adaptation" (i.e. track) of a content.
+ * @param {Object} parsedAdaptation
+ * @param {Object|undefined} [options]
+ * @returns {Object}
  */
 
-var Adaptation = /*#__PURE__*/function () {
-  /**
-   * @constructor
-   * @param {Object} parsedAdaptation
-   * @param {Object|undefined} [options]
-   */
-  function Adaptation(parsedAdaptation, options) {
-    if (options === void 0) {
-      options = {};
-    }
+function createAdaptationObject(_x, _x2) {
+  return _createAdaptationObject.apply(this, arguments);
+}
 
-    var trickModeTracks = parsedAdaptation.trickModeTracks;
-    var _options = options,
-        representationFilter = _options.representationFilter,
-        isManuallyAdded = _options.isManuallyAdded;
-    this.id = parsedAdaptation.id;
-    this.isTrickModeTrack = parsedAdaptation.isTrickModeTrack;
-    this.type = parsedAdaptation.type;
+function _createAdaptationObject() {
+  _createAdaptationObject = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(parsedAdaptation, options) {
+    var trickModeTracks, _options, representationFilter, isManuallyAdded, adaptationObj, _iterator, _step, track, argsRepresentations, representationProms, hasSupport, i, representations, filteredRepresentations, _iterator2, _step2, representation, shouldAdd, getAvailableBitrates, getPlayableRepresentations, getRepresentation;
 
-    if (parsedAdaptation.language !== undefined) {
-      this.language = parsedAdaptation.language;
-      this.normalizedLanguage = (0,languages/* default */.ZP)(parsedAdaptation.language);
-    }
+    return regenerator_default().wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            getRepresentation = function _getRepresentation(wantedId) {
+              return (0,array_find/* default */.Z)(adaptationObj.representations, function (_ref) {
+                var id = _ref.id;
+                return wantedId === id;
+              });
+            };
 
-    if (parsedAdaptation.closedCaption !== undefined) {
-      this.isClosedCaption = parsedAdaptation.closedCaption;
-    }
+            getPlayableRepresentations = function _getPlayableRepresent() {
+              return adaptationObj.representations.filter(function (rep) {
+                return rep.isCodecSupported && rep.decipherable !== false && rep.isSupported !== false;
+              });
+            };
 
-    if (parsedAdaptation.audioDescription !== undefined) {
-      this.isAudioDescription = parsedAdaptation.audioDescription;
-    }
+            getAvailableBitrates = function _getAvailableBitrates() {
+              var bitrates = [];
 
-    if (parsedAdaptation.isDub !== undefined) {
-      this.isDub = parsedAdaptation.isDub;
-    }
+              for (var _i = 0; _i < adaptationObj.representations.length; _i++) {
+                var representation = adaptationObj.representations[_i];
 
-    if (parsedAdaptation.isSignInterpreted !== undefined) {
-      this.isSignInterpreted = parsedAdaptation.isSignInterpreted;
-    }
+                if (representation.decipherable !== false) {
+                  bitrates.push(representation.bitrate);
+                }
+              }
 
-    if (trickModeTracks !== undefined && trickModeTracks.length > 0) {
-      this.trickModeTracks = trickModeTracks.map(function (track) {
-        return new Adaptation(track);
-      });
-    }
+              return uniq(bitrates);
+            };
 
-    var argsRepresentations = parsedAdaptation.representations;
-    var representations = [];
-    var isSupported = false;
+            if (options === void 0) {
+              options = {};
+            }
 
-    for (var i = 0; i < argsRepresentations.length; i++) {
-      var representation = new manifest_representation(argsRepresentations[i], {
-        type: this.type
-      });
-      var shouldAdd = (0,is_null_or_undefined/* default */.Z)(representationFilter) || representationFilter(representation, {
-        bufferType: this.type,
-        language: this.language,
-        normalizedLanguage: this.normalizedLanguage,
-        isClosedCaption: this.isClosedCaption,
-        isDub: this.isDub,
-        isAudioDescription: this.isAudioDescription,
-        isSignInterpreted: this.isSignInterpreted
-      });
+            trickModeTracks = parsedAdaptation.trickModeTracks;
+            _options = options, representationFilter = _options.representationFilter, isManuallyAdded = _options.isManuallyAdded;
+            adaptationObj = {
+              id: parsedAdaptation.id,
+              type: parsedAdaptation.type,
+              representations: [],
+              hasSupport: false,
+              getAvailableBitrates: getAvailableBitrates,
+              getPlayableRepresentations: getPlayableRepresentations,
+              getRepresentation: getRepresentation
+            };
 
-      if (shouldAdd) {
-        representations.push(representation);
+            if (parsedAdaptation.isTrickModeTrack !== undefined) {
+              adaptationObj.isTrickModeTrack = parsedAdaptation.isTrickModeTrack;
+            }
 
-        if (!isSupported && representation.isSupported) {
-          isSupported = true;
+            if (parsedAdaptation.language !== undefined) {
+              adaptationObj.language = parsedAdaptation.language;
+              adaptationObj.normalizedLanguage = (0,languages/* default */.ZP)(parsedAdaptation.language);
+            }
+
+            if (parsedAdaptation.closedCaption !== undefined) {
+              adaptationObj.isClosedCaption = parsedAdaptation.closedCaption;
+            }
+
+            if (parsedAdaptation.audioDescription !== undefined) {
+              adaptationObj.isAudioDescription = parsedAdaptation.audioDescription;
+            }
+
+            if (parsedAdaptation.isDub !== undefined) {
+              adaptationObj.isDub = parsedAdaptation.isDub;
+            }
+
+            if (parsedAdaptation.isSignInterpreted !== undefined) {
+              adaptationObj.isSignInterpreted = parsedAdaptation.isSignInterpreted;
+            }
+
+            if (!(trickModeTracks !== undefined && trickModeTracks.length > 0)) {
+              _context.next = 25;
+              break;
+            }
+
+            adaptationObj.trickModeTracks = [];
+            _iterator = adaptation_createForOfIteratorHelperLoose(trickModeTracks);
+
+          case 16:
+            if ((_step = _iterator()).done) {
+              _context.next = 25;
+              break;
+            }
+
+            track = _step.value;
+            _context.t0 = adaptationObj.trickModeTracks;
+            _context.next = 21;
+            return createAdaptationObject(track);
+
+          case 21:
+            _context.t1 = _context.sent;
+
+            _context.t0.push.call(_context.t0, _context.t1);
+
+          case 23:
+            _context.next = 16;
+            break;
+
+          case 25:
+            argsRepresentations = parsedAdaptation.representations;
+            representationProms = [];
+            hasSupport = false;
+
+            for (i = 0; i < argsRepresentations.length; i++) {
+              representationProms.push(createRepresentationObject(argsRepresentations[i], {
+                type: adaptationObj.type
+              }));
+            }
+
+            _context.next = 31;
+            return promise/* default.all */.Z.all(representationProms);
+
+          case 31:
+            representations = _context.sent;
+            filteredRepresentations = [];
+
+            for (_iterator2 = adaptation_createForOfIteratorHelperLoose(representations); !(_step2 = _iterator2()).done;) {
+              representation = _step2.value;
+              shouldAdd = (0,is_null_or_undefined/* default */.Z)(representationFilter) || representationFilter(representation, {
+                bufferType: adaptationObj.type,
+                language: adaptationObj.language,
+                normalizedLanguage: adaptationObj.normalizedLanguage,
+                isClosedCaption: adaptationObj.isClosedCaption,
+                isDub: adaptationObj.isDub,
+                isAudioDescription: adaptationObj.isAudioDescription,
+                isSignInterpreted: adaptationObj.isSignInterpreted
+              });
+
+              if (shouldAdd) {
+                filteredRepresentations.push(representation);
+
+                if (!hasSupport && representation.isCodecSupported && representation.isSupported !== false) {
+                  hasSupport = true;
+                }
+              }
+            }
+
+            filteredRepresentations.sort(function (a, b) {
+              return a.bitrate - b.bitrate;
+            });
+            adaptationObj.representations = filteredRepresentations;
+            adaptationObj.hasSupport = hasSupport; // for manuallyAdded adaptations (not in the manifest)
+
+            adaptationObj.manuallyAdded = isManuallyAdded === true;
+            return _context.abrupt("return", adaptationObj);
+
+          case 39:
+          case "end":
+            return _context.stop();
         }
       }
-    }
-
-    representations.sort(function (a, b) {
-      return a.bitrate - b.bitrate;
-    });
-    this.representations = representations;
-    this.isSupported = isSupported; // for manuallyAdded adaptations (not in the manifest)
-
-    this.manuallyAdded = isManuallyAdded === true;
-  }
-  /**
-   * Returns unique bitrate for every Representation in this Adaptation.
-   * @returns {Array.<Number>}
-   */
-
-
-  var _proto = Adaptation.prototype;
-
-  _proto.getAvailableBitrates = function getAvailableBitrates() {
-    var bitrates = [];
-
-    for (var i = 0; i < this.representations.length; i++) {
-      var representation = this.representations[i];
-
-      if (representation.decipherable !== false) {
-        bitrates.push(representation.bitrate);
-      }
-    }
-
-    return uniq(bitrates);
-  }
-  /**
-   * Returns all Representation in this Adaptation that can be played (that is:
-   * not undecipherable and with a supported codec).
-   * @returns {Array.<Representation>}
-   */
-  ;
-
-  _proto.getPlayableRepresentations = function getPlayableRepresentations() {
-    return this.representations.filter(function (rep) {
-      return rep.isSupported && rep.decipherable !== false;
-    });
-  }
-  /**
-   * Returns the Representation linked to the given ID.
-   * @param {number|string} wantedId
-   * @returns {Object|undefined}
-   */
-  ;
-
-  _proto.getRepresentation = function getRepresentation(wantedId) {
-    return (0,array_find/* default */.Z)(this.representations, function (_ref) {
-      var id = _ref.id;
-      return wantedId === id;
-    });
-  };
-
-  return Adaptation;
-}();
-
-
+    }, _callee);
+  }));
+  return _createAdaptationObject.apply(this, arguments);
+}
 
 /***/ }),
 
-/***/ 1989:
+/***/ 7244:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 
 // EXPORTS
 __webpack_require__.d(__webpack_exports__, {
-  "ZP": function() { return /* binding */ manifest; }
+  "P": function() { return /* binding */ createManifestObject; }
 });
 
-// UNUSED EXPORTS: Adaptation, MANIFEST_UPDATE_TYPE, Period, Representation, SUPPORTED_ADAPTATIONS_TYPE, StaticRepresentationIndex, areSameContent, getLoggableSegmentId
-
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inheritsLoose.js
-var inheritsLoose = __webpack_require__(4578);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(5861);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
+var regenerator = __webpack_require__(7757);
+var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 // EXTERNAL MODULE: ./src/errors/media_error.ts
 var media_error = __webpack_require__(3714);
 // EXTERNAL MODULE: ./src/utils/are_arrays_of_numbers_equal.ts
@@ -14536,13 +14816,24 @@ var array_find = __webpack_require__(3274);
 var event_emitter = __webpack_require__(1959);
 // EXTERNAL MODULE: ./src/utils/id_generator.ts
 var id_generator = __webpack_require__(908);
+// EXTERNAL MODULE: ./src/utils/promise.ts
+var promise = __webpack_require__(9589);
 // EXTERNAL MODULE: ./src/utils/warn_once.ts
 var warn_once = __webpack_require__(8806);
-// EXTERNAL MODULE: ./src/manifest/adaptation.ts + 3 modules
-var manifest_adaptation = __webpack_require__(8999);
+// EXTERNAL MODULE: ./src/manifest/adaptation.ts + 4 modules
+var manifest_adaptation = __webpack_require__(3089);
 // EXTERNAL MODULE: ./src/utils/object_values.ts
 var object_values = __webpack_require__(1679);
 ;// CONCATENATED MODULE: ./src/manifest/period.ts
+
+
+
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -14562,143 +14853,169 @@ var object_values = __webpack_require__(1679);
 
 
 
+
 /**
- * Class representing the tracks and qualities available from a given time
- * period in the the Manifest.
- * @class Period
+ * Create an `IPeriod`-compatible object, which will declare the characteristics
+ * of a content during a particular time period.
+ * @param {Object} parsedPeriod
+ * @param {function|undefined} representationFilter
+ * @returns {Array.<Object>} Tuple of two values:
+ *   1. The parsed Period as an object
+ *   2. Array containing every minor errors that happened when the Manifest has
+ *      been created, in the order they have happened..
  */
 
-var Period = /*#__PURE__*/function () {
-  /**
-   * @constructor
-   * @param {Object} args
-   * @param {function|undefined} [representationFilter]
-   */
-  function Period(args, representationFilter) {
-    var _this = this;
+function createPeriodObject(_x, _x2) {
+  return _createPeriodObject.apply(this, arguments);
+}
 
-    this.contentWarnings = [];
-    this.id = args.id;
-    this.adaptations = Object.keys(args.adaptations).reduce(function (acc, type) {
-      var adaptationsForType = args.adaptations[type];
+function _createPeriodObject() {
+  _createPeriodObject = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(args, representationFilter) {
+    var _a, warnings, adaptations, _i, _Object$keys, type, adapType, adaptationsForType, adaptationProms, _iterator, _step, adaptation, adaptationArr, filteredAdaptations, _iterator2, _step2, newAdaptation, error, end, periodObject, getAdaptations, getAdaptationsForType, getAdaptation, getSupportedAdaptations;
 
-      if (adaptationsForType == null) {
-        return acc;
-      }
+    return regenerator_default().wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            getSupportedAdaptations = function _getSupportedAdaptati(aType) {
+              if (aType === undefined) {
+                return getAdaptations().filter(function (ada) {
+                  return ada.hasSupport;
+                });
+              }
 
-      var filteredAdaptations = adaptationsForType.map(function (adaptation) {
-        var newAdaptation = new manifest_adaptation/* default */.Z(adaptation, {
-          representationFilter: representationFilter
-        });
+              var adaptationsForType = adaptations[aType];
 
-        if (newAdaptation.representations.length > 0 && !newAdaptation.isSupported) {
-          var error = new media_error/* default */.Z("MANIFEST_INCOMPATIBLE_CODECS_ERROR", "An Adaptation contains only incompatible codecs.");
+              if (adaptationsForType === undefined) {
+                return [];
+              }
 
-          _this.contentWarnings.push(error);
+              return adaptationsForType.filter(function (ada) {
+                return ada.hasSupport;
+              });
+            };
+
+            getAdaptation = function _getAdaptation(wantedId) {
+              return (0,array_find/* default */.Z)(getAdaptations(), function (_ref) {
+                var adapId = _ref.id;
+                return wantedId === adapId;
+              });
+            };
+
+            getAdaptationsForType = function _getAdaptationsForTyp(adaptationType) {
+              var adaptationsForType = adaptations[adaptationType];
+              return adaptationsForType == null ? [] : adaptationsForType;
+            };
+
+            getAdaptations = function _getAdaptations() {
+              return (0,object_values/* default */.Z)(adaptations).reduce(function (acc, adaps) {
+                return acc.concat(adaps);
+              }, []);
+            };
+
+            warnings = [];
+            adaptations = {};
+            _i = 0, _Object$keys = Object.keys(args.adaptations);
+
+          case 7:
+            if (!(_i < _Object$keys.length)) {
+              _context.next = 26;
+              break;
+            }
+
+            type = _Object$keys[_i];
+            adapType = type;
+            adaptationsForType = args.adaptations[adapType];
+
+            if (!(adaptationsForType == null)) {
+              _context.next = 13;
+              break;
+            }
+
+            return _context.abrupt("continue", 23);
+
+          case 13:
+            adaptationProms = [];
+
+            for (_iterator = _createForOfIteratorHelperLoose(adaptationsForType); !(_step = _iterator()).done;) {
+              adaptation = _step.value;
+              adaptationProms.push((0,manifest_adaptation/* createAdaptationObject */.K)(adaptation, {
+                representationFilter: representationFilter
+              }));
+            }
+
+            _context.next = 17;
+            return promise/* default.all */.Z.all(adaptationProms);
+
+          case 17:
+            adaptationArr = _context.sent;
+            filteredAdaptations = [];
+
+            for (_iterator2 = _createForOfIteratorHelperLoose(adaptationArr); !(_step2 = _iterator2()).done;) {
+              newAdaptation = _step2.value;
+
+              if (newAdaptation.representations.length > 0 && !newAdaptation.hasSupport) {
+                error = new media_error/* default */.Z("MANIFEST_INCOMPATIBLE_CODECS_ERROR", "An Adaptation contains only incompatible codecs.");
+                warnings.push(error);
+              }
+
+              if (newAdaptation.representations.length > 0) {
+                filteredAdaptations.push(newAdaptation);
+              }
+            }
+
+            if (!(filteredAdaptations.every(function (adaptation) {
+              return !adaptation.hasSupport;
+            }) && adaptationsForType.length > 0 && (adapType === "video" || adapType === "audio"))) {
+              _context.next = 22;
+              break;
+            }
+
+            throw new media_error/* default */.Z("MANIFEST_PARSE_ERROR", "No supported " + adapType + " adaptations");
+
+          case 22:
+            if (filteredAdaptations.length > 0) {
+              adaptations[adapType] = filteredAdaptations;
+            }
+
+          case 23:
+            _i++;
+            _context.next = 7;
+            break;
+
+          case 26:
+            if (!(!Array.isArray(adaptations.video) && !Array.isArray(adaptations.audio))) {
+              _context.next = 28;
+              break;
+            }
+
+            throw new media_error/* default */.Z("MANIFEST_PARSE_ERROR", "No supported audio and video tracks.");
+
+          case 28:
+            end = args.duration !== undefined && args.start !== undefined ? args.duration + args.start : undefined;
+            periodObject = {
+              id: args.id,
+              adaptations: adaptations,
+              start: args.start,
+              duration: args.duration,
+              end: end,
+              streamEvents: (_a = args.streamEvents) !== null && _a !== void 0 ? _a : [],
+              getAdaptations: getAdaptations,
+              getAdaptationsForType: getAdaptationsForType,
+              getAdaptation: getAdaptation,
+              getSupportedAdaptations: getSupportedAdaptations
+            };
+            return _context.abrupt("return", [periodObject, warnings]);
+
+          case 31:
+          case "end":
+            return _context.stop();
         }
-
-        return newAdaptation;
-      }).filter(function (adaptation) {
-        return adaptation.representations.length > 0;
-      });
-
-      if (filteredAdaptations.every(function (adaptation) {
-        return !adaptation.isSupported;
-      }) && adaptationsForType.length > 0 && (type === "video" || type === "audio")) {
-        throw new media_error/* default */.Z("MANIFEST_PARSE_ERROR", "No supported " + type + " adaptations");
       }
-
-      if (filteredAdaptations.length > 0) {
-        acc[type] = filteredAdaptations;
-      }
-
-      return acc;
-    }, {});
-
-    if (!Array.isArray(this.adaptations.video) && !Array.isArray(this.adaptations.audio)) {
-      throw new media_error/* default */.Z("MANIFEST_PARSE_ERROR", "No supported audio and video tracks.");
-    }
-
-    this.duration = args.duration;
-    this.start = args.start;
-
-    if (this.duration != null && this.start != null) {
-      this.end = this.start + this.duration;
-    }
-
-    this.streamEvents = args.streamEvents === undefined ? [] : args.streamEvents;
-  }
-  /**
-   * Returns every `Adaptations` (or `tracks`) linked to that Period, in an
-   * Array.
-   * @returns {Array.<Object>}
-   */
-
-
-  var _proto = Period.prototype;
-
-  _proto.getAdaptations = function getAdaptations() {
-    var adaptationsByType = this.adaptations;
-    return (0,object_values/* default */.Z)(adaptationsByType).reduce( // Note: the second case cannot happen. TS is just being dumb here
-    function (acc, adaptations) {
-      return adaptations != null ? acc.concat(adaptations) : acc;
-    }, []);
-  }
-  /**
-   * Returns every `Adaptations` (or `tracks`) linked to that Period for a
-   * given type.
-   * @param {string} adaptationType
-   * @returns {Array.<Object>}
-   */
-  ;
-
-  _proto.getAdaptationsForType = function getAdaptationsForType(adaptationType) {
-    var adaptationsForType = this.adaptations[adaptationType];
-    return adaptationsForType == null ? [] : adaptationsForType;
-  }
-  /**
-   * Returns the Adaptation linked to the given ID.
-   * @param {number|string} wantedId
-   * @returns {Object|undefined}
-   */
-  ;
-
-  _proto.getAdaptation = function getAdaptation(wantedId) {
-    return (0,array_find/* default */.Z)(this.getAdaptations(), function (_ref) {
-      var id = _ref.id;
-      return wantedId === id;
-    });
-  }
-  /**
-   * Returns Adaptations that contain Representations in supported codecs.
-   * @param {string|undefined} type - If set filter on a specific Adaptation's
-   * type. Will return for all types if `undefined`.
-   * @returns {Array.<Adaptation>}
-   */
-  ;
-
-  _proto.getSupportedAdaptations = function getSupportedAdaptations(type) {
-    if (type === undefined) {
-      return this.getAdaptations().filter(function (ada) {
-        return ada.isSupported;
-      });
-    }
-
-    var adaptationsForType = this.adaptations[type];
-
-    if (adaptationsForType === undefined) {
-      return [];
-    }
-
-    return adaptationsForType.filter(function (ada) {
-      return ada.isSupported;
-    });
-  };
-
-  return Period;
-}();
-
-
+    }, _callee);
+  }));
+  return _createPeriodObject.apply(this, arguments);
+}
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
 ;// CONCATENATED MODULE: ./src/manifest/representation_index/static.ts
@@ -15098,6 +15415,13 @@ function updatePeriods(oldPeriods, newPeriods) {
 ;// CONCATENATED MODULE: ./src/manifest/manifest.ts
 
 
+
+function manifest_createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = manifest_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function manifest_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return manifest_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return manifest_arrayLikeToArray(o, minLen); }
+
+function manifest_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -15124,553 +15448,23 @@ function updatePeriods(oldPeriods, newPeriods) {
 
 
 
+
 var generateSupplementaryTrackID = (0,id_generator/* default */.Z)();
 var generateNewManifestId = (0,id_generator/* default */.Z)();
 /**
- * Normalized Manifest structure.
- *
- * Details the current content being played:
- *   - the duration of the content
- *   - the available tracks
- *   - the available qualities
- *   - the segments defined in those qualities
- *   - ...
- * while staying agnostic of the transport protocol used (Smooth, DASH etc.).
- *
- * The Manifest and its contained information can evolve over time (like when
- * updating a dynamic manifest or when right management forbid some tracks from
- * being played).
- * To perform actions on those changes, any module using this Manifest can
- * listen to its sent events and react accordingly.
- *
- * @class Manifest
+ * Create an `IManifest`-compatible object, which will list all characteristics
+ * about a media content, regardless of the streaming protocol.
+ * @param {Object} parsedAdaptation
+ * @param {Object} options
+ * @returns {Array.<Object>} Tuple of two values:
+ *   1. The parsed Manifest as an object
+ *   2. Array containing every minor errors that happened when the Manifest has
+ *      been created, in the order they have happened..
  */
 
-var Manifest = /*#__PURE__*/function (_EventEmitter) {
-  (0,inheritsLoose/* default */.Z)(Manifest, _EventEmitter);
-
-  /**
-   * Construct a Manifest instance from a parsed Manifest object (as returned by
-   * Manifest parsers) and options.
-   *
-   * Some minor errors can arise during that construction. `this.contentWarnings`
-   * will contain all such errors, in the order they have been encountered.
-   * @param {Object} parsedManifest
-   * @param {Object} options
-   */
-  function Manifest(parsedManifest, options) {
-    var _this;
-
-    var _a;
-
-    _this = _EventEmitter.call(this) || this;
-    var _options$supplementar = options.supplementaryTextTracks,
-        supplementaryTextTracks = _options$supplementar === void 0 ? [] : _options$supplementar,
-        _options$supplementar2 = options.supplementaryImageTracks,
-        supplementaryImageTracks = _options$supplementar2 === void 0 ? [] : _options$supplementar2,
-        representationFilter = options.representationFilter,
-        manifestUpdateUrl = options.manifestUpdateUrl;
-    _this.contentWarnings = [];
-    _this.id = generateNewManifestId();
-    _this.expired = (_a = parsedManifest.expired) !== null && _a !== void 0 ? _a : null;
-    _this.transport = parsedManifest.transportType;
-    _this.clockOffset = parsedManifest.clockOffset;
-    _this.periods = parsedManifest.periods.map(function (parsedPeriod) {
-      var _this$contentWarnings;
-
-      var period = new Period(parsedPeriod, representationFilter);
-
-      (_this$contentWarnings = _this.contentWarnings).push.apply(_this$contentWarnings, period.contentWarnings);
-
-      return period;
-    }).sort(function (a, b) {
-      return a.start - b.start;
-    });
-    /**
-     * @deprecated It is here to ensure compatibility with the way the
-     * v3.x.x manages adaptations at the Manifest level
-     */
-
-    /* eslint-disable import/no-deprecated */
-
-    _this.adaptations = _this.periods[0] === undefined ? {} : _this.periods[0].adaptations;
-    /* eslint-enable import/no-deprecated */
-
-    _this._timeBounds = parsedManifest.timeBounds;
-    _this.isDynamic = parsedManifest.isDynamic;
-    _this.isLive = parsedManifest.isLive;
-    _this.isLastPeriodKnown = parsedManifest.isLastPeriodKnown;
-    _this.uris = parsedManifest.uris === undefined ? [] : parsedManifest.uris;
-    _this.updateUrl = manifestUpdateUrl;
-    _this.lifetime = parsedManifest.lifetime;
-    _this.suggestedPresentationDelay = parsedManifest.suggestedPresentationDelay;
-    _this.availabilityStartTime = parsedManifest.availabilityStartTime;
-    _this.publishTime = parsedManifest.publishTime;
-
-    if (supplementaryImageTracks.length > 0) {
-      _this._addSupplementaryImageAdaptations(supplementaryImageTracks);
-    }
-
-    if (supplementaryTextTracks.length > 0) {
-      _this._addSupplementaryTextAdaptations(supplementaryTextTracks);
-    }
-
-    return _this;
-  }
-  /**
-   * Returns the Period corresponding to the given `id`.
-   * Returns `undefined` if there is none.
-   * @param {string} id
-   * @returns {Object|undefined}
-   */
-
-
-  var _proto = Manifest.prototype;
-
-  _proto.getPeriod = function getPeriod(id) {
-    return (0,array_find/* default */.Z)(this.periods, function (period) {
-      return id === period.id;
-    });
-  }
-  /**
-   * Returns the Period encountered at the given time.
-   * Returns `undefined` if there is no Period exactly at the given time.
-   * @param {number} time
-   * @returns {Object|undefined}
-   */
-  ;
-
-  _proto.getPeriodForTime = function getPeriodForTime(time) {
-    return (0,array_find/* default */.Z)(this.periods, function (period) {
-      return time >= period.start && (period.end === undefined || period.end > time);
-    });
-  }
-  /**
-   * Returns the first Period starting strictly after the given time.
-   * Returns `undefined` if there is no Period starting after that time.
-   * @param {number} time
-   * @returns {Object|undefined}
-   */
-  ;
-
-  _proto.getNextPeriod = function getNextPeriod(time) {
-    return (0,array_find/* default */.Z)(this.periods, function (period) {
-      return period.start > time;
-    });
-  }
-  /**
-   * Returns the Period coming chronologically just after another given Period.
-   * Returns `undefined` if not found.
-   * @param {Object} period
-   * @returns {Object|null}
-   */
-  ;
-
-  _proto.getPeriodAfter = function getPeriodAfter(period) {
-    var endOfPeriod = period.end;
-
-    if (endOfPeriod === undefined) {
-      return null;
-    }
-
-    var nextPeriod = (0,array_find/* default */.Z)(this.periods, function (_period) {
-      return _period.end === undefined || endOfPeriod < _period.end;
-    });
-    return nextPeriod === undefined ? null : nextPeriod;
-  }
-  /**
-   * Returns the most important URL from which the Manifest can be refreshed.
-   * `undefined` if no URL is found.
-   * @returns {string|undefined}
-   */
-  ;
-
-  _proto.getUrl = function getUrl() {
-    return this.uris[0];
-  }
-  /**
-   * Update the current Manifest properties by giving a new updated version.
-   * This instance will be updated with the new information coming from it.
-   * @param {Object} newManifest
-   */
-  ;
-
-  _proto.replace = function replace(newManifest) {
-    this._performUpdate(newManifest, MANIFEST_UPDATE_TYPE.Full);
-  }
-  /**
-   * Update the current Manifest properties by giving a new but shorter version
-   * of it.
-   * This instance will add the new information coming from it and will
-   * automatically clean old Periods that shouldn't be available anymore.
-   *
-   * /!\ Throws if the given Manifest cannot be used or is not sufficient to
-   * update the Manifest.
-   * @param {Object} newManifest
-   */
-  ;
-
-  _proto.update = function update(newManifest) {
-    this._performUpdate(newManifest, MANIFEST_UPDATE_TYPE.Partial);
-  }
-  /**
-   * Get the minimum position currently defined by the Manifest, in seconds.
-   * @returns {number}
-   */
-  ;
-
-  _proto.getMinimumPosition = function getMinimumPosition() {
-    var _a, _b;
-
-    var windowData = this._timeBounds;
-
-    if (windowData.timeshiftDepth === null) {
-      return (_a = windowData.absoluteMinimumTime) !== null && _a !== void 0 ? _a : 0;
-    }
-
-    var maximumTimeData = windowData.maximumTimeData;
-    var maximumTime;
-
-    if (!windowData.maximumTimeData.isLinear) {
-      maximumTime = maximumTimeData.value;
-    } else {
-      var timeDiff = performance.now() - maximumTimeData.time;
-      maximumTime = maximumTimeData.value + timeDiff / 1000;
-    }
-
-    var theoricalMinimum = maximumTime - windowData.timeshiftDepth;
-    return Math.max((_b = windowData.absoluteMinimumTime) !== null && _b !== void 0 ? _b : 0, theoricalMinimum);
-  }
-  /**
-   * Get the maximum position currently defined by the Manifest, in seconds.
-   * @returns {number}
-   */
-  ;
-
-  _proto.getMaximumPosition = function getMaximumPosition() {
-    var maximumTimeData = this._timeBounds.maximumTimeData;
-
-    if (!maximumTimeData.isLinear) {
-      return maximumTimeData.value;
-    }
-
-    var timeDiff = performance.now() - maximumTimeData.time;
-    return maximumTimeData.value + timeDiff / 1000;
-  }
-  /**
-   * Look in the Manifest for Representations linked to the given key ID,
-   * and mark them as being impossible to decrypt.
-   * Then trigger a "decipherabilityUpdate" event to notify everyone of the
-   * changes performed.
-   * @param {Object} keyUpdates
-   */
-  ;
-
-  _proto.updateDeciperabilitiesBasedOnKeyIds = function updateDeciperabilitiesBasedOnKeyIds(_ref) {
-    var whitelistedKeyIds = _ref.whitelistedKeyIds,
-        blacklistedKeyIDs = _ref.blacklistedKeyIDs;
-    var updates = updateDeciperability(this, function (representation) {
-      if (representation.decipherable === false || representation.contentProtections === undefined) {
-        return representation.decipherable;
-      }
-
-      var contentKIDs = representation.contentProtections.keyIds;
-
-      for (var i = 0; i < contentKIDs.length; i++) {
-        var elt = contentKIDs[i];
-
-        for (var j = 0; j < blacklistedKeyIDs.length; j++) {
-          if ((0,are_arrays_of_numbers_equal/* default */.Z)(blacklistedKeyIDs[j], elt.keyId)) {
-            return false;
-          }
-        }
-
-        for (var _j = 0; _j < whitelistedKeyIds.length; _j++) {
-          if ((0,are_arrays_of_numbers_equal/* default */.Z)(whitelistedKeyIds[_j], elt.keyId)) {
-            return true;
-          }
-        }
-      }
-
-      return representation.decipherable;
-    });
-
-    if (updates.length > 0) {
-      this.trigger("decipherabilityUpdate", updates);
-    }
-  }
-  /**
-   * Look in the Manifest for Representations linked to the given content
-   * protection initialization data and mark them as being impossible to
-   * decrypt.
-   * Then trigger a "decipherabilityUpdate" event to notify everyone of the
-   * changes performed.
-   * @param {Object} initData
-   */
-  ;
-
-  _proto.addUndecipherableProtectionData = function addUndecipherableProtectionData(initData) {
-    var updates = updateDeciperability(this, function (representation) {
-      var _a, _b;
-
-      if (representation.decipherable === false) {
-        return false;
-      }
-
-      var segmentProtections = (_b = (_a = representation.contentProtections) === null || _a === void 0 ? void 0 : _a.initData) !== null && _b !== void 0 ? _b : [];
-
-      var _loop = function _loop(i) {
-        if (initData.type === undefined || segmentProtections[i].type === initData.type) {
-          var containedInitData = initData.values.every(function (undecipherableVal) {
-            return segmentProtections[i].values.some(function (currVal) {
-              return (undecipherableVal.systemId === undefined || currVal.systemId === undecipherableVal.systemId) && (0,are_arrays_of_numbers_equal/* default */.Z)(currVal.data, undecipherableVal.data);
-            });
-          });
-
-          if (containedInitData) {
-            return {
-              v: false
-            };
-          }
-        }
-      };
-
-      for (var i = 0; i < segmentProtections.length; i++) {
-        var _ret = _loop(i);
-
-        if (typeof _ret === "object") return _ret.v;
-      }
-
-      return representation.decipherable;
-    });
-
-    if (updates.length > 0) {
-      this.trigger("decipherabilityUpdate", updates);
-    }
-  }
-  /**
-   * @deprecated only returns adaptations for the first period
-   * @returns {Array.<Object>}
-   */
-  ;
-
-  _proto.getAdaptations = function getAdaptations() {
-    (0,warn_once/* default */.Z)("manifest.getAdaptations() is deprecated." + " Please use manifest.period[].getAdaptations() instead");
-    var firstPeriod = this.periods[0];
-
-    if (firstPeriod === undefined) {
-      return [];
-    }
-
-    var adaptationsByType = firstPeriod.adaptations;
-    var adaptationsList = [];
-
-    for (var adaptationType in adaptationsByType) {
-      if (adaptationsByType.hasOwnProperty(adaptationType)) {
-        var adaptations = adaptationsByType[adaptationType];
-        adaptationsList.push.apply(adaptationsList, adaptations);
-      }
-    }
-
-    return adaptationsList;
-  }
-  /**
-   * @deprecated only returns adaptations for the first period
-   * @returns {Array.<Object>}
-   */
-  ;
-
-  _proto.getAdaptationsForType = function getAdaptationsForType(adaptationType) {
-    (0,warn_once/* default */.Z)("manifest.getAdaptationsForType(type) is deprecated." + " Please use manifest.period[].getAdaptationsForType(type) instead");
-    var firstPeriod = this.periods[0];
-
-    if (firstPeriod === undefined) {
-      return [];
-    }
-
-    var adaptationsForType = firstPeriod.adaptations[adaptationType];
-    return adaptationsForType === undefined ? [] : adaptationsForType;
-  }
-  /**
-   * @deprecated only returns adaptations for the first period
-   * @returns {Array.<Object>}
-   */
-  ;
-
-  _proto.getAdaptation = function getAdaptation(wantedId) {
-    (0,warn_once/* default */.Z)("manifest.getAdaptation(id) is deprecated." + " Please use manifest.period[].getAdaptation(id) instead");
-    /* eslint-disable import/no-deprecated */
-
-    return (0,array_find/* default */.Z)(this.getAdaptations(), function (_ref2) {
-      var id = _ref2.id;
-      return wantedId === id;
-    });
-    /* eslint-enable import/no-deprecated */
-  }
-  /**
-   * Add supplementary image Adaptation(s) to the manifest.
-   * @private
-   * @param {Object|Array.<Object>} imageTracks
-   */
-  ;
-
-  _proto._addSupplementaryImageAdaptations = function _addSupplementaryImageAdaptations(
-  /* eslint-disable import/no-deprecated */
-  imageTracks) {
-    var _this2 = this;
-
-    var _imageTracks = Array.isArray(imageTracks) ? imageTracks : [imageTracks];
-
-    var newImageTracks = _imageTracks.map(function (_ref3) {
-      var mimeType = _ref3.mimeType,
-          url = _ref3.url;
-      var adaptationID = "gen-image-ada-" + generateSupplementaryTrackID();
-      var representationID = "gen-image-rep-" + generateSupplementaryTrackID();
-      var newAdaptation = new manifest_adaptation/* default */.Z({
-        id: adaptationID,
-        type: "image",
-        representations: [{
-          bitrate: 0,
-          id: representationID,
-          mimeType: mimeType,
-          index: new StaticRepresentationIndex({
-            media: url
-          })
-        }]
-      }, {
-        isManuallyAdded: true
-      });
-
-      if (newAdaptation.representations.length > 0 && !newAdaptation.isSupported) {
-        var error = new media_error/* default */.Z("MANIFEST_INCOMPATIBLE_CODECS_ERROR", "An Adaptation contains only incompatible codecs.");
-
-        _this2.contentWarnings.push(error);
-      }
-
-      return newAdaptation;
-    });
-
-    if (newImageTracks.length > 0 && this.periods.length > 0) {
-      var adaptations = this.periods[0].adaptations;
-      adaptations.image = adaptations.image != null ? adaptations.image.concat(newImageTracks) : newImageTracks;
-    }
-  }
-  /**
-   * Add supplementary text Adaptation(s) to the manifest.
-   * @private
-   * @param {Object|Array.<Object>} textTracks
-   */
-  ;
-
-  _proto._addSupplementaryTextAdaptations = function _addSupplementaryTextAdaptations(
-  /* eslint-disable import/no-deprecated */
-  textTracks
-  /* eslint-enable import/no-deprecated */
-  ) {
-    var _this3 = this;
-
-    var _textTracks = Array.isArray(textTracks) ? textTracks : [textTracks];
-
-    var newTextAdaptations = _textTracks.reduce(function (allSubs, _ref4) {
-      var mimeType = _ref4.mimeType,
-          codecs = _ref4.codecs,
-          url = _ref4.url,
-          language = _ref4.language,
-          languages = _ref4.languages,
-          closedCaption = _ref4.closedCaption;
-      var langsToMapOn = language != null ? [language] : languages != null ? languages : [];
-      return allSubs.concat(langsToMapOn.map(function (_language) {
-        var adaptationID = "gen-text-ada-" + generateSupplementaryTrackID();
-        var representationID = "gen-text-rep-" + generateSupplementaryTrackID();
-        var newAdaptation = new manifest_adaptation/* default */.Z({
-          id: adaptationID,
-          type: "text",
-          language: _language,
-          closedCaption: closedCaption,
-          representations: [{
-            bitrate: 0,
-            id: representationID,
-            mimeType: mimeType,
-            codecs: codecs,
-            index: new StaticRepresentationIndex({
-              media: url
-            })
-          }]
-        }, {
-          isManuallyAdded: true
-        });
-
-        if (newAdaptation.representations.length > 0 && !newAdaptation.isSupported) {
-          var error = new media_error/* default */.Z("MANIFEST_INCOMPATIBLE_CODECS_ERROR", "An Adaptation contains only incompatible codecs.");
-
-          _this3.contentWarnings.push(error);
-        }
-
-        return newAdaptation;
-      }));
-    }, []);
-
-    if (newTextAdaptations.length > 0 && this.periods.length > 0) {
-      var adaptations = this.periods[0].adaptations;
-      adaptations.text = adaptations.text != null ? adaptations.text.concat(newTextAdaptations) : newTextAdaptations;
-    }
-  }
-  /**
-   * @param {Object} newManifest
-   * @param {number} type
-   */
-  ;
-
-  _proto._performUpdate = function _performUpdate(newManifest, updateType) {
-    this.availabilityStartTime = newManifest.availabilityStartTime;
-    this.expired = newManifest.expired;
-    this.isDynamic = newManifest.isDynamic;
-    this.isLive = newManifest.isLive;
-    this.isLastPeriodKnown = newManifest.isLastPeriodKnown;
-    this.lifetime = newManifest.lifetime;
-    this.contentWarnings = newManifest.contentWarnings;
-    this.suggestedPresentationDelay = newManifest.suggestedPresentationDelay;
-    this.transport = newManifest.transport;
-    this.publishTime = newManifest.publishTime;
-
-    if (updateType === MANIFEST_UPDATE_TYPE.Full) {
-      this._timeBounds = newManifest._timeBounds;
-      this.uris = newManifest.uris;
-      replacePeriods(this.periods, newManifest.periods);
-    } else {
-      this._timeBounds.maximumTimeData = newManifest._timeBounds.maximumTimeData;
-      this.updateUrl = newManifest.uris[0];
-      updatePeriods(this.periods, newManifest.periods); // Partial updates do not remove old Periods.
-      // This can become a memory problem when playing a content long enough.
-      // Let's clean manually Periods behind the minimum possible position.
-
-      var min = this.getMinimumPosition();
-
-      while (this.periods.length > 0) {
-        var period = this.periods[0];
-
-        if (period.end === undefined || period.end > min) {
-          break;
-        }
-
-        this.periods.shift();
-      }
-    } // Re-set this.adaptations for retro-compatibility in v3.x.x
-
-    /* eslint-disable import/no-deprecated */
-
-
-    this.adaptations = this.periods[0] === undefined ? {} : this.periods[0].adaptations;
-    /* eslint-enable import/no-deprecated */
-    // Let's trigger events at the end, as those can trigger side-effects.
-    // We do not want the current Manifest object to be incomplete when those
-    // happen.
-
-    this.trigger("manifestUpdate", null);
-  };
-
-  return Manifest;
-}(event_emitter/* default */.Z);
+function createManifestObject(_x, _x2) {
+  return _createManifestObject.apply(this, arguments);
+}
 /**
  * Update `decipherable` property of every `Representation` found in the
  * Manifest based on the result of a `isDecipherable` callback:
@@ -15683,8 +15477,525 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
  * @returns {Array.<Object>}
  */
 
+function _createManifestObject() {
+  _createManifestObject = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee3(parsedManifest, options) {
+    var _a, _b, _c, _d, eventEmitter, _options$supplementar, supplementaryTextTracks, _options$supplementar2, supplementaryImageTracks, representationFilter, warnings, _periodProms, _iterator, _step, parsedPeriod, _periods, _iterator2, _step2, _step2$value, period, pWarnings, manifestObject, getPeriod, getPeriodForTime, getNextPeriod, getPeriodAfter, getUrl, replace, update, getMinimumPosition, getMaximumPosition, updateDeciperabilitiesBasedOnKeyIds, addUndecipherableProtectionData, getAdaptations, getAdaptationsForType, getAdaptation, _addSupplementaryImageAdaptations, _addSupplementaryImageAdaptations2, _addSupplementaryTextAdaptations, _addSupplementaryTextAdaptations2, _performUpdate;
+
+    return regenerator_default().wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            _performUpdate = function _performUpdate2(newManifest, updateType) {
+              manifestObject.availabilityStartTime = newManifest.availabilityStartTime;
+              manifestObject.expired = newManifest.expired;
+              manifestObject.isDynamic = newManifest.isDynamic;
+              manifestObject.isLive = newManifest.isLive;
+              manifestObject.isLastPeriodKnown = newManifest.isLastPeriodKnown;
+              manifestObject.lifetime = newManifest.lifetime;
+              manifestObject.suggestedPresentationDelay = newManifest.suggestedPresentationDelay;
+              manifestObject.transport = newManifest.transport;
+              manifestObject.publishTime = newManifest.publishTime;
+
+              if (updateType === MANIFEST_UPDATE_TYPE.Full) {
+                manifestObject.timeBounds = newManifest.timeBounds;
+                manifestObject.uris = newManifest.uris;
+                replacePeriods(manifestObject.periods, newManifest.periods);
+              } else {
+                manifestObject.timeBounds.maximumTimeData = newManifest.timeBounds.maximumTimeData;
+                manifestObject.updateUrl = newManifest.uris[0];
+                updatePeriods(manifestObject.periods, newManifest.periods); // Partial updates do not remove old Periods.
+                // This can become a memory problem when playing a content long enough.
+                // Let's clean manually Periods behind the minimum possible position.
+
+                var min = manifestObject.getMinimumPosition();
+
+                while (manifestObject.periods.length > 0) {
+                  var period = manifestObject.periods[0];
+
+                  if (period.end === undefined || period.end > min) {
+                    break;
+                  }
+
+                  manifestObject.periods.shift();
+                }
+              } // Re-set this.adaptations for retro-compatibility in v3.x.x
+
+              /* eslint-disable import/no-deprecated */
 
 
+              manifestObject.adaptations = manifestObject.periods[0] === undefined ? {} : manifestObject.periods[0].adaptations;
+              /* eslint-enable import/no-deprecated */
+              // Let's trigger events at the end, as those can trigger side-effects.
+              // We do not want the current Manifest object to be incomplete when those
+              // happen.
+
+              eventEmitter.trigger("manifestUpdate", null);
+            };
+
+            _addSupplementaryTextAdaptations2 = function _addSupplementaryText2() {
+              _addSupplementaryTextAdaptations2 = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee2(
+              /* eslint-disable-next-line import/no-deprecated */
+              textTracks) {
+                var _textTracks, newTextAdaptations, _iterator4, _step4, textTrack, mimeType, codecs, url, language, languages, closedCaption, langsToMapOn, _iterator5, _step5, _language, adaptationID, representationID, newAdaptation, error, adaptations;
+
+                return regenerator_default().wrap(function _callee2$(_context2) {
+                  while (1) {
+                    switch (_context2.prev = _context2.next) {
+                      case 0:
+                        _textTracks = Array.isArray(textTracks) ? textTracks : [textTracks];
+                        newTextAdaptations = [];
+                        _iterator4 = manifest_createForOfIteratorHelperLoose(_textTracks);
+
+                      case 3:
+                        if ((_step4 = _iterator4()).done) {
+                          _context2.next = 21;
+                          break;
+                        }
+
+                        textTrack = _step4.value;
+                        mimeType = textTrack.mimeType, codecs = textTrack.codecs, url = textTrack.url, language = textTrack.language, languages = textTrack.languages, closedCaption = textTrack.closedCaption;
+                        langsToMapOn = language != null ? [language] : languages != null ? languages : [];
+                        _iterator5 = manifest_createForOfIteratorHelperLoose(langsToMapOn);
+
+                      case 8:
+                        if ((_step5 = _iterator5()).done) {
+                          _context2.next = 19;
+                          break;
+                        }
+
+                        _language = _step5.value;
+                        adaptationID = "gen-text-ada-" + generateSupplementaryTrackID();
+                        representationID = "gen-text-rep-" + generateSupplementaryTrackID();
+                        _context2.next = 14;
+                        return (0,manifest_adaptation/* createAdaptationObject */.K)({
+                          id: adaptationID,
+                          type: "text",
+                          language: _language,
+                          closedCaption: closedCaption,
+                          representations: [{
+                            bitrate: 0,
+                            id: representationID,
+                            mimeType: mimeType,
+                            codecs: codecs,
+                            index: new StaticRepresentationIndex({
+                              media: url
+                            })
+                          }]
+                        }, {
+                          isManuallyAdded: true
+                        });
+
+                      case 14:
+                        newAdaptation = _context2.sent;
+
+                        if (newAdaptation.representations.length > 0 && !newAdaptation.hasSupport) {
+                          error = new media_error/* default */.Z("MANIFEST_INCOMPATIBLE_CODECS_ERROR", "An Adaptation contains only incompatible codecs.");
+                          warnings.push(error);
+                        }
+
+                        newTextAdaptations.push(newAdaptation);
+
+                      case 17:
+                        _context2.next = 8;
+                        break;
+
+                      case 19:
+                        _context2.next = 3;
+                        break;
+
+                      case 21:
+                        if (newTextAdaptations.length > 0 && manifestObject.periods.length > 0) {
+                          adaptations = manifestObject.periods[0].adaptations;
+                          adaptations.text = adaptations.text != null ? adaptations.text.concat(newTextAdaptations) : newTextAdaptations;
+                        }
+
+                      case 22:
+                      case "end":
+                        return _context2.stop();
+                    }
+                  }
+                }, _callee2);
+              }));
+              return _addSupplementaryTextAdaptations2.apply(this, arguments);
+            };
+
+            _addSupplementaryTextAdaptations = function _addSupplementaryText(_x4) {
+              return _addSupplementaryTextAdaptations2.apply(this, arguments);
+            };
+
+            _addSupplementaryImageAdaptations2 = function _addSupplementaryImag2() {
+              _addSupplementaryImageAdaptations2 = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(
+              /* eslint-disable-next-line import/no-deprecated */
+              imageTracks) {
+                var _imageTracks, newImageTracks, _iterator3, _step3, _step3$value, mimeType, url, adaptationID, representationID, newAdaptation, error, adaptations;
+
+                return regenerator_default().wrap(function _callee$(_context) {
+                  while (1) {
+                    switch (_context.prev = _context.next) {
+                      case 0:
+                        _imageTracks = Array.isArray(imageTracks) ? imageTracks : [imageTracks];
+                        newImageTracks = [];
+                        _iterator3 = manifest_createForOfIteratorHelperLoose(_imageTracks);
+
+                      case 3:
+                        if ((_step3 = _iterator3()).done) {
+                          _context.next = 14;
+                          break;
+                        }
+
+                        _step3$value = _step3.value, mimeType = _step3$value.mimeType, url = _step3$value.url;
+                        adaptationID = "gen-image-ada-" + generateSupplementaryTrackID();
+                        representationID = "gen-image-rep-" + generateSupplementaryTrackID();
+                        _context.next = 9;
+                        return (0,manifest_adaptation/* createAdaptationObject */.K)({
+                          id: adaptationID,
+                          type: "image",
+                          representations: [{
+                            bitrate: 0,
+                            id: representationID,
+                            mimeType: mimeType,
+                            index: new StaticRepresentationIndex({
+                              media: url
+                            })
+                          }]
+                        }, {
+                          isManuallyAdded: true
+                        });
+
+                      case 9:
+                        newAdaptation = _context.sent;
+
+                        if (newAdaptation.representations.length > 0 && newAdaptation.hasSupport) {
+                          error = new media_error/* default */.Z("MANIFEST_INCOMPATIBLE_CODECS_ERROR", "An Adaptation contains only incompatible codecs.");
+                          warnings.push(error);
+                        }
+
+                        newImageTracks.push(newAdaptation);
+
+                      case 12:
+                        _context.next = 3;
+                        break;
+
+                      case 14:
+                        if (newImageTracks.length > 0 && manifestObject.periods.length > 0) {
+                          adaptations = manifestObject.periods[0].adaptations;
+                          adaptations.image = adaptations.image != null ? adaptations.image.concat(newImageTracks) : newImageTracks;
+                        }
+
+                      case 15:
+                      case "end":
+                        return _context.stop();
+                    }
+                  }
+                }, _callee);
+              }));
+              return _addSupplementaryImageAdaptations2.apply(this, arguments);
+            };
+
+            _addSupplementaryImageAdaptations = function _addSupplementaryImag(_x3) {
+              return _addSupplementaryImageAdaptations2.apply(this, arguments);
+            };
+
+            getAdaptation = function _getAdaptation(wantedId) {
+              (0,warn_once/* default */.Z)("manifest.getAdaptation(id) is deprecated." + " Please use manifest.period[].getAdaptation(id) instead");
+              /* eslint-disable-next-line import/no-deprecated */
+
+              return (0,array_find/* default */.Z)(getAdaptations(), function (_ref2) {
+                var id = _ref2.id;
+                return wantedId === id;
+              });
+            };
+
+            getAdaptationsForType = function _getAdaptationsForTyp(adaptationType) {
+              (0,warn_once/* default */.Z)("manifest.getAdaptationsForType(type) is deprecated." + " Please use manifest.period[].getAdaptationsForType(type) instead");
+              var firstPeriod = manifestObject.periods[0];
+
+              if (firstPeriod === undefined) {
+                return [];
+              }
+
+              var adaptationsForType = firstPeriod.adaptations[adaptationType];
+              return adaptationsForType === undefined ? [] : adaptationsForType;
+            };
+
+            getAdaptations = function _getAdaptations() {
+              (0,warn_once/* default */.Z)("manifest.getAdaptations() is deprecated." + " Please use manifest.period[].getAdaptations() instead");
+              var firstPeriod = manifestObject.periods[0];
+
+              if (firstPeriod === undefined) {
+                return [];
+              }
+
+              var adaptationsByType = firstPeriod.adaptations;
+              var adaptationsList = [];
+
+              for (var adaptationType in adaptationsByType) {
+                if (adaptationsByType.hasOwnProperty(adaptationType)) {
+                  var _adap = adaptationsByType[adaptationType];
+                  adaptationsList.push.apply(adaptationsList, _adap);
+                }
+              }
+
+              return adaptationsList;
+            };
+
+            addUndecipherableProtectionData = function _addUndecipherablePro(initData) {
+              var updates = updateDeciperability(manifestObject, function (representation) {
+                var _a, _b;
+
+                if (representation.decipherable === false) {
+                  return false;
+                }
+
+                var segmentProtections = (_b = (_a = representation.contentProtections) === null || _a === void 0 ? void 0 : _a.initData) !== null && _b !== void 0 ? _b : [];
+
+                var _loop = function _loop(i) {
+                  if (initData.type === undefined || segmentProtections[i].type === initData.type) {
+                    var containedInitData = initData.values.every(function (undecipherableVal) {
+                      return segmentProtections[i].values.some(function (currVal) {
+                        return (undecipherableVal.systemId === undefined || currVal.systemId === undecipherableVal.systemId) && (0,are_arrays_of_numbers_equal/* default */.Z)(currVal.data, undecipherableVal.data);
+                      });
+                    });
+
+                    if (containedInitData) {
+                      return {
+                        v: false
+                      };
+                    }
+                  }
+                };
+
+                for (var i = 0; i < segmentProtections.length; i++) {
+                  var _ret = _loop(i);
+
+                  if (typeof _ret === "object") return _ret.v;
+                }
+
+                return representation.decipherable;
+              });
+
+              if (updates.length > 0) {
+                eventEmitter.trigger("decipherabilityUpdate", updates);
+              }
+            };
+
+            updateDeciperabilitiesBasedOnKeyIds = function _updateDeciperabiliti(_ref) {
+              var whitelistedKeyIds = _ref.whitelistedKeyIds,
+                  blacklistedKeyIDs = _ref.blacklistedKeyIDs;
+              var updates = updateDeciperability(manifestObject, function (representation) {
+                if (representation.decipherable === false || representation.contentProtections === undefined) {
+                  return representation.decipherable;
+                }
+
+                var contentKIDs = representation.contentProtections.keyIds;
+
+                for (var i = 0; i < contentKIDs.length; i++) {
+                  var elt = contentKIDs[i];
+
+                  for (var j = 0; j < blacklistedKeyIDs.length; j++) {
+                    if ((0,are_arrays_of_numbers_equal/* default */.Z)(blacklistedKeyIDs[j], elt.keyId)) {
+                      return false;
+                    }
+                  }
+
+                  for (var _j = 0; _j < whitelistedKeyIds.length; _j++) {
+                    if ((0,are_arrays_of_numbers_equal/* default */.Z)(whitelistedKeyIds[_j], elt.keyId)) {
+                      return true;
+                    }
+                  }
+                }
+
+                return representation.decipherable;
+              });
+
+              if (updates.length > 0) {
+                eventEmitter.trigger("decipherabilityUpdate", updates);
+              }
+            };
+
+            getMaximumPosition = function _getMaximumPosition() {
+              var maximumTimeData = manifestObject.timeBounds.maximumTimeData;
+
+              if (!maximumTimeData.isLinear) {
+                return maximumTimeData.value;
+              }
+
+              var timeDiff = performance.now() - maximumTimeData.time;
+              return maximumTimeData.value + timeDiff / 1000;
+            };
+
+            getMinimumPosition = function _getMinimumPosition() {
+              var _a, _b;
+
+              var windowData = manifestObject.timeBounds;
+
+              if (windowData.timeshiftDepth === null) {
+                return (_a = windowData.absoluteMinimumTime) !== null && _a !== void 0 ? _a : 0;
+              }
+
+              var maximumTimeData = windowData.maximumTimeData;
+              var maximumTime;
+
+              if (!windowData.maximumTimeData.isLinear) {
+                maximumTime = maximumTimeData.value;
+              } else {
+                var timeDiff = performance.now() - maximumTimeData.time;
+                maximumTime = maximumTimeData.value + timeDiff / 1000;
+              }
+
+              var theoricalMinimum = maximumTime - windowData.timeshiftDepth;
+              return Math.max((_b = windowData.absoluteMinimumTime) !== null && _b !== void 0 ? _b : 0, theoricalMinimum);
+            };
+
+            update = function _update(newManifest) {
+              _performUpdate(newManifest, MANIFEST_UPDATE_TYPE.Partial);
+            };
+
+            replace = function _replace(newManifest) {
+              _performUpdate(newManifest, MANIFEST_UPDATE_TYPE.Full);
+            };
+
+            getUrl = function _getUrl() {
+              return manifestObject.uris[0];
+            };
+
+            getPeriodAfter = function _getPeriodAfter(period) {
+              var endOfPeriod = period.end;
+
+              if (endOfPeriod === undefined) {
+                return null;
+              }
+
+              var nextPeriod = (0,array_find/* default */.Z)(manifestObject.periods, function (_period) {
+                return _period.end === undefined || endOfPeriod < _period.end;
+              });
+              return nextPeriod === undefined ? null : nextPeriod;
+            };
+
+            getNextPeriod = function _getNextPeriod(time) {
+              return (0,array_find/* default */.Z)(manifestObject.periods, function (period) {
+                return period.start > time;
+              });
+            };
+
+            getPeriodForTime = function _getPeriodForTime(time) {
+              return (0,array_find/* default */.Z)(manifestObject.periods, function (period) {
+                return time >= period.start && (period.end === undefined || period.end > time);
+              });
+            };
+
+            getPeriod = function _getPeriod(periodId) {
+              return (0,array_find/* default */.Z)(manifestObject.periods, function (period) {
+                return periodId === period.id;
+              });
+            };
+
+            eventEmitter = new event_emitter/* default */.Z();
+            _options$supplementar = options.supplementaryTextTracks, supplementaryTextTracks = _options$supplementar === void 0 ? [] : _options$supplementar, _options$supplementar2 = options.supplementaryImageTracks, supplementaryImageTracks = _options$supplementar2 === void 0 ? [] : _options$supplementar2, representationFilter = options.representationFilter;
+            warnings = [];
+            _periodProms = [];
+
+            for (_iterator = manifest_createForOfIteratorHelperLoose(parsedManifest.periods); !(_step = _iterator()).done;) {
+              parsedPeriod = _step.value;
+
+              _periodProms.push(createPeriodObject(parsedPeriod, representationFilter));
+            }
+
+            _periods = [];
+            _context3.t0 = manifest_createForOfIteratorHelperLoose;
+            _context3.next = 28;
+            return promise/* default.all */.Z.all(_periodProms);
+
+          case 28:
+            _context3.t1 = _context3.sent;
+            _iterator2 = (0, _context3.t0)(_context3.t1);
+
+          case 30:
+            if ((_step2 = _iterator2()).done) {
+              _context3.next = 36;
+              break;
+            }
+
+            _step2$value = _step2.value, period = _step2$value[0], pWarnings = _step2$value[1];
+            warnings.push.apply(warnings, pWarnings);
+
+            _periods.push(period);
+
+          case 34:
+            _context3.next = 30;
+            break;
+
+          case 36:
+            _periods.sort(function (a, b) {
+              return a.start - b.start;
+            });
+
+            manifestObject = {
+              id: generateNewManifestId(),
+              expired: (_a = parsedManifest.expired) !== null && _a !== void 0 ? _a : null,
+              transport: parsedManifest.transportType,
+              clockOffset: parsedManifest.clockOffset,
+              periods: _periods,
+
+              /* eslint-disable-next-line import/no-deprecated */
+              adaptations: (_c = (_b = _periods[0]) === null || _b === void 0 ? void 0 : _b.adaptations) !== null && _c !== void 0 ? _c : {},
+              isDynamic: parsedManifest.isDynamic,
+              isLive: parsedManifest.isLive,
+              isLastPeriodKnown: parsedManifest.isLastPeriodKnown,
+              uris: (_d = parsedManifest.uris) !== null && _d !== void 0 ? _d : [],
+              updateUrl: options.manifestUpdateUrl,
+              lifetime: parsedManifest.lifetime,
+              suggestedPresentationDelay: parsedManifest.suggestedPresentationDelay,
+              availabilityStartTime: parsedManifest.availabilityStartTime,
+              publishTime: parsedManifest.publishTime,
+              timeBounds: parsedManifest.timeBounds,
+              getPeriod: getPeriod,
+              getPeriodForTime: getPeriodForTime,
+              getPeriodAfter: getPeriodAfter,
+              getNextPeriod: getNextPeriod,
+              getUrl: getUrl,
+              replace: replace,
+              update: update,
+              getMinimumPosition: getMinimumPosition,
+              getMaximumPosition: getMaximumPosition,
+              updateDeciperabilitiesBasedOnKeyIds: updateDeciperabilitiesBasedOnKeyIds,
+              addUndecipherableProtectionData: addUndecipherableProtectionData,
+              getAdaptations: getAdaptations,
+              getAdaptationsForType: getAdaptationsForType,
+              getAdaptation: getAdaptation,
+              addEventListener: eventEmitter.addEventListener.bind(eventEmitter),
+              removeEventListener: eventEmitter.removeEventListener.bind(eventEmitter)
+            };
+
+            if (!(supplementaryImageTracks.length > 0)) {
+              _context3.next = 41;
+              break;
+            }
+
+            _context3.next = 41;
+            return _addSupplementaryImageAdaptations(supplementaryImageTracks);
+
+          case 41:
+            if (!(supplementaryTextTracks.length > 0)) {
+              _context3.next = 44;
+              break;
+            }
+
+            _context3.next = 44;
+            return _addSupplementaryTextAdaptations(supplementaryTextTracks);
+
+          case 44:
+            return _context3.abrupt("return", [manifestObject, warnings]);
+
+          case 45:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3);
+  }));
+  return _createManifestObject.apply(this, arguments);
+}
 
 function updateDeciperability(manifest, isDecipherable) {
   var updates = [];
@@ -15716,31 +16027,6 @@ function updateDeciperability(manifest, isDecipherable) {
 
   return updates;
 }
-;// CONCATENATED MODULE: ./src/manifest/index.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-/* harmony default export */ var manifest = (Manifest);
-
-
 
 /***/ }),
 
@@ -18330,8 +18616,8 @@ var ManifestBoundsCalculator = /*#__PURE__*/function () {
 var array_includes = __webpack_require__(7714);
 // EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
 var is_non_empty_string = __webpack_require__(6923);
-// EXTERNAL MODULE: ./src/manifest/adaptation.ts + 3 modules
-var manifest_adaptation = __webpack_require__(8999);
+// EXTERNAL MODULE: ./src/manifest/adaptation.ts + 4 modules
+var manifest_adaptation = __webpack_require__(3089);
 ;// CONCATENATED MODULE: ./src/parsers/manifest/dash/common/attach_trickmode_track.ts
 function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
@@ -19072,7 +19358,7 @@ function constructTimelineFromElements(elements, scaledPeriodStart) {
     var nextItem = initialTimeline[_i + 1] === undefined ? null : initialTimeline[_i + 1];
     var timelineElement = convertElementsToIndexSegment(item, previousItem, nextItem, scaledPeriodStart);
 
-    if (timelineElement != null) {
+    if (timelineElement !== null) {
       timeline.push(timelineElement);
     }
   }
@@ -19374,6 +19660,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
     var availabilityTimeComplete = context.availabilityTimeComplete,
         manifestBoundsCalculator = context.manifestBoundsCalculator,
         isDynamic = context.isDynamic,
+        isLastPeriod = context.isLastPeriod,
         representationBaseURLs = context.representationBaseURLs,
         representationId = context.representationId,
         representationBitrate = context.representationBitrate,
@@ -19386,6 +19673,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
     var indexTimeOffset = presentationTimeOffset - scaledStart;
     this._manifestBoundsCalculator = manifestBoundsCalculator;
     this._isEMSGWhitelisted = isEMSGWhitelisted;
+    this._isLastPeriod = isLastPeriod;
     this._lastUpdate = context.receivedTime == null ? performance.now() : context.receivedTime;
     this._unsafelyBaseOnPreviousIndex = null;
 
@@ -19592,6 +19880,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
     this._scaledPeriodEnd = newIndex._scaledPeriodEnd;
     this._lastUpdate = newIndex._lastUpdate;
     this._manifestBoundsCalculator = newIndex._manifestBoundsCalculator;
+    this._isLastPeriod = newIndex._isLastPeriod;
   }
   /**
    * Update this RepresentationIndex with a shorter version of it coming from a
@@ -19609,11 +19898,17 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
       newIndex._index.timeline = newIndex._getTimeline();
     }
 
-    (0,update_segment_timeline/* default */.Z)(this._index.timeline, newIndex._index.timeline);
+    var hasReplaced = (0,update_segment_timeline/* default */.Z)(this._index.timeline, newIndex._index.timeline);
+
+    if (hasReplaced) {
+      this._index.startNumber = newIndex._index.startNumber;
+    }
+
     this._isDynamic = newIndex._isDynamic;
     this._scaledPeriodStart = newIndex._scaledPeriodStart;
     this._scaledPeriodEnd = newIndex._scaledPeriodEnd;
     this._lastUpdate = newIndex._lastUpdate;
+    this._isLastPeriod = newIndex._isLastPeriod;
   }
   /**
    * Returns `true` if this RepresentationIndex currently contains its last
@@ -19624,7 +19919,13 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
   ;
 
   _proto.isFinished = function isFinished() {
-    if (!this._isDynamic) {
+    if (!this._isDynamic || !this._isLastPeriod) {
+      // Either the content is not dynamic, in which case no new segment will
+      // be generated, either it is but this index is not linked to the current
+      // last Period in the MPD, in which case it is inferred that it has been
+      // completely generated. Note that this second condition might break very
+      // very rare use cases where old Periods are still being generated, yet it
+      // should fix more cases than it breaks.
       return true;
     }
 
@@ -19679,7 +19980,11 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
     }
 
     var scaledFirstPosition = (0,index_helpers/* toIndexTime */.gT)(firstPosition, this._index);
-    (0,clear_timeline_from_position/* default */.Z)(this._index.timeline, scaledFirstPosition);
+    var nbEltsRemoved = (0,clear_timeline_from_position/* default */.Z)(this._index.timeline, scaledFirstPosition);
+
+    if (this._index.startNumber !== undefined) {
+      this._index.startNumber += nbEltsRemoved;
+    }
   };
 
   TimelineRepresentationIndex.getIndexEnd = function getIndexEnd(timeline, scaledPeriodEnd) {
@@ -20274,24 +20579,25 @@ function resolveBaseURLs(currentBaseURLs, newBaseUrlsIR) {
  * Parse the specific segment indexing information found in a representation
  * into a IRepresentationIndex implementation.
  * @param {Array.<Object>} representation
- * @param {Object} representationInfos
+ * @param {Object} context
  * @returns {Array.<Object>}
  */
 
-function parseRepresentationIndex(representation, representationInfos) {
+function parseRepresentationIndex(representation, context) {
   var _a, _b;
 
-  var representationBaseURLs = resolveBaseURLs(representationInfos.baseURLs, representation.children.baseURLs);
-  var aggressiveMode = representationInfos.aggressiveMode,
-      availabilityTimeOffset = representationInfos.availabilityTimeOffset,
-      manifestBoundsCalculator = representationInfos.manifestBoundsCalculator,
-      isDynamic = representationInfos.isDynamic,
-      periodEnd = representationInfos.end,
-      periodStart = representationInfos.start,
-      receivedTime = representationInfos.receivedTime,
-      timeShiftBufferDepth = representationInfos.timeShiftBufferDepth,
-      unsafelyBaseOnPreviousRepresentation = representationInfos.unsafelyBaseOnPreviousRepresentation,
-      inbandEventStreams = representationInfos.inbandEventStreams;
+  var representationBaseURLs = resolveBaseURLs(context.baseURLs, representation.children.baseURLs);
+  var aggressiveMode = context.aggressiveMode,
+      availabilityTimeOffset = context.availabilityTimeOffset,
+      manifestBoundsCalculator = context.manifestBoundsCalculator,
+      isDynamic = context.isDynamic,
+      periodEnd = context.end,
+      periodStart = context.start,
+      receivedTime = context.receivedTime,
+      timeShiftBufferDepth = context.timeShiftBufferDepth,
+      unsafelyBaseOnPreviousRepresentation = context.unsafelyBaseOnPreviousRepresentation,
+      inbandEventStreams = context.inbandEventStreams,
+      isLastPeriod = context.isLastPeriod;
 
   var isEMSGWhitelisted = function isEMSGWhitelisted(inbandEvent) {
     if (inbandEventStreams === undefined) {
@@ -20304,12 +20610,13 @@ function parseRepresentationIndex(representation, representationInfos) {
     });
   };
 
-  var context = {
+  var reprIndexCtxt = {
     aggressiveMode: aggressiveMode,
     availabilityTimeComplete: true,
     availabilityTimeOffset: availabilityTimeOffset,
     unsafelyBaseOnPreviousRepresentation: unsafelyBaseOnPreviousRepresentation,
     isEMSGWhitelisted: isEMSGWhitelisted,
+    isLastPeriod: isLastPeriod,
     manifestBoundsCalculator: manifestBoundsCalculator,
     isDynamic: isDynamic,
     periodEnd: periodEnd,
@@ -20324,12 +20631,12 @@ function parseRepresentationIndex(representation, representationInfos) {
 
   if (representation.children.segmentBase !== undefined) {
     var segmentBase = representation.children.segmentBase;
-    representationIndex = new base/* default */.Z(segmentBase, context);
+    representationIndex = new base/* default */.Z(segmentBase, reprIndexCtxt);
   } else if (representation.children.segmentList !== undefined) {
     var segmentList = representation.children.segmentList;
-    representationIndex = new ListRepresentationIndex(segmentList, context);
-  } else if (representation.children.segmentTemplate !== undefined || representationInfos.parentSegmentTemplates.length > 0) {
-    var segmentTemplates = representationInfos.parentSegmentTemplates.slice();
+    representationIndex = new ListRepresentationIndex(segmentList, reprIndexCtxt);
+  } else if (representation.children.segmentTemplate !== undefined || context.parentSegmentTemplates.length > 0) {
+    var segmentTemplates = context.parentSegmentTemplates.slice();
     var childSegmentTemplate = representation.children.segmentTemplate;
 
     if (childSegmentTemplate !== undefined) {
@@ -20337,25 +20644,25 @@ function parseRepresentationIndex(representation, representationInfos) {
     }
 
     var segmentTemplate = object_assign/* default.apply */.Z.apply(void 0, [{}].concat(segmentTemplates));
-    context.availabilityTimeComplete = (_a = segmentTemplate.availabilityTimeComplete) !== null && _a !== void 0 ? _a : representationInfos.availabilityTimeComplete;
-    context.availabilityTimeOffset = ((_b = segmentTemplate.availabilityTimeOffset) !== null && _b !== void 0 ? _b : 0) + representationInfos.availabilityTimeOffset;
-    representationIndex = timeline.isTimelineIndexArgument(segmentTemplate) ? new timeline(segmentTemplate, context) : new TemplateRepresentationIndex(segmentTemplate, context);
+    reprIndexCtxt.availabilityTimeComplete = (_a = segmentTemplate.availabilityTimeComplete) !== null && _a !== void 0 ? _a : context.availabilityTimeComplete;
+    reprIndexCtxt.availabilityTimeOffset = ((_b = segmentTemplate.availabilityTimeOffset) !== null && _b !== void 0 ? _b : 0) + context.availabilityTimeOffset;
+    representationIndex = timeline.isTimelineIndexArgument(segmentTemplate) ? new timeline(segmentTemplate, reprIndexCtxt) : new TemplateRepresentationIndex(segmentTemplate, reprIndexCtxt);
   } else {
-    var adaptationChildren = representationInfos.adaptation.children;
+    var adaptationChildren = context.adaptation.children;
 
     if (adaptationChildren.segmentBase !== undefined) {
       var _segmentBase = adaptationChildren.segmentBase;
-      representationIndex = new base/* default */.Z(_segmentBase, context);
+      representationIndex = new base/* default */.Z(_segmentBase, reprIndexCtxt);
     } else if (adaptationChildren.segmentList !== undefined) {
       var _segmentList = adaptationChildren.segmentList;
-      representationIndex = new ListRepresentationIndex(_segmentList, context);
+      representationIndex = new ListRepresentationIndex(_segmentList, reprIndexCtxt);
     } else {
       representationIndex = new TemplateRepresentationIndex({
         duration: Number.MAX_VALUE,
         timescale: 1,
         startNumber: 0,
         media: ""
-      }, context);
+      }, reprIndexCtxt);
     }
   }
 
@@ -20447,12 +20754,12 @@ function getHDRInformation(_ref) {
 /**
  * Process intermediate representations to create final parsed representations.
  * @param {Array.<Object>} representationsIR
- * @param {Object} adaptationInfos
+ * @param {Object} context
  * @returns {Array.<Object>}
  */
 
 
-function parseRepresentations(representationsIR, adaptation, adaptationInfos) {
+function parseRepresentations(representationsIR, adaptation, context) {
   var _a, _b, _c, _d;
 
   var parsedRepresentations = [];
@@ -20469,18 +20776,18 @@ function parseRepresentations(representationsIR, adaptation, adaptationInfos) {
     } // Retrieve previous version of the Representation, if one.
 
 
-    var unsafelyBaseOnPreviousRepresentation = (_b = (_a = adaptationInfos.unsafelyBaseOnPreviousAdaptation) === null || _a === void 0 ? void 0 : _a.getRepresentation(representationID)) !== null && _b !== void 0 ? _b : null;
+    var unsafelyBaseOnPreviousRepresentation = (_b = (_a = context.unsafelyBaseOnPreviousAdaptation) === null || _a === void 0 ? void 0 : _a.getRepresentation(representationID)) !== null && _b !== void 0 ? _b : null;
     var inbandEventStreams = combineInbandEventStreams(representation, adaptation);
-    var availabilityTimeComplete = (_c = representation.attributes.availabilityTimeComplete) !== null && _c !== void 0 ? _c : adaptationInfos.availabilityTimeComplete;
-    var availabilityTimeOffset = ((_d = representation.attributes.availabilityTimeOffset) !== null && _d !== void 0 ? _d : 0) + adaptationInfos.availabilityTimeOffset;
-    var representationInfos = (0,object_assign/* default */.Z)({}, adaptationInfos, {
+    var availabilityTimeComplete = (_c = representation.attributes.availabilityTimeComplete) !== null && _c !== void 0 ? _c : context.availabilityTimeComplete;
+    var availabilityTimeOffset = ((_d = representation.attributes.availabilityTimeOffset) !== null && _d !== void 0 ? _d : 0) + context.availabilityTimeOffset;
+    var reprIndexCtxt = (0,object_assign/* default */.Z)({}, context, {
       availabilityTimeOffset: availabilityTimeOffset,
       availabilityTimeComplete: availabilityTimeComplete,
       unsafelyBaseOnPreviousRepresentation: unsafelyBaseOnPreviousRepresentation,
       adaptation: adaptation,
       inbandEventStreams: inbandEventStreams
     });
-    var representationIndex = parseRepresentationIndex(representation, representationInfos); // Find bitrate
+    var representationIndex = parseRepresentationIndex(representation, reprIndexCtxt); // Find bitrate
 
     var representationBitrate = void 0;
 
@@ -20599,7 +20906,7 @@ function parseRepresentations(representationsIR, adaptation, adaptationInfos) {
 
     parsedRepresentation.hdrInfo = getHDRInformation({
       adaptationProfiles: adaptation.attributes.profiles,
-      manifestProfiles: adaptationInfos.manifestProfiles,
+      manifestProfiles: context.manifestProfiles,
       codecs: codecs
     });
     parsedRepresentations.push(parsedRepresentation);
@@ -20651,7 +20958,7 @@ function parse_adaptation_sets_arrayLikeToArray(arr, len) { if (len == null || l
  */
 
 function isVisuallyImpaired(accessibility) {
-  if (accessibility == null) {
+  if (accessibility === undefined) {
     return false;
   }
 
@@ -20669,7 +20976,7 @@ function isVisuallyImpaired(accessibility) {
 
 
 function isHardOfHearing(accessibility) {
-  if (accessibility == null) {
+  if (accessibility === undefined) {
     return false;
   }
 
@@ -20685,7 +20992,7 @@ function isHardOfHearing(accessibility) {
 
 
 function hasSignLanguageInterpretation(accessibility) {
-  if (accessibility == null) {
+  if (accessibility === undefined) {
     return false;
   }
 
@@ -20783,12 +21090,12 @@ function getAdaptationSetSwitchingIDs(adaptation) {
  * Note that the AdaptationSets returned are sorted by priority (from the most
  * priority to the least one).
  * @param {Array.<Object>} adaptationsIR
- * @param {Object} periodInfos
+ * @param {Object} context
  * @returns {Array.<Object>}
  */
 
 
-function parseAdaptationSets(adaptationsIR, periodInfos) {
+function parseAdaptationSets(adaptationsIR, context) {
   var _a, _b, _c, _d, _e, _f, _g;
 
   var parsedAdaptations = {};
@@ -20826,8 +21133,8 @@ function parseAdaptationSets(adaptationsIR, periodInfos) {
       return role.schemeIdUri === "urn:mpeg:dash:role:2011";
     });
     var representationsIR = adaptation.children.representations;
-    var availabilityTimeComplete = (_a = adaptation.attributes.availabilityTimeComplete) !== null && _a !== void 0 ? _a : periodInfos.availabilityTimeComplete;
-    var availabilityTimeOffset = ((_b = adaptation.attributes.availabilityTimeOffset) !== null && _b !== void 0 ? _b : 0) + periodInfos.availabilityTimeOffset;
+    var availabilityTimeComplete = (_a = adaptation.attributes.availabilityTimeComplete) !== null && _a !== void 0 ? _a : context.availabilityTimeComplete;
+    var availabilityTimeOffset = ((_b = adaptation.attributes.availabilityTimeOffset) !== null && _b !== void 0 ? _b : 0) + context.availabilityTimeOffset;
     var adaptationMimeType = adaptation.attributes.mimeType;
     var adaptationCodecs = adaptation.attributes.codecs;
     var type = inferAdaptationType(representationsIR, (0,is_non_empty_string/* default */.Z)(adaptationMimeType) ? adaptationMimeType : null, (0,is_non_empty_string/* default */.Z)(adaptationCodecs) ? adaptationCodecs : null, adaptationChildren.roles != null ? adaptationChildren.roles : null);
@@ -20841,27 +21148,28 @@ function parseAdaptationSets(adaptationsIR, periodInfos) {
     var adaptationSetSwitchingIDs = getAdaptationSetSwitchingIDs(adaptation);
     var parentSegmentTemplates = [];
 
-    if (periodInfos.segmentTemplate !== undefined) {
-      parentSegmentTemplates.push(periodInfos.segmentTemplate);
+    if (context.segmentTemplate !== undefined) {
+      parentSegmentTemplates.push(context.segmentTemplate);
     }
 
     if (adaptation.children.segmentTemplate !== undefined) {
       parentSegmentTemplates.push(adaptation.children.segmentTemplate);
     }
 
-    var adaptationInfos = {
-      aggressiveMode: periodInfos.aggressiveMode,
+    var reprCtxt = {
+      aggressiveMode: context.aggressiveMode,
       availabilityTimeComplete: availabilityTimeComplete,
       availabilityTimeOffset: availabilityTimeOffset,
-      baseURLs: resolveBaseURLs(periodInfos.baseURLs, adaptationChildren.baseURLs),
-      manifestBoundsCalculator: periodInfos.manifestBoundsCalculator,
-      end: periodInfos.end,
-      isDynamic: periodInfos.isDynamic,
-      manifestProfiles: periodInfos.manifestProfiles,
+      baseURLs: resolveBaseURLs(context.baseURLs, adaptationChildren.baseURLs),
+      manifestBoundsCalculator: context.manifestBoundsCalculator,
+      end: context.end,
+      isDynamic: context.isDynamic,
+      isLastPeriod: context.isLastPeriod,
+      manifestProfiles: context.manifestProfiles,
       parentSegmentTemplates: parentSegmentTemplates,
-      receivedTime: periodInfos.receivedTime,
-      start: periodInfos.start,
-      timeShiftBufferDepth: periodInfos.timeShiftBufferDepth,
+      receivedTime: context.receivedTime,
+      start: context.start,
+      timeShiftBufferDepth: context.timeShiftBufferDepth,
       unsafelyBaseOnPreviousAdaptation: null
     };
     var trickModeProperty = Array.isArray(essentialProperties) ? (0,array_find/* default */.Z)(essentialProperties, function (scheme) {
@@ -20876,8 +21184,8 @@ function parseAdaptationSets(adaptationsIR, periodInfos) {
       // Add to the already existing main video adaptation
       // TODO remove that ugly custom logic?
       var videoMainAdaptation = parsedAdaptations.video[lastMainAdaptationIndex.video];
-      adaptationInfos.unsafelyBaseOnPreviousAdaptation = (_e = (_d = periodInfos.unsafelyBaseOnPreviousPeriod) === null || _d === void 0 ? void 0 : _d.getAdaptation(videoMainAdaptation.id)) !== null && _e !== void 0 ? _e : null;
-      var representations = parseRepresentations(representationsIR, adaptation, adaptationInfos);
+      reprCtxt.unsafelyBaseOnPreviousAdaptation = (_e = (_d = context.unsafelyBaseOnPreviousPeriod) === null || _d === void 0 ? void 0 : _d.getAdaptation(videoMainAdaptation.id)) !== null && _e !== void 0 ? _e : null;
+      var representations = parseRepresentations(representationsIR, adaptation, reprCtxt);
 
       (_videoMainAdaptation$ = videoMainAdaptation.representations).push.apply(_videoMainAdaptation$, representations);
 
@@ -20930,9 +21238,9 @@ function parseAdaptationSets(adaptationsIR, periodInfos) {
 
       newID = adaptationID;
       parsedAdaptationsIDs.push(adaptationID);
-      adaptationInfos.unsafelyBaseOnPreviousAdaptation = (_g = (_f = periodInfos.unsafelyBaseOnPreviousPeriod) === null || _f === void 0 ? void 0 : _f.getAdaptation(adaptationID)) !== null && _g !== void 0 ? _g : null;
+      reprCtxt.unsafelyBaseOnPreviousAdaptation = (_g = (_f = context.unsafelyBaseOnPreviousPeriod) === null || _f === void 0 ? void 0 : _f.getAdaptation(adaptationID)) !== null && _g !== void 0 ? _g : null;
 
-      var _representations = parseRepresentations(representationsIR, adaptation, adaptationInfos);
+      var _representations = parseRepresentations(representationsIR, adaptation, reprCtxt);
 
       var parsedAdaptationSet = {
         id: adaptationID,
@@ -21078,37 +21386,38 @@ var generatePeriodID = (0,id_generator/* default */.Z)();
 /**
  * Process intermediate periods to create final parsed periods.
  * @param {Array.<Object>} periodsIR
- * @param {Object} contextInfos
+ * @param {Object} context
  * @returns {Array.<Object>}
  */
 
-function parsePeriods(periodsIR, contextInfos) {
+function parsePeriods(periodsIR, context) {
   var _a, _b, _c, _d, _e, _f;
 
   var parsedPeriods = [];
-  var periodsTimeInformation = getPeriodsTimeInformation(periodsIR, contextInfos);
+  var periodsTimeInformation = getPeriodsTimeInformation(periodsIR, context);
 
   if (periodsTimeInformation.length !== periodsIR.length) {
     throw new Error("MPD parsing error: the time information are incoherent.");
   }
 
-  var isDynamic = contextInfos.isDynamic,
-      timeShiftBufferDepth = contextInfos.timeShiftBufferDepth;
+  var isDynamic = context.isDynamic,
+      timeShiftBufferDepth = context.timeShiftBufferDepth;
   var manifestBoundsCalculator = new ManifestBoundsCalculator({
     isDynamic: isDynamic,
     timeShiftBufferDepth: timeShiftBufferDepth
   });
 
-  if (!isDynamic && contextInfos.duration != null) {
-    manifestBoundsCalculator.setLastPosition(contextInfos.duration);
+  if (!isDynamic && context.duration != null) {
+    manifestBoundsCalculator.setLastPosition(context.duration);
   } // We parse it in reverse because we might need to deduce the buffer depth from
   // the last Periods' indexes
 
 
   var _loop = function _loop(i) {
+    var isLastPeriod = i === periodsIR.length - 1;
     var periodIR = periodsIR[i];
-    var xlinkInfos = contextInfos.xlinkInfos.get(periodIR);
-    var periodBaseURLs = resolveBaseURLs(contextInfos.baseURLs, periodIR.children.baseURLs);
+    var xlinkInfos = context.xlinkInfos.get(periodIR);
+    var periodBaseURLs = resolveBaseURLs(context.baseURLs, periodIR.children.baseURLs);
     var _periodsTimeInformati = periodsTimeInformation[i],
         periodStart = _periodsTimeInformati.periodStart,
         periodDuration = _periodsTimeInformati.periodDuration,
@@ -21129,27 +21438,31 @@ function parsePeriods(periodsIR, contextInfos) {
       periodID += "-dup";
     }
 
-    var receivedTime = xlinkInfos !== undefined ? xlinkInfos.receivedTime : contextInfos.receivedTime;
-    var unsafelyBaseOnPreviousPeriod = (_b = (_a = contextInfos.unsafelyBaseOnPreviousManifest) === null || _a === void 0 ? void 0 : _a.getPeriod(periodID)) !== null && _b !== void 0 ? _b : null;
+    var receivedTime = xlinkInfos !== undefined ? xlinkInfos.receivedTime : context.receivedTime;
+    var unsafelyBaseOnPreviousPeriod = (_b = (_a = context.unsafelyBaseOnPreviousManifest) === null || _a === void 0 ? void 0 : _a.getPeriod(periodID)) !== null && _b !== void 0 ? _b : null;
     var availabilityTimeComplete = (_c = periodIR.attributes.availabilityTimeComplete) !== null && _c !== void 0 ? _c : true;
     var availabilityTimeOffset = (_d = periodIR.attributes.availabilityTimeOffset) !== null && _d !== void 0 ? _d : 0;
-    var periodInfos = {
-      aggressiveMode: contextInfos.aggressiveMode,
+    var aggressiveMode = context.aggressiveMode,
+        manifestProfiles = context.manifestProfiles;
+    var segmentTemplate = periodIR.children.segmentTemplate;
+    var adapCtxt = {
+      aggressiveMode: aggressiveMode,
       availabilityTimeComplete: availabilityTimeComplete,
       availabilityTimeOffset: availabilityTimeOffset,
       baseURLs: periodBaseURLs,
       manifestBoundsCalculator: manifestBoundsCalculator,
       end: periodEnd,
       isDynamic: isDynamic,
-      manifestProfiles: contextInfos.manifestProfiles,
+      isLastPeriod: isLastPeriod,
+      manifestProfiles: manifestProfiles,
       receivedTime: receivedTime,
-      segmentTemplate: periodIR.children.segmentTemplate,
+      segmentTemplate: segmentTemplate,
       start: periodStart,
       timeShiftBufferDepth: timeShiftBufferDepth,
       unsafelyBaseOnPreviousPeriod: unsafelyBaseOnPreviousPeriod
     };
-    var adaptations = parseAdaptationSets(periodIR.children.adaptations, periodInfos);
-    var namespaces = ((_e = contextInfos.xmlNamespaces) !== null && _e !== void 0 ? _e : []).concat((_f = periodIR.attributes.namespaces) !== null && _f !== void 0 ? _f : []);
+    var adaptations = parseAdaptationSets(periodIR.children.adaptations, adapCtxt);
+    var namespaces = ((_e = context.xmlNamespaces) !== null && _e !== void 0 ? _e : []).concat((_f = periodIR.attributes.namespaces) !== null && _f !== void 0 ? _f : []);
     var streamEvents = generateStreamEvents(periodIR.children.eventStreams, periodStart, namespaces);
     var parsedPeriod = {
       id: periodID,
@@ -21174,7 +21487,7 @@ function parsePeriods(periodsIR, contextInfos) {
 
           manifestBoundsCalculator.setLastPosition(_lastPosition, _positionTime);
         } else {
-          var _guessedLastPositionFromClock = guessLastPositionFromClock(contextInfos, periodStart);
+          var _guessedLastPositionFromClock = guessLastPositionFromClock(context, periodStart);
 
           if (_guessedLastPositionFromClock !== undefined) {
             var guessedLastPosition = _guessedLastPositionFromClock[0],
@@ -21190,9 +21503,9 @@ function parsePeriods(periodsIR, contextInfos) {
     _loop(i);
   }
 
-  if (contextInfos.isDynamic && !manifestBoundsCalculator.lastPositionIsKnown()) {
+  if (context.isDynamic && !manifestBoundsCalculator.lastPositionIsKnown()) {
     // Guess a last time the last position
-    var guessedLastPositionFromClock = guessLastPositionFromClock(contextInfos, 0);
+    var guessedLastPositionFromClock = guessLastPositionFromClock(context, 0);
 
     if (guessedLastPositionFromClock !== undefined) {
       var lastPosition = guessedLastPositionFromClock[0],
@@ -21226,14 +21539,14 @@ function parsePeriods(periodsIR, contextInfos) {
  * the live time more directly from that previous one, we might be better off
  * than just using the clock.
  *
- * @param {Object} contextInfos
+ * @param {Object} context
  * @param {number} minimumTime
  * @returns {Array.<number|undefined>}
  */
 
-function guessLastPositionFromClock(contextInfos, minimumTime) {
-  if (contextInfos.clockOffset != null) {
-    var lastPosition = contextInfos.clockOffset / 1000 - contextInfos.availabilityStartTime;
+function guessLastPositionFromClock(context, minimumTime) {
+  if (context.clockOffset != null) {
+    var lastPosition = context.clockOffset / 1000 - context.availabilityStartTime;
     var positionTime = performance.now() / 1000;
     var timeInSec = positionTime + lastPosition;
 
@@ -21246,7 +21559,7 @@ function guessLastPositionFromClock(contextInfos, minimumTime) {
     if (now >= minimumTime) {
       log/* default.warn */.Z.warn("DASH Parser: no clock synchronization mechanism found." + " Using the system clock instead.");
 
-      var _lastPosition2 = now - contextInfos.availabilityStartTime;
+      var _lastPosition2 = now - context.availabilityStartTime;
 
       var _positionTime2 = performance.now() / 1000;
 
@@ -24026,28 +24339,35 @@ function parseFromDocument(document, args) {
  * Remove segments which starts before the given `firstAvailablePosition` from
  * the timeline. `firstAvailablePosition` has to be time scaled.
  * @param {Array.<Object>}
- * @returns {number}
+ * @returns {number} - Returns the number of removed segments. This includes
+ * potential implicit segment from decremented `repeatCount` attributes.
  */
 function clearTimelineFromPosition(timeline, firstAvailablePosition) {
+  var nbEltsRemoved = 0;
+
   while (timeline.length > 0) {
     var firstElt = timeline[0];
 
     if (firstElt.start >= firstAvailablePosition) {
-      return; // all clear
+      return nbEltsRemoved; // all clear
     }
 
-    if (firstElt.repeatCount <= 0) {
+    if (firstElt.repeatCount === -1) {
+      return nbEltsRemoved;
+    } else if (firstElt.repeatCount === 0) {
       timeline.shift();
+      nbEltsRemoved += 1;
     } else {
       // we have a segment repetition
       var nextElt = timeline[1];
 
       if (nextElt !== undefined && nextElt.start <= firstAvailablePosition) {
         timeline.shift();
+        nbEltsRemoved += 1;
       } else {
         // no next segment or next segment is available
         if (firstElt.duration <= 0) {
-          return;
+          return nbEltsRemoved;
         }
 
         var nextStart = firstElt.start + firstElt.duration;
@@ -24061,16 +24381,20 @@ function clearTimelineFromPosition(timeline, firstAvailablePosition) {
         if (nextRepeat > firstElt.repeatCount) {
           // every start is before
           timeline.shift();
+          nbEltsRemoved = firstElt.repeatCount + 1;
         } else {
           // some repetitions start after and some before
           var newRepeat = firstElt.repeatCount - nextRepeat;
           firstElt.start = nextStart;
           firstElt.repeatCount = newRepeat;
-          return;
+          nbEltsRemoved += nextRepeat;
+          return nbEltsRemoved;
         }
       }
     }
   }
+
+  return nbEltsRemoved;
 }
 
 /***/ }),
@@ -24353,22 +24677,29 @@ function isSegmentStillAvailable(segment, timeline, timescale, indexTimeOffset) 
 /**
  * Update a complete array of segments in a given timeline with a [generally]
  * smaller but [generally] newer set of segments.
+ *
+ * Returns a boolean:
+ *   - If set to `true`, the old timeline was emptied and completely replaced by
+ *     the content of the newer timeline.
+ *     This could happen either if a problem happened while trying to update or
+ *     when the update is actually bigger than what it is updating.
+ *   - If set to `false`, the older timeline was either updated to add the newer
+ *     segments, or untouched.
+ *
  * @param {Array.<Object>} oldTimeline
  * @param {Array.<Object>} newTimeline
+ * @returns {boolean}
  */
 
 function updateSegmentTimeline(oldTimeline, newTimeline) {
-  var prevTimelineLength = oldTimeline.length;
-
   if (oldTimeline.length === 0) {
-    oldTimeline.splice.apply(oldTimeline, [0, prevTimelineLength].concat(newTimeline));
-    return;
+    oldTimeline.push.apply(oldTimeline, newTimeline);
+    return true;
+  } else if (newTimeline.length === 0) {
+    return false;
   }
 
-  if (newTimeline.length === 0) {
-    return;
-  }
-
+  var prevTimelineLength = oldTimeline.length;
   var newIndexStart = newTimeline[0].start;
   var oldLastElt = oldTimeline[prevTimelineLength - 1];
   var oldIndexEnd = (0,_index_helpers__WEBPACK_IMPORTED_MODULE_0__/* .getIndexSegmentEnd */ .jH)(oldLastElt, newTimeline[0]);
@@ -24382,24 +24713,26 @@ function updateSegmentTimeline(oldTimeline, newTimeline) {
 
     if (currStart === newIndexStart) {
       // replace that one and those after it
-      oldTimeline.splice.apply(oldTimeline, [i, prevTimelineLength - i].concat(newTimeline));
-      return;
+      var nbEltsToRemove = prevTimelineLength - i;
+      oldTimeline.splice.apply(oldTimeline, [i, nbEltsToRemove].concat(newTimeline));
+      return false;
     } else if (currStart < newIndexStart) {
       // first to be before
       var currElt = oldTimeline[i];
 
       if (currElt.start + currElt.duration > newIndexStart) {
-        // the new Manifest overlaps a previous segment (weird). Remove the latter.
-        _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: Manifest update removed previous segments");
-        oldTimeline.splice.apply(oldTimeline, [i, prevTimelineLength - i].concat(newTimeline));
-        return;
+        // The new Manifest overlaps a previous segment (weird)
+        // In that improbable case, we'll just completely replace segments
+        _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: Manifest update removed all previous segments");
+        oldTimeline.splice.apply(oldTimeline, [0, prevTimelineLength].concat(newTimeline));
+        return true;
       } else if (currElt.repeatCount === undefined || currElt.repeatCount <= 0) {
         if (currElt.repeatCount < 0) {
           currElt.repeatCount = Math.floor((newIndexStart - currElt.start) / currElt.duration) - 1;
         }
 
         oldTimeline.splice.apply(oldTimeline, [i + 1, prevTimelineLength - (i + 1)].concat(newTimeline));
-        return;
+        return false;
       } // else, there is a positive repeat we might want to update
 
 
@@ -24409,7 +24742,7 @@ function updateSegmentTimeline(oldTimeline, newTimeline) {
         // our new index comes directly after
         // put it after this one
         oldTimeline.splice.apply(oldTimeline, [i + 1, prevTimelineLength - (i + 1)].concat(newTimeline));
-        return;
+        return false;
       }
 
       var newCurrRepeat = (newIndexStart - currElt.start) / currElt.duration - 1;
@@ -24421,14 +24754,14 @@ function updateSegmentTimeline(oldTimeline, newTimeline) {
         oldTimeline.splice.apply(oldTimeline, [i, prevTimelineLength - i].concat(newTimeline));
         oldTimeline[i].start = currElt.start;
         oldTimeline[i].repeatCount = newRepeatCount;
-        return;
+        return false;
       }
 
       _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: Manifest update removed previous segments");
       oldTimeline[i].repeatCount = Math.floor(newCurrRepeat); // put it after this one
 
       oldTimeline.splice.apply(oldTimeline, [i + 1, prevTimelineLength - (i + 1)].concat(newTimeline));
-      return;
+      return false;
     }
   } // if we got here, it means that every segments in the previous manifest are
   // after the new one. This is unusual.
@@ -24441,12 +24774,12 @@ function updateSegmentTimeline(oldTimeline, newTimeline) {
   if (prevLastElt.repeatCount !== undefined && prevLastElt.repeatCount < 0) {
     if (prevLastElt.start > newLastElt.start) {
       _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: The new index is older than the previous one");
-      return; // the old comes after
+      return false;
     } else {
       // the new has more depth
       _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: The new index is \"bigger\" than the previous one");
       oldTimeline.splice.apply(oldTimeline, [0, prevTimelineLength].concat(newTimeline));
-      return;
+      return true;
     }
   }
 
@@ -24455,13 +24788,13 @@ function updateSegmentTimeline(oldTimeline, newTimeline) {
 
   if (prevLastTime >= newLastTime) {
     _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: The new index is older than the previous one");
-    return; // the old comes after
+    return false;
   } // the new one has more depth. full update
 
 
   _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("RepresentationIndex: The new index is \"bigger\" than the previous one");
   oldTimeline.splice.apply(oldTimeline, [0, prevTimelineLength].concat(newTimeline));
-  return;
+  return true;
 }
 
 /***/ }),
@@ -29113,9 +29446,8 @@ __webpack_require__.d(__webpack_exports__, {
 var features = __webpack_require__(7874);
 // EXTERNAL MODULE: ./src/transports/utils/generate_manifest_loader.ts + 1 modules
 var generate_manifest_loader = __webpack_require__(8791);
-// EXTERNAL MODULE: ./node_modules/pinkie/index.js
-var pinkie = __webpack_require__(8555);
-var pinkie_default = /*#__PURE__*/__webpack_require__.n(pinkie);
+// EXTERNAL MODULE: ./src/utils/promise.ts
+var promise = __webpack_require__(9589);
 // EXTERNAL MODULE: ./src/utils/request/index.ts + 1 modules
 var request = __webpack_require__(4597);
 // EXTERNAL MODULE: ./src/utils/take_first_set.ts
@@ -29153,7 +29485,7 @@ function imageLoader(url, content, cancelSignal, callbacks) {
   var segment = content.segment;
 
   if (segment.isInit || url === null) {
-    return pinkie_default().resolve({
+    return promise/* default.resolve */.Z.resolve({
       resultType: "segment-created",
       resultData: null
     });
@@ -29233,17 +29565,25 @@ function imageParser(loadedSegment, content) {
     appendWindow: [period.start, period.end]
   };
 }
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(5861);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
+var regenerator = __webpack_require__(7757);
+var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 // EXTERNAL MODULE: ./src/errors/format_error.ts
 var format_error = __webpack_require__(8750);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
-// EXTERNAL MODULE: ./src/manifest/index.ts + 6 modules
-var src_manifest = __webpack_require__(1989);
+// EXTERNAL MODULE: ./src/manifest/manifest.ts + 5 modules
+var manifest_manifest = __webpack_require__(7244);
 // EXTERNAL MODULE: ./src/utils/object_assign.ts
 var object_assign = __webpack_require__(8026);
 // EXTERNAL MODULE: ./src/utils/string_parsing.ts
 var string_parsing = __webpack_require__(3635);
 ;// CONCATENATED MODULE: ./src/transports/dash/manifest_parser.ts
+
+
+
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -29344,83 +29684,122 @@ function generateManifestParser(options) {
      */
 
 
-    function processMpdParserResponse(parserResponse) {
-      if (parserResponse.type === "done") {
-        if (parserResponse.value.warnings.length > 0) {
-          onWarnings(parserResponse.value.warnings);
-        }
+    function processMpdParserResponse(_x) {
+      return _processMpdParserResponse.apply(this, arguments);
+    }
 
-        if (cancelSignal.isCancelled) {
-          return pinkie_default().reject(cancelSignal.cancellationError);
-        }
+    function _processMpdParserResponse() {
+      _processMpdParserResponse = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(parserResponse) {
+        var _yield$createManifest, manifest, mWarnings, value, externalResources;
 
-        var manifest = new src_manifest/* default */.ZP(parserResponse.value.parsed, options);
-        return {
-          manifest: manifest,
-          url: url
-        };
-      }
+        return regenerator_default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                if (!(parserResponse.type === "done")) {
+                  _context.next = 11;
+                  break;
+                }
 
-      var value = parserResponse.value;
-      var externalResources = value.urls.map(function (resourceUrl) {
-        return scheduleRequest(function () {
-          return value.format === "string" ? (0,request/* default */.ZP)({
-            url: resourceUrl,
-            responseType: "text",
-            cancelSignal: cancelSignal
-          }) : (0,request/* default */.ZP)({
-            url: resourceUrl,
-            responseType: "arraybuffer",
-            cancelSignal: cancelSignal
-          });
-        }).then(function (res) {
-          if (value.format === "string") {
-            if (typeof res.responseData !== "string") {
-              throw new Error("External DASH resources should have been a string");
+                if (parserResponse.value.warnings.length > 0) {
+                  onWarnings(parserResponse.value.warnings);
+                }
+
+                if (!cancelSignal.isCancelled) {
+                  _context.next = 4;
+                  break;
+                }
+
+                return _context.abrupt("return", promise/* default.reject */.Z.reject(cancelSignal.cancellationError));
+
+              case 4:
+                _context.next = 6;
+                return (0,manifest_manifest/* createManifestObject */.P)(parserResponse.value.parsed, options);
+
+              case 6:
+                _yield$createManifest = _context.sent;
+                manifest = _yield$createManifest[0];
+                mWarnings = _yield$createManifest[1];
+
+                if (mWarnings.length > 0) {
+                  onWarnings(parserResponse.value.warnings);
+                }
+
+                return _context.abrupt("return", {
+                  manifest: manifest,
+                  url: url
+                });
+
+              case 11:
+                value = parserResponse.value;
+                externalResources = value.urls.map(function (resourceUrl) {
+                  return scheduleRequest(function () {
+                    return value.format === "string" ? (0,request/* default */.ZP)({
+                      url: resourceUrl,
+                      responseType: "text",
+                      cancelSignal: cancelSignal
+                    }) : (0,request/* default */.ZP)({
+                      url: resourceUrl,
+                      responseType: "arraybuffer",
+                      cancelSignal: cancelSignal
+                    });
+                  }).then(function (res) {
+                    if (value.format === "string") {
+                      if (typeof res.responseData !== "string") {
+                        throw new Error("External DASH resources should have been a string");
+                      }
+
+                      return (0,object_assign/* default */.Z)(res, {
+                        responseData: {
+                          success: true,
+                          data: res.responseData
+                        }
+                      });
+                    } else {
+                      if (!(res.responseData instanceof ArrayBuffer)) {
+                        throw new Error("External DASH resources should have been ArrayBuffers");
+                      }
+
+                      return (0,object_assign/* default */.Z)(res, {
+                        responseData: {
+                          success: true,
+                          data: res.responseData
+                        }
+                      });
+                    }
+                  }, function (err) {
+                    var error = (0,format_error/* default */.Z)(err, {
+                      defaultCode: "PIPELINE_PARSE_ERROR",
+                      defaultReason: "An unknown error occured when parsing ressources."
+                    });
+                    return (0,object_assign/* default */.Z)({}, {
+                      size: undefined,
+                      requestDuration: undefined,
+                      responseData: {
+                        success: false,
+                        error: error
+                      }
+                    });
+                  });
+                });
+                return _context.abrupt("return", promise/* default.all */.Z.all(externalResources).then(function (loadedResources) {
+                  if (value.format === "string") {
+                    assertLoadedResourcesFormatString(loadedResources);
+                    return processMpdParserResponse(value["continue"](loadedResources));
+                  } else {
+                    assertLoadedResourcesFormatArrayBuffer(loadedResources);
+                    return processMpdParserResponse(value["continue"](loadedResources));
+                  }
+                }));
+
+              case 14:
+              case "end":
+                return _context.stop();
             }
-
-            return (0,object_assign/* default */.Z)(res, {
-              responseData: {
-                success: true,
-                data: res.responseData
-              }
-            });
-          } else {
-            if (!(res.responseData instanceof ArrayBuffer)) {
-              throw new Error("External DASH resources should have been ArrayBuffers");
-            }
-
-            return (0,object_assign/* default */.Z)(res, {
-              responseData: {
-                success: true,
-                data: res.responseData
-              }
-            });
           }
-        }, function (err) {
-          var error = (0,format_error/* default */.Z)(err, {
-            defaultCode: "PIPELINE_PARSE_ERROR",
-            defaultReason: "An unknown error occured when parsing ressources."
-          });
-          return (0,object_assign/* default */.Z)({}, {
-            size: undefined,
-            requestDuration: undefined,
-            responseData: {
-              success: false,
-              error: error
-            }
-          });
-        });
-      });
-      return pinkie_default().all(externalResources).then(function (loadedResources) {
-        if (value.format === "string") {
-          assertLoadedResourcesFormatString(loadedResources);
-          return processMpdParserResponse(value["continue"](loadedResources));
-        } else {
-          assertLoadedResourcesFormatArrayBuffer(loadedResources);
-          return processMpdParserResponse(value["continue"](loadedResources));
-        }
-      });
+        }, _callee);
+      }));
+      return _processMpdParserResponse.apply(this, arguments);
     }
   };
 }
@@ -29544,11 +29923,6 @@ function doesXmlSeemsUtf8Encoded(xmlData) {
 }
 // EXTERNAL MODULE: ./src/errors/custom_loader_error.ts
 var custom_loader_error = __webpack_require__(7839);
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
-var asyncToGenerator = __webpack_require__(5861);
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(7757);
-var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 // EXTERNAL MODULE: ./src/config.ts
 var config = __webpack_require__(944);
 // EXTERNAL MODULE: ./src/errors/request_error.ts
@@ -29631,11 +30005,16 @@ function fetchRequest(options) {
     cancellation = err;
     abortFetch();
   });
-  return fetch(options.url, {
-    headers: headers,
-    method: "GET",
-    signal: !(0,is_null_or_undefined/* default */.Z)(abortController) ? abortController.signal : undefined
-  }).then(function (response) {
+  var fetchOpts = {
+    method: "GET"
+  };
+
+  if (headers !== undefined) {
+    fetchOpts.headers = headers;
+  }
+
+  fetchOpts.signal = !(0,is_null_or_undefined/* default */.Z)(abortController) ? abortController.signal : null;
+  return fetch(options.url, fetchOpts).then(function (response) {
     if (!(0,is_null_or_undefined/* default */.Z)(timeout)) {
       clearTimeout(timeout);
     }
@@ -29821,6 +30200,7 @@ var check_isobmff_integrity = __webpack_require__(4460);
 
 
 
+
 /**
  * Add multiple checks on the response given by the `segmentLoader` in argument.
  * If the response appear to be corrupted, the returned Promise will reject with
@@ -29831,7 +30211,7 @@ var check_isobmff_integrity = __webpack_require__(4460);
 
 function addSegmentIntegrityChecks(segmentLoader) {
   return function (url, content, initialCancelSignal, callbacks) {
-    return new Promise(function (res, rej) {
+    return new promise/* default */.Z(function (res, rej) {
       var canceller = new task_canceller/* default */.ZP();
       var unregisterCancelLstnr = initialCancelSignal.register(function onCheckCancellation(err) {
         canceller.cancel();
@@ -29986,7 +30366,7 @@ function initSegmentLoader(url, segment, cancelSignal, callbacks) {
     cancelSignal: cancelSignal,
     onProgress: callbacks.onProgress
   });
-  return pinkie_default().all([rangeRequest$, indexRequest$]).then(function (_ref) {
+  return promise/* default.all */.Z.all([rangeRequest$, indexRequest$]).then(function (_ref) {
     var initData = _ref[0],
         indexData = _ref[1];
     var data = (0,byte_parsing/* concat */.zo)(new Uint8Array(initData.responseData), new Uint8Array(indexData.responseData));
@@ -30246,7 +30626,7 @@ function generateSegmentLoader(_ref) {
 
   function segmentLoader(url, content, cancelSignal, callbacks) {
     if (url == null) {
-      return pinkie_default().resolve({
+      return promise/* default.resolve */.Z.resolve({
         resultType: "segment-created",
         resultData: null
       });
@@ -30265,7 +30645,7 @@ function generateSegmentLoader(_ref) {
       transport: "dash",
       url: url
     };
-    return new Promise(function (res, rej) {
+    return new promise/* default */.Z(function (res, rej) {
       /** `true` when the custom segmentLoader should not be active anymore. */
       var hasFinished = false;
       /**
@@ -31062,7 +31442,7 @@ function generateTextTrackLoader(_ref) {
     var range = segment.range;
 
     if (url === null) {
-      return pinkie_default().resolve({
+      return promise/* default.resolve */.Z.resolve({
         resultType: "segment-created",
         resultData: null
       });
@@ -31596,19 +31976,21 @@ __webpack_require__.d(__webpack_exports__, {
   "Z": function() { return /* binding */ transports_smooth; }
 });
 
-// EXTERNAL MODULE: ./node_modules/pinkie/index.js
-var pinkie = __webpack_require__(8555);
-var pinkie_default = /*#__PURE__*/__webpack_require__.n(pinkie);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
+var asyncToGenerator = __webpack_require__(5861);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
+var regenerator = __webpack_require__(7757);
+var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 // EXTERNAL MODULE: ./src/features/index.ts
 var features = __webpack_require__(7874);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
-// EXTERNAL MODULE: ./src/manifest/index.ts + 6 modules
-var src_manifest = __webpack_require__(1989);
+// EXTERNAL MODULE: ./src/manifest/manifest.ts + 5 modules
+var manifest_manifest = __webpack_require__(7244);
 // EXTERNAL MODULE: ./src/parsers/containers/isobmff/read.ts
 var read = __webpack_require__(6807);
-// EXTERNAL MODULE: ./src/manifest/adaptation.ts + 3 modules
-var adaptation = __webpack_require__(8999);
+// EXTERNAL MODULE: ./src/manifest/adaptation.ts + 4 modules
+var adaptation = __webpack_require__(3089);
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
 var array_includes = __webpack_require__(7714);
 // EXTERNAL MODULE: ./src/utils/assert.ts
@@ -33324,6 +33706,8 @@ function createPSSHBox(systemId, privateData) {
 
 /* harmony default export */ var smooth = (create_parser);
 
+// EXTERNAL MODULE: ./src/utils/promise.ts
+var promise = __webpack_require__(9589);
 // EXTERNAL MODULE: ./src/utils/request/index.ts + 1 modules
 var request = __webpack_require__(4597);
 // EXTERNAL MODULE: ./src/utils/warn_once.ts
@@ -34440,7 +34824,7 @@ function resolveManifest(url) {
 /**
  * Returns `true` if the given Representation refers to segments in an MP4
  * container
- * @param {Representation} representation
+ * @param {Object} representation
  * @returns {Boolean}
  */
 
@@ -34587,12 +34971,12 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
           responseData = new Uint8Array(0);
       }
 
-      return pinkie_default().resolve({
+      return promise/* default.resolve */.Z.resolve({
         resultType: "segment-created",
         resultData: responseData
       });
     } else if (url === null) {
-      return pinkie_default().resolve({
+      return promise/* default.resolve */.Z.resolve({
         resultType: "segment-created",
         resultData: null
       });
@@ -34611,7 +34995,7 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
         return regularSegmentLoader(url, content, callbacks, cancelSignal, checkMediaSegmentIntegrity);
       }
 
-      return new Promise(function (res, rej) {
+      return new promise/* default */.Z(function (res, rej) {
         /** `true` when the custom segmentLoader should not be active anymore. */
         var hasFinished = false;
         /**
@@ -34727,6 +35111,9 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
 
 /* harmony default export */ var segment_loader = (generateSegmentLoader);
 ;// CONCATENATED MODULE: ./src/transports/smooth/pipelines.ts
+
+
+
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -34792,7 +35179,7 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
     // TODO (v4.x.x) Remove that function
     resolveManifestUrl: function resolveManifestUrl(url, cancelSignal) {
       if (url === undefined) {
-        return pinkie_default().resolve(undefined);
+        return promise/* default.resolve */.Z.resolve(undefined);
       }
 
       var resolving;
@@ -34813,7 +35200,7 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
           return extractedURL;
         });
       } else {
-        resolving = pinkie_default().resolve(url);
+        resolving = promise/* default.resolve */.Z.resolve(url);
       }
 
       var token = extractToken(url);
@@ -34822,24 +35209,47 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
       });
     },
     loadManifest: manifestLoader,
-    parseManifest: function parseManifest(manifestData, parserOptions) {
-      var _a;
+    parseManifest: function parseManifest(manifestData, parserOptions, onWarnings) {
+      return (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee() {
+        var _a, url, manifestReceivedTime, responseData, documentData, parserResult, _yield$createManifest, manifest, warnings;
 
-      var url = (_a = manifestData.url) !== null && _a !== void 0 ? _a : parserOptions.originalUrl;
-      var manifestReceivedTime = manifestData.receivedTime,
-          responseData = manifestData.responseData;
-      var documentData = typeof responseData === "string" ? new DOMParser().parseFromString(responseData, "text/xml") : responseData; // TODO find a way to check if Document?
+        return regenerator_default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                url = (_a = manifestData.url) !== null && _a !== void 0 ? _a : parserOptions.originalUrl;
+                manifestReceivedTime = manifestData.receivedTime, responseData = manifestData.responseData;
+                documentData = typeof responseData === "string" ? new DOMParser().parseFromString(responseData, "text/xml") : responseData; // TODO find a way to check if Document?
 
-      var parserResult = smoothManifestParser(documentData, url, manifestReceivedTime);
-      var manifest = new src_manifest/* default */.ZP(parserResult, {
-        representationFilter: options.representationFilter,
-        supplementaryImageTracks: options.supplementaryImageTracks,
-        supplementaryTextTracks: options.supplementaryTextTracks
-      });
-      return {
-        manifest: manifest,
-        url: url
-      };
+                parserResult = smoothManifestParser(documentData, url, manifestReceivedTime);
+                _context.next = 6;
+                return (0,manifest_manifest/* createManifestObject */.P)(parserResult, {
+                  representationFilter: options.representationFilter,
+                  supplementaryImageTracks: options.supplementaryImageTracks,
+                  supplementaryTextTracks: options.supplementaryTextTracks
+                });
+
+              case 6:
+                _yield$createManifest = _context.sent;
+                manifest = _yield$createManifest[0];
+                warnings = _yield$createManifest[1];
+
+                if (warnings.length > 0) {
+                  onWarnings(warnings);
+                }
+
+                return _context.abrupt("return", {
+                  manifest: manifest,
+                  url: url
+                });
+
+              case 11:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
     }
   };
   /**
@@ -34933,7 +35343,7 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
           representation = content.representation;
 
       if (segment.isInit || url === null) {
-        return pinkie_default().resolve({
+        return promise/* default.resolve */.Z.resolve({
           resultType: "segment-created",
           resultData: null
         });
@@ -35128,7 +35538,7 @@ function addNextSegments(adaptation, nextSegments, dlSegment) {
     loadSegment: function loadSegment(url, content, cancelSignal, callbacks) {
       if (content.segment.isInit || url === null) {
         // image do not need an init segment. Passthrough directly to the parser
-        return pinkie_default().resolve({
+        return promise/* default.resolve */.Z.resolve({
           resultType: "segment-created",
           resultData: null
         });
@@ -35427,11 +35837,10 @@ __webpack_require__.d(__webpack_exports__, {
 var assert_unreachable = __webpack_require__(7904);
 // EXTERNAL MODULE: ./src/utils/request/index.ts + 1 modules
 var request = __webpack_require__(4597);
-// EXTERNAL MODULE: ./node_modules/pinkie/index.js
-var pinkie = __webpack_require__(8555);
-var pinkie_default = /*#__PURE__*/__webpack_require__.n(pinkie);
 // EXTERNAL MODULE: ./src/errors/custom_loader_error.ts
 var custom_loader_error = __webpack_require__(7839);
+// EXTERNAL MODULE: ./src/utils/promise.ts
+var promise = __webpack_require__(9589);
 ;// CONCATENATED MODULE: ./src/transports/utils/call_custom_manifest_loader.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -35452,7 +35861,7 @@ var custom_loader_error = __webpack_require__(7839);
 
 function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) {
   return function (url, cancelSignal) {
-    return new (pinkie_default())(function (res, rej) {
+    return new promise/* default */.Z(function (res, rej) {
       var timeAPIsDelta = Date.now() - performance.now();
       /** `true` when the custom segmentLoader should not be active anymore. */
 
@@ -36456,12 +36865,11 @@ function toUint8Array(input) {
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var pinkie__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(8555);
-/* harmony import */ var pinkie__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(pinkie__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1480);
+/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1480);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(3102);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(2817);
 /* harmony import */ var _is_null_or_undefined__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1946);
+/* harmony import */ var _promise__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9589);
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -36488,9 +36896,9 @@ function toUint8Array(input) {
  */
 
 function castToObservable(value) {
-  if (value instanceof rxjs__WEBPACK_IMPORTED_MODULE_1__/* .Observable */ .y) {
+  if (value instanceof rxjs__WEBPACK_IMPORTED_MODULE_0__/* .Observable */ .y) {
     return value;
-  } else if (value instanceof (pinkie__WEBPACK_IMPORTED_MODULE_0___default()) || value instanceof Promise || !(0,_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z)(value) && typeof value.then === "function") {
+  } else if (value instanceof _promise__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .Z || value instanceof Promise || !(0,_is_null_or_undefined__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z)(value) && typeof value.then === "function") {
     return (0,rxjs__WEBPACK_IMPORTED_MODULE_3__/* .from */ .D)(value);
   }
 
@@ -38516,6 +38924,8 @@ var request_error = __webpack_require__(9105);
 var is_non_empty_string = __webpack_require__(6923);
 // EXTERNAL MODULE: ./src/utils/is_null_or_undefined.ts
 var is_null_or_undefined = __webpack_require__(1946);
+// EXTERNAL MODULE: ./src/utils/promise.ts
+var promise = __webpack_require__(9589);
 ;// CONCATENATED MODULE: ./src/utils/request/xhr.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -38536,6 +38946,7 @@ var is_null_or_undefined = __webpack_require__(1946);
 
 
 
+
 var DEFAULT_REQUEST_TIMEOUT = config/* default.DEFAULT_REQUEST_TIMEOUT */.Z.DEFAULT_REQUEST_TIMEOUT;
 var DEFAULT_RESPONSE_TYPE = "json";
 function request(options) {
@@ -38545,7 +38956,7 @@ function request(options) {
     responseType: (0,is_null_or_undefined/* default */.Z)(options.responseType) ? DEFAULT_RESPONSE_TYPE : options.responseType,
     timeout: (0,is_null_or_undefined/* default */.Z)(options.timeout) ? DEFAULT_REQUEST_TIMEOUT : options.timeout
   };
-  return new Promise(function (resolve, reject) {
+  return new promise/* default */.Z(function (resolve, reject) {
     var onProgress = options.onProgress,
         cancelSignal = options.cancelSignal;
     var url = requestOptions.url,
@@ -44949,8 +45360,6 @@ var format_error = __webpack_require__(8750);
 var error_codes = __webpack_require__(5992);
 // EXTERNAL MODULE: ./src/features/index.ts
 var features = __webpack_require__(7874);
-// EXTERNAL MODULE: ./src/manifest/index.ts + 6 modules
-var manifest = __webpack_require__(1989);
 // EXTERNAL MODULE: ./src/utils/are_arrays_of_numbers_equal.ts
 var are_arrays_of_numbers_equal = __webpack_require__(4791);
 // EXTERNAL MODULE: ./src/utils/event_emitter.ts
@@ -45154,9 +45563,6 @@ var asyncToGenerator = __webpack_require__(5861);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
 var regenerator = __webpack_require__(7757);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
-// EXTERNAL MODULE: ./node_modules/pinkie/index.js
-var pinkie = __webpack_require__(8555);
-var pinkie_default = /*#__PURE__*/__webpack_require__.n(pinkie);
 // EXTERNAL MODULE: ./src/utils/assert.ts
 var assert = __webpack_require__(811);
 // EXTERNAL MODULE: ./src/utils/task_canceller.ts
@@ -45280,7 +45686,7 @@ var is_known_error = __webpack_require__(9822);
  */
 
 function cancellableSleep(delay, cancellationSignal) {
-  return new (pinkie_default())(function (res, rej) {
+  return new promise/* default */.Z(function (res, rej) {
     var timeout = setTimeout(function () {
       unregisterCancelSignal();
       res();
@@ -45429,7 +45835,7 @@ function getRequestErrorType(error) {
 
 function tryURLsWithBackoff(urls, performRequest, options, cancellationSignal) {
   if (cancellationSignal.isCancelled) {
-    return pinkie_default().reject(cancellationSignal.cancellationError);
+    return promise/* default.reject */.Z.reject(cancellationSignal.cancellationError);
   }
 
   var baseDelay = options.baseDelay,
@@ -45445,7 +45851,7 @@ function tryURLsWithBackoff(urls, performRequest, options, cancellationSignal) {
 
   if (urlsToTry.length === 0) {
     log/* default.warn */.Z.warn("Fetchers: no URL given to `tryURLsWithBackoff`.");
-    return pinkie_default().reject(new Error("No URL to request"));
+    return promise/* default.reject */.Z.reject(new Error("No URL to request"));
   }
 
   return tryURLsRecursively(urlsToTry[0], 0);
@@ -45927,7 +46333,6 @@ var ManifestFetcher = /*#__PURE__*/function () {
 
 
       function emitManifestAndComplete(manifest) {
-        onWarnings(manifest.contentWarnings);
         var parsingTime = performance.now() - parsingTimeStart;
         log/* default.info */.Z.info("MF: Manifest parsed in " + parsingTime + "ms");
         obs.next({
@@ -46004,7 +46409,7 @@ var ManifestFetcher = /*#__PURE__*/function () {
 
 
 function isPromise(val) {
-  return val instanceof (pinkie_default()) || val instanceof Promise;
+  return val instanceof promise/* default */.Z || val instanceof Promise;
 }
 ;// CONCATENATED MODULE: ./src/core/fetchers/manifest/index.ts
 /**
@@ -46023,7 +46428,7 @@ function isPromise(val) {
  * limitations under the License.
  */
 
-/* harmony default export */ var fetchers_manifest = (ManifestFetcher);
+/* harmony default export */ var manifest = (ManifestFetcher);
 ;// CONCATENATED MODULE: ./src/core/fetchers/segment/prioritized_segment_fetcher.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -46780,7 +47185,8 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, callbacks, o
       /**
        * If the request succeeded, set to the corresponding
        * `IChunkCompleteInformation` object.
-       * If the request failed or was cancelled, set to `null`.
+       * For any other completion cases: if the request either failed, was
+       * cancelled or just if no request was needed, set to `null`.
        *
        * Stays to `undefined` when the request is still pending.
        */
@@ -46895,6 +47301,8 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, callbacks, o
         if (res.resultType !== "segment-created") {
           requestInfo = res.resultData;
           sendNetworkMetricsIfAvailable();
+        } else {
+          requestInfo = null;
         }
 
         if (!canceller.isUsed) {
@@ -47467,93 +47875,6 @@ function getBufferLevels(bitrates) {
     return Vp * (gp + (bitrates[boundedIndex] * utilities[boundedIndex - 1] - bitrates[boundedIndex - 1] * utilities[boundedIndex]) / (bitrates[boundedIndex] - bitrates[boundedIndex - 1])) + 4;
   }
 }
-;// CONCATENATED MODULE: ./src/core/abr/get_estimate_from_buffer_levels.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * From the buffer gap, choose a representation.
- * @param {Object} playbackObservation
- * @param {Array.<Number>} bitrates
- * @param {Array.<Number>} bufferLevels
- * @returns {Object|undefined}
- */
-
-function getEstimateFromBufferLevels(playbackObservation, bitrates, bufferLevels) {
-  var bufferGap = playbackObservation.bufferGap,
-      currentBitrate = playbackObservation.currentBitrate,
-      currentScore = playbackObservation.currentScore,
-      speed = playbackObservation.speed;
-
-  if (currentBitrate == null) {
-    return bitrates[0];
-  }
-
-  var currentBitrateIndex = (0,array_find_index/* default */.Z)(bitrates, function (b) {
-    return b === currentBitrate;
-  });
-
-  if (currentBitrateIndex < 0 || bitrates.length !== bufferLevels.length) {
-    log/* default.error */.Z.error("ABR: Current Bitrate not found in the calculated levels");
-    return bitrates[0];
-  }
-
-  var scaledScore;
-
-  if (currentScore != null) {
-    scaledScore = speed === 0 ? currentScore : currentScore / speed;
-  }
-
-  if (scaledScore != null && scaledScore > 1) {
-    var currentBufferLevel = bufferLevels[currentBitrateIndex];
-
-    var nextIndex = function () {
-      for (var i = currentBitrateIndex + 1; i < bufferLevels.length; i++) {
-        if (bufferLevels[i] > currentBufferLevel) {
-          return i;
-        }
-      }
-    }();
-
-    if (nextIndex != null) {
-      var nextBufferLevel = bufferLevels[nextIndex];
-
-      if (bufferGap >= nextBufferLevel) {
-        return bitrates[nextIndex];
-      }
-    }
-  }
-
-  if (scaledScore == null || scaledScore < 1.15) {
-    var _currentBufferLevel = bufferLevels[currentBitrateIndex];
-
-    if (bufferGap < _currentBufferLevel) {
-      for (var i = currentBitrateIndex - 1; i >= 0; i--) {
-        if (bitrates[i] < currentBitrate) {
-          return bitrates[i];
-        }
-      }
-
-      return currentBitrate;
-    }
-  }
-
-  return currentBitrate;
-}
 ;// CONCATENATED MODULE: ./src/core/abr/buffer_based_chooser.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -47573,7 +47894,6 @@ function getEstimateFromBufferLevels(playbackObservation, bitrates, bufferLevels
 
 
 
-
 /**
  * Choose a bitrate based on the currently available buffer.
  *
@@ -47585,23 +47905,99 @@ function getEstimateFromBufferLevels(playbackObservation, bitrates, bufferLevels
  * "maintanable" or not.
  * If so, we may switch to a better quality, or conversely to a worse quality.
  *
- * @param {Observable} update$
- * @param {Array.<number>} bitrates
- * @returns {Observable}
+ * @class BufferBasedChooser
  */
 
-function BufferBasedChooser(update$, bitrates) {
-  var levelsMap = getBufferLevels(bitrates);
-  log/* default.debug */.Z.debug("ABR: Steps for buffer based chooser.", levelsMap.map(function (l, i) {
-    return {
-      bufferLevel: l,
-      bitrate: bitrates[i]
-    };
-  }));
-  return update$.pipe((0,map/* map */.U)(function (playbackObservation) {
-    return getEstimateFromBufferLevels(playbackObservation, bitrates, levelsMap);
-  }));
-}
+var BufferBasedChooser = /*#__PURE__*/function () {
+  /**
+   * @param {Array.<number>} number;
+   */
+  function BufferBasedChooser(bitrates) {
+    this._levelsMap = getBufferLevels(bitrates);
+    this._bitrates = bitrates;
+    log/* default.debug */.Z.debug("ABR: Steps for buffer based chooser.", this._levelsMap.map(function (l, i) {
+      return {
+        bufferLevel: l,
+        bitrate: bitrates[i]
+      };
+    }));
+  }
+  /**
+   * @param {Object} playbackObservation
+   * @returns {number|undefined}
+   */
+
+
+  var _proto = BufferBasedChooser.prototype;
+
+  _proto.getEstimate = function getEstimate(playbackObservation) {
+    var bufferLevels = this._levelsMap;
+    var bitrates = this._bitrates;
+    var bufferGap = playbackObservation.bufferGap,
+        currentBitrate = playbackObservation.currentBitrate,
+        currentScore = playbackObservation.currentScore,
+        speed = playbackObservation.speed;
+
+    if (currentBitrate == null) {
+      return bitrates[0];
+    }
+
+    var currentBitrateIndex = (0,array_find_index/* default */.Z)(bitrates, function (b) {
+      return b === currentBitrate;
+    });
+
+    if (currentBitrateIndex < 0 || bitrates.length !== bufferLevels.length) {
+      log/* default.error */.Z.error("ABR: Current Bitrate not found in the calculated levels");
+      return bitrates[0];
+    }
+
+    var scaledScore;
+
+    if (currentScore != null) {
+      scaledScore = speed === 0 ? currentScore : currentScore / speed;
+    }
+
+    if (scaledScore != null && scaledScore > 1) {
+      var currentBufferLevel = bufferLevels[currentBitrateIndex];
+
+      var nextIndex = function () {
+        for (var i = currentBitrateIndex + 1; i < bufferLevels.length; i++) {
+          if (bufferLevels[i] > currentBufferLevel) {
+            return i;
+          }
+        }
+      }();
+
+      if (nextIndex != null) {
+        var nextBufferLevel = bufferLevels[nextIndex];
+
+        if (bufferGap >= nextBufferLevel) {
+          return bitrates[nextIndex];
+        }
+      }
+    }
+
+    if (scaledScore == null || scaledScore < 1.15) {
+      var _currentBufferLevel = bufferLevels[currentBitrateIndex];
+
+      if (bufferGap < _currentBufferLevel) {
+        for (var i = currentBitrateIndex - 1; i >= 0; i--) {
+          if (bitrates[i] < currentBitrate) {
+            return bitrates[i];
+          }
+        }
+
+        return currentBitrate;
+      }
+    }
+
+    return currentBitrate;
+  };
+
+  return BufferBasedChooser;
+}();
+
+
 // EXTERNAL MODULE: ./src/utils/array_find.ts
 var array_find = __webpack_require__(3274);
 ;// CONCATENATED MODULE: ./src/core/abr/network_analyzer.ts
@@ -48396,11 +48792,8 @@ var PendingRequestsStore = /*#__PURE__*/function () {
 
   _proto.remove = function remove(id) {
     if (this._currentRequests[id] == null) {
-      // TODO This breaks github actions.
-      // Find why
-      // if (__ENVIRONMENT__.CURRENT_ENV === __ENVIRONMENT__.DEV as number) {
-      //   throw new Error("ABR: can't remove unknown request");
-      // }
+      if (false) {}
+
       log/* default.warn */.Z.warn("ABR: can't remove unknown request");
     }
 
@@ -48671,7 +49064,7 @@ function filterByWidth(representations, width) {
  * From the given array of Representations (sorted by bitrate order ascending),
  * returns the one corresponding to the given optimal, minimum and maximum
  * bitrates.
- * @param {Array.<Representation>} representations - The representations array,
+ * @param {Array.<Object>} representations - The representations array,
  * sorted in bitrate ascending order.
  * @param {Number} optimalBitrate - The optimal bitrate the Representation
  * should have under the current condition.
@@ -48681,7 +49074,7 @@ function filterByWidth(representations, width) {
  * @param {Number} maxBitrate - The maximum bitrate the chosen Representation
  * should have. We will take the Representation with the minimum bitrate if none
  * is found.
- * @returns {Representation|undefined}
+ * @returns {Object|undefined}
  */
 
 function selectOptimalRepresentation(representations, optimalBitrate, minBitrate, maxBitrate) {
@@ -48888,7 +49281,10 @@ function RepresentationEstimator(_ref) {
       var bitrates = representations.map(function (r) {
         return r.bitrate;
       });
-      var bufferBasedEstimation$ = BufferBasedChooser(bufferBasedobservation$, bitrates).pipe((0,startWith/* startWith */.O)(undefined));
+      var bufferBasedChooser = new BufferBasedChooser(bitrates);
+      var bufferBasedEstimation$ = bufferBasedobservation$.pipe((0,map/* map */.U)(function (bbo) {
+        return bufferBasedChooser.getEstimate(bbo);
+      }), (0,startWith/* startWith */.O)(undefined));
       return (0,combineLatest/* combineLatest */.a)([observation$, minAutoBitrate$, maxAutoBitrate$, filters$, bufferBasedEstimation$]).pipe((0,withLatestFrom/* withLatestFrom */.M)(currentRepresentation$), (0,map/* map */.U)(function (_ref4) {
         var _ref4$ = _ref4[0],
             observation = _ref4$[0],
@@ -49054,7 +49450,7 @@ var ABRManager = /*#__PURE__*/function () {
    * observable emitting the best representation (given the network/buffer
    * state).
    * @param {string} type
-   * @param {Array.<Representation>} representations
+   * @param {Array.<Object>} representations
    * @param {Observable<Object>} observation$
    * @param {Observable<Object>} streamEvents$
    * @returns {Observable}
@@ -52143,7 +52539,7 @@ function getPlayableBufferedSegments(neededRange, segmentInventory) {
     var eltInventory = segmentInventory[i];
     var representation = eltInventory.infos.representation;
 
-    if (!eltInventory.partiallyPushed && representation.decipherable !== false && representation.isSupported) {
+    if (!eltInventory.partiallyPushed && representation.decipherable !== false && representation.isCodecSupported) {
       var inventorySegment = eltInventory.infos.segment;
       var eltInventoryStart = inventorySegment.time / inventorySegment.timescale;
       var eltInventoryEnd = !inventorySegment.complete ? eltInventory.end : eltInventoryStart + inventorySegment.duration / inventorySegment.timescale;
@@ -52228,20 +52624,19 @@ function selectGCedRanges(position, buffered, gcGap) {
 
   var cleanedupRanges = []; // start by trying to remove all ranges that do not contain the
   // current time and respect the gcGap
-  // respect the gcGap? FIXME?
 
   for (var i = 0; i < outerRanges.length; i++) {
     var outerRange = outerRanges[i];
 
-    if (position - gcGap < outerRange.end) {
+    if (position - gcGap > outerRange.end) {
       cleanedupRanges.push(outerRange);
-    } else if (position + gcGap > outerRange.start) {
+    } else if (position + gcGap < outerRange.start) {
       cleanedupRanges.push(outerRange);
     }
   } // try to clean up some space in the current range
 
 
-  if (innerRange != null) {
+  if (innerRange !== null) {
     log/* default.debug */.Z.debug("Stream: GC removing part of inner range", cleanedupRanges);
 
     if (position - gcGap > innerRange.start) {
@@ -53300,6 +53695,8 @@ var ADAPTATION_SWITCH_BUFFER_PADDINGS = config/* default.ADAPTATION_SWITCH_BUFFE
  */
 
 function getAdaptationSwitchStrategy(segmentBuffer, period, adaptation, playbackInfo, options) {
+  var _a;
+
   if (segmentBuffer.codec !== undefined && options.onCodecSwitch === "reload" && !hasCompatibleCodec(adaptation, segmentBuffer.codec)) {
     return {
       type: "needs-reload",
@@ -53368,11 +53765,7 @@ function getAdaptationSwitchStrategy(segmentBuffer, period, adaptation, playback
     start: start,
     end: end
   }, currentTime) && ( // There is data for the current position or the codecs are differents
-  playbackInfo.readyState > 1 || !adaptation.getPlayableRepresentations().some(function (rep) {
-    var _a;
-
-    return are_codecs_compatible(rep.getMimeTypeString(), (_a = segmentBuffer.codec) !== null && _a !== void 0 ? _a : "");
-  })) && // We're not playing the current wanted video Adaptation
+  playbackInfo.readyState > 1 || !hasCompatibleCodec(adaptation, (_a = segmentBuffer.codec) !== null && _a !== void 0 ? _a : "")) && // We're not playing the current wanted video Adaptation
   !(0,ranges/* isTimeInRanges */.A1)(adaptationInBuffer, currentTime)) {
     return {
       type: "needs-reload",
@@ -58460,7 +58853,6 @@ function getRightVideoTrack(adaptation, isTrickModeEnabled) {
 
 
 
-
 /* eslint-disable @typescript-eslint/naming-convention */
 
 var DEFAULT_UNMUTED_VOLUME = config/* default.DEFAULT_UNMUTED_VOLUME */.Z.DEFAULT_UNMUTED_VOLUME;
@@ -58518,7 +58910,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     videoElement.preload = "auto";
     _this.version =
     /* PLAYER_VERSION */
-    "3.26.2";
+    "3.26.2-check.mediacapabilities";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -58830,7 +59222,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
           manifestRetry = networkConfig.manifestRetry;
       /** Interface used to load and refresh the Manifest. */
 
-      var manifestFetcher = new fetchers_manifest(url, transportPipelines, {
+      var manifestFetcher = new manifest(url, transportPipelines, {
         lowLatencyMode: lowLatencyMode,
         maxRetryRegular: manifestRetry,
         maxRetryOffline: offlineRetry
@@ -58846,16 +59238,19 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
       var manifest$;
 
-      if (initialManifest instanceof manifest/* default */.ZP) {
-        manifest$ = (0,of.of)({
-          type: "parsed",
-          manifest: initialManifest
-        });
-      } else if (initialManifest !== undefined) {
-        manifest$ = manifestFetcher.parse(initialManifest, {
-          previousManifest: null,
-          unsafeMode: false
-        });
+      if (!(0,is_null_or_undefined/* default */.Z)(initialManifest)) {
+        // Rudimentary check for if this is an `IManifest`
+        if (typeof initialManifest.getPeriodForTime === "function") {
+          manifest$ = (0,of.of)({
+            type: "parsed",
+            manifest: initialManifest
+          });
+        } else {
+          manifest$ = manifestFetcher.parse(initialManifest, {
+            previousManifest: null,
+            unsafeMode: false
+          });
+        }
       } else {
         manifest$ = manifestFetcher.fetch(url).pipe((0,mergeMap/* mergeMap */.z)(function (response) {
           return response.type === "warning" ? (0,of.of)(response) : // bubble-up warnings
@@ -61303,7 +61698,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.26.2";
+"3.26.2-check.mediacapabilities";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
