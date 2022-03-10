@@ -15,15 +15,15 @@
  */
 
 import {
-  type IContentProtection,
-  type IInitializationDataInfo,
+  IContentProtection,
+  IInitializationDataInfo,
 } from "../core/eme";
 import {
-  type IContentProtections,
-  type IManifestStreamEvent,
+  IContentProtections,
+  IManifestStreamEvent,
 } from "../parsers/manifest";
-import { type IEventEmitter } from "../utils/event_emitter";
-import { type IRepresentationIndex } from "./representation_index";
+import { IEventEmitter } from "../utils/event_emitter";
+import { IRepresentationIndex } from "./representation_index";
 
 /**
  * Normalized Manifest structure.

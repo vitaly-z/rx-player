@@ -15,7 +15,7 @@
  */
 
 import isNullOrUndefined from "../utils/is_null_or_undefined";
-import { type ISegment } from "./representation_index";
+import { ISegment } from "./representation_index";
 import {
   IAdaptation,
   IPeriod,
