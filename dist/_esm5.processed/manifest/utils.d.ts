@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { type ISegment } from "./representation_index";
+import { ISegment } from "./representation_index";
 import { IAdaptation, IPeriod, IRepresentation } from "./types";
 /** All information needed to identify a given segment. */
 export interface IBufferedChunkInfos {

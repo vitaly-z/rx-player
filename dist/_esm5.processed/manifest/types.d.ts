@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { type IContentProtection, type IInitializationDataInfo } from "../core/eme";
-import { type IContentProtections, type IManifestStreamEvent } from "../parsers/manifest";
-import { type IEventEmitter } from "../utils/event_emitter";
-import { type IRepresentationIndex } from "./representation_index";
+import { IContentProtection, IInitializationDataInfo } from "../core/eme";
+import { IContentProtections, IManifestStreamEvent } from "../parsers/manifest";
+import { IEventEmitter } from "../utils/event_emitter";
+import { IRepresentationIndex } from "./representation_index";
 /**
  * Normalized Manifest structure.
  *
