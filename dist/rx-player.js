@@ -11803,12 +11803,6 @@ var BufferedHistory = /*#__PURE__*/function () {
 
 
 ;// CONCATENATED MODULE: ./src/core/segment_buffers/inventory/segment_inventory.ts
-function segment_inventory_createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = segment_inventory_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function segment_inventory_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return segment_inventory_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return segment_inventory_arrayLikeToArray(o, minLen); }
-
-function segment_inventory_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -12355,7 +12349,7 @@ var SegmentInventory = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.completeSegment = function completeSegment(content, newBuffered) {
+  _proto.completeSegment = function completeSegment(content, _newBuffered) {
     if (content.segment.isInit) {
       return;
     }
@@ -12404,18 +12398,17 @@ var SegmentInventory = /*#__PURE__*/function () {
 
     if (resSegments.length === 0) {
       log/* default.warn */.Z.warn("SI: Completed Segment not found", content);
-    } else {
-      this.synchronizeBuffered(newBuffered);
-
-      for (var _iterator = segment_inventory_createForOfIteratorHelperLoose(resSegments), _step; !(_step = _iterator()).done;) {
-        var seg = _step.value;
-
-        if (seg.bufferedStart !== undefined && seg.bufferedEnd !== undefined) {
-          this._bufferedHistory.addBufferedSegment(seg.infos, seg.bufferedStart, seg.bufferedEnd);
-        } else {
-          log/* default.debug */.Z.debug("SI: buffered range not known after sync. Skipping history.", seg);
-        }
-      }
+    } else {// this.synchronizeBuffered(newBuffered);
+      // for (const seg of resSegments) {
+      //   if (seg.bufferedStart !== undefined && seg.bufferedEnd !== undefined) {
+      //     this._bufferedHistory.addBufferedSegment(seg.infos,
+      //                                              seg.bufferedStart,
+      //                                              seg.bufferedEnd);
+      //   } else {
+      //     log.debug("SI: buffered range not known after sync. Skipping history.",
+      //               seg);
+      //   }
+      // }
     }
   }
   /**
@@ -57328,7 +57321,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     videoElement.preload = "auto";
     _this.version =
     /* PLAYER_VERSION */
-    "3.26.1";
+    "3.26.1-no.sync.buffered";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -60109,7 +60102,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.26.1";
+"3.26.1-no.sync.buffered";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
