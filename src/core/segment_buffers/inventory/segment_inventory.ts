@@ -685,7 +685,7 @@ export default class SegmentInventory {
                 adaptation: Adaptation;
                 representation: Representation;
                 segment: ISegment; },
-    newBuffered : TimeRanges
+    _newBuffered : TimeRanges
   ) : void {
     if (content.segment.isInit) {
       return;
@@ -733,17 +733,17 @@ export default class SegmentInventory {
     if (resSegments.length === 0) {
       log.warn("SI: Completed Segment not found", content);
     } else {
-      this.synchronizeBuffered(newBuffered);
-      for (const seg of resSegments) {
-        if (seg.bufferedStart !== undefined && seg.bufferedEnd !== undefined) {
-          this._bufferedHistory.addBufferedSegment(seg.infos,
-                                                   seg.bufferedStart,
-                                                   seg.bufferedEnd);
-        } else {
-          log.debug("SI: buffered range not known after sync. Skipping history.",
-                    seg);
-        }
-      }
+      // this.synchronizeBuffered(newBuffered);
+      // for (const seg of resSegments) {
+      //   if (seg.bufferedStart !== undefined && seg.bufferedEnd !== undefined) {
+      //     this._bufferedHistory.addBufferedSegment(seg.infos,
+      //                                              seg.bufferedStart,
+      //                                              seg.bufferedEnd);
+      //   } else {
+      //     log.debug("SI: buffered range not known after sync. Skipping history.",
+      //               seg);
+      //   }
+      // }
     }
   }
 
