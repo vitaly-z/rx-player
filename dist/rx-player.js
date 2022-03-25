@@ -5180,6 +5180,7 @@ function isSessionUsable(loadedSession) {
 
 
 
+
 /**
  * Create a new Session on the given MediaKeys, corresponding to the given
  * initializationData.
@@ -5282,6 +5283,16 @@ function createAndTryToRetrievePersistentSession(loadedSessionsStore, persistent
       }));
     };
 
+    var msg = "Trying to load Session \"" + storedEntry.sessionId + "\".";
+
+    if (initData.keyIds !== undefined) {
+      var hexKids = initData.keyIds.map(function (val) {
+        return (0,string_parsing/* bytesToHex */.ci)(val);
+      });
+      msg += " key ids: " + JSON.stringify(hexKids);
+    }
+
+    console.warn(msg);
     return loadSession(session, storedEntry.sessionId).pipe((0,mergeMap/* mergeMap */.z)(function (hasLoadedSession) {
       if (!hasLoadedSession) {
         log/* default.warn */.Z.warn("EME: No data stored for the loaded session");
@@ -6074,9 +6085,9 @@ function safelyCloseMediaKeySession(mediaKeySession) {
    */
 
   function recursivelyTryToCloseMediaKeySession(retryNb) {
-    log/* default.debug */.Z.debug("EME: Trying to close a MediaKeySession", mediaKeySession, retryNb);
+    console.warn("EME: Trying to close a MediaKeySession", mediaKeySession.sessionId, retryNb);
     return closeSession$(mediaKeySession).pipe((0,tap/* tap */.b)(function () {
-      log/* default.debug */.Z.debug("EME: Succeeded to close MediaKeySession");
+      console.warn("EME: Succeeded to close MediaKeySession", mediaKeySession.sessionId);
     }), (0,catchError/* catchError */.K)(function (err) {
       // Unitialized MediaKeySession may not close properly until their
       // corresponding `generateRequest` or `load` call are handled by the
@@ -6098,7 +6109,7 @@ function safelyCloseMediaKeySession(mediaKeySession) {
       }
 
       var delay = Math.min(Math.pow(2, retryNb) * EME_SESSION_CLOSING_INITIAL_DELAY, EME_SESSION_CLOSING_MAX_DELAY);
-      log/* default.warn */.Z.warn("EME: attempt to close a mediaKeySession failed, " + "scheduling retry...", delay);
+      console.warn("EME: attempt to close a mediaKeySession failed, " + "scheduling retry...", delay, mediaKeySession.sessionId);
       return (0,race/* race */.S)([(0,timer/* timer */.H)(delay), (0,event_listeners/* onKeyStatusesChange$ */.eX)(mediaKeySession), (0,event_listeners/* onKeyMessage$ */.GJ)(mediaKeySession)]).pipe((0,take/* take */.q)(1), (0,mergeMap/* mergeMap */.z)(function () {
         return recursivelyTryToCloseMediaKeySession(nextRetryNb);
       }));
