@@ -29,6 +29,7 @@ import {
   loadSession,
 } from "../../compat";
 import log from "../../log";
+import { bytesToHex } from "../../utils/string_parsing";
 import {
   IInitializationDataInfo,
   IMediaKeySessionStores,
@@ -156,6 +157,12 @@ function createAndTryToRetrievePersistentSession(
         }));
     };
 
+    let msg = `Trying to load Session "${storedEntry.sessionId}".`;
+    if (initData.keyIds !== undefined) {
+      const hexKids = initData.keyIds.map((val) => bytesToHex(val));
+      msg += ` key ids: ${JSON.stringify(hexKids)}`;
+    }
+    console.warn(msg);
     return loadSession(session, storedEntry.sessionId).pipe(
       mergeMap((hasLoadedSession) : Observable<ICreateSessionEvent> => {
         if (!hasLoadedSession) {

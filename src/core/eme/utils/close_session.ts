@@ -62,9 +62,12 @@ export default function safelyCloseMediaKeySession(
   function recursivelyTryToCloseMediaKeySession(
     retryNb : number
   ) : Observable<unknown> {
-    log.debug("EME: Trying to close a MediaKeySession", mediaKeySession, retryNb);
+    console.warn("EME: Trying to close a MediaKeySession",
+                 mediaKeySession.sessionId,
+                 retryNb);
     return closeSession(mediaKeySession).pipe(
-      tap(() => { log.debug("EME: Succeeded to close MediaKeySession"); }),
+      tap(() => { console.warn("EME: Succeeded to close MediaKeySession",
+                               mediaKeySession.sessionId); }),
       catchError((err : unknown) => {
         // Unitialized MediaKeySession may not close properly until their
         // corresponding `generateRequest` or `load` call are handled by the
@@ -87,8 +90,8 @@ export default function safelyCloseMediaKeySession(
         }
         const delay = Math.min(Math.pow(2, retryNb) * EME_SESSION_CLOSING_INITIAL_DELAY,
                                EME_SESSION_CLOSING_MAX_DELAY);
-        log.warn("EME: attempt to close a mediaKeySession failed, " +
-                 "scheduling retry...", delay);
+        console.warn("EME: attempt to close a mediaKeySession failed, " +
+                 "scheduling retry...", delay, mediaKeySession.sessionId);
         return observableRace([timer(delay),
                                onKeyStatusesChange$(mediaKeySession),
                                onKeyMessage$(mediaKeySession)])
