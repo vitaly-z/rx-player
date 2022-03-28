@@ -497,7 +497,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1194624
     videoElement.preload = "auto";
 
-    this.version = /* PLAYER_VERSION */"3.26.0";
+    this.version = /* PLAYER_VERSION */"3.26.1-bisect1.3.nodebug";
     this.log = log;
     this.state = "STOPPED";
     this.videoElement = videoElement;
@@ -2977,7 +2977,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     return activeRepresentations[currentPeriod.id];
   }
 }
-Player.version = /* PLAYER_VERSION */"3.26.0";
+Player.version = /* PLAYER_VERSION */"3.26.1-bisect1.3.nodebug";
 
 export default Player;
 export { IStreamEventData };
