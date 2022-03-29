@@ -131,8 +131,15 @@ export default class TaskCanceller {
      * Creates a new `TaskCanceller`, with its own `CancellationSignal` created
      * as its `signal` provide.
      * You can then pass this property to async task you wish to be cancellable.
+     * @param {Object|undefined} options
      */
-    constructor();
+    constructor(options?: {
+        /**
+         * If set the TaskCanceller created here will automatically be triggered
+         * when that signal emits.
+         */
+        cancelOn?: CancellationSignal | undefined;
+    } | undefined);
     /**
      * "Trigger" the `TaskCanceller`, notify through its associated
      * `CancellationSignal` (its `signal` property) that a task should be aborted.

@@ -28822,60 +28822,61 @@ var check_isobmff_integrity = __webpack_require__(4460);
 
 function addSegmentIntegrityChecks(segmentLoader) {
   return function (url, content, initialCancelSignal, callbacks) {
-    return new Promise(function (res, rej) {
-      var canceller = new task_canceller/* default */.ZP();
-      var unregisterCancelLstnr = initialCancelSignal.register(function onCheckCancellation(err) {
-        canceller.cancel();
-        rej(err);
-      });
-      /**
-       * If the data's seems to be corrupted, cancel the loading task and reject
-       * with an `INTEGRITY_ERROR` error.
-       * @param {*} data
-       */
+    return new Promise(function (resolve, reject) {
+      var requestCanceller = new task_canceller/* default */.ZP({
+        cancelOn: initialCancelSignal
+      }); // Reject the `CancellationError` when `requestCanceller`'s signal emits
+      // `stopRejectingOnCancel` here is a function allowing to stop this mechanism
 
-      function cancelAndRejectOnBadIntegrity(data) {
-        if (!(data instanceof Array) && !(data instanceof Uint8Array) || inferSegmentContainer(content.adaptation.type, content.representation) !== "mp4") {
-          return;
-        }
-
-        try {
-          (0,check_isobmff_integrity/* default */.Z)(new Uint8Array(data), content.segment.isInit);
-        } catch (err) {
-          unregisterCancelLstnr();
-          canceller.cancel();
-          rej(err);
-        }
-      }
-
-      segmentLoader(url, content, canceller.signal, Object.assign(Object.assign({}, callbacks), {
+      var stopRejectingOnCancel = requestCanceller.signal.register(reject);
+      segmentLoader(url, content, requestCanceller.signal, Object.assign(Object.assign({}, callbacks), {
         onNewChunk: function onNewChunk(data) {
-          cancelAndRejectOnBadIntegrity(data);
-
-          if (!canceller.isUsed) {
+          try {
+            trowOnIntegrityError(data);
             callbacks.onNewChunk(data);
+          } catch (err) {
+            // Do not reject with a `CancellationError` after cancelling the request
+            stopRejectingOnCancel(); // Cancel the request
+
+            requestCanceller.cancel(); // Reject with thrown error
+
+            reject(err);
           }
         }
       })).then(function (info) {
-        if (canceller.isUsed) {
+        if (requestCanceller.isUsed) {
           return;
         }
 
-        unregisterCancelLstnr();
+        stopRejectingOnCancel();
 
         if (info.resultType === "segment-loaded") {
-          cancelAndRejectOnBadIntegrity(info.resultData.responseData);
+          try {
+            trowOnIntegrityError(info.resultData.responseData);
+          } catch (err) {
+            reject(err);
+            return;
+          }
         }
 
-        res(info);
+        resolve(info);
       }, function (error) {
-        // The segmentLoader's cancellations cases are all handled here
-        if (!task_canceller/* default.isCancellationError */.ZP.isCancellationError(error)) {
-          unregisterCancelLstnr();
-          rej(error);
-        }
+        stopRejectingOnCancel();
+        reject(error);
       });
     });
+    /**
+     * If the data's seems to be corrupted, throws an `INTEGRITY_ERROR` error.
+     * @param {*} data
+     */
+
+    function trowOnIntegrityError(data) {
+      if (!(data instanceof ArrayBuffer) && !(data instanceof Uint8Array) || inferSegmentContainer(content.adaptation.type, content.representation) !== "mp4") {
+        return;
+      }
+
+      (0,check_isobmff_integrity/* default */.Z)(new Uint8Array(data), content.segment.isInit);
+    }
   };
 }
 // EXTERNAL MODULE: ./src/utils/byte_parsing.ts
@@ -38360,8 +38361,11 @@ var TaskCanceller = /*#__PURE__*/function () {
    * Creates a new `TaskCanceller`, with its own `CancellationSignal` created
    * as its `signal` provide.
    * You can then pass this property to async task you wish to be cancellable.
+   * @param {Object|undefined} options
    */
-  function TaskCanceller() {
+  function TaskCanceller(options) {
+    var _this = this;
+
     var _createCancellationFu = createCancellationFunctions(),
         trigger = _createCancellationFu[0],
         register = _createCancellationFu[1];
@@ -38369,6 +38373,13 @@ var TaskCanceller = /*#__PURE__*/function () {
     this.isUsed = false;
     this._trigger = trigger;
     this.signal = new CancellationSignal(register);
+
+    if ((options === null || options === void 0 ? void 0 : options.cancelOn) !== undefined) {
+      var unregisterParent = options.cancelOn.register(function () {
+        _this.cancel();
+      });
+      this.signal.register(unregisterParent);
+    }
   }
   /**
    * "Trigger" the `TaskCanceller`, notify through its associated
@@ -38426,17 +38437,17 @@ var CancellationSignal = /*#__PURE__*/function () {
    * cancelled.
    */
   function CancellationSignal(registerToSource) {
-    var _this = this;
+    var _this2 = this;
 
     this.isCancelled = false;
     this.cancellationError = null;
     this._listeners = [];
     registerToSource(function (cancellationError) {
-      _this.cancellationError = cancellationError;
-      _this.isCancelled = true;
+      _this2.cancellationError = cancellationError;
+      _this2.isCancelled = true;
 
-      while (_this._listeners.length > 0) {
-        var listener = _this._listeners.splice(_this._listeners.length - 1, 1)[0];
+      while (_this2._listeners.length > 0) {
+        var listener = _this2._listeners.splice(_this2._listeners.length - 1, 1)[0];
 
         listener(cancellationError);
       }
@@ -38468,7 +38479,7 @@ var CancellationSignal = /*#__PURE__*/function () {
   var _proto2 = CancellationSignal.prototype;
 
   _proto2.register = function register(fn) {
-    var _this2 = this;
+    var _this3 = this;
 
     if (this.isCancelled) {
       (0,_assert__WEBPACK_IMPORTED_MODULE_0__/* .default */ .Z)(this.cancellationError !== null);
@@ -38478,7 +38489,7 @@ var CancellationSignal = /*#__PURE__*/function () {
     this._listeners.push(fn);
 
     return function () {
-      return _this2.deregister(fn);
+      return _this3.deregister(fn);
     };
   }
   /**
@@ -38521,14 +38532,14 @@ var CancellationError = /*#__PURE__*/function (_Error) {
    * @param {string} message
    */
   function CancellationError() {
-    var _this3;
+    var _this4;
 
-    _this3 = _Error.call(this) || this; // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
+    _this4 = _Error.call(this) || this; // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
 
-    Object.setPrototypeOf((0,_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_2__/* .default */ .Z)(_this3), CancellationError.prototype);
-    _this3.name = "CancellationError";
-    _this3.message = "This task was cancelled.";
-    return _this3;
+    Object.setPrototypeOf((0,_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_2__/* .default */ .Z)(_this4), CancellationError.prototype);
+    _this4.name = "CancellationError";
+    _this4.message = "This task was cancelled.";
+    return _this4;
   }
 
   return CancellationError;
@@ -56584,7 +56595,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     videoElement.preload = "auto";
     _this.version =
     /* PLAYER_VERSION */
-    "3.26.1-bisect1.3.nodebug";
+    "3.26.1-bisect1.3.fix.integrity";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -59362,7 +59373,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.26.1-bisect1.3.nodebug";
+"3.26.1-bisect1.3.fix.integrity";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**

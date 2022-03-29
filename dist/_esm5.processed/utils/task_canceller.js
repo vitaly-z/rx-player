@@ -132,12 +132,20 @@ var TaskCanceller = /** @class */ (function () {
      * Creates a new `TaskCanceller`, with its own `CancellationSignal` created
      * as its `signal` provide.
      * You can then pass this property to async task you wish to be cancellable.
+     * @param {Object|undefined} options
      */
-    function TaskCanceller() {
+    function TaskCanceller(options) {
+        var _this = this;
         var _a = createCancellationFunctions(), trigger = _a[0], register = _a[1];
         this.isUsed = false;
         this._trigger = trigger;
         this.signal = new CancellationSignal(register);
+        if ((options === null || options === void 0 ? void 0 : options.cancelOn) !== undefined) {
+            var unregisterParent = options.cancelOn.register(function () {
+                _this.cancel();
+            });
+            this.signal.register(unregisterParent);
+        }
     }
     /**
      * "Trigger" the `TaskCanceller`, notify through its associated

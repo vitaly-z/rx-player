@@ -89,7 +89,7 @@ var Player = /** @class */ (function (_super) {
         // Workaround to support Firefox autoplay on FF 42.
         // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1194624
         videoElement.preload = "auto";
-        _this.version = /* PLAYER_VERSION */ "3.26.1-bisect1.3.nodebug";
+        _this.version = /* PLAYER_VERSION */ "3.26.1-bisect1.3.fix.integrity";
         _this.log = log;
         _this.state = "STOPPED";
         _this.videoElement = videoElement;
@@ -2286,5 +2286,5 @@ var Player = /** @class */ (function (_super) {
     };
     return Player;
 }(EventEmitter));
-Player.version = /* PLAYER_VERSION */ "3.26.1-bisect1.3.nodebug";
+Player.version = /* PLAYER_VERSION */ "3.26.1-bisect1.3.fix.integrity";
 export default Player;
