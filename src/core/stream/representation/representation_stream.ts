@@ -181,8 +181,10 @@ export default function RepresentationStream<TSegmentDataType>({
                    IStreamNeedsManifestRefresh |
                    IStreamTerminatingEvent>
     {
-      const initialWantedTime = observation.position.pending ??
-                                observation.position.last;
+      const initialWantedTime = Math.max(
+        (observation.position.pending ?? observation.position.last) - 0.25,
+        0
+      );
       const status = getBufferStatus(content,
                                      initialWantedTime,
                                      playbackObserver,
