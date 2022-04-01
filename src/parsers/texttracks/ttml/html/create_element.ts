@@ -75,6 +75,10 @@ function applyTextStyle(
   // applies to span
   const textOutline = style.textOutline;
   if (isNonEmptyString(textOutline)) {
+    // XXX TODO Something like:
+    // -webkit-text-stroke-width: 0.3px;
+    // -webkit-text-stroke-color: rgb(0, 0, 0);
+    // ?
     const outlineData = textOutline
       .trim()
       .replace(/\s+/g, " ")
