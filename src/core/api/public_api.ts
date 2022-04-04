@@ -588,6 +588,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @param {Object} opts
    */
   loadVideo(opts : ILoadVideoOptions) : void {
+    log.newTs();
     const options = parseLoadVideoOptions(opts);
     log.info("API: Calling loadvideo", options);
     this._priv_lastContentPlaybackInfos = { options };

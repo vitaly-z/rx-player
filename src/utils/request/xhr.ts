@@ -16,6 +16,7 @@
 
 import config from "../../config";
 import { RequestError } from "../../errors";
+import log from "../../log";
 import isNonEmptyString from "../is_non_empty_string";
 import isNullOrUndefined from "../is_null_or_undefined";
 import {
@@ -186,6 +187,7 @@ export default function request<T>(
     }
 
     xhr.onerror = function onXHRError() {
+      log.newTs();
       if (deregisterCancellationListener !== null) {
         deregisterCancellationListener();
       }
@@ -193,6 +195,7 @@ export default function request<T>(
     };
 
     xhr.ontimeout = function onXHRTimeout() {
+      log.newTs();
       if (deregisterCancellationListener !== null) {
         deregisterCancellationListener();
       }
@@ -201,6 +204,7 @@ export default function request<T>(
 
     if (onProgress !== undefined) {
       xhr.onprogress = function onXHRProgress(event) {
+        log.newTs();
         const currentTime = performance.now();
         onProgress({ url,
                      duration: currentTime - sendingTime,
@@ -212,6 +216,7 @@ export default function request<T>(
     }
 
     xhr.onload = function onXHRLoad(event : ProgressEvent) {
+      log.newTs();
       if (xhr.readyState === 4) {
         if (deregisterCancellationListener !== null) {
           deregisterCancellationListener();

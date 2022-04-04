@@ -208,6 +208,7 @@ export default class PlaybackObserver {
       const getCurrentObservation = (
         event : IPlaybackObserverEventType
       ) : IPlaybackObservation => {
+        log.newTs();
         let tmpEvt: IPlaybackObserverEventType = event;
         if (tmpEvt === "seeking" && this._internalSeekingEventsIncomingCounter > 0) {
           tmpEvt = "internal-seeking";

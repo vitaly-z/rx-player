@@ -37,6 +37,7 @@ export default class Logger {
   public debug : IConsoleFn;
   private _currentLevel : ILoggerLevel;
   private readonly _levels : Record<ILoggerLevel, number>;
+  private _lastTs : number;
 
   constructor() {
     this.error = noop;
@@ -49,6 +50,11 @@ export default class Logger {
                      INFO: 3,
                      DEBUG: 4 };
     this._currentLevel = DEFAULT_LOG_LEVEL;
+    this._lastTs = performance.now();
+  }
+
+  public newTs() {
+    this._lastTs = performance.now();
   }
 
   /**
@@ -67,14 +73,18 @@ export default class Logger {
 
     /* eslint-disable no-invalid-this */
     /* eslint-disable no-console */
-    this.error = (level >= this._levels.ERROR) ? console.error.bind(console) :
-                                                 noop;
-    this.warn = (level >= this._levels.WARNING) ? console.warn.bind(console) :
-                                                  noop;
-    this.info = (level >= this._levels.INFO) ? console.info.bind(console) :
-                                               noop;
-    this.debug = (level >= this._levels.DEBUG) ? console.log.bind(console) :
-                                                 noop;
+    this.error = (level >= this._levels.ERROR) ?
+      (...args) => console.error(performance.now() - this._lastTs, ...args) :
+      noop;
+    this.warn = (level >= this._levels.WARNING) ?
+      (...args) => console.warn(performance.now() - this._lastTs, ...args) :
+      noop;
+    this.info = (level >= this._levels.INFO) ?
+      (...args) => console.info(performance.now() - this._lastTs, ...args) :
+      noop;
+    this.debug = (level >= this._levels.DEBUG) ?
+      (...args) => console.log(performance.now() - this._lastTs, ...args) :
+      noop;
     /* eslint-enable no-console */
     /* eslint-enable no-invalid-this */
   }

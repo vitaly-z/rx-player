@@ -180,16 +180,16 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer {
     // This interval is here to check at regular intervals if the underlying
     // SourceBuffer is currently updating.
     interval(SOURCE_BUFFER_FLUSHING_INTERVAL).pipe(
-      tap(() => this._flush()),
+      tap(() => { log.newTs(); this._flush(); }),
       takeUntil(this._destroy$)
     ).subscribe();
 
     fromEvent(this._sourceBuffer, "error").pipe(
-      tap((err) => this._onPendingTaskError(err)),
+      tap((err) => { log.newTs(); this._onPendingTaskError(err); }),
       takeUntil(this._destroy$)
     ).subscribe();
     fromEvent(this._sourceBuffer, "updateend").pipe(
-      tap(() => this._flush()),
+      tap(() => { log.newTs(); this._flush(); }),
       takeUntil(this._destroy$)
     ).subscribe();
   }

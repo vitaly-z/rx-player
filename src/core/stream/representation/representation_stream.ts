@@ -301,6 +301,7 @@ export default function RepresentationStream<TSegmentDataType>({
                    IStreamNeedsManifestRefresh |
                    IStreamTerminatingEvent>
     {
+      const now = performance.now();
       const wantedStartPosition = observation.position + observation.wantedTimeOffset;
       const status = getBufferStatus(content,
                                      wantedStartPosition,
@@ -391,6 +392,7 @@ export default function RepresentationStream<TSegmentDataType>({
             .pipe(ignoreElements());
         }
       }
+      console.error("TIME", performance.now() - now);
       return status.shouldRefreshManifest ?
         observableConcat(observableOf(EVENTS.needsManifestRefresh()),
                          bufferStatusEvt, bufferRemoval) :
