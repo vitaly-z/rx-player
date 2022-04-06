@@ -1604,14 +1604,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     if (positionWanted === undefined) {
       throw new Error("invalid time given");
     }
-    let seekAt = positionWanted;
-    if (manifest !== null && !manifest.isLive) {
-      const maximumTime = manifest.getMaximumSafePosition();
-      seekAt = maximumTime !== undefined ? Math.min(positionWanted,
-                                                    maximumTime - 0.001) :
-                                           positionWanted;
-    }
-    this.videoElement.currentTime = seekAt;
+    this.videoElement.currentTime = positionWanted;
     return positionWanted;
   }
 
@@ -2258,6 +2251,8 @@ class Player extends EventEmitter<IPublicAPIEvent> {
       return this.videoElement.duration;
     }
 
+    // XXX TODO minimum of the maximum of both the last known audio track
+    // for the last Period and the last known video track for the last Period?
     if (manifest !== null) {
       return manifest.getMaximumSafePosition();
     }

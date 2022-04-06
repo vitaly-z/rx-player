@@ -37,9 +37,7 @@ import {
   onSourceEnded$,
 } from "../../compat/event_listeners";
 import log from "../../log";
-import Manifest, {
-  Adaptation, IRepresentationIndex,
-} from "../../manifest";
+import Manifest from "../../manifest";
 import { fromEvent } from "../../utils/event_emitter";
 import createSharedReference, {
   ISharedReference,
@@ -60,18 +58,7 @@ export default class MediaDurationUpdater {
    * `undefined` if the audio track for the last Period has never been known yet.
    * `null` if there are no chosen audio Adaptation.
    */
-  private _lastAudioRepresentation : ISharedReference<undefined |
-                                                      Adaptation |
-                                                      null>;
-  /**
-   * The last known video Adaptation (i.e. track) chosen for the last Period.
-   * Useful to determinate the duration of the current content.
-   * `undefined` if the video track for the last Period has never been known yet.
-   * `null` if there are no chosen video Adaptation.
-   */
-  private _lastVideoRepresentation : ISharedReference<undefined |
-                                                      Adaptation |
-                                                      null>;
+  private _lastKnownDuration : ISharedReference<number | undefined>;
 
   /**
    * Create a new `MediaDurationUpdater` that will keep the given MediaSource's
@@ -88,25 +75,22 @@ export default class MediaDurationUpdater {
     mediaSource : MediaSource,
     mediaElement : HTMLMediaElement
   ) {
-    this._lastAudioRepresentation = createSharedReference(undefined);
-    this._lastVideoRepresentation = createSharedReference(undefined);
+    this._lastKnownDuration = createSharedReference(undefined);
     this._subscription = isMediaSourceOpened$(mediaSource).pipe(
       switchMap((canUpdate) =>
-        canUpdate ? observableCombineLatest([this._lastAudioRepresentation.asObservable(),
-                                             this._lastVideoRepresentation.asObservable(),
+        canUpdate ? observableCombineLatest([this._lastKnownDuration.asObservable(),
                                              fromEvent(manifest, "manifestUpdate")
                                                .pipe(startWith(null))]) :
                     EMPTY
       ),
-      switchMap(([lastAudioAdapVal, lastVideoAdapVal]) =>
+      switchMap(([lastKnownDuration]) =>
         whenSourceBuffersEndedUpdates$(mediaSource.sourceBuffers).pipe(
           take(1)
         ).pipe(tap(() => {
           setMediaSourceDuration(mediaSource,
                                  mediaElement,
                                  manifest,
-                                 lastAudioAdapVal,
-                                 lastVideoAdapVal);
+                                 lastKnownDuration);
         }))
       )).subscribe();
   }
@@ -114,23 +98,16 @@ export default class MediaDurationUpdater {
   /**
    * By default, the `MediaDurationUpdater` only set a safe estimate for the
    * MediaSource's duration.
-   * A more precize duration can be set by communicating the video Adaptation
-   * last loaded for the last Period.
-   * @param {Object} adaptation
+   * A more precize duration can be set by communicating to it a more precize
+   * media duration through `updateKnownDuration`.
+   * If the duration becomes unknown, `undefined` can be given to it so the
+   * `MediaDurationUpdater` goes back to a safe estimate.
+   * @param {number | undefined} newDuration
    */
-  public updateLastVideoAdaptation(adaptation : Adaptation | null) {
-    this._lastVideoRepresentation.setValue(adaptation);
-  }
-
-  /**
-   * By default, the `MediaDurationUpdater` only set a safe estimate for the
-   * MediaSource's duration.
-   * A more precize duration can be set by communicating the audio Adaptation
-   * last loaded for the last Period.
-   * @param {Object} adaptation
-   */
-  public updateLastAudioAdaptation(adaptation : Adaptation | null) {
-    this._lastAudioRepresentation.setValue(adaptation);
+  public updateKnownDuration(
+    newDuration : number | undefined
+  ) : void {
+    this._lastKnownDuration.setValue(newDuration);
   }
 
   /**
@@ -160,12 +137,27 @@ function setMediaSourceDuration(
   mediaSource: MediaSource,
   mediaElement: HTMLMediaElement,
   manifest: Manifest,
-  lastAudioAdaptationRef : undefined | Adaptation | null,
-  lastVideoAdaptationRef : undefined | Adaptation | null
+  knownDuration : number | undefined
 ): number | null {
-  const newDuration = getCalculatedContentDuration(manifest,
-                                                   lastAudioAdaptationRef,
-                                                   lastVideoAdaptationRef);
+  let newDuration  = knownDuration;
+
+  if (newDuration === undefined) {
+    if (manifest.isDynamic) {
+      const maxPotentialPos = manifest.getLivePosition() ??
+                              manifest.getMaximumSafePosition();
+      // Some targets poorly support setting a very high number for durations.
+      // Yet, in dynamic contents, we would prefer setting a value as high as possible
+      // to still be able to seek anywhere we want to (even ahead of the Manifest if
+      // we want to). As such, we put it at a safe default value of 2^32 excepted
+      // when the maximum position is already relatively close to that value, where
+      // we authorize exceptionally going over it.
+      newDuration =  Math.max(Math.pow(2, 32), maxPotentialPos + YEAR_IN_SECONDS);
+    } else {
+      newDuration = manifest.getMaximumSafePosition();
+    }
+  }
+
+  // XXX TODO check all that shit, with SourceBuffers perhaps.
   const bufferedLen = mediaElement.buffered.length;
   if ((bufferedLen > 0 && mediaElement.buffered.end(bufferedLen - 1) >= newDuration)) {
     // We already buffered further than the duration we want to set.
@@ -219,105 +211,6 @@ function whenSourceBuffersEndedUpdates$(
     }),
     map(() => undefined)
   );
-}
-
-function getCalculatedContentDuration(
-  manifest : Manifest,
-  lastAudioAdaptationRef : undefined | Adaptation | null,
-  lastVideoAdaptationRef : undefined | Adaptation | null
-) : number {
-  if (manifest.isDynamic) {
-    const maxPotentialPos = manifest.getLivePosition() ??
-                            manifest.getMaximumSafePosition();
-    // Some targets poorly support setting a very high number for durations.
-    // Yet, in dynamic contents, we would prefer setting a value as high as possible
-    // to still be able to seek anywhere we want to (even ahead of the Manifest if
-    // we want to). As such, we put it at a safe default value of 2^32 excepted
-    // when the maximum position is already relatively close to that value, where
-    // we authorize exceptionally going over it.
-    return Math.max(Math.pow(2, 32), maxPotentialPos + YEAR_IN_SECONDS);
-  } else {
-    if (lastAudioAdaptationRef === undefined ||
-        lastVideoAdaptationRef === undefined)
-    {
-      return manifest.getMaximumSafePosition();
-    } else if (lastAudioAdaptationRef === null) {
-      if (lastVideoAdaptationRef === null) {
-        return manifest.getMaximumSafePosition();
-      } else {
-        const lastVideoPosition =
-          getLastPositionFromAdaptation(lastVideoAdaptationRef);
-        if (typeof lastVideoPosition !== "number") {
-          return manifest.getMaximumSafePosition();
-        }
-        return lastVideoPosition;
-      }
-    } else if (lastVideoAdaptationRef === null) {
-      const lastAudioPosition =
-        getLastPositionFromAdaptation(lastAudioAdaptationRef);
-      if (typeof lastAudioPosition !== "number") {
-        return manifest.getMaximumSafePosition();
-      }
-      return lastAudioPosition;
-    } else {
-      const lastAudioPosition = getLastPositionFromAdaptation(
-        lastAudioAdaptationRef
-      );
-      const lastVideoPosition = getLastPositionFromAdaptation(
-        lastVideoAdaptationRef
-      );
-      if (typeof lastAudioPosition !== "number" ||
-          typeof lastVideoPosition !== "number")
-      {
-        return manifest.getMaximumSafePosition();
-      } else {
-        return Math.min(lastAudioPosition, lastVideoPosition);
-      }
-    }
-  }
-}
-
-/**
- * Returns "last time of reference" from the adaptation given.
- * `undefined` if a time could not be found.
- * Null if the Adaptation has no segments (it could be that it didn't started or
- * that it already finished for example).
- *
- * We consider the earliest last time from every representations in the given
- * adaptation.
- * @param {Object} adaptation
- * @returns {Number|undefined|null}
- */
-function getLastPositionFromAdaptation(
-  adaptation: Adaptation
-) : number | undefined | null {
-  const { representations } = adaptation;
-  let min : null | number = null;
-
-  /**
-   * Some Manifest parsers use the exact same `IRepresentationIndex` reference
-   * for each Representation of a given Adaptation, because in the actual source
-   * Manifest file, indexing data is often defined at Adaptation-level.
-   * This variable allows to optimize the logic here when this is the case.
-   */
-  let lastIndex : IRepresentationIndex | undefined;
-  for (let i = 0; i < representations.length; i++) {
-    if (representations[i].index !== lastIndex) {
-      lastIndex = representations[i].index;
-      const lastPosition = representations[i].index.getLastPosition();
-      if (lastPosition === undefined) { // we cannot tell
-        return undefined;
-      }
-      if (lastPosition !== null) {
-        min = min == null ? lastPosition :
-                            Math.min(min, lastPosition);
-      }
-    }
-  }
-  if (min === null) { // It means that all positions were null === no segments (yet?)
-    return null;
-  }
-  return min;
 }
 
 /**

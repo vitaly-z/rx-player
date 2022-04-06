@@ -39,6 +39,8 @@ import SegmentBuffersStore from "../segment_buffers";
 import StreamOrchestrator, {
   IStreamOrchestratorOptions,
 } from "../stream";
+/* eslint-disable-next-line max-len */
+import ContentTimeBoundariesObserver from "../stream/orchestrator/media_time_boundaries_calculator";
 import createStreamPlaybackObserver from "./create_stream_playback_observer";
 import emitLoadedEvent from "./emit_loaded_event";
 import { maintainEndOfStream } from "./end_of_stream";
@@ -156,19 +158,8 @@ export default function createMediaSourceLoader(
                                         segmentFetcherCreator,
                                         bufferOptions
     ).pipe(
-      mergeMap((evt) : Observable<IMediaSourceLoaderEvent> => {
+      mergeMap((evt) => {
         switch (evt.type) {
-          case "adaptationChange": {
-            const lastPeriod = manifest.periods[manifest.periods.length - 1];
-            if (evt.value.period.id === lastPeriod?.id) {
-              if (evt.value.type === "audio") {
-                mediaDurationUpdater.updateLastAudioAdaptation(evt.value.adaptation);
-              } else if (evt.value.type === "video") {
-                mediaDurationUpdater.updateLastVideoAdaptation(evt.value.adaptation);
-              }
-            }
-            return observableOf(evt);
-          }
           case "end-of-stream":
             log.debug("Init: end-of-stream order received.");
             return maintainEndOfStream(mediaSource).pipe(
@@ -193,6 +184,21 @@ export default function createMediaSourceLoader(
         }
       })
     );
+
+    const contentTimeObserver = ContentTimeBoundariesObserver(manifest,
+                                                              streams$,
+                                                              streamObserver)
+      .pipe(
+        mergeMap((evt) => {
+          switch (evt.type) {
+            case "contentDurationUpdate":
+              log.debug("Init: Duration has to be updated.", evt.value);
+              mediaDurationUpdater.updateKnownDuration(evt.value);
+              return EMPTY;
+            default:
+              return observableOf(evt);
+          }
+        }));
 
     /**
      * On subscription, keep the playback speed synchronized to the speed set by
@@ -226,6 +232,7 @@ export default function createMediaSourceLoader(
                            playbackRate$,
                            stallAvoider$,
                            streams$,
+                           contentTimeObserver,
                            streamEvents$
     ).pipe(finalize(() => {
       mediaDurationUpdater.stop();
