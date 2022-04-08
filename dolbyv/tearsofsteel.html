@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Tears of steel test page">
+<link rel="preload" href="./fonts/FontAwesome.otf" as="font" crossorigin="anonymous">
+<link rel="stylesheet" href="styles/style.css" media="screen">
+<link rel="icon" type="image/x-icon" href="plus.ico" />
+<style>
+video {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  z-index: 1;
+}
+#overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 5px;
+  width: 80%;
+  background-color: #ccc;
+  font-size: 13px;
+  z-index: 2;
+}
+</style>
+<title>Tears Of Steel Test Page (directfile)</title>
+<script type="text/javascript" charset="utf-8">
+setInterval(function () {
+  const overlay = document.getElementById("overlay");
+  if (overlay === undefined) {
+    return;
+  }
+  overlay.innerHTML = "";
+  const video = document.getElementsByTagName("video")[0];
+  if (video !== undefined) {
+    const error = video.error;
+    let errorMsg;
+    if (error != null) {
+      overlay.textContent += "ERROR (code " + error.code + "): " + error.message;
+      overlay.innerHTML += "<br>";
+    }
+    overlay.innerHTML += "position: " + video.currentTime;
+    overlay.innerHTML += "<br>";
+    overlay.innerHTML += "duration: " + video.duration;
+    overlay.innerHTML += "<br>";
+    overlay.innerHTML += "readyState: " + video.readyState;
+    overlay.innerHTML += "<br>";
+    overlay.innerHTML += "paused: " + video.paused;
+    overlay.innerHTML += "<br>";
+    overlay.innerHTML += "playbackRate: " + video.playbackRate;
+    overlay.innerHTML += "<br>";
+    overlay.innerHTML += "ended: " + video.ended;
+  }
+}, 200);
+</script>
+</head>
+<body>
+  <p id="overlay"></p>
+  <video autoplay src= "./tearsofsteel.mp4"></video>
+</body>
+</html>
