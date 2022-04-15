@@ -1,5 +1,17 @@
 # Changelog
 
+## v3.27.1-dev.2022041500 (2022-04-15)
+
+### Bug fixes
+
+  - Use the first compatible codec of the current AdaptationSet when creating a SourceBuffer [#1094]
+  - DASH: fix wrong segment estimates on some SegmentTimeline-based contents where the last segment has a negative `S@d` attribute set in the MPD [#1098]
+
+### Other improvements
+
+  - Update duration of a content based on the last chosen tracks [#1102]
+  - If seeking after the last potential position, load last segments before ending [#1097]
+
 ## v3.27.0 (2022-03-31)
 
 ### Features
