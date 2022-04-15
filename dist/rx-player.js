@@ -16734,6 +16734,16 @@ var Period = /*#__PURE__*/function () {
     return adaptationsForType.filter(function (ada) {
       return ada.isSupported;
     });
+  }
+  /**
+   * Returns true if the give time is in the time boundaries of this `Period`.
+   * @param {number} time
+   * @returns {boolean}
+   */
+  ;
+
+  _proto.containsTime = function containsTime(time) {
+    return time >= this.start && (this.end === undefined || time < this.end);
   };
 
   return Period;
@@ -17360,48 +17370,72 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
     this._performUpdate(newManifest, MANIFEST_UPDATE_TYPE.Partial);
   }
   /**
-   * Get the minimum position currently defined by the Manifest, in seconds.
+   * Returns the theoretical minimum playable position on the content
+   * regardless of the current Adaptation chosen, as estimated at parsing
+   * time.
    * @returns {number}
    */
   ;
 
-  _proto.getMinimumPosition = function getMinimumPosition() {
+  _proto.getMinimumSafePosition = function getMinimumSafePosition() {
     var _a, _b;
 
     var windowData = this._timeBounds;
 
     if (windowData.timeshiftDepth === null) {
-      return (_a = windowData.absoluteMinimumTime) !== null && _a !== void 0 ? _a : 0;
+      return (_a = windowData.minimumSafePosition) !== null && _a !== void 0 ? _a : 0;
     }
 
     var maximumTimeData = windowData.maximumTimeData;
     var maximumTime;
 
     if (!windowData.maximumTimeData.isLinear) {
-      maximumTime = maximumTimeData.value;
+      maximumTime = maximumTimeData.maximumSafePosition;
     } else {
       var timeDiff = performance.now() - maximumTimeData.time;
-      maximumTime = maximumTimeData.value + timeDiff / 1000;
+      maximumTime = maximumTimeData.maximumSafePosition + timeDiff / 1000;
     }
 
     var theoricalMinimum = maximumTime - windowData.timeshiftDepth;
-    return Math.max((_b = windowData.absoluteMinimumTime) !== null && _b !== void 0 ? _b : 0, theoricalMinimum);
+    return Math.max((_b = windowData.minimumSafePosition) !== null && _b !== void 0 ? _b : 0, theoricalMinimum);
   }
   /**
-   * Get the maximum position currently defined by the Manifest, in seconds.
-   * @returns {number}
+   * Get the position of the live edge - that is, the position of what is
+   * currently being broadcasted, in seconds.
+   * @returns {number|undefined}
    */
   ;
 
-  _proto.getMaximumPosition = function getMaximumPosition() {
+  _proto.getLivePosition = function getLivePosition() {
     var maximumTimeData = this._timeBounds.maximumTimeData;
 
+    if (!this.isLive || maximumTimeData.livePosition === undefined) {
+      return undefined;
+    }
+
     if (!maximumTimeData.isLinear) {
-      return maximumTimeData.value;
+      return maximumTimeData.livePosition;
     }
 
     var timeDiff = performance.now() - maximumTimeData.time;
-    return maximumTimeData.value + timeDiff / 1000;
+    return maximumTimeData.livePosition + timeDiff / 1000;
+  }
+  /**
+   * Returns the theoretical maximum playable position on the content
+   * regardless of the current Adaptation chosen, as estimated at parsing
+   * time.
+   */
+  ;
+
+  _proto.getMaximumSafePosition = function getMaximumSafePosition() {
+    var maximumTimeData = this._timeBounds.maximumTimeData;
+
+    if (!maximumTimeData.isLinear) {
+      return maximumTimeData.maximumSafePosition;
+    }
+
+    var timeDiff = performance.now() - maximumTimeData.time;
+    return maximumTimeData.maximumSafePosition + timeDiff / 1000;
   }
   /**
    * Look in the Manifest for Representations linked to the given key ID,
@@ -17615,7 +17649,7 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
       // This can become a memory problem when playing a content long enough.
       // Let's clean manually Periods behind the minimum possible position.
 
-      var min = this.getMinimumPosition();
+      var min = this.getMinimumSafePosition();
 
       while (this.periods.length > 0) {
         var period = this.periods[0];
@@ -19195,6 +19229,8 @@ var BaseRepresentationIndex = /*#__PURE__*/function () {
   ;
 
   _proto.getLastPosition = function getLastPosition() {
+    var _a;
+
     var timeline = this._index.timeline;
 
     if (timeline.length === 0) {
@@ -19202,7 +19238,7 @@ var BaseRepresentationIndex = /*#__PURE__*/function () {
     }
 
     var lastTimelineElement = timeline[timeline.length - 1];
-    var lastTime = (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__/* .getIndexSegmentEnd */ .jH)(lastTimelineElement, null, this._scaledPeriodEnd);
+    var lastTime = Math.min((0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__/* .getIndexSegmentEnd */ .jH)(lastTimelineElement, null, this._scaledPeriodEnd), (_a = this._scaledPeriodEnd) !== null && _a !== void 0 ? _a : Infinity);
     return (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__/* .fromIndexTime */ .zG)(lastTime, this._index);
   }
   /**
@@ -19623,7 +19659,7 @@ function createDashUrlDetokenizer(time, nb) {
 
 /***/ }),
 
-/***/ 3501:
+/***/ 4846:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -19766,7 +19802,7 @@ function getLastPositionFromAdaptation(adaptation) {
 
   return min;
 }
-;// CONCATENATED MODULE: ./src/parsers/manifest/utils/get_maximum_position.ts
+;// CONCATENATED MODULE: ./src/parsers/manifest/utils/get_maximum_positions.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -19804,7 +19840,10 @@ function getMaximumPosition(periods) {
         var lastPosition = getLastPositionFromAdaptation(firstAudioAdaptationFromPeriod);
 
         if (lastPosition === undefined) {
-          return undefined;
+          return {
+            safe: undefined,
+            unsafe: undefined
+          };
         }
 
         maximumAudioPosition = lastPosition;
@@ -19814,7 +19853,10 @@ function getMaximumPosition(periods) {
         var _lastPosition = getLastPositionFromAdaptation(firstVideoAdaptationFromPeriod);
 
         if (_lastPosition === undefined) {
-          return undefined;
+          return {
+            safe: undefined,
+            unsafe: undefined
+          };
         }
 
         maximumVideoPosition = _lastPosition;
@@ -19822,22 +19864,39 @@ function getMaximumPosition(periods) {
 
       if (firstAudioAdaptationFromPeriod !== undefined && maximumAudioPosition === null || firstVideoAdaptationFromPeriod !== undefined && maximumVideoPosition === null) {
         log/* default.info */.Z.info("Parser utils: found Period with no segment. ", "Going to previous one to calculate last position");
-        return undefined;
+        return {
+          safe: undefined,
+          unsafe: undefined
+        };
       }
 
       if (maximumVideoPosition !== null) {
         if (maximumAudioPosition !== null) {
-          return Math.min(maximumAudioPosition, maximumVideoPosition);
+          return {
+            safe: Math.min(maximumAudioPosition, maximumVideoPosition),
+            unsafe: Math.max(maximumAudioPosition, maximumVideoPosition)
+          };
         }
 
-        return maximumVideoPosition;
+        return {
+          safe: maximumVideoPosition,
+          unsafe: maximumVideoPosition
+        };
       }
 
       if (maximumAudioPosition !== null) {
-        return maximumAudioPosition;
+        return {
+          safe: maximumAudioPosition,
+          unsafe: maximumAudioPosition
+        };
       }
     }
   }
+
+  return {
+    safe: undefined,
+    unsafe: undefined
+  };
 }
 ;// CONCATENATED MODULE: ./src/parsers/manifest/utils/get_first_time_from_adaptation.ts
 /**
@@ -19986,12 +20045,18 @@ function getMinimumPosition(periods) {
  * @returns {Array.<number>}
  */
 
-function getMinimumAndMaximumPosition(periods) {
+function getMinimumAndMaximumPositions(periods) {
   if (periods.length === 0) {
     throw new Error("DASH Parser: no period available for a dynamic content");
   }
 
-  return [getMinimumPosition(periods), getMaximumPosition(periods)];
+  var minimumSafePosition = getMinimumPosition(periods);
+  var maxPositions = getMaximumPosition(periods);
+  return {
+    minimumSafePosition: minimumSafePosition,
+    maximumSafePosition: maxPositions.safe,
+    maximumUnsafePosition: maxPositions.unsafe
+  };
 }
 ;// CONCATENATED MODULE: ./src/parsers/manifest/dash/common/parse_availability_start_time.ts
 /**
@@ -20618,12 +20683,14 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
     }
 
     var periodStart = context.periodStart,
+        periodEnd = context.periodEnd,
         representationBaseURLs = context.representationBaseURLs,
         representationId = context.representationId,
         representationBitrate = context.representationBitrate,
         isEMSGWhitelisted = context.isEMSGWhitelisted;
     this._isEMSGWhitelisted = isEMSGWhitelisted;
     this._periodStart = periodStart;
+    this._periodEnd = periodEnd;
     var presentationTimeOffset = index.presentationTimeOffset != null ? index.presentationTimeOffset : 0;
     var timescale = (_a = index.timescale) !== null && _a !== void 0 ? _a : 1;
     var indexTimeOffset = presentationTimeOffset - periodStart * timescale;
@@ -20746,10 +20813,12 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
   ;
 
   _proto.getLastPosition = function getLastPosition() {
+    var _a;
+
     var index = this._index;
     var duration = index.duration,
         list = index.list;
-    return list.length * duration / index.timescale + this._periodStart;
+    return Math.min(list.length * duration / index.timescale + this._periodStart, (_a = this._periodEnd) !== null && _a !== void 0 ? _a : Infinity);
   }
   /**
    * Returns true if a Segment returned by this index is still considered
@@ -21385,7 +21454,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
       timescale: timescale
     };
     this._scaledPeriodStart = (0,index_helpers/* toIndexTime */.gT)(periodStart, this._index);
-    this._scaledPeriodEnd = periodEnd == null ? undefined : (0,index_helpers/* toIndexTime */.gT)(periodEnd, this._index);
+    this._scaledPeriodEnd = periodEnd === undefined ? undefined : (0,index_helpers/* toIndexTime */.gT)(periodEnd, this._index);
   }
   /**
    * Construct init Segment.
@@ -21475,7 +21544,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
       this._index.timeline = this._getTimeline();
     }
 
-    var lastTime = TimelineRepresentationIndex.getIndexEnd(this._index.timeline, this._scaledPeriodStart);
+    var lastTime = TimelineRepresentationIndex.getIndexEnd(this._index.timeline, this._scaledPeriodEnd);
     return lastTime === null ? null : (0,index_helpers/* fromIndexTime */.zG)(lastTime, this._index);
   }
   /**
@@ -21675,7 +21744,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
       return null;
     }
 
-    return (0,index_helpers/* getIndexSegmentEnd */.jH)(timeline[timeline.length - 1], null, scaledPeriodEnd);
+    return Math.min((0,index_helpers/* getIndexSegmentEnd */.jH)(timeline[timeline.length - 1], null, scaledPeriodEnd), scaledPeriodEnd !== null && scaledPeriodEnd !== void 0 ? scaledPeriodEnd : Infinity);
   }
   /**
    * Allows to generate the "timeline" for this RepresentationIndex.
@@ -21837,7 +21906,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
     };
     this._isDynamic = isDynamic;
     this._periodStart = periodStart;
-    this._scaledPeriodEnd = periodEnd == null ? undefined : (periodEnd - periodStart) * timescale;
+    this._scaledPeriodEnd = periodEnd === undefined ? undefined : (periodEnd - periodStart) * timescale;
     this._isEMSGWhitelisted = isEMSGWhitelisted;
   }
   /**
@@ -21944,6 +22013,8 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
   ;
 
   _proto.getLastPosition = function getLastPosition() {
+    var _a;
+
     var lastSegmentStart = this._getLastSegmentStart();
 
     if (lastSegmentStart == null) {
@@ -21953,7 +22024,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
       return lastSegmentStart;
     }
 
-    var lastSegmentEnd = lastSegmentStart + this._index.duration;
+    var lastSegmentEnd = Math.min(lastSegmentStart + this._index.duration, (_a = this._scaledPeriodEnd) !== null && _a !== void 0 ? _a : Infinity);
     return lastSegmentEnd / this._index.timescale + this._periodStart;
   }
   /**
@@ -23591,64 +23662,77 @@ function parseCompleteIntermediateRepresentation(mpdIR, args, warnings, xlinkInf
     lifetime = rootAttributes.minimumUpdatePeriod === 0 ? config/* default.getCurrent */.Z.getCurrent().DASH_FALLBACK_LIFETIME_WHEN_MINIMUM_UPDATE_PERIOD_EQUAL_0 : rootAttributes.minimumUpdatePeriod;
   }
 
-  var _getMinimumAndMaximum = getMinimumAndMaximumPosition(parsedPeriods),
-      contentStart = _getMinimumAndMaximum[0],
-      contentEnd = _getMinimumAndMaximum[1];
+  var _getMinimumAndMaximum = getMinimumAndMaximumPositions(parsedPeriods),
+      minimumSafePosition = _getMinimumAndMaximum.minimumSafePosition,
+      maximumSafePosition = _getMinimumAndMaximum.maximumSafePosition,
+      maximumUnsafePosition = _getMinimumAndMaximum.maximumUnsafePosition;
 
   var now = performance.now();
 
   if (!isDynamic) {
-    minimumTime = contentStart !== undefined ? contentStart : ((_a = parsedPeriods[0]) === null || _a === void 0 ? void 0 : _a.start) !== undefined ? parsedPeriods[0].start : 0;
-    var maximumTime = mediaPresentationDuration !== null && mediaPresentationDuration !== void 0 ? mediaPresentationDuration : Infinity;
+    minimumTime = minimumSafePosition !== undefined ? minimumSafePosition : ((_a = parsedPeriods[0]) === null || _a === void 0 ? void 0 : _a.start) !== undefined ? parsedPeriods[0].start : 0;
+    var finalMaximumSafePosition = mediaPresentationDuration !== null && mediaPresentationDuration !== void 0 ? mediaPresentationDuration : Infinity;
 
     if (parsedPeriods[parsedPeriods.length - 1] !== undefined) {
       var lastPeriod = parsedPeriods[parsedPeriods.length - 1];
       var lastPeriodEnd = (_b = lastPeriod.end) !== null && _b !== void 0 ? _b : lastPeriod.duration !== undefined ? lastPeriod.start + lastPeriod.duration : undefined;
 
-      if (lastPeriodEnd !== undefined && lastPeriodEnd < maximumTime) {
-        maximumTime = lastPeriodEnd;
+      if (lastPeriodEnd !== undefined && lastPeriodEnd < finalMaximumSafePosition) {
+        finalMaximumSafePosition = lastPeriodEnd;
       }
     }
 
-    if (contentEnd !== undefined && contentEnd < maximumTime) {
-      maximumTime = contentEnd;
+    if (maximumSafePosition !== undefined && maximumSafePosition < finalMaximumSafePosition) {
+      finalMaximumSafePosition = maximumSafePosition;
     }
 
     maximumTimeData = {
       isLinear: false,
-      value: maximumTime,
+      maximumSafePosition: finalMaximumSafePosition,
+      livePosition: undefined,
       time: now
     };
   } else {
-    minimumTime = contentStart;
+    minimumTime = minimumSafePosition;
     timeshiftDepth = timeShiftBufferDepth !== null && timeShiftBufferDepth !== void 0 ? timeShiftBufferDepth : null;
 
-    var _maximumTime;
+    var _finalMaximumSafePosition;
 
-    if (contentEnd !== undefined) {
-      _maximumTime = contentEnd;
+    var livePosition;
+
+    if (maximumUnsafePosition !== undefined) {
+      livePosition = maximumUnsafePosition;
+    }
+
+    if (maximumSafePosition !== undefined) {
+      _finalMaximumSafePosition = maximumSafePosition;
     } else {
       var ast = availabilityStartTime !== null && availabilityStartTime !== void 0 ? availabilityStartTime : 0;
       var externalClockOffset = args.externalClockOffset;
 
       if (externalClockOffset === undefined) {
         log/* default.warn */.Z.warn("DASH Parser: use system clock to define maximum position");
-        _maximumTime = Date.now() / 1000 - ast;
+        _finalMaximumSafePosition = Date.now() / 1000 - ast;
       } else {
         var serverTime = performance.now() + externalClockOffset;
-        _maximumTime = serverTime / 1000 - ast;
+        _finalMaximumSafePosition = serverTime / 1000 - ast;
       }
+    }
+
+    if (livePosition === undefined) {
+      livePosition = _finalMaximumSafePosition;
     }
 
     maximumTimeData = {
       isLinear: true,
-      value: _maximumTime,
+      maximumSafePosition: _finalMaximumSafePosition,
+      livePosition: livePosition,
       time: now
     }; // if the minimum calculated time is even below the buffer depth, perhaps we
     // can go even lower in terms of depth
 
-    if (timeshiftDepth !== null && minimumTime !== undefined && _maximumTime - minimumTime > timeshiftDepth) {
-      timeshiftDepth = _maximumTime - minimumTime;
+    if (timeshiftDepth !== null && minimumTime !== undefined && _finalMaximumSafePosition - minimumTime > timeshiftDepth) {
+      timeshiftDepth = _finalMaximumSafePosition - minimumTime;
     }
   } // `isLastPeriodKnown` should be `true` in two cases for DASH contents:
   //   1. When the content is static, because we know that no supplementary
@@ -23671,7 +23755,7 @@ function parseCompleteIntermediateRepresentation(mpdIR, args, warnings, xlinkInf
     suggestedPresentationDelay: rootAttributes.suggestedPresentationDelay,
     transportType: "dash",
     timeBounds: {
-      absoluteMinimumTime: minimumTime,
+      minimumSafePosition: minimumTime,
       timeshiftDepth: timeshiftDepth,
       maximumTimeData: maximumTimeData
     },
@@ -35261,8 +35345,15 @@ function createSmoothStreamingParser(parserOptions) {
     var maximumTimeData;
     var firstVideoAdaptation = adaptations.video !== undefined ? adaptations.video[0] : undefined;
     var firstAudioAdaptation = adaptations.audio !== undefined ? adaptations.audio[0] : undefined;
-    var firstTimeReference;
-    var lastTimeReference;
+    /** Minimum time that can be reached regardless of the StreamIndex chosen. */
+
+    var safeMinimumTime;
+    /** Maximum time that can be reached regardless of the StreamIndex chosen. */
+
+    var safeMaximumTime;
+    /** Maximum time that can be reached in absolute on the content. */
+
+    var unsafeMaximumTime;
 
     if (firstVideoAdaptation !== undefined || firstAudioAdaptation !== undefined) {
       var firstTimeReferences = [];
@@ -35303,42 +35394,54 @@ function createSmoothStreamingParser(parserOptions) {
       }
 
       if (firstTimeReferences.length > 0) {
-        firstTimeReference = Math.max.apply(Math, firstTimeReferences);
+        safeMinimumTime = Math.max.apply(Math, firstTimeReferences);
       }
 
       if (lastTimeReferences.length > 0) {
-        lastTimeReference = Math.min.apply(Math, lastTimeReferences);
+        safeMaximumTime = Math.min.apply(Math, lastTimeReferences);
+        unsafeMaximumTime = Math.max.apply(Math, lastTimeReferences);
       }
     }
 
     var manifestDuration = root.getAttribute("Duration");
-    var duration = manifestDuration != null && +manifestDuration !== 0 ? +manifestDuration / timescale : undefined;
+    var duration = manifestDuration !== null && +manifestDuration !== 0 ? +manifestDuration / timescale : undefined;
 
     if (isLive) {
       suggestedPresentationDelay = parserOptions.suggestedPresentationDelay;
       availabilityStartTime = referenceDateTime;
-      minimumTime = firstTimeReference !== null && firstTimeReference !== void 0 ? firstTimeReference : availabilityStartTime;
-      var maximumTime = lastTimeReference != null ? lastTimeReference : Date.now() / 1000 - availabilityStartTime;
+      minimumTime = safeMinimumTime !== null && safeMinimumTime !== void 0 ? safeMinimumTime : availabilityStartTime;
+      var livePosition = unsafeMaximumTime;
+
+      if (livePosition === undefined) {
+        livePosition = Date.now() / 1000 - availabilityStartTime;
+      }
+
+      var maximumSafePosition = safeMaximumTime;
+
+      if (maximumSafePosition === undefined) {
+        maximumSafePosition = livePosition;
+      }
+
       maximumTimeData = {
         isLinear: true,
-        value: maximumTime,
+        maximumSafePosition: maximumSafePosition,
+        livePosition: livePosition,
         time: performance.now()
       };
       timeshiftDepth = timeShiftBufferDepth !== null && timeShiftBufferDepth !== void 0 ? timeShiftBufferDepth : null;
     } else {
-      minimumTime = firstTimeReference !== null && firstTimeReference !== void 0 ? firstTimeReference : 0;
-
-      var _maximumTime = lastTimeReference !== undefined ? lastTimeReference : duration !== undefined ? minimumTime + duration : Infinity;
-
+      minimumTime = safeMinimumTime !== null && safeMinimumTime !== void 0 ? safeMinimumTime : 0;
+      var maximumTime = safeMaximumTime !== undefined ? safeMaximumTime : duration !== undefined ? minimumTime + duration : Infinity;
       maximumTimeData = {
         isLinear: false,
-        value: _maximumTime,
+        maximumSafePosition: maximumTime,
+        livePosition: undefined,
         time: performance.now()
       };
     }
 
     var periodStart = isLive ? 0 : minimumTime;
-    var periodEnd = isLive ? undefined : maximumTimeData.value;
+    var periodEnd = isLive ? undefined : maximumTimeData.maximumSafePosition;
     var manifest = {
       availabilityStartTime: availabilityStartTime === undefined ? 0 : availabilityStartTime,
       clockOffset: serverTimeOffset,
@@ -35346,7 +35449,7 @@ function createSmoothStreamingParser(parserOptions) {
       isDynamic: isLive,
       isLastPeriodKnown: true,
       timeBounds: {
-        absoluteMinimumTime: minimumTime,
+        minimumSafePosition: minimumTime,
         timeshiftDepth: timeshiftDepth,
         maximumTimeData: maximumTimeData
       },
@@ -50529,6 +50632,7 @@ function getFilteredRepresentations(representations, filters) {
 
 function RepresentationEstimator(_ref) {
   var bandwidthEstimator = _ref.bandwidthEstimator,
+      context = _ref.context,
       observation$ = _ref.observation$,
       filters$ = _ref.filters$,
       initialBitrate = _ref.initialBitrate,
@@ -50668,7 +50772,8 @@ function RepresentationEstimator(_ref) {
             bufferBasedBitrate = _ref4$[4],
             currentRepresentation = _ref4[1];
         var bufferGap = observation.bufferGap,
-            liveGap = observation.liveGap;
+            position = observation.position,
+            maximumPosition = observation.maximumPosition;
         var filteredReps = getFilteredRepresentations(representations, filters);
         var requests = requestsStore.getRequests();
 
@@ -50730,7 +50835,7 @@ function RepresentationEstimator(_ref) {
 
         var chosenRepFromGuessMode = null;
 
-        if (lowLatencyMode && currentRepresentation !== null && liveGap !== undefined && liveGap < 40) {
+        if (lowLatencyMode && currentRepresentation !== null && context.manifest.isDynamic && maximumPosition - position < 40) {
           chosenRepFromGuessMode = guessBasedChooser.getGuess(representations, observation, currentRepresentation, currentBestBitrate, requests);
         }
 
@@ -50823,7 +50928,7 @@ var ABRManager = /*#__PURE__*/function () {
    * Take type and an array of the available representations, spit out an
    * observable emitting the best representation (given the network/buffer
    * state).
-   * @param {string} type
+   * @param {Object} context
    * @param {Array.<Representation>} representations
    * @param {Observable<Object>} observation$
    * @param {Observable<Object>} streamEvents$
@@ -50833,8 +50938,10 @@ var ABRManager = /*#__PURE__*/function () {
 
   var _proto = ABRManager.prototype;
 
-  _proto.get$ = function get$(type, representations, observation$, streamEvents$) {
+  _proto.get$ = function get$(context, representations, observation$, streamEvents$) {
     var _a, _b, _c;
+
+    var type = context.adaptation.type;
 
     var bandwidthEstimator = this._getBandwidthEstimator(type);
 
@@ -50845,6 +50952,7 @@ var ABRManager = /*#__PURE__*/function () {
     var filters$ = createFilters(this._throttlers.limitWidth[type], this._throttlers.throttleBitrate[type], this._throttlers.throttle[type]);
     return RepresentationEstimator({
       bandwidthEstimator: bandwidthEstimator,
+      context: context,
       streamEvents$: streamEvents$,
       observation$: observation$,
       filters$: filters$,
@@ -51087,6 +51195,7 @@ var events_generators = __webpack_require__(8343);
  */
 
 
+
 /**
  * Returns the calculated initial time for the content described by the given
  * Manifest:
@@ -51102,27 +51211,35 @@ var events_generators = __webpack_require__(8343);
  */
 
 function getInitialTime(manifest, lowLatencyMode, startAt) {
-  if (startAt != null) {
-    var min = manifest.getMinimumPosition();
-    var max = manifest.getMaximumPosition();
+  if (!(0,is_null_or_undefined/* default */.Z)(startAt)) {
+    var min = manifest.getMinimumSafePosition();
+    var max;
 
-    if (startAt.position != null) {
+    if (manifest.isLive) {
+      max = manifest.getLivePosition();
+    }
+
+    if (max === undefined) {
+      max = manifest.getMaximumSafePosition();
+    }
+
+    if (!(0,is_null_or_undefined/* default */.Z)(startAt.position)) {
       log/* default.debug */.Z.debug("Init: using startAt.minimumPosition");
       return Math.max(Math.min(startAt.position, max), min);
-    } else if (startAt.wallClockTime != null) {
+    } else if (!(0,is_null_or_undefined/* default */.Z)(startAt.wallClockTime)) {
       log/* default.debug */.Z.debug("Init: using startAt.wallClockTime");
-      var ast = manifest.availabilityStartTime == null ? 0 : manifest.availabilityStartTime;
+      var ast = manifest.availabilityStartTime === undefined ? 0 : manifest.availabilityStartTime;
       var position = startAt.wallClockTime - ast;
       return Math.max(Math.min(position, max), min);
-    } else if (startAt.fromFirstPosition != null) {
+    } else if (!(0,is_null_or_undefined/* default */.Z)(startAt.fromFirstPosition)) {
       log/* default.debug */.Z.debug("Init: using startAt.fromFirstPosition");
       var fromFirstPosition = startAt.fromFirstPosition;
       return fromFirstPosition <= 0 ? min : Math.min(max, min + fromFirstPosition);
-    } else if (startAt.fromLastPosition != null) {
+    } else if (!(0,is_null_or_undefined/* default */.Z)(startAt.fromLastPosition)) {
       log/* default.debug */.Z.debug("Init: using startAt.fromLastPosition");
       var fromLastPosition = startAt.fromLastPosition;
       return fromLastPosition >= 0 ? max : Math.max(min, max + fromLastPosition);
-    } else if (startAt.percentage != null) {
+    } else if (!(0,is_null_or_undefined/* default */.Z)(startAt.percentage)) {
       log/* default.debug */.Z.debug("Init: using startAt.percentage");
       var percentage = startAt.percentage;
 
@@ -51138,24 +51255,24 @@ function getInitialTime(manifest, lowLatencyMode, startAt) {
     }
   }
 
-  var minimumPosition = manifest.getMinimumPosition();
+  var minimumPosition = manifest.getMinimumSafePosition();
 
   if (manifest.isLive) {
     var suggestedPresentationDelay = manifest.suggestedPresentationDelay,
         clockOffset = manifest.clockOffset;
-    var maximumPosition = manifest.getMaximumPosition();
+    var maximumPosition = manifest.getMaximumSafePosition();
     var liveTime;
 
     var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
         DEFAULT_LIVE_GAP = _config$getCurrent.DEFAULT_LIVE_GAP;
 
-    if (clockOffset == null) {
+    if (clockOffset === undefined) {
       log/* default.info */.Z.info("Init: no clock offset found for a live content, " + "starting close to maximum available position");
       liveTime = maximumPosition;
     } else {
       log/* default.info */.Z.info("Init: clock offset found for a live content, " + "checking if we can start close to it");
 
-      var _ast = manifest.availabilityStartTime == null ? 0 : manifest.availabilityStartTime;
+      var _ast = manifest.availabilityStartTime === undefined ? 0 : manifest.availabilityStartTime;
 
       var clockRelativeLiveTime = (performance.now() + clockOffset) / 1000 - _ast;
 
@@ -53892,6 +54009,7 @@ function getSegmentPriority(segmentTime, wantedStartTimestamp) {
 
 
 
+
 /**
  * Checks on the current buffered data for the given type and Period
  * and returns what should be done to fill the buffer according to the buffer
@@ -53900,25 +54018,20 @@ function getSegmentPriority(segmentTime, wantedStartTimestamp) {
  * be filled by any segment, even in the future.
  *
  * @param {Object} content
- * @param {Object} playbackInfo
+ * @param {number} initialWantedTime
+ * @param {Object} playbackObserver
  * @param {number|undefined} fastSwitchThreshold
  * @param {number} bufferGoal
+ * @param {number} maxBufferSize
  * @param {Object} segmentBuffer
  * @returns {Object}
  */
 
-function getBufferStatus(content, wantedStartPosition, playbackObserver, fastSwitchThreshold, bufferGoal, maxBufferSize, segmentBuffer) {
-  var _a;
-
-  var period = content.period,
-      representation = content.representation;
+function getBufferStatus(content, initialWantedTime, playbackObserver, fastSwitchThreshold, bufferGoal, maxBufferSize, segmentBuffer) {
   segmentBuffer.synchronizeInventory();
-  var wantedEndPosition = wantedStartPosition + bufferGoal;
-  var neededRange = {
-    start: Math.max(wantedStartPosition, period.start),
-    end: Math.min(wantedEndPosition, (_a = period.end) !== null && _a !== void 0 ? _a : Infinity)
-  };
-  var shouldRefreshManifest = representation.index.shouldRefresh(wantedStartPosition, wantedEndPosition);
+  var representation = content.representation;
+  var neededRange = getRangeOfNeededSegments(content, initialWantedTime, bufferGoal);
+  var shouldRefreshManifest = representation.index.shouldRefresh(neededRange.start, neededRange.end);
   /**
    * Every segment awaiting an "EndOfSegment" operation, which indicates that a
    * completely-loaded segment is still being pushed to the SegmentBuffer.
@@ -53957,7 +54070,7 @@ function getBufferStatus(content, wantedStartPosition, playbackObserver, fastSwi
 
   var prioritizedNeededSegments = segmentsToLoad.map(function (segment) {
     return {
-      priority: getSegmentPriority(segment.time, wantedStartPosition),
+      priority: getSegmentPriority(segment.time, initialWantedTime),
       segment: segment
     };
   });
@@ -53966,31 +54079,7 @@ function getBufferStatus(content, wantedStartPosition, playbackObserver, fastSwi
    * needed segments for this Representation until the end of the Period.
    */
 
-  var hasFinishedLoading;
-  var lastPosition = representation.index.getLastPosition();
-
-  if (!representation.index.isInitialized() || period.end === undefined || prioritizedNeededSegments.length > 0 || segmentsOnHold.length > 0) {
-    hasFinishedLoading = false;
-  } else {
-    if (lastPosition === undefined) {
-      // We do not know the end of this index.
-      // If we reached the end of the period, check that all segments are
-      // available.
-      hasFinishedLoading = neededRange.end >= period.end && representation.index.isFinished();
-    } else if (lastPosition === null) {
-      // There is no available segment in the index currently. If the index
-      // tells us it has finished generating new segments, we're done.
-      hasFinishedLoading = representation.index.isFinished();
-    } else {
-      // We have a declared end. Check that our range went until the last
-      // position available in the index. If that's the case and we're left
-      // with no segments after filtering them, it means we already have
-      // downloaded the last segments and have nothing left to do: full.
-      var endOfRange = period.end !== undefined ? Math.min(period.end, lastPosition) : lastPosition;
-      hasFinishedLoading = neededRange.end >= endOfRange && representation.index.isFinished();
-    }
-  }
-
+  var hasFinishedLoading = neededRange.hasReachedPeriodEnd && prioritizedNeededSegments.length === 0 && segmentsOnHold.length === 0;
   var imminentDiscontinuity;
 
   if (!representation.index.isInitialized() || // TODO better handle contents not chronologically generated
@@ -54030,6 +54119,79 @@ function getBufferStatus(content, wantedStartPosition, playbackObserver, fastSwi
   };
 }
 /**
+ * Returns both the time range of segments that should be loaded (from a
+ * starting position to an ending position) and whether the end of the Period is
+ * reached by that range.
+ * @param {Object} content
+ * @param {number} initialWantedTime
+ * @param {number} bufferGoal
+ * @returns {Object}
+ */
+
+function getRangeOfNeededSegments(content, initialWantedTime, bufferGoal) {
+  var _a;
+
+  var wantedStartPosition;
+  var manifest = content.manifest,
+      period = content.period,
+      representation = content.representation;
+  var lastIndexPosition = representation.index.getLastPosition();
+  var representationIndex = representation.index; // There is an exception for when the current initially wanted time is already
+  // after the last position with segments AND when we're playing the absolute
+  // last Period in the Manifest.
+  // In that case, we want to actually request at least the last segment to
+  // avoid ending the last Period - and by extension the content - with a
+  // segment which isn't the last one.
+
+  if (!(0,is_null_or_undefined/* default */.Z)(lastIndexPosition) && initialWantedTime >= lastIndexPosition && representationIndex.isInitialized() && representationIndex.isFinished() && isPeriodTheCurrentAndLastOne(manifest, period, initialWantedTime)) {
+    wantedStartPosition = lastIndexPosition - 1;
+  } else {
+    wantedStartPosition = initialWantedTime;
+  }
+
+  var wantedEndPosition = wantedStartPosition + bufferGoal;
+  var hasReachedPeriodEnd;
+
+  if (!representation.index.isInitialized() || !representation.index.isFinished() || period.end === undefined) {
+    hasReachedPeriodEnd = false;
+  } else if (lastIndexPosition === undefined) {
+    // We do not know the end of this index.
+    hasReachedPeriodEnd = wantedEndPosition >= period.end;
+  } else if (lastIndexPosition === null) {
+    // There is no available segment in the index currently.
+    hasReachedPeriodEnd = true;
+  } else {
+    // We have a declared end. Check that our range went until the last
+    // position available in the index. If that's the case and we're left
+    // with no segments after filtering them, it means we already have
+    // downloaded the last segments and have nothing left to do: full.
+    hasReachedPeriodEnd = wantedEndPosition >= lastIndexPosition;
+  }
+
+  return {
+    start: Math.max(wantedStartPosition, period.start),
+    end: Math.min(wantedEndPosition, (_a = period.end) !== null && _a !== void 0 ? _a : Infinity),
+    hasReachedPeriodEnd: hasReachedPeriodEnd
+  };
+}
+/**
+ * Returns `true` if the given Period is both:
+ *   - the one being played (the current position is known from `time`)
+ *   - the absolute last one in the Manifest (that is, there will never be a
+ *     Period after it).
+ * @param {Object} manifest
+ * @param {Object} period
+ * @param {number} time
+ * @returns {boolean}
+ */
+
+
+function isPeriodTheCurrentAndLastOne(manifest, period, time) {
+  var _a;
+
+  return period.containsTime(time) && manifest.isLastPeriodKnown && period.id === ((_a = manifest.periods[manifest.periods.length - 1]) === null || _a === void 0 ? void 0 : _a.id);
+}
+/**
  * From the given SegmentInventory, filters the "playable" (in a supported codec
  * and not known to be undecipherable) buffered Segment Objects which overlap
  * with the given range.
@@ -54037,6 +54199,7 @@ function getBufferStatus(content, wantedStartPosition, playbackObserver, fastSwi
  * @param {Array.<Object>} segmentInventory
  * @returns {Array.<Object>}
  */
+
 
 function getPlayableBufferedSegments(neededRange, segmentInventory) {
   var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
@@ -54491,8 +54654,8 @@ function RepresentationStream(_ref) {
         maxBufferSize = _ref2$[2],
         terminate = _ref2$[3],
         fastSwitchThreshold = _ref2[1];
-    var wantedStartPosition = observation.position + observation.wantedTimeOffset;
-    var status = getBufferStatus(content, wantedStartPosition, playbackObserver, fastSwitchThreshold, bufferGoal, maxBufferSize, segmentBuffer);
+    var initialWantedTime = observation.position + observation.wantedTimeOffset;
+    var status = getBufferStatus(content, initialWantedTime, playbackObserver, fastSwitchThreshold, bufferGoal, maxBufferSize, segmentBuffer);
     var neededSegments = status.neededSegments;
     var neededInitSegment = null; // Add initialization segment if required
 
@@ -54568,7 +54731,7 @@ function RepresentationStream(_ref) {
         UPTO_CURRENT_POSITION_CLEANUP = _config$getCurrent.UPTO_CURRENT_POSITION_CLEANUP;
 
     if (status.isBufferFull) {
-      var gcedPosition = Math.max(0, wantedStartPosition - UPTO_CURRENT_POSITION_CLEANUP);
+      var gcedPosition = Math.max(0, initialWantedTime - UPTO_CURRENT_POSITION_CLEANUP);
 
       if (gcedPosition > 0) {
         bufferRemoval = segmentBuffer.removeBuffer(0, gcedPosition) // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -54744,9 +54907,9 @@ function RepresentationStream(_ref) {
  * @returns {Object}
  */
 
-function createRepresentationEstimator(_ref, abrManager, observation$) {
-  var manifest = _ref.manifest,
-      adaptation = _ref.adaptation;
+function createRepresentationEstimator(content, abrManager, observation$) {
+  var manifest = content.manifest,
+      adaptation = content.adaptation;
   var abrFeedbacks$ = new Subject/* Subject */.x();
   var estimator$ = (0,merge/* merge */.T)( // subscribe "first" (hack as it is a merge here) to event
   (0,event_emitter/* fromEvent */.R)(manifest, "decipherabilityUpdate"), // Emit directly a first time on subscription (after subscribing to event)
@@ -54773,7 +54936,7 @@ function createRepresentationEstimator(_ref, abrManager, observation$) {
 
     return true;
   }), (0,switchMap/* switchMap */.w)(function (playableRepresentations) {
-    return abrManager.get$(adaptation.type, playableRepresentations, observation$, abrFeedbacks$);
+    return abrManager.get$(content, playableRepresentations, observation$, abrFeedbacks$);
   }));
   return {
     estimator$: estimator$,
@@ -55683,10 +55846,11 @@ function createOrReuseSegmentBuffer(segmentBuffersStore, bufferType, adaptation,
 
 
 function getFirstDeclaredMimeType(adaptation) {
-  var representations = adaptation.representations;
+  var representations = adaptation.getPlayableRepresentations();
 
-  if (representations[0] == null) {
-    return "";
+  if (representations.length === 0) {
+    var noRepErr = new media_error/* default */.Z("NO_PLAYABLE_REPRESENTATION", "No Representation in the chosen " + adaptation.type + " Adaptation can be played");
+    throw noRepErr;
   }
 
   return representations[0].getMimeTypeString();
@@ -56103,28 +56267,9 @@ function StreamOrchestrator(content, playbackObserver, abrManager, segmentBuffer
         return Math.min(val, defaultMaxAhead);
       }))
     });
-  }); // trigger warnings when the wanted time is before or after the manifest's
-  // segments
+  }); // Every PeriodStreams for every possible types
 
-  var outOfManifest$ = playbackObserver.observe(true).pipe((0,filter_map/* default */.Z)(function (_ref) {
-    var position = _ref.position,
-        wantedTimeOffset = _ref.wantedTimeOffset;
-    var offsetedPosition = wantedTimeOffset + position;
-
-    if (offsetedPosition < manifest.getMinimumPosition()) {
-      var warning = new media_error/* default */.Z("MEDIA_TIME_BEFORE_MANIFEST", "The current position is behind the " + "earliest time announced in the Manifest.");
-      return stream_events_generators/* default.warning */.Z.warning(warning);
-    } else if (offsetedPosition > manifest.getMaximumPosition()) {
-      var _warning = new media_error/* default */.Z("MEDIA_TIME_AFTER_MANIFEST", "The current position is after the latest " + "time announced in the Manifest.");
-
-      return stream_events_generators/* default.warning */.Z.warning(_warning);
-    }
-
-    return null;
-  }, null));
-  var bufferTypes = segmentBuffersStore.getBufferTypes(); // Every PeriodStreams for every possible types
-
-  var streamsArray = bufferTypes.map(function (bufferType) {
+  var streamsArray = segmentBuffersStore.getBufferTypes().map(function (bufferType) {
     return manageEveryStreams(bufferType, initialPeriod).pipe((0,defer_subscriptions/* default */.Z)(), (0,share/* share */.B)());
   }); // Emits the activePeriodChanged events every time the active Period changes.
 
@@ -56139,14 +56284,14 @@ function StreamOrchestrator(content, playbackObserver, abrManager, segmentBuffer
   }), (0,startWith/* startWith */.O)(manifest.isLastPeriodKnown), (0,distinctUntilChanged/* distinctUntilChanged */.x)()); // Emits an "end-of-stream" event once every PeriodStream are complete.
   // Emits a 'resume-stream" when it's not
 
-  var endOfStream$ = (0,combineLatest/* combineLatest */.a)([areStreamsComplete.apply(void 0, streamsArray), isLastPeriodKnown$]).pipe((0,map/* map */.U)(function (_ref2) {
-    var areComplete = _ref2[0],
-        isLastPeriodKnown = _ref2[1];
+  var endOfStream$ = (0,combineLatest/* combineLatest */.a)([areStreamsComplete.apply(void 0, streamsArray), isLastPeriodKnown$]).pipe((0,map/* map */.U)(function (_ref) {
+    var areComplete = _ref[0],
+        isLastPeriodKnown = _ref[1];
     return areComplete && isLastPeriodKnown;
   }), (0,distinctUntilChanged/* distinctUntilChanged */.x)(), (0,map/* map */.U)(function (emitEndOfStream) {
     return emitEndOfStream ? stream_events_generators/* default.endOfStream */.Z.endOfStream() : stream_events_generators/* default.resumeStream */.Z.resumeStream();
   }));
-  return merge/* merge.apply */.T.apply(void 0, streamsArray.concat([activePeriodChanged$, endOfStream$, outOfManifest$]));
+  return merge/* merge.apply */.T.apply(void 0, streamsArray.concat([activePeriodChanged$, endOfStream$]));
   /**
    * Manage creation and removal of Streams for every Periods for a given type.
    *
@@ -56228,9 +56373,9 @@ function StreamOrchestrator(content, playbackObserver, abrManager, segmentBuffer
     // than the ones already considered
 
 
-    var restartStreamsWhenOutOfBounds$ = playbackObserver.observe(true).pipe((0,filter_map/* default */.Z)(function (_ref3) {
-      var position = _ref3.position,
-          wantedTimeOffset = _ref3.wantedTimeOffset;
+    var restartStreamsWhenOutOfBounds$ = playbackObserver.observe(true).pipe((0,filter_map/* default */.Z)(function (_ref2) {
+      var position = _ref2.position,
+          wantedTimeOffset = _ref2.wantedTimeOffset;
 
       var _a;
 
@@ -56283,9 +56428,9 @@ function StreamOrchestrator(content, playbackObserver, abrManager, segmentBuffer
 
       enableOutOfBoundsCheck = false;
       destroyStreams$.next();
-      return concat/* concat.apply */.z.apply(void 0, rangesToClean.map(function (_ref4) {
-        var start = _ref4.start,
-            end = _ref4.end;
+      return concat/* concat.apply */.z.apply(void 0, rangesToClean.map(function (_ref3) {
+        var start = _ref3.start,
+            end = _ref3.end;
         return start >= end ? empty/* EMPTY */.E : segmentBuffer.removeBuffer(start, end).pipe((0,ignoreElements/* ignoreElements */.l)());
       }).concat([playbackObserver.observe(true).pipe((0,take/* take */.q)(1), (0,mergeMap/* mergeMap */.z)(function (observation) {
         return (0,concat/* concat */.z)((0,of.of)(stream_events_generators/* default.needsDecipherabilityFlush */.Z.needsDecipherabilityFlush(observation.position, !observation.isPaused, observation.duration)), (0,defer/* defer */.P)(function () {
@@ -56339,9 +56484,9 @@ function StreamOrchestrator(content, playbackObserver, abrManager, segmentBuffer
 
     var destroyNextStreams$ = new Subject/* Subject */.x(); // Emits when the current position goes over the end of the current Stream.
 
-    var endOfCurrentStream$ = playbackObserver.observe(true).pipe((0,filter/* filter */.h)(function (_ref5) {
-      var position = _ref5.position,
-          wantedTimeOffset = _ref5.wantedTimeOffset;
+    var endOfCurrentStream$ = playbackObserver.observe(true).pipe((0,filter/* filter */.h)(function (_ref4) {
+      var position = _ref4.position,
+          wantedTimeOffset = _ref4.wantedTimeOffset;
       return basePeriod.end != null && position + wantedTimeOffset >= basePeriod.end;
     })); // Create Period Stream for the next Period.
 
@@ -56439,6 +56584,260 @@ function StreamOrchestrator(content, playbackObserver, abrManager, segmentBuffer
 
 
 /* harmony default export */ var stream = (orchestrator);
+;// CONCATENATED MODULE: ./src/core/init/content_time_boundaries_observer.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+ // NOTE As of now (RxJS 7.4.0), RxJS defines `ignoreElements` default
+// first type parameter as `any` instead of the perfectly fine `unknown`,
+// leading to linter issues, as it forbids the usage of `any`.
+// This is why we're disabling the eslint rule.
+
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+
+/**
+ * Observes the position and Adaptations being played and deduce various events
+ * related to the available time boundaries:
+ *  - Emit when the theoretical duration of the content becomes known or when it
+ *    changes.
+ *  - Emit warnings when the duration goes out of what is currently
+ *    theoretically playable.
+ *
+ * @param {Object} manifest
+ * @param {Observable} streams
+ * @param {Object} playbackObserver
+ * @returns {Observable}
+ */
+
+function ContentTimeBoundariesObserver(manifest, streams, playbackObserver) {
+  /**
+   * Allows to calculate the minimum and maximum playable position on the
+   * whole content.
+   */
+  var maximumPositionCalculator = new MaximumPositionCalculator(manifest); // trigger warnings when the wanted time is before or after the manifest's
+  // segments
+
+  var outOfManifest$ = playbackObserver.observe(true).pipe((0,filter_map/* default */.Z)(function (_ref) {
+    var position = _ref.position,
+        wantedTimeOffset = _ref.wantedTimeOffset;
+    var offsetedPosition = wantedTimeOffset + position;
+
+    if (offsetedPosition < manifest.getMinimumSafePosition()) {
+      var warning = new media_error/* default */.Z("MEDIA_TIME_BEFORE_MANIFEST", "The current position is behind the " + "earliest time announced in the Manifest.");
+      return events_generators/* default.warning */.Z.warning(warning);
+    } else if (offsetedPosition > maximumPositionCalculator.getCurrentMaximumPosition()) {
+      var _warning = new media_error/* default */.Z("MEDIA_TIME_AFTER_MANIFEST", "The current position is after the latest " + "time announced in the Manifest.");
+
+      return events_generators/* default.warning */.Z.warning(_warning);
+    }
+
+    return null;
+  }, null));
+  /**
+   * Contains the content duration according to the last audio and video
+   * Adaptation chosen for the last Period.
+   * `undefined` if unknown yet.
+   */
+
+  var contentDuration = (0,reference/* default */.Z)(undefined);
+  var updateDurationOnManifestUpdate$ = (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,startWith/* startWith */.O)(null), (0,tap/* tap */.b)(function () {
+    if (!manifest.isDynamic) {
+      var maxPos = maximumPositionCalculator.getCurrentMaximumPosition();
+      contentDuration.setValue(maxPos);
+    } else {
+      // TODO handle finished dynamic contents?
+      contentDuration.setValue(undefined);
+    }
+  }), (0,ignoreElements/* ignoreElements */.l)());
+  var updateDurationAndTimeBoundsOnTrackChange$ = streams.pipe((0,tap/* tap */.b)(function (message) {
+    if (message.type === "adaptationChange") {
+      var lastPeriod = manifest.periods[manifest.periods.length - 1];
+
+      if (message.value.period.id === (lastPeriod === null || lastPeriod === void 0 ? void 0 : lastPeriod.id)) {
+        if (message.value.type === "audio") {
+          maximumPositionCalculator.updateLastAudioAdaptation(message.value.adaptation);
+
+          if (!manifest.isDynamic) {
+            contentDuration.setValue(maximumPositionCalculator.getCurrentMaximumPosition());
+          }
+        } else if (message.value.type === "video") {
+          maximumPositionCalculator.updateLastVideoAdaptation(message.value.adaptation);
+
+          if (!manifest.isDynamic) {
+            contentDuration.setValue(maximumPositionCalculator.getCurrentMaximumPosition());
+          }
+        }
+      }
+    }
+  }), (0,ignoreElements/* ignoreElements */.l)());
+  return (0,merge/* merge */.T)(updateDurationOnManifestUpdate$, updateDurationAndTimeBoundsOnTrackChange$, outOfManifest$, contentDuration.asObservable().pipe(skipWhile(function (val) {
+    return val === undefined;
+  }), (0,distinctUntilChanged/* distinctUntilChanged */.x)(), (0,map/* map */.U)(function (value) {
+    return {
+      type: "contentDurationUpdate",
+      value: value
+    };
+  })));
+}
+/**
+ * Calculate the last position from the last chosen audio and video Adaptations
+ * for the last Period (or a default one, if no Adaptations has been chosen).
+ * @class MaximumPositionCalculator
+ */
+
+var MaximumPositionCalculator = /*#__PURE__*/function () {
+  /**
+   * @param {Object} manifest
+   */
+  function MaximumPositionCalculator(manifest) {
+    this._manifest = manifest;
+    this._lastAudioAdaptation = undefined;
+    this._lastVideoAdaptation = undefined;
+  }
+  /**
+   * Update the last known audio Adaptation for the last Period.
+   * If no Adaptation has been set, it should be set to `null`.
+   *
+   * Allows to calculate the maximum position more precizely in
+   * `getCurrentMaximumPosition`.
+   * @param {Object|null} adaptation
+   */
+
+
+  var _proto = MaximumPositionCalculator.prototype;
+
+  _proto.updateLastAudioAdaptation = function updateLastAudioAdaptation(adaptation) {
+    this._lastAudioAdaptation = adaptation;
+  }
+  /**
+   * Update the last known video Adaptation for the last Period.
+   * If no Adaptation has been set, it should be set to `null`.
+   *
+   * Allows to calculate the maximum position more precizely in
+   * `getCurrentMaximumPosition`.
+   * @param {Object|null} adaptation
+   */
+  ;
+
+  _proto.updateLastVideoAdaptation = function updateLastVideoAdaptation(adaptation) {
+    this._lastVideoAdaptation = adaptation;
+  }
+  /**
+   * Returns an estimate of the maximum position reachable under the current
+   * circumstances.
+   * @returns {number}
+   */
+  ;
+
+  _proto.getCurrentMaximumPosition = function getCurrentMaximumPosition() {
+    var _a;
+
+    if (this._manifest.isDynamic) {
+      return (_a = this._manifest.getLivePosition()) !== null && _a !== void 0 ? _a : this._manifest.getMaximumSafePosition();
+    }
+
+    if (this._lastVideoAdaptation === undefined || this._lastAudioAdaptation === undefined) {
+      return this._manifest.getMaximumSafePosition();
+    } else if (this._lastAudioAdaptation === null) {
+      if (this._lastVideoAdaptation === null) {
+        return this._manifest.getMaximumSafePosition();
+      } else {
+        var lastVideoPosition = getLastPositionFromAdaptation(this._lastVideoAdaptation);
+
+        if (typeof lastVideoPosition !== "number") {
+          return this._manifest.getMaximumSafePosition();
+        }
+
+        return lastVideoPosition;
+      }
+    } else if (this._lastVideoAdaptation === null) {
+      var lastAudioPosition = getLastPositionFromAdaptation(this._lastAudioAdaptation);
+
+      if (typeof lastAudioPosition !== "number") {
+        return this._manifest.getMaximumSafePosition();
+      }
+
+      return lastAudioPosition;
+    } else {
+      var _lastAudioPosition = getLastPositionFromAdaptation(this._lastAudioAdaptation);
+
+      var _lastVideoPosition = getLastPositionFromAdaptation(this._lastVideoAdaptation);
+
+      if (typeof _lastAudioPosition !== "number" || typeof _lastVideoPosition !== "number") {
+        return this._manifest.getMaximumSafePosition();
+      } else {
+        return Math.min(_lastAudioPosition, _lastVideoPosition);
+      }
+    }
+  };
+
+  return MaximumPositionCalculator;
+}();
+/**
+ * Returns "last time of reference" from the adaptation given.
+ * `undefined` if a time could not be found.
+ * Null if the Adaptation has no segments (it could be that it didn't started or
+ * that it already finished for example).
+ *
+ * We consider the earliest last time from every representations in the given
+ * adaptation.
+ * @param {Object} adaptation
+ * @returns {Number|undefined|null}
+ */
+
+
+function getLastPositionFromAdaptation(adaptation) {
+  var representations = adaptation.representations;
+  var min = null;
+  /**
+   * Some Manifest parsers use the exact same `IRepresentationIndex` reference
+   * for each Representation of a given Adaptation, because in the actual source
+   * Manifest file, indexing data is often defined at Adaptation-level.
+   * This variable allows to optimize the logic here when this is the case.
+   */
+
+  var lastIndex;
+
+  for (var i = 0; i < representations.length; i++) {
+    if (representations[i].index !== lastIndex) {
+      lastIndex = representations[i].index;
+      var lastPosition = representations[i].index.getLastPosition();
+
+      if (lastPosition === undefined) {
+        // we cannot tell
+        return undefined;
+      }
+
+      if (lastPosition !== null) {
+        min = min == null ? lastPosition : Math.min(min, lastPosition);
+      }
+    }
+  }
+
+  if (min === null) {
+    // It means that all positions were null === no segments (yet?)
+    return null;
+  }
+
+  return min;
+}
 ;// CONCATENATED MODULE: ./src/core/init/create_stream_playback_observer.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -56473,8 +56872,21 @@ function createStreamPlaybackObserver(manifest, playbackObserver, _ref) {
     return (0,combineLatest/* combineLatest */.a)([observation$, speed.asObservable()]).pipe((0,map/* map */.U)(function (_ref2) {
       var observation = _ref2[0],
           lastSpeed = _ref2[1];
+      var wantedTimeOffset = 0;
+
+      if (!initialSeekPerformed.getValue()) {
+        wantedTimeOffset = startTime - observation.position;
+      } else if (!manifest.isDynamic || manifest.isLastPeriodKnown) {
+        var lastPeriod = manifest.periods[manifest.periods.length - 1];
+
+        if (lastPeriod !== undefined && lastPeriod.end !== undefined && observation.position > lastPeriod.end) {
+          wantedTimeOffset = lastPeriod.end - observation.position - 1;
+        }
+      }
+
       return {
-        liveGap: manifest.isLive ? manifest.getMaximumPosition() - observation.position : undefined,
+        // TODO more exact according to the current Adaptation chosen?
+        maximumPosition: manifest.getMaximumSafePosition(),
         position: observation.position,
         duration: observation.duration,
         isPaused: initialPlayPerformed.getValue() ? observation.paused : !autoPlay,
@@ -56486,179 +56898,11 @@ function createStreamPlaybackObserver(manifest, playbackObserver, _ref) {
         // initial position, the currentTime will most probably be 0 where the
         // effective starting position will be _startTime_.
         // Thus we initially set a wantedTimeOffset equal to startTime.
-        wantedTimeOffset: initialSeekPerformed.getValue() ? 0 : startTime - observation.position
+        wantedTimeOffset: wantedTimeOffset
       };
     }));
   });
 }
-;// CONCATENATED MODULE: ./src/core/init/duration_updater.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-/** Number of seconds in a regular year. */
-
-var YEAR_IN_SECONDS = 365 * 24 * 3600;
-/**
- * Keep the MediaSource duration up-to-date with the Manifest one on
- * subscription:
- * Set the current duration initially and then update if needed after
- * each Manifest updates.
- * @param {Object} manifest
- * @param {MediaSource} mediaSource
- * @returns {Observable}
- */
-
-function DurationUpdater(manifest, mediaSource) {
-  return (0,defer/* defer */.P)(function () {
-    var lastDurationUpdate;
-    return setMediaSourceDuration(mediaSource, manifest).pipe((0,mergeMap/* mergeMap */.z)(function (initialDurationUpdate) {
-      // only update `lastDurationUpdate` if the MediaSource's duration has
-      // been updated.
-      if (initialDurationUpdate !== null) {
-        lastDurationUpdate = initialDurationUpdate;
-      }
-
-      return (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,switchMap/* switchMap */.w)(function () {
-        return setMediaSourceDuration(mediaSource, manifest, lastDurationUpdate);
-      }), (0,tap/* tap */.b)(function (durationUpdate) {
-        if (durationUpdate !== null) {
-          lastDurationUpdate = durationUpdate;
-        }
-      }));
-    }), // NOTE As of now (RxJS 7.4.0), RxJS defines `ignoreElements` default
-    // first type parameter as `any` instead of the perfectly fine `unknown`,
-    // leading to linter issues, as it forbids the usage of `any`.
-    // This is why we're disabling the eslint rule.
-
-    /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
-    (0,ignoreElements/* ignoreElements */.l)());
-  });
-}
-/**
- * Checks that duration can be updated on the MediaSource, and then
- * sets it.
- *
- * Returns either:
- *   - the new duration it has been updated to if it has
- *   - `null` if it hasn'nt been updated
- *
- * @param {MediaSource} mediaSource
- * @param {Object} manifest
- * @param {number | undefined} lastSetDuration
- * @returns {Observable.<number | null>}
- */
-
-function setMediaSourceDuration(mediaSource, manifest, lastSetDuration) {
-  return isMediaSourceOpened$(mediaSource).pipe((0,switchMap/* switchMap */.w)(function (isMediaSourceOpened) {
-    if (!isMediaSourceOpened) {
-      return empty/* EMPTY */.E;
-    }
-
-    return whenSourceBuffersEndedUpdates$(mediaSource.sourceBuffers);
-  }), (0,take/* take */.q)(1), (0,map/* map */.U)(function () {
-    var maximumPosition = manifest.getMaximumPosition();
-    var isLive = manifest.isLive; // Some targets poorly support setting a very high number for durations.
-    // Yet, in live contents, we would prefer setting a value as high as possible
-    // to still be able to seek anywhere we want to (even ahead of the Manifest if
-    // we want to). As such, we put it at a safe default value of 2^32 excepted
-    // when the maximum position is already relatively close to that value, where
-    // we authorize exceptionally going over it.
-
-    var newDuration = !isLive ? maximumPosition : Math.max(Math.pow(2, 32), maximumPosition + YEAR_IN_SECONDS);
-
-    if (mediaSource.duration >= newDuration || // Even if the MediaSource duration is different than the duration that
-    // we want to set now, the last duration we wanted to set may be the same,
-    // as the MediaSource duration may have been changed by the browser.
-    //
-    // In that case, we do not want to update it.
-    //
-    newDuration === lastSetDuration) {
-      return null;
-    }
-
-    if (isNaN(mediaSource.duration) || !isFinite(mediaSource.duration) || newDuration - mediaSource.duration > 0.01) {
-      log/* default.info */.Z.info("Init: Updating duration", newDuration);
-      mediaSource.duration = newDuration;
-      return newDuration;
-    }
-
-    return null;
-  }), (0,catchError/* catchError */.K)(function (err) {
-    log/* default.warn */.Z.warn("Duration Updater: Can't update duration on the MediaSource.", err);
-    return (0,of.of)(null);
-  }));
-}
-/**
- * Returns an Observable which will emit only when all the SourceBuffers ended
- * all pending updates.
- * @param {SourceBufferList} sourceBuffers
- * @returns {Observable}
- */
-
-
-function whenSourceBuffersEndedUpdates$(sourceBuffers) {
-  if (sourceBuffers.length === 0) {
-    return (0,of.of)(undefined);
-  }
-
-  var sourceBufferUpdatingStatuses = [];
-
-  var _loop = function _loop(i) {
-    var sourceBuffer = sourceBuffers[i];
-    sourceBufferUpdatingStatuses.push((0,merge/* merge */.T)((0,fromEvent/* fromEvent */.R)(sourceBuffer, "updatestart").pipe((0,map/* map */.U)(function () {
-      return true;
-    })), (0,fromEvent/* fromEvent */.R)(sourceBuffer, "update").pipe((0,map/* map */.U)(function () {
-      return false;
-    })), (0,observable_interval/* interval */.F)(500).pipe((0,map/* map */.U)(function () {
-      return sourceBuffer.updating;
-    }))).pipe((0,startWith/* startWith */.O)(sourceBuffer.updating), (0,distinctUntilChanged/* distinctUntilChanged */.x)()));
-  };
-
-  for (var i = 0; i < sourceBuffers.length; i++) {
-    _loop(i);
-  }
-
-  return (0,combineLatest/* combineLatest */.a)(sourceBufferUpdatingStatuses).pipe((0,filter/* filter */.h)(function (areUpdating) {
-    return areUpdating.every(function (isUpdating) {
-      return !isUpdating;
-    });
-  }), (0,map/* map */.U)(function () {
-    return undefined;
-  }));
-}
-/**
- * Emit a boolean that tells if the media source is opened or not.
- * @param {MediaSource} mediaSource
- * @returns {Object}
- */
-
-
-function isMediaSourceOpened$(mediaSource) {
-  return (0,merge/* merge */.T)((0,event_listeners/* onSourceOpen$ */.ym)(mediaSource).pipe((0,map/* map */.U)(function () {
-    return true;
-  })), (0,event_listeners/* onSourceEnded$ */.ep)(mediaSource).pipe((0,map/* map */.U)(function () {
-    return false;
-  })), (0,event_listeners/* onSourceClose$ */.UG)(mediaSource).pipe((0,map/* map */.U)(function () {
-    return false;
-  }))).pipe((0,startWith/* startWith */.O)(mediaSource.readyState === "open"), (0,distinctUntilChanged/* distinctUntilChanged */.x)());
-}
-/* eslint-enable @typescript-eslint/no-unsafe-argument */
 // EXTERNAL MODULE: ./src/core/init/emit_loaded_event.ts + 1 modules
 var emit_loaded_event = __webpack_require__(5039);
 ;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/util/argsOrArgArray.js
@@ -56830,6 +57074,253 @@ function maintainEndOfStream(mediaSource) {
 }
 // EXTERNAL MODULE: ./src/core/init/initial_seek_and_play.ts + 2 modules
 var initial_seek_and_play = __webpack_require__(7920);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/timer.js
+var timer = __webpack_require__(6625);
+;// CONCATENATED MODULE: ./src/core/init/media_duration_updater.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+/** Number of seconds in a regular year. */
+
+var YEAR_IN_SECONDS = 365 * 24 * 3600;
+/**
+ * Keep the MediaSource's duration up-to-date with what is being played.
+ * @class MediaDurationUpdater
+ */
+
+var MediaDurationUpdater = /*#__PURE__*/function () {
+  /**
+   * Create a new `MediaDurationUpdater` that will keep the given MediaSource's
+   * duration as soon as possible.
+   * This duration will be updated until the `stop` method is called.
+   * @param {Object} manifest - The Manifest currently played.
+   * For another content, you will have to create another `MediaDurationUpdater`.
+   * @param {MediaSource} mediaSource - The MediaSource on which the content is
+   * pushed.
+   */
+  function MediaDurationUpdater(manifest, mediaSource) {
+    var _this = this;
+
+    this._lastKnownDuration = (0,reference/* default */.Z)(undefined);
+    this._subscription = isMediaSourceOpened$(mediaSource).pipe((0,switchMap/* switchMap */.w)(function (canUpdate) {
+      return canUpdate ? (0,combineLatest/* combineLatest */.a)([_this._lastKnownDuration.asObservable(), (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,startWith/* startWith */.O)(null))]) : empty/* EMPTY */.E;
+    }), (0,switchMap/* switchMap */.w)(function (_ref) {
+      var lastKnownDuration = _ref[0];
+      return areSourceBuffersUpdating$(mediaSource.sourceBuffers).pipe((0,switchMap/* switchMap */.w)(function (areSBUpdating) {
+        return areSBUpdating ? empty/* EMPTY */.E : recursivelyTryUpdatingDuration();
+
+        function recursivelyTryUpdatingDuration() {
+          var res = setMediaSourceDuration(mediaSource, manifest, lastKnownDuration);
+
+          if (res === "success"
+          /* Success */
+          ) {
+            return empty/* EMPTY */.E;
+          }
+
+          return (0,timer/* timer */.H)(2000).pipe((0,mergeMap/* mergeMap */.z)(function () {
+            return recursivelyTryUpdatingDuration();
+          }));
+        }
+      }));
+    })).subscribe();
+  }
+  /**
+   * By default, the `MediaDurationUpdater` only set a safe estimate for the
+   * MediaSource's duration.
+   * A more precize duration can be set by communicating to it a more precize
+   * media duration through `updateKnownDuration`.
+   * If the duration becomes unknown, `undefined` can be given to it so the
+   * `MediaDurationUpdater` goes back to a safe estimate.
+   * @param {number | undefined} newDuration
+   */
+
+
+  var _proto = MediaDurationUpdater.prototype;
+
+  _proto.updateKnownDuration = function updateKnownDuration(newDuration) {
+    this._lastKnownDuration.setValue(newDuration);
+  }
+  /**
+   * Stop the `MediaDurationUpdater` from updating and free its resources.
+   * Once stopped, it is not possible to start it again, beside creating another
+   * `MediaDurationUpdater`.
+   */
+  ;
+
+  _proto.stop = function stop() {
+    this._subscription.unsubscribe();
+  };
+
+  return MediaDurationUpdater;
+}();
+/**
+ * Checks that duration can be updated on the MediaSource, and then
+ * sets it.
+ *
+ * Returns either:
+ *   - the new duration it has been updated to if it has
+ *   - `null` if it hasn'nt been updated
+ *
+ * @param {MediaSource} mediaSource
+ * @param {Object} manifest
+ * @returns {string}
+ */
+
+
+
+
+function setMediaSourceDuration(mediaSource, manifest, knownDuration) {
+  var _a;
+
+  var newDuration = knownDuration;
+
+  if (newDuration === undefined) {
+    if (manifest.isDynamic) {
+      var maxPotentialPos = (_a = manifest.getLivePosition()) !== null && _a !== void 0 ? _a : manifest.getMaximumSafePosition(); // Some targets poorly support setting a very high number for durations.
+      // Yet, in dynamic contents, we would prefer setting a value as high as possible
+      // to still be able to seek anywhere we want to (even ahead of the Manifest if
+      // we want to). As such, we put it at a safe default value of 2^32 excepted
+      // when the maximum position is already relatively close to that value, where
+      // we authorize exceptionally going over it.
+
+      newDuration = Math.max(Math.pow(2, 32), maxPotentialPos + YEAR_IN_SECONDS);
+    } else {
+      newDuration = manifest.getMaximumSafePosition();
+    }
+  }
+
+  var maxBufferedEnd = 0;
+
+  for (var i = 0; i < mediaSource.sourceBuffers.length; i++) {
+    var sourceBuffer = mediaSource.sourceBuffers[i];
+    var sbBufferedLen = sourceBuffer.buffered.length;
+
+    if (sbBufferedLen > 0) {
+      maxBufferedEnd = Math.max(sourceBuffer.buffered.end(sbBufferedLen - 1));
+    }
+  }
+
+  if (newDuration === mediaSource.duration) {
+    return "success"
+    /* Success */
+    ;
+  } else if (maxBufferedEnd > newDuration) {
+    // We already buffered further than the duration we want to set.
+    // Keep the duration that was set at that time as a security.
+    if (maxBufferedEnd < mediaSource.duration) {
+      try {
+        log/* default.info */.Z.info("Init: Updating duration to what is currently buffered", maxBufferedEnd);
+        mediaSource.duration = newDuration;
+      } catch (err) {
+        log/* default.warn */.Z.warn("Duration Updater: Can't update duration on the MediaSource.", err);
+        return "failed"
+        /* Failed */
+        ;
+      }
+    }
+
+    return "partial"
+    /* Partial */
+    ;
+  } else {
+    var oldDuration = mediaSource.duration;
+
+    try {
+      log/* default.info */.Z.info("Init: Updating duration", newDuration);
+      mediaSource.duration = newDuration;
+    } catch (err) {
+      log/* default.warn */.Z.warn("Duration Updater: Can't update duration on the MediaSource.", err);
+      return "failed"
+      /* Failed */
+      ;
+    }
+
+    var deltaToExpected = Math.abs(mediaSource.duration - newDuration);
+
+    if (deltaToExpected >= 0.1) {
+      var deltaToBefore = Math.abs(mediaSource.duration - oldDuration);
+      return deltaToExpected < deltaToBefore ? "partial"
+      /* Partial */
+      : "failed"
+      /* Failed */
+      ;
+    }
+
+    return "success"
+    /* Success */
+    ;
+  }
+}
+/**
+ * Returns an Observable which will emit only when all the SourceBuffers ended
+ * all pending updates.
+ * @param {SourceBufferList} sourceBuffers
+ * @returns {Observable}
+ */
+
+
+function areSourceBuffersUpdating$(sourceBuffers) {
+  if (sourceBuffers.length === 0) {
+    return (0,of.of)(false);
+  }
+
+  var sourceBufferUpdatingStatuses = [];
+
+  var _loop = function _loop(i) {
+    var sourceBuffer = sourceBuffers[i];
+    sourceBufferUpdatingStatuses.push((0,merge/* merge */.T)((0,fromEvent/* fromEvent */.R)(sourceBuffer, "updatestart").pipe((0,map/* map */.U)(function () {
+      return true;
+    })), (0,fromEvent/* fromEvent */.R)(sourceBuffer, "update").pipe((0,map/* map */.U)(function () {
+      return false;
+    })), (0,observable_interval/* interval */.F)(500).pipe((0,map/* map */.U)(function () {
+      return sourceBuffer.updating;
+    }))).pipe((0,startWith/* startWith */.O)(sourceBuffer.updating), (0,distinctUntilChanged/* distinctUntilChanged */.x)()));
+  };
+
+  for (var i = 0; i < sourceBuffers.length; i++) {
+    _loop(i);
+  }
+
+  return (0,combineLatest/* combineLatest */.a)(sourceBufferUpdatingStatuses).pipe((0,map/* map */.U)(function (areUpdating) {
+    return areUpdating.some(function (isUpdating) {
+      return isUpdating;
+    });
+  }), (0,distinctUntilChanged/* distinctUntilChanged */.x)());
+}
+/**
+ * Emit a boolean that tells if the media source is opened or not.
+ * @param {MediaSource} mediaSource
+ * @returns {Object}
+ */
+
+
+function isMediaSourceOpened$(mediaSource) {
+  return (0,merge/* merge */.T)((0,event_listeners/* onSourceOpen$ */.ym)(mediaSource).pipe((0,map/* map */.U)(function () {
+    return true;
+  })), (0,event_listeners/* onSourceEnded$ */.ep)(mediaSource).pipe((0,map/* map */.U)(function () {
+    return false;
+  })), (0,event_listeners/* onSourceClose$ */.UG)(mediaSource).pipe((0,map/* map */.U)(function () {
+    return false;
+  }))).pipe((0,startWith/* startWith */.O)(mediaSource.readyState === "open"), (0,distinctUntilChanged/* distinctUntilChanged */.x)());
+}
 // EXTERNAL MODULE: ./src/core/init/stall_avoider.ts + 1 modules
 var stall_avoider = __webpack_require__(467);
 ;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/pairwise.js
@@ -57160,6 +57651,7 @@ var update_playback_rate = __webpack_require__(2983);
 
 
 
+
 /**
  * Returns a function allowing to load or reload the content in arguments into
  * a single or multiple MediaSources.
@@ -57187,7 +57679,7 @@ function createMediaSourceLoader(_ref) {
     /** Maintains the MediaSource's duration up-to-date with the Manifest */
 
 
-    var durationUpdater$ = DurationUpdater(manifest, mediaSource);
+    var mediaDurationUpdater = new MediaDurationUpdater(manifest, mediaSource);
     var initialPeriod = (_a = manifest.getPeriodForTime(initialTime)) !== null && _a !== void 0 ? _a : manifest.getNextPeriod(initialTime);
 
     if (initialPeriod === undefined) {
@@ -57270,6 +57762,17 @@ function createMediaSourceLoader(_ref) {
           return (0,of.of)(evt);
       }
     }));
+    var contentTimeObserver = ContentTimeBoundariesObserver(manifest, streams$, streamObserver).pipe((0,mergeMap/* mergeMap */.z)(function (evt) {
+      switch (evt.type) {
+        case "contentDurationUpdate":
+          log/* default.debug */.Z.debug("Init: Duration has to be updated.", evt.value);
+          mediaDurationUpdater.updateKnownDuration(evt.value);
+          return empty/* EMPTY */.E;
+
+        default:
+          return (0,of.of)(evt);
+      }
+    }));
     /**
      * On subscription, keep the playback speed synchronized to the speed set by
      * the user on the media element and force a speed of `0` when the buffer is
@@ -57292,14 +57795,13 @@ function createMediaSourceLoader(_ref) {
     var loadingEvts$ = seekAndPlay$.pipe((0,switchMap/* switchMap */.w)(function (evt) {
       return evt.type === "warning" ? (0,of.of)(evt) : (0,emit_loaded_event/* default */.Z)(observation$, mediaElement, segmentBuffersStore, false);
     }));
-    return (0,merge/* merge */.T)(durationUpdater$, loadingEvts$, playbackRate$, stallAvoider$, streams$, streamEvents$).pipe(finalize(function () {
-      // clean-up every created SegmentBuffers
+    return (0,merge/* merge */.T)(loadingEvts$, playbackRate$, stallAvoider$, streams$, contentTimeObserver, streamEvents$).pipe(finalize(function () {
+      mediaDurationUpdater.stop(); // clean-up every created SegmentBuffers
+
       segmentBuffersStore.disposeAll();
     }));
   };
 }
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/timer.js
-var timer = __webpack_require__(6625);
 ;// CONCATENATED MODULE: ./src/utils/rx-throttle.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -60490,7 +60992,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     videoElement.preload = "auto";
     _this.version =
     /* PLAYER_VERSION */
-    "3.27.0";
+    "3.27.1-dev.2022041500";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -61744,14 +62246,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       throw new Error("invalid time given");
     }
 
-    var seekAt = positionWanted;
-
-    if (manifest !== null && !manifest.isLive) {
-      var maximumTime = manifest.getMaximumPosition();
-      seekAt = maximumTime !== undefined ? Math.min(positionWanted, maximumTime - 0.001) : positionWanted;
-    }
-
-    this.videoElement.currentTime = seekAt;
+    this.videoElement.currentTime = positionWanted;
     return positionWanted;
   }
   /**
@@ -62510,7 +63005,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     var manifest = this._priv_contentInfos.manifest;
 
     if (manifest !== null) {
-      return manifest.getMinimumPosition();
+      return manifest.getMinimumSafePosition();
     }
 
     return null;
@@ -62539,7 +63034,11 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     }
 
     if (manifest !== null) {
-      return manifest.getMaximumPosition();
+      if (!manifest.isDynamic && this.videoElement !== null) {
+        return this.videoElement.duration;
+      }
+
+      return manifest.getMaximumSafePosition();
     }
 
     return null;
@@ -63212,7 +63711,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     }
 
     this._priv_lastContentPlaybackInfos.lastPlaybackPosition = observation.position;
-    var maximumPosition = manifest !== null ? manifest.getMaximumPosition() : undefined;
+    var maximumPosition = manifest !== null ? manifest.getMaximumSafePosition() : undefined;
     var positionData = {
       position: observation.position,
       duration: observation.duration,
@@ -63222,10 +63721,14 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       bufferGap: isFinite(observation.bufferGap) ? observation.bufferGap : 0
     };
 
-    if (manifest !== null && maximumPosition !== undefined && manifest.isLive && observation.position > 0) {
+    if (manifest !== null && manifest.isLive && observation.position > 0) {
       var ast = (_a = manifest.availabilityStartTime) !== null && _a !== void 0 ? _a : 0;
       positionData.wallClockTime = observation.position + ast;
-      positionData.liveGap = maximumPosition - observation.position;
+      var livePosition = manifest.getLivePosition();
+
+      if (livePosition !== undefined) {
+        positionData.liveGap = livePosition - observation.position;
+      }
     } else if (isDirectFile && this.videoElement !== null) {
       var startDate = getStartDate(this.videoElement);
 
@@ -63322,7 +63825,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.27.0";
+"3.27.1-dev.2022041500";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
@@ -63394,7 +63897,7 @@ function initializeFeaturesObject() {
 
   if (true) {
     features_object/* default.transports.dash */.Z.transports.dash = (__webpack_require__(5877)/* ["default"] */ .Z);
-    features_object/* default.dashParsers.js */.Z.dashParsers.js = (__webpack_require__(3501)/* ["default"] */ .Z);
+    features_object/* default.dashParsers.js */.Z.dashParsers.js = (__webpack_require__(4846)/* ["default"] */ .Z);
   }
 
   if (false) {}
