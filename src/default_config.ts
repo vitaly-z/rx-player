@@ -1198,6 +1198,19 @@ const DEFAULT_CONFIG = {
    * It is set to avoid playback issues
    */
   UPTO_CURRENT_POSITION_CLEANUP : 5,
+
+  /**
+   * Half-life, in seconds for a fastly-evolving exponential weighted moving
+   * average.
+   * @type {Number}
+   */
+  ABR_QUALITY_MANAGER_FAST_EWMA: 5,
+
+  /**
+   * Half-life, in seconds for a slowly-evolving exponential weighted moving
+   * average.
+   */
+  ABR_QUALITY_MANAGER_SLOW_EWMA: 20,
 };
 
 export type IDefaultConfig = typeof DEFAULT_CONFIG;
