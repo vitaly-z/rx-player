@@ -140,6 +140,9 @@ import TrackChoiceManager, {
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+(window as any).DISABLE_FAST_SEEKING = false;
 
 const { isPageActive,
         isVideoVisible,
@@ -1610,6 +1613,22 @@ class Player extends EventEmitter<IPublicAPIEvent> {
       seekAt = maximumTime !== undefined ? Math.min(positionWanted,
                                                     maximumTime - 0.001) :
                                            positionWanted;
+    }
+
+    if ((window as any).DISABLE_FAST_SEEKING !== true) {
+      if (!isNullOrUndefined(this._priv_contentInfos?.currentPeriod)) {
+        const representations = this._priv_contentInfos.activeRepresentations;
+        const currentPeriod = this._priv_contentInfos.currentPeriod;
+        const currentVideoRep = representations?.[currentPeriod.id]?.video;
+        if (currentVideoRep !== undefined && currentVideoRep !== null) {
+          const segments = currentVideoRep.index.getSegments(seekAt, 2);
+          if (segments.length > 0) {
+            /* eslint-disable no-console */
+            console.warn("previous seekAt", seekAt, "new seekAt", segments[0].time);
+            seekAt = segments[0].time;
+          }
+        }
+      }
     }
     this.videoElement.currentTime = seekAt;
     return positionWanted;
