@@ -51087,6 +51087,7 @@ var events_generators = __webpack_require__(8343);
  */
 
 
+
 /**
  * Returns the calculated initial time for the content described by the given
  * Manifest:
@@ -51106,23 +51107,23 @@ function getInitialTime(manifest, lowLatencyMode, startAt) {
     var min = manifest.getMinimumPosition();
     var max = manifest.getMaximumPosition();
 
-    if (startAt.position != null) {
+    if (!(0,is_null_or_undefined/* default */.Z)(startAt.position)) {
       log/* default.debug */.Z.debug("Init: using startAt.minimumPosition");
       return Math.max(Math.min(startAt.position, max), min);
-    } else if (startAt.wallClockTime != null) {
+    } else if (!(0,is_null_or_undefined/* default */.Z)(startAt.wallClockTime)) {
       log/* default.debug */.Z.debug("Init: using startAt.wallClockTime");
-      var ast = manifest.availabilityStartTime == null ? 0 : manifest.availabilityStartTime;
+      var ast = manifest.availabilityStartTime === undefined ? 0 : manifest.availabilityStartTime;
       var position = startAt.wallClockTime - ast;
       return Math.max(Math.min(position, max), min);
-    } else if (startAt.fromFirstPosition != null) {
+    } else if (!(0,is_null_or_undefined/* default */.Z)(startAt.fromFirstPosition)) {
       log/* default.debug */.Z.debug("Init: using startAt.fromFirstPosition");
       var fromFirstPosition = startAt.fromFirstPosition;
       return fromFirstPosition <= 0 ? min : Math.min(max, min + fromFirstPosition);
-    } else if (startAt.fromLastPosition != null) {
+    } else if (!(0,is_null_or_undefined/* default */.Z)(startAt.fromLastPosition)) {
       log/* default.debug */.Z.debug("Init: using startAt.fromLastPosition");
       var fromLastPosition = startAt.fromLastPosition;
       return fromLastPosition >= 0 ? max : Math.max(min, max + fromLastPosition);
-    } else if (startAt.percentage != null) {
+    } else if (!(0,is_null_or_undefined/* default */.Z)(startAt.percentage)) {
       log/* default.debug */.Z.debug("Init: using startAt.percentage");
       var percentage = startAt.percentage;
 
@@ -51149,13 +51150,13 @@ function getInitialTime(manifest, lowLatencyMode, startAt) {
     var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
         DEFAULT_LIVE_GAP = _config$getCurrent.DEFAULT_LIVE_GAP;
 
-    if (clockOffset == null) {
+    if (clockOffset === undefined) {
       log/* default.info */.Z.info("Init: no clock offset found for a live content, " + "starting close to maximum available position");
       liveTime = maximumPosition;
     } else {
       log/* default.info */.Z.info("Init: clock offset found for a live content, " + "checking if we can start close to it");
 
-      var _ast = manifest.availabilityStartTime == null ? 0 : manifest.availabilityStartTime;
+      var _ast = manifest.availabilityStartTime === undefined ? 0 : manifest.availabilityStartTime;
 
       var clockRelativeLiveTime = (performance.now() + clockOffset) / 1000 - _ast;
 
@@ -60432,6 +60433,11 @@ function getRightVideoTrack(adaptation, isTrickModeEnabled) {
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+window.DISABLE_FAST_SEEKING = false;
 var isPageActive = event_listeners/* isPageActive */.Nh,
     isVideoVisible = event_listeners/* isVideoVisible */._K,
     onEnded$ = event_listeners/* onEnded$ */.C1,
@@ -61691,7 +61697,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.seekTo = function seekTo(time) {
-    var _a;
+    var _a, _b, _c;
 
     if (this.videoElement === null) {
       throw new Error("Disposed player");
@@ -61749,6 +61755,24 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     if (manifest !== null && !manifest.isLive) {
       var maximumTime = manifest.getMaximumPosition();
       seekAt = maximumTime !== undefined ? Math.min(positionWanted, maximumTime - 0.001) : positionWanted;
+    }
+
+    if (window.DISABLE_FAST_SEEKING !== true) {
+      if (!(0,is_null_or_undefined/* default */.Z)((_b = this._priv_contentInfos) === null || _b === void 0 ? void 0 : _b.currentPeriod)) {
+        var representations = this._priv_contentInfos.activeRepresentations;
+        var currentPeriod = this._priv_contentInfos.currentPeriod;
+        var currentVideoRep = (_c = representations === null || representations === void 0 ? void 0 : representations[currentPeriod.id]) === null || _c === void 0 ? void 0 : _c.video;
+
+        if (currentVideoRep !== undefined && currentVideoRep !== null) {
+          var segments = currentVideoRep.index.getSegments(seekAt, 2);
+
+          if (segments.length > 0) {
+            /* eslint-disable no-console */
+            console.warn("previous seekAt", seekAt, "new seekAt", segments[0].time);
+            seekAt = segments[0].time;
+          }
+        }
+      }
     }
 
     this.videoElement.currentTime = seekAt;
