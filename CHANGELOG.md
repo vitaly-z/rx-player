@@ -1,5 +1,24 @@
 # Changelog
 
+## v3.27.1-dev.2022051100 (2022-05-11)
+
+### Bug fixes
+
+  - Use the first **compatible** codec of the current AdaptationSet when creating a SourceBuffer [#1094]
+  - DASH/DRM: Fix potential infinite rebuffering when a KID is not anounced in the MPD [#1113]
+  - DASH: Avoid infinite loop due to rounding errors while parsing multi-Periods MPDs [#1111, #1110]
+  - TTML: Add support for percent based thickness for textOutline in TTML Subtitles
+  - If seeking after the last potential position, load last segments before ending [#1097]
+  - DASH: Fix possibility of wrong segments being requested when a SegmentTimeline in a given Period (whose Period@end is set) had an S@r set to `-1` at its end [#1098]
+  - DASH: Don't include presentationTimeOffset for the default initial time of the first `<S>` element if its S@t is not set.
+  - subtitles/TTML: Set default values for `tts:extent` and `tts:origin` when improbable values are found
+
+### Other improvements
+
+  - The duration set on the media element is now only relative to the current chosen tracks (it was previously relative to all potential track). This allows to seek later when switching e.g. to a longer video track [#1102]
+  - Errors coming from an HTMLMediaElement now have the browser's error message if it exists [#1112]
+
+
 ## v3.27.0 (2022-03-31)
 
 ### Features
