@@ -21,6 +21,9 @@ import {
 import config from "../../../../config";
 import log from "../../../../log";
 import { getLoggableSegmentId } from "../../../../manifest";
+import {
+  fakeEncryptionDataInInitSegment,
+} from "../../../../parsers/containers/isobmff/utils";
 import areArraysOfNumbersEqual from "../../../../utils/are_arrays_of_numbers_equal";
 import assertUnreachable from "../../../../utils/assert_unreachable";
 import { toUint8Array } from "../../../../utils/byte_parsing";
@@ -571,7 +574,7 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer {
         (hasUpdatedSourceBufferType || !this._isLastInitSegment(data.initSegment)))
     {
       // Push initialization segment before the media segment
-      const segmentData = data.initSegment;
+      const segmentData = fakeEncryptionDataInInitSegment(data.initSegment);
       dataToPush.push(segmentData);
       const initU8 = toUint8Array(segmentData);
       this._lastInitSegment = { data: initU8,
