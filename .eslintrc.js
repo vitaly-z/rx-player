@@ -335,10 +335,6 @@ module.exports = {
         "message": "Not available in IE11, use another method such as `indexOf` instead.",
       },
       {
-        "property": "find",
-        "message": "Not available in IE11, use `arrayFind` utils instead.",
-      },
-      {
         "property": "findIndex",
         "message": "Not available in IE11, use `arrayFindIndex` utils instead.",
       },
