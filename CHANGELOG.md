@@ -18,12 +18,14 @@
   - DASH: Fix issues that could arise if a segment is calculated to start at a negative position [#1122]
   - DASH: Fix possibility of wrong segments being requested when a SegmentTimeline in a given Period (whose Period@end is set) had an S@r set to `-1` at its end [#1098]
   - DASH: If the first `<S>` has its S@t attribute not set, make as if it is set to `0` [#1118]
+  - Reload in the paused state when the action that lead to reloading was performed directly as the RxPlayer went into the `PAUSED` state [#1132]
 
 ### Other improvements
 
   - If seeking after the last potential position, load last segments before ending [#1097]
   - The duration set on the media element is now only relative to the current chosen tracks (it was previously relative to all potential track). This allows to seek later when switching e.g. to a longer video track [#1102]
   - Errors coming from an HTMLMediaElement now have the browser's error message if it exists [#1112]
+  - TTML: Better handle EBU-TT subtitles by handling the `tt` XML namespace in our TTML parser [#1131]
   - DRM: Information on persisted DRM sessions are now automatically updated to their last version when possible [#1096]
   - Only log values which are relatively inexpensive to stringify to reduce the difference between debugging sessions and what is usually seen in production [#1116]
 
