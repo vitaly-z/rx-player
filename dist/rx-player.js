@@ -2891,7 +2891,7 @@ var DEFAULT_CONFIG = {
    * small enough so this (arguably rare) situation won't lead to too much
    * waiting time.
    */
-  FORCE_DISCONTINUITY_SEEK_DELAY: 2000,
+  FORCE_DISCONTINUITY_SEEK_DELAY: 3000,
 
   /**
    * Ratio used to know if an already loaded segment should be re-buffered.
@@ -11663,7 +11663,8 @@ var EPSILON = 1 / 60;
  * @param {Object} manifest - The Manifest of the currently-played content.
  * @param {Observable} discontinuityUpdate$ - Observable emitting encountered
  * discontinuities for loaded Period and buffer types.
- * @param {Function} setCurrentTime
+ * @param {Observable} lockedStream$
+ * @param {Observable} discontinuityUpdate$
  * @returns {Observable}
  */
 
@@ -11742,6 +11743,9 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
   var stall$ = playbackObserver.getReference().asObservable().pipe((0,withLatestFrom/* withLatestFrom */.M)(discontinuitiesStore$), (0,map/* map */.U)(function (_ref3) {
     var observation = _ref3[0],
         discontinuitiesStore = _ref3[1];
+
+    var _a;
+
     var buffered = observation.buffered,
         position = observation.position,
         readyState = observation.readyState,
@@ -11784,7 +11788,7 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
         var reason;
 
         if (observation.seeking) {
-          reason = observation.internalSeeking ? "internal-seek" : "seeking";
+          reason = observation.pendingInternalSeek !== null ? "internal-seek" : "seeking";
         } else {
           reason = "not-ready";
         }
@@ -11803,7 +11807,7 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
     // internally by the player to when its due to a regular user seek.
 
 
-    var stalledReason = rebuffering.reason === "seeking" && observation.internalSeeking ? "internal-seek" : rebuffering.reason;
+    var stalledReason = rebuffering.reason === "seeking" && observation.pendingInternalSeek !== null ? "internal-seek" : rebuffering.reason;
 
     if (observation.seeking) {
       lastSeekingPosition = observation.position;
@@ -11814,16 +11818,20 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
         ignoredStallTimeStamp = _now;
       }
 
-      if (is_seeking_approximate && observation.position < lastSeekingPosition) {
-        log/* default.debug */.Z.debug("Init: the device appeared to have seeked back by itself.");
+      if (is_seeking_approximate) {
+        var positionSeekedTo = Math.max((_a = observation.pendingInternalSeek) !== null && _a !== void 0 ? _a : 0, lastSeekingPosition);
 
-        if (_now - ignoredStallTimeStamp < FORCE_DISCONTINUITY_SEEK_DELAY) {
-          return {
-            type: "stalled",
-            value: stalledReason
-          };
-        } else {
-          log/* default.warn */.Z.warn("Init: ignored stall for too long, checking discontinuity", _now - ignoredStallTimeStamp);
+        if (observation.position < positionSeekedTo) {
+          log/* default.debug */.Z.debug("Init: the device appeared to have seeked back by itself.");
+
+          if (_now - ignoredStallTimeStamp < FORCE_DISCONTINUITY_SEEK_DELAY) {
+            return {
+              type: "stalled",
+              value: stalledReason
+            };
+          } else {
+            log/* default.warn */.Z.warn("Init: ignored stall for too long, checking discontinuity", _now - ignoredStallTimeStamp);
+          }
         }
       }
 
@@ -59317,7 +59325,7 @@ var PlaybackObserver = /*#__PURE__*/function () {
    * @param {Object} options
    */
   function PlaybackObserver(mediaElement, options) {
-    this._internalSeekingEventsIncomingCounter = 0;
+    this._internalSeeksIncoming = [];
     this._mediaElement = mediaElement;
     this._withMediaSource = options.withMediaSource;
     this._lowLatencyMode = options.lowLatencyMode;
@@ -59376,7 +59384,8 @@ var PlaybackObserver = /*#__PURE__*/function () {
   ;
 
   _proto.setCurrentTime = function setCurrentTime(time) {
-    this._internalSeekingEventsIncomingCounter += 1;
+    this._internalSeeksIncoming.push(time);
+
     this._mediaElement.currentTime = time;
   }
   /**
@@ -59468,18 +59477,26 @@ var PlaybackObserver = /*#__PURE__*/function () {
 
     var getCurrentObservation = function getCurrentObservation(event) {
       var tmpEvt = event;
+      var startedInternalSeekTime;
 
-      if (tmpEvt === "seeking" && _this._internalSeekingEventsIncomingCounter > 0) {
+      if (tmpEvt === "seeking" && _this._internalSeeksIncoming.length > 0) {
         tmpEvt = "internal-seeking";
-        _this._internalSeekingEventsIncomingCounter -= 1;
+        startedInternalSeekTime = _this._internalSeeksIncoming.shift();
       }
 
       var _lastObservation = lastObservation !== null && lastObservation !== void 0 ? lastObservation : _this._generateInitialObservation();
 
       var mediaTimings = getMediaInfos(_this._mediaElement, tmpEvt);
-      var internalSeeking = mediaTimings.seeking && ( // We've just received the event for internally seeking
-      tmpEvt === "internal-seeking" || // or We're still waiting on the previous internal-seek
-      _lastObservation.internalSeeking && tmpEvt !== "seeking");
+      var pendingInternalSeek = null;
+
+      if (mediaTimings.seeking) {
+        if (typeof startedInternalSeekTime === "number") {
+          pendingInternalSeek = startedInternalSeekTime;
+        } else if (_lastObservation.pendingInternalSeek !== null && event !== "seeking") {
+          pendingInternalSeek = _lastObservation.pendingInternalSeek;
+        }
+      }
+
       var rebufferingStatus = getRebufferingStatus(_lastObservation, mediaTimings, {
         lowLatencyMode: _this._lowLatencyMode,
         withMediaSource: _this._withMediaSource
@@ -59488,11 +59505,11 @@ var PlaybackObserver = /*#__PURE__*/function () {
       var timings = (0,object_assign/* default */.Z)({}, {
         rebuffering: rebufferingStatus,
         freezing: freezingStatus,
-        internalSeeking: internalSeeking
+        pendingInternalSeek: pendingInternalSeek
       }, mediaTimings);
 
       if (log/* default.hasLevel */.Z.hasLevel("DEBUG")) {
-        log/* default.debug */.Z.debug("API: current media element state tick", "event", timings.event, "position", timings.position, "seeking", timings.seeking, "internalSeeking", timings.internalSeeking, "rebuffering", timings.rebuffering !== null, "freezing", timings.freezing !== null, "ended", timings.ended, "paused", timings.paused, "playbackRate", timings.playbackRate, "readyState", timings.readyState);
+        log/* default.debug */.Z.debug("API: current media element state tick", "event", timings.event, "position", timings.position, "seeking", timings.seeking, "internalSeek", timings.pendingInternalSeek, "rebuffering", timings.rebuffering !== null, "freezing", timings.freezing !== null, "ended", timings.ended, "paused", timings.paused, "playbackRate", timings.playbackRate, "readyState", timings.readyState);
       }
 
       return timings;
@@ -59550,7 +59567,7 @@ var PlaybackObserver = /*#__PURE__*/function () {
     return (0,object_assign/* default */.Z)(getMediaInfos(this._mediaElement, "init"), {
       rebuffering: null,
       freezing: null,
-      internalSeeking: false
+      pendingInternalSeek: null
     });
   };
 
@@ -61303,7 +61320,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     videoElement.preload = "auto";
     _this.version =
     /* PLAYER_VERSION */
-    "3.28.0";
+    "3.28.0-samsung.seek";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -64124,7 +64141,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.28.0";
+"3.28.0-samsung.seek";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
