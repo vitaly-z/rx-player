@@ -227,6 +227,11 @@ export default function StallAvoider(
               UNFREEZING_SEEK_DELAY,
               UNFREEZING_DELTA_POSITION } = config.getCurrent();
 
+      const prevLastSeekPosition = lastSeekingPosition;
+      lastSeekingPosition = observation.seeking ?
+        Math.max(observation.pendingInternalSeek ?? 0, observation.position) :
+        null;
+
       if (freezing !== null) {
         const now = performance.now();
 
@@ -274,17 +279,13 @@ export default function StallAvoider(
         "internal-seek" as const :
         rebuffering.reason;
 
-      if (observation.seeking) {
-        lastSeekingPosition = observation.position;
-      } else if (lastSeekingPosition !== null) {
+      if (!observation.seeking && prevLastSeekPosition !== null) {
         const now = performance.now();
         if (ignoredStallTimeStamp === null) {
           ignoredStallTimeStamp = now;
         }
         if (isSeekingApproximate) {
-          const positionSeekedTo =
-            Math.max(observation.pendingInternalSeek ?? 0, lastSeekingPosition);
-          if (observation.position < positionSeekedTo) {
+          if (observation.position < prevLastSeekPosition) {
             log.debug("Init: the device appeared to have seeked back by itself.");
             if (now - ignoredStallTimeStamp < FORCE_DISCONTINUITY_SEEK_DELAY) {
               return { type: "stalled" as const,
@@ -295,7 +296,6 @@ export default function StallAvoider(
             }
           }
         }
-        lastSeekingPosition = null;
       }
 
       ignoredStallTimeStamp = null;
