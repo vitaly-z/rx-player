@@ -11752,6 +11752,9 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
         UNFREEZING_SEEK_DELAY = _config$getCurrent.UNFREEZING_SEEK_DELAY,
         UNFREEZING_DELTA_POSITION = _config$getCurrent.UNFREEZING_DELTA_POSITION;
 
+    var prevLastSeekPosition = lastSeekingPosition;
+    lastSeekingPosition = observation.seeking ? Math.max((_a = observation.pendingInternalSeek) !== null && _a !== void 0 ? _a : 0, observation.position) : null;
+
     if (freezing !== null) {
       var now = performance.now();
       var referenceTimestamp = prevFreezingState === null ? freezing.timestamp : prevFreezingState.attemptTimestamp;
@@ -11802,9 +11805,7 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
 
     var stalledReason = rebuffering.reason === "seeking" && observation.pendingInternalSeek !== null ? "internal-seek" : rebuffering.reason;
 
-    if (observation.seeking) {
-      lastSeekingPosition = observation.position;
-    } else if (lastSeekingPosition !== null) {
+    if (!observation.seeking && prevLastSeekPosition !== null) {
       var _now = performance.now();
 
       if (ignoredStallTimeStamp === null) {
@@ -11812,9 +11813,7 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
       }
 
       if (is_seeking_approximate) {
-        var positionSeekedTo = Math.max((_a = observation.pendingInternalSeek) !== null && _a !== void 0 ? _a : 0, lastSeekingPosition);
-
-        if (observation.position < positionSeekedTo) {
+        if (observation.position < prevLastSeekPosition) {
           log/* default.debug */.Z.debug("Init: the device appeared to have seeked back by itself.");
 
           if (_now - ignoredStallTimeStamp < FORCE_DISCONTINUITY_SEEK_DELAY) {
@@ -11827,8 +11826,6 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
           }
         }
       }
-
-      lastSeekingPosition = null;
     }
 
     ignoredStallTimeStamp = null;
@@ -61313,7 +61310,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     videoElement.preload = "auto";
     _this.version =
     /* PLAYER_VERSION */
-    "3.28.0-samsung.seek";
+    "3.28.0-samsung.seek2";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -64134,7 +64131,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.28.0-samsung.seek";
+"3.28.0-samsung.seek2";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
