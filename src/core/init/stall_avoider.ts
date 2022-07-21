@@ -31,6 +31,7 @@ import Manifest, {
   Period,
 } from "../../manifest";
 import { getNextRangeGap } from "../../utils/ranges";
+import { IReadOnlySharedReference } from "../../utils/reference";
 import {
   IPlaybackObservation,
   PlaybackObserver,
@@ -121,6 +122,7 @@ interface IDiscontinuityStoredInfo {
  * encountered and exited.
  * @param {object} playbackObserver - emit the current playback conditions.
  * @param {Object} manifest - The Manifest of the currently-played content.
+ * @param {Object} speed - The last speed set by the user
  * @param {Observable} discontinuityUpdate$ - Observable emitting encountered
  * discontinuities for loaded Period and buffer types.
  * @returns {Observable}
@@ -128,6 +130,7 @@ interface IDiscontinuityStoredInfo {
 export default function StallAvoider(
   playbackObserver : PlaybackObserver,
   manifest: Manifest | null,
+  speed : IReadOnlySharedReference<number>,
   lockedStream$ : Observable<ILockedStreamEvent>,
   discontinuityUpdate$: Observable<IDiscontinuityEvent>
 ) : Observable<IStalledEvent | IUnstalledEvent | IWarningEvent> {
@@ -183,7 +186,7 @@ export default function StallAvoider(
       if (
         !observation.rebuffering ||
         observation.paused ||
-        observation.playbackRate <= 0 || (
+        speed.getValue() <= 0 || (
           lockedStreamEvt.bufferType !== "audio" &&
           lockedStreamEvt.bufferType !== "video"
         )
@@ -217,7 +220,6 @@ export default function StallAvoider(
               readyState,
               rebuffering,
               paused,
-              playbackRate,
               freezing } = observation;
 
       const { BUFFER_DISCONTINUITY_THRESHOLD,
@@ -302,7 +304,7 @@ export default function StallAvoider(
       /** Position at which data is awaited. */
       const { position: stalledPosition } = rebuffering;
 
-      if (stalledPosition !== null) {
+      if (stalledPosition !== null && !paused && speed.getValue() > 0) {
         const skippableDiscontinuity = findSeekableDiscontinuity(discontinuitiesStore,
                                                                  manifest,
                                                                  stalledPosition);
@@ -333,7 +335,7 @@ export default function StallAvoider(
       const nextBufferRangeGap = getNextRangeGap(buffered, freezePosition);
       if (
         !paused &&
-        playbackRate > 0 &&
+        speed.getValue() > 0 &&
         nextBufferRangeGap < BUFFER_DISCONTINUITY_THRESHOLD
       ) {
         const seekTo = (freezePosition + nextBufferRangeGap + EPSILON);
