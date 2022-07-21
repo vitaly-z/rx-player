@@ -91,6 +91,7 @@ export default function getBufferStatus(
              period : Period;
              representation : Representation; },
   initialWantedTime : number,
+  isReversePlayback : boolean,
   playbackObserver : IReadOnlyPlaybackObserver<unknown>,
   fastSwitchThreshold : number | undefined,
   bufferGoal : number,
@@ -100,11 +101,15 @@ export default function getBufferStatus(
   segmentBuffer.synchronizeInventory();
 
   const { representation } = content;
-  const neededRange = getRangeOfNeededSegments(content,
-                                               initialWantedTime,
-                                               bufferGoal);
-  const shouldRefreshManifest = representation.index.shouldRefresh(neededRange.start,
-                                                                   neededRange.end);
+  const neededRange = getRangeOfNeededSegments2(content,
+                                                initialWantedTime,
+                                                bufferGoal,
+                                                isReversePlayback);
+
+  const [rangeMin, rangeMax] = isReversePlayback ?
+    [neededRange.end, neededRange.start] :
+    [neededRange.start, neededRange.end];
+  const shouldRefreshManifest = representation.index.shouldRefresh(rangeMin, rangeMax);
 
   /**
    * Every segment awaiting an "EndOfSegment" operation, which indicates that a
@@ -116,10 +121,14 @@ export default function getBufferStatus(
     ).map(operation => operation.value);
 
   /** Data on every segments buffered around `neededRange`. */
-  const bufferedSegments =
-    getPlayableBufferedSegments({ start: Math.max(neededRange.start - 0.5, 0),
-                                  end: neededRange.end + 0.5 },
+  let bufferedSegments =
+    getPlayableBufferedSegments({ start: Math.max(rangeMin - 0.5, 0),
+                                  end: rangeMax + 0.5 },
                                 segmentBuffer.getInventory());
+  if (isReversePlayback) {
+    bufferedSegments = bufferedSegments.reverse();
+  }
+
   const currentPlaybackTime = playbackObserver.getCurrentTime();
 
   /** Callback allowing to retrieve a segment's history in the buffer. */
@@ -148,7 +157,7 @@ export default function getBufferStatus(
    * `true` if the current `RepresentationStream` has loaded all the
    * needed segments for this Representation until the end of the Period.
    */
-  const hasFinishedLoading = neededRange.hasReachedPeriodEnd &&
+  const hasFinishedLoading = neededRange.hasReachedPeriodBoundary &&
                              prioritizedNeededSegments.length === 0 &&
                              segmentsOnHold.length === 0;
 
@@ -257,6 +266,83 @@ function getRangeOfNeededSegments(
                            period.start),
            end: Math.min(wantedEndPosition, period.end ?? Infinity),
            hasReachedPeriodEnd };
+}
+
+export function getRangeOfNeededSegments2(
+  content: { adaptation : Adaptation;
+             manifest : Manifest;
+             period : Period;
+             representation : Representation; },
+  initialWantedTime : number,
+  bufferGoal : number,
+  isReversePlayback : boolean
+) : { start : number; end : number; hasReachedPeriodBoundary : boolean } {
+  let wantedStartPosition : number;
+  const { manifest, period, representation } = content;
+  const lastIndexPosition = representation.index.getLastPosition();
+  const representationIndex = representation.index;
+
+  // There is an exception for when the current initially wanted time is already
+  // after the last position with segments AND when we're playing the absolute
+  // last Period in the Manifest.
+  // In that case, we want to actually request at least the last segment to
+  // avoid ending the last Period - and by extension the content - with a
+  // segment which isn't the last one.
+  if (!isNullOrUndefined(lastIndexPosition) &&
+      initialWantedTime >= lastIndexPosition &&
+      representationIndex.isInitialized() &&
+      representationIndex.isFinished() &&
+      isPeriodTheCurrentAndLastOne(manifest, period, initialWantedTime))
+  {
+    wantedStartPosition = lastIndexPosition - 1;
+  } else {
+    wantedStartPosition = initialWantedTime;
+  }
+
+  const wantedEndPosition = isReversePlayback ?
+    wantedStartPosition - bufferGoal :
+
+    wantedStartPosition + bufferGoal;
+
+  let hasReachedPeriodBoundary;
+  if (!representation.index.isInitialized()) {
+    hasReachedPeriodBoundary = false;
+  } else if (isReversePlayback) {
+    const firstIndexPosition = representation.index.getFirstPosition();
+    if (firstIndexPosition === undefined) {
+      hasReachedPeriodBoundary = wantedEndPosition <= period.start;
+    } else if (firstIndexPosition === null) {
+      hasReachedPeriodBoundary = true;
+    } else {
+      hasReachedPeriodBoundary = wantedEndPosition <= firstIndexPosition;
+    }
+  } else if (!representation.index.isFinished() ||
+             period.end === undefined)
+  {
+    hasReachedPeriodBoundary = false;
+  } else if (lastIndexPosition === undefined) {
+    // We do not know the end of this index.
+    hasReachedPeriodBoundary = wantedEndPosition >= period.end;
+  } else if (lastIndexPosition === null) {
+    // There is no available segment in the index currently.
+    hasReachedPeriodBoundary = true;
+  } else {
+    // We have a declared end. Check that our range went until the last
+    // position available in the index. If that's the case and we're left
+    // with no segments after filtering them, it means we already have
+    // downloaded the last segments and have nothing left to do: full.
+    hasReachedPeriodBoundary = wantedEndPosition >= lastIndexPosition;
+  }
+
+  if (isReversePlayback) {
+    return { start: Math.min(wantedStartPosition, period.end ?? Infinity),
+             end: Math.max(wantedEndPosition, period.start),
+             hasReachedPeriodBoundary };
+  }
+  return { start: Math.max(wantedStartPosition,
+                           period.start),
+           end: Math.min(wantedEndPosition, period.end ?? Infinity),
+           hasReachedPeriodBoundary };
 }
 
 /**

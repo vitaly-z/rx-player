@@ -123,7 +123,6 @@ interface IDiscontinuityStoredInfo {
  * @param {Object} manifest - The Manifest of the currently-played content.
  * @param {Observable} discontinuityUpdate$ - Observable emitting encountered
  * discontinuities for loaded Period and buffer types.
- * @param {Function} setCurrentTime
  * @returns {Observable}
  */
 export default function StallAvoider(
@@ -192,15 +191,30 @@ export default function StallAvoider(
       ) {
         return;
       }
+
       const currPos = observation.position;
       const rebufferingPos = observation.rebuffering.position ?? currPos;
-      const lockedPeriodStart = lockedStreamEvt.period.start;
-      if (currPos < lockedPeriodStart &&
-          Math.abs(rebufferingPos - lockedPeriodStart) < 1)
-      {
+      let seekPosition : number | undefined;
+      if (observation.isPlayingInReverse) {
+        const lockedPeriodEnd = lockedStreamEvt.period.end;
+        if (lockedPeriodEnd !== undefined &&
+            currPos >= lockedPeriodEnd &&
+            Math.abs(rebufferingPos - lockedPeriodEnd) < 1)
+        {
+          seekPosition = lockedPeriodEnd - 0.001;
+        }
+      } else {
+        const lockedPeriodStart = lockedStreamEvt.period.start;
+        if (currPos < lockedPeriodStart &&
+            Math.abs(rebufferingPos - lockedPeriodStart) < 1)
+        {
+          seekPosition = lockedPeriodStart + 0.001;
+        }
+      }
+      if (seekPosition !== undefined) {
         log.warn("Init: rebuffering because of a future locked stream.\n" +
-                 "Trying to unlock by seeking to the next Period");
-        playbackObserver.setCurrentTime(lockedPeriodStart + 0.001);
+                 "Trying to unlock by seeking to the future Period");
+        playbackObserver.setCurrentTime(seekPosition);
       }
     }),
     // NOTE As of now (RxJS 7.4.0), RxJS defines `ignoreElements` default
@@ -218,6 +232,7 @@ export default function StallAvoider(
               position,
               readyState,
               rebuffering,
+              isPlayingInReverse,
               freezing } = observation;
 
       const { BUFFER_DISCONTINUITY_THRESHOLD,
@@ -274,7 +289,7 @@ export default function StallAvoider(
 
       if (observation.seeking) {
         lastSeekingPosition = observation.position;
-      } else if (lastSeekingPosition !== null) {
+      } else if (!isPlayingInReverse && lastSeekingPosition !== null) {
         const now = performance.now();
         if (ignoredStallTimeStamp === null) {
           ignoredStallTimeStamp = now;
@@ -294,7 +309,10 @@ export default function StallAvoider(
 
       ignoredStallTimeStamp = null;
 
-      if (manifest === null) {
+      // TODO proper handling of discontinuities when playing in reverse?
+      // As this is a very rare usecase - and as reverse playback is often
+      // implemented through back-seeks anyway, this is somewhat low priority
+      if (manifest === null || isPlayingInReverse) {
         return { type: "stalled" as const,
                  value: stalledReason };
       }

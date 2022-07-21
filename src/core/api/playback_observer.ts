@@ -403,6 +403,8 @@ interface IMediaInfos {
   seeking : boolean;
    /** Event that triggered this playback observation. */
   event : IPlaybackObserverEventType;
+
+  isPlayingInReverse : boolean;
 }
 
 /**
@@ -597,12 +599,23 @@ function getMediaInfos(
           playbackRate,
           readyState,
           seeking } = mediaElement;
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+  /* eslint-disable @typescript-eslint/strict-boolean-expressions */
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const isPlayingInReverse : boolean = !!(window as any).isPlayingInReverse;
+  /* eslint-enable @typescript-eslint/no-explicit-any */
+  /* eslint-enable @typescript-eslint/strict-boolean-expressions */
+  /* eslint-enable @typescript-eslint/no-unsafe-assignment */
+  /* eslint-enable @typescript-eslint/no-unsafe-member-access */
 
   const currentRange = getRange(buffered, currentTime);
-  return { bufferGap: currentRange !== null ? currentRange.end - currentTime :
-                                              // TODO null/0 would probably be
-                                              // more appropriate
-                                              Infinity,
+
+  // TODO null or 0 would probably be more appropriate as a default value
+  const bufferGap = currentRange === null ? Infinity :
+                    isPlayingInReverse    ? currentRange.start - currentTime :
+                                            currentRange.end - currentTime;
+  return { bufferGap,
            buffered,
            currentRange,
            position: currentTime,
@@ -612,6 +625,7 @@ function getMediaInfos(
            playbackRate,
            readyState,
            seeking,
+           isPlayingInReverse,
            event };
 }
 
