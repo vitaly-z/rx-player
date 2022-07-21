@@ -102,7 +102,7 @@ export default function getBufferStatus(
   const { representation } = content;
   const askedStart = playbackObserver.getIsPaused() ||
                      playbackObserver.getPlaybackRate() <= 0 ?
-    initialWantedTime - 0.1 :
+    initialWantedTime - 0.2 :
     initialWantedTime;
   const neededRange = getRangeOfNeededSegments(content,
                                                askedStart,
