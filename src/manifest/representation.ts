@@ -22,16 +22,25 @@ import {
 } from "../parsers/manifest";
 import { IHDRInformation } from "../public_types";
 import areArraysOfNumbersEqual from "../utils/are_arrays_of_numbers_equal";
+import idGenerator from "../utils/id_generator";
 import { IRepresentationIndex } from "./representation_index";
 import {
   IAdaptationType,
 } from "./types";
+
+const generateUniqueId = idGenerator();
 
 /**
  * Normalized Representation structure.
  * @class Representation
  */
 class Representation {
+  /**
+   * An ID uniquely identifying the Representation amongst all Representations
+   * that have ever been played in the currently-evaluated RxPlayer logic.
+   */
+  public readonly uniqueId : string;
+
   /** ID uniquely identifying the Representation in the Adaptation. */
   public readonly id : string;
 
@@ -101,6 +110,7 @@ class Representation {
    * @param {Object} args
    */
   constructor(args : IParsedRepresentation, opts : { type : IAdaptationType }) {
+    this.uniqueId = generateUniqueId();
     this.id = args.id;
     this.bitrate = args.bitrate;
     this.codec = args.codecs;

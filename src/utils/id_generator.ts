@@ -23,13 +23,14 @@
  */
 export default function idGenerator() : () => string {
   let prefix = "";
-  let currId = -1;
+  let currCharCode = 0;
   return function generateNewId() : string {
-    currId++;
-    if (currId >= Number.MAX_SAFE_INTEGER) {
-      prefix += "0";
-      currId = 0;
+    if (currCharCode >= 65535) {
+      prefix += "\x00";
+      currCharCode = 0;
     }
-    return prefix + String(currId);
+    const id = prefix + String.fromCharCode(currCharCode);
+    currCharCode++;
+    return id;
   };
 }
