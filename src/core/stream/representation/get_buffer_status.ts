@@ -120,6 +120,15 @@ export default function getBufferStatus(
     getPlayableBufferedSegments({ start: Math.max(neededRange.start - 0.5, 0),
                                   end: neededRange.end + 0.5 },
                                 segmentBuffer.getInventory());
+
+  const buffered = segmentBuffer.getBufferedRanges();
+  if (buffered.length === 0 && bufferedSegments.length > 0) {
+    console.error("XXX BUFFEREDSEGMENTS NOT EMPTY", bufferedSegments.length,
+    bufferedSegments[0].start, bufferedSegments[0].end,
+    bufferedSegments[bufferedSegments.length - 1].start,
+      bufferedSegments[bufferedSegments.length - 1].end);
+  }
+
   const currentPlaybackTime = playbackObserver.getCurrentTime();
 
   /** Callback allowing to retrieve a segment's history in the buffer. */
@@ -184,6 +193,14 @@ export default function getBufferStatus(
                                                   nextSegmentStart,
                                                   hasFinishedLoading,
                                                   bufferedSegments);
+  }
+
+  if (segmentsToLoad.length === 0) {
+    const prevTime = window.TIME_WITHOUT_SEGMENTS[content.adaptation.type];
+    if (performance.now() - prevTime >= 10000) {
+      console.error("XXX hasFinishedLoading", hasFinishedLoading);
+      console.error("XXX imminentDiscontinuity", JSON.stringify(imminentDiscontinuity));
+    }
   }
   return { imminentDiscontinuity,
            hasFinishedLoading,

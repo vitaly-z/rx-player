@@ -25,7 +25,7 @@ import Manifest, {
   Representation,
 } from "../../../manifest";
 import objectAssign from "../../../utils/object_assign";
-import { IBufferedChunk, IEndOfSegmentInfos } from "../../segment_buffers";
+import { IBufferedChunk, IBufferType, IEndOfSegmentInfos } from "../../segment_buffers";
 import {
   IBufferedHistoryEntry,
   IChunkContext,
@@ -97,6 +97,10 @@ interface INeededSegments {
    */
   isBufferFull: boolean;
 }
+
+const TIME_WITHOUT_SEGMENTS : Partial<Record<IBufferType, number>> = {};
+window.TIME_WITHOUT_SEGMENTS = TIME_WITHOUT_SEGMENTS;
+
 /**
  * Return the list of segments that can currently be downloaded to fill holes
  * in the buffer in the given range, including already-pushed segments currently
@@ -146,9 +150,9 @@ export default function getNeededSegments({
                                               currentSeg.bufferedStart)) {
           return false;
         }
-        log.debug("Stream: skipping segment gc-ed at the start",
-                  currentSeg.start,
-                  currentSeg.bufferedStart);
+        console.error("XXX Stream: skipping segment gc-ed at the start",
+                      currentSeg.start,
+                      currentSeg.bufferedStart);
       }
       if (doesEndSeemGarbageCollected(currentSeg, nextSeg, neededRange.end)) {
         lazySegmentHistory = lazySegmentHistory ?? getBufferedHistory(currentSeg.infos);
@@ -156,9 +160,9 @@ export default function getNeededSegments({
                                             currentSeg.bufferedEnd)) {
           return false;
         }
-        log.debug("Stream: skipping segment gc-ed at the end",
-                  currentSeg.end,
-                  currentSeg.bufferedEnd);
+        console.error("XXX Stream: skipping segment gc-ed at the end",
+                      currentSeg.end,
+                      currentSeg.bufferedEnd);
       }
       return true;
     });
@@ -172,6 +176,8 @@ export default function getNeededSegments({
   const ROUNDING_ERROR = Math.min(1 / 60, MINIMUM_SEGMENT_SIZE);
   let isBufferFull = false;
   const segmentsOnHold : ISegment[] = [];
+
+  let reasons : string[] = [];
   const segmentsToLoad = availableSegmentsForRange.filter(segment => {
     const contentObject = objectAssign({ segment }, content);
 
@@ -180,19 +186,23 @@ export default function getNeededSegments({
       const isAlreadyBeingPushed = segmentsBeingPushed
         .some((pendingSegment) => areSameContent(contentObject, pendingSegment));
       if (isAlreadyBeingPushed) {
+        reasons.push("already being pushed");
         return false;
       }
     }
 
     const { duration, time, end } = segment;
     if (segment.isInit) {
+      reasons.push("is init");
       return true; // never skip initialization segments
     }
     if (shouldStopLoadingSegments) {
       segmentsOnHold.push(segment);
+      reasons.push("YOU BETTER STOP, before you fill the buffer");
       return false;
     }
     if (segment.complete && duration < MINIMUM_SEGMENT_SIZE) {
+      reasons.push("itsi bitsi teeny weeny");
       return false; // too small, don't download
     }
 
@@ -218,6 +228,7 @@ export default function getNeededSegments({
                                         fastSwitchThreshold);
       });
       if (waitForPushedSegment) {
+        reasons.push("similar segment being pushed");
         return false;
       }
     }
@@ -235,6 +246,7 @@ export default function getNeededSegments({
         if (time - completeSegInfos.time > -ROUNDING_ERROR &&
             completeSegInfos.end - end > -ROUNDING_ERROR)
         {
+          reasons.push("ALREADY DOWNLOADED");
           return false; // already downloaded
         }
       }
@@ -246,6 +258,7 @@ export default function getNeededSegments({
       if (time > neededRange.start + MIN_BUFFER_AHEAD) {
         shouldStopLoadingSegments = true;
         segmentsOnHold.push(segment);
+        reasons.push("NO MORE BUFFER SIZE");
         return false;
       }
     }
@@ -258,15 +271,18 @@ export default function getNeededSegments({
       if (lastTimeItWasPushed.buffered === null &&
           beforeLastTimeItWasPushed.buffered === null
       ) {
-        log.warn("Stream: Segment GCed multiple times in a row, ignoring it.",
-                 "If this happens a lot and lead to unpleasant experience, please " +
-                 " check your device's available memory. If it's low when this message " +
-                 "is emitted, you might want to update the RxPlayer's settings (" +
-                 "`maxBufferAhead`, `maxVideoBufferSize` etc.) so less memory is used " +
-                 "by regular media data buffering." +
-                 adaptation.type,
-                 representation.id,
-                 segment.time);
+
+        console.error("XXX",
+          "Stream: Segment GCed multiple times in a row, ignoring it.",
+          "If this happens a lot and lead to unpleasant experience, please " +
+          " check your device's available memory. If it's low when this message " +
+          "is emitted, you might want to update the RxPlayer's settings (" +
+          "`maxBufferAhead`, `maxVideoBufferSize` etc.) so less memory is used " +
+          "by regular media data buffering." +
+          adaptation.type,
+          representation.id,
+          segment.time);
+        reasons.push("EVERYTHING GCed :o");
         return false;
       }
     }
@@ -284,12 +300,45 @@ export default function getNeededSegments({
         if (shouldLoad) {
           availableBufferSize -= estimatedSegmentSize;
         }
+        reasons.push("Way dooown in the hole ");
         return shouldLoad;
       }
     }
     availableBufferSize -= estimatedSegmentSize;
+    reasons.push("Load it (check it...)");
     return true;
   });
+
+  window[adaptation.type + "Content"] = content;
+  if (segmentsToLoad.length > 0) {
+    if (TIME_WITHOUT_SEGMENTS[content.adaptation.type] !== undefined) {
+      TIME_WITHOUT_SEGMENTS[content.adaptation.type] = undefined;
+    }
+  } else {
+    const prevTime = TIME_WITHOUT_SEGMENTS[content.adaptation.type];
+    if (prevTime === undefined) {
+      TIME_WITHOUT_SEGMENTS[content.adaptation.type] = performance.now();
+    } else if (performance.now() - prevTime >= 10000) {
+      console.error("XXX MORE THAN 10 seconds without segmentsToLoad",
+        adaptation.type, performance.now(), prevTime);
+      console.error("XXX currentPlaybackTime", currentPlaybackTime);
+      console.error("XXX nnededRange", JSON.stringify(neededRange));
+      console.error("XXX SEGMENTS BEING PUSHED LENGTH:", segmentsBeingPushed.length,
+                    `FIRST ${segmentsBeingPushed[0]?.segment.time} -`,
+                    `${segmentsBeingPushed[0]?.segment.end} -`,
+                    `LAST ${segmentsBeingPushed[segmentsBeingPushed.length - 1]?.segment.time} - ` +
+                    `${segmentsBeingPushed[segmentsBeingPushed.length - 1]?.segment.end}`);
+      console.error("XXX ACTUAL SEGS LENGTH:", availableSegmentsForRange.length,
+                    `FIRST ${availableSegmentsForRange[0]?.time} -`,
+                    `${availableSegmentsForRange[0]?.end} -`,
+                    `LAST ${availableSegmentsForRange[availableSegmentsForRange.length - 1]?.time} - ` +
+                    `${availableSegmentsForRange[availableSegmentsForRange.length - 1]?.end}`);
+
+      const displayedReasons = reasons.slice(reasons.length - 6);
+      console.error("XXX LAST 5 reasons:", JSON.stringify(displayedReasons));
+      console.error("XXX isBufferFull", isBufferFull);
+    }
+  }
   return { segmentsToLoad, segmentsOnHold, isBufferFull };
 
 }

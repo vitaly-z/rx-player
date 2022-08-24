@@ -50,9 +50,13 @@ import {
   IPrioritizedSegmentFetcher,
   IPrioritizedSegmentFetcherEvent,
 } from "../../fetchers";
+import {IBufferType} from "../../segment_buffers";
 import {
   IQueuedSegment,
 } from "../types";
+
+const TIME_WITHOUT_REQ : Partial<Record<IBufferType, number>> = {};
+window.TIME_WITHOUT_REQ = TIME_WITHOUT_REQ;
 
 /**
  * Class scheduling segment downloads for a single Representation.
@@ -203,6 +207,11 @@ export default class DownloadingQueue<T> {
 
       const initSegmentPush$ = this._downloadQueue.asObservable().pipe(
         filter((next) => {
+          const prevTime = TIME_WITHOUT_REQ[this._content.adaptation.type];
+          if ((next.segmentQueue.length > 0 || next.initSegment !== null) &&
+            prevTime !== undefined && performance.now() - prevTime >= 10000) {
+            console.error("XXX NO DOWNLOADING QUEUE ANYMORE", next.segmentQueue.length);
+          }
           const initSegmentRequest = this._initSegmentRequest;
           if (next.initSegment !== null && initSegmentRequest !== null) {
             if (next.initSegment.priority !== initSegmentRequest.priority) {
@@ -257,6 +266,7 @@ export default class DownloadingQueue<T> {
       const request$ = this._segmentFetcher.createRequest(context, priority);
 
       this._mediaSegmentRequest = { segment, priority, request$ };
+      TIME_WITHOUT_REQ[this._content.adaptation.type] = performance.now();
       return request$
         .pipe(mergeMap((evt) => {
           switch (evt.type) {
@@ -332,6 +342,7 @@ export default class DownloadingQueue<T> {
     const request$ = this._segmentFetcher.createRequest(context, priority);
 
     this._initSegmentRequest = { segment, priority, request$ };
+    TIME_WITHOUT_REQ[this._content.adaptation.type] = performance.now();
     return request$
       .pipe(mergeMap((evt) : Observable<ILoaderRetryEvent |
                                         IParsedInitSegmentEvent<T> |

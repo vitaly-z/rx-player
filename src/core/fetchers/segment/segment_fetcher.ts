@@ -51,6 +51,9 @@ import { IBufferType } from "../../segment_buffers";
 import errorSelector from "../utils/error_selector";
 import { tryURLsWithBackoff } from "../utils/try_urls_with_backoff";
 
+const TIME_WITHOUT_FETCH : Partial<Record<IBufferType, number>> = {};
+window.TIME_WITHOUT_FETCH = TIME_WITHOUT_FETCH;
+
 
 const generateRequestID = idGenerator();
 
@@ -102,6 +105,10 @@ export default function createSegmentFetcher<TLoadedFormat, TSegmentDataType>(
     content : ISegmentLoaderContent
   ) : Observable<ISegmentFetcherEvent<TSegmentDataType>> {
     const { segment } = content;
+    const prevTime = TIME_WITHOUT_FETCH[content.adaptation.type];
+    if (prevTime !== undefined && performance.now() - prevTime >= 10000) {
+      console.error("XXX NO REQUEST ANYMORE", content.adaptation.type);
+    }
 
     // used by logs
     const segmentIdString = getLoggableSegmentId(content);
@@ -257,6 +264,7 @@ export default function createSegmentFetcher<TLoadedFormat, TSegmentDataType>(
         url : string | null,
         cancellationSignal: CancellationSignal
       ) {
+        TIME_WITHOUT_FETCH[content.adaptation.type] = performance.now();
         return loadSegment(url, content, cancellationSignal, loaderCallbacks);
       }
 
