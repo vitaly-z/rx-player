@@ -56,7 +56,7 @@ import {
 } from "../types";
 
 const TIME_WITHOUT_REQ : Partial<Record<IBufferType, number>> = {};
-window.TIME_WITHOUT_REQ = TIME_WITHOUT_REQ;
+(window as any).TIME_WITHOUT_REQ = TIME_WITHOUT_REQ;
 
 /**
  * Class scheduling segment downloads for a single Representation.

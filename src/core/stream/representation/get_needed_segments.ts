@@ -99,7 +99,7 @@ interface INeededSegments {
 }
 
 const TIME_WITHOUT_SEGMENTS : Partial<Record<IBufferType, number>> = {};
-window.TIME_WITHOUT_SEGMENTS = TIME_WITHOUT_SEGMENTS;
+(window as any).TIME_WITHOUT_SEGMENTS = TIME_WITHOUT_SEGMENTS;
 
 /**
  * Return the list of segments that can currently be downloaded to fill holes
@@ -309,7 +309,7 @@ export default function getNeededSegments({
     return true;
   });
 
-  window[adaptation.type + "Content"] = content;
+  (window as any)[adaptation.type + "Content"] = content;
   if (segmentsToLoad.length > 0) {
     if (TIME_WITHOUT_SEGMENTS[content.adaptation.type] !== undefined) {
       TIME_WITHOUT_SEGMENTS[content.adaptation.type] = undefined;

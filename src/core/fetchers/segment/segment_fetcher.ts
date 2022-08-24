@@ -52,7 +52,7 @@ import errorSelector from "../utils/error_selector";
 import { tryURLsWithBackoff } from "../utils/try_urls_with_backoff";
 
 const TIME_WITHOUT_FETCH : Partial<Record<IBufferType, number>> = {};
-window.TIME_WITHOUT_FETCH = TIME_WITHOUT_FETCH;
+(window as any).TIME_WITHOUT_FETCH = TIME_WITHOUT_FETCH;
 
 
 const generateRequestID = idGenerator();

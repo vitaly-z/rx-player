@@ -196,7 +196,7 @@ export default function getBufferStatus(
   }
 
   if (segmentsToLoad.length === 0) {
-    const prevTime = window.TIME_WITHOUT_SEGMENTS[content.adaptation.type];
+    const prevTime = (window as any).TIME_WITHOUT_SEGMENTS[content.adaptation.type];
     if (performance.now() - prevTime >= 10000) {
       console.error("XXX hasFinishedLoading", hasFinishedLoading);
       console.error("XXX imminentDiscontinuity", JSON.stringify(imminentDiscontinuity));
