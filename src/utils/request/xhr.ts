@@ -148,8 +148,20 @@ export default function request<T>(
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);
 
+    let timeoutId : undefined | number;
     if (timeout >= 0) {
       xhr.timeout = timeout;
+
+      // We've seen on some browser (mainly on some LG TVs), that `xhr.timeout`
+      // was either not supported or did not function properly despite the
+      // browser being recent enough to support it.
+      // That's why we also start a manual timeout. We do this a little later
+      // than the "native one" performed on the xhr assuming that the latter
+      // is more precise, it might also be more efficient.
+      timeoutId = window.setTimeout(() => {
+        clearCancellingProcess();
+        reject(new RequestError(url, xhr.status, "TIMEOUT", xhr));
+      }, timeout + 3);
     }
 
     xhr.responseType = responseType;
@@ -174,6 +186,7 @@ export default function request<T>(
     if (cancelSignal !== undefined) {
       deregisterCancellationListener = cancelSignal
         .register(function abortRequest(err : CancellationError) {
+          clearCancellingProcess();
           if (!isNullOrUndefined(xhr) && xhr.readyState !== 4) {
             xhr.abort();
           }
@@ -186,16 +199,12 @@ export default function request<T>(
     }
 
     xhr.onerror = function onXHRError() {
-      if (deregisterCancellationListener !== null) {
-        deregisterCancellationListener();
-      }
+      clearCancellingProcess();
       reject(new RequestError(url, xhr.status, "ERROR_EVENT", xhr));
     };
 
     xhr.ontimeout = function onXHRTimeout() {
-      if (deregisterCancellationListener !== null) {
-        deregisterCancellationListener();
-      }
+      clearCancellingProcess();
       reject(new RequestError(url, xhr.status, "TIMEOUT", xhr));
     };
 
@@ -213,9 +222,7 @@ export default function request<T>(
 
     xhr.onload = function onXHRLoad(event : ProgressEvent) {
       if (xhr.readyState === 4) {
-        if (deregisterCancellationListener !== null) {
-          deregisterCancellationListener();
-        }
+        clearCancellingProcess();
         if (xhr.status >= 200 && xhr.status < 300) {
           const receivedTime = performance.now();
           const totalSize = xhr.response instanceof
@@ -259,6 +266,18 @@ export default function request<T>(
     };
 
     xhr.send();
+
+    /**
+     * Clear resources and timers created to handle cancellation and timeouts.
+     */
+    function clearCancellingProcess() {
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+      if (deregisterCancellationListener !== null) {
+        deregisterCancellationListener();
+      }
+    }
   });
 }
 
