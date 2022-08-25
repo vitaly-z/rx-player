@@ -18,7 +18,7 @@ import config from "../../config";
 import { RequestError } from "../../errors";
 import isNonEmptyString from "../is_non_empty_string";
 import isNullOrUndefined from "../is_null_or_undefined";
-import {
+import TaskCanceller, {
   CancellationError,
   CancellationSignal,
 } from "../task_canceller";
@@ -148,10 +148,6 @@ export default function request<T>(
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);
 
-    if (timeout >= 0) {
-      xhr.timeout = timeout;
-    }
-
     xhr.responseType = responseType;
 
     if (xhr.responseType === "document") {
@@ -169,11 +165,14 @@ export default function request<T>(
 
     const sendingTime = performance.now();
 
+    const timeoutCanceller = new TaskCanceller();
+
     // Handle request cancellation
     let deregisterCancellationListener : (() => void) | null = null;
     if (cancelSignal !== undefined) {
       deregisterCancellationListener = cancelSignal
         .register(function abortRequest(err : CancellationError) {
+          timeoutCanceller.cancel();
           if (!isNullOrUndefined(xhr) && xhr.readyState !== 4) {
             xhr.abort();
           }
@@ -185,7 +184,23 @@ export default function request<T>(
       }
     }
 
+    if (timeout >= 0) {
+      xhr.timeout = timeout;
+      const timeoutId = setTimeout(() => {
+        console.error("XXX IN MANUAL TIMEOUT", url);
+        timeoutCanceller.cancel();
+        if (deregisterCancellationListener !== null) {
+          deregisterCancellationListener();
+        }
+        reject(new RequestError(url, xhr.status, "TIMEOUT", xhr));
+      }, timeout + 5000);
+      timeoutCanceller.signal.register(() => {
+        clearTimeout(timeoutId);
+      });
+    }
+
     xhr.onerror = function onXHRError() {
+      timeoutCanceller.cancel();
       if (deregisterCancellationListener !== null) {
         deregisterCancellationListener();
       }
@@ -193,6 +208,8 @@ export default function request<T>(
     };
 
     xhr.ontimeout = function onXHRTimeout() {
+      console.error("XXX IN REGULAR TIMEOUT", url);
+      timeoutCanceller.cancel();
       if (deregisterCancellationListener !== null) {
         deregisterCancellationListener();
       }
@@ -213,6 +230,7 @@ export default function request<T>(
 
     xhr.onload = function onXHRLoad(event : ProgressEvent) {
       if (xhr.readyState === 4) {
+        timeoutCanceller.cancel();
         if (deregisterCancellationListener !== null) {
           deregisterCancellationListener();
         }

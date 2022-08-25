@@ -50,7 +50,7 @@ import {
   IPrioritizedSegmentFetcher,
   IPrioritizedSegmentFetcherEvent,
 } from "../../fetchers";
-import {IBufferType} from "../../segment_buffers";
+import { IBufferType } from "../../segment_buffers";
 import {
   IQueuedSegment,
 } from "../types";
@@ -210,7 +210,10 @@ export default class DownloadingQueue<T> {
           const prevTime = TIME_WITHOUT_REQ[this._content.adaptation.type];
           if ((next.segmentQueue.length > 0 || next.initSegment !== null) &&
             prevTime !== undefined && performance.now() - prevTime >= 10000) {
-            console.error("XXX NO DOWNLOADING QUEUE ANYMORE", next.segmentQueue.length);
+            console.error("XXX NO DOWNLOADING QUEUE ANYMORE",
+              next.segmentQueue.length,
+              this._content.adaptation.type,
+              JSON.stringify(next.segmentQueue[0].segment.mediaURLs));
           }
           const initSegmentRequest = this._initSegmentRequest;
           if (next.initSegment !== null && initSegmentRequest !== null) {
