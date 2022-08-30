@@ -186,7 +186,7 @@ export default class Adaptation {
    */
   getPlayableRepresentations() : Representation[] {
     return this.representations.filter(rep => {
-      return rep.isSupported && rep.decipherable !== false;
+      return rep.isSupported;
     });
   }
 
