@@ -323,8 +323,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    */
   constructor(options : IConstructorOptions = {}) {
     super();
-    const { initialAudioBitrate,
-            initialVideoBitrate,
+    const { baseBandwidth,
             limitVideoWidth,
             minAudioBitrate,
             minVideoBitrate,
@@ -370,8 +369,8 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     };
 
     this._priv_bitrateInfos = {
-      lastBitrates: { audio: initialAudioBitrate,
-                      video: initialVideoBitrate },
+      lastBitrates: { audio: baseBandwidth,
+                      video: baseBandwidth },
       minAutoBitrates: { audio: createSharedReference(minAudioBitrate,
                                                       this._destroyCanceller.signal),
                          video: createSharedReference(minVideoBitrate,
