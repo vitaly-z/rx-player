@@ -82,6 +82,39 @@ export function waitUntilPlayable(
 }
 
 /**
+ * Emit once as soon as enough data is buffered to begin playback.
+ * @param {Observable} observation$
+ * @returns {Observable.<undefined>}
+ */
+export function waitUntilBuffered(
+  observation$ : Observable<IPlaybackObservation>,
+  initialPosition : number
+) : Observable<undefined> {
+  return observation$.pipe(
+    filter(({ buffered }) => {
+      if (buffered.length === 0) {
+        return false;
+      }
+      for (let i = 0; i < buffered.length; i++) {
+        if (buffered.end(i) > initialPosition) {
+          if (buffered.start(i) <= initialPosition &&
+              buffered.end(i) - initialPosition > 2)
+          {
+            return true;
+          } else {
+            log.warn("Init: Data is buffered after the initial seeking position");
+            return true;
+          }
+        }
+      }
+      return false;
+    }),
+    take(1),
+    map(() => undefined)
+  );
+}
+
+/**
  * Try to play content then handle autoplay errors.
  * @param {HTMLMediaElement} mediaElement
  * @returns {Observable}
@@ -147,9 +180,15 @@ export default function initialSeekAndPlay(
 
   const seek$ = whenLoadedMetadata$(mediaElement).pipe(
     take(1),
-    tap(() => {
+    mergeMap(() => {
       const initialTime = typeof startTime === "function" ? startTime() :
                                                             startTime;
+      return waitUntilBuffered(playbackObserver.getReference().asObservable(),
+                               initialTime)
+        .pipe(map(() => initialTime));
+    }),
+    take(1),
+    tap((initialTime) => {
       log.info("Init: Set initial time", initialTime);
       playbackObserver.setCurrentTime(initialTime);
       initialSeekPerformed.setValue(true);
