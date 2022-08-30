@@ -1,5 +1,15 @@
 # Changelog
 
+## v3.28.1-dev.2022083000 (2022-08-30)
+
+### Bug fixes
+
+  - DRM: When using persistent licenses, create new MediaKeySession when `load` resolves with `false`, instead of relying the same, to fix issues with such persistent sessions [#1139]
+
+### Other improvements
+
+  - In the experimental "local" transport, add `incomingRanges` property to signal the time ranges of remaining data, allowing better discontinuity handling and duration estimates for sill-loading dowloaded contents [#1151]
+
 ## v3.28.0 (2022-07-12)
 
 ### Features
