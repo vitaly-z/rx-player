@@ -26,6 +26,7 @@ import {
   startWith,
   take,
   tap,
+  timer,
 } from "rxjs";
 import {
   play,
@@ -147,6 +148,7 @@ export default function initialSeekAndPlay(
 
   const seek$ = whenLoadedMetadata$(mediaElement).pipe(
     take(1),
+    mergeMap(() => timer(1000)),
     tap(() => {
       const initialTime = typeof startTime === "function" ? startTime() :
                                                             startTime;
