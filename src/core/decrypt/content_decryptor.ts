@@ -60,7 +60,6 @@ import InitDataValuesContainer from "./utils/init_data_values_container";
 import {
   areAllKeyIdsContainedIn,
   areKeyIdsEqual,
-  areSomeKeyIdsContainedIn,
   isKeyIdContainedIn,
 } from "./utils/key_id_comparison";
 import KeySessionRecord from "./utils/key_session_record";
@@ -372,29 +371,6 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
         x.source === MediaKeySessionLoadingType.Created);
 
       if (firstCreatedSession !== undefined) {
-        // We already fetched a `singleLicensePer: "content"` license, yet we
-        // could not use the already-created MediaKeySession with it.
-        // It means that we'll never handle it and we should thus blacklist it.
-        const keyIds = initializationData.keyIds;
-        if (keyIds === undefined) {
-          if (initializationData.content === undefined) {
-            log.warn("DRM: Unable to fallback from a non-decipherable quality.");
-          } else {
-            blackListProtectionData(initializationData.content.manifest,
-                                    initializationData);
-          }
-          return ;
-        }
-
-        firstCreatedSession.record.associateKeyIds(keyIds);
-        if (initializationData.content !== undefined) {
-          if (log.hasLevel("DEBUG")) {
-            const hexKids = keyIds
-              .reduce((acc, kid) => `${acc}, ${bytesToHex(kid)}`, "");
-            log.debug("DRM: Blacklisting new key ids", hexKids);
-          }
-          updateDecipherability(initializationData.content.manifest, [], keyIds);
-        }
         return ;
       }
     } else if (options.singleLicensePer === "periods" &&
@@ -423,7 +399,7 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
             }
             updateDecipherability(initializationData.content.manifest,
                                   createdSess.keyStatuses.whitelisted,
-                                  createdSess.keyStatuses.blacklisted);
+                                  []);
             return;
           }
         }
@@ -522,7 +498,7 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
           if (initializationData.content !== undefined) {
             updateDecipherability(initializationData.content.manifest,
                                   linkedKeys.whitelisted,
-                                  linkedKeys.blacklisted);
+                                  []);
           }
 
           this._unlockInitDataQueue();
@@ -590,7 +566,7 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
     initializationData : IProcessedProtectionData,
     mediaKeysData : IAttachedMediaKeysData
   ) : boolean {
-    const { stores, options } = mediaKeysData;
+    const { stores } = mediaKeysData;
 
     /**
      * If set, a currently-used key session is already compatible to this
@@ -624,36 +600,19 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
 
     // Check if the current key id(s) has been blacklisted by this session
     if (initializationData.keyIds !== undefined) {
+      // In any other mode, as soon as not all of this initialization
+      // data's linked key ids are explicitely whitelisted, we can mark
+      // the corresponding Representation as "not decipherable".
+      // This is because we've no such retro-compatibility guarantee to
+      // make there.
+      const { whitelisted } = compatibleSessionInfo.keyStatuses;
+
       /**
        * If set to `true`, the Representation(s) linked to this
        * initialization data's key id should be marked as "not decipherable".
        */
-      let isUndecipherable : boolean;
-
-      if (options.singleLicensePer === undefined ||
-          options.singleLicensePer === "init-data")
-      {
-        // Note: In the default "init-data" mode, we only avoid a
-        // Representation if the key id was originally explicitely
-        // blacklisted (and not e.g. if its key was just not present in
-        // the license).
-        //
-        // This is to enforce v3.x.x retro-compatibility: we cannot
-        // fallback from a Representation unless some RxPlayer option
-        // documentating this behavior has been set.
-        const { blacklisted } = compatibleSessionInfo.keyStatuses;
-        isUndecipherable = areSomeKeyIdsContainedIn(initializationData.keyIds,
-                                                    blacklisted);
-      } else {
-        // In any other mode, as soon as not all of this initialization
-        // data's linked key ids are explicitely whitelisted, we can mark
-        // the corresponding Representation as "not decipherable".
-        // This is because we've no such retro-compatibility guarantee to
-        // make there.
-        const { whitelisted } = compatibleSessionInfo.keyStatuses;
-        isUndecipherable = !areAllKeyIdsContainedIn(initializationData.keyIds,
-                                                    whitelisted);
-      }
+      const isUndecipherable = !areAllKeyIdsContainedIn(initializationData.keyIds,
+                                                        whitelisted);
 
       if (isUndecipherable) {
         if (initializationData.content === undefined) {
