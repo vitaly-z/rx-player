@@ -11,405 +11,6 @@
 return /******/ (function() { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 9591:
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var _typeof = (__webpack_require__(8)["default"]);
-
-function _regeneratorRuntime() {
-  "use strict";
-  /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
-
-  module.exports = _regeneratorRuntime = function _regeneratorRuntime() {
-    return exports;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
-  var exports = {},
-      Op = Object.prototype,
-      hasOwn = Op.hasOwnProperty,
-      $Symbol = "function" == typeof Symbol ? Symbol : {},
-      iteratorSymbol = $Symbol.iterator || "@@iterator",
-      asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator",
-      toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
-
-  function define(obj, key, value) {
-    return Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: !0,
-      configurable: !0,
-      writable: !0
-    }), obj[key];
-  }
-
-  try {
-    define({}, "");
-  } catch (err) {
-    define = function define(obj, key, value) {
-      return obj[key] = value;
-    };
-  }
-
-  function wrap(innerFn, outerFn, self, tryLocsList) {
-    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator,
-        generator = Object.create(protoGenerator.prototype),
-        context = new Context(tryLocsList || []);
-    return generator._invoke = function (innerFn, self, context) {
-      var state = "suspendedStart";
-      return function (method, arg) {
-        if ("executing" === state) throw new Error("Generator is already running");
-
-        if ("completed" === state) {
-          if ("throw" === method) throw arg;
-          return doneResult();
-        }
-
-        for (context.method = method, context.arg = arg;;) {
-          var delegate = context.delegate;
-
-          if (delegate) {
-            var delegateResult = maybeInvokeDelegate(delegate, context);
-
-            if (delegateResult) {
-              if (delegateResult === ContinueSentinel) continue;
-              return delegateResult;
-            }
-          }
-
-          if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) {
-            if ("suspendedStart" === state) throw state = "completed", context.arg;
-            context.dispatchException(context.arg);
-          } else "return" === context.method && context.abrupt("return", context.arg);
-          state = "executing";
-          var record = tryCatch(innerFn, self, context);
-
-          if ("normal" === record.type) {
-            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue;
-            return {
-              value: record.arg,
-              done: context.done
-            };
-          }
-
-          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
-        }
-      };
-    }(innerFn, self, context), generator;
-  }
-
-  function tryCatch(fn, obj, arg) {
-    try {
-      return {
-        type: "normal",
-        arg: fn.call(obj, arg)
-      };
-    } catch (err) {
-      return {
-        type: "throw",
-        arg: err
-      };
-    }
-  }
-
-  exports.wrap = wrap;
-  var ContinueSentinel = {};
-
-  function Generator() {}
-
-  function GeneratorFunction() {}
-
-  function GeneratorFunctionPrototype() {}
-
-  var IteratorPrototype = {};
-  define(IteratorPrototype, iteratorSymbol, function () {
-    return this;
-  });
-  var getProto = Object.getPrototypeOf,
-      NativeIteratorPrototype = getProto && getProto(getProto(values([])));
-  NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
-  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
-
-  function defineIteratorMethods(prototype) {
-    ["next", "throw", "return"].forEach(function (method) {
-      define(prototype, method, function (arg) {
-        return this._invoke(method, arg);
-      });
-    });
-  }
-
-  function AsyncIterator(generator, PromiseImpl) {
-    function invoke(method, arg, resolve, reject) {
-      var record = tryCatch(generator[method], generator, arg);
-
-      if ("throw" !== record.type) {
-        var result = record.arg,
-            value = result.value;
-        return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) {
-          invoke("next", value, resolve, reject);
-        }, function (err) {
-          invoke("throw", err, resolve, reject);
-        }) : PromiseImpl.resolve(value).then(function (unwrapped) {
-          result.value = unwrapped, resolve(result);
-        }, function (error) {
-          return invoke("throw", error, resolve, reject);
-        });
-      }
-
-      reject(record.arg);
-    }
-
-    var previousPromise;
-
-    this._invoke = function (method, arg) {
-      function callInvokeWithMethodAndArg() {
-        return new PromiseImpl(function (resolve, reject) {
-          invoke(method, arg, resolve, reject);
-        });
-      }
-
-      return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
-    };
-  }
-
-  function maybeInvokeDelegate(delegate, context) {
-    var method = delegate.iterator[context.method];
-
-    if (undefined === method) {
-      if (context.delegate = null, "throw" === context.method) {
-        if (delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method)) return ContinueSentinel;
-        context.method = "throw", context.arg = new TypeError("The iterator does not provide a 'throw' method");
-      }
-
-      return ContinueSentinel;
-    }
-
-    var record = tryCatch(method, delegate.iterator, context.arg);
-    if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
-    var info = record.arg;
-    return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
-  }
-
-  function pushTryEntry(locs) {
-    var entry = {
-      tryLoc: locs[0]
-    };
-    1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
-  }
-
-  function resetTryEntry(entry) {
-    var record = entry.completion || {};
-    record.type = "normal", delete record.arg, entry.completion = record;
-  }
-
-  function Context(tryLocsList) {
-    this.tryEntries = [{
-      tryLoc: "root"
-    }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0);
-  }
-
-  function values(iterable) {
-    if (iterable) {
-      var iteratorMethod = iterable[iteratorSymbol];
-      if (iteratorMethod) return iteratorMethod.call(iterable);
-      if ("function" == typeof iterable.next) return iterable;
-
-      if (!isNaN(iterable.length)) {
-        var i = -1,
-            next = function next() {
-          for (; ++i < iterable.length;) {
-            if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next;
-          }
-
-          return next.value = undefined, next.done = !0, next;
-        };
-
-        return next.next = next;
-      }
-    }
-
-    return {
-      next: doneResult
-    };
-  }
-
-  function doneResult() {
-    return {
-      value: undefined,
-      done: !0
-    };
-  }
-
-  return GeneratorFunction.prototype = GeneratorFunctionPrototype, define(Gp, "constructor", GeneratorFunctionPrototype), define(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) {
-    var ctor = "function" == typeof genFun && genFun.constructor;
-    return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
-  }, exports.mark = function (genFun) {
-    return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
-  }, exports.awrap = function (arg) {
-    return {
-      __await: arg
-    };
-  }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
-    return this;
-  }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) {
-    void 0 === PromiseImpl && (PromiseImpl = Promise);
-    var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl);
-    return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) {
-      return result.done ? result.value : iter.next();
-    });
-  }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () {
-    return this;
-  }), define(Gp, "toString", function () {
-    return "[object Generator]";
-  }), exports.keys = function (object) {
-    var keys = [];
-
-    for (var key in object) {
-      keys.push(key);
-    }
-
-    return keys.reverse(), function next() {
-      for (; keys.length;) {
-        var key = keys.pop();
-        if (key in object) return next.value = key, next.done = !1, next;
-      }
-
-      return next.done = !0, next;
-    };
-  }, exports.values = values, Context.prototype = {
-    constructor: Context,
-    reset: function reset(skipTempReset) {
-      if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) {
-        "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined);
-      }
-    },
-    stop: function stop() {
-      this.done = !0;
-      var rootRecord = this.tryEntries[0].completion;
-      if ("throw" === rootRecord.type) throw rootRecord.arg;
-      return this.rval;
-    },
-    dispatchException: function dispatchException(exception) {
-      if (this.done) throw exception;
-      var context = this;
-
-      function handle(loc, caught) {
-        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught;
-      }
-
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i],
-            record = entry.completion;
-        if ("root" === entry.tryLoc) return handle("end");
-
-        if (entry.tryLoc <= this.prev) {
-          var hasCatch = hasOwn.call(entry, "catchLoc"),
-              hasFinally = hasOwn.call(entry, "finallyLoc");
-
-          if (hasCatch && hasFinally) {
-            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
-            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
-          } else if (hasCatch) {
-            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
-          } else {
-            if (!hasFinally) throw new Error("try statement without catch or finally");
-            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
-          }
-        }
-      }
-    },
-    abrupt: function abrupt(type, arg) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-
-        if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
-          var finallyEntry = entry;
-          break;
-        }
-      }
-
-      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
-      var record = finallyEntry ? finallyEntry.completion : {};
-      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
-    },
-    complete: function complete(record, afterLoc) {
-      if ("throw" === record.type) throw record.arg;
-      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
-    },
-    finish: function finish(finallyLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
-      }
-    },
-    "catch": function _catch(tryLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-
-        if (entry.tryLoc === tryLoc) {
-          var record = entry.completion;
-
-          if ("throw" === record.type) {
-            var thrown = record.arg;
-            resetTryEntry(entry);
-          }
-
-          return thrown;
-        }
-      }
-
-      throw new Error("illegal catch attempt");
-    },
-    delegateYield: function delegateYield(iterable, resultName, nextLoc) {
-      return this.delegate = {
-        iterator: values(iterable),
-        resultName: resultName,
-        nextLoc: nextLoc
-      }, "next" === this.method && (this.arg = undefined), ContinueSentinel;
-    }
-  }, exports;
-}
-
-module.exports = _regeneratorRuntime, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 8:
-/***/ (function(module) {
-
-function _typeof(obj) {
-  "@babel/helpers - typeof";
-
-  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
-    return typeof obj;
-  } : function (obj) {
-    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(obj);
-}
-
-module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 7757:
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-// TODO(Babel 8): Remove this file.
-
-var runtime = __webpack_require__(9591)();
-module.exports = runtime;
-
-// Copied from https://github.com/facebook/regenerator/blob/main/packages/runtime/runtime.js#L736=
-try {
-  regeneratorRuntime = runtime;
-} catch (accidentalStrictMode) {
-  if (typeof globalThis === "object") {
-    globalThis.regeneratorRuntime = runtime;
-  } else {
-    Function("r", "regeneratorRuntime = r")(runtime);
-  }
-}
-
-
-/***/ }),
-
 /***/ 3774:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
@@ -659,18 +260,6 @@ var CustomMediaKeySystemAccess = /*#__PURE__*/function () {
 }();
 
 
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inheritsLoose.js
-var inheritsLoose = __webpack_require__(4578);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Subject.js + 1 modules
-var Subject = __webpack_require__(6716);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
-var merge = __webpack_require__(3071);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/takeUntil.js
-var takeUntil = __webpack_require__(3505);
-// EXTERNAL MODULE: ./src/utils/event_emitter.ts
-var event_emitter = __webpack_require__(1959);
-// EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
-var event_listeners = __webpack_require__(1381);
 ;// CONCATENATED MODULE: ./src/compat/eme/custom_media_keys/ms_media_keys_constructor.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -704,6 +293,18 @@ if (!is_node/* default */.Z) {
 }
 
 
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inheritsLoose.js
+var inheritsLoose = __webpack_require__(4578);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Subject.js + 1 modules
+var Subject = __webpack_require__(6716);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
+var merge = __webpack_require__(3071);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/takeUntil.js
+var takeUntil = __webpack_require__(3505);
+// EXTERNAL MODULE: ./src/utils/event_emitter.ts
+var event_emitter = __webpack_require__(1959);
+// EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
+var event_listeners = __webpack_require__(1381);
 ;// CONCATENATED MODULE: ./src/compat/eme/custom_media_keys/ie11_media_keys.ts
 
 
@@ -1813,6 +1414,8 @@ __webpack_require__.d(__webpack_exports__, {
 
 // UNUSED EXPORTS: addEventListener, onTimeUpdate$
 
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/fromEvent.js
+var fromEvent = __webpack_require__(2401);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
 var Observable = __webpack_require__(1480);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/noop.js
@@ -1825,8 +1428,6 @@ function never() {
     return NEVER;
 }
 //# sourceMappingURL=never.js.map
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/fromEvent.js
-var fromEvent = __webpack_require__(2401);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
 var merge = __webpack_require__(3071);
 // EXTERNAL MODULE: ./src/config.ts + 2 modules
@@ -3788,18 +3389,18 @@ function deepMerge(target) {
   if (isObject(target) && isObject(source)) {
     for (var key in source) {
       if (isObject(source[key])) {
-        if (target[key] === undefined) {
-          var _objectAssign;
+        var newTarget = target[key];
 
-          (0,object_assign/* default */.Z)(target, (_objectAssign = {}, _objectAssign[key] = {}, _objectAssign));
+        if (newTarget === undefined) {
+          newTarget = {};
+          target[key] = newTarget;
         }
 
-        var newTarget = target[key];
         deepMerge(newTarget, source[key]);
       } else {
-        var _objectAssign2;
+        var _objectAssign;
 
-        (0,object_assign/* default */.Z)(target, (_objectAssign2 = {}, _objectAssign2[key] = source[key], _objectAssign2));
+        (0,object_assign/* default */.Z)(target, (_objectAssign = {}, _objectAssign[key] = source[key], _objectAssign));
       }
     }
   }
@@ -4895,8 +4496,10 @@ var asyncToGenerator = __webpack_require__(5861);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inheritsLoose.js
 var inheritsLoose = __webpack_require__(4578);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(7757);
+var regenerator = __webpack_require__(4687);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
+// EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
+var event_listeners = __webpack_require__(1381);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
 // EXTERNAL MODULE: ./src/parsers/containers/isobmff/take_pssh_out.ts + 1 modules
@@ -5066,8 +4669,6 @@ function getInitData(encryptedEvent) {
     values: values
   };
 }
-// EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
-var event_listeners = __webpack_require__(1381);
 // EXTERNAL MODULE: ./src/config.ts + 2 modules
 var config = __webpack_require__(6872);
 // EXTERNAL MODULE: ./src/errors/encrypted_media_error.ts
@@ -5324,7 +4925,7 @@ function createAndTryToRetrievePersistentSession(_x, _x2, _x3, _x4) {
 
 function _createAndTryToRetrievePersistentSession() {
   _createAndTryToRetrievePersistentSession = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee2(loadedSessionsStore, persistentSessionsStore, initData, cancelSignal) {
-    var entry, storedEntry, hasLoadedSession, recreatePersistentSession, _recreatePersistentSession;
+    var entry, storedEntry, hasLoadedSession, newEntry, recreatePersistentSession, _recreatePersistentSession;
 
     return regenerator_default().wrap(function _callee2$(_context2) {
       while (1) {
@@ -5352,18 +4953,37 @@ function _createAndTryToRetrievePersistentSession() {
                           persistentSessionsStore["delete"](persistentEntry.sessionId);
                         }
 
-                        _context.next = 7;
+                        _context.prev = 5;
+                        _context.next = 8;
                         return loadedSessionsStore.closeSession(entry.mediaKeySession);
 
-                      case 7:
+                      case 8:
+                        _context.next = 15;
+                        break;
+
+                      case 10:
+                        _context.prev = 10;
+                        _context.t0 = _context["catch"](5);
+
+                        if (!(entry.mediaKeySession.sessionId !== "")) {
+                          _context.next = 14;
+                          break;
+                        }
+
+                        throw _context.t0;
+
+                      case 14:
+                        loadedSessionsStore.removeSessionWithoutClosingIt(entry.mediaKeySession);
+
+                      case 15:
                         if (!(cancelSignal.cancellationError !== null)) {
-                          _context.next = 9;
+                          _context.next = 17;
                           break;
                         }
 
                         throw cancelSignal.cancellationError;
 
-                      case 9:
+                      case 17:
                         newEntry = loadedSessionsStore.createSession(initData, "persistent-license");
                         return _context.abrupt("return", {
                           type: "created-session"
@@ -5372,12 +4992,12 @@ function _createAndTryToRetrievePersistentSession() {
                           value: newEntry
                         });
 
-                      case 11:
+                      case 19:
                       case "end":
                         return _context.stop();
                     }
                   }
-                }, _callee);
+                }, _callee, null, [[5, 10]]);
               }));
               return _recreatePersistentSession.apply(this, arguments);
             };
@@ -5419,22 +5039,30 @@ function _createAndTryToRetrievePersistentSession() {
             hasLoadedSession = _context2.sent;
 
             if (hasLoadedSession) {
-              _context2.next = 17;
+              _context2.next = 19;
               break;
             }
 
             log/* default.warn */.Z.warn("DRM: No data stored for the loaded session");
-            persistentSessionsStore["delete"](storedEntry.sessionId);
+            persistentSessionsStore["delete"](storedEntry.sessionId); // The EME specification is kind of implicit about it but it seems from my
+            // understanding (Paul B.) that a MediaKeySession on wich a `load` attempt
+            // did not succeed due to the loaded session not being found by the
+            // browser/CDM, should neither be used anymore nor closed.
+            // Thus, we're creating another `"persistent-license"` `MediaKeySession`
+            // in that specific case.
+
+            loadedSessionsStore.removeSessionWithoutClosingIt(entry.mediaKeySession);
+            newEntry = loadedSessionsStore.createSession(initData, "persistent-license");
             return _context2.abrupt("return", {
               type: "created-session"
               /* MediaKeySessionLoadingType.Created */
               ,
-              value: entry
+              value: newEntry
             });
 
-          case 17:
+          case 19:
             if (!(hasLoadedSession && isSessionUsable(entry.mediaKeySession))) {
-              _context2.next = 21;
+              _context2.next = 23;
               break;
             }
 
@@ -5447,23 +5075,23 @@ function _createAndTryToRetrievePersistentSession() {
               value: entry
             });
 
-          case 21:
+          case 23:
             // Unusable persistent session: recreate a new session from scratch.
             log/* default.warn */.Z.warn("DRM: Previous persistent session not usable anymore.");
             return _context2.abrupt("return", recreatePersistentSession());
 
-          case 25:
-            _context2.prev = 25;
+          case 27:
+            _context2.prev = 27;
             _context2.t0 = _context2["catch"](9);
             log/* default.warn */.Z.warn("DRM: Unable to load persistent session: " + (_context2.t0 instanceof Error ? _context2.t0.toString() : "Unknown Error"));
             return _context2.abrupt("return", recreatePersistentSession());
 
-          case 29:
+          case 31:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[9, 25]]);
+    }, _callee2, null, [[9, 27]]);
   }));
   return _createAndTryToRetrievePersistentSession.apply(this, arguments);
 }
@@ -6221,15 +5849,14 @@ var EME_WAITING_DELAY_LOADED_SESSION_EMPTY_KEYSTATUSES = 100;
  * Load a persistent session, based on its `sessionId`, on the given
  * MediaKeySession.
  *
- * Returns an Observable which emits:
- *   - true if the persistent MediaKeySession was found and loaded
- *   - false if no persistent MediaKeySession was found with that `sessionId`.
- * Then completes.
+ * Returns a Promise which resolves with:
+ *   - `true` if the persistent MediaKeySession was found and loaded
+ *   - `false` if no persistent MediaKeySession was found with that `sessionId`.
  *
- * The Observable throws if anything goes wrong in the process.
+ * The Promise rejects if anything goes wrong in the process.
  * @param {MediaKeySession} session
  * @param {string} sessionId
- * @returns {Observable}
+ * @returns {Promise.<boolean>}
  */
 
 function loadSession(_x, _x2) {
@@ -6459,6 +6086,8 @@ function closeSession(session) {
     return _tryUpdatingSession.apply(this, arguments);
   }
 }
+// EXTERNAL MODULE: ./src/utils/assert.ts
+var assert = __webpack_require__(811);
 ;// CONCATENATED MODULE: ./src/core/decrypt/utils/key_id_comparison.ts
 function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
@@ -6774,6 +6403,7 @@ function loaded_sessions_store_arrayLikeToArray(arr, len) { if (len == null || l
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 
@@ -7267,6 +6897,36 @@ var LoadedSessionsStore = /*#__PURE__*/function () {
     return closeAllSessions;
   }()
   /**
+   * Find the given `MediaKeySession` in the `LoadedSessionsStore` and removes
+   * any reference to it without actually closing it.
+   *
+   * Returns `true` if the given `mediaKeySession` has been found and removed,
+   * `false` otherwise.
+   *
+   * Note that this may create a `MediaKeySession` leakage in the wrong
+   * conditions, cases where this method should be called should be very
+   * carefully evaluated.
+   * @param {MediaKeySession} mediaKeySession
+   * @returns {boolean}
+   */
+  ;
+
+  _proto.removeSessionWithoutClosingIt = function removeSessionWithoutClosingIt(mediaKeySession) {
+    (0,assert/* default */.Z)(mediaKeySession.sessionId === "", "Initialized `MediaKeySession`s should always be properly closed");
+
+    for (var i = this._storage.length - 1; i >= 0; i--) {
+      var stored = this._storage[i];
+
+      if (stored.mediaKeySession === mediaKeySession) {
+        this._storage.splice(i, 1);
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+  /**
    * Get the index of a stored MediaKeySession entry based on its
    * `KeySessionRecord`.
    * Returns -1 if not found.
@@ -7404,8 +7064,6 @@ function _safelyCloseMediaKeySession() {
   }));
   return _safelyCloseMediaKeySession.apply(this, arguments);
 }
-// EXTERNAL MODULE: ./src/utils/assert.ts
-var assert = __webpack_require__(811);
 // EXTERNAL MODULE: ./src/utils/base64.ts
 var utils_base64 = __webpack_require__(9689);
 // EXTERNAL MODULE: ./src/utils/hash_buffer.ts
@@ -11164,12 +10822,12 @@ var switchMap = __webpack_require__(4978);
 var of = __webpack_require__(2817);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
 var merge = __webpack_require__(3071);
+// EXTERNAL MODULE: ./src/compat/clear_element_src.ts
+var clear_element_src = __webpack_require__(5767);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
 var Observable = __webpack_require__(1480);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
-// EXTERNAL MODULE: ./src/compat/clear_element_src.ts
-var clear_element_src = __webpack_require__(5767);
 ;// CONCATENATED MODULE: ./src/compat/set_element_src.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -11397,6 +11055,8 @@ var merge = __webpack_require__(3071);
 var map = __webpack_require__(9127);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
 var Observable = __webpack_require__(1480);
+// EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
+var event_listeners = __webpack_require__(1381);
 // EXTERNAL MODULE: ./src/compat/eme/custom_media_keys/index.ts + 7 modules
 var custom_media_keys = __webpack_require__(6139);
 ;// CONCATENATED MODULE: ./src/compat/has_eme_apis.ts
@@ -11425,8 +11085,6 @@ var custom_media_keys = __webpack_require__(6139);
 function hasEMEAPIs() {
   return typeof custom_media_keys/* requestMediaKeySystemAccess */.N === "function";
 }
-// EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
-var event_listeners = __webpack_require__(1381);
 // EXTERNAL MODULE: ./src/errors/encrypted_media_error.ts
 var encrypted_media_error = __webpack_require__(5157);
 // EXTERNAL MODULE: ./src/features/index.ts
@@ -15753,7 +15411,6 @@ var EncryptedMediaError = /*#__PURE__*/function (_Error) {
   /**
    * @param {string} code
    * @param {string} reason
-   * @Param {Boolean} fatal
    */
   function EncryptedMediaError(code, reason) {
     var _this;
@@ -16030,7 +15687,6 @@ var MediaError = /*#__PURE__*/function (_Error) {
   /**
    * @param {string} code
    * @param {string} reason
-   * @param {Boolean} fatal
    */
   function MediaError(code, reason) {
     var _this;
@@ -16099,7 +15755,6 @@ var NetworkError = /*#__PURE__*/function (_Error) {
   /**
    * @param {string} code
    * @param {Error} baseError
-   * @param {Boolean} fatal
    */
   function NetworkError(code, baseError) {
     var _this;
@@ -16182,7 +15837,6 @@ var OtherError = /*#__PURE__*/function (_Error) {
   /**
    * @param {string} code
    * @param {string} reason
-   * @param {Boolean} fatal
    */
   function OtherError(code, reason) {
     var _this;
@@ -17318,6 +16972,7 @@ var StaticRepresentationIndex = /*#__PURE__*/function () {
       end: Number.MAX_VALUE,
       duration: Number.MAX_VALUE,
       complete: true,
+      privateInfos: {},
       timescale: 1
     }];
   }
@@ -17327,7 +16982,7 @@ var StaticRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getFirstPosition = function getFirstPosition() {
+  _proto.getFirstAvailablePosition = function getFirstAvailablePosition() {
     return;
   }
   /**
@@ -17336,8 +16991,35 @@ var StaticRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getLastPosition = function getLastPosition() {
+  _proto.getLastAvailablePosition = function getLastAvailablePosition() {
     return;
+  }
+  /**
+   * Returns the absolute end in seconds this RepresentationIndex can reach once
+   * all segments are available.
+   * @returns {number|null|undefined}
+   */
+  ;
+
+  _proto.getEnd = function getEnd() {
+    return;
+  }
+  /**
+   * Returns:
+   *   - `true` if in the given time interval, at least one new segment is
+   *     expected to be available in the future.
+   *   - `false` either if all segments in that time interval are already
+   *     available for download or if none will ever be available for it.
+   *   - `undefined` when it is not possible to tell.
+   *
+   * Always `false` in a `StaticRepresentationIndex` because all segments should
+   * be directly available.
+   * @returns {boolean}
+   */
+  ;
+
+  _proto.awaitSegmentBetween = function awaitSegmentBetween() {
+    return false;
   }
   /**
    * Returns false as a static file never need to be refreshed.
@@ -17355,14 +17037,6 @@ var StaticRepresentationIndex = /*#__PURE__*/function () {
 
   _proto.checkDiscontinuity = function checkDiscontinuity() {
     return null;
-  }
-  /**
-   * @returns {boolean}
-   */
-  ;
-
-  _proto.areSegmentsChronologicallyGenerated = function areSegmentsChronologicallyGenerated() {
-    return true;
   }
   /**
    * Returns true as a static file should never need lose availability.
@@ -17951,7 +17625,7 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
    * and mark them as being impossible to decrypt.
    * Then trigger a "decipherabilityUpdate" event to notify everyone of the
    * changes performed.
-   * @param {Object} keyUpdates
+   * @param {Function} isDecipherableCb
    */
   ;
 
@@ -19831,7 +19505,7 @@ var BaseRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getFirstPosition = function getFirstPosition() {
+  _proto.getFirstAvailablePosition = function getFirstAvailablePosition() {
     var index = this._index;
 
     if (index.timeline.length === 0) {
@@ -19846,7 +19520,7 @@ var BaseRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getLastPosition = function getLastPosition() {
+  _proto.getLastAvailablePosition = function getLastAvailablePosition() {
     var _a;
 
     var timeline = this._index.timeline;
@@ -19858,6 +19532,33 @@ var BaseRepresentationIndex = /*#__PURE__*/function () {
     var lastTimelineElement = timeline[timeline.length - 1];
     var lastTime = Math.min((0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__/* .getIndexSegmentEnd */ .jH)(lastTimelineElement, null, this._scaledPeriodEnd), (_a = this._scaledPeriodEnd) !== null && _a !== void 0 ? _a : Infinity);
     return (0,_utils_index_helpers__WEBPACK_IMPORTED_MODULE_1__/* .fromIndexTime */ .zG)(lastTime, this._index);
+  }
+  /**
+   * Returns the absolute end in seconds this RepresentationIndex can reach once
+   * all segments are available.
+   * @returns {number|null|undefined}
+   */
+  ;
+
+  _proto.getEnd = function getEnd() {
+    return this.getLastAvailablePosition();
+  }
+  /**
+   * Returns:
+   *   - `true` if in the given time interval, at least one new segment is
+   *     expected to be available in the future.
+   *   - `false` either if all segments in that time interval are already
+   *     available for download or if none will ever be available for it.
+   *   - `undefined` when it is not possible to tell.
+   *
+   * Always `false` in a `BaseRepresentationIndex` because all segments should
+   * be directly available.
+   * @returns {boolean}
+   */
+  ;
+
+  _proto.awaitSegmentBetween = function awaitSegmentBetween() {
+    return false;
   }
   /**
    * Segments in a segmentBase scheme should stay available.
@@ -19876,16 +19577,6 @@ var BaseRepresentationIndex = /*#__PURE__*/function () {
 
   _proto.checkDiscontinuity = function checkDiscontinuity() {
     return null;
-  }
-  /**
-   * `BaseRepresentationIndex` should just already all be generated.
-   * Return `true` as a default value here.
-   * @returns {boolean}
-   */
-  ;
-
-  _proto.areSegmentsChronologicallyGenerated = function areSegmentsChronologicallyGenerated() {
-    return true;
   }
   /**
    * No segment in a `BaseRepresentationIndex` are known initially.
@@ -20282,7 +19973,7 @@ function createDashUrlDetokenizer(time, nb) {
 
 /***/ }),
 
-/***/ 4846:
+/***/ 4541:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -20406,7 +20097,7 @@ function getLastPositionFromAdaptation(adaptation) {
   var min = null;
 
   for (var i = 0; i < representations.length; i++) {
-    var lastPosition = representations[i].index.getLastPosition();
+    var lastPosition = representations[i].index.getLastAvailablePosition();
 
     if (lastPosition === undefined) {
       // we cannot tell
@@ -20553,7 +20244,7 @@ function getFirstPositionFromAdaptation(adaptation) {
   var max = null;
 
   for (var i = 0; i < representations.length; i++) {
-    var firstPosition = representations[i].index.getFirstPosition();
+    var firstPosition = representations[i].index.getFirstAvailablePosition();
 
     if (firstPosition === undefined) {
       // we cannot tell
@@ -21367,7 +21058,7 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
   }
   /**
    * @param {Number} fromTime
-   * @param {Number} duration
+   * @param {Number} dur
    * @returns {Array.<Object>}
    */
   ;
@@ -21435,7 +21126,7 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getFirstPosition = function getFirstPosition() {
+  _proto.getFirstAvailablePosition = function getFirstAvailablePosition() {
     return this._periodStart;
   }
   /**
@@ -21444,7 +21135,7 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getLastPosition = function getLastPosition() {
+  _proto.getLastAvailablePosition = function getLastAvailablePosition() {
     var _a;
 
     var index = this._index;
@@ -21453,9 +21144,35 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
     return Math.min(list.length * duration / index.timescale + this._periodStart, (_a = this._periodEnd) !== null && _a !== void 0 ? _a : Infinity);
   }
   /**
+   * Returns the absolute end in seconds this RepresentationIndex can reach once
+   * all segments are available.
+   * @returns {number|null|undefined}
+   */
+  ;
+
+  _proto.getEnd = function getEnd() {
+    return this.getLastAvailablePosition();
+  }
+  /**
+   * Returns:
+   *   - `true` if in the given time interval, at least one new segment is
+   *     expected to be available in the future.
+   *   - `false` either if all segments in that time interval are already
+   *     available for download or if none will ever be available for it.
+   *   - `undefined` when it is not possible to tell.
+   *
+   * Always `false` in a `ListRepresentationIndex` because all segments should
+   * be directly available.
+   * @returns {boolean}
+   */
+  ;
+
+  _proto.awaitSegmentBetween = function awaitSegmentBetween() {
+    return false;
+  }
+  /**
    * Returns true if a Segment returned by this index is still considered
    * available.
-   * @param {Object} segment
    * @returns {Boolean}
    */
   ;
@@ -21471,14 +21188,6 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
 
   _proto.checkDiscontinuity = function checkDiscontinuity() {
     return null;
-  }
-  /**
-   * @returns {boolean}
-   */
-  ;
-
-  _proto.areSegmentsChronologicallyGenerated = function areSegmentsChronologicallyGenerated() {
-    return true;
   }
   /**
    * SegmentList should not be updated.
@@ -21512,11 +21221,7 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
 
   _proto._replace = function _replace(newIndex) {
     this._index = newIndex._index;
-  }
-  /**
-   * @param {Object} newIndex
-   */
-  ;
+  };
 
   _proto._update = function _update() {
     log/* default.error */.Z.error("List RepresentationIndex: Cannot update a SegmentList");
@@ -21528,6 +21233,8 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
 
 // EXTERNAL MODULE: ./src/errors/network_error.ts
 var network_error = __webpack_require__(9362);
+// EXTERNAL MODULE: ./src/utils/assert.ts
+var assert = __webpack_require__(811);
 // EXTERNAL MODULE: ./src/parsers/manifest/utils/clear_timeline_from_position.ts
 var clear_timeline_from_position = __webpack_require__(8232);
 // EXTERNAL MODULE: ./src/parsers/manifest/utils/is_segment_still_available.ts
@@ -21536,7 +21243,7 @@ var is_segment_still_available = __webpack_require__(1091);
 var update_segment_timeline = __webpack_require__(5505);
 // EXTERNAL MODULE: ./src/parsers/manifest/dash/common/indexes/get_segments_from_timeline.ts
 var get_segments_from_timeline = __webpack_require__(6394);
-;// CONCATENATED MODULE: ./src/parsers/manifest/dash/common/indexes/is_period_fulfilled.ts
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/common/indexes/utils.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -21557,18 +21264,14 @@ var get_segments_from_timeline = __webpack_require__(6394);
  * In Javascript, numbers are encoded in a way that a floating number may be
  * represented internally with a rounding error.
  *
- * As the period end is the result of a multiplication between a floating or integer
- * number (period end * timescale), this function takes into account the potential
- * rounding error to tell if the period is fulfilled with content.
+ * This function returns a small number allowing to accound for rounding many
+ * rounding errors.
  * @param {number} timescale
- * @param {number} lastSegmentEnd
- * @param {number} periodEnd
  * @returns {boolean}
  */
 
-function isPeriodFulfilled(timescale, lastSegmentEnd, periodEnd) {
-  var scaledRoundingError = config/* default.getCurrent */.Z.getCurrent().DEFAULT_MAXIMUM_TIME_ROUNDING_ERROR * timescale;
-  return lastSegmentEnd + scaledRoundingError >= periodEnd;
+function getSegmentTimeRoundingError(timescale) {
+  return config/* default.getCurrent */.Z.getCurrent().DEFAULT_MAXIMUM_TIME_ROUNDING_ERROR * timescale;
 }
 ;// CONCATENATED MODULE: ./src/parsers/manifest/dash/common/indexes/timeline/convert_element_to_index_segment.ts
 /**
@@ -22021,6 +21724,7 @@ function constructTimelineFromPreviousTimeline(newElements, prevTimeline) {
 
 
 
+
  // eslint-disable-next-line max-len
 
 
@@ -22147,7 +21851,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getFirstPosition = function getFirstPosition() {
+  _proto.getFirstAvailablePosition = function getFirstAvailablePosition() {
     this._refreshTimeline();
 
     if (this._index.timeline === null) {
@@ -22165,7 +21869,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getLastPosition = function getLastPosition() {
+  _proto.getLastAvailablePosition = function getLastAvailablePosition() {
     this._refreshTimeline();
 
     if (this._index.timeline === null) {
@@ -22174,6 +21878,72 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
 
     var lastTime = TimelineRepresentationIndex.getIndexEnd(this._index.timeline, this._scaledPeriodEnd);
     return lastTime === null ? null : (0,index_helpers/* fromIndexTime */.zG)(lastTime, this._index);
+  }
+  /**
+   * Returns the absolute end in seconds this RepresentationIndex can reach once
+   * all segments are available.
+   * @returns {number|null|undefined}
+   */
+  ;
+
+  _proto.getEnd = function getEnd() {
+    if (!this._isDynamic || !this._isLastPeriod) {
+      // @see isFinished
+      return this.getLastAvailablePosition();
+    }
+
+    return undefined;
+  }
+  /**
+   * Returns:
+   *   - `true` if in the given time interval, at least one new segment is
+   *     expected to be available in the future.
+   *   - `false` either if all segments in that time interval are already
+   *     available for download or if none will ever be available for it.
+   *   - `undefined` when it is not possible to tell.
+   * @param {number} start
+   * @param {number} end
+   * @returns {boolean|undefined}
+   */
+  ;
+
+  _proto.awaitSegmentBetween = function awaitSegmentBetween(start, end) {
+    var _a;
+
+    (0,assert/* default */.Z)(start <= end);
+
+    if (!this._isDynamic || !this._isLastPeriod) {
+      return false;
+    }
+
+    this._refreshTimeline();
+
+    if (this._index.timeline === null) {
+      this._index.timeline = this._getTimeline();
+    }
+
+    var _this$_index2 = this._index,
+        timeline = _this$_index2.timeline,
+        timescale = _this$_index2.timescale;
+    var segmentTimeRounding = getSegmentTimeRoundingError(timescale);
+    var scaledEnd = (0,index_helpers/* toIndexTime */.gT)(end, this._index);
+
+    if (timeline.length > 0) {
+      var lastTimelineElement = timeline[timeline.length - 1];
+      var lastSegmentEnd = (0,index_helpers/* getIndexSegmentEnd */.jH)(lastTimelineElement, null, this._scaledPeriodEnd);
+      var roundedEnd = lastSegmentEnd + segmentTimeRounding;
+
+      if (roundedEnd >= Math.min(scaledEnd, (_a = this._scaledPeriodEnd) !== null && _a !== void 0 ? _a : Infinity)) {
+        return false; // already loaded
+      }
+    }
+
+    if (this._scaledPeriodEnd === undefined) {
+      return scaledEnd + segmentTimeRounding > this._scaledPeriodStart ? undefined : false;
+    }
+
+    var scaledStart = (0,index_helpers/* toIndexTime */.gT)(start, this._index);
+    return scaledStart - segmentTimeRounding < this._scaledPeriodEnd && scaledEnd + segmentTimeRounding > this._scaledPeriodStart;
   }
   /**
    * Returns true if a Segment returned by this index is still considered
@@ -22196,10 +21966,10 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
       this._index.timeline = this._getTimeline();
     }
 
-    var _this$_index2 = this._index,
-        timeline = _this$_index2.timeline,
-        timescale = _this$_index2.timescale,
-        indexTimeOffset = _this$_index2.indexTimeOffset;
+    var _this$_index3 = this._index,
+        timeline = _this$_index3.timeline,
+        timescale = _this$_index3.timescale,
+        indexTimeOffset = _this$_index3.indexTimeOffset;
     return (0,is_segment_still_available/* default */.Z)(segment, timeline, timescale, indexTimeOffset);
   }
   /**
@@ -22240,10 +22010,6 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
     }
 
     return error instanceof network_error/* default */.Z && error.isHttpError(404);
-  };
-
-  _proto.areSegmentsChronologicallyGenerated = function areSegmentsChronologicallyGenerated() {
-    return true;
   }
   /**
    * Replace this RepresentationIndex with one from a new version of the
@@ -22321,7 +22087,8 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
 
     var lastTimelineElement = timeline[timeline.length - 1];
     var lastTime = (0,index_helpers/* getIndexSegmentEnd */.jH)(lastTimelineElement, null, this._scaledPeriodEnd);
-    return isPeriodFulfilled(this._index.timescale, lastTime, this._scaledPeriodEnd);
+    var segmentTimeRounding = getSegmentTimeRoundingError(this._index.timescale);
+    return lastTime + segmentTimeRounding >= this._scaledPeriodEnd;
   }
   /**
    * @returns {Boolean}
@@ -22481,6 +22248,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
 
 
 
+
 /**
  * IRepresentationIndex implementation for DASH' SegmentTemplate without a
  * SegmentTimeline.
@@ -22538,7 +22306,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
     };
     this._isDynamic = isDynamic;
     this._periodStart = periodStart;
-    this._scaledPeriodEnd = periodEnd === undefined ? undefined : (periodEnd - periodStart) * timescale;
+    this._scaledRelativePeriodEnd = periodEnd === undefined ? undefined : (periodEnd - periodStart) * timescale;
     this._isEMSGWhitelisted = isEMSGWhitelisted;
   }
   /**
@@ -22566,7 +22334,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
         timescale = index.timescale,
         mediaURLs = index.mediaURLs;
     var scaledStart = this._periodStart * timescale;
-    var scaledEnd = this._scaledPeriodEnd; // Convert the asked position to the right timescales, and consider them
+    var scaledEnd = this._scaledRelativePeriodEnd; // Convert the asked position to the right timescales, and consider them
     // relatively to the Period's start.
 
     var upFromPeriodStart = fromTime * timescale - scaledStart;
@@ -22629,7 +22397,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getFirstPosition = function getFirstPosition() {
+  _proto.getFirstAvailablePosition = function getFirstAvailablePosition() {
     var firstSegmentStart = this._getFirstSegmentStart();
 
     if (firstSegmentStart == null) {
@@ -22644,20 +22412,74 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getLastPosition = function getLastPosition() {
+  _proto.getLastAvailablePosition = function getLastAvailablePosition() {
     var _a;
 
     var lastSegmentStart = this._getLastSegmentStart();
 
     if (lastSegmentStart == null) {
-      // In that case (null or undefined), getLastPosition should reflect
+      // In that case (null or undefined), getLastAvailablePosition should reflect
       // the result of getLastSegmentStart, as the meaning is the same for
       // the two functions. So, we return the result of the latter.
       return lastSegmentStart;
     }
 
-    var lastSegmentEnd = Math.min(lastSegmentStart + this._index.duration, (_a = this._scaledPeriodEnd) !== null && _a !== void 0 ? _a : Infinity);
+    var lastSegmentEnd = Math.min(lastSegmentStart + this._index.duration, (_a = this._scaledRelativePeriodEnd) !== null && _a !== void 0 ? _a : Infinity);
     return lastSegmentEnd / this._index.timescale + this._periodStart;
+  }
+  /**
+   * Returns the absolute end in seconds this RepresentationIndex can reach once
+   * all segments are available.
+   * @returns {number|null|undefined}
+   */
+  ;
+
+  _proto.getEnd = function getEnd() {
+    if (!this._isDynamic) {
+      return this.getLastAvailablePosition();
+    }
+
+    if (this._scaledRelativePeriodEnd === undefined) {
+      return undefined;
+    }
+
+    var timescale = this._index.timescale;
+    var absoluteScaledPeriodEnd = this._scaledRelativePeriodEnd + this._periodStart * timescale;
+    return absoluteScaledPeriodEnd / this._index.timescale;
+  }
+  /**
+   * Returns:
+   *   - `true` if in the given time interval, at least one new segment is
+   *     expected to be available in the future.
+   *   - `false` either if all segments in that time interval are already
+   *     available for download or if none will ever be available for it.
+   *   - `undefined` when it is not possible to tell.
+   *
+   * Always `false` in a `BaseRepresentationIndex` because all segments should
+   * be directly available.
+   * @returns {boolean}
+   */
+  ;
+
+  _proto.awaitSegmentBetween = function awaitSegmentBetween(start, end) {
+    (0,assert/* default */.Z)(start <= end);
+
+    if (!this._isDynamic) {
+      return false;
+    }
+
+    var timescale = this._index.timescale;
+    var segmentTimeRounding = getSegmentTimeRoundingError(timescale);
+    var scaledPeriodStart = this._periodStart * timescale;
+    var scaledRelativeEnd = end * timescale - scaledPeriodStart;
+
+    if (this._scaledRelativePeriodEnd === undefined) {
+      return scaledRelativeEnd + segmentTimeRounding >= 0;
+    }
+
+    var scaledRelativePeriodEnd = this._scaledRelativePeriodEnd;
+    var scaledRelativeStart = start * timescale - scaledPeriodStart;
+    return scaledRelativeStart - segmentTimeRounding < scaledRelativePeriodEnd && scaledRelativeEnd + segmentTimeRounding >= 0;
   }
   /**
    * Returns true if, based on the arguments, the index should be refreshed.
@@ -22677,14 +22499,6 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
 
   _proto.checkDiscontinuity = function checkDiscontinuity() {
     return null;
-  }
-  /**
-   * @returns {Boolean}
-   */
-  ;
-
-  _proto.areSegmentsChronologicallyGenerated = function areSegmentsChronologicallyGenerated() {
-    return true;
   }
   /**
    * Returns `true` if the given segment should still be available as of now
@@ -22728,7 +22542,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
       return true;
     }
 
-    if (this._scaledPeriodEnd === undefined) {
+    if (this._scaledRelativePeriodEnd === undefined) {
       return false;
     }
 
@@ -22743,7 +22557,8 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
     }
 
     var lastSegmentEnd = lastSegmentStart + this._index.duration;
-    return isPeriodFulfilled(timescale, lastSegmentEnd, this._scaledPeriodEnd);
+    var segmentTimeRounding = getSegmentTimeRoundingError(timescale);
+    return lastSegmentEnd + segmentTimeRounding >= this._scaledRelativePeriodEnd;
   }
   /**
    * @returns {Boolean}
@@ -22763,7 +22578,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
     this._aggressiveMode = newIndex._aggressiveMode;
     this._isDynamic = newIndex._isDynamic;
     this._periodStart = newIndex._periodStart;
-    this._scaledPeriodEnd = newIndex._scaledPeriodEnd;
+    this._scaledRelativePeriodEnd = newIndex._scaledRelativePeriodEnd;
     this._manifestBoundsCalculator = newIndex._manifestBoundsCalculator;
   }
   /**
@@ -22789,7 +22604,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
     } // 1 - check that this index is already available
 
 
-    if (this._scaledPeriodEnd === 0 || this._scaledPeriodEnd === undefined) {
+    if (this._scaledRelativePeriodEnd === 0 || this._scaledRelativePeriodEnd === undefined) {
       // /!\ The scaled max position augments continuously and might not
       // reflect exactly the real server-side value. As segments are
       // generated discretely.
@@ -22840,12 +22655,12 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
 
       var agressiveModeOffset = this._aggressiveMode ? duration / timescale : 0;
 
-      if (this._scaledPeriodEnd != null && this._scaledPeriodEnd < (lastPos + agressiveModeOffset - this._periodStart) * this._index.timescale) {
-        if (this._scaledPeriodEnd < duration) {
+      if (this._scaledRelativePeriodEnd != null && this._scaledRelativePeriodEnd < (lastPos + agressiveModeOffset - this._periodStart) * this._index.timescale) {
+        if (this._scaledRelativePeriodEnd < duration) {
           return null;
         }
 
-        return (Math.floor(this._scaledPeriodEnd / duration) - 1) * duration;
+        return (Math.floor(this._scaledRelativePeriodEnd / duration) - 1) * duration;
       } // /!\ The scaled last position augments continuously and might not
       // reflect exactly the real server-side value. As segments are
       // generated discretely.
@@ -22862,7 +22677,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
       var numberOfSegmentsAvailable = Math.floor((scaledLastPosition + availabilityTimeOffset) / duration);
       return numberOfSegmentsAvailable <= 0 ? null : (numberOfSegmentsAvailable - 1) * duration;
     } else {
-      var maximumTime = (_a = this._scaledPeriodEnd) !== null && _a !== void 0 ? _a : 0;
+      var maximumTime = (_a = this._scaledRelativePeriodEnd) !== null && _a !== void 0 ? _a : 0;
       var numberIndexedToZero = Math.ceil(maximumTime / duration) - 1;
       var regularLastSegmentStart = numberIndexedToZero * duration; // In some SegmentTemplate, we could think that there is one more
       // segment that there actually is due to a very little difference between
@@ -24016,7 +23831,7 @@ function getMaximumLastPosition(adaptationsPerType) {
 
     for (var _iterator2 = parse_periods_createForOfIteratorHelperLoose(representations), _step2; !(_step2 = _iterator2()).done;) {
       var representation = _step2.value;
-      var position = representation.index.getLastPosition();
+      var position = representation.index.getLastAvailablePosition();
 
       if (position !== null) {
         allIndexAreEmpty = false;
@@ -32002,7 +31817,7 @@ var generate_manifest_loader = __webpack_require__(8791);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
 var asyncToGenerator = __webpack_require__(5861);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(7757);
+var regenerator = __webpack_require__(4687);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 // EXTERNAL MODULE: ./src/utils/request/index.ts + 1 modules
 var request = __webpack_require__(4597);
@@ -34543,7 +34358,7 @@ __webpack_require__.d(__webpack_exports__, {
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
 var asyncToGenerator = __webpack_require__(5861);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(7757);
+var regenerator = __webpack_require__(4687);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 // EXTERNAL MODULE: ./src/features/index.ts
 var features = __webpack_require__(7874);
@@ -34553,12 +34368,685 @@ var log = __webpack_require__(3887);
 var src_manifest = __webpack_require__(1989);
 // EXTERNAL MODULE: ./src/parsers/containers/isobmff/read.ts
 var read = __webpack_require__(6807);
+// EXTERNAL MODULE: ./src/errors/network_error.ts
+var network_error = __webpack_require__(9362);
+// EXTERNAL MODULE: ./src/utils/assert.ts
+var assert = __webpack_require__(811);
+// EXTERNAL MODULE: ./src/parsers/manifest/utils/clear_timeline_from_position.ts
+var clear_timeline_from_position = __webpack_require__(8232);
+// EXTERNAL MODULE: ./src/parsers/manifest/utils/index_helpers.ts
+var index_helpers = __webpack_require__(3911);
+// EXTERNAL MODULE: ./src/parsers/manifest/utils/is_segment_still_available.ts
+var is_segment_still_available = __webpack_require__(1091);
+// EXTERNAL MODULE: ./src/parsers/manifest/utils/update_segment_timeline.ts
+var update_segment_timeline = __webpack_require__(5505);
+;// CONCATENATED MODULE: ./src/parsers/manifest/smooth/utils/add_segment_infos.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Add a new segment to the index.
+ *
+ * /!\ Mutate the given index
+ * @param {Object} index
+ * @param {Object} newSegment
+ * @param {Object} currentSegment
+ * @returns {Boolean} - true if the segment has been added
+ */
+
+function _addSegmentInfos(index, newSegment, currentSegment) {
+  var timeline = index.timeline,
+      timescale = index.timescale;
+  var timelineLength = timeline.length;
+  var last = timeline[timelineLength - 1];
+  var scaledNewSegment = newSegment.timescale === timescale ? {
+    time: newSegment.time,
+    duration: newSegment.duration
+  } : {
+    time: newSegment.time / newSegment.timescale * timescale,
+    duration: newSegment.duration / newSegment.timescale * timescale
+  }; // in some circumstances, the new segment information are only duration
+  // information that we could use to deduct the start of the next segment.
+  // This is the case where the new segment are associated to a current
+  // segment and have the same start.
+  // However, we prefer to be sure of the duration of the new segments
+  // before adding such segments.
+
+  var shouldDeductNextSegment = currentSegment.time === scaledNewSegment.time;
+
+  if (shouldDeductNextSegment) {
+    return false;
+  } else if (scaledNewSegment.time >= (0,index_helpers/* getIndexSegmentEnd */.jH)(last, null)) {
+    // if the given timing has a timestamp after the timeline end we
+    // just need to push a new element in the timeline, or increase
+    // the @r attribute of the last element.
+    if (last.duration === scaledNewSegment.duration) {
+      last.repeatCount++;
+    } else {
+      index.timeline.push({
+        duration: scaledNewSegment.duration,
+        start: scaledNewSegment.time,
+        repeatCount: 0
+      });
+    }
+
+    return true;
+  }
+
+  return false;
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/smooth/utils/tokens.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {string} url
+ * @param {string|number} bitrate
+ * @returns {string}
+ */
+function replaceRepresentationSmoothTokens(url, bitrate, customAttributes) {
+  return url.replace(/\{bitrate\}/g, String(bitrate)).replace(/{CustomAttributes}/g, customAttributes.length > 0 ? customAttributes[0] : "");
+}
+/**
+ * @param {string} url
+ * @param {number} time
+ * @returns {string}
+ */
+
+
+function replaceSegmentSmoothTokens(url, time) {
+  return url.replace(/\{start time\}/g, String(time));
+}
+
+
+;// CONCATENATED MODULE: ./src/parsers/manifest/smooth/representation_index.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+
+
+
+/**
+ * @param {Number} start
+ * @param {Number} up
+ * @param {Number} duration
+ * @returns {Number}
+ */
+
+function getSegmentNumber(start, up, duration) {
+  var diff = up - start;
+  return diff > 0 ? Math.floor(diff / duration) : 0;
+}
+/**
+ * Convert second-based start time and duration to the timescale of the
+ * manifest's index.
+ * @param {Object} index
+ * @param {Number} start
+ * @param {Number} duration
+ * @returns {Object} - Object with two properties:
+ *   - up {Number}: timescaled timestamp of the beginning time
+ *   - to {Number}: timescaled timestamp of the end time (start time + duration)
+ */
+
+
+function normalizeRange(index, start, duration) {
+  var timescale = index.timescale === undefined || index.timescale === 0 ? 1 : index.timescale;
+  return {
+    up: start * timescale,
+    to: (start + duration) * timescale
+  };
+}
+/**
+ * Calculate the number of times a segment repeat based on the next segment.
+ * @param {Object} segment
+ * @param {Object} nextSegment
+ * @returns {Number}
+ */
+
+
+function calculateRepeat(segment, nextSegment) {
+  var repeatCount = segment.repeatCount; // A negative value of the @r attribute of the S element indicates
+  // that the duration indicated in @d attribute repeats until the
+  // start of the next S element, the end of the Period or until the
+  // next MPD update.
+  // TODO Also for SMOOTH????
+
+  if (segment.duration != null && repeatCount < 0) {
+    var repeatEnd = nextSegment !== undefined ? nextSegment.start : Infinity;
+    repeatCount = Math.ceil((repeatEnd - segment.start) / segment.duration) - 1;
+  }
+
+  return repeatCount;
+}
+/**
+ * RepresentationIndex implementation for Smooth Manifests.
+ *
+ * Allows to interact with the index to create new Segments.
+ *
+ * @class SmoothRepresentationIndex
+ */
+
+
+var SmoothRepresentationIndex = /*#__PURE__*/function () {
+  /**
+   * Creates a new `SmoothRepresentationIndex`.
+   * @param {Object} index
+   * @param {Object} options
+   */
+  function SmoothRepresentationIndex(index, options) {
+    var aggressiveMode = options.aggressiveMode,
+        isLive = options.isLive,
+        segmentPrivateInfos = options.segmentPrivateInfos,
+        timeShiftBufferDepth = options.timeShiftBufferDepth;
+    var estimatedReceivedTime = options.manifestReceivedTime == null ? performance.now() : options.manifestReceivedTime;
+    this._index = index;
+    this._indexValidityTime = estimatedReceivedTime;
+    this._timeShiftBufferDepth = timeShiftBufferDepth;
+    this._initSegmentInfos = {
+      bitsPerSample: segmentPrivateInfos.bitsPerSample,
+      channels: segmentPrivateInfos.channels,
+      codecPrivateData: segmentPrivateInfos.codecPrivateData,
+      packetSize: segmentPrivateInfos.packetSize,
+      samplingRate: segmentPrivateInfos.samplingRate,
+      timescale: index.timescale,
+      protection: segmentPrivateInfos.protection
+    };
+    this._isAggressiveMode = aggressiveMode;
+    this._isLive = isLive;
+
+    if (index.timeline.length !== 0) {
+      var lastItem = index.timeline[index.timeline.length - 1];
+      var scaledEnd = (0,index_helpers/* getIndexSegmentEnd */.jH)(lastItem, null);
+      this._initialScaledLastPosition = scaledEnd;
+
+      if (isLive) {
+        var scaledReceivedTime = estimatedReceivedTime / 1000 * index.timescale;
+        this._scaledLiveGap = scaledReceivedTime - scaledEnd;
+      }
+    }
+  }
+  /**
+   * Construct init Segment compatible with a Smooth Manifest.
+   * @returns {Object}
+   */
+
+
+  var _proto = SmoothRepresentationIndex.prototype;
+
+  _proto.getInitSegment = function getInitSegment() {
+    return {
+      id: "init",
+      isInit: true,
+      privateInfos: {
+        smoothInitSegment: this._initSegmentInfos
+      },
+      mediaURLs: null,
+      time: 0,
+      end: 0,
+      duration: 0,
+      timescale: 1,
+      complete: true
+    };
+  }
+  /**
+   * Generate a list of Segments for a particular period of time.
+   *
+   * @param {Number} from
+   * @param {Number} dur
+   * @returns {Array.<Object>}
+   */
+  ;
+
+  _proto.getSegments = function getSegments(from, dur) {
+    this._refreshTimeline();
+
+    var _normalizeRange = normalizeRange(this._index, from, dur),
+        up = _normalizeRange.up,
+        to = _normalizeRange.to;
+
+    var _this$_index = this._index,
+        timeline = _this$_index.timeline,
+        timescale = _this$_index.timescale,
+        media = _this$_index.media;
+    var isAggressive = this._isAggressiveMode;
+    var currentNumber;
+    var segments = [];
+    var timelineLength = timeline.length;
+    var maxPosition = this._scaledLiveGap == null ? undefined : performance.now() / 1000 * timescale - this._scaledLiveGap;
+
+    for (var i = 0; i < timelineLength; i++) {
+      var segmentRange = timeline[i];
+      var duration = segmentRange.duration,
+          start = segmentRange.start;
+      var repeat = calculateRepeat(segmentRange, timeline[i + 1]);
+      var segmentNumberInCurrentRange = getSegmentNumber(start, up, duration);
+      var segmentTime = start + segmentNumberInCurrentRange * duration;
+      var timeToAddToCheckMaxPosition = isAggressive ? 0 : duration;
+
+      while (segmentTime < to && segmentNumberInCurrentRange <= repeat && (maxPosition == null || segmentTime + timeToAddToCheckMaxPosition <= maxPosition)) {
+        var time = segmentTime;
+        var number = currentNumber != null ? currentNumber + segmentNumberInCurrentRange : undefined;
+        var segment = {
+          id: String(segmentTime),
+          isInit: false,
+          time: time / timescale,
+          end: (time + duration) / timescale,
+          duration: duration / timescale,
+          timescale: 1,
+          number: number,
+          mediaURLs: [replaceSegmentSmoothTokens(media, time)],
+          complete: true,
+          privateInfos: {
+            smoothMediaSegment: {
+              time: time,
+              duration: duration
+            }
+          }
+        };
+        segments.push(segment); // update segment number and segment time for the next segment
+
+        segmentNumberInCurrentRange++;
+        segmentTime = start + segmentNumberInCurrentRange * duration;
+      }
+
+      if (segmentTime >= to) {
+        // we reached ``to``, we're done
+        return segments;
+      }
+
+      if (currentNumber != null) {
+        currentNumber += repeat + 1;
+      }
+    }
+
+    return segments;
+  }
+  /**
+   * Returns true if, based on the arguments, the index should be refreshed.
+   * (If we should re-fetch the manifest)
+   * @param {Number} up
+   * @param {Number} to
+   * @returns {Boolean}
+   */
+  ;
+
+  _proto.shouldRefresh = function shouldRefresh(up, to) {
+    this._refreshTimeline();
+
+    if (!this._isLive) {
+      return false;
+    }
+
+    var _this$_index2 = this._index,
+        timeline = _this$_index2.timeline,
+        timescale = _this$_index2.timescale;
+    var lastSegmentInCurrentTimeline = timeline[timeline.length - 1];
+
+    if (lastSegmentInCurrentTimeline === undefined) {
+      return false;
+    }
+
+    var repeat = lastSegmentInCurrentTimeline.repeatCount;
+    var endOfLastSegmentInCurrentTimeline = lastSegmentInCurrentTimeline.start + (repeat + 1) * lastSegmentInCurrentTimeline.duration;
+
+    if (to * timescale < endOfLastSegmentInCurrentTimeline) {
+      return false;
+    }
+
+    if (up * timescale >= endOfLastSegmentInCurrentTimeline) {
+      return true;
+    } // ----
+
+
+    var startOfLastSegmentInCurrentTimeline = lastSegmentInCurrentTimeline.start + repeat * lastSegmentInCurrentTimeline.duration;
+    return up * timescale > startOfLastSegmentInCurrentTimeline;
+  }
+  /**
+   * Returns first position available in the index.
+   * @returns {Number|null}
+   */
+  ;
+
+  _proto.getFirstAvailablePosition = function getFirstAvailablePosition() {
+    this._refreshTimeline();
+
+    var index = this._index;
+
+    if (index.timeline.length === 0) {
+      return null;
+    }
+
+    return index.timeline[0].start / index.timescale;
+  }
+  /**
+   * Returns last position available in the index.
+   * @returns {Number}
+   */
+  ;
+
+  _proto.getLastAvailablePosition = function getLastAvailablePosition() {
+    this._refreshTimeline();
+
+    var index = this._index;
+
+    if (this._scaledLiveGap == null) {
+      var lastTimelineElement = index.timeline[index.timeline.length - 1];
+      return (0,index_helpers/* getIndexSegmentEnd */.jH)(lastTimelineElement, null) / index.timescale;
+    }
+
+    for (var i = index.timeline.length - 1; i >= 0; i--) {
+      var timelineElt = index.timeline[i];
+      var timescaledNow = performance.now() / 1000 * index.timescale;
+      var start = timelineElt.start,
+          duration = timelineElt.duration,
+          repeatCount = timelineElt.repeatCount;
+
+      for (var j = repeatCount; j >= 0; j--) {
+        var end = start + duration * (j + 1);
+        var positionToReach = this._isAggressiveMode ? end - duration : end;
+
+        if (positionToReach <= timescaledNow - this._scaledLiveGap) {
+          return end / index.timescale;
+        }
+      }
+    }
+
+    return undefined;
+  }
+  /**
+   * Returns the absolute end in seconds this RepresentationIndex can reach once
+   * all segments are available.
+   * @returns {number|null|undefined}
+   */
+  ;
+
+  _proto.getEnd = function getEnd() {
+    if (!this._isLive) {
+      return this.getLastAvailablePosition();
+    }
+
+    return undefined;
+  }
+  /**
+   * Returns:
+   *   - `true` if in the given time interval, at least one new segment is
+   *     expected to be available in the future.
+   *   - `false` either if all segments in that time interval are already
+   *     available for download or if none will ever be available for it.
+   *   - `undefined` when it is not possible to tell.
+   * @param {number} start
+   * @param {number} end
+   * @returns {boolean|undefined}
+   */
+  ;
+
+  _proto.awaitSegmentBetween = function awaitSegmentBetween(start, end) {
+    var _a;
+
+    (0,assert/* default */.Z)(start <= end);
+
+    if (this.isFinished()) {
+      return false;
+    }
+
+    var lastAvailablePosition = this.getLastAvailablePosition();
+
+    if (lastAvailablePosition !== undefined && end < lastAvailablePosition) {
+      return false;
+    }
+
+    return end > ((_a = this.getFirstAvailablePosition()) !== null && _a !== void 0 ? _a : 0) ? undefined : false;
+  }
+  /**
+   * Checks if `timeSec` is in a discontinuity.
+   * That is, if there's no segment available for the `timeSec` position.
+   * @param {number} timeSec - The time to check if it's in a discontinuity, in
+   * seconds.
+   * @returns {number | null} - If `null`, no discontinuity is encountered at
+   * `time`. If this is a number instead, there is one and that number is the
+   * position for which a segment is available in seconds.
+   */
+  ;
+
+  _proto.checkDiscontinuity = function checkDiscontinuity(timeSec) {
+    this._refreshTimeline();
+
+    return (0,index_helpers/* checkDiscontinuity */._j)(this._index, timeSec, undefined);
+  }
+  /**
+   * Returns `true` if a Segment returned by this index is still considered
+   * available.
+   * Returns `false` if it is not available anymore.
+   * Returns `undefined` if we cannot know whether it is still available or not.
+   * @param {Object} segment
+   * @returns {Boolean|undefined}
+   */
+  ;
+
+  _proto.isSegmentStillAvailable = function isSegmentStillAvailable(segment) {
+    if (segment.isInit) {
+      return true;
+    }
+
+    this._refreshTimeline();
+
+    var _this$_index3 = this._index,
+        timeline = _this$_index3.timeline,
+        timescale = _this$_index3.timescale;
+    return (0,is_segment_still_available/* default */.Z)(segment, timeline, timescale, 0);
+  }
+  /**
+   * @param {Error} error
+   * @returns {Boolean}
+   */
+  ;
+
+  _proto.canBeOutOfSyncError = function canBeOutOfSyncError(error) {
+    if (!this._isLive) {
+      return false;
+    }
+
+    return error instanceof network_error/* default */.Z && (error.isHttpError(404) || error.isHttpError(412));
+  }
+  /**
+   * Replace this RepresentationIndex by a newly downloaded one.
+   * Check if the old index had more information about new segments and re-add
+   * them if that's the case.
+   * @param {Object} newIndex
+   */
+  ;
+
+  _proto._replace = function _replace(newIndex) {
+    var oldTimeline = this._index.timeline;
+    var newTimeline = newIndex._index.timeline;
+    var oldTimescale = this._index.timescale;
+    var newTimescale = newIndex._index.timescale;
+    this._index = newIndex._index;
+    this._initialScaledLastPosition = newIndex._initialScaledLastPosition;
+    this._indexValidityTime = newIndex._indexValidityTime;
+    this._scaledLiveGap = newIndex._scaledLiveGap;
+
+    if (oldTimeline.length === 0 || newTimeline.length === 0 || oldTimescale !== newTimescale) {
+      return; // don't take risk, if something is off, take the new one
+    }
+
+    var lastOldTimelineElement = oldTimeline[oldTimeline.length - 1];
+    var lastNewTimelineElement = newTimeline[newTimeline.length - 1];
+    var newEnd = (0,index_helpers/* getIndexSegmentEnd */.jH)(lastNewTimelineElement, null);
+
+    if ((0,index_helpers/* getIndexSegmentEnd */.jH)(lastOldTimelineElement, null) <= newEnd) {
+      return;
+    }
+
+    for (var i = 0; i < oldTimeline.length; i++) {
+      var oldTimelineRange = oldTimeline[i];
+      var oldEnd = (0,index_helpers/* getIndexSegmentEnd */.jH)(oldTimelineRange, null);
+
+      if (oldEnd === newEnd) {
+        // just add the supplementary segments
+        this._index.timeline = this._index.timeline.concat(oldTimeline.slice(i + 1));
+        return;
+      }
+
+      if (oldEnd > newEnd) {
+        // adjust repeatCount + add supplementary segments
+        if (oldTimelineRange.duration !== lastNewTimelineElement.duration) {
+          return;
+        }
+
+        var rangeDuration = newEnd - oldTimelineRange.start;
+
+        if (rangeDuration === 0) {
+          log/* default.warn */.Z.warn("Smooth Parser: a discontinuity detected in the previous manifest" + " has been resolved.");
+          this._index.timeline = this._index.timeline.concat(oldTimeline.slice(i));
+          return;
+        }
+
+        if (rangeDuration < 0 || rangeDuration % oldTimelineRange.duration !== 0) {
+          return;
+        }
+
+        var repeatWithOld = rangeDuration / oldTimelineRange.duration - 1;
+        var relativeRepeat = oldTimelineRange.repeatCount - repeatWithOld;
+
+        if (relativeRepeat < 0) {
+          return;
+        }
+
+        lastNewTimelineElement.repeatCount += relativeRepeat;
+        var supplementarySegments = oldTimeline.slice(i + 1);
+        this._index.timeline = this._index.timeline.concat(supplementarySegments);
+        return;
+      }
+    }
+  }
+  /**
+   * Update the current index with a new, partial, version.
+   * This method might be use to only add information about new segments.
+   * @param {Object} newIndex
+   */
+  ;
+
+  _proto._update = function _update(newIndex) {
+    (0,update_segment_timeline/* default */.Z)(this._index.timeline, newIndex._index.timeline);
+    this._initialScaledLastPosition = newIndex._initialScaledLastPosition;
+    this._indexValidityTime = newIndex._indexValidityTime;
+    this._scaledLiveGap = newIndex._scaledLiveGap;
+  }
+  /**
+   * Returns `true` if the last segments in this index have already been
+   * generated.
+   * Returns `false` if the index is still waiting on future segments to be
+   * generated.
+   *
+   * For Smooth, it should only depend on whether the content is a live content
+   * or not.
+   * TODO What about Smooth live content that finishes at some point?
+   * @returns {boolean}
+   */
+  ;
+
+  _proto.isFinished = function isFinished() {
+    return !this._isLive;
+  }
+  /**
+   * @returns {Boolean}
+   */
+  ;
+
+  _proto.isInitialized = function isInitialized() {
+    return true;
+  }
+  /**
+   * Add new segments to a `SmoothRepresentationIndex`.
+   * @param {Array.<Object>} nextSegments - The segment information parsed.
+   * @param {Object} segment - Information on the segment which contained that
+   * new segment information.
+   */
+  ;
+
+  _proto.addNewSegments = function addNewSegments(nextSegments, currentSegment) {
+    this._refreshTimeline();
+
+    for (var i = 0; i < nextSegments.length; i++) {
+      _addSegmentInfos(this._index, nextSegments[i], currentSegment);
+    }
+  }
+  /**
+   * Clean-up timeline to remove segment information which should not be
+   * available due to the timeshift window
+   */
+  ;
+
+  _proto._refreshTimeline = function _refreshTimeline() {
+    // clean segments before time shift buffer depth
+    if (this._initialScaledLastPosition == null) {
+      return;
+    }
+
+    var index = this._index;
+    var timeShiftBufferDepth = this._timeShiftBufferDepth;
+    var timeSinceLastRealUpdate = (performance.now() - this._indexValidityTime) / 1000;
+    var lastPositionEstimate = timeSinceLastRealUpdate + this._initialScaledLastPosition / index.timescale;
+
+    if (timeShiftBufferDepth != null) {
+      var minimumPosition = (lastPositionEstimate - timeShiftBufferDepth) * index.timescale;
+      (0,clear_timeline_from_position/* default */.Z)(index.timeline, minimumPosition);
+    }
+  };
+
+  return SmoothRepresentationIndex;
+}();
+
+
 // EXTERNAL MODULE: ./src/manifest/adaptation.ts + 3 modules
 var adaptation = __webpack_require__(8999);
 // EXTERNAL MODULE: ./src/utils/array_includes.ts
 var array_includes = __webpack_require__(7714);
-// EXTERNAL MODULE: ./src/utils/assert.ts
-var assert = __webpack_require__(811);
 // EXTERNAL MODULE: ./src/utils/byte_parsing.ts
 var byte_parsing = __webpack_require__(6968);
 // EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
@@ -34961,647 +35449,6 @@ function parseProtectionNode(protectionNode, keySystemCreator) {
     }].concat(keySystemCreator(keyIdBytes))
   };
 }
-// EXTERNAL MODULE: ./src/errors/network_error.ts
-var network_error = __webpack_require__(9362);
-// EXTERNAL MODULE: ./src/parsers/manifest/utils/clear_timeline_from_position.ts
-var clear_timeline_from_position = __webpack_require__(8232);
-// EXTERNAL MODULE: ./src/parsers/manifest/utils/index_helpers.ts
-var index_helpers = __webpack_require__(3911);
-// EXTERNAL MODULE: ./src/parsers/manifest/utils/is_segment_still_available.ts
-var is_segment_still_available = __webpack_require__(1091);
-// EXTERNAL MODULE: ./src/parsers/manifest/utils/update_segment_timeline.ts
-var update_segment_timeline = __webpack_require__(5505);
-;// CONCATENATED MODULE: ./src/parsers/manifest/smooth/utils/add_segment_infos.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Add a new segment to the index.
- *
- * /!\ Mutate the given index
- * @param {Object} index
- * @param {Object} newSegment
- * @param {Object} currentSegment
- * @returns {Boolean} - true if the segment has been added
- */
-
-function _addSegmentInfos(index, newSegment, currentSegment) {
-  var timeline = index.timeline,
-      timescale = index.timescale;
-  var timelineLength = timeline.length;
-  var last = timeline[timelineLength - 1];
-  var scaledNewSegment = newSegment.timescale === timescale ? {
-    time: newSegment.time,
-    duration: newSegment.duration
-  } : {
-    time: newSegment.time / newSegment.timescale * timescale,
-    duration: newSegment.duration / newSegment.timescale * timescale
-  }; // in some circumstances, the new segment information are only duration
-  // information that we could use to deduct the start of the next segment.
-  // This is the case where the new segment are associated to a current
-  // segment and have the same start.
-  // However, we prefer to be sure of the duration of the new segments
-  // before adding such segments.
-
-  var shouldDeductNextSegment = currentSegment.time === scaledNewSegment.time;
-
-  if (shouldDeductNextSegment) {
-    return false;
-  } else if (scaledNewSegment.time >= (0,index_helpers/* getIndexSegmentEnd */.jH)(last, null)) {
-    // if the given timing has a timestamp after the timeline end we
-    // just need to push a new element in the timeline, or increase
-    // the @r attribute of the last element.
-    if (last.duration === scaledNewSegment.duration) {
-      last.repeatCount++;
-    } else {
-      index.timeline.push({
-        duration: scaledNewSegment.duration,
-        start: scaledNewSegment.time,
-        repeatCount: 0
-      });
-    }
-
-    return true;
-  }
-
-  return false;
-}
-;// CONCATENATED MODULE: ./src/parsers/manifest/smooth/utils/tokens.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @param {string} url
- * @param {string|number} bitrate
- * @returns {string}
- */
-function replaceRepresentationSmoothTokens(url, bitrate, customAttributes) {
-  return url.replace(/\{bitrate\}/g, String(bitrate)).replace(/{CustomAttributes}/g, customAttributes.length > 0 ? customAttributes[0] : "");
-}
-/**
- * @param {string} url
- * @param {number} time
- * @returns {string}
- */
-
-
-function replaceSegmentSmoothTokens(url, time) {
-  return url.replace(/\{start time\}/g, String(time));
-}
-
-
-;// CONCATENATED MODULE: ./src/parsers/manifest/smooth/representation_index.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-
-
-/**
- * @param {Number} start
- * @param {Number} up
- * @param {Number} duration
- * @returns {Number}
- */
-
-function getSegmentNumber(start, up, duration) {
-  var diff = up - start;
-  return diff > 0 ? Math.floor(diff / duration) : 0;
-}
-/**
- * Convert second-based start time and duration to the timescale of the
- * manifest's index.
- * @param {Object} index
- * @param {Number} start
- * @param {Number} duration
- * @returns {Object} - Object with two properties:
- *   - up {Number}: timescaled timestamp of the beginning time
- *   - to {Number}: timescaled timestamp of the end time (start time + duration)
- */
-
-
-function normalizeRange(index, start, duration) {
-  var timescale = index.timescale === undefined || index.timescale === 0 ? 1 : index.timescale;
-  return {
-    up: start * timescale,
-    to: (start + duration) * timescale
-  };
-}
-/**
- * Calculate the number of times a segment repeat based on the next segment.
- * @param {Object} segment
- * @param {Object} nextSegment
- * @returns {Number}
- */
-
-
-function calculateRepeat(segment, nextSegment) {
-  var repeatCount = segment.repeatCount; // A negative value of the @r attribute of the S element indicates
-  // that the duration indicated in @d attribute repeats until the
-  // start of the next S element, the end of the Period or until the
-  // next MPD update.
-  // TODO Also for SMOOTH????
-
-  if (segment.duration != null && repeatCount < 0) {
-    var repeatEnd = nextSegment !== undefined ? nextSegment.start : Infinity;
-    repeatCount = Math.ceil((repeatEnd - segment.start) / segment.duration) - 1;
-  }
-
-  return repeatCount;
-}
-/**
- * RepresentationIndex implementation for Smooth Manifests.
- *
- * Allows to interact with the index to create new Segments.
- *
- * @class SmoothRepresentationIndex
- */
-
-
-var SmoothRepresentationIndex = /*#__PURE__*/function () {
-  /**
-   * Creates a new `SmoothRepresentationIndex`.
-   * @param {Object} index
-   * @param {Object} options
-   */
-  function SmoothRepresentationIndex(index, options) {
-    var aggressiveMode = options.aggressiveMode,
-        isLive = options.isLive,
-        segmentPrivateInfos = options.segmentPrivateInfos,
-        timeShiftBufferDepth = options.timeShiftBufferDepth;
-    var estimatedReceivedTime = options.manifestReceivedTime == null ? performance.now() : options.manifestReceivedTime;
-    this._index = index;
-    this._indexValidityTime = estimatedReceivedTime;
-    this._timeShiftBufferDepth = timeShiftBufferDepth;
-    this._initSegmentInfos = {
-      bitsPerSample: segmentPrivateInfos.bitsPerSample,
-      channels: segmentPrivateInfos.channels,
-      codecPrivateData: segmentPrivateInfos.codecPrivateData,
-      packetSize: segmentPrivateInfos.packetSize,
-      samplingRate: segmentPrivateInfos.samplingRate,
-      timescale: index.timescale,
-      protection: segmentPrivateInfos.protection
-    };
-    this._isAggressiveMode = aggressiveMode;
-    this._isLive = isLive;
-
-    if (index.timeline.length !== 0) {
-      var lastItem = index.timeline[index.timeline.length - 1];
-      var scaledEnd = (0,index_helpers/* getIndexSegmentEnd */.jH)(lastItem, null);
-      this._initialScaledLastPosition = scaledEnd;
-
-      if (isLive) {
-        var scaledReceivedTime = estimatedReceivedTime / 1000 * index.timescale;
-        this._scaledLiveGap = scaledReceivedTime - scaledEnd;
-      }
-    }
-  }
-  /**
-   * Construct init Segment compatible with a Smooth Manifest.
-   * @returns {Object}
-   */
-
-
-  var _proto = SmoothRepresentationIndex.prototype;
-
-  _proto.getInitSegment = function getInitSegment() {
-    return {
-      id: "init",
-      isInit: true,
-      privateInfos: {
-        smoothInitSegment: this._initSegmentInfos
-      },
-      mediaURLs: null,
-      time: 0,
-      end: 0,
-      duration: 0,
-      timescale: 1,
-      complete: true
-    };
-  }
-  /**
-   * Generate a list of Segments for a particular period of time.
-   *
-   * @param {Number} from
-   * @param {Number} duration
-   * @returns {Array.<Object>}
-   */
-  ;
-
-  _proto.getSegments = function getSegments(from, dur) {
-    this._refreshTimeline();
-
-    var _normalizeRange = normalizeRange(this._index, from, dur),
-        up = _normalizeRange.up,
-        to = _normalizeRange.to;
-
-    var _this$_index = this._index,
-        timeline = _this$_index.timeline,
-        timescale = _this$_index.timescale,
-        media = _this$_index.media;
-    var isAggressive = this._isAggressiveMode;
-    var currentNumber;
-    var segments = [];
-    var timelineLength = timeline.length;
-    var maxPosition = this._scaledLiveGap == null ? undefined : performance.now() / 1000 * timescale - this._scaledLiveGap;
-
-    for (var i = 0; i < timelineLength; i++) {
-      var segmentRange = timeline[i];
-      var duration = segmentRange.duration,
-          start = segmentRange.start;
-      var repeat = calculateRepeat(segmentRange, timeline[i + 1]);
-      var segmentNumberInCurrentRange = getSegmentNumber(start, up, duration);
-      var segmentTime = start + segmentNumberInCurrentRange * duration;
-      var timeToAddToCheckMaxPosition = isAggressive ? 0 : duration;
-
-      while (segmentTime < to && segmentNumberInCurrentRange <= repeat && (maxPosition == null || segmentTime + timeToAddToCheckMaxPosition <= maxPosition)) {
-        var time = segmentTime;
-        var number = currentNumber != null ? currentNumber + segmentNumberInCurrentRange : undefined;
-        var segment = {
-          id: String(segmentTime),
-          isInit: false,
-          time: time / timescale,
-          end: (time + duration) / timescale,
-          duration: duration / timescale,
-          timescale: 1,
-          number: number,
-          mediaURLs: [replaceSegmentSmoothTokens(media, time)],
-          complete: true,
-          privateInfos: {
-            smoothMediaSegment: {
-              time: time,
-              duration: duration
-            }
-          }
-        };
-        segments.push(segment); // update segment number and segment time for the next segment
-
-        segmentNumberInCurrentRange++;
-        segmentTime = start + segmentNumberInCurrentRange * duration;
-      }
-
-      if (segmentTime >= to) {
-        // we reached ``to``, we're done
-        return segments;
-      }
-
-      if (currentNumber != null) {
-        currentNumber += repeat + 1;
-      }
-    }
-
-    return segments;
-  }
-  /**
-   * Returns true if, based on the arguments, the index should be refreshed.
-   * (If we should re-fetch the manifest)
-   * @param {Number} up
-   * @param {Number} to
-   * @returns {Boolean}
-   */
-  ;
-
-  _proto.shouldRefresh = function shouldRefresh(up, to) {
-    this._refreshTimeline();
-
-    if (!this._isLive) {
-      return false;
-    }
-
-    var _this$_index2 = this._index,
-        timeline = _this$_index2.timeline,
-        timescale = _this$_index2.timescale;
-    var lastSegmentInCurrentTimeline = timeline[timeline.length - 1];
-
-    if (lastSegmentInCurrentTimeline === undefined) {
-      return false;
-    }
-
-    var repeat = lastSegmentInCurrentTimeline.repeatCount;
-    var endOfLastSegmentInCurrentTimeline = lastSegmentInCurrentTimeline.start + (repeat + 1) * lastSegmentInCurrentTimeline.duration;
-
-    if (to * timescale < endOfLastSegmentInCurrentTimeline) {
-      return false;
-    }
-
-    if (up * timescale >= endOfLastSegmentInCurrentTimeline) {
-      return true;
-    } // ----
-
-
-    var startOfLastSegmentInCurrentTimeline = lastSegmentInCurrentTimeline.start + repeat * lastSegmentInCurrentTimeline.duration;
-    return up * timescale > startOfLastSegmentInCurrentTimeline;
-  }
-  /**
-   * Returns first position available in the index.
-   *
-   * @param {Object} index
-   * @returns {Number|null}
-   */
-  ;
-
-  _proto.getFirstPosition = function getFirstPosition() {
-    this._refreshTimeline();
-
-    var index = this._index;
-
-    if (index.timeline.length === 0) {
-      return null;
-    }
-
-    return index.timeline[0].start / index.timescale;
-  }
-  /**
-   * Returns last position available in the index.
-   * @param {Object} index
-   * @returns {Number}
-   */
-  ;
-
-  _proto.getLastPosition = function getLastPosition() {
-    this._refreshTimeline();
-
-    var index = this._index;
-
-    if (this._scaledLiveGap == null) {
-      var lastTimelineElement = index.timeline[index.timeline.length - 1];
-      return (0,index_helpers/* getIndexSegmentEnd */.jH)(lastTimelineElement, null) / index.timescale;
-    }
-
-    for (var i = index.timeline.length - 1; i >= 0; i--) {
-      var timelineElt = index.timeline[i];
-      var timescaledNow = performance.now() / 1000 * index.timescale;
-      var start = timelineElt.start,
-          duration = timelineElt.duration,
-          repeatCount = timelineElt.repeatCount;
-
-      for (var j = repeatCount; j >= 0; j--) {
-        var end = start + duration * (j + 1);
-        var positionToReach = this._isAggressiveMode ? end - duration : end;
-
-        if (positionToReach <= timescaledNow - this._scaledLiveGap) {
-          return end / index.timescale;
-        }
-      }
-    }
-
-    return undefined;
-  }
-  /**
-   * Checks if `timeSec` is in a discontinuity.
-   * That is, if there's no segment available for the `timeSec` position.
-   * @param {number} timeSec - The time to check if it's in a discontinuity, in
-   * seconds.
-   * @returns {number | null} - If `null`, no discontinuity is encountered at
-   * `time`. If this is a number instead, there is one and that number is the
-   * position for which a segment is available in seconds.
-   */
-  ;
-
-  _proto.checkDiscontinuity = function checkDiscontinuity(timeSec) {
-    this._refreshTimeline();
-
-    return (0,index_helpers/* checkDiscontinuity */._j)(this._index, timeSec, undefined);
-  }
-  /**
-   * Returns `true` as Smooth segments should always be generated in
-   * chronological order.
-   * @returns {boolean}
-   */
-  ;
-
-  _proto.areSegmentsChronologicallyGenerated = function areSegmentsChronologicallyGenerated() {
-    return true;
-  }
-  /**
-   * Returns `true` if a Segment returned by this index is still considered
-   * available.
-   * Returns `false` if it is not available anymore.
-   * Returns `undefined` if we cannot know whether it is still available or not.
-   * @param {Object} segment
-   * @returns {Boolean|undefined}
-   */
-  ;
-
-  _proto.isSegmentStillAvailable = function isSegmentStillAvailable(segment) {
-    if (segment.isInit) {
-      return true;
-    }
-
-    this._refreshTimeline();
-
-    var _this$_index3 = this._index,
-        timeline = _this$_index3.timeline,
-        timescale = _this$_index3.timescale;
-    return (0,is_segment_still_available/* default */.Z)(segment, timeline, timescale, 0);
-  }
-  /**
-   * @param {Error} error
-   * @returns {Boolean}
-   */
-  ;
-
-  _proto.canBeOutOfSyncError = function canBeOutOfSyncError(error) {
-    if (!this._isLive) {
-      return false;
-    }
-
-    return error instanceof network_error/* default */.Z && (error.isHttpError(404) || error.isHttpError(412));
-  }
-  /**
-   * Replace this RepresentationIndex by a newly downloaded one.
-   * Check if the old index had more information about new segments and re-add
-   * them if that's the case.
-   * @param {Object} newIndex
-   */
-  ;
-
-  _proto._replace = function _replace(newIndex) {
-    var oldTimeline = this._index.timeline;
-    var newTimeline = newIndex._index.timeline;
-    var oldTimescale = this._index.timescale;
-    var newTimescale = newIndex._index.timescale;
-    this._index = newIndex._index;
-    this._initialScaledLastPosition = newIndex._initialScaledLastPosition;
-    this._indexValidityTime = newIndex._indexValidityTime;
-    this._scaledLiveGap = newIndex._scaledLiveGap;
-
-    if (oldTimeline.length === 0 || newTimeline.length === 0 || oldTimescale !== newTimescale) {
-      return; // don't take risk, if something is off, take the new one
-    }
-
-    var lastOldTimelineElement = oldTimeline[oldTimeline.length - 1];
-    var lastNewTimelineElement = newTimeline[newTimeline.length - 1];
-    var newEnd = (0,index_helpers/* getIndexSegmentEnd */.jH)(lastNewTimelineElement, null);
-
-    if ((0,index_helpers/* getIndexSegmentEnd */.jH)(lastOldTimelineElement, null) <= newEnd) {
-      return;
-    }
-
-    for (var i = 0; i < oldTimeline.length; i++) {
-      var oldTimelineRange = oldTimeline[i];
-      var oldEnd = (0,index_helpers/* getIndexSegmentEnd */.jH)(oldTimelineRange, null);
-
-      if (oldEnd === newEnd) {
-        // just add the supplementary segments
-        this._index.timeline = this._index.timeline.concat(oldTimeline.slice(i + 1));
-        return;
-      }
-
-      if (oldEnd > newEnd) {
-        // adjust repeatCount + add supplementary segments
-        if (oldTimelineRange.duration !== lastNewTimelineElement.duration) {
-          return;
-        }
-
-        var rangeDuration = newEnd - oldTimelineRange.start;
-
-        if (rangeDuration === 0) {
-          log/* default.warn */.Z.warn("Smooth Parser: a discontinuity detected in the previous manifest" + " has been resolved.");
-          this._index.timeline = this._index.timeline.concat(oldTimeline.slice(i));
-          return;
-        }
-
-        if (rangeDuration < 0 || rangeDuration % oldTimelineRange.duration !== 0) {
-          return;
-        }
-
-        var repeatWithOld = rangeDuration / oldTimelineRange.duration - 1;
-        var relativeRepeat = oldTimelineRange.repeatCount - repeatWithOld;
-
-        if (relativeRepeat < 0) {
-          return;
-        }
-
-        lastNewTimelineElement.repeatCount += relativeRepeat;
-        var supplementarySegments = oldTimeline.slice(i + 1);
-        this._index.timeline = this._index.timeline.concat(supplementarySegments);
-        return;
-      }
-    }
-  }
-  /**
-   * Update the current index with a new, partial, version.
-   * This method might be use to only add information about new segments.
-   * @param {Object} newIndex
-   */
-  ;
-
-  _proto._update = function _update(newIndex) {
-    (0,update_segment_timeline/* default */.Z)(this._index.timeline, newIndex._index.timeline);
-    this._initialScaledLastPosition = newIndex._initialScaledLastPosition;
-    this._indexValidityTime = newIndex._indexValidityTime;
-    this._scaledLiveGap = newIndex._scaledLiveGap;
-  }
-  /**
-   * Returns `true` if the last segments in this index have already been
-   * generated.
-   * Returns `false` if the index is still waiting on future segments to be
-   * generated.
-   *
-   * For Smooth, it should only depend on whether the content is a live content
-   * or not.
-   * TODO What about Smooth live content that finishes at some point?
-   * @returns {boolean}
-   */
-  ;
-
-  _proto.isFinished = function isFinished() {
-    return !this._isLive;
-  }
-  /**
-   * @returns {Boolean}
-   */
-  ;
-
-  _proto.isInitialized = function isInitialized() {
-    return true;
-  }
-  /**
-   * Add new segments to a `SmoothRepresentationIndex`.
-   * @param {Array.<Object>} nextSegments - The segment information parsed.
-   * @param {Object} segment - Information on the segment which contained that
-   * new segment information.
-   */
-  ;
-
-  _proto.addNewSegments = function addNewSegments(nextSegments, currentSegment) {
-    this._refreshTimeline();
-
-    for (var i = 0; i < nextSegments.length; i++) {
-      _addSegmentInfos(this._index, nextSegments[i], currentSegment);
-    }
-  }
-  /**
-   * Clean-up timeline to remove segment information which should not be
-   * available due to the timeshift window
-   */
-  ;
-
-  _proto._refreshTimeline = function _refreshTimeline() {
-    // clean segments before time shift buffer depth
-    if (this._initialScaledLastPosition == null) {
-      return;
-    }
-
-    var index = this._index;
-    var timeShiftBufferDepth = this._timeShiftBufferDepth;
-    var timeSinceLastRealUpdate = (performance.now() - this._indexValidityTime) / 1000;
-    var lastPositionEstimate = timeSinceLastRealUpdate + this._initialScaledLastPosition / index.timescale;
-
-    if (timeShiftBufferDepth != null) {
-      var minimumPosition = (lastPositionEstimate - timeShiftBufferDepth) * index.timescale;
-      (0,clear_timeline_from_position/* default */.Z)(index.timeline, minimumPosition);
-    }
-  };
-
-  return SmoothRepresentationIndex;
-}();
-
-
 ;// CONCATENATED MODULE: ./src/parsers/manifest/smooth/utils/parseBoolean.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -36140,8 +35987,8 @@ function createSmoothStreamingParser(parserOptions) {
         var firstVideoRepresentation = firstVideoAdaptation.representations[0];
 
         if (firstVideoRepresentation !== undefined) {
-          var firstVideoTimeReference = firstVideoRepresentation.index.getFirstPosition();
-          var lastVideoTimeReference = firstVideoRepresentation.index.getLastPosition();
+          var firstVideoTimeReference = firstVideoRepresentation.index.getFirstAvailablePosition();
+          var lastVideoTimeReference = firstVideoRepresentation.index.getLastAvailablePosition();
 
           if (firstVideoTimeReference != null) {
             firstTimeReferences.push(firstVideoTimeReference);
@@ -36157,8 +36004,8 @@ function createSmoothStreamingParser(parserOptions) {
         var firstAudioRepresentation = firstAudioAdaptation.representations[0];
 
         if (firstAudioRepresentation !== undefined) {
-          var firstAudioTimeReference = firstAudioRepresentation.index.getFirstPosition();
-          var lastAudioTimeReference = firstAudioRepresentation.index.getLastPosition();
+          var firstAudioTimeReference = firstAudioRepresentation.index.getFirstAvailablePosition();
+          var lastAudioTimeReference = firstAudioRepresentation.index.getLastAvailablePosition();
 
           if (firstAudioTimeReference != null) {
             firstTimeReferences.push(firstAudioTimeReference);
@@ -37438,7 +37285,7 @@ function isMP4EmbeddedTrack(representation) {
 
 /**
  * Segment loader triggered if there was no custom-defined one in the API.
- * @param {string} uri
+ * @param {string} url
  * @param {Object} content
  * @param {Object} callbacks
  * @param {Object} cancelSignal
@@ -39552,6 +39399,8 @@ __webpack_require__.d(__webpack_exports__, {
   "Z": function() { return /* binding */ deferSubscriptions; }
 });
 
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/subscribeOn.js
+var subscribeOn = __webpack_require__(8720);
 // EXTERNAL MODULE: ./node_modules/rxjs/node_modules/tslib/tslib.es6.js
 var tslib_es6 = __webpack_require__(5987);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/scheduler/AsyncAction.js + 2 modules
@@ -39683,8 +39532,6 @@ var AsapScheduler = (function (_super) {
 var asapScheduler = new AsapScheduler(AsapAction);
 var asap = (/* unused pure expression or super */ null && (asapScheduler));
 //# sourceMappingURL=asap.js.map
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/subscribeOn.js
-var subscribeOn = __webpack_require__(8720);
 ;// CONCATENATED MODULE: ./src/utils/defer_subscriptions.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -42842,9 +42689,6 @@ var CancellationSignal = /*#__PURE__*/function () {
 var CancellationError = /*#__PURE__*/function (_Error) {
   (0,_babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .Z)(CancellationError, _Error);
 
-  /**
-   * @param {string} message
-   */
   function CancellationError() {
     var _this4;
 
@@ -46234,6 +46078,405 @@ function __classPrivateFieldSet(receiver, privateMap, value) {
 
 /***/ }),
 
+/***/ 7061:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var _typeof = (__webpack_require__(8698)["default"]);
+
+function _regeneratorRuntime() {
+  "use strict";
+  /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+
+  module.exports = _regeneratorRuntime = function _regeneratorRuntime() {
+    return exports;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  var exports = {},
+      Op = Object.prototype,
+      hasOwn = Op.hasOwnProperty,
+      $Symbol = "function" == typeof Symbol ? Symbol : {},
+      iteratorSymbol = $Symbol.iterator || "@@iterator",
+      asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator",
+      toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    return Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: !0,
+      configurable: !0,
+      writable: !0
+    }), obj[key];
+  }
+
+  try {
+    define({}, "");
+  } catch (err) {
+    define = function define(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator,
+        generator = Object.create(protoGenerator.prototype),
+        context = new Context(tryLocsList || []);
+    return generator._invoke = function (innerFn, self, context) {
+      var state = "suspendedStart";
+      return function (method, arg) {
+        if ("executing" === state) throw new Error("Generator is already running");
+
+        if ("completed" === state) {
+          if ("throw" === method) throw arg;
+          return doneResult();
+        }
+
+        for (context.method = method, context.arg = arg;;) {
+          var delegate = context.delegate;
+
+          if (delegate) {
+            var delegateResult = maybeInvokeDelegate(delegate, context);
+
+            if (delegateResult) {
+              if (delegateResult === ContinueSentinel) continue;
+              return delegateResult;
+            }
+          }
+
+          if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) {
+            if ("suspendedStart" === state) throw state = "completed", context.arg;
+            context.dispatchException(context.arg);
+          } else "return" === context.method && context.abrupt("return", context.arg);
+          state = "executing";
+          var record = tryCatch(innerFn, self, context);
+
+          if ("normal" === record.type) {
+            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue;
+            return {
+              value: record.arg,
+              done: context.done
+            };
+          }
+
+          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
+        }
+      };
+    }(innerFn, self, context), generator;
+  }
+
+  function tryCatch(fn, obj, arg) {
+    try {
+      return {
+        type: "normal",
+        arg: fn.call(obj, arg)
+      };
+    } catch (err) {
+      return {
+        type: "throw",
+        arg: err
+      };
+    }
+  }
+
+  exports.wrap = wrap;
+  var ContinueSentinel = {};
+
+  function Generator() {}
+
+  function GeneratorFunction() {}
+
+  function GeneratorFunctionPrototype() {}
+
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+  var getProto = Object.getPrototypeOf,
+      NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
+  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
+
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function (method) {
+      define(prototype, method, function (arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+
+      if ("throw" !== record.type) {
+        var result = record.arg,
+            value = result.value;
+        return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) {
+          invoke("next", value, resolve, reject);
+        }, function (err) {
+          invoke("throw", err, resolve, reject);
+        }) : PromiseImpl.resolve(value).then(function (unwrapped) {
+          result.value = unwrapped, resolve(result);
+        }, function (error) {
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+
+      reject(record.arg);
+    }
+
+    var previousPromise;
+
+    this._invoke = function (method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new PromiseImpl(function (resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+    };
+  }
+
+  function maybeInvokeDelegate(delegate, context) {
+    var method = delegate.iterator[context.method];
+
+    if (undefined === method) {
+      if (context.delegate = null, "throw" === context.method) {
+        if (delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method)) return ContinueSentinel;
+        context.method = "throw", context.arg = new TypeError("The iterator does not provide a 'throw' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+    if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
+    var info = record.arg;
+    return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
+  }
+
+  function pushTryEntry(locs) {
+    var entry = {
+      tryLoc: locs[0]
+    };
+    1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal", delete record.arg, entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    this.tryEntries = [{
+      tryLoc: "root"
+    }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0);
+  }
+
+  function values(iterable) {
+    if (iterable) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) return iteratorMethod.call(iterable);
+      if ("function" == typeof iterable.next) return iterable;
+
+      if (!isNaN(iterable.length)) {
+        var i = -1,
+            next = function next() {
+          for (; ++i < iterable.length;) {
+            if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next;
+          }
+
+          return next.value = undefined, next.done = !0, next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    return {
+      next: doneResult
+    };
+  }
+
+  function doneResult() {
+    return {
+      value: undefined,
+      done: !0
+    };
+  }
+
+  return GeneratorFunction.prototype = GeneratorFunctionPrototype, define(Gp, "constructor", GeneratorFunctionPrototype), define(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) {
+    var ctor = "function" == typeof genFun && genFun.constructor;
+    return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
+  }, exports.mark = function (genFun) {
+    return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
+  }, exports.awrap = function (arg) {
+    return {
+      __await: arg
+    };
+  }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    void 0 === PromiseImpl && (PromiseImpl = Promise);
+    var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl);
+    return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) {
+      return result.done ? result.value : iter.next();
+    });
+  }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () {
+    return this;
+  }), define(Gp, "toString", function () {
+    return "[object Generator]";
+  }), exports.keys = function (object) {
+    var keys = [];
+
+    for (var key in object) {
+      keys.push(key);
+    }
+
+    return keys.reverse(), function next() {
+      for (; keys.length;) {
+        var key = keys.pop();
+        if (key in object) return next.value = key, next.done = !1, next;
+      }
+
+      return next.done = !0, next;
+    };
+  }, exports.values = values, Context.prototype = {
+    constructor: Context,
+    reset: function reset(skipTempReset) {
+      if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) {
+        "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined);
+      }
+    },
+    stop: function stop() {
+      this.done = !0;
+      var rootRecord = this.tryEntries[0].completion;
+      if ("throw" === rootRecord.type) throw rootRecord.arg;
+      return this.rval;
+    },
+    dispatchException: function dispatchException(exception) {
+      if (this.done) throw exception;
+      var context = this;
+
+      function handle(loc, caught) {
+        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i],
+            record = entry.completion;
+        if ("root" === entry.tryLoc) return handle("end");
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc"),
+              hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+          } else {
+            if (!hasFinally) throw new Error("try statement without catch or finally");
+            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+          }
+        }
+      }
+    },
+    abrupt: function abrupt(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+
+        if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
+      var record = finallyEntry ? finallyEntry.completion : {};
+      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
+    },
+    complete: function complete(record, afterLoc) {
+      if ("throw" === record.type) throw record.arg;
+      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
+    },
+    finish: function finish(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
+      }
+    },
+    "catch": function _catch(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+
+          if ("throw" === record.type) {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+
+          return thrown;
+        }
+      }
+
+      throw new Error("illegal catch attempt");
+    },
+    delegateYield: function delegateYield(iterable, resultName, nextLoc) {
+      return this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      }, "next" === this.method && (this.arg = undefined), ContinueSentinel;
+    }
+  }, exports;
+}
+
+module.exports = _regeneratorRuntime, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 8698:
+/***/ (function(module) {
+
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+
+  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+    return typeof obj;
+  } : function (obj) {
+    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(obj);
+}
+
+module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 4687:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+// TODO(Babel 8): Remove this file.
+
+var runtime = __webpack_require__(7061)();
+module.exports = runtime;
+
+// Copied from https://github.com/facebook/regenerator/blob/main/packages/runtime/runtime.js#L736=
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+}
+
+
+/***/ }),
+
 /***/ 7326:
 /***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
 
@@ -46979,7 +47222,7 @@ var warn_once = __webpack_require__(8806);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
 var asyncToGenerator = __webpack_require__(5861);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(7757);
+var regenerator = __webpack_require__(4687);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 // EXTERNAL MODULE: ./src/compat/eme/custom_media_keys/index.ts + 7 modules
 var custom_media_keys = __webpack_require__(6139);
@@ -48684,7 +48927,7 @@ var generateRequestID = (0,id_generator/* default */.Z)();
  * `options` argument, which may retry a segment request when it fails.
  *
  * @param {string} bufferType
- * @param {Object} transport
+ * @param {Object} pipeline
  * @param {Object} callbacks
  * @param {Object} options
  * @returns {Function}
@@ -53406,10 +53649,16 @@ function checkForDiscontinuity(content, checkedRange, nextSegmentStart, hasFinis
   if ( // Next buffered segment starts after the start of the current range
   nextBufferedSegment.bufferedStart !== undefined && nextBufferedSegment.bufferedStart > checkedRange.start && ( // and no segment will fill in that hole
   nextSegmentStart === null || nextBufferedSegment.infos.segment.end <= nextSegmentStart)) {
+    var _discontinuityEnd = nextBufferedSegment.bufferedStart;
+
+    if (!hasFinishedLoading && representation.index.awaitSegmentBetween(checkedRange.start, _discontinuityEnd) !== false) {
+      return null;
+    }
+
     log/* default.debug */.Z.debug("RS: current discontinuity encountered", adaptation.type, nextBufferedSegment.bufferedStart);
     return {
       start: undefined,
-      end: nextBufferedSegment.bufferedStart
+      end: _discontinuityEnd
     };
   } // Check if there's a discontinuity BETWEEN segments of the current range
 
@@ -53417,15 +53666,26 @@ function checkForDiscontinuity(content, checkedRange, nextSegmentStart, hasFinis
   var nextHoleIdx = getIndexOfFirstDiscontinuityBetweenChunks(bufferedSegments, checkedRange, nextBufferedInRangeIdx + 1); // If there was a hole between two consecutives segments, and if this hole
   // comes before the next segment to load, there is a discontinuity (that hole!)
 
-  if (nextHoleIdx !== null && (nextSegmentStart === null || bufferedSegments[nextHoleIdx].infos.segment.end <= nextSegmentStart)) {
-    var start = bufferedSegments[nextHoleIdx - 1].bufferedEnd;
-    var end = bufferedSegments[nextHoleIdx].bufferedStart;
-    log/* default.debug */.Z.debug("RS: future discontinuity encountered", adaptation.type, start, end);
-    return {
-      start: start,
-      end: end
-    };
-  } else if (nextSegmentStart === null) {
+  if (nextHoleIdx !== null) {
+    var segmentInfoBeforeHole = bufferedSegments[nextHoleIdx - 1];
+    var segmentInfoAfterHole = bufferedSegments[nextHoleIdx];
+
+    if (nextSegmentStart === null || segmentInfoAfterHole.infos.segment.end <= nextSegmentStart) {
+      if (!hasFinishedLoading && representation.index.awaitSegmentBetween(segmentInfoBeforeHole.infos.segment.end, segmentInfoAfterHole.infos.segment.time) !== false) {
+        return null;
+      }
+
+      var start = segmentInfoBeforeHole.bufferedEnd;
+      var end = segmentInfoAfterHole.bufferedStart;
+      log/* default.debug */.Z.debug("RS: future discontinuity encountered", adaptation.type, start, end);
+      return {
+        start: start,
+        end: end
+      };
+    }
+  }
+
+  if (nextSegmentStart === null) {
     // If no hole between segments and no segment to load, check for a
     // discontinuity at the end of the Period
     if (hasFinishedLoading && period.end !== undefined) {
@@ -53468,12 +53728,12 @@ function checkForDiscontinuity(content, checkedRange, nextSegmentStart, hasFinis
 
       if (bufSeg.bufferedStart < checkedRange.end) {
         if (bufSeg.bufferedEnd !== undefined && bufSeg.bufferedEnd < checkedRange.end) {
-          var _discontinuityEnd = representation.index.checkDiscontinuity(checkedRange.end);
+          var _discontinuityEnd2 = representation.index.checkDiscontinuity(checkedRange.end);
 
-          if (_discontinuityEnd !== null) {
+          if (_discontinuityEnd2 !== null) {
             return {
               start: bufSeg.bufferedEnd,
-              end: _discontinuityEnd
+              end: _discontinuityEnd2
             };
           }
         }
@@ -54219,37 +54479,29 @@ function getBufferStatus(content, initialWantedTime, playbackObserver, fastSwitc
    * needed segments for this Representation until the end of the Period.
    */
 
-  var hasFinishedLoading = neededRange.hasReachedPeriodEnd && prioritizedNeededSegments.length === 0 && segmentsOnHold.length === 0;
-  var imminentDiscontinuity;
+  var hasFinishedLoading = representation.index.isInitialized() && representation.index.isFinished() && neededRange.hasReachedPeriodEnd && prioritizedNeededSegments.length === 0 && segmentsOnHold.length === 0;
+  /**
+   * Start time in seconds of the next available not-yet pushed segment.
+   * `null` if no segment is wanted for the current wanted range.
+   */
 
-  if (!representation.index.isInitialized() || // TODO better handle contents not chronologically generated
-  !representation.index.areSegmentsChronologicallyGenerated() && !hasFinishedLoading) {
-    // We might be missing information about future segments
-    imminentDiscontinuity = null;
-  } else {
-    /**
-     * Start time in seconds of the next available not-yet pushed segment.
-     * `null` if no segment is wanted for the current wanted range.
-     */
-    var nextSegmentStart = null;
+  var nextSegmentStart = null;
 
-    if (segmentsBeingPushed.length > 0) {
-      nextSegmentStart = Math.min.apply(Math, segmentsBeingPushed.map(function (info) {
-        return info.segment.time;
-      }));
-    }
-
-    if (segmentsOnHold.length > 0) {
-      nextSegmentStart = nextSegmentStart !== null ? Math.min(nextSegmentStart, segmentsOnHold[0].time) : segmentsOnHold[0].time;
-    }
-
-    if (prioritizedNeededSegments.length > 0) {
-      nextSegmentStart = nextSegmentStart !== null ? Math.min(nextSegmentStart, prioritizedNeededSegments[0].segment.time) : prioritizedNeededSegments[0].segment.time;
-    }
-
-    imminentDiscontinuity = checkForDiscontinuity(content, neededRange, nextSegmentStart, hasFinishedLoading, bufferedSegments);
+  if (segmentsBeingPushed.length > 0) {
+    nextSegmentStart = Math.min.apply(Math, segmentsBeingPushed.map(function (info) {
+      return info.segment.time;
+    }));
   }
 
+  if (segmentsOnHold.length > 0) {
+    nextSegmentStart = nextSegmentStart !== null ? Math.min(nextSegmentStart, segmentsOnHold[0].time) : segmentsOnHold[0].time;
+  }
+
+  if (prioritizedNeededSegments.length > 0) {
+    nextSegmentStart = nextSegmentStart !== null ? Math.min(nextSegmentStart, prioritizedNeededSegments[0].segment.time) : prioritizedNeededSegments[0].segment.time;
+  }
+
+  var imminentDiscontinuity = checkForDiscontinuity(content, neededRange, nextSegmentStart, hasFinishedLoading, bufferedSegments);
   return {
     imminentDiscontinuity: imminentDiscontinuity,
     hasFinishedLoading: hasFinishedLoading,
@@ -54275,7 +54527,7 @@ function getRangeOfNeededSegments(content, initialWantedTime, bufferGoal) {
   var manifest = content.manifest,
       period = content.period,
       representation = content.representation;
-  var lastIndexPosition = representation.index.getLastPosition();
+  var lastIndexPosition = representation.index.getLastAvailablePosition();
   var representationIndex = representation.index; // There is an exception for when the current initially wanted time is already
   // after the last position with segments AND when we're playing the absolute
   // last Period in the Manifest.
@@ -56810,6 +57062,7 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
 
 
 
+
  // NOTE As of now (RxJS 7.4.0), RxJS defines `ignoreElements` default
 // first type parameter as `any` instead of the perfectly fine `unknown`,
 // leading to linter issues, as it forbids the usage of `any`.
@@ -56849,7 +57102,7 @@ function ContentTimeBoundariesObserver(manifest, streams, playbackObserver) {
     if (wantedPosition < manifest.getMinimumSafePosition()) {
       var warning = new media_error/* default */.Z("MEDIA_TIME_BEFORE_MANIFEST", "The current position is behind the " + "earliest time announced in the Manifest.");
       return events_generators/* default.warning */.Z.warning(warning);
-    } else if (wantedPosition > maximumPositionCalculator.getCurrentMaximumPosition()) {
+    } else if (wantedPosition > maximumPositionCalculator.getMaximumAvailablePosition()) {
       var _warning = new media_error/* default */.Z("MEDIA_TIME_AFTER_MANIFEST", "The current position is after the latest " + "time announced in the Manifest.");
 
       return events_generators/* default.warning */.Z.warning(_warning);
@@ -56865,31 +57118,27 @@ function ContentTimeBoundariesObserver(manifest, streams, playbackObserver) {
 
   var contentDuration = (0,reference/* default */.ZP)(undefined);
   var updateDurationOnManifestUpdate$ = (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,startWith/* startWith */.O)(null), (0,tap/* tap */.b)(function () {
-    if (!manifest.isDynamic) {
-      var maxPos = maximumPositionCalculator.getCurrentMaximumPosition();
-      contentDuration.setValue(maxPos);
-    } else {
-      // TODO handle finished dynamic contents?
-      contentDuration.setValue(undefined);
-    }
+    var duration = manifest.isDynamic ? maximumPositionCalculator.getEndingPosition() : maximumPositionCalculator.getMaximumAvailablePosition();
+    contentDuration.setValue(duration);
   }), (0,ignoreElements/* ignoreElements */.l)());
   var updateDurationAndTimeBoundsOnTrackChange$ = streams.pipe((0,tap/* tap */.b)(function (message) {
     if (message.type === "adaptationChange") {
+      if (!manifest.isLastPeriodKnown) {
+        return;
+      }
+
       var lastPeriod = manifest.periods[manifest.periods.length - 1];
 
       if (message.value.period.id === (lastPeriod === null || lastPeriod === void 0 ? void 0 : lastPeriod.id)) {
-        if (message.value.type === "audio") {
-          maximumPositionCalculator.updateLastAudioAdaptation(message.value.adaptation);
-
-          if (!manifest.isDynamic) {
-            contentDuration.setValue(maximumPositionCalculator.getCurrentMaximumPosition());
+        if (message.value.type === "audio" || message.value.type === "video") {
+          if (message.value.type === "audio") {
+            maximumPositionCalculator.updateLastAudioAdaptation(message.value.adaptation);
+          } else {
+            maximumPositionCalculator.updateLastVideoAdaptation(message.value.adaptation);
           }
-        } else if (message.value.type === "video") {
-          maximumPositionCalculator.updateLastVideoAdaptation(message.value.adaptation);
 
-          if (!manifest.isDynamic) {
-            contentDuration.setValue(maximumPositionCalculator.getCurrentMaximumPosition());
-          }
+          var newDuration = manifest.isDynamic ? maximumPositionCalculator.getMaximumAvailablePosition() : maximumPositionCalculator.getEndingPosition();
+          contentDuration.setValue(newDuration);
         }
       }
     }
@@ -56923,7 +57172,7 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
    * If no Adaptation has been set, it should be set to `null`.
    *
    * Allows to calculate the maximum position more precizely in
-   * `getCurrentMaximumPosition`.
+   * `getMaximumAvailablePosition` and `getEndingPosition`.
    * @param {Object|null} adaptation
    */
 
@@ -56938,7 +57187,7 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
    * If no Adaptation has been set, it should be set to `null`.
    *
    * Allows to calculate the maximum position more precizely in
-   * `getCurrentMaximumPosition`.
+   * `getMaximumAvailablePosition` and `getEndingPosition`.
    * @param {Object|null} adaptation
    */
   ;
@@ -56947,13 +57196,13 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
     this._lastVideoAdaptation = adaptation;
   }
   /**
-   * Returns an estimate of the maximum position reachable under the current
-   * circumstances.
+   * Returns an estimate of the maximum position currently reachable (i.e.
+   * segments are available) under the current circumstances.
    * @returns {number}
    */
   ;
 
-  _proto.getCurrentMaximumPosition = function getCurrentMaximumPosition() {
+  _proto.getMaximumAvailablePosition = function getMaximumAvailablePosition() {
     var _a;
 
     if (this._manifest.isDynamic) {
@@ -56966,7 +57215,7 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
       if (this._lastVideoAdaptation === null) {
         return this._manifest.getMaximumSafePosition();
       } else {
-        var lastVideoPosition = getLastPositionFromAdaptation(this._lastVideoAdaptation);
+        var lastVideoPosition = getLastAvailablePositionFromAdaptation(this._lastVideoAdaptation);
 
         if (typeof lastVideoPosition !== "number") {
           return this._manifest.getMaximumSafePosition();
@@ -56975,7 +57224,7 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
         return lastVideoPosition;
       }
     } else if (this._lastVideoAdaptation === null) {
-      var lastAudioPosition = getLastPositionFromAdaptation(this._lastAudioAdaptation);
+      var lastAudioPosition = getLastAvailablePositionFromAdaptation(this._lastAudioAdaptation);
 
       if (typeof lastAudioPosition !== "number") {
         return this._manifest.getMaximumSafePosition();
@@ -56983,9 +57232,9 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
 
       return lastAudioPosition;
     } else {
-      var _lastAudioPosition = getLastPositionFromAdaptation(this._lastAudioAdaptation);
+      var _lastAudioPosition = getLastAvailablePositionFromAdaptation(this._lastAudioAdaptation);
 
-      var _lastVideoPosition = getLastPositionFromAdaptation(this._lastVideoAdaptation);
+      var _lastVideoPosition = getLastAvailablePositionFromAdaptation(this._lastVideoAdaptation);
 
       if (typeof _lastAudioPosition !== "number" || typeof _lastVideoPosition !== "number") {
         return this._manifest.getMaximumSafePosition();
@@ -56993,24 +57242,60 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
         return Math.min(_lastAudioPosition, _lastVideoPosition);
       }
     }
+  }
+  /**
+   * Returns an estimate of the actual ending position once
+   * the full content is available.
+   * Returns `undefined` if that could not be determined, for various reasons.
+   * @returns {number|undefined}
+   */
+  ;
+
+  _proto.getEndingPosition = function getEndingPosition() {
+    var _a, _b;
+
+    if (!this._manifest.isDynamic) {
+      return this.getMaximumAvailablePosition();
+    }
+
+    if (this._lastVideoAdaptation === undefined || this._lastAudioAdaptation === undefined) {
+      return undefined;
+    } else if (this._lastAudioAdaptation === null) {
+      if (this._lastVideoAdaptation === null) {
+        return undefined;
+      } else {
+        return (_a = getEndingPositionFromAdaptation(this._lastVideoAdaptation)) !== null && _a !== void 0 ? _a : undefined;
+      }
+    } else if (this._lastVideoAdaptation === null) {
+      return (_b = getEndingPositionFromAdaptation(this._lastAudioAdaptation)) !== null && _b !== void 0 ? _b : undefined;
+    } else {
+      var lastAudioPosition = getEndingPositionFromAdaptation(this._lastAudioAdaptation);
+      var lastVideoPosition = getEndingPositionFromAdaptation(this._lastVideoAdaptation);
+
+      if (typeof lastAudioPosition !== "number" || typeof lastVideoPosition !== "number") {
+        return undefined;
+      } else {
+        return Math.min(lastAudioPosition, lastVideoPosition);
+      }
+    }
   };
 
   return MaximumPositionCalculator;
 }();
 /**
- * Returns "last time of reference" from the adaptation given.
+ * Returns last currently available position from the Adaptation given.
  * `undefined` if a time could not be found.
- * Null if the Adaptation has no segments (it could be that it didn't started or
+ * `null` if the Adaptation has no segments (it could be that it didn't started or
  * that it already finished for example).
  *
- * We consider the earliest last time from every representations in the given
- * adaptation.
+ * We consider the earliest last available position from every Representation
+ * in the given Adaptation.
  * @param {Object} adaptation
  * @returns {Number|undefined|null}
  */
 
 
-function getLastPositionFromAdaptation(adaptation) {
+function getLastAvailablePositionFromAdaptation(adaptation) {
   var representations = adaptation.representations;
   var min = null;
   /**
@@ -57025,7 +57310,7 @@ function getLastPositionFromAdaptation(adaptation) {
   for (var i = 0; i < representations.length; i++) {
     if (representations[i].index !== lastIndex) {
       lastIndex = representations[i].index;
-      var lastPosition = representations[i].index.getLastPosition();
+      var lastPosition = representations[i].index.getLastAvailablePosition();
 
       if (lastPosition === undefined) {
         // we cannot tell
@@ -57033,14 +57318,53 @@ function getLastPositionFromAdaptation(adaptation) {
       }
 
       if (lastPosition !== null) {
-        min = min == null ? lastPosition : Math.min(min, lastPosition);
+        min = (0,is_null_or_undefined/* default */.Z)(min) ? lastPosition : Math.min(min, lastPosition);
       }
     }
   }
 
-  if (min === null) {
-    // It means that all positions were null === no segments (yet?)
-    return null;
+  return min;
+}
+/**
+ * Returns ending time from the Adaptation given, once all its segments are
+ * available.
+ * `undefined` if a time could not be found.
+ * `null` if the Adaptation has no segments (it could be that it already
+ * finished for example).
+ *
+ * We consider the earliest ending time from every Representation in the given
+ * Adaptation.
+ * @param {Object} adaptation
+ * @returns {Number|undefined|null}
+ */
+
+
+function getEndingPositionFromAdaptation(adaptation) {
+  var representations = adaptation.representations;
+  var min = null;
+  /**
+   * Some Manifest parsers use the exact same `IRepresentationIndex` reference
+   * for each Representation of a given Adaptation, because in the actual source
+   * Manifest file, indexing data is often defined at Adaptation-level.
+   * This variable allows to optimize the logic here when this is the case.
+   */
+
+  var lastIndex;
+
+  for (var i = 0; i < representations.length; i++) {
+    if (representations[i].index !== lastIndex) {
+      lastIndex = representations[i].index;
+      var lastPosition = representations[i].index.getEnd();
+
+      if (lastPosition === undefined) {
+        // we cannot tell
+        return undefined;
+      }
+
+      if (lastPosition !== null) {
+        min = (0,is_null_or_undefined/* default */.Z)(min) ? lastPosition : Math.min(min, lastPosition);
+      }
+    }
   }
 
   return min;
@@ -61303,7 +61627,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     videoElement.preload = "auto";
     _this.version =
     /* PLAYER_VERSION */
-    "3.28.0";
+    "3.28.1-dev.2022083000";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -64124,7 +64448,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.28.0";
+"3.28.1-dev.2022083000";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
@@ -64196,7 +64520,7 @@ function initializeFeaturesObject() {
 
   if (true) {
     features_object/* default.transports.dash */.Z.transports.dash = (__webpack_require__(5877)/* ["default"] */ .Z);
-    features_object/* default.dashParsers.js */.Z.dashParsers.js = (__webpack_require__(4846)/* ["default"] */ .Z);
+    features_object/* default.dashParsers.js */.Z.dashParsers.js = (__webpack_require__(4541)/* ["default"] */ .Z);
   }
 
   if (false) {}
