@@ -15,6 +15,7 @@
   - Compat: Fix issue with Samsung TVs where starting playback on a discontinuity could lead to infinite rebuffering [#1140]
   - Better handle valid reverse playback use cases by not skipping gaps when the playback rate has been set to `0` or a negative value [#1138]
   - DRM: When using persistent licenses, create new MediaKeySession when `load` resolves with `false`, instead of relying the same, to fix issues with such persistent sessions [#1139]
+  - subtitles/TTML: Set default values for `tts:extent` and `tts:origin` when improbable values are found
 
 ### Other improvements
 
@@ -41,7 +42,6 @@
   - DASH: Fix issues that could arise if a segment is calculated to start at a negative position [#1122]
   - DASH: Fix possibility of wrong segments being requested when a SegmentTimeline in a given Period (whose Period@end is set) had an S@r set to `-1` at its end [#1098]
   - DASH: If the first `<S>` has its S@t attribute not set, make as if it is set to `0` [#1118]
-  - subtitles/TTML: Set default values for `tts:extent` and `tts:origin` when improbable values are found
 
 ### Other improvements
 
