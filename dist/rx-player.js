@@ -59795,7 +59795,7 @@ function checkReloadOptions(options) {
 
 
 function parseLoadVideoOptions(options) {
-  var _a, _b, _c, _d, _e, _f;
+  var _a, _b, _c, _d, _e, _f, _g;
 
   var url;
   var transport;
@@ -59961,11 +59961,7 @@ function parseLoadVideoOptions(options) {
     }
   }
 
-  var networkConfig = (0,is_null_or_undefined/* default */.Z)(options.networkConfig) ? {} : {
-    manifestRetry: options.networkConfig.manifestRetry,
-    offlineRetry: options.networkConfig.offlineRetry,
-    segmentRetry: options.networkConfig.segmentRetry
-  }; // TODO without cast
+  var networkConfig = (_g = options.networkConfig) !== null && _g !== void 0 ? _g : {}; // TODO without cast
 
   /* eslint-disable @typescript-eslint/consistent-type-assertions */
 
@@ -62057,7 +62053,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     videoElement.preload = "auto";
     _this.version =
     /* PLAYER_VERSION */
-    "3.29.0-canal.2022090500";
+    "3.29.0-canal.2022090600";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -64882,7 +64878,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.29.0-canal.2022090500";
+"3.29.0-canal.2022090600";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
