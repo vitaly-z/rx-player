@@ -83,6 +83,8 @@ export default function checkKeyStatuses(
   const whitelistedKeyIds : Uint8Array[] = [];
   const { fallbackOn = {}, throwOnLicenseExpiration } = options;
 
+  let logStr = "";
+
   (session.keyStatuses.forEach as IKeyStatusesForEach)((
     _arg1 : unknown,
     _arg2 : unknown) => {
@@ -96,6 +98,7 @@ export default function checkKeyStatuses(
 
     const keyId = getUUIDKidFromKeyStatusKID(keySystem,
                                              new Uint8Array(keyStatusKeyId));
+    logStr += ` ${bytesToHex(keyId)}: "${keyStatus}" -`;
     switch (keyStatus) {
       case KEY_STATUSES.EXPIRED: {
         const error = new EncryptedMediaError(
@@ -139,5 +142,6 @@ export default function checkKeyStatuses(
         break;
     }
   });
+  console.error("XXX KS", logStr);
   return { warnings, blacklistedKeyIDs, whitelistedKeyIds };
 }
