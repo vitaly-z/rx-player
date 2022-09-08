@@ -393,3 +393,8 @@ interface IKeyMessageHandledEvent {
                     ICustomMediaKeySession;
            license: ILicense|null; };
 }
+
+export interface IKeyMessageReceivedEvent {
+  type: "key-message-received";
+  value: null;
+}

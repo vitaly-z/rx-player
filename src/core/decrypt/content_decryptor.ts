@@ -525,6 +525,7 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
                                   linkedKeys.blacklisted);
           }
 
+          console.error("XXX UNLOCKING now");
           this._unlockInitDataQueue();
         },
 
@@ -552,11 +553,11 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
       sub.unsubscribe();
     });
 
-    if (options.singleLicensePer === undefined ||
-        options.singleLicensePer === "init-data")
-    {
-      this._unlockInitDataQueue();
-    }
+//     if (options.singleLicensePer === undefined ||
+//         options.singleLicensePer === "init-data")
+//     {
+//       this._unlockInitDataQueue();
+//     }
 
     if (sessionRes.type === MediaKeySessionLoadingType.Created) {
       const requestData = initializationData.values.constructRequestData();
