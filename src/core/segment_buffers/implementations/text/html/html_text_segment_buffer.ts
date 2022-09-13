@@ -413,10 +413,15 @@ export default class HTMLTextSegmentBuffer extends SegmentBuffer {
    */
   private refreshSubtitles() : void {
     const { MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL } = config.getCurrent();
-    // to spread the time error, we divide the regular chosen interval.
-    const time = Math.max(this._videoElement.currentTime +
-                            (MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL / 1000) / 2,
-                          0);
+    let time;
+    if (this._videoElement.paused || this._videoElement.playbackRate <= 0) {
+      time = this._videoElement.currentTime;
+    } else {
+      // to spread the time error, we divide the regular chosen interval.
+      time = Math.max(this._videoElement.currentTime +
+                       (MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL / 1000) / 2,
+                      0);
+    }
     const cues = this._buffer.get(time);
     if (cues.length === 0) {
       this._disableCurrentCues();
