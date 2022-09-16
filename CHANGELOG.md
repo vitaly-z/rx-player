@@ -1,5 +1,29 @@
 # Changelog
 
+## v3.29.0-dev.2022091600 (2022-09-16)
+
+### Features
+
+  - add `networkConfig.segmentRequestTimeout` and `networkConfig.manifestRequestTimeout` options to loadVideo to configure the timeout of respectively segment and manifest requests [#1156]
+  - add `timeout` property to the first argument communicated to a `segmentLoader` (from `loadVideo`'s `transportOptions`) [#1156]
+  - add `timeout` property to a new third argument communicated to a `manifestLoader` (from `loadVideo`'s `transportOptions`) [#1156]
+  - add `keySystems[].onKeyExpiration` to `loadVideo` options to configure the behavior the RxPlayer should have on key expiration [#1157]
+  - add `keyStatuses` property to an `EncryptedMediaError` with the `KEY_STATUS_CHANGE_ERROR` code to communicate which key id and key statuses caused issues. [#1157]
+
+### Bug fixes
+
+  - Compat/Directfile: Fix an issue with LG TV when playing multiple directfile contents with the `stopAtEnd` player option set to `true` [#1154]
+  - Compat: To work around an issue on LG TVs, also specify a request timeout manually through a `setTimeout` call when XMLHttpRequests are created for Manifest and segment requests [#1152]
+  - Compat: Fix issue with Samsung TVs where starting playback on a discontinuity could lead to infinite rebuffering [#1140]
+  - Compat: For `"directfile"` contents, also consider `AudioTrack` with a `description` (without an "s") as audio-description audio tracks to work-around what seems to be a Safari typo [#1160]
+  - Better handle valid reverse playback use cases by not skipping gaps when the playback rate has been set to `0` or a negative value [#1138]
+  - DRM: When using persistent licenses, create new MediaKeySession when `load` resolves with `false`, instead of relying the same, to fix issues with such persistent sessions [#1139]
+
+### Other improvements
+
+  - In the experimental "local" transport, add `incomingRanges` property to signal the time ranges of remaining data, allowing better discontinuity handling and duration estimates for sill-loading dowloaded contents [#1151]
+  - Only send through `"warning"` events, just one `EncryptedMediaError` with a `KEY_STATUS_CHANGE_ERROR` code when multiple ones arises at the same time [#1157]
+
 ## v3.28.0 (2022-07-12)
 
 ### Features
