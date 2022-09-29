@@ -15,6 +15,7 @@
  */
 
 import { RequestError } from "../../errors";
+import idGenerator from "../id_generator";
 import isNonEmptyString from "../is_non_empty_string";
 import isNullOrUndefined from "../is_null_or_undefined";
 import {
@@ -22,6 +23,18 @@ import {
   CancellationSignal,
 } from "../task_canceller";
 
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+/* eslint-disable no-console */
+
+const worker = new Worker("./worker.js");
+const generateRequestId = idGenerator();
 
 const DEFAULT_RESPONSE_TYPE : XMLHttpRequestResponseType = "json";
 
@@ -137,11 +150,83 @@ export default function request<T>(
   };
 
   return new Promise((resolve, reject) => {
-    const { onProgress, cancelSignal } = options;
+    const { /** onProgress, */ cancelSignal } = options;
     const { url,
             headers,
             responseType,
             timeout } = requestOptions;
+    const requestId = generateRequestId();
+    if ((window as any).REQWORKER) {
+
+      let deregisterSignal : (() => void) | undefined;
+      worker.addEventListener("message", onMessage);
+
+      function cleanUpWorkerResources() {
+        deregisterSignal?.();
+        worker.removeEventListener("message", onMessage);
+      }
+      function onMessage(evt: MessageEvent) {
+        const { requestId: rid, type, value } = evt.data;
+        if (requestId !== rid) {
+          return;
+        }
+
+        if (type === "response") {
+          cleanUpWorkerResources();
+          resolve(value);
+          return;
+        } else if (type === "bad-status") {
+          cleanUpWorkerResources();
+          reject(new RequestError(url, value.status, "ERROR_HTTP_CODE", undefined));
+          return;
+        } else if (type === "error") {
+          cleanUpWorkerResources();
+          reject(new RequestError(url, value.status, "ERROR_EVENT", undefined));
+          return;
+        } else if (type === "timeout") {
+          cleanUpWorkerResources();
+          reject(new RequestError(url, value.status, "TIMEOUT", undefined));
+          return;
+        }
+      }
+
+      if (cancelSignal !== undefined) {
+        deregisterSignal = cancelSignal.register((err) => {
+          worker.postMessage({
+            type: "abort",
+            value: requestId,
+          });
+          cleanUpWorkerResources();
+          reject(err);
+        });
+      }
+
+      worker.postMessage({
+        type: "send",
+        value: {
+          requestId,
+          url,
+          headers,
+          responseType,
+          timeout,
+          sendBack: true,
+        },
+      });
+
+      return;
+    }
+
+    worker.postMessage({
+      type: "send",
+      value: {
+        requestId,
+        url,
+        headers,
+        responseType,
+        timeout,
+      },
+    });
+
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);
 
@@ -170,7 +255,7 @@ export default function request<T>(
     if (!isNullOrUndefined(headers)) {
       const _headers = headers;
       for (const key in _headers) {
-        if (_headers.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(_headers, key)) {
           xhr.setRequestHeader(key, _headers[key]);
         }
       }
@@ -183,6 +268,10 @@ export default function request<T>(
     if (cancelSignal !== undefined) {
       deregisterCancellationListener = cancelSignal
         .register(function abortRequest(err : CancellationError) {
+          worker.postMessage({
+            type: "abort",
+            value: requestId,
+          });
           clearCancellingProcess();
           if (!isNullOrUndefined(xhr) && xhr.readyState !== 4) {
             xhr.abort();
@@ -197,6 +286,7 @@ export default function request<T>(
 
     xhr.onerror = function onXHRError() {
       clearCancellingProcess();
+      console.error("!!!! MAIN NETERROR ", url, headers?.range, xhr);
       reject(new RequestError(url, xhr.status, "ERROR_EVENT", xhr));
     };
 
@@ -205,17 +295,17 @@ export default function request<T>(
       reject(new RequestError(url, xhr.status, "TIMEOUT", xhr));
     };
 
-    if (onProgress !== undefined) {
-      xhr.onprogress = function onXHRProgress(event) {
-        const currentTime = performance.now();
-        onProgress({ url,
-                     duration: currentTime - sendingTime,
-                     sendingTime,
-                     currentTime,
-                     size: event.loaded,
-                     totalSize: event.total });
-      };
-    }
+    // if (onProgress !== undefined) {
+    //   xhr.onprogress = function onXHRProgress(event) {
+    //     const currentTime = performance.now();
+    //     onProgress({ url,
+    //                  duration: currentTime - sendingTime,
+    //                  sendingTime,
+    //                  currentTime,
+    //                  size: event.loaded,
+    //                  totalSize: event.total });
+    //   };
+    // }
 
     xhr.onload = function onXHRLoad(event : ProgressEvent) {
       if (xhr.readyState === 4) {
@@ -243,10 +333,16 @@ export default function request<T>(
           }
 
           if (isNullOrUndefined(responseData)) {
+            console.error("!!!! MAIN ERROR ", url, headers?.range, xhr);
             reject(new RequestError(url, xhr.status, "PARSE_ERROR", xhr));
             return;
           }
 
+          console.warn("!!!! MAIN SUCCESS ",
+                       url,
+                       headers?.range,
+                       "size", totalSize,
+                       "duration", receivedTime - sendingTime);
           resolve({ status,
                     url: _url,
                     responseType: loadedResponseType,
