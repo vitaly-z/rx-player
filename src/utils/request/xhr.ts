@@ -32,6 +32,7 @@ import {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
 /* eslint-disable no-console */
+/* eslint-disable prefer-const */
 
 const worker = new Worker("./worker.js");
 const generateRequestId = idGenerator();
@@ -156,81 +157,14 @@ export default function request<T>(
             responseType,
             timeout } = requestOptions;
     const requestId = generateRequestId();
-    if ((window as any).REQWORKER) {
-
-      let deregisterSignal : (() => void) | undefined;
-      worker.addEventListener("message", onMessage);
-
-      function cleanUpWorkerResources() {
-        deregisterSignal?.();
-        worker.removeEventListener("message", onMessage);
-      }
-      function onMessage(evt: MessageEvent) {
-        const { requestId: rid, type, value } = evt.data;
-        if (requestId !== rid) {
-          return;
-        }
-
-        if (type === "response") {
-          cleanUpWorkerResources();
-          resolve(value);
-          return;
-        } else if (type === "bad-status") {
-          cleanUpWorkerResources();
-          reject(new RequestError(url, value.status, "ERROR_HTTP_CODE", undefined));
-          return;
-        } else if (type === "error") {
-          cleanUpWorkerResources();
-          reject(new RequestError(url, value.status, "ERROR_EVENT", undefined));
-          return;
-        } else if (type === "timeout") {
-          cleanUpWorkerResources();
-          reject(new RequestError(url, value.status, "TIMEOUT", undefined));
-          return;
-        }
-      }
-
-      if (cancelSignal !== undefined) {
-        deregisterSignal = cancelSignal.register((err) => {
-          worker.postMessage({
-            type: "abort",
-            value: requestId,
-          });
-          cleanUpWorkerResources();
-          reject(err);
-        });
-      }
-
-      worker.postMessage({
-        type: "send",
-        value: {
-          requestId,
-          url,
-          headers,
-          responseType,
-          timeout,
-          sendBack: true,
-        },
-      });
-
-      return;
-    }
-
-    worker.postMessage({
-      type: "send",
-      value: {
-        requestId,
-        url,
-        headers,
-        responseType,
-        timeout,
-      },
-    });
+    let mainXhr : XMLHttpRequest | undefined;
+    let timeoutId : undefined | number;
+    let deregisterCancellationListener : (() => void) | null = null;
+    let deregisterWorkerSignal : (() => void) | undefined;
 
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);
 
-    let timeoutId : undefined | number;
     if (timeout !== undefined) {
       xhr.timeout = timeout;
 
@@ -242,6 +176,7 @@ export default function request<T>(
       // is more precise, it might also be more efficient.
       timeoutId = window.setTimeout(() => {
         clearCancellingProcess();
+        cleanUpWorkerResources();
         reject(new RequestError(url, xhr.status, "TIMEOUT", xhr));
       }, timeout + 3000);
     }
@@ -264,7 +199,6 @@ export default function request<T>(
     const sendingTime = performance.now();
 
     // Handle request cancellation
-    let deregisterCancellationListener : (() => void) | null = null;
     if (cancelSignal !== undefined) {
       deregisterCancellationListener = cancelSignal
         .register(function abortRequest(err : CancellationError) {
@@ -273,6 +207,7 @@ export default function request<T>(
             value: requestId,
           });
           clearCancellingProcess();
+          cleanUpWorkerResources();
           if (!isNullOrUndefined(xhr) && xhr.readyState !== 4) {
             xhr.abort();
           }
@@ -286,12 +221,14 @@ export default function request<T>(
 
     xhr.onerror = function onXHRError() {
       clearCancellingProcess();
+      cleanUpWorkerResources();
       console.error("!!!! MAIN NETERROR ", url, headers?.range, xhr);
       reject(new RequestError(url, xhr.status, "ERROR_EVENT", xhr));
     };
 
     xhr.ontimeout = function onXHRTimeout() {
       clearCancellingProcess();
+      cleanUpWorkerResources();
       reject(new RequestError(url, xhr.status, "TIMEOUT", xhr));
     };
 
@@ -310,6 +247,7 @@ export default function request<T>(
     xhr.onload = function onXHRLoad(event : ProgressEvent) {
       if (xhr.readyState === 4) {
         clearCancellingProcess();
+        cleanUpWorkerResources();
         if (xhr.status >= 200 && xhr.status < 300) {
           const receivedTime = performance.now();
           const totalSize = xhr.response instanceof
@@ -358,7 +296,52 @@ export default function request<T>(
       }
     };
 
-    xhr.send();
+
+    if ((window as any).REQBOTH) {
+      mainXhr = xhr;
+      xhr.send();
+      worker.postMessage({
+        type: "send",
+        value: {
+          requestId,
+          url,
+          headers,
+          responseType,
+          timeout,
+        },
+      });
+    } else if ((window as any).REQWORKER) {
+      if ((window as any).REQMAIN) {
+        mainXhr = xhr;
+        xhr.send();
+      }
+      worker.addEventListener("message", onMessage);
+      if (cancelSignal !== undefined) {
+        deregisterWorkerSignal = cancelSignal.register((err) => {
+          worker.postMessage({
+            type: "abort",
+            value: requestId,
+          });
+          cleanUpWorkerResources();
+          reject(err);
+        });
+      }
+
+      worker.postMessage({
+        type: "send",
+        value: {
+          requestId,
+          url,
+          headers,
+          responseType,
+          timeout,
+          sendBack: true,
+        },
+      });
+    } else {
+      mainXhr = xhr;
+      xhr.send();
+    }
 
     /**
      * Clear resources and timers created to handle cancellation and timeouts.
@@ -371,6 +354,53 @@ export default function request<T>(
         deregisterCancellationListener();
       }
     }
+
+    function cleanUpWorkerResources() {
+      deregisterWorkerSignal?.();
+      worker.removeEventListener("message", onMessage);
+    }
+
+    function onMessage(evt: MessageEvent) {
+      const { requestId: rid, type, value } = evt.data;
+      if (requestId !== rid) {
+        return;
+      }
+
+      if (type === "response") {
+        if (mainXhr !== undefined) {
+          mainXhr.abort();
+        }
+        clearCancellingProcess();
+        cleanUpWorkerResources();
+        resolve(value);
+        return;
+      } else if (type === "bad-status") {
+        if (mainXhr !== undefined) {
+          mainXhr.abort();
+        }
+        clearCancellingProcess();
+        cleanUpWorkerResources();
+        reject(new RequestError(url, value.status, "ERROR_HTTP_CODE", undefined));
+        return;
+      } else if (type === "error") {
+        if (mainXhr !== undefined) {
+          mainXhr.abort();
+        }
+        clearCancellingProcess();
+        cleanUpWorkerResources();
+        reject(new RequestError(url, value.status, "ERROR_EVENT", undefined));
+        return;
+      } else if (type === "timeout") {
+        if (mainXhr !== undefined) {
+          mainXhr.abort();
+        }
+        clearCancellingProcess();
+        cleanUpWorkerResources();
+        reject(new RequestError(url, value.status, "TIMEOUT", undefined));
+        return;
+      }
+    }
+
   });
 }
 
