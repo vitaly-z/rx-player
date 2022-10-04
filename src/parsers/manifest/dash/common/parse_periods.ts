@@ -126,7 +126,7 @@ export default function parsePeriods(
                                                start: periodStart,
                                                timeShiftBufferDepth,
                                                unsafelyBaseOnPreviousPeriod };
-    const adaptations = parseAdaptationSets(periodIR.children.adaptations, adapCtxt);
+    const { adaptations } = parseAdaptationSets(periodIR.children.adaptations, adapCtxt);
 
     const namespaces = (context.xmlNamespaces ?? [])
       .concat(periodIR.attributes.namespaces ?? []);

@@ -215,7 +215,7 @@ function getAdaptationSetSwitchingIDs(
       if (
         supplementalProperty.schemeIdUri ===
         "urn:mpeg:dash:adaptation-set-switching:2016" &&
-        supplementalProperty.value != null
+        supplementalProperty.value !== undefined
       ) {
         return supplementalProperty.value.split(",")
           .map(id => id.trim())
@@ -224,6 +224,31 @@ function getAdaptationSetSwitchingIDs(
     }
   }
   return [];
+}
+
+/**
+ * Returns a list of ID this adaptation can be seamlessly switched to
+ * @param {Object} adaptation
+ * @returns {Array.<string>}
+ */
+function getConnectedPeriod(
+  adaptation : IAdaptationSetIntermediateRepresentation
+) : string | undefined {
+  if (adaptation.children.supplementalProperties != null) {
+    const { supplementalProperties } = adaptation.children;
+    for (const supplementalProperty of supplementalProperties) {
+      if (
+        (supplementalProperty.schemeIdUri ===
+          "urn:mpeg:dash:period-continuity:2015" ||
+          supplementalProperty.schemeIdUri ===
+            "urn:mpeg:dash:period-connectivity:2015") &&
+        supplementalProperty.value !== undefined
+      ) {
+        return supplementalProperty.value;
+      }
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -238,7 +263,7 @@ function getAdaptationSetSwitchingIDs(
 export default function parseAdaptationSets(
   adaptationsIR : IAdaptationSetIntermediateRepresentation[],
   context : IAdaptationSetContext
-): IParsedAdaptations {
+): { adaptations: IParsedAdaptations; metadata: IParsedAdaptationsMetadata } {
   const parsedAdaptations : Record<
     IAdaptationType,
     Array<[ IParsedAdaptation,
@@ -252,6 +277,8 @@ export default function parseAdaptationSets(
   const adaptationSwitchingInfos : IAdaptationSwitchingInfos = {};
 
   const parsedAdaptationsIDs : string[] = [];
+  const metadata : IParsedAdaptationsMetadata = { originalIds: new Map(),
+                                                  connectedAdaptations : [] };
 
   /**
    * Index of the last parsed Video AdaptationSet with a Role set as "main" in
@@ -389,7 +416,6 @@ export default function parseAdaptationSets(
                                            isSignInterpreted,
                                            isTrickModeTrack,
                                            type });
-
       // Avoid duplicate IDs
       while (arrayIncludes(parsedAdaptationsIDs, adaptationID)) {
         adaptationID += "-dup";
@@ -483,9 +509,19 @@ export default function parseAdaptationSets(
       }
     }
 
-    if (originalID != null && adaptationSwitchingInfos[originalID] == null) {
-      adaptationSwitchingInfos[originalID] = { newID,
-                                               adaptationSetSwitchingIDs };
+    const connectedPeriod = getConnectedPeriod(adaptation);
+    if (connectedPeriod !== undefined) {
+      metadata.connectedAdaptations.push({
+        periodId: connectedPeriod,
+        adaptationOriginalId: originalID,
+      });
+    }
+    if (originalID !== undefined) {
+      metadata.originalIds.set(originalID, newID);
+      if (adaptationSwitchingInfos[originalID] === undefined) {
+        adaptationSwitchingInfos[originalID] = { newID,
+                                                 adaptationSetSwitchingIDs };
+      }
     }
   }
 
@@ -501,7 +537,7 @@ export default function parseAdaptationSets(
     }, {});
   parsedAdaptations.video.sort(compareAdaptations);
   attachTrickModeTrack(adaptationsPerType, trickModeAdaptations);
-  return adaptationsPerType;
+  return { adaptations: adaptationsPerType, metadata };
 }
 
 /** Metadata allowing to order AdaptationSets between one another. */
@@ -565,3 +601,20 @@ export interface IAdaptationSetContext extends IInheritedRepresentationContext {
 type IInheritedRepresentationContext = Omit<IRepresentationContext,
                                             "unsafelyBaseOnPreviousAdaptation" |
                                             "parentSegmentTemplates">;
+
+export interface IParsedAdaptationsMetadata {
+  /**
+   * Link Adaptation's sets original id in the MPD, to their newly set id.
+   *
+   * AdaptationSet which didn't have an id in the MPD do not have an entry in
+   * this map.
+   */
+  originalIds : Map<string, string>;
+
+  connectedAdaptations : IConnectedAdaptationMetadata[];
+}
+
+export interface IConnectedAdaptationMetadata {
+  periodId : string;
+  adaptationOriginalId : string | undefined;
+}
