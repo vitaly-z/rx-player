@@ -51,7 +51,15 @@ onmessage = (evt) => {
       const duration = performance.now() - sendingTime;
       const range = headers == null ? undefined : headers.range;
       if (responseData == null) {
-        console.warn("!!!! WORKER PARSE ERROR ", _url, range, "size", totalSize, "duration", duration);
+        // postMessage({
+        //   requestId,
+        //   type: "log",
+        //   value: {
+        //     level: "error",
+        //     message: "!!!! WORKER PARSE ERROR " + _url + " " + range +
+        //       " size " + totalSize + " duration " + duration,
+        //   }
+        // });
         if (sendBack) {
           postMessage({
             requestId,
@@ -64,7 +72,15 @@ onmessage = (evt) => {
         }
         return;
       }
-      console.warn("!!!! WORKER SUCCESS ", _url, range, "size", totalSize, "duration", duration);
+      // postMessage({
+      //   requestId,
+      //   type: "log",
+      //   value: {
+      //     level: "warn",
+      //     message: "!!!! WORKER SUCCESS " + _url + " " + range +
+      //       " size " + totalSize + " duration " + duration,
+      //   }
+      // });
       if (sendBack) {
         const transferable = responseType === "arraybuffer" ?
           responseData :
@@ -90,7 +106,14 @@ onmessage = (evt) => {
       );
       err.xhr = xhr;
       const range = headers == null ? undefined : headers.range;
-      console.error("!!!! WORKER ERROR ", url, range, xhr);
+      // postMessage({
+      //   requestId,
+      //   type: "log",
+      //   value: {
+      //     level: "error",
+      //     message: "!!!! WORKER ERROR " + url + " " + range,
+      //   },
+      // });
       if (sendBack) {
         postMessage({
           requestId,
@@ -107,7 +130,14 @@ onmessage = (evt) => {
   xhr.onerror = function() {
     REQUESTS.delete(requestId);
     const range = headers == null ? undefined : headers.range;
-    console.error("!!!! WORKER NETERROR ", url, range, xhr);
+    // postMessage({
+    //   requestId,
+    //   type: "log",
+    //   value: {
+    //     level: "error",
+    //     message: "!!!! WORKER NETERROR " + url + " " + range,
+    //   },
+    // });
     if (sendBack) {
       postMessage({
         requestId,
@@ -121,8 +151,15 @@ onmessage = (evt) => {
   };
 
   xhr.ontimeout = function onXHRTimeout() {
-    const range = headers == null ? undefined : headers.range;
-    console.error("!!!! WORKER timeout ", url, range, xhr);
+    // const range = headers == null ? undefined : headers.range;
+    // postMessage({
+    //   requestId,
+    //   type: "log",
+    //   value: {
+    //     level: "error",
+    //     message: "!!!! WORKER TIMEOUT " + url + " " + range,
+    //   },
+    // });
     if (sendBack) {
       postMessage({
         requestId,

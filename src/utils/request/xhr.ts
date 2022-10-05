@@ -23,6 +23,11 @@ import {
   CancellationSignal,
 } from "../task_canceller";
 
+const LAST_RESULTS : Array<{
+  worker : number | undefined;
+  main : number | undefined;
+}> = [];
+
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
@@ -34,7 +39,11 @@ import {
 /* eslint-disable no-console */
 /* eslint-disable prefer-const */
 
+console.warn("!!!!!!!!!!!!! BEFORE WORKER");
 const worker = new Worker("./worker.js");
+worker.onerror = (err) => {
+  console.error("!!!!! WORKER ERR", err.error?.message);
+};
 const generateRequestId = idGenerator();
 
 const DEFAULT_RESPONSE_TYPE : XMLHttpRequestResponseType = "json";
@@ -162,6 +171,19 @@ export default function request<T>(
     let deregisterCancellationListener : (() => void) | null = null;
     let deregisterWorkerSignal : (() => void) | undefined;
 
+    const sendingTime = performance.now();
+
+    let hasWorkerFinished = false;
+    let hasMainFinished = false;
+
+    const lastResult : { main: number | undefined; worker: number | undefined } = {
+      main: undefined,
+      worker: undefined,
+    };
+    LAST_RESULTS.push(lastResult);
+    while (LAST_RESULTS.length > 15) {
+      LAST_RESULTS.shift();
+    }
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);
 
@@ -196,8 +218,6 @@ export default function request<T>(
       }
     }
 
-    const sendingTime = performance.now();
-
     // Handle request cancellation
     if (cancelSignal !== undefined) {
       deregisterCancellationListener = cancelSignal
@@ -209,6 +229,7 @@ export default function request<T>(
           clearCancellingProcess();
           cleanUpWorkerResources();
           if (!isNullOrUndefined(xhr) && xhr.readyState !== 4) {
+            hasMainFinished = true;
             xhr.abort();
           }
           reject(err);
@@ -220,6 +241,7 @@ export default function request<T>(
     }
 
     xhr.onerror = function onXHRError() {
+      hasMainFinished = true;
       clearCancellingProcess();
       cleanUpWorkerResources();
       console.error("!!!! MAIN NETERROR ", url, headers?.range, xhr);
@@ -247,9 +269,22 @@ export default function request<T>(
     xhr.onload = function onXHRLoad(event : ProgressEvent) {
       if (xhr.readyState === 4) {
         clearCancellingProcess();
-        cleanUpWorkerResources();
+        if (!(window as any).REQBOTH) {
+          cleanUpWorkerResources();
+        }
         if (xhr.status >= 200 && xhr.status < 300) {
           const receivedTime = performance.now();
+          hasMainFinished = true;
+          lastResult.main = receivedTime - sendingTime;
+          if (hasWorkerFinished && lastResult.worker !== undefined) {
+            console.warn("!!!! WINNER WORKER",
+                         lastResult.worker - lastResult.main,
+                         lastResult.worker, lastResult.main);
+            displayCurrentWinner();
+          } else if (hasWorkerFinished) {
+            console.warn("!!!! WINNER MAIN due tu worker error", lastResult.main);
+            displayCurrentWinner();
+          }
           const totalSize = xhr.response instanceof
                               ArrayBuffer ? xhr.response.byteLength :
                                             event.total;
@@ -271,6 +306,7 @@ export default function request<T>(
           }
 
           if (isNullOrUndefined(responseData)) {
+            hasMainFinished = true;
             console.error("!!!! MAIN ERROR ", url, headers?.range, xhr);
             reject(new RequestError(url, xhr.status, "PARSE_ERROR", xhr));
             return;
@@ -291,27 +327,15 @@ export default function request<T>(
                     responseData });
 
         } else {
+          hasMainFinished = true;
           reject(new RequestError(url, xhr.status, "ERROR_HTTP_CODE", xhr));
         }
       }
     };
 
 
-    if ((window as any).REQBOTH) {
-      mainXhr = xhr;
-      xhr.send();
-      worker.postMessage({
-        type: "send",
-        value: {
-          requestId,
-          url,
-          headers,
-          responseType,
-          timeout,
-        },
-      });
-    } else if ((window as any).REQWORKER) {
-      if ((window as any).REQMAIN) {
+    if ((window as any).REQBOTH || (window as any).REQWORKER) {
+      if ((window as any).REQBOTH || (window as any).REQMAIN) {
         mainXhr = xhr;
         xhr.send();
       }
@@ -356,6 +380,7 @@ export default function request<T>(
     }
 
     function cleanUpWorkerResources() {
+      hasWorkerFinished = true;
       deregisterWorkerSignal?.();
       worker.removeEventListener("message", onMessage);
     }
@@ -366,36 +391,58 @@ export default function request<T>(
         return;
       }
 
-      if (type === "response") {
-        if (mainXhr !== undefined) {
-          mainXhr.abort();
+      if (type === "log") {
+        console[value.level as "warn" | "error"](value.message as string);
+      } else if (type === "response") {
+        hasWorkerFinished = true;
+        lastResult.worker = performance.now() - sendingTime;
+        if (hasMainFinished && lastResult.main !== undefined) {
+          console.warn("!!!! WINNER MAIN",
+                       lastResult.main - lastResult.worker,
+                       lastResult.main, lastResult.worker);
+          displayCurrentWinner();
+        } else if (hasMainFinished) {
+          console.warn("!!!! WINNER WORKER due tu main error", lastResult.worker);
+          displayCurrentWinner();
         }
-        clearCancellingProcess();
+        if ((!(window as any).REQBOTH) && mainXhr !== undefined) {
+          mainXhr.abort();
+          clearCancellingProcess();
+        }
+        console.warn("!!!! WORKER SUCCESS ",
+                     value.url, value.requestDuration, "size", value.size);
         cleanUpWorkerResources();
         resolve(value);
         return;
       } else if (type === "bad-status") {
-        if (mainXhr !== undefined) {
+        hasWorkerFinished = true;
+        if ((!(window as any).REQBOTH) && mainXhr !== undefined) {
           mainXhr.abort();
+          clearCancellingProcess();
         }
-        clearCancellingProcess();
         cleanUpWorkerResources();
         reject(new RequestError(url, value.status, "ERROR_HTTP_CODE", undefined));
         return;
       } else if (type === "error") {
-        if (mainXhr !== undefined) {
+        hasWorkerFinished = true;
+        if ((!(window as any).REQBOTH) && mainXhr !== undefined) {
           mainXhr.abort();
+          clearCancellingProcess();
         }
-        clearCancellingProcess();
+        console.warn("!!!! WORKER ERROR ", url);
         cleanUpWorkerResources();
         reject(new RequestError(url, value.status, "ERROR_EVENT", undefined));
         return;
+      } else if (type === "parse-error") {
+        console.warn("!!!! WORKER PARSE ERROR ", url);
       } else if (type === "timeout") {
-        if (mainXhr !== undefined) {
+        hasWorkerFinished = true;
+        if ((!(window as any).REQBOTH) && mainXhr !== undefined) {
           mainXhr.abort();
+          clearCancellingProcess();
         }
-        clearCancellingProcess();
         cleanUpWorkerResources();
+        console.warn("!!!! WORKER TIMEOUT ", url);
         reject(new RequestError(url, value.status, "TIMEOUT", undefined));
         return;
       }
@@ -475,4 +522,24 @@ export interface IProgressInfo {
   sendingTime : number;
   url : string;
   totalSize? : number | undefined;
+}
+
+function displayCurrentWinner() {
+  const exploitableResults = LAST_RESULTS.filter(r => {
+    return r.worker !== undefined && r.main !== undefined;
+  });
+
+  if (exploitableResults.length >= 10) {
+    const meanWorker = exploitableResults.reduce((acc, val) => {
+      return acc + (val.worker as number);
+    }, 0) / exploitableResults.length;
+    const meanMain = exploitableResults.reduce((acc, val) => {
+      return acc + (val.main as number);
+    }, 0) / exploitableResults.length;
+    if (meanWorker <= meanMain) {
+      console.warn("!!!!! CURRENT WINNER WORKER", meanWorker - meanMain);
+    } else {
+      console.warn("!!!!! CURRENT WINNER MAIN", meanMain - meanWorker);
+    }
+  }
 }
