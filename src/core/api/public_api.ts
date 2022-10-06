@@ -502,7 +502,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
             keySystems,
             lowLatencyMode,
             minimumManifestUpdateInterval,
-            networkConfig,
+            requestConfig,
             onCodecSwitch,
             startAt,
             transport,
@@ -551,15 +551,10 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                                                serverSyncInfos,
                                                __priv_patchLastSegmentInSidx });
 
-      const { segmentRetry,
-              manifestRetry,
-              manifestRequestTimeout,
-              segmentRequestTimeout } = networkConfig;
-
       /** Interface used to load and refresh the Manifest. */
       const manifestRequestSettings = { lowLatencyMode,
-                                        maxRetry : manifestRetry,
-                                        requestTimeout:  manifestRequestTimeout,
+                                        maxRetry : requestConfig.manifest?.maxRetry,
+                                        requestTimeout:  requestConfig.manifest?.timeout,
                                         minimumManifestUpdateInterval,
                                         initialManifest };
 
@@ -612,8 +607,8 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                                          this._priv_bufferOptions);
 
       const segmentRequestOptions = { lowLatencyMode,
-                                      maxRetry: segmentRetry,
-                                      requestTimeout: segmentRequestTimeout };
+                                      maxRetry: requestConfig.segment?.maxRetry,
+                                      requestTimeout: requestConfig.segment?.timeout };
 
       initializer = new MediaSourceContentInitializer({
         adaptiveOptions,
