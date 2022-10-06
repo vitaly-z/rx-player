@@ -11,405 +11,6 @@
 return /******/ (function() { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 9591:
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-var _typeof = (__webpack_require__(8)["default"]);
-
-function _regeneratorRuntime() {
-  "use strict";
-  /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
-
-  module.exports = _regeneratorRuntime = function _regeneratorRuntime() {
-    return exports;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
-  var exports = {},
-      Op = Object.prototype,
-      hasOwn = Op.hasOwnProperty,
-      $Symbol = "function" == typeof Symbol ? Symbol : {},
-      iteratorSymbol = $Symbol.iterator || "@@iterator",
-      asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator",
-      toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
-
-  function define(obj, key, value) {
-    return Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: !0,
-      configurable: !0,
-      writable: !0
-    }), obj[key];
-  }
-
-  try {
-    define({}, "");
-  } catch (err) {
-    define = function define(obj, key, value) {
-      return obj[key] = value;
-    };
-  }
-
-  function wrap(innerFn, outerFn, self, tryLocsList) {
-    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator,
-        generator = Object.create(protoGenerator.prototype),
-        context = new Context(tryLocsList || []);
-    return generator._invoke = function (innerFn, self, context) {
-      var state = "suspendedStart";
-      return function (method, arg) {
-        if ("executing" === state) throw new Error("Generator is already running");
-
-        if ("completed" === state) {
-          if ("throw" === method) throw arg;
-          return doneResult();
-        }
-
-        for (context.method = method, context.arg = arg;;) {
-          var delegate = context.delegate;
-
-          if (delegate) {
-            var delegateResult = maybeInvokeDelegate(delegate, context);
-
-            if (delegateResult) {
-              if (delegateResult === ContinueSentinel) continue;
-              return delegateResult;
-            }
-          }
-
-          if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) {
-            if ("suspendedStart" === state) throw state = "completed", context.arg;
-            context.dispatchException(context.arg);
-          } else "return" === context.method && context.abrupt("return", context.arg);
-          state = "executing";
-          var record = tryCatch(innerFn, self, context);
-
-          if ("normal" === record.type) {
-            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue;
-            return {
-              value: record.arg,
-              done: context.done
-            };
-          }
-
-          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
-        }
-      };
-    }(innerFn, self, context), generator;
-  }
-
-  function tryCatch(fn, obj, arg) {
-    try {
-      return {
-        type: "normal",
-        arg: fn.call(obj, arg)
-      };
-    } catch (err) {
-      return {
-        type: "throw",
-        arg: err
-      };
-    }
-  }
-
-  exports.wrap = wrap;
-  var ContinueSentinel = {};
-
-  function Generator() {}
-
-  function GeneratorFunction() {}
-
-  function GeneratorFunctionPrototype() {}
-
-  var IteratorPrototype = {};
-  define(IteratorPrototype, iteratorSymbol, function () {
-    return this;
-  });
-  var getProto = Object.getPrototypeOf,
-      NativeIteratorPrototype = getProto && getProto(getProto(values([])));
-  NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
-  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
-
-  function defineIteratorMethods(prototype) {
-    ["next", "throw", "return"].forEach(function (method) {
-      define(prototype, method, function (arg) {
-        return this._invoke(method, arg);
-      });
-    });
-  }
-
-  function AsyncIterator(generator, PromiseImpl) {
-    function invoke(method, arg, resolve, reject) {
-      var record = tryCatch(generator[method], generator, arg);
-
-      if ("throw" !== record.type) {
-        var result = record.arg,
-            value = result.value;
-        return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) {
-          invoke("next", value, resolve, reject);
-        }, function (err) {
-          invoke("throw", err, resolve, reject);
-        }) : PromiseImpl.resolve(value).then(function (unwrapped) {
-          result.value = unwrapped, resolve(result);
-        }, function (error) {
-          return invoke("throw", error, resolve, reject);
-        });
-      }
-
-      reject(record.arg);
-    }
-
-    var previousPromise;
-
-    this._invoke = function (method, arg) {
-      function callInvokeWithMethodAndArg() {
-        return new PromiseImpl(function (resolve, reject) {
-          invoke(method, arg, resolve, reject);
-        });
-      }
-
-      return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
-    };
-  }
-
-  function maybeInvokeDelegate(delegate, context) {
-    var method = delegate.iterator[context.method];
-
-    if (undefined === method) {
-      if (context.delegate = null, "throw" === context.method) {
-        if (delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method)) return ContinueSentinel;
-        context.method = "throw", context.arg = new TypeError("The iterator does not provide a 'throw' method");
-      }
-
-      return ContinueSentinel;
-    }
-
-    var record = tryCatch(method, delegate.iterator, context.arg);
-    if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
-    var info = record.arg;
-    return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
-  }
-
-  function pushTryEntry(locs) {
-    var entry = {
-      tryLoc: locs[0]
-    };
-    1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
-  }
-
-  function resetTryEntry(entry) {
-    var record = entry.completion || {};
-    record.type = "normal", delete record.arg, entry.completion = record;
-  }
-
-  function Context(tryLocsList) {
-    this.tryEntries = [{
-      tryLoc: "root"
-    }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0);
-  }
-
-  function values(iterable) {
-    if (iterable) {
-      var iteratorMethod = iterable[iteratorSymbol];
-      if (iteratorMethod) return iteratorMethod.call(iterable);
-      if ("function" == typeof iterable.next) return iterable;
-
-      if (!isNaN(iterable.length)) {
-        var i = -1,
-            next = function next() {
-          for (; ++i < iterable.length;) {
-            if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next;
-          }
-
-          return next.value = undefined, next.done = !0, next;
-        };
-
-        return next.next = next;
-      }
-    }
-
-    return {
-      next: doneResult
-    };
-  }
-
-  function doneResult() {
-    return {
-      value: undefined,
-      done: !0
-    };
-  }
-
-  return GeneratorFunction.prototype = GeneratorFunctionPrototype, define(Gp, "constructor", GeneratorFunctionPrototype), define(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) {
-    var ctor = "function" == typeof genFun && genFun.constructor;
-    return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
-  }, exports.mark = function (genFun) {
-    return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
-  }, exports.awrap = function (arg) {
-    return {
-      __await: arg
-    };
-  }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
-    return this;
-  }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) {
-    void 0 === PromiseImpl && (PromiseImpl = Promise);
-    var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl);
-    return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) {
-      return result.done ? result.value : iter.next();
-    });
-  }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () {
-    return this;
-  }), define(Gp, "toString", function () {
-    return "[object Generator]";
-  }), exports.keys = function (object) {
-    var keys = [];
-
-    for (var key in object) {
-      keys.push(key);
-    }
-
-    return keys.reverse(), function next() {
-      for (; keys.length;) {
-        var key = keys.pop();
-        if (key in object) return next.value = key, next.done = !1, next;
-      }
-
-      return next.done = !0, next;
-    };
-  }, exports.values = values, Context.prototype = {
-    constructor: Context,
-    reset: function reset(skipTempReset) {
-      if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) {
-        "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined);
-      }
-    },
-    stop: function stop() {
-      this.done = !0;
-      var rootRecord = this.tryEntries[0].completion;
-      if ("throw" === rootRecord.type) throw rootRecord.arg;
-      return this.rval;
-    },
-    dispatchException: function dispatchException(exception) {
-      if (this.done) throw exception;
-      var context = this;
-
-      function handle(loc, caught) {
-        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught;
-      }
-
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i],
-            record = entry.completion;
-        if ("root" === entry.tryLoc) return handle("end");
-
-        if (entry.tryLoc <= this.prev) {
-          var hasCatch = hasOwn.call(entry, "catchLoc"),
-              hasFinally = hasOwn.call(entry, "finallyLoc");
-
-          if (hasCatch && hasFinally) {
-            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
-            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
-          } else if (hasCatch) {
-            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
-          } else {
-            if (!hasFinally) throw new Error("try statement without catch or finally");
-            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
-          }
-        }
-      }
-    },
-    abrupt: function abrupt(type, arg) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-
-        if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
-          var finallyEntry = entry;
-          break;
-        }
-      }
-
-      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
-      var record = finallyEntry ? finallyEntry.completion : {};
-      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
-    },
-    complete: function complete(record, afterLoc) {
-      if ("throw" === record.type) throw record.arg;
-      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
-    },
-    finish: function finish(finallyLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
-      }
-    },
-    "catch": function _catch(tryLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-
-        if (entry.tryLoc === tryLoc) {
-          var record = entry.completion;
-
-          if ("throw" === record.type) {
-            var thrown = record.arg;
-            resetTryEntry(entry);
-          }
-
-          return thrown;
-        }
-      }
-
-      throw new Error("illegal catch attempt");
-    },
-    delegateYield: function delegateYield(iterable, resultName, nextLoc) {
-      return this.delegate = {
-        iterator: values(iterable),
-        resultName: resultName,
-        nextLoc: nextLoc
-      }, "next" === this.method && (this.arg = undefined), ContinueSentinel;
-    }
-  }, exports;
-}
-
-module.exports = _regeneratorRuntime, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 8:
-/***/ (function(module) {
-
-function _typeof(obj) {
-  "@babel/helpers - typeof";
-
-  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
-    return typeof obj;
-  } : function (obj) {
-    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(obj);
-}
-
-module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ 7757:
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
-
-// TODO(Babel 8): Remove this file.
-
-var runtime = __webpack_require__(9591)();
-module.exports = runtime;
-
-// Copied from https://github.com/facebook/regenerator/blob/main/packages/runtime/runtime.js#L736=
-try {
-  regeneratorRuntime = runtime;
-} catch (accidentalStrictMode) {
-  if (typeof globalThis === "object") {
-    globalThis.regeneratorRuntime = runtime;
-  } else {
-    Function("r", "regeneratorRuntime = r")(runtime);
-  }
-}
-
-
-/***/ }),
-
 /***/ 3774:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
@@ -659,18 +260,6 @@ var CustomMediaKeySystemAccess = /*#__PURE__*/function () {
 }();
 
 
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inheritsLoose.js
-var inheritsLoose = __webpack_require__(4578);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Subject.js + 1 modules
-var Subject = __webpack_require__(6716);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
-var merge = __webpack_require__(3071);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/takeUntil.js
-var takeUntil = __webpack_require__(3505);
-// EXTERNAL MODULE: ./src/utils/event_emitter.ts
-var event_emitter = __webpack_require__(1959);
-// EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
-var event_listeners = __webpack_require__(1381);
 ;// CONCATENATED MODULE: ./src/compat/eme/custom_media_keys/ms_media_keys_constructor.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -704,6 +293,18 @@ if (!is_node/* default */.Z) {
 }
 
 
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inheritsLoose.js
+var inheritsLoose = __webpack_require__(4578);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Subject.js + 1 modules
+var Subject = __webpack_require__(6716);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
+var merge = __webpack_require__(3071);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/takeUntil.js
+var takeUntil = __webpack_require__(3505);
+// EXTERNAL MODULE: ./src/utils/event_emitter.ts
+var event_emitter = __webpack_require__(1959);
+// EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
+var event_listeners = __webpack_require__(1381);
 ;// CONCATENATED MODULE: ./src/compat/eme/custom_media_keys/ie11_media_keys.ts
 
 
@@ -1793,23 +1394,25 @@ __webpack_require__.d(__webpack_exports__, {
   "it": function() { return /* binding */ getVideoVisibilityRef; },
   "O0": function() { return /* binding */ getVideoWidthRef; },
   "Oh": function() { return /* binding */ onEncrypted$; },
-  "C1": function() { return /* binding */ onEnded$; },
+  "M4": function() { return /* binding */ onEnded; },
   "GV": function() { return /* binding */ onKeyAdded$; },
   "Xe": function() { return /* binding */ onKeyError$; },
   "GJ": function() { return /* binding */ onKeyMessage$; },
   "eX": function() { return /* binding */ onKeyStatusesChange$; },
   "K4": function() { return /* binding */ onLoadedMetadata$; },
   "gg": function() { return /* binding */ onRemoveSourceBuffers$; },
-  "ik": function() { return /* binding */ onSeeked$; },
-  "d5": function() { return /* binding */ onSeeking$; },
+  "bQ": function() { return /* binding */ onSeeked; },
+  "Q$": function() { return /* binding */ onSeeking; },
   "UG": function() { return /* binding */ onSourceClose$; },
   "ep": function() { return /* binding */ onSourceEnded$; },
   "ym": function() { return /* binding */ onSourceOpen$; },
   "_E": function() { return /* binding */ onUpdate$; }
 });
 
-// UNUSED EXPORTS: addEventListener, onTextTrackChanges$, onTimeUpdate$
+// UNUSED EXPORTS: addEventListener, onEnded$, onSeeked$, onSeeking$, onTextTrackChanges$, onTimeUpdate$
 
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/fromEvent.js
+var fromEvent = __webpack_require__(2401);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
 var Observable = __webpack_require__(1480);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/noop.js
@@ -1822,8 +1425,6 @@ function never() {
     return NEVER;
 }
 //# sourceMappingURL=never.js.map
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/fromEvent.js
-var fromEvent = __webpack_require__(2401);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
 var merge = __webpack_require__(3071);
 // EXTERNAL MODULE: ./src/config.ts + 2 modules
@@ -1918,6 +1519,53 @@ function eventPrefixed(eventNames, prefixes) {
   }, []);
 }
 /**
+ * Returns a function allowing to add event listeners for particular event(s)
+ * optionally automatically adding browser prefixes if needed.
+ * @param {Array.<string>} eventNames - The event(s) to listen to. If multiple
+ * events are set, the event listener will be triggered when any of them emits.
+ * @returns {Function} - Returns function allowing to easily add a callback to
+ * be triggered when that event is emitted on a given event target.
+ */
+
+
+function createCompatibleEventListener(eventNames) {
+  var mem;
+  var prefixedEvents = eventPrefixed(eventNames);
+  return function (element, listener, cancelSignal) {
+    if (cancelSignal.isCancelled) {
+      return;
+    } // if the element is a HTMLElement we can detect
+    // the supported event, and memoize it in `mem`
+
+
+    if (element instanceof HTMLElement) {
+      if (typeof mem === "undefined") {
+        mem = findSupportedEvent(element, prefixedEvents);
+      }
+
+      if ((0,is_non_empty_string/* default */.Z)(mem)) {
+        element.addEventListener(mem, listener);
+        cancelSignal.register(function () {
+          if (mem !== undefined) {
+            element.removeEventListener(mem, listener);
+          }
+        });
+      } else {
+        if (false) {}
+
+        return;
+      }
+    }
+
+    prefixedEvents.forEach(function (eventName) {
+      element.addEventListener(eventName, listener);
+      cancelSignal.register(function () {
+        element.removeEventListener(eventName, listener);
+      });
+    });
+  };
+}
+/**
  * @param {Array.<string>} eventNames
  * @param {Array.<string>|undefined} prefixes
  * @returns {Observable}
@@ -2005,7 +1653,8 @@ function getVideoWidthFromPIPWindow(mediaElement, pipWindow) {
 }
 /**
  * Emit when video enters and leaves Picture-In-Picture mode.
- * @param {HTMLMediaElement} mediaElement
+ * @param {HTMLMediaElement} elt
+ * @param {Object} stopListening
  * @returns {Observable}
  */
 
@@ -2260,6 +1909,24 @@ var onKeyError$ = compatibleListener(["keyerror", "error"]);
  */
 
 var onKeyStatusesChange$ = compatibleListener(["keystatuseschange"]);
+/**
+ * @param {HTMLMediaElement} mediaElement
+ * @returns {Observable}
+ */
+
+var onSeeking = createCompatibleEventListener(["seeking"]);
+/**
+ * @param {HTMLMediaElement} mediaElement
+ * @returns {Observable}
+ */
+
+var onSeeked = createCompatibleEventListener(["seeked"]);
+/**
+ * @param {HTMLMediaElement} mediaElement
+ * @returns {Observable}
+ */
+
+var onEnded = createCompatibleEventListener(["ended"]);
 /**
  * Utilitary function allowing to add an event listener and remove it
  * automatically once the given `CancellationSignal` emits.
@@ -2522,18 +2189,6 @@ var DEFAULT_CONFIG = {
   DEFAULT_TEXT_TRACK_MODE: "native",
 
   /**
-   * Strategy to adopt when manually setting the current bitrate.
-   * Can be either:
-   *   - "seamless": transitions are very smooth but not immediate.
-   *   - "direct": the quality switch happens immediately but to achieve that,
-   *     the player will need to set a new MediaSource on the media element in
-   *     some cases. This often leads to a black screen + unavailable APIs
-   *     during a short moment.
-   * @type {string}
-   */
-  DEFAULT_MANUAL_BITRATE_SWITCHING_MODE: "seamless",
-
-  /**
    * Default behavior for the `enableFastSwitching` loadVideo options.
    *
    * Fast-switching allows to provide quicker transitions from lower quality
@@ -2687,60 +2342,7 @@ var DEFAULT_CONFIG = {
    * play will always take the last set one.
    * @type {Object}
    */
-  DEFAULT_INITIAL_BITRATES: {
-    audio: 0,
-    video: 0,
-    other: 0 // tracks which are not audio/video (like text).
-    // Though those are generally at a single bitrate, so no adaptive
-    // mechanism is triggered for them.
-
-  },
-
-  /* eslint-disable @typescript-eslint/consistent-type-assertions */
-
-  /**
-   * Default bitrate floor initially set to dictate the minimum bitrate the
-   * adaptive logic can automatically switch to.
-   *
-   * If no track is found with a quality superior or equal to the
-   * bitrate there, the lowest bitrate will be taken instead.
-   *
-   * Set to Infinity to discard any limit in the ABR strategy.
-   * @type {Object}
-   */
-  DEFAULT_MIN_BITRATES: {
-    audio: 0,
-    video: 0,
-    other: 0 // tracks which are not audio/video
-    // Though those are generally at a single bitrate, so no
-    // adaptive mechanism is triggered for them.
-
-  },
-
-  /* eslint-enable @typescript-eslint/consistent-type-assertions */
-
-  /* eslint-disable @typescript-eslint/consistent-type-assertions */
-
-  /**
-   * Default bitrate ceil initially set to dictate the maximum bitrate the
-   * adaptive logic can automatically switch to.
-   *
-   * If no track is found with a quality inferior or equal to the
-   * bitrate there, the lowest bitrate will be taken instead.
-   *
-   * Set to Infinity to discard any limit in the ABR strategy.
-   * @type {Object}
-   */
-  DEFAULT_MAX_BITRATES: {
-    audio: Infinity,
-    video: Infinity,
-    other: Infinity // tracks which are not audio/video
-    // Though those are generally at a single bitrate, so no
-    // adaptive mechanism is triggered for them.
-
-  },
-
-  /* eslint-enable @typescript-eslint/consistent-type-assertions */
+  DEFAULT_BASE_BANDWIDTH: 0,
 
   /**
    * Delay after which, if the page is hidden, the user is considered inactive
@@ -2803,7 +2405,7 @@ var DEFAULT_CONFIG = {
    * small enough so this (arguably rare) situation won't lead to too much
    * waiting time.
    */
-  FORCE_DISCONTINUITY_SEEK_DELAY: 2000,
+  FORCE_DISCONTINUITY_SEEK_DELAY: 3000,
 
   /**
    * Ratio used to know if an already loaded segment should be re-buffered.
@@ -2850,11 +2452,21 @@ var DEFAULT_CONFIG = {
    *   - if the error is not due to the xhr, no retry will be peformed
    *   - if the error is an HTTP error code, but not a 500-smthg or a 404, no
    *     retry will be performed.
-   *   - if it has a high chance of being due to the user being offline, a
-   *     separate counter is used (see DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE).
    * @type Number
    */
   DEFAULT_MAX_MANIFEST_REQUEST_RETRY: 4,
+
+  /**
+   * Default delay, in seconds, during which a CDN will be "downgraded".
+   *
+   * For example in case of media content being available on multiple CDNs, the
+   * RxPlayer may decide that a CDN is less reliable (for example, it returned a
+   * server error) and should thus be avoided, at least for some time
+   *
+   * This value is the amount of time this CDN will be "less considered" than the
+   * alternatives.
+   */
+  DEFAULT_CDN_DOWNGRADE_TIME: 60,
 
   /**
    * The default number of times a segment request will be re-performed when
@@ -2864,24 +2476,9 @@ var DEFAULT_CONFIG = {
    *   - if the error is not due to the xhr, no retry will be peformed
    *   - if the error is an HTTP error code, but not a 500-smthg or a 404, no
    *     retry will be performed.
-   *   - if it has a high chance of being due to the user being offline, a
-   *     separate counter is used (see DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE).
    * @type Number
    */
   DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR: 4,
-
-  /**
-   * Under some circonstances, we're able to tell that the user is offline (see
-   * the compat files).
-   * When this happens, and xhr requests fails due to an error event (you might
-   * still be able to perform xhr offline, e.g. on localhost), you might want to
-   * retry indefinitely or with a higher number of retry than if the error is
-   * due to a CDN problem.
-   *
-   * A capped exponential backoff will still be used (like for an error code).
-   * @type {Number}
-   */
-  DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE: Infinity,
 
   /**
    * Initial backoff delay when a segment / manifest download fails, in
@@ -3380,6 +2977,17 @@ var DEFAULT_CONFIG = {
   EME_DEFAULT_WIDEVINE_ROBUSTNESSES: ["HW_SECURE_ALL", "HW_SECURE_DECODE", "HW_SECURE_CRYPTO", "SW_SECURE_DECODE", "SW_SECURE_CRYPTO"],
 
   /**
+   * Robustnesses used in the {audio,video}Capabilities of the
+   * MediaKeySystemConfiguration (DRM).
+   *
+   * Only used for "com.microsoft.playready.recommendation" keysystems.
+   *
+   * Defined in order of importance (first will be tested first etc.)
+   * @type {Array.<string>}
+   */
+  EME_DEFAULT_PLAYREADY_RECOMMENDATION_ROBUSTNESSES: ["3000", "2000"],
+
+  /**
    * Link canonical key systems names to their respective reverse domain name,
    * used in the EME APIs.
    * This allows to have a simpler API, where users just need to set "widevine"
@@ -3391,7 +2999,7 @@ var DEFAULT_CONFIG = {
   EME_KEY_SYSTEMS: {
     clearkey: ["webkit-org.w3.clearkey", "org.w3.clearkey"],
     widevine: ["com.widevine.alpha"],
-    playready: ["com.microsoft.playready", "com.chromecast.playready", "com.youtube.playready"],
+    playready: ["com.microsoft.playready.recommendation", "com.microsoft.playready", "com.chromecast.playready", "com.youtube.playready"],
     fairplay: ["com.apple.fps.1_0"]
   },
 
@@ -3728,18 +3336,18 @@ function deepMerge(target) {
   if (isObject(target) && isObject(source)) {
     for (var key in source) {
       if (isObject(source[key])) {
-        if (target[key] === undefined) {
-          var _objectAssign;
+        var newTarget = target[key];
 
-          (0,object_assign/* default */.Z)(target, (_objectAssign = {}, _objectAssign[key] = {}, _objectAssign));
+        if (newTarget === undefined) {
+          newTarget = {};
+          target[key] = newTarget;
         }
 
-        var newTarget = target[key];
         deepMerge(newTarget, source[key]);
       } else {
-        var _objectAssign2;
+        var _objectAssign;
 
-        (0,object_assign/* default */.Z)(target, (_objectAssign2 = {}, _objectAssign2[key] = source[key], _objectAssign2));
+        (0,object_assign/* default */.Z)(target, (_objectAssign = {}, _objectAssign[key] = source[key], _objectAssign));
       }
     }
   }
@@ -3873,7 +3481,9 @@ function createAudioTracks(audioTracks) {
       language: audioTrack.language,
       id: id,
       normalized: (0,_utils_languages__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .ZP)(audioTrack.language),
-      audioDescription: audioTrack.kind === "descriptions",
+      audioDescription: audioTrack.kind === "descriptions" || // Safari seem to prefer the non-standard singular
+      // version, funnily enough
+      audioTrack.kind === "description",
       representations: []
     };
     newAudioTracks.push({
@@ -4672,8 +4282,10 @@ var asyncToGenerator = __webpack_require__(5861);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inheritsLoose.js
 var inheritsLoose = __webpack_require__(4578);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(7757);
+var regenerator = __webpack_require__(4687);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
+// EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
+var event_listeners = __webpack_require__(1381);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
 // EXTERNAL MODULE: ./src/parsers/containers/isobmff/take_pssh_out.ts + 1 modules
@@ -4843,8 +4455,6 @@ function getInitData(encryptedEvent) {
     values: values
   };
 }
-// EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
-var event_listeners = __webpack_require__(1381);
 // EXTERNAL MODULE: ./src/config.ts + 2 modules
 var config = __webpack_require__(6872);
 // EXTERNAL MODULE: ./src/errors/encrypted_media_error.ts
@@ -5101,7 +4711,7 @@ function createAndTryToRetrievePersistentSession(_x, _x2, _x3, _x4) {
 
 function _createAndTryToRetrievePersistentSession() {
   _createAndTryToRetrievePersistentSession = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee2(loadedSessionsStore, persistentSessionsStore, initData, cancelSignal) {
-    var entry, storedEntry, hasLoadedSession, recreatePersistentSession, _recreatePersistentSession;
+    var entry, storedEntry, hasLoadedSession, newEntry, recreatePersistentSession, _recreatePersistentSession;
 
     return regenerator_default().wrap(function _callee2$(_context2) {
       while (1) {
@@ -5129,18 +4739,37 @@ function _createAndTryToRetrievePersistentSession() {
                           persistentSessionsStore["delete"](persistentEntry.sessionId);
                         }
 
-                        _context.next = 7;
+                        _context.prev = 5;
+                        _context.next = 8;
                         return loadedSessionsStore.closeSession(entry.mediaKeySession);
 
-                      case 7:
+                      case 8:
+                        _context.next = 15;
+                        break;
+
+                      case 10:
+                        _context.prev = 10;
+                        _context.t0 = _context["catch"](5);
+
+                        if (!(entry.mediaKeySession.sessionId !== "")) {
+                          _context.next = 14;
+                          break;
+                        }
+
+                        throw _context.t0;
+
+                      case 14:
+                        loadedSessionsStore.removeSessionWithoutClosingIt(entry.mediaKeySession);
+
+                      case 15:
                         if (!(cancelSignal.cancellationError !== null)) {
-                          _context.next = 9;
+                          _context.next = 17;
                           break;
                         }
 
                         throw cancelSignal.cancellationError;
 
-                      case 9:
+                      case 17:
                         newEntry = loadedSessionsStore.createSession(initData, "persistent-license");
                         return _context.abrupt("return", {
                           type: "created-session"
@@ -5149,12 +4778,12 @@ function _createAndTryToRetrievePersistentSession() {
                           value: newEntry
                         });
 
-                      case 11:
+                      case 19:
                       case "end":
                         return _context.stop();
                     }
                   }
-                }, _callee);
+                }, _callee, null, [[5, 10]]);
               }));
               return _recreatePersistentSession.apply(this, arguments);
             };
@@ -5196,22 +4825,30 @@ function _createAndTryToRetrievePersistentSession() {
             hasLoadedSession = _context2.sent;
 
             if (hasLoadedSession) {
-              _context2.next = 17;
+              _context2.next = 19;
               break;
             }
 
             log/* default.warn */.Z.warn("DRM: No data stored for the loaded session");
-            persistentSessionsStore["delete"](storedEntry.sessionId);
+            persistentSessionsStore["delete"](storedEntry.sessionId); // The EME specification is kind of implicit about it but it seems from my
+            // understanding (Paul B.) that a MediaKeySession on wich a `load` attempt
+            // did not succeed due to the loaded session not being found by the
+            // browser/CDM, should neither be used anymore nor closed.
+            // Thus, we're creating another `"persistent-license"` `MediaKeySession`
+            // in that specific case.
+
+            loadedSessionsStore.removeSessionWithoutClosingIt(entry.mediaKeySession);
+            newEntry = loadedSessionsStore.createSession(initData, "persistent-license");
             return _context2.abrupt("return", {
               type: "created-session"
               /* MediaKeySessionLoadingType.Created */
               ,
-              value: entry
+              value: newEntry
             });
 
-          case 17:
+          case 19:
             if (!(hasLoadedSession && isSessionUsable(entry.mediaKeySession))) {
-              _context2.next = 21;
+              _context2.next = 23;
               break;
             }
 
@@ -5224,23 +4861,23 @@ function _createAndTryToRetrievePersistentSession() {
               value: entry
             });
 
-          case 21:
+          case 23:
             // Unusable persistent session: recreate a new session from scratch.
             log/* default.warn */.Z.warn("DRM: Previous persistent session not usable anymore.");
             return _context2.abrupt("return", recreatePersistentSession());
 
-          case 25:
-            _context2.prev = 25;
+          case 27:
+            _context2.prev = 27;
             _context2.t0 = _context2["catch"](9);
             log/* default.warn */.Z.warn("DRM: Unable to load persistent session: " + (_context2.t0 instanceof Error ? _context2.t0.toString() : "Unknown Error"));
             return _context2.abrupt("return", recreatePersistentSession());
 
-          case 29:
+          case 31:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[9, 25]]);
+    }, _callee2, null, [[9, 27]]);
   }));
   return _createAndTryToRetrievePersistentSession.apply(this, arguments);
 }
@@ -5514,6 +5151,7 @@ var flat_map = __webpack_require__(9592);
 
 
 
+
 /**
  * @param {Array.<Object>} keySystems
  * @param {MediaKeySystemAccess} currentKeySystemAccess
@@ -5534,11 +5172,11 @@ function checkCachedMediaKeySystemAccess(keySystems, currentKeySystemAccess, cur
       return false;
     }
 
-    if ((ks.persistentLicense === true || ks.persistentStateRequired === true) && mksConfiguration.persistentState !== "required") {
+    if ((!(0,is_null_or_undefined/* default */.Z)(ks.persistentLicenseConfig) || ks.persistentState === "required") && mksConfiguration.persistentState !== "required") {
       return false;
     }
 
-    if (ks.distinctiveIdentifierRequired === true && mksConfiguration.distinctiveIdentifier !== "required") {
+    if (ks.distinctiveIdentifier === "required" && mksConfiguration.distinctiveIdentifier !== "required") {
       return false;
     }
 
@@ -5578,50 +5216,36 @@ function findKeySystemCanonicalName(ksType) {
 /**
  * Build configuration for the requestMediaKeySystemAccess EME API, based
  * on the current keySystem object.
- * @param {string} [ksName] - Generic name for the key system. e.g. "clearkey",
- * "widevine", "playready". Can be used to make exceptions depending on it.
- * @param {Object} keySystem
+ * @param {Object} keySystemTypeInfo
  * @returns {Array.<Object>} - Configuration to give to the
  * requestMediaKeySystemAccess API.
  */
 
 
-function buildKeySystemConfigurations(ksName, keySystem) {
+function buildKeySystemConfigurations(keySystemTypeInfo) {
+  var keyName = keySystemTypeInfo.keyName,
+      keyType = keySystemTypeInfo.keyType,
+      keySystem = keySystemTypeInfo.keySystemOptions;
   var sessionTypes = ["temporary"];
   var persistentState = "optional";
   var distinctiveIdentifier = "optional";
 
-  if (keySystem.persistentLicense === true) {
+  if (!(0,is_null_or_undefined/* default */.Z)(keySystem.persistentLicenseConfig)) {
     persistentState = "required";
     sessionTypes.push("persistent-license");
   }
 
-  if (keySystem.persistentStateRequired === true) {
-    persistentState = "required";
+  if (!(0,is_null_or_undefined/* default */.Z)(keySystem.persistentState)) {
+    persistentState = keySystem.persistentState;
   }
 
-  if (keySystem.distinctiveIdentifierRequired === true) {
-    distinctiveIdentifier = "required";
+  if (!(0,is_null_or_undefined/* default */.Z)(keySystem.distinctiveIdentifier)) {
+    distinctiveIdentifier = keySystem.distinctiveIdentifier;
   }
 
   var _config$getCurrent2 = config/* default.getCurrent */.Z.getCurrent(),
-      EME_DEFAULT_WIDEVINE_ROBUSTNESSES = _config$getCurrent2.EME_DEFAULT_WIDEVINE_ROBUSTNESSES; // Set robustness, in order of consideration:
-  //   1. the user specified its own robustnesses
-  //   2. a "widevine" key system is used, in that case set the default widevine
-  //      robustnesses as defined in the config
-  //   3. set an undefined robustness
-
-
-  var videoRobustnesses = keySystem.videoRobustnesses != null ? keySystem.videoRobustnesses : ksName === "widevine" ? EME_DEFAULT_WIDEVINE_ROBUSTNESSES : [];
-  var audioRobustnesses = keySystem.audioRobustnesses != null ? keySystem.audioRobustnesses : ksName === "widevine" ? EME_DEFAULT_WIDEVINE_ROBUSTNESSES : [];
-
-  if (videoRobustnesses.length === 0) {
-    videoRobustnesses.push(undefined);
-  }
-
-  if (audioRobustnesses.length === 0) {
-    audioRobustnesses.push(undefined);
-  } // From the W3 EME spec, we have to provide videoCapabilities and
+      EME_DEFAULT_WIDEVINE_ROBUSTNESSES = _config$getCurrent2.EME_DEFAULT_WIDEVINE_ROBUSTNESSES,
+      EME_DEFAULT_PLAYREADY_RECOMMENDATION_ROBUSTNESSES = _config$getCurrent2.EME_DEFAULT_PLAYREADY_RECOMMENDATION_ROBUSTNESSES; // From the W3 EME spec, we have to provide videoCapabilities and
   // audioCapabilities.
   // These capabilities must specify a codec (even though you can use a
   // completely different codec afterward).
@@ -5634,38 +5258,74 @@ function buildKeySystemConfigurations(ksName, keySystem) {
   // https://www.w3.org/TR/encrypted-media/#get-supported-configuration-and-consent
 
 
-  var videoCapabilities = (0,flat_map/* default */.Z)(audioRobustnesses, function (robustness) {
-    return ["video/mp4;codecs=\"avc1.4d401e\"", "video/mp4;codecs=\"avc1.42e01e\"", "video/webm;codecs=\"vp8\""].map(function (contentType) {
-      return robustness !== undefined ? {
-        contentType: contentType,
-        robustness: robustness
-      } : {
-        contentType: contentType
-      };
+  var audioCapabilities;
+  var videoCapabilities;
+  var audioCapabilitiesConfig = keySystem.audioCapabilitiesConfig,
+      videoCapabilitiesConfig = keySystem.videoCapabilitiesConfig;
+
+  if ((audioCapabilitiesConfig === null || audioCapabilitiesConfig === void 0 ? void 0 : audioCapabilitiesConfig.type) === "full") {
+    audioCapabilities = audioCapabilitiesConfig.value;
+  } else {
+    var audioRobustnesses;
+
+    if ((audioCapabilitiesConfig === null || audioCapabilitiesConfig === void 0 ? void 0 : audioCapabilitiesConfig.type) === "robustness") {
+      audioRobustnesses = audioCapabilitiesConfig.value;
+    } else if (keyName === "widevine") {
+      audioRobustnesses = EME_DEFAULT_WIDEVINE_ROBUSTNESSES;
+    } else if (keyType === "com.microsoft.playready.recommendation") {
+      audioRobustnesses = EME_DEFAULT_PLAYREADY_RECOMMENDATION_ROBUSTNESSES;
+    } else {
+      audioRobustnesses = [];
+    }
+
+    if (audioRobustnesses.length === 0) {
+      audioRobustnesses.push(undefined);
+    }
+
+    var audioCodecs = (audioCapabilitiesConfig === null || audioCapabilitiesConfig === void 0 ? void 0 : audioCapabilitiesConfig.type) === "contentType" ? audioCapabilitiesConfig.value : ["audio/mp4;codecs=\"mp4a.40.2\"", "audio/webm;codecs=opus"];
+    audioCapabilities = (0,flat_map/* default */.Z)(audioRobustnesses, function (robustness) {
+      return audioCodecs.map(function (contentType) {
+        return robustness !== undefined ? {
+          contentType: contentType,
+          robustness: robustness
+        } : {
+          contentType: contentType
+        };
+      });
     });
-  });
-  var audioCapabilities = (0,flat_map/* default */.Z)(audioRobustnesses, function (robustness) {
-    return ["audio/mp4;codecs=\"mp4a.40.2\"", "audio/webm;codecs=opus"].map(function (contentType) {
-      return robustness !== undefined ? {
-        contentType: contentType,
-        robustness: robustness
-      } : {
-        contentType: contentType
-      };
+  }
+
+  if ((videoCapabilitiesConfig === null || videoCapabilitiesConfig === void 0 ? void 0 : videoCapabilitiesConfig.type) === "full") {
+    videoCapabilities = videoCapabilitiesConfig.value;
+  } else {
+    var videoRobustnesses;
+
+    if ((videoCapabilitiesConfig === null || videoCapabilitiesConfig === void 0 ? void 0 : videoCapabilitiesConfig.type) === "robustness") {
+      videoRobustnesses = videoCapabilitiesConfig.value;
+    } else if (keyName === "widevine") {
+      videoRobustnesses = EME_DEFAULT_WIDEVINE_ROBUSTNESSES;
+    } else if (keyType === "com.microsoft.playready.recommendation") {
+      videoRobustnesses = EME_DEFAULT_PLAYREADY_RECOMMENDATION_ROBUSTNESSES;
+    } else {
+      videoRobustnesses = [];
+    }
+
+    if (videoRobustnesses.length === 0) {
+      videoRobustnesses.push(undefined);
+    }
+
+    var videoCodecs = (videoCapabilitiesConfig === null || videoCapabilitiesConfig === void 0 ? void 0 : videoCapabilitiesConfig.type) === "contentType" ? videoCapabilitiesConfig.value : ["video/mp4;codecs=\"avc1.4d401e\"", "video/mp4;codecs=\"avc1.42e01e\"", "video/webm;codecs=\"vp8\""];
+    videoCapabilities = (0,flat_map/* default */.Z)(videoRobustnesses, function (robustness) {
+      return videoCodecs.map(function (contentType) {
+        return robustness !== undefined ? {
+          contentType: contentType,
+          robustness: robustness
+        } : {
+          contentType: contentType
+        };
+      });
     });
-  }); // TODO Re-test with a set contentType but an undefined robustness on the
-  // STBs on which this problem was found.
-  //
-  // add another with no {audio,video}Capabilities for some legacy browsers.
-  // As of today's spec, this should return NotSupported but the first
-  // candidate configuration should be good, so we should have no downside
-  // doing that.
-  // initDataTypes: ["cenc"],
-  // videoCapabilities: undefined,
-  // audioCapabilities: undefined,
-  // distinctiveIdentifier,
-  // persistentState,
-  // sessionTypes,
+  }
 
   return [{
     initDataTypes: ["cenc"],
@@ -5688,7 +5348,7 @@ function buildKeySystemConfigurations(ksName, keySystem) {
  *   - reject if no compatible key system has been found.
  *
  * @param {HTMLMediaElement} mediaElement
- * @param {Array.<Object>} keySystems - The keySystems you want to test.
+ * @param {Array.<Object>} keySystemsConfigs - The keySystems you want to test.
  * @param {Object} cancelSignal
  * @returns {Promise.<Object>}
  */
@@ -5770,8 +5430,7 @@ function getMediaKeySystemAccess(mediaElement, keySystemsConfigs, cancelSignal) 
 
   function _recursivelyTestKeySystems() {
     _recursivelyTestKeySystems = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(index) {
-      var _keySystemsType$index, keyName, keyType, keySystemOptions, keySystemConfigurations, keySystemAccess;
-
+      var chosenType, keyType, keySystemOptions, keySystemConfigurations, keySystemAccess;
       return regenerator_default().wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -5792,14 +5451,15 @@ function getMediaKeySystemAccess(mediaElement, keySystemsConfigs, cancelSignal) 
               throw new Error("requestMediaKeySystemAccess is not implemented in your browser.");
 
             case 4:
-              _keySystemsType$index = keySystemsType[index], keyName = _keySystemsType$index.keyName, keyType = _keySystemsType$index.keyType, keySystemOptions = _keySystemsType$index.keySystemOptions;
-              keySystemConfigurations = buildKeySystemConfigurations(keyName, keySystemOptions);
+              chosenType = keySystemsType[index];
+              keyType = chosenType.keyType, keySystemOptions = chosenType.keySystemOptions;
+              keySystemConfigurations = buildKeySystemConfigurations(chosenType);
               log/* default.debug */.Z.debug("DRM: Request keysystem access " + keyType + "," + (index + 1 + " of " + keySystemsType.length));
-              _context.prev = 7;
-              _context.next = 10;
+              _context.prev = 8;
+              _context.next = 11;
               return (0,custom_media_keys/* requestMediaKeySystemAccess */.N)(keyType, keySystemConfigurations);
 
-            case 10:
+            case 11:
               keySystemAccess = _context.sent;
               log/* default.info */.Z.info("DRM: Found compatible keysystem", keyType, index + 1);
               return _context.abrupt("return", {
@@ -5810,27 +5470,27 @@ function getMediaKeySystemAccess(mediaElement, keySystemsConfigs, cancelSignal) 
                 }
               });
 
-            case 15:
-              _context.prev = 15;
-              _context.t0 = _context["catch"](7);
+            case 16:
+              _context.prev = 16;
+              _context.t0 = _context["catch"](8);
               log/* default.debug */.Z.debug("DRM: Rejected access to keysystem", keyType, index + 1);
 
               if (!(cancelSignal.cancellationError !== null)) {
-                _context.next = 20;
+                _context.next = 21;
                 break;
               }
 
               throw cancelSignal.cancellationError;
 
-            case 20:
+            case 21:
               return _context.abrupt("return", recursivelyTestKeySystems(index + 1));
 
-            case 21:
+            case 22:
             case "end":
               return _context.stop();
           }
         }
-      }, _callee, null, [[7, 15]]);
+      }, _callee, null, [[8, 16]]);
     }));
     return _recursivelyTestKeySystems.apply(this, arguments);
   }
@@ -6235,6 +5895,8 @@ function closeSession(session) {
     return _tryUpdatingSession.apply(this, arguments);
   }
 }
+// EXTERNAL MODULE: ./src/utils/assert.ts
+var assert = __webpack_require__(811);
 ;// CONCATENATED MODULE: ./src/core/decrypt/utils/key_id_comparison.ts
 function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
@@ -6550,6 +6212,7 @@ function loaded_sessions_store_arrayLikeToArray(arr, len) { if (len == null || l
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 
@@ -7043,6 +6706,36 @@ var LoadedSessionsStore = /*#__PURE__*/function () {
     return closeAllSessions;
   }()
   /**
+   * Find the given `MediaKeySession` in the `LoadedSessionsStore` and removes
+   * any reference to it without actually closing it.
+   *
+   * Returns `true` if the given `mediaKeySession` has been found and removed,
+   * `false` otherwise.
+   *
+   * Note that this may create a `MediaKeySession` leakage in the wrong
+   * conditions, cases where this method should be called should be very
+   * carefully evaluated.
+   * @param {MediaKeySession} mediaKeySession
+   * @returns {boolean}
+   */
+  ;
+
+  _proto.removeSessionWithoutClosingIt = function removeSessionWithoutClosingIt(mediaKeySession) {
+    (0,assert/* default */.Z)(mediaKeySession.sessionId === "", "Initialized `MediaKeySession`s should always be properly closed");
+
+    for (var i = this._storage.length - 1; i >= 0; i--) {
+      var stored = this._storage[i];
+
+      if (stored.mediaKeySession === mediaKeySession) {
+        this._storage.splice(i, 1);
+
+        return true;
+      }
+    }
+
+    return false;
+  }
+  /**
    * Get the index of a stored MediaKeySession entry based on its
    * `KeySessionRecord`.
    * Returns -1 if not found.
@@ -7180,8 +6873,6 @@ function _safelyCloseMediaKeySession() {
   }));
   return _safelyCloseMediaKeySession.apply(this, arguments);
 }
-// EXTERNAL MODULE: ./src/utils/assert.ts
-var assert = __webpack_require__(811);
 // EXTERNAL MODULE: ./src/utils/base64.ts
 var utils_base64 = __webpack_require__(9689);
 // EXTERNAL MODULE: ./src/utils/hash_buffer.ts
@@ -7414,11 +7105,11 @@ function checkStorage(storage) {
   (0,assert/* assertInterface */.u)(storage, {
     save: "function",
     load: "function"
-  }, "licenseStorage");
+  }, "persistentLicenseConfig");
 }
 /**
- * Set representing persisted licenses. Depends on a simple local-
- * storage implementation with a `save`/`load` synchronous interface
+ * Set representing persisted licenses. Depends on a simple
+ * implementation with a `save`/`load` synchronous interface
  * to persist information on persisted sessions.
  *
  * This set is used only for a cdm/keysystem with license persistency
@@ -7788,7 +7479,8 @@ var PersistentSessionsStore = /*#__PURE__*/function () {
     try {
       this._storage.save(this._entries);
     } catch (e) {
-      log/* default.warn */.Z.warn("DRM-PSS: Could not save licenses in localStorage");
+      var err = e instanceof Error ? e : undefined;
+      log/* default.warn */.Z.warn("DRM-PSS: Could not save MediaKeySession information", err);
     }
   };
 
@@ -7969,18 +7661,18 @@ var serverCertificateHashesMap = new WeakMap();
  */
 
 function createPersistentSessionsStorage(keySystemOptions) {
-  if (keySystemOptions.persistentLicense !== true) {
+  if ((0,is_null_or_undefined/* default */.Z)(keySystemOptions.persistentLicenseConfig)) {
     return null;
   }
 
-  var licenseStorage = keySystemOptions.licenseStorage;
+  var persistentLicenseConfig = keySystemOptions.persistentLicenseConfig;
 
-  if (licenseStorage == null) {
-    throw new encrypted_media_error/* default */.Z("INVALID_KEY_SYSTEM", "No license storage found for persistent license.");
+  if (persistentLicenseConfig == null) {
+    throw new encrypted_media_error/* default */.Z("INVALID_KEY_SYSTEM", "No `persistentLicenseConfig` found for " + "persistent license.");
   }
 
   log/* default.debug */.Z.debug("DRM: Set the given license storage");
-  return new PersistentSessionsStore(licenseStorage);
+  return new PersistentSessionsStore(persistentLicenseConfig);
 }
 /**
  * Create a MediaKeys instance and associated structures (or just return the
@@ -8296,8 +7988,8 @@ var empty = __webpack_require__(1545);
 var of = __webpack_require__(2817);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/takeUntil.js
 var takeUntil = __webpack_require__(3505);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
-var concat = __webpack_require__(6362);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js + 1 modules
+var concat = __webpack_require__(2034);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/tap.js
 var tap = __webpack_require__(2006);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/ignoreElements.js
@@ -8386,8 +8078,6 @@ function retryObsWithBackoff(obs$, options) {
     }));
   }));
 }
-// EXTERNAL MODULE: ./src/utils/rx-try_catch.ts
-var rx_try_catch = __webpack_require__(5561);
 ;// CONCATENATED MODULE: ./src/compat/eme/get_uuid_kid_from_keystatus_kid.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -8461,7 +8151,7 @@ var KEY_STATUSES = {
 
 function checkKeyStatuses(session, options, keySystem) {
   var warnings = [];
-  var blacklistedKeyIDs = [];
+  var blacklistedKeyIds = [];
   var whitelistedKeyIds = [];
   var _options$fallbackOn = options.fallbackOn,
       fallbackOn = _options$fallbackOn === void 0 ? {} : _options$fallbackOn,
@@ -8506,7 +8196,7 @@ function checkKeyStatuses(session, options, keySystem) {
             type: "warning",
             value: _error
           });
-          blacklistedKeyIDs.push(keyId);
+          blacklistedKeyIds.push(keyId);
           break;
         }
 
@@ -8522,7 +8212,7 @@ function checkKeyStatuses(session, options, keySystem) {
             type: "warning",
             value: _error2
           });
-          blacklistedKeyIDs.push(keyId);
+          blacklistedKeyIds.push(keyId);
           break;
         }
 
@@ -8533,7 +8223,7 @@ function checkKeyStatuses(session, options, keySystem) {
   });
   return {
     warnings: warnings,
-    blacklistedKeyIDs: blacklistedKeyIDs,
+    blacklistedKeyIds: blacklistedKeyIds,
     whitelistedKeyIds: whitelistedKeyIds
   };
 }
@@ -8557,7 +8247,6 @@ function checkKeyStatuses(session, options, keySystem) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -8610,8 +8299,8 @@ function SessionEventsListener(session, keySystemOptions, keySystem) {
   var keyErrors = onKeyError$(session).pipe((0,map/* map */.U)(function (error) {
     throw new encrypted_media_error/* default */.Z("KEY_ERROR", error.type);
   }));
-  var keyStatusesChange$ = onKeyStatusesChange$(session).pipe((0,mergeMap/* mergeMap */.z)(function (keyStatusesEvent) {
-    return handleKeyStatusesChangeEvent(session, keySystemOptions, keySystem, keyStatusesEvent);
+  var keyStatusesChange$ = onKeyStatusesChange$(session).pipe((0,mergeMap/* mergeMap */.z)(function () {
+    return handleKeyStatusesChangeEvent(session, keySystemOptions, keySystem);
   }));
   var keyMessages$ = onKeyMessage$(session).pipe((0,mergeMap/* mergeMap */.z)(function (messageEvent) {
     var message = new Uint8Array(messageEvent.message);
@@ -8651,7 +8340,6 @@ function SessionEventsListener(session, keySystemOptions, keySystem) {
   var sessionUpdates = (0,merge/* merge */.T)(keyMessages$, keyStatusesChange$).pipe(concatMap(function (evt) {
     switch (evt.type) {
       case "key-message-handled":
-      case "key-status-change-handled":
         if ((0,is_null_or_undefined/* default */.Z)(evt.value.license)) {
           log/* default.info */.Z.info("DRM: No message given, skipping session.update");
           return empty/* EMPTY */.E;
@@ -8689,7 +8377,7 @@ function getKeyStatusesEvents(session, options, keySystem) {
 
     var _checkKeyStatuses = checkKeyStatuses(session, options, keySystem),
         warnings = _checkKeyStatuses.warnings,
-        blacklistedKeyIDs = _checkKeyStatuses.blacklistedKeyIDs,
+        blacklistedKeyIds = _checkKeyStatuses.blacklistedKeyIds,
         whitelistedKeyIds = _checkKeyStatuses.whitelistedKeyIds;
 
     var warnings$ = warnings.length > 0 ? of.of.apply(void 0, warnings) : empty/* EMPTY */.E;
@@ -8697,7 +8385,7 @@ function getKeyStatusesEvents(session, options, keySystem) {
       type: "keys-update",
       value: {
         whitelistedKeyIds: whitelistedKeyIds,
-        blacklistedKeyIDs: blacklistedKeyIDs
+        blacklistedKeyIds: blacklistedKeyIds
       }
     });
     return (0,concat/* concat */.z)(warnings$, keysUpdate$);
@@ -8751,39 +8439,13 @@ function updateSessionWithMessage(session, message) {
 /**
  * @param {MediaKeySession}
  * @param {Object} keySystem
- * @param {Event} keyStatusesEvent
  * @returns {Observable}
  */
 
 
-function handleKeyStatusesChangeEvent(session, keySystemOptions, keySystem, keyStatusesEvent) {
+function handleKeyStatusesChangeEvent(session, keySystemOptions, keySystem) {
   log/* default.info */.Z.info("DRM: keystatuseschange event received", session.sessionId);
-  var callback$ = (0,defer/* defer */.P)(function () {
-    return (0,rx_try_catch/* default */.Z)(function () {
-      if (typeof keySystemOptions.onKeyStatusesChange !== "function") {
-        return empty/* EMPTY */.E;
-      }
-
-      return (0,cast_to_observable/* default */.Z)(keySystemOptions.onKeyStatusesChange(keyStatusesEvent, session));
-    }, undefined);
-  }).pipe((0,map/* map */.U)(function (licenseObject) {
-    return {
-      type: "key-status-change-handled",
-      value: {
-        session: session,
-        license: licenseObject
-      }
-    };
-  }), (0,catchError/* catchError */.K)(function (error) {
-    var err = new encrypted_media_error/* default */.Z("KEY_STATUS_CHANGE_ERROR", "Unknown `onKeyStatusesChange` error");
-
-    if (!(0,is_null_or_undefined/* default */.Z)(error) && (0,is_non_empty_string/* default */.Z)(error.message)) {
-      err.message = error.message;
-    }
-
-    throw err;
-  }));
-  return (0,merge/* merge */.T)(getKeyStatusesEvents(session, keySystemOptions, keySystem), callback$);
+  return getKeyStatusesEvents(session, keySystemOptions, keySystem);
 }
 /**
  * Construct backoff options for the getLicense call.
@@ -9287,7 +8949,7 @@ var ContentDecryptor = /*#__PURE__*/function (_EventEmitter) {
 
       var systemId;
 
-      if ((0,is_null_or_undefined/* default */.Z)(options.licenseStorage) || options.licenseStorage.disableRetroCompatibility === true) {
+      if ((0,is_null_or_undefined/* default */.Z)(options.persistentLicenseConfig) || options.persistentLicenseConfig.disableRetroCompatibility === true) {
         systemId = getDrmSystemId(mediaKeySystemAccess.keySystem);
       }
 
@@ -9648,7 +9310,7 @@ var ContentDecryptor = /*#__PURE__*/function (_EventEmitter) {
               // Can we find a better strategy?
               this._lockInitDataQueue();
 
-              if (options.persistentLicense !== true) {
+              if ((0,is_null_or_undefined/* default */.Z)(options.persistentLicenseConfig)) {
                 wantedSessionType = "temporary";
               } else if (!canCreatePersistentSession(mediaKeySystemAccess)) {
                 log/* default.warn */.Z.warn("DRM: Cannot create \"persistent-license\" session: not supported");
@@ -9704,7 +9366,7 @@ var ContentDecryptor = /*#__PURE__*/function (_EventEmitter) {
 
                   var linkedKeys = getKeyIdsLinkedToSession(initializationData, sessionInfo.record, options.singleLicensePer, sessionInfo.source === "created-session"
                   /* MediaKeySessionLoadingType.Created */
-                  , evt.value.whitelistedKeyIds, evt.value.blacklistedKeyIDs);
+                  , evt.value.whitelistedKeyIds, evt.value.blacklistedKeyIds);
                   sessionInfo.record.associateKeyIds(linkedKeys.whitelisted);
                   sessionInfo.record.associateKeyIds(linkedKeys.blacklisted);
                   sessionInfo.keyStatuses = {
@@ -9908,14 +9570,25 @@ var ContentDecryptor = /*#__PURE__*/function (_EventEmitter) {
     }
 
     return false;
-  };
+  }
+  /**
+   * Callback that should be called if an error that made the current
+   * `ContentDecryptor` instance unusable arised.
+   * This callbacks takes care of resetting state and sending the right events.
+   *
+   * Once called, no further actions should be taken.
+   *
+   * @param {*} err - The error object which describes the issue. Will be
+   * formatted and sent in an "error" event.
+   */
+  ;
 
   _proto._onFatalError = function _onFatalError(err) {
     if (this._canceller.isUsed) {
       return;
     }
 
-    var formattedErr = err instanceof Error ? err : new other_error/* default */.Z("NONE", "Unknown encryption error");
+    var formattedErr = err instanceof Error ? err : new other_error/* default */.Z("NONE", "Unknown decryption error");
     this.error = formattedErr;
     this._initDataQueue.length = 0;
     this._stateData = {
@@ -9942,7 +9615,12 @@ var ContentDecryptor = /*#__PURE__*/function (_EventEmitter) {
 
   _proto._isStopped = function _isStopped() {
     return this._stateData.state === ContentDecryptorState.Disposed || this._stateData.state === ContentDecryptorState.Error;
-  };
+  }
+  /**
+   * Start processing the next initialization data of the `_initDataQueue` if it
+   * isn't lock.
+   */
+  ;
 
   _proto._processCurrentInitDataQueue = function _processCurrentInitDataQueue() {
     while (this._stateData.isInitDataQueueLocked === false) {
@@ -9954,13 +9632,27 @@ var ContentDecryptor = /*#__PURE__*/function (_EventEmitter) {
 
       this.onInitializationData(initData);
     }
-  };
+  }
+  /**
+   * Lock new initialization data (from the `_initDataQueue`) from being
+   * processed until `_unlockInitDataQueue` is called.
+   *
+   * You may want to call this method when performing operations which may have
+   * an impact on the handling of other initialization data.
+   */
+  ;
 
   _proto._lockInitDataQueue = function _lockInitDataQueue() {
     if (this._stateData.isInitDataQueueLocked === false) {
       this._stateData.isInitDataQueueLocked = true;
     }
-  };
+  }
+  /**
+   * Unlock `_initDataQueue` and start processing the first element.
+   *
+   * Should have no effect if the `_initDataQueue` was not locked.
+   */
+  ;
 
   _proto._unlockInitDataQueue = function _unlockInitDataQueue() {
     if (this._stateData.isMediaKeysAttached !== true) {
@@ -9991,8 +9683,23 @@ function canCreatePersistentSession(mediaKeySystemAccess) {
 
   return sessionTypes !== undefined && (0,array_includes/* default */.Z)(sessionTypes, "persistent-license");
 }
+/**
+ * Change the decipherability of Representations which have their key id in one
+ * of the given Arrays:
+ *
+ *   - Those who have a key id listed in `whitelistedKeyIds` will have their
+ *     decipherability updated to `true`
+ *
+ *   - Those who have a key id listed in `blacklistedKeyIds` will have their
+ *     decipherability updated to `false`
+ *
+ * @param {Object} manifest
+ * @param {Array.<Uint8Array>} whitelistedKeyIds
+ * @param {Array.<Uint8Array>} blacklistedKeyIds
+ */
 
-function updateDecipherability(manifest, whitelistedKeyIds, blacklistedKeyIDs) {
+
+function updateDecipherability(manifest, whitelistedKeyIds, blacklistedKeyIds) {
   manifest.updateRepresentationsDeciperability(function (representation) {
     if (representation.contentProtections === undefined) {
       return representation.decipherable;
@@ -10004,8 +9711,8 @@ function updateDecipherability(manifest, whitelistedKeyIds, blacklistedKeyIDs) {
       for (var i = 0; i < contentKIDs.length; i++) {
         var elt = contentKIDs[i];
 
-        for (var j = 0; j < blacklistedKeyIDs.length; j++) {
-          if (areKeyIdsEqual(blacklistedKeyIDs[j], elt.keyId)) {
+        for (var j = 0; j < blacklistedKeyIds.length; j++) {
+          if (areKeyIdsEqual(blacklistedKeyIds[j], elt.keyId)) {
             return false;
           }
         }
@@ -10021,6 +9728,13 @@ function updateDecipherability(manifest, whitelistedKeyIds, blacklistedKeyIDs) {
     return representation.decipherable;
   });
 }
+/**
+ * Update decipherability to `false` to any Representation which is linked to
+ * the given initialization data.
+ * @param {Object} manifest
+ * @param {Object} initData
+ */
+
 
 function blackListProtectionData(manifest, initData) {
   manifest.updateRepresentationsDeciperability(function (representation) {
@@ -10263,6 +9977,13 @@ function getKeyIdsLinkedToSession(initializationData, keySessionRecord, singleLi
     blacklisted: associatedKeyIds.slice(usableKeyIds.length)
   };
 }
+/**
+ * Push all kei ids in the given `set` and add it to the `arr` Array only if it
+ * isn't already present in it.
+ * @param {Set.<Uint8Array>} set
+ * @param {Array.<Uint8Array>} arr
+ */
+
 
 function mergeKeyIdSetIntoArray(set, arr) {
   var setArr = Array.from(set.values());
@@ -10282,6 +10003,12 @@ function mergeKeyIdSetIntoArray(set, arr) {
     _loop4();
   }
 }
+/**
+ * Add to the given `set` all key ids found in the given `Period`.
+ * @param {Set.<Uint8Array>} set
+ * @param {Object} period
+ */
+
 
 function addKeyIdsFromPeriod(set, period) {
   for (var _iterator6 = content_decryptor_createForOfIteratorHelperLoose(period.getAdaptations()), _step6; !(_step6 = _iterator6()).done;) {
@@ -10553,19 +10280,6 @@ function unstalled() {
   };
 }
 /**
- * Construct a "decipherabilityUpdate" event.
- * @param {Array.<Object>} arg
- * @returns {Object}
- */
-
-
-function decipherabilityUpdate(arg) {
-  return {
-    type: "decipherabilityUpdate",
-    value: arg
-  };
-}
-/**
  * Construct a "manifestReady" event.
  * @param {Object} manifest
  * @returns {Object}
@@ -10638,7 +10352,6 @@ function reloadingMediaSource() {
 
 var INIT_EVENTS = {
   loaded: loaded,
-  decipherabilityUpdate: decipherabilityUpdate,
   manifestReady: manifestReady,
   manifestUpdate: manifestUpdate,
   nullRepresentation: nullRepresentation,
@@ -10651,7 +10364,7 @@ var INIT_EVENTS = {
 
 /***/ }),
 
-/***/ 7920:
+/***/ 5936:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -10681,14 +10394,47 @@ var shareReplay = __webpack_require__(8515);
 var mergeMap = __webpack_require__(7877);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/startWith.js
 var startWith = __webpack_require__(6108);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
-var concat = __webpack_require__(6362);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js + 1 modules
+var concat = __webpack_require__(2034);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/defer.js
 var defer = __webpack_require__(9917);
 // EXTERNAL MODULE: ./src/utils/cast_to_observable.ts
 var cast_to_observable = __webpack_require__(8117);
-// EXTERNAL MODULE: ./src/utils/rx-try_catch.ts
-var rx_try_catch = __webpack_require__(5561);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/throwError.js
+var throwError = __webpack_require__(3610);
+;// CONCATENATED MODULE: ./src/utils/rx-try_catch.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {Function} func - A function you want to execute
+ * @param {*} argsForFunc - The function's argument
+ * @returns {*} - If it fails, returns a throwing Observable, else the
+ * function's result (which should be, in most cases, an Observable).
+ */
+
+function tryCatch(func, argsForFunc) {
+  try {
+    return func(argsForFunc);
+  } catch (e) {
+    return (0,throwError/* throwError */._)(function () {
+      return e;
+    });
+  }
+}
 ;// CONCATENATED MODULE: ./src/compat/play.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -10720,7 +10466,7 @@ function play(mediaElement) {
     return (// mediaElement.play is not always a Promise. In the improbable case it
       // throws, I prefer still to catch to return the error wrapped in an
       // Observable
-      (0,rx_try_catch/* default */.Z)(function () {
+      tryCatch(function () {
         return (0,cast_to_observable/* default */.Z)(mediaElement.play());
       }, undefined)
     );
@@ -10940,12 +10686,12 @@ var switchMap = __webpack_require__(4978);
 var of = __webpack_require__(2817);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
 var merge = __webpack_require__(3071);
+// EXTERNAL MODULE: ./src/compat/clear_element_src.ts
+var clear_element_src = __webpack_require__(5767);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
 var Observable = __webpack_require__(1480);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
-// EXTERNAL MODULE: ./src/compat/clear_element_src.ts
-var clear_element_src = __webpack_require__(5767);
 ;// CONCATENATED MODULE: ./src/compat/set_element_src.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -10989,8 +10735,8 @@ function setElementSrc$(mediaElement, url) {
 var defer_subscriptions = __webpack_require__(8333);
 // EXTERNAL MODULE: ./src/core/init/emit_loaded_event.ts + 1 modules
 var emit_loaded_event = __webpack_require__(5039);
-// EXTERNAL MODULE: ./src/core/init/initial_seek_and_play.ts + 2 modules
-var initial_seek_and_play = __webpack_require__(7920);
+// EXTERNAL MODULE: ./src/core/init/initial_seek_and_play.ts + 3 modules
+var initial_seek_and_play = __webpack_require__(5936);
 // EXTERNAL MODULE: ./src/core/init/link_drm_and_content.ts + 1 modules
 var link_drm_and_content = __webpack_require__(9607);
 // EXTERNAL MODULE: ./src/core/init/stall_avoider.ts + 1 modules
@@ -11134,7 +10880,7 @@ function initializeDirectfileContent(_ref) {
    * events when it cannot, as well as "unstalled" events when it get out of one.
    */
 
-  var stallAvoider$ = (0,stall_avoider/* default */.Z)(playbackObserver, null, empty/* EMPTY */.E, empty/* EMPTY */.E);
+  var stallAvoider$ = (0,stall_avoider/* default */.Z)(playbackObserver, null, speed, empty/* EMPTY */.E, empty/* EMPTY */.E);
   /**
    * Emit a "loaded" events once the initial play has been performed and the
    * media can begin playback.
@@ -11173,6 +10919,8 @@ var merge = __webpack_require__(3071);
 var map = __webpack_require__(9127);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
 var Observable = __webpack_require__(1480);
+// EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
+var event_listeners = __webpack_require__(1381);
 // EXTERNAL MODULE: ./src/compat/eme/custom_media_keys/index.ts + 7 modules
 var custom_media_keys = __webpack_require__(6139);
 ;// CONCATENATED MODULE: ./src/compat/has_eme_apis.ts
@@ -11201,8 +10949,6 @@ var custom_media_keys = __webpack_require__(6139);
 function hasEMEAPIs() {
   return typeof custom_media_keys/* requestMediaKeySystemAccess */.N === "function";
 }
-// EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
-var event_listeners = __webpack_require__(1381);
 // EXTERNAL MODULE: ./src/errors/encrypted_media_error.ts
 var encrypted_media_error = __webpack_require__(5157);
 // EXTERNAL MODULE: ./src/features/index.ts
@@ -11437,13 +11183,15 @@ var EPSILON = 1 / 60;
  * encountered and exited.
  * @param {object} playbackObserver - emit the current playback conditions.
  * @param {Object} manifest - The Manifest of the currently-played content.
+ * @param {Object} speed - The last speed set by the user
+ * @param {Observable} lockedStream$ - Emit information on currently "locked"
+ * streams.
  * @param {Observable} discontinuityUpdate$ - Observable emitting encountered
  * discontinuities for loaded Period and buffer types.
- * @param {Function} setCurrentTime
  * @returns {Observable}
  */
 
-function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUpdate$) {
+function StallAvoider(playbackObserver, manifest, speed, lockedStream$, discontinuityUpdate$) {
   var initialDiscontinuitiesStore = [];
   /**
    * Emit every known audio and video buffer discontinuities in chronological
@@ -11492,11 +11240,9 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
     var lockedStreamEvt = _ref2[0],
         observation = _ref2[1];
 
-    var _a; // TODO(PaulB) also skip when the user's wanted speed is set to `0`, as we
-    // might not want to seek in that case?
+    var _a;
 
-
-    if (!observation.rebuffering || observation.paused || lockedStreamEvt.bufferType !== "audio" && lockedStreamEvt.bufferType !== "video") {
+    if (!observation.rebuffering || observation.paused || speed.getValue() <= 0 || lockedStreamEvt.bufferType !== "audio" && lockedStreamEvt.bufferType !== "video") {
       return;
     }
 
@@ -11518,6 +11264,9 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
   var stall$ = playbackObserver.getReference().asObservable().pipe((0,withLatestFrom/* withLatestFrom */.M)(discontinuitiesStore$), (0,map/* map */.U)(function (_ref3) {
     var observation = _ref3[0],
         discontinuitiesStore = _ref3[1];
+
+    var _a;
+
     var buffered = observation.buffered,
         position = observation.position,
         readyState = observation.readyState,
@@ -11531,19 +11280,28 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
         UNFREEZING_SEEK_DELAY = _config$getCurrent.UNFREEZING_SEEK_DELAY,
         UNFREEZING_DELTA_POSITION = _config$getCurrent.UNFREEZING_DELTA_POSITION;
 
-    if (freezing !== null) {
+    if (!observation.seeking && is_seeking_approximate && ignoredStallTimeStamp === null && lastSeekingPosition !== null && observation.position < lastSeekingPosition) {
+      log/* default.debug */.Z.debug("Init: the device appeared to have seeked back by itself.");
       var now = performance.now();
+      ignoredStallTimeStamp = now;
+    }
+
+    lastSeekingPosition = observation.seeking ? Math.max((_a = observation.pendingInternalSeek) !== null && _a !== void 0 ? _a : 0, observation.position) : null;
+
+    if (freezing !== null) {
+      var _now = performance.now();
+
       var referenceTimestamp = prevFreezingState === null ? freezing.timestamp : prevFreezingState.attemptTimestamp;
 
-      if (now - referenceTimestamp > UNFREEZING_SEEK_DELAY) {
+      if (_now - referenceTimestamp > UNFREEZING_SEEK_DELAY) {
         log/* default.warn */.Z.warn("Init: trying to seek to un-freeze player");
         playbackObserver.setCurrentTime(playbackObserver.getCurrentTime() + UNFREEZING_DELTA_POSITION);
         prevFreezingState = {
-          attemptTimestamp: now
+          attemptTimestamp: _now
         };
       }
 
-      if (now - freezing.timestamp > FREEZING_STALLED_DELAY) {
+      if (_now - freezing.timestamp > FREEZING_STALLED_DELAY) {
         return {
           type: "stalled",
           value: "freezing"
@@ -11560,7 +11318,7 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
         var reason;
 
         if (observation.seeking) {
-          reason = observation.internalSeeking ? "internal-seek" : "seeking";
+          reason = observation.pendingInternalSeek !== null ? "internal-seek" : "seeking";
         } else {
           reason = "not-ready";
         }
@@ -11579,31 +11337,20 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
     // internally by the player to when its due to a regular user seek.
 
 
-    var stalledReason = rebuffering.reason === "seeking" && observation.internalSeeking ? "internal-seek" : rebuffering.reason;
+    var stalledReason = rebuffering.reason === "seeking" && observation.pendingInternalSeek !== null ? "internal-seek" : rebuffering.reason;
 
-    if (observation.seeking) {
-      lastSeekingPosition = observation.position;
-    } else if (lastSeekingPosition !== null) {
-      var _now = performance.now();
+    if (ignoredStallTimeStamp !== null) {
+      var _now2 = performance.now();
 
-      if (ignoredStallTimeStamp === null) {
-        ignoredStallTimeStamp = _now;
+      if (_now2 - ignoredStallTimeStamp < FORCE_DISCONTINUITY_SEEK_DELAY) {
+        log/* default.debug */.Z.debug("Init: letting the device get out of a stall by itself");
+        return {
+          type: "stalled",
+          value: stalledReason
+        };
+      } else {
+        log/* default.warn */.Z.warn("Init: ignored stall for too long, checking discontinuity", _now2 - ignoredStallTimeStamp);
       }
-
-      if (is_seeking_approximate && observation.position < lastSeekingPosition) {
-        log/* default.debug */.Z.debug("Init: the device appeared to have seeked back by itself.");
-
-        if (_now - ignoredStallTimeStamp < FORCE_DISCONTINUITY_SEEK_DELAY) {
-          return {
-            type: "stalled",
-            value: stalledReason
-          };
-        } else {
-          log/* default.warn */.Z.warn("Init: ignored stall for too long, checking discontinuity", _now - ignoredStallTimeStamp);
-        }
-      }
-
-      lastSeekingPosition = null;
     }
 
     ignoredStallTimeStamp = null;
@@ -11619,7 +11366,7 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
 
     var stalledPosition = rebuffering.position;
 
-    if (stalledPosition !== null) {
+    if (stalledPosition !== null && speed.getValue() > 0) {
       var skippableDiscontinuity = findSeekableDiscontinuity(discontinuitiesStore, manifest, stalledPosition);
 
       if (skippableDiscontinuity !== null) {
@@ -11645,7 +11392,7 @@ function StallAvoider(playbackObserver, manifest, lockedStream$, discontinuityUp
 
     var nextBufferRangeGap = (0,ranges/* getNextRangeGap */.XS)(buffered, freezePosition);
 
-    if (nextBufferRangeGap < BUFFER_DISCONTINUITY_THRESHOLD) {
+    if (speed.getValue() > 0 && nextBufferRangeGap < BUFFER_DISCONTINUITY_THRESHOLD) {
       var seekTo = freezePosition + nextBufferRangeGap + EPSILON;
 
       if (playbackObserver.getCurrentTime() < seekTo) {
@@ -11962,34 +11709,12 @@ __webpack_require__.d(__webpack_exports__, {
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inheritsLoose.js
 var inheritsLoose = __webpack_require__(4578);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
-var merge = __webpack_require__(3071);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/interval.js
-var observable_interval = __webpack_require__(6697);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/startWith.js
-var startWith = __webpack_require__(6108);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/switchMap.js
-var switchMap = __webpack_require__(4978);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
-var concat = __webpack_require__(6362);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/map.js
-var map = __webpack_require__(9127);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/takeUntil.js
-var takeUntil = __webpack_require__(3505);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
-var of = __webpack_require__(2817);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Subject.js + 1 modules
-var Subject = __webpack_require__(6716);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/defer.js
-var defer = __webpack_require__(9917);
 // EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
 var event_listeners = __webpack_require__(1381);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
-var Observable = __webpack_require__(1480);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/distinctUntilChanged.js
-var distinctUntilChanged = __webpack_require__(3741);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
 var log = __webpack_require__(3887);
+// EXTERNAL MODULE: ./src/utils/reference.ts
+var reference = __webpack_require__(5095);
 // EXTERNAL MODULE: ./src/compat/is_node.ts
 var is_node = __webpack_require__(2203);
 ;// CONCATENATED MODULE: ./src/compat/on_height_width_change.ts
@@ -12021,8 +11746,8 @@ var _ResizeObserver = is_node/* default */.Z ? undefined : window.ResizeObserver
 /* eslint-enable @typescript-eslint/no-unsafe-assignment */
 
 /**
- * Emit the current height and width of the given `element` on subscribtion
- * and each time it changes.
+ * Emit the current height and width of the given `element` each time it
+ * changes.
  *
  * On some browsers, we might not be able to rely on a native API to know when
  * it changes, the `interval` argument allow us to provide us an inverval in
@@ -12033,55 +11758,69 @@ var _ResizeObserver = is_node/* default */.Z ? undefined : window.ResizeObserver
  */
 
 
-function onHeightWidthChange(element, interval) {
-  return (0,defer/* defer */.P)(function () {
-    if (_ResizeObserver !== undefined) {
-      var lastHeight = -1;
-      var lastWidth = -1;
-      return new Observable/* Observable */.y(function (obs) {
-        var resizeObserver = new _ResizeObserver(function (entries) {
-          if (entries.length === 0) {
-            log/* default.error */.Z.error("Compat: Resized but no observed element.");
-            return;
-          }
+function onHeightWidthChange(element, interval, cancellationSignal) {
+  var _element$getBoundingC = element.getBoundingClientRect(),
+      initHeight = _element$getBoundingC.height,
+      initWidth = _element$getBoundingC.width;
 
-          var entry = entries[0];
-          var _entry$contentRect = entry.contentRect,
-              height = _entry$contentRect.height,
-              width = _entry$contentRect.width;
-
-          if (height !== lastHeight || width !== lastWidth) {
-            lastHeight = height;
-            lastWidth = width;
-            obs.next({
-              height: height,
-              width: width
-            });
-          }
-        });
-        resizeObserver.observe(element);
-        return function () {
-          resizeObserver.disconnect();
-        };
-      });
-    }
-
-    return (0,observable_interval/* interval */.F)(interval).pipe((0,startWith/* startWith */.O)(null), (0,map/* map */.U)(function () {
-      var _element$getBoundingC = element.getBoundingClientRect(),
-          height = _element$getBoundingC.height,
-          width = _element$getBoundingC.width;
-
-      return {
-        height: height,
-        width: width
-      };
-    }), (0,distinctUntilChanged/* distinctUntilChanged */.x)(function (o, n) {
-      return o.height === n.height && o.width === n.width;
-    }));
+  var ref = (0,reference/* default */.ZP)({
+    height: initHeight,
+    width: initWidth
   });
+  var lastHeight = initHeight;
+  var lastWidth = initWidth;
+
+  if (_ResizeObserver !== undefined) {
+    var resizeObserver = new _ResizeObserver(function (entries) {
+      if (entries.length === 0) {
+        log/* default.error */.Z.error("Compat: Resized but no observed element.");
+        return;
+      }
+
+      var entry = entries[0];
+      var _entry$contentRect = entry.contentRect,
+          height = _entry$contentRect.height,
+          width = _entry$contentRect.width;
+
+      if (height !== lastHeight || width !== lastWidth) {
+        lastHeight = height;
+        lastWidth = width;
+        ref.setValue({
+          height: height,
+          width: width
+        });
+      }
+    });
+    resizeObserver.observe(element);
+    cancellationSignal.register(function () {
+      resizeObserver.disconnect();
+    });
+  } else {
+    var intervalId = setInterval(function () {
+      var _element$getBoundingC2 = element.getBoundingClientRect(),
+          height = _element$getBoundingC2.height,
+          width = _element$getBoundingC2.width;
+
+      if (height !== lastHeight || width !== lastWidth) {
+        lastHeight = height;
+        lastWidth = width;
+        ref.setValue({
+          height: height,
+          width: width
+        });
+      }
+    }, interval);
+    cancellationSignal.register(function () {
+      clearInterval(intervalId);
+    });
+  }
+
+  return ref;
 }
 // EXTERNAL MODULE: ./src/config.ts + 2 modules
 var config = __webpack_require__(6872);
+// EXTERNAL MODULE: ./src/utils/task_canceller.ts
+var task_canceller = __webpack_require__(288);
 // EXTERNAL MODULE: ./src/core/segment_buffers/implementations/types.ts + 3 modules
 var types = __webpack_require__(9612);
 // EXTERNAL MODULE: ./src/core/segment_buffers/implementations/utils/manual_time_ranges.ts
@@ -12730,36 +12469,13 @@ function updateProportionalElements(currentHeight, currentWidth, resolution, tex
 
 
 
-var onEnded$ = event_listeners/* onEnded$ */.C1,
-    onSeeked$ = event_listeners/* onSeeked$ */.ik,
-    onSeeking$ = event_listeners/* onSeeking$ */.d5;
-/**
- * Generate the interval at which TextTrack HTML Cues should be refreshed.
- * @param {HTMLMediaElement} videoElement
- * @returns {Observable}
- */
-
-function generateRefreshInterval(videoElement) {
-  var seeking$ = onSeeking$(videoElement);
-  var seeked$ = onSeeked$(videoElement);
-  var ended$ = onEnded$(videoElement);
-
-  var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
-      MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL = _config$getCurrent.MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL;
-
-  var manualRefresh$ = (0,merge/* merge */.T)(seeked$, ended$);
-  var autoRefresh$ = (0,observable_interval/* interval */.F)(MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL).pipe((0,startWith/* startWith */.O)(null));
-  return manualRefresh$.pipe((0,startWith/* startWith */.O)(null), (0,switchMap/* switchMap */.w)(function () {
-    return (0,concat/* concat */.z)(autoRefresh$.pipe((0,map/* map */.U)(function () {
-      return true;
-    }), (0,takeUntil/* takeUntil */.R)(seeking$)), (0,of.of)(false));
-  }));
-}
+var onEnded = event_listeners/* onEnded */.M4,
+    onSeeked = event_listeners/* onSeeked */.bQ,
+    onSeeking = event_listeners/* onSeeking */.Q$;
 /**
  * @param {Element} element
  * @param {Element} child
  */
-
 
 function safelyRemoveChild(element, child) {
   try {
@@ -12817,88 +12533,55 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
     _this._buffered = new manual_time_ranges/* default */.Z();
     _this._videoElement = videoElement;
     _this._textTrackElement = textTrackElement;
-    _this._clearSizeUpdates$ = new Subject/* Subject */.x();
-    _this._destroy$ = new Subject/* Subject */.x();
+    _this._sizeUpdateCanceller = new task_canceller/* default */.ZP();
+    _this._canceller = new task_canceller/* default */.ZP();
     _this._buffer = new TextTrackCuesStore();
-    _this._currentCues = []; // update text tracks
+    _this._currentCues = [];
 
-    generateRefreshInterval(_this._videoElement).pipe((0,takeUntil/* takeUntil */.R)(_this._destroy$)).subscribe(function (shouldDisplay) {
-      if (!shouldDisplay) {
-        _this._disableCurrentCues();
+    _this.autoRefreshSubtitles(_this._canceller.signal);
 
-        return;
-      }
-
-      var _config$getCurrent2 = config/* default.getCurrent */.Z.getCurrent(),
-          MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL = _config$getCurrent2.MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL; // to spread the time error, we divide the regular chosen interval.
-
-
-      var time = Math.max(_this._videoElement.currentTime + MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL / 1000 / 2, 0);
-
-      var cues = _this._buffer.get(time);
-
-      if (cues.length === 0) {
-        _this._disableCurrentCues();
-      } else {
-        _this._displayCues(cues);
-      }
-    });
     return _this;
   }
   /**
    * Push segment on Subscription.
    * @param {Object} infos
-   * @returns {Observable}
+   * @returns {Promise}
    */
 
 
   var _proto = HTMLTextSegmentBuffer.prototype;
 
   _proto.pushChunk = function pushChunk(infos) {
-    var _this2 = this;
+    try {
+      this.pushChunkSync(infos);
+    } catch (err) {
+      return Promise.reject(err);
+    }
 
-    return (0,defer/* defer */.P)(function () {
-      _this2.pushChunkSync(infos);
-
-      return (0,of.of)(undefined);
-    });
+    return Promise.resolve();
   }
   /**
    * Remove buffered data.
    * @param {number} start - start position, in seconds
    * @param {number} end - end position, in seconds
-   * @returns {Observable}
+   * @returns {Promise}
    */
   ;
 
   _proto.removeBuffer = function removeBuffer(start, end) {
-    var _this3 = this;
-
-    return (0,defer/* defer */.P)(function () {
-      _this3.removeBufferSync(start, end);
-
-      return (0,of.of)(undefined);
-    });
+    this.removeBufferSync(start, end);
+    return Promise.resolve();
   }
   /**
-   * Indicate that every chunks from a Segment has been given to pushChunk so
-   * far.
-   * This will update our internal Segment inventory accordingly.
-   * The returned Observable will emit and complete successively once the whole
-   * segment has been pushed and this indication is acknowledged.
    * @param {Object} infos
-   * @returns {Observable}
+   * @returns {Promise}
    */
   ;
 
-  _proto.endOfSegment = function endOfSegment(_infos) {
-    var _this4 = this;
+  _proto.endOfSegment = function endOfSegment(infos) {
+    this._segmentInventory.completeSegment(infos, this._buffered);
 
-    return (0,defer/* defer */.P)(function () {
-      _this4._segmentInventory.completeSegment(_infos, _this4._buffered);
-
-      return (0,of.of)(undefined);
-    });
+    return Promise.resolve();
   }
   /**
    * Returns the currently buffered data, in a TimeRanges object.
@@ -12919,9 +12602,7 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
 
     this._buffered.remove(0, Infinity);
 
-    this._destroy$.next();
-
-    this._destroy$.complete();
+    this._canceller.cancel();
   }
   /**
    * Push the text track contained in `data` to the HTMLTextSegmentBuffer
@@ -12935,7 +12616,7 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
    *
    * /!\ This method won't add any data to the linked inventory.
    * Please use the `pushChunk` method for most use-cases.
-   * @param {Object} data
+   * @param {Object} infos
    * @returns {boolean}
    */
   ;
@@ -13056,7 +12737,7 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
   ;
 
   _proto._disableCurrentCues = function _disableCurrentCues() {
-    this._clearSizeUpdates$.next();
+    this._sizeUpdateCanceller.cancel();
 
     if (this._currentCues.length > 0) {
       for (var i = 0; i < this._currentCues.length; i++) {
@@ -13068,7 +12749,7 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
   }
   /**
    * Display a new Cue. If one was already present, it will be replaced.
-   * @param {HTMLElement} element
+   * @param {HTMLElement} elements
    */
   ;
 
@@ -13083,7 +12764,7 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
     // TODO More intelligent handling
 
 
-    this._clearSizeUpdates$.next();
+    this._sizeUpdateCanceller.cancel();
 
     for (var i = 0; i < this._currentCues.length; i++) {
       safelyRemoveChild(this._textTrackElement, this._currentCues[i].element);
@@ -13108,11 +12789,16 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
     });
 
     if (proportionalCues.length > 0) {
-      var _config$getCurrent3 = config/* default.getCurrent */.Z.getCurrent(),
-          TEXT_TRACK_SIZE_CHECKS_INTERVAL = _config$getCurrent3.TEXT_TRACK_SIZE_CHECKS_INTERVAL; // update propertionally-sized elements periodically
+      this._sizeUpdateCanceller = new task_canceller/* default */.ZP({
+        cancelOn: this._canceller.signal
+      });
+
+      var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
+          TEXT_TRACK_SIZE_CHECKS_INTERVAL = _config$getCurrent.TEXT_TRACK_SIZE_CHECKS_INTERVAL; // update propertionally-sized elements periodically
 
 
-      onHeightWidthChange(this._textTrackElement, TEXT_TRACK_SIZE_CHECKS_INTERVAL).pipe((0,takeUntil/* takeUntil */.R)(this._clearSizeUpdates$), (0,takeUntil/* takeUntil */.R)(this._destroy$)).subscribe(function (_ref) {
+      var heightWidthRef = onHeightWidthChange(this._textTrackElement, TEXT_TRACK_SIZE_CHECKS_INTERVAL, this._sizeUpdateCanceller.signal);
+      heightWidthRef.onUpdate(function (_ref) {
         var height = _ref.height,
             width = _ref.width;
 
@@ -13122,7 +12808,83 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
               _element = _proportionalCues$_i.element;
           updateProportionalElements(height, width, _resolution, _element);
         }
+      }, {
+        clearSignal: this._sizeUpdateCanceller.signal,
+        emitCurrentValue: true
       });
+    }
+  }
+  /**
+   * Auto-refresh the display of subtitles according to the media element's
+   * position and events.
+   * @param {Object} cancellationSignal
+   */
+  ;
+
+  _proto.autoRefreshSubtitles = function autoRefreshSubtitles(cancellationSignal) {
+    var _this2 = this;
+
+    var autoRefreshCanceller = null;
+
+    var _config$getCurrent2 = config/* default.getCurrent */.Z.getCurrent(),
+        MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL = _config$getCurrent2.MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL;
+
+    var startAutoRefresh = function startAutoRefresh() {
+      stopAutoRefresh();
+      autoRefreshCanceller = new task_canceller/* default */.ZP({
+        cancelOn: cancellationSignal
+      });
+      var intervalId = setInterval(function () {
+        return _this2.refreshSubtitles();
+      }, MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL);
+      autoRefreshCanceller.signal.register(function () {
+        clearInterval(intervalId);
+      });
+
+      _this2.refreshSubtitles();
+    };
+
+    onSeeking(this._videoElement, function () {
+      stopAutoRefresh();
+
+      _this2._disableCurrentCues();
+    }, cancellationSignal);
+    onSeeked(this._videoElement, startAutoRefresh, cancellationSignal);
+    onEnded(this._videoElement, startAutoRefresh, cancellationSignal);
+    startAutoRefresh();
+
+    function stopAutoRefresh() {
+      if (autoRefreshCanceller !== null) {
+        autoRefreshCanceller.cancel();
+        autoRefreshCanceller = null;
+      }
+    }
+  }
+  /**
+   * Refresh current subtitles according to the current media element's
+   * position.
+   */
+  ;
+
+  _proto.refreshSubtitles = function refreshSubtitles() {
+    var _config$getCurrent3 = config/* default.getCurrent */.Z.getCurrent(),
+        MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL = _config$getCurrent3.MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL;
+
+    var time;
+
+    if (this._videoElement.paused || this._videoElement.playbackRate <= 0) {
+      time = this._videoElement.currentTime;
+    } else {
+      // to spread the time error, we divide the regular chosen interval.
+      time = Math.max(this._videoElement.currentTime + MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL / 1000 / 2, 0);
+    }
+
+    var cues = this._buffer.get(time);
+
+    if (cues.length === 0) {
+      this._disableCurrentCues();
+    } else {
+      this._displayCues(cues);
     }
   };
 
@@ -13197,10 +12959,6 @@ __webpack_require__.d(__webpack_exports__, {
 
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inheritsLoose.js
 var inheritsLoose = __webpack_require__(4578);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/defer.js
-var defer = __webpack_require__(9917);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
-var of = __webpack_require__(2817);
 // EXTERNAL MODULE: ./src/compat/browser_detection.ts
 var browser_detection = __webpack_require__(3666);
 ;// CONCATENATED MODULE: ./src/compat/add_text_track.ts
@@ -13400,7 +13158,6 @@ function parseTextTrackToCues(type, data, timestampOffset, language) {
 
 
 
-
 /**
  * Implementation of an SegmentBuffer for "native" text tracks.
  * "Native" text tracks rely on a `<track>` HTMLElement and its associated
@@ -13433,36 +13190,35 @@ var NativeTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
   }
   /**
    * @param {Object} infos
-   * @returns {Observable}
+   * @returns {Promise}
    */
 
 
   var _proto = NativeTextSegmentBuffer.prototype;
 
   _proto.pushChunk = function pushChunk(infos) {
-    var _this2 = this;
+    var _a, _b;
 
-    return (0,defer/* defer */.P)(function () {
-      var _a, _b;
+    log/* default.debug */.Z.debug("NTSB: Appending new native text tracks");
 
-      log/* default.debug */.Z.debug("NTSB: Appending new native text tracks");
+    if (infos.data.chunk === null) {
+      return Promise.resolve();
+    }
 
-      if (infos.data.chunk === null) {
-        return (0,of.of)(undefined);
-      }
+    var _infos$data = infos.data,
+        timestampOffset = _infos$data.timestampOffset,
+        appendWindow = _infos$data.appendWindow,
+        chunk = _infos$data.chunk;
+    assertChunkIsTextTrackSegmentData(chunk);
+    var startTime = chunk.start,
+        endTime = chunk.end,
+        dataString = chunk.data,
+        type = chunk.type,
+        language = chunk.language;
+    var appendWindowStart = (_a = appendWindow[0]) !== null && _a !== void 0 ? _a : 0;
+    var appendWindowEnd = (_b = appendWindow[1]) !== null && _b !== void 0 ? _b : Infinity;
 
-      var _infos$data = infos.data,
-          timestampOffset = _infos$data.timestampOffset,
-          appendWindow = _infos$data.appendWindow,
-          chunk = _infos$data.chunk;
-      assertChunkIsTextTrackSegmentData(chunk);
-      var startTime = chunk.start,
-          endTime = chunk.end,
-          dataString = chunk.data,
-          type = chunk.type,
-          language = chunk.language;
-      var appendWindowStart = (_a = appendWindow[0]) !== null && _a !== void 0 ? _a : 0;
-      var appendWindowEnd = (_b = appendWindow[1]) !== null && _b !== void 0 ? _b : Infinity;
+    try {
       var cues = parseTextTrackToCues(type, dataString, timestampOffset, language);
 
       if (appendWindowStart !== 0 && appendWindowEnd !== Infinity) {
@@ -13504,7 +13260,7 @@ var NativeTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
       } else {
         if (cues.length <= 0) {
           log/* default.warn */.Z.warn("NTSB: Current text tracks have no cues nor start time. Aborting");
-          return (0,of.of)(undefined);
+          return Promise.resolve();
         }
 
         log/* default.warn */.Z.warn("NTSB: No start time given. Guessing from cues.");
@@ -13518,7 +13274,7 @@ var NativeTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
       } else {
         if (cues.length <= 0) {
           log/* default.warn */.Z.warn("NTSB: Current text tracks have no cues nor end time. Aborting");
-          return (0,of.of)(undefined);
+          return Promise.resolve();
         }
 
         log/* default.warn */.Z.warn("NTSB: No end time given. Guessing from cues.");
@@ -13527,7 +13283,7 @@ var NativeTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
 
       if (end <= start) {
         log/* default.warn */.Z.warn("NTSB: Invalid text track appended: ", "the start time is inferior or equal to the end time.");
-        return (0,of.of)(undefined);
+        return Promise.resolve();
       }
 
       if (cues.length > 0) {
@@ -13536,64 +13292,53 @@ var NativeTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
         // IE/Edge.
         // TODO Move to compat
 
-        var currentCues = _this2._track.cues;
+        var currentCues = this._track.cues;
 
         if (currentCues !== null && currentCues.length > 0) {
           if (firstCue.startTime < currentCues[currentCues.length - 1].startTime) {
-            _this2._removeData(firstCue.startTime, +Infinity);
+            this._removeData(firstCue.startTime, +Infinity);
           }
         }
 
         for (var _i = 0; _i < cues.length; _i++) {
-          _this2._track.addCue(cues[_i]);
+          this._track.addCue(cues[_i]);
         }
       }
 
-      _this2._buffered.insert(start, end);
+      this._buffered.insert(start, end);
 
       if (infos.inventoryInfos !== null) {
-        _this2._segmentInventory.insertChunk(infos.inventoryInfos);
+        this._segmentInventory.insertChunk(infos.inventoryInfos);
       }
+    } catch (err) {
+      return Promise.reject(err);
+    }
 
-      return (0,of.of)(undefined);
-    });
+    return Promise.resolve();
   }
   /**
    * Remove buffered data.
    * @param {number} start - start position, in seconds
    * @param {number} end - end position, in seconds
-   * @returns {Observable}
+   * @returns {Promise}
    */
   ;
 
   _proto.removeBuffer = function removeBuffer(start, end) {
-    var _this3 = this;
+    this._removeData(start, end);
 
-    return (0,defer/* defer */.P)(function () {
-      _this3._removeData(start, end);
-
-      return (0,of.of)(undefined);
-    });
+    return Promise.resolve();
   }
   /**
-   * Indicate that every chunks from a Segment has been given to pushChunk so
-   * far.
-   * This will update our internal Segment inventory accordingly.
-   * The returned Observable will emit and complete successively once the whole
-   * segment has been pushed and this indication is acknowledged.
    * @param {Object} infos
-   * @returns {Observable}
+   * @returns {Promise}
    */
   ;
 
   _proto.endOfSegment = function endOfSegment(_infos) {
-    var _this4 = this;
+    this._segmentInventory.completeSegment(_infos, this._buffered);
 
-    return (0,defer/* defer */.P)(function () {
-      _this4._segmentInventory.completeSegment(_infos, _this4._buffered);
-
-      return (0,of.of)(undefined);
-    });
+    return Promise.resolve();
   }
   /**
    * Returns the currently buffered data, in a TimeRanges object.
@@ -15073,9 +14818,9 @@ var EVENTS = {
       }
     };
   },
-  bitrateEstimationChange: function bitrateEstimationChange(type, bitrate) {
+  bitrateEstimateChange: function bitrateEstimateChange(type, bitrate) {
     return {
-      type: "bitrateEstimationChange",
+      type: "bitrateEstimateChange",
       value: {
         type: type,
         bitrate: bitrate
@@ -15274,11 +15019,11 @@ var CustomLoaderError = /*#__PURE__*/function (_Error) {
   (0,_babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z)(CustomLoaderError, _Error);
 
   /**
+   * @param {string} message
+   * @param {boolean} canRetry
    * @param {XMLHttpRequest} xhr
-   * @param {string} url
-   * @param {string} type
    */
-  function CustomLoaderError(message, canRetry, isOfflineError, xhr) {
+  function CustomLoaderError(message, canRetry, xhr) {
     var _this;
 
     _this = _Error.call(this) || this; // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
@@ -15287,7 +15032,6 @@ var CustomLoaderError = /*#__PURE__*/function (_Error) {
     _this.name = "CustomLoaderError";
     _this.message = message;
     _this.canRetry = canRetry;
-    _this.isOfflineError = isOfflineError;
     _this.xhr = xhr;
     return _this;
   }
@@ -15345,7 +15089,6 @@ var EncryptedMediaError = /*#__PURE__*/function (_Error) {
   /**
    * @param {string} code
    * @param {string} reason
-   * @Param {Boolean} fatal
    */
   function EncryptedMediaError(code, reason) {
     var _this;
@@ -15622,7 +15365,6 @@ var MediaError = /*#__PURE__*/function (_Error) {
   /**
    * @param {string} code
    * @param {string} reason
-   * @param {Boolean} fatal
    */
   function MediaError(code, reason) {
     var _this;
@@ -15691,7 +15433,6 @@ var NetworkError = /*#__PURE__*/function (_Error) {
   /**
    * @param {string} code
    * @param {Error} baseError
-   * @param {Boolean} fatal
    */
   function NetworkError(code, baseError) {
     var _this;
@@ -15773,7 +15514,6 @@ var OtherError = /*#__PURE__*/function (_Error) {
   /**
    * @param {string} code
    * @param {string} reason
-   * @param {Boolean} fatal
    */
   function OtherError(code, reason) {
     var _this;
@@ -16203,6 +15943,7 @@ var Representation = /*#__PURE__*/function () {
       this.hdrInfo = args.hdrInfo;
     }
 
+    this.cdnMetadata = args.cdnMetadata;
     this.index = args.index;
     this.isSupported = opts.type === "audio" || opts.type === "video" ? isCodecSupported(this.getMimeTypeString()) : true; // TODO for other types
   }
@@ -16886,6 +16627,8 @@ function updatePeriodInPlace(oldPeriod, newPeriod, updateType) {
         if (newRepresentation === undefined) {
           log/* default.warn */.Z.warn("Manifest: Representation \"" + oldRepresentations[k].id + "\" " + "not found when merging.");
         } else {
+          oldRepresentation.cdnMetadata = newRepresentation.cdnMetadata;
+
           if (updateType === MANIFEST_UPDATE_TYPE.Full) {
             oldRepresentation.index._replace(newRepresentation.index);
           } else {
@@ -17214,12 +16957,12 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
   /**
    * Returns the most important URL from which the Manifest can be refreshed.
    * `undefined` if no URL is found.
-   * @returns {string|undefined}
+   * @returns {Array.<string>}
    */
   ;
 
-  _proto.getUrl = function getUrl() {
-    return this.uris[0];
+  _proto.getUrls = function getUrls() {
+    return this.uris;
   }
   /**
    * Update the current Manifest properties by giving a new updated version.
@@ -17319,7 +17062,7 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
    * and mark them as being impossible to decrypt.
    * Then trigger a "decipherabilityUpdate" event to notify everyone of the
    * changes performed.
-   * @param {Object} keyUpdates
+   * @param {Function} isDecipherableCb
    */
   ;
 
@@ -17391,7 +17134,7 @@ var Manifest = /*#__PURE__*/function (_EventEmitter) {
   }
   /**
    * @param {Object} newManifest
-   * @param {number} type
+   * @param {number} updateType
    */
   ;
 
@@ -18810,7 +18553,7 @@ function getKeyIdFromInitSegment(segment) {
 
 /***/ }),
 
-/***/ 7144:
+/***/ 5904:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -18934,7 +18677,7 @@ function getLastPositionFromAdaptation(adaptation) {
   var min = null;
 
   for (var i = 0; i < representations.length; i++) {
-    var lastPosition = representations[i].index.getLastPosition();
+    var lastPosition = representations[i].index.getLastAvailablePosition();
 
     if (lastPosition === undefined) {
       // we cannot tell
@@ -19081,7 +18824,7 @@ function getFirstPositionFromAdaptation(adaptation) {
   var max = null;
 
   for (var i = 0; i < representations.length; i++) {
-    var firstPosition = representations[i].index.getFirstPosition();
+    var firstPosition = representations[i].index.getFirstAvailablePosition();
 
     if (firstPosition === undefined) {
       // we cannot tell
@@ -19823,12 +19566,10 @@ function get_init_segment_getInitSegment(index, isEMSGWhitelisted) {
   var _a;
 
   var initialization = index.initialization;
-  var privateInfos;
+  var privateInfos = {};
 
   if (isEMSGWhitelisted !== undefined) {
-    privateInfos = {
-      isEMSGWhitelisted: isEMSGWhitelisted
-    };
+    privateInfos.isEMSGWhitelisted = isEMSGWhitelisted;
   }
 
   return {
@@ -19840,7 +19581,7 @@ function get_init_segment_getInitSegment(index, isEMSGWhitelisted) {
     timescale: 1,
     range: initialization != null ? initialization.range : undefined,
     indexRange: index.indexRange,
-    mediaURLs: (_a = initialization === null || initialization === void 0 ? void 0 : initialization.mediaURLs) !== null && _a !== void 0 ? _a : null,
+    url: (_a = initialization === null || initialization === void 0 ? void 0 : initialization.url) !== null && _a !== void 0 ? _a : null,
     complete: true,
     privateInfos: privateInfos,
     timestampOffset: -(index.indexTimeOffset / index.timescale)
@@ -19862,7 +19603,6 @@ function get_init_segment_getInitSegment(index, isEMSGWhitelisted) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 /**
  * Pad with 0 in the left of the given n argument to reach l length
@@ -19894,22 +19634,15 @@ function processFormatedToken(replacer) {
   };
 }
 /**
- * @param {string} baseURLs
- * @param {string|undefined} media
- * @param {string|undefined} id
+ * @param {string} urlTemplate
+ * @param {string|undefined} representationId
  * @param {number|undefined} bitrate
  * @returns {string}
  */
 
 
-function createIndexURLs(baseURLs, media, id, bitrate) {
-  if (baseURLs.length === 0) {
-    return media !== undefined ? [replaceRepresentationDASHTokens(media, id, bitrate)] : null;
-  }
-
-  return baseURLs.map(function (baseURL) {
-    return replaceRepresentationDASHTokens((0,resolve_url/* default */.Z)(baseURL, media), id, bitrate);
-  });
+function constructRepresentationUrl(urlTemplate, representationId, bitrate) {
+  return replaceRepresentationDASHTokens(urlTemplate, representationId, bitrate);
 }
 /**
  * Replace "tokens" written in a given path (e.g. $RepresentationID$) by the corresponding
@@ -20013,7 +19746,7 @@ function getSegmentsFromTimeline(index, from, durationWanted, isEMSGWhitelisted,
   var scaledTo = (0,index_helpers/* toIndexTime */.gT)(from + durationWanted, index);
   var timeline = index.timeline,
       timescale = index.timescale,
-      mediaURLs = index.mediaURLs,
+      segmentUrlTemplate = index.segmentUrlTemplate,
       startNumber = index.startNumber;
   var currentNumber = startNumber !== null && startNumber !== void 0 ? startNumber : 1;
   var segments = [];
@@ -20031,7 +19764,7 @@ function getSegmentsFromTimeline(index, from, durationWanted, isEMSGWhitelisted,
 
     while (segmentTime < scaledTo && segmentNumberInCurrentRange <= repeat) {
       var segmentNumber = currentNumber + segmentNumberInCurrentRange;
-      var detokenizedURLs = mediaURLs === null ? null : mediaURLs.map(createDashUrlDetokenizer(segmentTime, segmentNumber));
+      var detokenizedURL = segmentUrlTemplate === null ? null : createDashUrlDetokenizer(segmentTime, segmentNumber)(segmentUrlTemplate);
       var time = segmentTime - index.indexTimeOffset;
       var realDuration = duration;
 
@@ -20049,7 +19782,7 @@ function getSegmentsFromTimeline(index, from, durationWanted, isEMSGWhitelisted,
         isInit: false,
         range: range,
         timescale: 1,
-        mediaURLs: detokenizedURLs,
+        url: detokenizedURL,
         number: segmentNumber,
         timestampOffset: -(index.indexTimeOffset / timescale),
         complete: complete,
@@ -20130,21 +19863,18 @@ var BaseRepresentationIndex = /*#__PURE__*/function () {
    * @param {Object} context
    */
   function BaseRepresentationIndex(index, context) {
-    var _a, _b;
+    var _a, _b, _c;
 
     var periodStart = context.periodStart,
         periodEnd = context.periodEnd,
-        representationBaseURLs = context.representationBaseURLs,
         representationId = context.representationId,
         representationBitrate = context.representationBitrate,
         isEMSGWhitelisted = context.isEMSGWhitelisted;
     var timescale = (_a = index.timescale) !== null && _a !== void 0 ? _a : 1;
     var presentationTimeOffset = index.presentationTimeOffset != null ? index.presentationTimeOffset : 0;
     var indexTimeOffset = presentationTimeOffset - periodStart * timescale;
-    var urlSources = representationBaseURLs.map(function (b) {
-      return b.url;
-    });
-    var mediaURLs = createIndexURLs(urlSources, index.initialization !== undefined ? index.initialization.media : undefined, representationId, representationBitrate); // TODO If indexRange is either undefined or behind the initialization segment
+    var initializationUrl = ((_b = index.initialization) === null || _b === void 0 ? void 0 : _b.media) === undefined ? null : constructRepresentationUrl(index.initialization.media, representationId, representationBitrate);
+    var segmentUrlTemplate = index.media === undefined ? null : constructRepresentationUrl(index.media, representationId, representationBitrate); // TODO If indexRange is either undefined or behind the initialization segment
     // the following logic will not work.
     // However taking the nth first bytes like `dash.js` does (where n = 1500) is
     // not straightforward as we would need to clean-up the segment after that.
@@ -20156,12 +19886,12 @@ var BaseRepresentationIndex = /*#__PURE__*/function () {
       indexRange: index.indexRange,
       indexTimeOffset: indexTimeOffset,
       initialization: {
-        mediaURLs: mediaURLs,
+        url: initializationUrl,
         range: range
       },
-      mediaURLs: createIndexURLs(urlSources, index.media, representationId, representationBitrate),
+      segmentUrlTemplate: segmentUrlTemplate,
       startNumber: index.startNumber,
-      timeline: (_b = index.timeline) !== null && _b !== void 0 ? _b : [],
+      timeline: (_c = index.timeline) !== null && _c !== void 0 ? _c : [],
       timescale: timescale
     };
     this._scaledPeriodStart = (0,index_helpers/* toIndexTime */.gT)(periodStart, this._index);
@@ -20214,7 +19944,7 @@ var BaseRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getFirstPosition = function getFirstPosition() {
+  _proto.getFirstAvailablePosition = function getFirstAvailablePosition() {
     var index = this._index;
 
     if (index.timeline.length === 0) {
@@ -20229,7 +19959,7 @@ var BaseRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getLastPosition = function getLastPosition() {
+  _proto.getLastAvailablePosition = function getLastAvailablePosition() {
     var _a;
 
     var timeline = this._index.timeline;
@@ -20241,6 +19971,33 @@ var BaseRepresentationIndex = /*#__PURE__*/function () {
     var lastTimelineElement = timeline[timeline.length - 1];
     var lastTime = Math.min((0,index_helpers/* getIndexSegmentEnd */.jH)(lastTimelineElement, null, this._scaledPeriodEnd), (_a = this._scaledPeriodEnd) !== null && _a !== void 0 ? _a : Infinity);
     return (0,index_helpers/* fromIndexTime */.zG)(lastTime, this._index);
+  }
+  /**
+   * Returns the absolute end in seconds this RepresentationIndex can reach once
+   * all segments are available.
+   * @returns {number|null|undefined}
+   */
+  ;
+
+  _proto.getEnd = function getEnd() {
+    return this.getLastAvailablePosition();
+  }
+  /**
+   * Returns:
+   *   - `true` if in the given time interval, at least one new segment is
+   *     expected to be available in the future.
+   *   - `false` either if all segments in that time interval are already
+   *     available for download or if none will ever be available for it.
+   *   - `undefined` when it is not possible to tell.
+   *
+   * Always `false` in a `BaseRepresentationIndex` because all segments should
+   * be directly available.
+   * @returns {boolean}
+   */
+  ;
+
+  _proto.awaitSegmentBetween = function awaitSegmentBetween() {
+    return false;
   }
   /**
    * Segments in a segmentBase scheme should stay available.
@@ -20259,16 +20016,6 @@ var BaseRepresentationIndex = /*#__PURE__*/function () {
 
   _proto.checkDiscontinuity = function checkDiscontinuity() {
     return null;
-  }
-  /**
-   * `BaseRepresentationIndex` should just already all be generated.
-   * Return `true` as a default value here.
-   * @returns {boolean}
-   */
-  ;
-
-  _proto.areSegmentsChronologicallyGenerated = function areSegmentsChronologicallyGenerated() {
-    return true;
   }
   /**
    * Returns `false` as a `BaseRepresentationIndex` should not be dynamic and as
@@ -20388,7 +20135,7 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
    * @param {Object} context
    */
   function ListRepresentationIndex(index, context) {
-    var _a;
+    var _a, _b;
 
     if (index.duration === undefined) {
       throw new Error("Invalid SegmentList: no duration");
@@ -20396,7 +20143,6 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
 
     var periodStart = context.periodStart,
         periodEnd = context.periodEnd,
-        representationBaseURLs = context.representationBaseURLs,
         representationId = context.representationId,
         representationBitrate = context.representationBitrate,
         isEMSGWhitelisted = context.isEMSGWhitelisted;
@@ -20406,12 +20152,10 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
     var presentationTimeOffset = index.presentationTimeOffset != null ? index.presentationTimeOffset : 0;
     var timescale = (_a = index.timescale) !== null && _a !== void 0 ? _a : 1;
     var indexTimeOffset = presentationTimeOffset - periodStart * timescale;
-    var urlSources = representationBaseURLs.map(function (b) {
-      return b.url;
-    });
+    var initializationUrl = ((_b = index.initialization) === null || _b === void 0 ? void 0 : _b.media) === undefined ? null : constructRepresentationUrl(index.initialization.media, representationId, representationBitrate);
     var list = index.list.map(function (lItem) {
       return {
-        mediaURLs: createIndexURLs(urlSources, lItem.media, representationId, representationBitrate),
+        url: lItem.media === undefined ? null : constructRepresentationUrl(lItem.media, representationId, representationBitrate),
         mediaRange: lItem.mediaRange
       };
     });
@@ -20422,7 +20166,7 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
       indexTimeOffset: indexTimeOffset,
       indexRange: index.indexRange,
       initialization: index.initialization == null ? undefined : {
-        mediaURLs: createIndexURLs(urlSources, index.initialization.media, representationId, representationBitrate),
+        url: initializationUrl,
         range: index.initialization.range
       }
     };
@@ -20470,7 +20214,7 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
 
     while (i <= length) {
       var range = list[i].mediaRange;
-      var mediaURLs = list[i].mediaURLs;
+      var url = list[i].url;
       var time = i * durationInSeconds + this._periodStart;
       var segment = {
         id: String(i),
@@ -20480,7 +20224,7 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
         duration: durationInSeconds,
         timescale: 1,
         end: time + durationInSeconds,
-        mediaURLs: mediaURLs,
+        url: url,
         timestampOffset: -(index.indexTimeOffset / timescale),
         complete: true,
         privateInfos: {
@@ -20515,7 +20259,7 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getFirstPosition = function getFirstPosition() {
+  _proto.getFirstAvailablePosition = function getFirstAvailablePosition() {
     return this._periodStart;
   }
   /**
@@ -20524,13 +20268,40 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getLastPosition = function getLastPosition() {
+  _proto.getLastAvailablePosition = function getLastAvailablePosition() {
     var _a;
 
     var index = this._index;
     var duration = index.duration,
         list = index.list;
     return Math.min(list.length * duration / index.timescale + this._periodStart, (_a = this._periodEnd) !== null && _a !== void 0 ? _a : Infinity);
+  }
+  /**
+   * Returns the absolute end in seconds this RepresentationIndex can reach once
+   * all segments are available.
+   * @returns {number|null|undefined}
+   */
+  ;
+
+  _proto.getEnd = function getEnd() {
+    return this.getLastAvailablePosition();
+  }
+  /**
+   * Returns:
+   *   - `true` if in the given time interval, at least one new segment is
+   *     expected to be available in the future.
+   *   - `false` either if all segments in that time interval are already
+   *     available for download or if none will ever be available for it.
+   *   - `undefined` when it is not possible to tell.
+   *
+   * Always `false` in a `ListRepresentationIndex` because all segments should
+   * be directly available.
+   * @returns {boolean}
+   */
+  ;
+
+  _proto.awaitSegmentBetween = function awaitSegmentBetween() {
+    return false;
   }
   /**
    * Returns true if a Segment returned by this index is still considered
@@ -20550,14 +20321,6 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
 
   _proto.checkDiscontinuity = function checkDiscontinuity() {
     return null;
-  }
-  /**
-   * @returns {boolean}
-   */
-  ;
-
-  _proto.areSegmentsChronologicallyGenerated = function areSegmentsChronologicallyGenerated() {
-    return true;
   }
   /**
    * SegmentList should not be updated.
@@ -20611,13 +20374,15 @@ var ListRepresentationIndex = /*#__PURE__*/function () {
 
 // EXTERNAL MODULE: ./src/errors/network_error.ts
 var network_error = __webpack_require__(9362);
+// EXTERNAL MODULE: ./src/utils/assert.ts
+var assert = __webpack_require__(811);
 // EXTERNAL MODULE: ./src/parsers/manifest/utils/clear_timeline_from_position.ts
 var clear_timeline_from_position = __webpack_require__(8232);
 // EXTERNAL MODULE: ./src/parsers/manifest/utils/is_segment_still_available.ts
 var is_segment_still_available = __webpack_require__(1091);
 // EXTERNAL MODULE: ./src/parsers/manifest/utils/update_segment_timeline.ts
 var update_segment_timeline = __webpack_require__(5505);
-;// CONCATENATED MODULE: ./src/parsers/manifest/dash/common/indexes/is_period_fulfilled.ts
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/common/indexes/utils.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -20638,18 +20403,14 @@ var update_segment_timeline = __webpack_require__(5505);
  * In Javascript, numbers are encoded in a way that a floating number may be
  * represented internally with a rounding error.
  *
- * As the period end is the result of a multiplication between a floating or integer
- * number (period end * timescale), this function takes into account the potential
- * rounding error to tell if the period is fulfilled with content.
+ * This function returns a small number allowing to accound for rounding many
+ * rounding errors.
  * @param {number} timescale
- * @param {number} lastSegmentEnd
- * @param {number} periodEnd
  * @returns {boolean}
  */
 
-function isPeriodFulfilled(timescale, lastSegmentEnd, periodEnd) {
-  var scaledRoundingError = config/* default.getCurrent */.Z.getCurrent().DEFAULT_MAXIMUM_TIME_ROUNDING_ERROR * timescale;
-  return lastSegmentEnd + scaledRoundingError >= periodEnd;
+function getSegmentTimeRoundingError(timescale) {
+  return config/* default.getCurrent */.Z.getCurrent().DEFAULT_MAXIMUM_TIME_ROUNDING_ERROR * timescale;
 }
 ;// CONCATENATED MODULE: ./src/parsers/manifest/dash/common/indexes/timeline/convert_element_to_index_segment.ts
 /**
@@ -21102,6 +20863,7 @@ function constructTimelineFromPreviousTimeline(newElements, prevTimeline) {
 
 
 
+
  // eslint-disable-next-line max-len
 
 
@@ -21112,7 +20874,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
    * @param {Object} context
    */
   function TimelineRepresentationIndex(index, context) {
-    var _a, _b, _c;
+    var _a, _b, _c, _d;
 
     if (!TimelineRepresentationIndex.isTimelineIndexArgument(index)) {
       throw new Error("The given index is not compatible with a " + "TimelineRepresentationIndex.");
@@ -21122,7 +20884,6 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
         manifestBoundsCalculator = context.manifestBoundsCalculator,
         isDynamic = context.isDynamic,
         isLastPeriod = context.isLastPeriod,
-        representationBaseURLs = context.representationBaseURLs,
         representationId = context.representationId,
         representationBitrate = context.representationBitrate,
         periodStart = context.periodStart,
@@ -21146,20 +20907,19 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
 
     this._isDynamic = isDynamic;
     this._parseTimeline = (_b = index.timelineParser) !== null && _b !== void 0 ? _b : null;
-    var urlSources = representationBaseURLs.map(function (b) {
-      return b.url;
-    });
+    var initializationUrl = ((_c = index.initialization) === null || _c === void 0 ? void 0 : _c.media) === undefined ? null : constructRepresentationUrl(index.initialization.media, representationId, representationBitrate);
+    var segmentUrlTemplate = index.media === undefined ? null : constructRepresentationUrl(index.media, representationId, representationBitrate);
     this._index = {
       availabilityTimeComplete: availabilityTimeComplete,
       indexRange: index.indexRange,
       indexTimeOffset: indexTimeOffset,
       initialization: index.initialization == null ? undefined : {
-        mediaURLs: createIndexURLs(urlSources, index.initialization.media, representationId, representationBitrate),
+        url: initializationUrl,
         range: index.initialization.range
       },
-      mediaURLs: createIndexURLs(urlSources, index.media, representationId, representationBitrate),
+      segmentUrlTemplate: segmentUrlTemplate,
       startNumber: index.startNumber,
-      timeline: (_c = index.timeline) !== null && _c !== void 0 ? _c : null,
+      timeline: (_d = index.timeline) !== null && _d !== void 0 ? _d : null,
       timescale: timescale
     };
     this._scaledPeriodStart = (0,index_helpers/* toIndexTime */.gT)(periodStart, this._index);
@@ -21194,13 +20954,13 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
 
 
     var _this$_index = this._index,
-        mediaURLs = _this$_index.mediaURLs,
+        segmentUrlTemplate = _this$_index.segmentUrlTemplate,
         startNumber = _this$_index.startNumber,
         timeline = _this$_index.timeline,
         timescale = _this$_index.timescale,
         indexTimeOffset = _this$_index.indexTimeOffset;
     return getSegmentsFromTimeline({
-      mediaURLs: mediaURLs,
+      segmentUrlTemplate: segmentUrlTemplate,
       startNumber: startNumber,
       timeline: timeline,
       timescale: timescale,
@@ -21209,8 +20969,6 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
   }
   /**
    * Returns true if the index should be refreshed.
-   * @param {Number} _up
-   * @param {Number} to
    * @returns {Boolean}
    */
   ;
@@ -21228,7 +20986,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getFirstPosition = function getFirstPosition() {
+  _proto.getFirstAvailablePosition = function getFirstAvailablePosition() {
     this._refreshTimeline();
 
     if (this._index.timeline === null) {
@@ -21246,7 +21004,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getLastPosition = function getLastPosition() {
+  _proto.getLastAvailablePosition = function getLastAvailablePosition() {
     this._refreshTimeline();
 
     if (this._index.timeline === null) {
@@ -21255,6 +21013,72 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
 
     var lastTime = TimelineRepresentationIndex.getIndexEnd(this._index.timeline, this._scaledPeriodEnd);
     return lastTime === null ? null : (0,index_helpers/* fromIndexTime */.zG)(lastTime, this._index);
+  }
+  /**
+   * Returns the absolute end in seconds this RepresentationIndex can reach once
+   * all segments are available.
+   * @returns {number|null|undefined}
+   */
+  ;
+
+  _proto.getEnd = function getEnd() {
+    if (!this._isDynamic || !this._isLastPeriod) {
+      // @see isFinished
+      return this.getLastAvailablePosition();
+    }
+
+    return undefined;
+  }
+  /**
+   * Returns:
+   *   - `true` if in the given time interval, at least one new segment is
+   *     expected to be available in the future.
+   *   - `false` either if all segments in that time interval are already
+   *     available for download or if none will ever be available for it.
+   *   - `undefined` when it is not possible to tell.
+   * @param {number} start
+   * @param {number} end
+   * @returns {boolean|undefined}
+   */
+  ;
+
+  _proto.awaitSegmentBetween = function awaitSegmentBetween(start, end) {
+    var _a;
+
+    (0,assert/* default */.Z)(start <= end);
+
+    if (!this._isDynamic || !this._isLastPeriod) {
+      return false;
+    }
+
+    this._refreshTimeline();
+
+    if (this._index.timeline === null) {
+      this._index.timeline = this._getTimeline();
+    }
+
+    var _this$_index2 = this._index,
+        timeline = _this$_index2.timeline,
+        timescale = _this$_index2.timescale;
+    var segmentTimeRounding = getSegmentTimeRoundingError(timescale);
+    var scaledEnd = (0,index_helpers/* toIndexTime */.gT)(end, this._index);
+
+    if (timeline.length > 0) {
+      var lastTimelineElement = timeline[timeline.length - 1];
+      var lastSegmentEnd = (0,index_helpers/* getIndexSegmentEnd */.jH)(lastTimelineElement, null, this._scaledPeriodEnd);
+      var roundedEnd = lastSegmentEnd + segmentTimeRounding;
+
+      if (roundedEnd >= Math.min(scaledEnd, (_a = this._scaledPeriodEnd) !== null && _a !== void 0 ? _a : Infinity)) {
+        return false; // already loaded
+      }
+    }
+
+    if (this._scaledPeriodEnd === undefined) {
+      return scaledEnd + segmentTimeRounding > this._scaledPeriodStart ? undefined : false;
+    }
+
+    var scaledStart = (0,index_helpers/* toIndexTime */.gT)(start, this._index);
+    return scaledStart - segmentTimeRounding < this._scaledPeriodEnd && scaledEnd + segmentTimeRounding > this._scaledPeriodStart;
   }
   /**
    * Returns true if a Segment returned by this index is still considered
@@ -21277,10 +21101,10 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
       this._index.timeline = this._getTimeline();
     }
 
-    var _this$_index2 = this._index,
-        timeline = _this$_index2.timeline,
-        timescale = _this$_index2.timescale,
-        indexTimeOffset = _this$_index2.indexTimeOffset;
+    var _this$_index3 = this._index,
+        timeline = _this$_index3.timeline,
+        timescale = _this$_index3.timescale,
+        indexTimeOffset = _this$_index3.indexTimeOffset;
     return (0,is_segment_still_available/* default */.Z)(segment, timeline, timescale, indexTimeOffset);
   }
   /**
@@ -21321,10 +21145,6 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
     }
 
     return error instanceof network_error/* default */.Z && error.isHttpError(404);
-  };
-
-  _proto.areSegmentsChronologicallyGenerated = function areSegmentsChronologicallyGenerated() {
-    return true;
   }
   /**
    * Replace this RepresentationIndex with one from a new version of the
@@ -21402,7 +21222,8 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
 
     var lastTimelineElement = timeline[timeline.length - 1];
     var lastTime = (0,index_helpers/* getIndexSegmentEnd */.jH)(lastTimelineElement, null, this._scaledPeriodEnd);
-    return isPeriodFulfilled(this._index.timescale, lastTime, this._scaledPeriodEnd);
+    var segmentTimeRounding = getSegmentTimeRoundingError(this._index.timescale);
+    return lastTime + segmentTimeRounding >= this._scaledPeriodEnd;
   }
   /**
    * @returns {Boolean}
@@ -21571,6 +21392,7 @@ var TimelineRepresentationIndex = /*#__PURE__*/function () {
 
 
 
+
 /**
  * IRepresentationIndex implementation for DASH' SegmentTemplate without a
  * SegmentTimeline.
@@ -21583,22 +21405,18 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
    * @param {Object} context
    */
   function TemplateRepresentationIndex(index, context) {
-    var _a;
+    var _a, _b;
 
     var availabilityTimeOffset = context.availabilityTimeOffset,
         manifestBoundsCalculator = context.manifestBoundsCalculator,
         isDynamic = context.isDynamic,
         periodEnd = context.periodEnd,
         periodStart = context.periodStart,
-        representationBaseURLs = context.representationBaseURLs,
         representationId = context.representationId,
         representationBitrate = context.representationBitrate,
         isEMSGWhitelisted = context.isEMSGWhitelisted;
     var timescale = (_a = index.timescale) !== null && _a !== void 0 ? _a : 1;
-    var minBaseUrlAto = representationBaseURLs.length === 0 ? 0 : representationBaseURLs.reduce(function (acc, rbu) {
-      return Math.min(acc, rbu.availabilityTimeOffset);
-    }, Infinity);
-    this._availabilityTimeOffset = availabilityTimeOffset + minBaseUrlAto;
+    this._availabilityTimeOffset = availabilityTimeOffset;
     this._manifestBoundsCalculator = manifestBoundsCalculator;
     var presentationTimeOffset = index.presentationTimeOffset != null ? index.presentationTimeOffset : 0;
     var scaledStart = periodStart * timescale;
@@ -21608,25 +21426,24 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
       throw new Error("Invalid SegmentTemplate: no duration");
     }
 
-    var urlSources = representationBaseURLs.map(function (b) {
-      return b.url;
-    });
+    var initializationUrl = ((_b = index.initialization) === null || _b === void 0 ? void 0 : _b.media) === undefined ? null : constructRepresentationUrl(index.initialization.media, representationId, representationBitrate);
+    var segmentUrlTemplate = index.media === undefined ? null : constructRepresentationUrl(index.media, representationId, representationBitrate);
     this._index = {
       duration: index.duration,
       timescale: timescale,
       indexRange: index.indexRange,
       indexTimeOffset: indexTimeOffset,
       initialization: index.initialization == null ? undefined : {
-        mediaURLs: createIndexURLs(urlSources, index.initialization.media, representationId, representationBitrate),
+        url: initializationUrl,
         range: index.initialization.range
       },
-      mediaURLs: createIndexURLs(urlSources, index.media, representationId, representationBitrate),
+      url: segmentUrlTemplate,
       presentationTimeOffset: presentationTimeOffset,
       startNumber: index.startNumber
     };
     this._isDynamic = isDynamic;
     this._periodStart = periodStart;
-    this._scaledPeriodEnd = periodEnd === undefined ? undefined : (periodEnd - periodStart) * timescale;
+    this._scaledRelativePeriodEnd = periodEnd === undefined ? undefined : (periodEnd - periodStart) * timescale;
     this._isEMSGWhitelisted = isEMSGWhitelisted;
   }
   /**
@@ -21652,9 +21469,9 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
     var duration = index.duration,
         startNumber = index.startNumber,
         timescale = index.timescale,
-        mediaURLs = index.mediaURLs;
+        url = index.url;
     var scaledStart = this._periodStart * timescale;
-    var scaledEnd = this._scaledPeriodEnd; // Convert the asked position to the right timescales, and consider them
+    var scaledEnd = this._scaledRelativePeriodEnd; // Convert the asked position to the right timescales, and consider them
     // relatively to the Period's start.
 
     var upFromPeriodStart = fromTime * timescale - scaledStart;
@@ -21688,7 +21505,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
       var realDuration = scaledEnd != null && timeFromPeriodStart + duration > scaledEnd ? scaledEnd - timeFromPeriodStart : duration;
       var realTime = timeFromPeriodStart + scaledStart;
       var manifestTime = timeFromPeriodStart + this._index.presentationTimeOffset;
-      var detokenizedURLs = mediaURLs === null ? null : mediaURLs.map(createDashUrlDetokenizer(manifestTime, realNumber));
+      var detokenizedURL = url === null ? null : createDashUrlDetokenizer(manifestTime, realNumber)(url);
       var args = {
         id: String(realNumber),
         number: realNumber,
@@ -21698,7 +21515,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
         timescale: 1,
         isInit: false,
         scaledDuration: realDuration / timescale,
-        mediaURLs: detokenizedURLs,
+        url: detokenizedURL,
         timestampOffset: -(index.indexTimeOffset / timescale),
         complete: true,
         privateInfos: {
@@ -21717,7 +21534,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getFirstPosition = function getFirstPosition() {
+  _proto.getFirstAvailablePosition = function getFirstAvailablePosition() {
     var firstSegmentStart = this._getFirstSegmentStart();
 
     if (firstSegmentStart == null) {
@@ -21732,20 +21549,74 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getLastPosition = function getLastPosition() {
+  _proto.getLastAvailablePosition = function getLastAvailablePosition() {
     var _a;
 
     var lastSegmentStart = this._getLastSegmentStart();
 
     if (lastSegmentStart == null) {
-      // In that case (null or undefined), getLastPosition should reflect
+      // In that case (null or undefined), getLastAvailablePosition should reflect
       // the result of getLastSegmentStart, as the meaning is the same for
       // the two functions. So, we return the result of the latter.
       return lastSegmentStart;
     }
 
-    var lastSegmentEnd = Math.min(lastSegmentStart + this._index.duration, (_a = this._scaledPeriodEnd) !== null && _a !== void 0 ? _a : Infinity);
+    var lastSegmentEnd = Math.min(lastSegmentStart + this._index.duration, (_a = this._scaledRelativePeriodEnd) !== null && _a !== void 0 ? _a : Infinity);
     return lastSegmentEnd / this._index.timescale + this._periodStart;
+  }
+  /**
+   * Returns the absolute end in seconds this RepresentationIndex can reach once
+   * all segments are available.
+   * @returns {number|null|undefined}
+   */
+  ;
+
+  _proto.getEnd = function getEnd() {
+    if (!this._isDynamic) {
+      return this.getLastAvailablePosition();
+    }
+
+    if (this._scaledRelativePeriodEnd === undefined) {
+      return undefined;
+    }
+
+    var timescale = this._index.timescale;
+    var absoluteScaledPeriodEnd = this._scaledRelativePeriodEnd + this._periodStart * timescale;
+    return absoluteScaledPeriodEnd / this._index.timescale;
+  }
+  /**
+   * Returns:
+   *   - `true` if in the given time interval, at least one new segment is
+   *     expected to be available in the future.
+   *   - `false` either if all segments in that time interval are already
+   *     available for download or if none will ever be available for it.
+   *   - `undefined` when it is not possible to tell.
+   *
+   * Always `false` in a `BaseRepresentationIndex` because all segments should
+   * be directly available.
+   * @returns {boolean}
+   */
+  ;
+
+  _proto.awaitSegmentBetween = function awaitSegmentBetween(start, end) {
+    (0,assert/* default */.Z)(start <= end);
+
+    if (!this._isDynamic) {
+      return false;
+    }
+
+    var timescale = this._index.timescale;
+    var segmentTimeRounding = getSegmentTimeRoundingError(timescale);
+    var scaledPeriodStart = this._periodStart * timescale;
+    var scaledRelativeEnd = end * timescale - scaledPeriodStart;
+
+    if (this._scaledRelativePeriodEnd === undefined) {
+      return scaledRelativeEnd + segmentTimeRounding >= 0;
+    }
+
+    var scaledRelativePeriodEnd = this._scaledRelativePeriodEnd;
+    var scaledRelativeStart = start * timescale - scaledPeriodStart;
+    return scaledRelativeStart - segmentTimeRounding < scaledRelativePeriodEnd && scaledRelativeEnd + segmentTimeRounding >= 0;
   }
   /**
    * Returns true if, based on the arguments, the index should be refreshed.
@@ -21765,14 +21636,6 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
 
   _proto.checkDiscontinuity = function checkDiscontinuity() {
     return null;
-  }
-  /**
-   * @returns {Boolean}
-   */
-  ;
-
-  _proto.areSegmentsChronologicallyGenerated = function areSegmentsChronologicallyGenerated() {
-    return true;
   }
   /**
    * Returns `true` if the given segment should still be available as of now
@@ -21816,7 +21679,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
       return true;
     }
 
-    if (this._scaledPeriodEnd === undefined) {
+    if (this._scaledRelativePeriodEnd === undefined) {
       return false;
     }
 
@@ -21831,7 +21694,8 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
     }
 
     var lastSegmentEnd = lastSegmentStart + this._index.duration;
-    return isPeriodFulfilled(timescale, lastSegmentEnd, this._scaledPeriodEnd);
+    var segmentTimeRounding = getSegmentTimeRoundingError(timescale);
+    return lastSegmentEnd + segmentTimeRounding >= this._scaledRelativePeriodEnd;
   }
   /**
    * @returns {Boolean}
@@ -21858,7 +21722,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
     this._index = newIndex._index;
     this._isDynamic = newIndex._isDynamic;
     this._periodStart = newIndex._periodStart;
-    this._scaledPeriodEnd = newIndex._scaledPeriodEnd;
+    this._scaledRelativePeriodEnd = newIndex._scaledRelativePeriodEnd;
     this._manifestBoundsCalculator = newIndex._manifestBoundsCalculator;
   }
   /**
@@ -21884,7 +21748,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
     } // 1 - check that this index is already available
 
 
-    if (this._scaledPeriodEnd === 0 || this._scaledPeriodEnd === undefined) {
+    if (this._scaledRelativePeriodEnd === 0 || this._scaledRelativePeriodEnd === undefined) {
       // /!\ The scaled max position augments continuously and might not
       // reflect exactly the real server-side value. As segments are
       // generated discretely.
@@ -21933,12 +21797,12 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
         return undefined;
       }
 
-      if (this._scaledPeriodEnd !== undefined && this._scaledPeriodEnd < (lastPos - this._periodStart) * this._index.timescale) {
-        if (this._scaledPeriodEnd < duration) {
+      if (this._scaledRelativePeriodEnd !== undefined && this._scaledRelativePeriodEnd < (lastPos - this._periodStart) * this._index.timescale) {
+        if (this._scaledRelativePeriodEnd < duration) {
           return null;
         }
 
-        return (Math.floor(this._scaledPeriodEnd / duration) - 1) * duration;
+        return (Math.floor(this._scaledRelativePeriodEnd / duration) - 1) * duration;
       } // /!\ The scaled last position augments continuously and might not
       // reflect exactly the real server-side value. As segments are
       // generated discretely.
@@ -21955,7 +21819,7 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
       var numberOfSegmentsAvailable = Math.floor((scaledLastPosition + availabilityTimeOffset) / duration);
       return numberOfSegmentsAvailable <= 0 ? null : (numberOfSegmentsAvailable - 1) * duration;
     } else {
-      var maximumTime = (_a = this._scaledPeriodEnd) !== null && _a !== void 0 ? _a : 0;
+      var maximumTime = (_a = this._scaledRelativePeriodEnd) !== null && _a !== void 0 ? _a : 0;
       var numberIndexedToZero = Math.ceil(maximumTime / duration) - 1;
       var regularLastSegmentStart = numberIndexedToZero * duration; // In some SegmentTemplate, we could think that there is one more
       // segment that there actually is due to a very little difference between
@@ -21976,67 +21840,6 @@ var TemplateRepresentationIndex = /*#__PURE__*/function () {
 }();
 
 
-;// CONCATENATED MODULE: ./src/parsers/manifest/dash/common/resolve_base_urls.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @param {Array.<string>} currentBaseURLs
- * @param {Array.<Object>} newBaseUrlsIR
- * @returns {Array.<string>}
- */
-
-function resolveBaseURLs(currentBaseURLs, newBaseUrlsIR) {
-  if (newBaseUrlsIR.length === 0) {
-    return currentBaseURLs;
-  }
-
-  var newBaseUrls = newBaseUrlsIR.map(function (ir) {
-    var _a, _b;
-
-    return {
-      url: ir.value,
-      availabilityTimeOffset: (_a = ir.attributes.availabilityTimeOffset) !== null && _a !== void 0 ? _a : 0,
-      availabilityTimeComplete: (_b = ir.attributes.availabilityTimeComplete) !== null && _b !== void 0 ? _b : true
-    };
-  });
-
-  if (currentBaseURLs.length === 0) {
-    return newBaseUrls;
-  }
-
-  var result = [];
-
-  for (var i = 0; i < currentBaseURLs.length; i++) {
-    var curBaseUrl = currentBaseURLs[i];
-
-    for (var j = 0; j < newBaseUrls.length; j++) {
-      var newBaseUrl = newBaseUrls[j];
-      var newUrl = (0,resolve_url/* default */.Z)(curBaseUrl.url, newBaseUrl.url);
-      var newAvailabilityTimeOffset = curBaseUrl.availabilityTimeOffset + newBaseUrl.availabilityTimeOffset;
-      result.push({
-        url: newUrl,
-        availabilityTimeOffset: newAvailabilityTimeOffset,
-        availabilityTimeComplete: newBaseUrl.availabilityTimeComplete
-      });
-    }
-  }
-
-  return result;
-}
 ;// CONCATENATED MODULE: ./src/parsers/manifest/dash/common/parse_representation_index.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -22055,7 +21858,6 @@ function resolveBaseURLs(currentBaseURLs, newBaseUrlsIR) {
  */
 
 
-
 /**
  * Parse the specific segment indexing information found in a representation
  * into a IRepresentationIndex implementation.
@@ -22067,7 +21869,6 @@ function resolveBaseURLs(currentBaseURLs, newBaseUrlsIR) {
 function parseRepresentationIndex(representation, context) {
   var _a, _b;
 
-  var representationBaseURLs = resolveBaseURLs(context.baseURLs, representation.children.baseURLs);
   var availabilityTimeOffset = context.availabilityTimeOffset,
       manifestBoundsCalculator = context.manifestBoundsCalculator,
       isDynamic = context.isDynamic,
@@ -22101,7 +21902,6 @@ function parseRepresentationIndex(representation, context) {
     periodEnd: periodEnd,
     periodStart: periodStart,
     receivedTime: receivedTime,
-    representationBaseURLs: representationBaseURLs,
     representationBitrate: representation.attributes.bitrate,
     representationId: representation.attributes.id,
     timeShiftBufferDepth: timeShiftBufferDepth
@@ -22147,6 +21947,63 @@ function parseRepresentationIndex(representation, context) {
 
   return representationIndex;
 }
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/common/resolve_base_urls.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {Array.<string>} currentBaseURLs
+ * @param {Array.<Object>} newBaseUrlsIR
+ * @returns {Array.<string>}
+ */
+
+function resolveBaseURLs(currentBaseURLs, newBaseUrlsIR) {
+  var _a;
+
+  if (newBaseUrlsIR.length === 0) {
+    return currentBaseURLs;
+  }
+
+  var newBaseUrls = newBaseUrlsIR.map(function (ir) {
+    return {
+      url: ir.value
+    };
+  });
+
+  if (currentBaseURLs.length === 0) {
+    return newBaseUrls;
+  }
+
+  var result = [];
+
+  for (var i = 0; i < currentBaseURLs.length; i++) {
+    var curBaseUrl = currentBaseURLs[i];
+
+    for (var j = 0; j < newBaseUrls.length; j++) {
+      var newBaseUrl = newBaseUrls[j];
+      var newUrl = (0,resolve_url/* default */.Z)(curBaseUrl.url, newBaseUrl.url);
+      result.push({
+        url: newUrl,
+        serviceLocation: (_a = newBaseUrl.serviceLocation) !== null && _a !== void 0 ? _a : curBaseUrl.serviceLocation
+      });
+    }
+  }
+
+  return result;
+}
 ;// CONCATENATED MODULE: ./src/parsers/manifest/dash/common/parse_representations.ts
 function parse_representations_createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = parse_representations_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
@@ -22169,6 +22026,7 @@ function parse_representations_arrayLikeToArray(arr, len) { if (len == null || l
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 
@@ -22275,11 +22133,19 @@ function parseRepresentations(representationsIR, adaptation, context) {
       representationBitrate = 0;
     } else {
       representationBitrate = representation.attributes.bitrate;
-    } // Construct Representation Base
+    }
 
+    var representationBaseURLs = resolveBaseURLs(context.baseURLs, representation.children.baseURLs);
+    var cdnMetadata = representationBaseURLs.map(function (x) {
+      return {
+        baseUrl: x.url,
+        id: x.serviceLocation
+      };
+    }); // Construct Representation Base
 
     var parsedRepresentation = {
       bitrate: representationBitrate,
+      cdnMetadata: cdnMetadata,
       index: representationIndex,
       id: representationID
     }; // Add optional attributes
@@ -23103,7 +22969,7 @@ function getMaximumLastPosition(adaptationsPerType) {
 
     for (var _iterator2 = parse_periods_createForOfIteratorHelperLoose(representations), _step2; !(_step2 = _iterator2()).done;) {
       var representation = _step2.value;
-      var position = representation.index.getLastPosition();
+      var position = representation.index.getLastAvailablePosition();
 
       if (position !== null) {
         allIndexAreEmpty = false;
@@ -23358,9 +23224,7 @@ function parseCompleteIntermediateRepresentation(mpdIR, args, warnings, xlinkInf
       rootAttributes = mpdIR.attributes;
   var isDynamic = rootAttributes.type === "dynamic";
   var initialBaseUrl = args.url !== undefined ? [{
-    url: (0,resolve_url/* normalizeBaseURL */.f)(args.url),
-    availabilityTimeOffset: 0,
-    availabilityTimeComplete: true
+    url: args.url.substring(0, (0,resolve_url/* getFilenameIndexInUrl */.$)(args.url))
   }] : [];
   var mpdBaseUrls = resolveBaseURLs(initialBaseUrl, rootChildren.baseURLs);
   var availabilityStartTime = parseAvailabilityStartTime(rootAttributes, args.referenceDateTime);
@@ -23519,6 +23383,90 @@ function parseCompleteIntermediateRepresentation(mpdIR, args, warnings, xlinkInf
 
 /* harmony default export */ var common = (parseMpdIr);
 
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/js-parser/node_parsers/BaseURL.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Parse an BaseURL element into an BaseURL intermediate
+ * representation.
+ * @param {Element} root - The BaseURL root element.
+ * @returns {Array.<Object|undefined>}
+ */
+function parseBaseURL(root) {
+  var value = root.textContent;
+  var warnings = [];
+
+  if (value === null || value.length === 0) {
+    return [undefined, warnings];
+  }
+
+  return [{
+    value: value
+  }, warnings];
+}
+;// CONCATENATED MODULE: ./src/parsers/manifest/dash/js-parser/node_parsers/ContentComponent.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Parse a "ContentComponent" Element in a DASH MPD.
+ * @param {Element} root
+ * @returns {Object}
+ */
+function parseContentComponent(root) {
+  var ret = {};
+
+  for (var i = 0; i < root.attributes.length; i++) {
+    var attribute = root.attributes[i];
+
+    switch (attribute.name) {
+      case "id":
+        ret.id = attribute.value;
+        break;
+
+      case "lang":
+        ret.language = attribute.value;
+        break;
+
+      case "contentType":
+        ret.contentType = attribute.value;
+        break;
+
+      case "par":
+        ret.par = attribute.value;
+        break;
+    }
+  }
+
+  return ret;
+}
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js
 var assertThisInitialized = __webpack_require__(7326);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/inheritsLoose.js
@@ -23892,116 +23840,6 @@ var MPDError = /*#__PURE__*/function (_Error) {
 }( /*#__PURE__*/(0,wrapNativeSuper/* default */.Z)(Error));
 
 
-;// CONCATENATED MODULE: ./src/parsers/manifest/dash/js-parser/node_parsers/BaseURL.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Parse an BaseURL element into an BaseURL intermediate
- * representation.
- * @param {Element} adaptationSetElement - The BaseURL root element.
- * @returns {Array.<Object|undefined>}
- */
-
-function parseBaseURL(root) {
-  var attributes = {};
-  var value = root.textContent;
-  var warnings = [];
-  var parseValue = ValueParser(attributes, warnings);
-
-  if (value === null || value.length === 0) {
-    return [undefined, warnings];
-  }
-
-  for (var i = 0; i < root.attributes.length; i++) {
-    var attribute = root.attributes[i];
-
-    switch (attribute.name) {
-      case "availabilityTimeOffset":
-        parseValue(attribute.value, {
-          asKey: "availabilityTimeOffset",
-          parser: parseMPDFloat,
-          dashName: "availabilityTimeOffset"
-        });
-        break;
-
-      case "availabilityTimeComplete":
-        parseValue(attribute.value, {
-          asKey: "availabilityTimeComplete",
-          parser: parseBoolean,
-          dashName: "availabilityTimeComplete"
-        });
-        break;
-    }
-  }
-
-  return [{
-    value: value,
-    attributes: attributes
-  }, warnings];
-}
-;// CONCATENATED MODULE: ./src/parsers/manifest/dash/js-parser/node_parsers/ContentComponent.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Parse a "ContentComponent" Element in a DASH MPD.
- * @param {Element} root
- * @returns {Object}
- */
-function parseContentComponent(root) {
-  var ret = {};
-
-  for (var i = 0; i < root.attributes.length; i++) {
-    var attribute = root.attributes[i];
-
-    switch (attribute.name) {
-      case "id":
-        ret.id = attribute.value;
-        break;
-
-      case "lang":
-        ret.language = attribute.value;
-        break;
-
-      case "contentType":
-        ret.contentType = attribute.value;
-        break;
-
-      case "par":
-        ret.par = attribute.value;
-        break;
-    }
-  }
-
-  return ret;
-}
 ;// CONCATENATED MODULE: ./src/parsers/manifest/dash/js-parser/node_parsers/ContentProtection.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -31105,7 +30943,7 @@ function findEndOfCueBlock(linified, startOfCueBlock) {
 
 /***/ }),
 
-/***/ 6779:
+/***/ 2047:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -31119,6 +30957,8 @@ __webpack_require__.d(__webpack_exports__, {
 var features = __webpack_require__(7874);
 // EXTERNAL MODULE: ./src/transports/utils/generate_manifest_loader.ts + 1 modules
 var generate_manifest_loader = __webpack_require__(8791);
+// EXTERNAL MODULE: ./src/config.ts + 2 modules
+var config = __webpack_require__(6872);
 // EXTERNAL MODULE: ./src/errors/format_error.ts
 var format_error = __webpack_require__(8750);
 // EXTERNAL MODULE: ./src/log.ts + 1 modules
@@ -31147,6 +30987,7 @@ var string_parsing = __webpack_require__(3635);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 
@@ -31248,13 +31089,16 @@ function generateManifestParser(options) {
       var value = parserResponse.value;
       var externalResources = value.urls.map(function (resourceUrl) {
         return scheduleRequest(function () {
+          var defaultTimeout = config/* default.getCurrent */.Z.getCurrent().DEFAULT_REQUEST_TIMEOUT;
           return value.format === "string" ? (0,request/* default */.ZP)({
             url: resourceUrl,
             responseType: "text",
+            timeout: defaultTimeout,
             cancelSignal: cancelSignal
           }) : (0,request/* default */.ZP)({
             url: resourceUrl,
             responseType: "arraybuffer",
+            timeout: defaultTimeout,
             cancelSignal: cancelSignal
           });
         }).then(function (res) {
@@ -31431,10 +31275,8 @@ var custom_loader_error = __webpack_require__(7839);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
 var asyncToGenerator = __webpack_require__(5861);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(7757);
+var regenerator = __webpack_require__(4687);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
-// EXTERNAL MODULE: ./src/config.ts + 2 modules
-var config = __webpack_require__(6872);
 // EXTERNAL MODULE: ./src/errors/request_error.ts
 var request_error = __webpack_require__(9105);
 // EXTERNAL MODULE: ./src/errors/error_codes.ts
@@ -31460,7 +31302,6 @@ var is_null_or_undefined = __webpack_require__(1946);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -31505,11 +31346,15 @@ function fetchRequest(options) {
     abortController.abort();
   }
 
-  var requestTimeout = (0,is_null_or_undefined/* default */.Z)(options.timeout) ? config/* default.getCurrent */.Z.getCurrent().DEFAULT_REQUEST_TIMEOUT : options.timeout;
-  var timeout = window.setTimeout(function () {
-    timeouted = true;
-    abortFetch();
-  }, requestTimeout);
+  var timeout;
+
+  if (options.timeout !== undefined) {
+    timeout = window.setTimeout(function () {
+      timeouted = true;
+      abortFetch();
+    }, options.timeout);
+  }
+
   var deregisterCancelLstnr = options.cancelSignal.register(function abortRequest(err) {
     cancellation = err;
     abortFetch();
@@ -31718,7 +31563,7 @@ var check_isobmff_integrity = __webpack_require__(4460);
  */
 
 function addSegmentIntegrityChecks(segmentLoader) {
-  return function (url, context, initialCancelSignal, callbacks) {
+  return function (url, context, loaderOptions, initialCancelSignal, callbacks) {
     return new Promise(function (resolve, reject) {
       var requestCanceller = new task_canceller/* default */.ZP({
         cancelOn: initialCancelSignal
@@ -31726,7 +31571,7 @@ function addSegmentIntegrityChecks(segmentLoader) {
       // `stopRejectingOnCancel` here is a function allowing to stop this mechanism
 
       var stopRejectingOnCancel = requestCanceller.signal.register(reject);
-      segmentLoader(url, context, requestCanceller.signal, Object.assign(Object.assign({}, callbacks), {
+      segmentLoader(url, context, loaderOptions, requestCanceller.signal, Object.assign(Object.assign({}, callbacks), {
         onNewChunk: function onNewChunk(data) {
           try {
             trowOnIntegrityError(data);
@@ -31776,6 +31621,28 @@ function addSegmentIntegrityChecks(segmentLoader) {
     }
   };
 }
+// EXTERNAL MODULE: ./src/utils/resolve_url.ts
+var resolve_url = __webpack_require__(9829);
+;// CONCATENATED MODULE: ./src/transports/dash/construct_segment_url.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+function constructSegmentUrl(wantedCdn, segment) {
+  return wantedCdn === null ? null : segment.url === null ? wantedCdn.baseUrl : (0,resolve_url/* default */.Z)(wantedCdn.baseUrl, segment.url);
+}
 // EXTERNAL MODULE: ./src/utils/byte_parsing.ts
 var byte_parsing = __webpack_require__(6968);
 ;// CONCATENATED MODULE: ./src/transports/dash/init_segment_loader.ts
@@ -31801,16 +31668,18 @@ var byte_parsing = __webpack_require__(6968);
  * Perform a request for an initialization segment, agnostic to the container.
  * @param {string} url
  * @param {Object} segment
+ * @param {Object} options
  * @param {CancellationSignal} cancelSignal
  * @param {Object} callbacks
  * @returns {Promise}
  */
 
-function initSegmentLoader(url, segment, cancelSignal, callbacks) {
+function initSegmentLoader(url, segment, options, cancelSignal, callbacks) {
   if (segment.range === undefined) {
     return (0,request/* default */.ZP)({
       url: url,
       responseType: "arraybuffer",
+      timeout: options.timeout,
       cancelSignal: cancelSignal,
       onProgress: callbacks.onProgress
     }).then(function (data) {
@@ -31828,6 +31697,7 @@ function initSegmentLoader(url, segment, cancelSignal, callbacks) {
         Range: (0,byte_range/* default */.Z)(segment.range)
       },
       responseType: "arraybuffer",
+      timeout: options.timeout,
       cancelSignal: cancelSignal,
       onProgress: callbacks.onProgress
     }).then(function (data) {
@@ -31846,6 +31716,7 @@ function initSegmentLoader(url, segment, cancelSignal, callbacks) {
         Range: (0,byte_range/* default */.Z)([segment.range[0], segment.indexRange[1]])
       },
       responseType: "arraybuffer",
+      timeout: options.timeout,
       cancelSignal: cancelSignal,
       onProgress: callbacks.onProgress
     }).then(function (data) {
@@ -31862,6 +31733,7 @@ function initSegmentLoader(url, segment, cancelSignal, callbacks) {
       Range: (0,byte_range/* default */.Z)(segment.range)
     },
     responseType: "arraybuffer",
+    timeout: options.timeout,
     cancelSignal: cancelSignal,
     onProgress: callbacks.onProgress
   });
@@ -31871,6 +31743,7 @@ function initSegmentLoader(url, segment, cancelSignal, callbacks) {
       Range: (0,byte_range/* default */.Z)(segment.indexRange)
     },
     responseType: "arraybuffer",
+    timeout: options.timeout,
     cancelSignal: cancelSignal,
     onProgress: callbacks.onProgress
   });
@@ -31997,12 +31870,13 @@ function extractCompleteChunks(buffer) {
  *
  * @param {string} url - URL of the segment to download.
  * @param {Object} content - Context of the segment needed.
+ * @param {Object} options
  * @param {Object} callbacks
  * @param {CancellationSignal} cancelSignal
  * @returns {Promise}
  */
 
-function lowLatencySegmentLoader(url, content, callbacks, cancelSignal) {
+function lowLatencySegmentLoader(url, content, options, callbacks, cancelSignal) {
   var segment = content.segment;
   var headers = segment.range !== undefined ? {
     Range: (0,byte_range/* default */.Z)(segment.range)
@@ -32043,6 +31917,7 @@ function lowLatencySegmentLoader(url, content, callbacks, cancelSignal) {
     url: url,
     headers: headers,
     onData: onData,
+    timeout: options.timeout,
     cancelSignal: cancelSignal
   }).then(function (res) {
     return {
@@ -32075,26 +31950,28 @@ function lowLatencySegmentLoader(url, content, callbacks, cancelSignal) {
 
 
 
+
 /**
  * Segment loader triggered if there was no custom-defined one in the API.
  * @param {string} url
  * @param {Object} context
  * @param {boolean} lowLatencyMode
+ * @param {Object} options
  * @param {Object} callbacks
  * @param {Object} cancelSignal
  * @returns {Promise}
  */
 
-function regularSegmentLoader(url, context, lowLatencyMode, callbacks, cancelSignal) {
+function regularSegmentLoader(url, context, lowLatencyMode, options, callbacks, cancelSignal) {
   if (context.segment.isInit) {
-    return initSegmentLoader(url, context.segment, cancelSignal, callbacks);
+    return initSegmentLoader(url, context.segment, options, cancelSignal, callbacks);
   }
 
   var containerType = inferSegmentContainer(context.type, context.mimeType);
 
   if (lowLatencyMode && (containerType === "mp4" || containerType === undefined)) {
     if (fetchIsSupported()) {
-      return lowLatencySegmentLoader(url, context, callbacks, cancelSignal);
+      return lowLatencySegmentLoader(url, context, options, callbacks, cancelSignal);
     } else {
       (0,warn_once/* default */.Z)("DASH: Your browser does not have the fetch API. You will have " + "a higher chance of rebuffering when playing close to the live edge");
     }
@@ -32107,6 +31984,7 @@ function regularSegmentLoader(url, context, lowLatencyMode, callbacks, cancelSig
     headers: segment.range !== undefined ? {
       Range: (0,byte_range/* default */.Z)(segment.range)
     } : undefined,
+    timeout: options.timeout,
     cancelSignal: cancelSignal,
     onProgress: callbacks.onProgress
   }).then(function (data) {
@@ -32127,11 +32005,14 @@ function generateSegmentLoader(_ref) {
       checkMediaSegmentIntegrity = _ref.checkMediaSegmentIntegrity;
   return checkMediaSegmentIntegrity !== true ? segmentLoader : addSegmentIntegrityChecks(segmentLoader);
   /**
+   * @param {Object|null} wantedCdn
    * @param {Object} context
    * @returns {Observable}
    */
 
-  function segmentLoader(url, context, cancelSignal, callbacks) {
+  function segmentLoader(wantedCdn, context, options, cancelSignal, callbacks) {
+    var url = constructSegmentUrl(wantedCdn, context.segment);
+
     if (url == null) {
       return Promise.resolve({
         resultType: "segment-created",
@@ -32140,7 +32021,7 @@ function generateSegmentLoader(_ref) {
     }
 
     if (lowLatencyMode || customSegmentLoader === undefined) {
-      return regularSegmentLoader(url, context, lowLatencyMode, callbacks, cancelSignal);
+      return regularSegmentLoader(url, context, lowLatencyMode, options, callbacks, cancelSignal);
     }
 
     return new Promise(function (res, rej) {
@@ -32148,7 +32029,7 @@ function generateSegmentLoader(_ref) {
       var hasFinished = false;
       /**
        * Callback triggered when the custom segment loader has a response.
-       * @param {Object} args
+       * @param {Object} _args
        */
 
       var resolve = function resolve(_args) {
@@ -32174,7 +32055,7 @@ function generateSegmentLoader(_ref) {
 
 
       var reject = function reject(err) {
-        var _a, _b, _c;
+        var _a, _b;
 
         if (hasFinished || cancelSignal.isCancelled) {
           return;
@@ -32185,7 +32066,7 @@ function generateSegmentLoader(_ref) {
 
         var castedErr = err;
         var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching a DASH segment through a " + "custom segmentLoader.";
-        var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
+        var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
         rej(emittedErr);
       };
 
@@ -32213,7 +32094,7 @@ function generateSegmentLoader(_ref) {
 
         hasFinished = true;
         cancelSignal.deregister(abortCustomLoader);
-        regularSegmentLoader(url, context, lowLatencyMode, callbacks, cancelSignal).then(res, rej);
+        regularSegmentLoader(url, context, lowLatencyMode, options, callbacks, cancelSignal).then(res, rej);
       };
 
       var customCallbacks = {
@@ -32222,10 +32103,20 @@ function generateSegmentLoader(_ref) {
         progress: progress,
         fallback: fallback
       };
+      var byteRanges;
+
+      if (context.segment.range !== undefined) {
+        byteRanges = [context.segment.range];
+
+        if (context.segment.indexRange !== undefined) {
+          byteRanges.push(context.segment.indexRange);
+        }
+      }
+
       var args = {
         isInit: context.segment.isInit,
-        range: context.segment.range,
-        indexRange: context.segment.indexRange,
+        timeout: options.timeout,
+        byteRanges: byteRanges,
         type: context.type,
         url: url
       };
@@ -32939,6 +32830,7 @@ function generateAudioVideoSegmentParser(_ref) {
 
 
 
+
 /**
  * Perform requests for "text" segments
  * @param {boolean} lowLatencyMode
@@ -32950,16 +32842,18 @@ function generateTextTrackLoader(_ref) {
       checkMediaSegmentIntegrity = _ref.checkMediaSegmentIntegrity;
   return checkMediaSegmentIntegrity !== true ? textTrackLoader : addSegmentIntegrityChecks(textTrackLoader);
   /**
-   * @param {string|null} url
-   * @param {Object} content
+   * @param {Object|null} wantedCdn
+   * @param {Object} context
+   * @param {Object} options
    * @param {Object} cancelSignal
    * @param {Object} callbacks
    * @returns {Promise}
    */
 
-  function textTrackLoader(url, context, cancelSignal, callbacks) {
+  function textTrackLoader(wantedCdn, context, options, cancelSignal, callbacks) {
     var segment = context.segment;
     var range = segment.range;
+    var url = constructSegmentUrl(wantedCdn, segment);
 
     if (url === null) {
       return Promise.resolve({
@@ -32969,7 +32863,7 @@ function generateTextTrackLoader(_ref) {
     }
 
     if (segment.isInit) {
-      return initSegmentLoader(url, segment, cancelSignal, callbacks);
+      return initSegmentLoader(url, segment, options, cancelSignal, callbacks);
     }
 
     var containerType = inferSegmentContainer(context.type, context.mimeType);
@@ -32977,7 +32871,7 @@ function generateTextTrackLoader(_ref) {
 
     if (lowLatencyMode && seemsToBeMP4) {
       if (fetchIsSupported()) {
-        return lowLatencySegmentLoader(url, context, callbacks, cancelSignal);
+        return lowLatencySegmentLoader(url, context, options, callbacks, cancelSignal);
       } else {
         (0,warn_once/* default */.Z)("DASH: Your browser does not have the fetch API. You will have " + "a higher chance of rebuffering when playing close to the live edge");
       }
@@ -32990,6 +32884,7 @@ function generateTextTrackLoader(_ref) {
         headers: Array.isArray(range) ? {
           Range: (0,byte_range/* default */.Z)(range)
         } : null,
+        timeout: options.timeout,
         onProgress: callbacks.onProgress,
         cancelSignal: cancelSignal
       }).then(function (data) {
@@ -33006,6 +32901,7 @@ function generateTextTrackLoader(_ref) {
       headers: Array.isArray(range) ? {
         Range: (0,byte_range/* default */.Z)(range)
       } : null,
+      timeout: options.timeout,
       onProgress: callbacks.onProgress,
       cancelSignal: cancelSignal
     }).then(function (data) {
@@ -33339,7 +33235,9 @@ function generateTextTrackParser(_ref) {
 
   /**
    * Parse TextTrack data.
-   * @param {Object} infos
+   * @param {Object} loadedSegment
+   * @param {Object} content
+   * @param {number|undefined} initTimescale
    * @returns {Observable.<Object>}
    */
   return function textTrackParser(loadedSegment, context, initTimescale) {
@@ -33475,7 +33373,7 @@ function mightUseDashWasmFeature() {
 
 /***/ }),
 
-/***/ 9774:
+/***/ 5418:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -33963,6 +33861,7 @@ function replaceSegmentSmoothTokens(url, time) {
 
 
 
+
 /**
  * @param {Number} start
  * @param {Number} up
@@ -34074,7 +33973,7 @@ var SmoothRepresentationIndex = /*#__PURE__*/function () {
       privateInfos: {
         smoothInitSegment: this._initSegmentInfos
       },
-      mediaURLs: null,
+      url: null,
       time: 0,
       end: 0,
       duration: 0,
@@ -34128,7 +34027,7 @@ var SmoothRepresentationIndex = /*#__PURE__*/function () {
           duration: duration / timescale,
           timescale: 1,
           number: number,
-          mediaURLs: [replaceSegmentSmoothTokens(media, time)],
+          url: replaceSegmentSmoothTokens(media, time),
           complete: true,
           privateInfos: {
             smoothMediaSegment: {
@@ -34197,13 +34096,11 @@ var SmoothRepresentationIndex = /*#__PURE__*/function () {
   }
   /**
    * Returns first position available in the index.
-   *
-   * @param {Object} index
    * @returns {Number|null}
    */
   ;
 
-  _proto.getFirstPosition = function getFirstPosition() {
+  _proto.getFirstAvailablePosition = function getFirstAvailablePosition() {
     this._refreshTimeline();
 
     var _this$_sharedSmoothTi3 = this._sharedSmoothTimeline,
@@ -34222,7 +34119,7 @@ var SmoothRepresentationIndex = /*#__PURE__*/function () {
    */
   ;
 
-  _proto.getLastPosition = function getLastPosition() {
+  _proto.getLastAvailablePosition = function getLastAvailablePosition() {
     this._refreshTimeline();
 
     var _this$_sharedSmoothTi4 = this._sharedSmoothTimeline,
@@ -34254,6 +34151,50 @@ var SmoothRepresentationIndex = /*#__PURE__*/function () {
     return undefined;
   }
   /**
+   * Returns the absolute end in seconds this RepresentationIndex can reach once
+   * all segments are available.
+   * @returns {number|null|undefined}
+   */
+  ;
+
+  _proto.getEnd = function getEnd() {
+    if (!this._isLive) {
+      return this.getLastAvailablePosition();
+    }
+
+    return undefined;
+  }
+  /**
+   * Returns:
+   *   - `true` if in the given time interval, at least one new segment is
+   *     expected to be available in the future.
+   *   - `false` either if all segments in that time interval are already
+   *     available for download or if none will ever be available for it.
+   *   - `undefined` when it is not possible to tell.
+   * @param {number} start
+   * @param {number} end
+   * @returns {boolean|undefined}
+   */
+  ;
+
+  _proto.awaitSegmentBetween = function awaitSegmentBetween(start, end) {
+    var _a;
+
+    (0,assert/* default */.Z)(start <= end);
+
+    if (this.isFinished()) {
+      return false;
+    }
+
+    var lastAvailablePosition = this.getLastAvailablePosition();
+
+    if (lastAvailablePosition !== undefined && end < lastAvailablePosition) {
+      return false;
+    }
+
+    return end > ((_a = this.getFirstAvailablePosition()) !== null && _a !== void 0 ? _a : 0) ? undefined : false;
+  }
+  /**
    * Checks if `timeSec` is in a discontinuity.
    * That is, if there's no segment available for the `timeSec` position.
    * @param {number} timeSec - The time to check if it's in a discontinuity, in
@@ -34268,16 +34209,6 @@ var SmoothRepresentationIndex = /*#__PURE__*/function () {
     this._refreshTimeline();
 
     return (0,index_helpers/* checkDiscontinuity */._j)(this._sharedSmoothTimeline, timeSec, undefined);
-  }
-  /**
-   * Returns `true` as Smooth segments should always be generated in
-   * chronological order.
-   * @returns {boolean}
-   */
-  ;
-
-  _proto.areSegmentsChronologicallyGenerated = function areSegmentsChronologicallyGenerated() {
-    return true;
   }
   /**
    * Returns `true` if a Segment returned by this index is still considered
@@ -34918,7 +34849,7 @@ function createSmoothStreamingParser(parserOptions) {
   function parseAdaptation(args) {
     var root = args.root,
         timescale = args.timescale,
-        rootURL = args.rootURL,
+        baseUrl = args.baseUrl,
         protections = args.protections,
         timeShiftBufferDepth = args.timeShiftBufferDepth,
         manifestReceivedTime = args.manifestReceivedTime,
@@ -34940,8 +34871,8 @@ function createSmoothStreamingParser(parserOptions) {
     var adaptationType = typeAttribute;
     var subType = root.getAttribute("Subtype");
     var language = root.getAttribute("Language");
-    var baseURLAttr = root.getAttribute("Url");
-    var baseURL = baseURLAttr === null ? "" : baseURLAttr;
+    var UrlAttr = root.getAttribute("Url");
+    var UrlPathWithTokens = UrlAttr === null ? "" : UrlAttr;
 
     if (false) {}
 
@@ -34985,8 +34916,7 @@ function createSmoothStreamingParser(parserOptions) {
     (0,assert/* default */.Z)(qualityLevels.length !== 0, "Adaptation should have at least one playable representation.");
     var adaptationID = adaptationType + ((0,is_non_empty_string/* default */.Z)(language) ? "_" + language : "");
     var representations = qualityLevels.map(function (qualityLevel) {
-      var path = (0,resolve_url/* default */.Z)(rootURL, baseURL);
-      var media = replaceRepresentationSmoothTokens(path, qualityLevel.bitrate, qualityLevel.customAttributes);
+      var media = replaceRepresentationSmoothTokens(UrlPathWithTokens, qualityLevel.bitrate, qualityLevel.customAttributes);
       var mimeType = (0,is_non_empty_string/* default */.Z)(qualityLevel.mimeType) ? qualityLevel.mimeType : DEFAULT_MIME_TYPES[adaptationType];
       var codecs = qualityLevel.codecs;
       var id = adaptationID + "_" + (adaptationType != null ? adaptationType + "-" : "") + (mimeType != null ? mimeType + "-" : "") + (codecs != null ? codecs + "-" : "") + String(qualityLevel.bitrate);
@@ -35028,6 +34958,9 @@ function createSmoothStreamingParser(parserOptions) {
       });
       var representation = (0,object_assign/* default */.Z)({}, qualityLevel, {
         index: reprIndex,
+        cdnMetadata: [{
+          baseUrl: baseUrl
+        }],
         mimeType: mimeType,
         codecs: codecs,
         id: id
@@ -35084,7 +35017,13 @@ function createSmoothStreamingParser(parserOptions) {
   }
 
   function parseFromDocument(doc, url, manifestReceivedTime) {
-    var rootURL = (0,resolve_url/* normalizeBaseURL */.f)(url == null ? "" : url);
+    var baseUrl = "";
+
+    if (url !== undefined) {
+      var filenameIdx = (0,resolve_url/* getFilenameIndexInUrl */.$)(url);
+      baseUrl = url.substring(0, filenameIdx);
+    }
+
     var root = doc.documentElement;
 
     if (root == null || root.nodeName !== "SmoothStreamingMedia") {
@@ -35137,7 +35076,7 @@ function createSmoothStreamingParser(parserOptions) {
     var adaptations = adaptationNodes.reduce(function (acc, node) {
       var adaptation = parseAdaptation({
         root: node,
-        rootURL: rootURL,
+        baseUrl: baseUrl,
         timescale: timescale,
         protections: protections,
         isLive: isLive,
@@ -35185,8 +35124,8 @@ function createSmoothStreamingParser(parserOptions) {
         var firstVideoRepresentation = firstVideoAdaptation.representations[0];
 
         if (firstVideoRepresentation !== undefined) {
-          var firstVideoTimeReference = firstVideoRepresentation.index.getFirstPosition();
-          var lastVideoTimeReference = firstVideoRepresentation.index.getLastPosition();
+          var firstVideoTimeReference = firstVideoRepresentation.index.getFirstAvailablePosition();
+          var lastVideoTimeReference = firstVideoRepresentation.index.getLastAvailablePosition();
 
           if (firstVideoTimeReference != null) {
             firstTimeReferences.push(firstVideoTimeReference);
@@ -35202,8 +35141,8 @@ function createSmoothStreamingParser(parserOptions) {
         var firstAudioRepresentation = firstAudioAdaptation.representations[0];
 
         if (firstAudioRepresentation !== undefined) {
-          var firstAudioTimeReference = firstAudioRepresentation.index.getFirstPosition();
-          var lastAudioTimeReference = firstAudioRepresentation.index.getLastPosition();
+          var firstAudioTimeReference = firstAudioRepresentation.index.getFirstAvailablePosition();
+          var lastAudioTimeReference = firstAudioRepresentation.index.getLastAvailablePosition();
 
           if (firstAudioTimeReference != null) {
             firstTimeReferences.push(firstAudioTimeReference);
@@ -36417,13 +36356,14 @@ function createAudioInitSegment(timescale, channelsCount, sampleSize, packetSize
  * Segment loader triggered if there was no custom-defined one in the API.
  * @param {string} url
  * @param {Object} context
+ * @param {Object} loaderOptions
  * @param {Object} callbacks
  * @param {Object} cancelSignal
  * @param {boolean} checkMediaSegmentIntegrity
  * @returns {Promise}
  */
 
-function regularSegmentLoader(url, context, callbacks, cancelSignal, checkMediaSegmentIntegrity) {
+function regularSegmentLoader(url, context, callbacks, loaderOptions, cancelSignal, checkMediaSegmentIntegrity) {
   var headers;
   var range = context.segment.range;
 
@@ -36437,6 +36377,7 @@ function regularSegmentLoader(url, context, callbacks, cancelSignal, checkMediaS
     url: url,
     responseType: "arraybuffer",
     headers: headers,
+    timeout: loaderOptions.timeout,
     cancelSignal: cancelSignal,
     onProgress: callbacks.onProgress
   }).then(function (data) {
@@ -36468,7 +36409,7 @@ function regularSegmentLoader(url, context, callbacks, cancelSignal, checkMediaS
 var generateSegmentLoader = function generateSegmentLoader(_ref) {
   var checkMediaSegmentIntegrity = _ref.checkMediaSegmentIntegrity,
       customSegmentLoader = _ref.customSegmentLoader;
-  return function (url, context, cancelSignal, callbacks) {
+  return function (url, context, loaderOptions, cancelSignal, callbacks) {
     var segment = context.segment;
 
     if (segment.isInit) {
@@ -36531,7 +36472,7 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
       });
     } else {
       if (typeof customSegmentLoader !== "function") {
-        return regularSegmentLoader(url, context, callbacks, cancelSignal, checkMediaSegmentIntegrity);
+        return regularSegmentLoader(url, context, callbacks, loaderOptions, cancelSignal, checkMediaSegmentIntegrity);
       }
 
       return new Promise(function (res, rej) {
@@ -36580,7 +36521,7 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
 
 
         var reject = function reject(err) {
-          var _a, _b, _c;
+          var _a, _b;
 
           if (hasFinished || cancelSignal.isCancelled) {
             return;
@@ -36591,7 +36532,7 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
 
           var castedErr = err;
           var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching a Smooth segment through a " + "custom segmentLoader.";
-          var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
+          var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
           rej(emittedErr);
         };
 
@@ -36614,7 +36555,7 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
 
           hasFinished = true;
           cancelSignal.deregister(abortCustomLoader);
-          regularSegmentLoader(url, context, callbacks, cancelSignal, checkMediaSegmentIntegrity).then(res, rej);
+          regularSegmentLoader(url, context, callbacks, loaderOptions, cancelSignal, checkMediaSegmentIntegrity).then(res, rej);
         };
 
         var customCallbacks = {
@@ -36623,10 +36564,20 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
           fallback: fallback,
           progress: progress
         };
+        var byteRanges;
+
+        if (context.segment.range !== undefined) {
+          byteRanges = [context.segment.range];
+
+          if (context.segment.indexRange !== undefined) {
+            byteRanges.push(context.segment.indexRange);
+          }
+        }
+
         var args = {
           isInit: context.segment.isInit,
-          range: context.segment.range,
-          indexRange: context.segment.indexRange,
+          timeout: loaderOptions.timeout,
+          byteRanges: byteRanges,
           type: context.type,
           url: url
         };
@@ -36656,6 +36607,39 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
 };
 
 /* harmony default export */ var segment_loader = (generateSegmentLoader);
+;// CONCATENATED MODULE: ./src/transports/smooth/utils.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Returns `true` if the given Representation refers to segments in an MP4
+ * container
+ * @param {Representation} representation
+ * @returns {Boolean}
+ */
+
+function utils_isMP4EmbeddedTrack(representation) {
+  return typeof representation.mimeType === "string" && representation.mimeType.indexOf("mp4") >= 0;
+}
+
+function constructSegmentUrl(wantedCdn, segment) {
+  return wantedCdn === null ? null : segment.url === null ? wantedCdn.baseUrl : (0,resolve_url/* default */.Z)(wantedCdn.baseUrl, segment.url);
+}
+
+
 ;// CONCATENATED MODULE: ./src/transports/smooth/pipelines.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -36684,11 +36668,12 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
 
 
 
-/* harmony default export */ function pipelines(options) {
-  var smoothManifestParser = smooth(options);
-  var segmentLoader = segment_loader(options);
+
+/* harmony default export */ function pipelines(transportOptions) {
+  var smoothManifestParser = smooth(transportOptions);
+  var segmentLoader = segment_loader(transportOptions);
   var manifestLoaderOptions = {
-    customManifestLoader: options.manifestLoader
+    customManifestLoader: transportOptions.manifestLoader
   };
   var manifestLoader = (0,generate_manifest_loader/* default */.Z)(manifestLoaderOptions, "text");
   var manifestPipeline = {
@@ -36703,7 +36688,7 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
 
       var parserResult = smoothManifestParser(documentData, url, manifestReceivedTime);
       var manifest = new src_manifest/* default */.ZP(parserResult, {
-        representationFilter: options.representationFilter
+        representationFilter: transportOptions.representationFilter
       });
       return {
         manifest: manifest,
@@ -36719,14 +36704,16 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
   var audioVideoPipeline = {
     /**
      * Load a Smooth audio/video segment.
-     * @param {string|null} url
+     * @param {Object|null} wantedCdn
      * @param {Object} context
+     * @param {Object} loaderOptions
      * @param {Object} cancelSignal
      * @param {Object} callbacks
      * @returns {Promise}
      */
-    loadSegment: function loadSegment(url, context, cancelSignal, callbacks) {
-      return segmentLoader(url, context, cancelSignal, callbacks);
+    loadSegment: function loadSegment(wantedCdn, context, loaderOptions, cancelSignal, callbacks) {
+      var url = constructSegmentUrl(wantedCdn, context.segment);
+      return segmentLoader(url, context, loaderOptions, cancelSignal, callbacks);
     },
     parseSegment: function parseSegment(loadedSegment, context, initTimescale) {
       var _a, _b;
@@ -36796,8 +36783,9 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
     }
   };
   var textTrackPipeline = {
-    loadSegment: function loadSegment(url, context, cancelSignal, callbacks) {
+    loadSegment: function loadSegment(wantedCdn, context, loaderOptions, cancelSignal, callbacks) {
       var segment = context.segment;
+      var url = constructSegmentUrl(wantedCdn, segment);
 
       if (segment.isInit || url === null) {
         return Promise.resolve({
@@ -36812,6 +36800,7 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
         return (0,request/* default */.ZP)({
           url: url,
           responseType: "text",
+          timeout: loaderOptions.timeout,
           cancelSignal: cancelSignal,
           onProgress: callbacks.onProgress
         }).then(function (data) {
@@ -36824,10 +36813,11 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
         return (0,request/* default */.ZP)({
           url: url,
           responseType: "arraybuffer",
+          timeout: loaderOptions.timeout,
           cancelSignal: cancelSignal,
           onProgress: callbacks.onProgress
         }).then(function (data) {
-          if (options.checkMediaSegmentIntegrity !== true) {
+          if (transportOptions.checkMediaSegmentIntegrity !== true) {
             return {
               resultType: "segment-loaded",
               resultData: data
@@ -37241,7 +37231,7 @@ var custom_loader_error = __webpack_require__(7839);
  */
 
 function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) {
-  return function (url, cancelSignal) {
+  return function (url, loaderOptions, cancelSignal) {
     return new Promise(function (res, rej) {
       var timeAPIsDelta = Date.now() - performance.now();
       /** `true` when the custom segmentLoader should not be active anymore. */
@@ -37277,7 +37267,7 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
 
 
       var reject = function reject(err) {
-        var _a, _b, _c;
+        var _a, _b;
 
         if (hasFinished || cancelSignal.isCancelled) {
           return;
@@ -37288,7 +37278,7 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
 
         var castedErr = err;
         var message = (_a = castedErr === null || castedErr === void 0 ? void 0 : castedErr.message) !== null && _a !== void 0 ? _a : "Unknown error when fetching the Manifest through a " + "custom manifestLoader.";
-        var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, (_c = castedErr === null || castedErr === void 0 ? void 0 : castedErr.isOfflineError) !== null && _c !== void 0 ? _c : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
+        var emittedErr = new custom_loader_error/* default */.Z(message, (_b = castedErr === null || castedErr === void 0 ? void 0 : castedErr.canRetry) !== null && _b !== void 0 ? _b : false, castedErr === null || castedErr === void 0 ? void 0 : castedErr.xhr);
         rej(emittedErr);
       };
       /**
@@ -37304,7 +37294,7 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
 
         hasFinished = true;
         cancelSignal.deregister(abortCustomLoader);
-        fallbackManifestLoader(url, cancelSignal).then(res, rej);
+        fallbackManifestLoader(url, loaderOptions, cancelSignal).then(res, rej);
       };
 
       var callbacks = {
@@ -37313,7 +37303,8 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
         fallback: fallback
       };
       var abort = customManifestLoader({
-        url: url
+        url: url,
+        timeout: loaderOptions.timeout
       }, callbacks);
       cancelSignal.register(abortCustomLoader);
       /**
@@ -37358,12 +37349,12 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
 
 /**
  * Manifest loader triggered if there was no custom-defined one in the API.
- * @param {string} url
- * @returns {Observable}
+ * @param {string} preferredType
+ * @returns {Function}
  */
 
 function generateRegularManifestLoader(preferredType) {
-  return function regularManifestLoader(url, cancelSignal) {
+  return function regularManifestLoader(url, loaderOptions, cancelSignal) {
     if (url === undefined) {
       throw new Error("Cannot perform HTTP(s) request. URL not known");
     } // What follows could be written in a single line, but TypeScript wouldn't
@@ -37376,6 +37367,7 @@ function generateRegularManifestLoader(preferredType) {
         return (0,request/* default */.ZP)({
           url: url,
           responseType: "arraybuffer",
+          timeout: loaderOptions.timeout,
           cancelSignal: cancelSignal
         });
 
@@ -37383,6 +37375,7 @@ function generateRegularManifestLoader(preferredType) {
         return (0,request/* default */.ZP)({
           url: url,
           responseType: "text",
+          timeout: loaderOptions.timeout,
           cancelSignal: cancelSignal
         });
 
@@ -37390,6 +37383,7 @@ function generateRegularManifestLoader(preferredType) {
         return (0,request/* default */.ZP)({
           url: url,
           responseType: "document",
+          timeout: loaderOptions.timeout,
           cancelSignal: cancelSignal
         });
 
@@ -38351,6 +38345,8 @@ __webpack_require__.d(__webpack_exports__, {
   "Z": function() { return /* binding */ deferSubscriptions; }
 });
 
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/subscribeOn.js
+var subscribeOn = __webpack_require__(8720);
 // EXTERNAL MODULE: ./node_modules/rxjs/node_modules/tslib/tslib.es6.js
 var tslib_es6 = __webpack_require__(5987);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/scheduler/AsyncAction.js + 2 modules
@@ -38482,8 +38478,6 @@ var AsapScheduler = (function (_super) {
 var asapScheduler = new AsapScheduler(AsapAction);
 var asap = (/* unused pure expression or super */ null && (asapScheduler));
 //# sourceMappingURL=asap.js.map
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/subscribeOn.js
-var subscribeOn = __webpack_require__(8720);
 ;// CONCATENATED MODULE: ./src/utils/defer_subscriptions.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -40150,9 +40144,11 @@ function isTimeInTimeRanges(ranges, time) {
 "use strict";
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "$l": function() { return /* binding */ createSharedReference; },
+/* harmony export */   "ZP": function() { return /* binding */ createSharedReference; },
 /* harmony export */   "lR": function() { return /* binding */ createMappedReference; }
 /* harmony export */ });
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1480);
+/* harmony import */ var _task_canceller__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(288);
 function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
@@ -40174,6 +40170,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 /**
  * Create an `ISharedReference` object encapsulating the mutable `initialValue`
@@ -40344,6 +40341,34 @@ function createSharedReference(initialValue) {
         }
       }
     },
+    waitUntilDefined: function waitUntilDefined(cb, options) {
+      if (value !== undefined) {
+        cb(value);
+        return;
+      }
+
+      if (isFinished) {
+        return;
+      }
+
+      var childCanceller = new _task_canceller__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .ZP();
+
+      if ((options === null || options === void 0 ? void 0 : options.clearSignal) !== undefined) {
+        options.clearSignal.register(function () {
+          return childCanceller.cancel();
+        });
+      }
+
+      this.onUpdate(function (val) {
+        if (val !== undefined) {
+          childCanceller.cancel();
+          cb(value);
+          return;
+        }
+      }, {
+        clearSignal: childCanceller.signal
+      });
+    },
 
     /**
      * Indicate that no new values will be emitted.
@@ -40401,7 +40426,7 @@ function createMappedReference(originalRef, mappingFn, cancellationSignal) {
 
   return newRef;
 }
-/* harmony default export */ __webpack_exports__["ZP"] = (createSharedReference);
+
 
 /***/ }),
 
@@ -40417,8 +40442,6 @@ __webpack_require__.d(__webpack_exports__, {
 
 // UNUSED EXPORTS: fetchIsSupported, fetchRequest, xhr
 
-// EXTERNAL MODULE: ./src/config.ts + 2 modules
-var config = __webpack_require__(6872);
 // EXTERNAL MODULE: ./src/errors/request_error.ts
 var request_error = __webpack_require__(9105);
 // EXTERNAL MODULE: ./src/utils/is_non_empty_string.ts
@@ -40444,17 +40467,13 @@ var is_null_or_undefined = __webpack_require__(1946);
 
 
 
-
 var DEFAULT_RESPONSE_TYPE = "json";
 function request(options) {
-  var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
-      DEFAULT_REQUEST_TIMEOUT = _config$getCurrent.DEFAULT_REQUEST_TIMEOUT;
-
   var requestOptions = {
     url: options.url,
     headers: options.headers,
     responseType: (0,is_null_or_undefined/* default */.Z)(options.responseType) ? DEFAULT_RESPONSE_TYPE : options.responseType,
-    timeout: (0,is_null_or_undefined/* default */.Z)(options.timeout) ? DEFAULT_REQUEST_TIMEOUT : options.timeout
+    timeout: options.timeout
   };
   return new Promise(function (resolve, reject) {
     var onProgress = options.onProgress,
@@ -40465,9 +40484,20 @@ function request(options) {
         timeout = requestOptions.timeout;
     var xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);
+    var timeoutId;
 
-    if (timeout >= 0) {
-      xhr.timeout = timeout;
+    if (timeout !== undefined) {
+      xhr.timeout = timeout; // We've seen on some browser (mainly on some LG TVs), that `xhr.timeout`
+      // was either not supported or did not function properly despite the
+      // browser being recent enough to support it.
+      // That's why we also start a manual timeout. We do this a little later
+      // than the "native one" performed on the xhr assuming that the latter
+      // is more precise, it might also be more efficient.
+
+      timeoutId = window.setTimeout(function () {
+        clearCancellingProcess();
+        reject(new request_error/* default */.Z(url, xhr.status, "TIMEOUT"));
+      }, timeout + 3000);
     }
 
     xhr.responseType = responseType;
@@ -40492,6 +40522,8 @@ function request(options) {
 
     if (cancelSignal !== undefined) {
       deregisterCancellationListener = cancelSignal.register(function abortRequest(err) {
+        clearCancellingProcess();
+
         if (!(0,is_null_or_undefined/* default */.Z)(xhr) && xhr.readyState !== 4) {
           xhr.abort();
         }
@@ -40505,18 +40537,12 @@ function request(options) {
     }
 
     xhr.onerror = function onXHRError() {
-      if (deregisterCancellationListener !== null) {
-        deregisterCancellationListener();
-      }
-
+      clearCancellingProcess();
       reject(new request_error/* default */.Z(url, xhr.status, "ERROR_EVENT"));
     };
 
     xhr.ontimeout = function onXHRTimeout() {
-      if (deregisterCancellationListener !== null) {
-        deregisterCancellationListener();
-      }
-
+      clearCancellingProcess();
       reject(new request_error/* default */.Z(url, xhr.status, "TIMEOUT"));
     };
 
@@ -40536,9 +40562,7 @@ function request(options) {
 
     xhr.onload = function onXHRLoad(event) {
       if (xhr.readyState === 4) {
-        if (deregisterCancellationListener !== null) {
-          deregisterCancellationListener();
-        }
+        clearCancellingProcess();
 
         if (xhr.status >= 200 && xhr.status < 300) {
           var receivedTime = performance.now();
@@ -40581,6 +40605,19 @@ function request(options) {
     };
 
     xhr.send();
+    /**
+     * Clear resources and timers created to handle cancellation and timeouts.
+     */
+
+    function clearCancellingProcess() {
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+
+      if (deregisterCancellationListener !== null) {
+        deregisterCancellationListener();
+      }
+    }
   });
 }
 /**
@@ -40623,8 +40660,8 @@ function toJSONForIE(data) {
 
 "use strict";
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Z": function() { return /* binding */ resolveURL; },
-/* harmony export */   "f": function() { return /* binding */ normalizeBaseURL; }
+/* harmony export */   "$": function() { return /* binding */ getFilenameIndexInUrl; },
+/* harmony export */   "Z": function() { return /* binding */ resolveURL; }
 /* harmony export */ });
 /**
  * Copyright 2015 CANAL+ Group
@@ -40721,16 +40758,19 @@ function resolveURL() {
   return _normalizeUrl(base);
 }
 /**
- * Remove string after the last '/'.
+ * In a given URL, find the index at which the filename begins.
+ * That is, this function finds the index of the last `/` character and returns
+ * the index after it, returning the length of the whole URL if no `/` was found
+ * after the scheme (i.e. in `http://`, the slashes are not considered).
  * @param {string} url
- * @returns {string}
+ * @returns {number}
  */
 
-function normalizeBaseURL(url) {
+function getFilenameIndexInUrl(url) {
   var indexOfLastSlash = url.lastIndexOf("/");
 
   if (indexOfLastSlash < 0) {
-    return url;
+    return url.length;
   }
 
   if (schemeRe.test(url)) {
@@ -40739,7 +40779,7 @@ function normalizeBaseURL(url) {
     if (firstSlashIndex >= 0 && indexOfLastSlash === firstSlashIndex + 1) {
       // The "/" detected is actually the one from the protocol part of the URL
       // ("https://")
-      return url;
+      return url.length;
     }
   }
 
@@ -40748,56 +40788,13 @@ function normalizeBaseURL(url) {
   if (indexOfQuestionMark >= 0 && indexOfQuestionMark < indexOfLastSlash) {
     // There are query parameters. Let's ignore them and re-run the logic
     // without
-    return normalizeBaseURL(url.substring(0, indexOfQuestionMark));
+    return getFilenameIndexInUrl(url.substring(0, indexOfQuestionMark));
   }
 
-  return url.substring(0, indexOfLastSlash + 1);
+  return indexOfLastSlash + 1;
 }
 
 
-
-/***/ }),
-
-/***/ 5561:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Z": function() { return /* binding */ tryCatch; }
-/* harmony export */ });
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3610);
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @param {Function} func - A function you want to execute
- * @param {*} argsForFunc - The function's argument
- * @returns {*} - If it fails, returns a throwing Observable, else the
- * function's result (which should be, in most cases, an Observable).
- */
-
-function tryCatch(func, argsForFunc) {
-  try {
-    return func(argsForFunc);
-  } catch (e) {
-    return (0,rxjs__WEBPACK_IMPORTED_MODULE_0__/* .throwError */ ._)(function () {
-      return e;
-    });
-  }
-}
 
 /***/ }),
 
@@ -41623,8 +41620,7 @@ var CancellationSignal = /*#__PURE__*/function () {
   return CancellationSignal;
 }();
 /**
- * Error created when a task is cancelled through the TaskCanceller.
- *
+ * Error created when a task is cancelled.
  * @class CancellationError
  * @extends Error
  */
@@ -42590,16 +42586,29 @@ var config = {
 
 /***/ }),
 
-/***/ 6362:
+/***/ 2034:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "z": function() { return /* binding */ concat; }
-/* harmony export */ });
-/* harmony import */ var _operators_concatAll__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(9834);
-/* harmony import */ var _util_args__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2457);
-/* harmony import */ var _from__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3102);
+
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, {
+  "z": function() { return /* binding */ concat; }
+});
+
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/mergeAll.js
+var mergeAll = __webpack_require__(4367);
+;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/concatAll.js
+
+function concatAll() {
+    return (0,mergeAll/* mergeAll */.J)(1);
+}
+//# sourceMappingURL=concatAll.js.map
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/args.js
+var util_args = __webpack_require__(2457);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/from.js + 8 modules
+var from = __webpack_require__(3102);
+;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
 
 
 
@@ -42608,7 +42617,7 @@ function concat() {
     for (var _i = 0; _i < arguments.length; _i++) {
         args[_i] = arguments[_i];
     }
-    return (0,_operators_concatAll__WEBPACK_IMPORTED_MODULE_0__/* .concatAll */ .u)()((0,_from__WEBPACK_IMPORTED_MODULE_1__/* .from */ .D)(args, (0,_util_args__WEBPACK_IMPORTED_MODULE_2__/* .popScheduler */ .yG)(args)));
+    return concatAll()((0,from/* from */.D)(args, (0,util_args/* popScheduler */.yG)(args)));
 }
 //# sourceMappingURL=concat.js.map
 
@@ -43095,29 +43104,6 @@ function process(asyncIterable, subscriber) {
 
 /***/ }),
 
-/***/ 6697:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "F": function() { return /* binding */ interval; }
-/* harmony export */ });
-/* harmony import */ var _scheduler_async__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7991);
-/* harmony import */ var _timer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(6625);
-
-
-function interval(period, scheduler) {
-    if (period === void 0) { period = 0; }
-    if (scheduler === void 0) { scheduler = _scheduler_async__WEBPACK_IMPORTED_MODULE_0__/* .asyncScheduler */ .z; }
-    if (period < 0) {
-        period = 0;
-    }
-    return (0,_timer__WEBPACK_IMPORTED_MODULE_1__/* .timer */ .H)(period, period, scheduler);
-}
-//# sourceMappingURL=interval.js.map
-
-/***/ }),
-
 /***/ 3071:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
@@ -43353,22 +43339,6 @@ function catchError(selector) {
     });
 }
 //# sourceMappingURL=catchError.js.map
-
-/***/ }),
-
-/***/ 9834:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "u": function() { return /* binding */ concatAll; }
-/* harmony export */ });
-/* harmony import */ var _mergeAll__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4367);
-
-function concatAll() {
-    return (0,_mergeAll__WEBPACK_IMPORTED_MODULE_0__/* .mergeAll */ .J)(1);
-}
-//# sourceMappingURL=concatAll.js.map
 
 /***/ }),
 
@@ -43782,7 +43752,7 @@ function shareReplay(configOrBufferSize, windowTime, scheduler) {
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "O": function() { return /* binding */ startWith; }
 /* harmony export */ });
-/* harmony import */ var _observable_concat__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(6362);
+/* harmony import */ var _observable_concat__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2034);
 /* harmony import */ var _util_args__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2457);
 /* harmony import */ var _util_lift__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(6798);
 
@@ -45021,6 +44991,405 @@ function __classPrivateFieldSet(receiver, privateMap, value) {
 
 /***/ }),
 
+/***/ 7061:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+var _typeof = (__webpack_require__(8698)["default"]);
+
+function _regeneratorRuntime() {
+  "use strict";
+  /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+
+  module.exports = _regeneratorRuntime = function _regeneratorRuntime() {
+    return exports;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  var exports = {},
+      Op = Object.prototype,
+      hasOwn = Op.hasOwnProperty,
+      $Symbol = "function" == typeof Symbol ? Symbol : {},
+      iteratorSymbol = $Symbol.iterator || "@@iterator",
+      asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator",
+      toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+
+  function define(obj, key, value) {
+    return Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: !0,
+      configurable: !0,
+      writable: !0
+    }), obj[key];
+  }
+
+  try {
+    define({}, "");
+  } catch (err) {
+    define = function define(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator,
+        generator = Object.create(protoGenerator.prototype),
+        context = new Context(tryLocsList || []);
+    return generator._invoke = function (innerFn, self, context) {
+      var state = "suspendedStart";
+      return function (method, arg) {
+        if ("executing" === state) throw new Error("Generator is already running");
+
+        if ("completed" === state) {
+          if ("throw" === method) throw arg;
+          return doneResult();
+        }
+
+        for (context.method = method, context.arg = arg;;) {
+          var delegate = context.delegate;
+
+          if (delegate) {
+            var delegateResult = maybeInvokeDelegate(delegate, context);
+
+            if (delegateResult) {
+              if (delegateResult === ContinueSentinel) continue;
+              return delegateResult;
+            }
+          }
+
+          if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) {
+            if ("suspendedStart" === state) throw state = "completed", context.arg;
+            context.dispatchException(context.arg);
+          } else "return" === context.method && context.abrupt("return", context.arg);
+          state = "executing";
+          var record = tryCatch(innerFn, self, context);
+
+          if ("normal" === record.type) {
+            if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue;
+            return {
+              value: record.arg,
+              done: context.done
+            };
+          }
+
+          "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
+        }
+      };
+    }(innerFn, self, context), generator;
+  }
+
+  function tryCatch(fn, obj, arg) {
+    try {
+      return {
+        type: "normal",
+        arg: fn.call(obj, arg)
+      };
+    } catch (err) {
+      return {
+        type: "throw",
+        arg: err
+      };
+    }
+  }
+
+  exports.wrap = wrap;
+  var ContinueSentinel = {};
+
+  function Generator() {}
+
+  function GeneratorFunction() {}
+
+  function GeneratorFunctionPrototype() {}
+
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+  var getProto = Object.getPrototypeOf,
+      NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
+  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
+
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function (method) {
+      define(prototype, method, function (arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+
+      if ("throw" !== record.type) {
+        var result = record.arg,
+            value = result.value;
+        return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) {
+          invoke("next", value, resolve, reject);
+        }, function (err) {
+          invoke("throw", err, resolve, reject);
+        }) : PromiseImpl.resolve(value).then(function (unwrapped) {
+          result.value = unwrapped, resolve(result);
+        }, function (error) {
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+
+      reject(record.arg);
+    }
+
+    var previousPromise;
+
+    this._invoke = function (method, arg) {
+      function callInvokeWithMethodAndArg() {
+        return new PromiseImpl(function (resolve, reject) {
+          invoke(method, arg, resolve, reject);
+        });
+      }
+
+      return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+    };
+  }
+
+  function maybeInvokeDelegate(delegate, context) {
+    var method = delegate.iterator[context.method];
+
+    if (undefined === method) {
+      if (context.delegate = null, "throw" === context.method) {
+        if (delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method)) return ContinueSentinel;
+        context.method = "throw", context.arg = new TypeError("The iterator does not provide a 'throw' method");
+      }
+
+      return ContinueSentinel;
+    }
+
+    var record = tryCatch(method, delegate.iterator, context.arg);
+    if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
+    var info = record.arg;
+    return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
+  }
+
+  function pushTryEntry(locs) {
+    var entry = {
+      tryLoc: locs[0]
+    };
+    1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
+  }
+
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal", delete record.arg, entry.completion = record;
+  }
+
+  function Context(tryLocsList) {
+    this.tryEntries = [{
+      tryLoc: "root"
+    }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0);
+  }
+
+  function values(iterable) {
+    if (iterable) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) return iteratorMethod.call(iterable);
+      if ("function" == typeof iterable.next) return iterable;
+
+      if (!isNaN(iterable.length)) {
+        var i = -1,
+            next = function next() {
+          for (; ++i < iterable.length;) {
+            if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next;
+          }
+
+          return next.value = undefined, next.done = !0, next;
+        };
+
+        return next.next = next;
+      }
+    }
+
+    return {
+      next: doneResult
+    };
+  }
+
+  function doneResult() {
+    return {
+      value: undefined,
+      done: !0
+    };
+  }
+
+  return GeneratorFunction.prototype = GeneratorFunctionPrototype, define(Gp, "constructor", GeneratorFunctionPrototype), define(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) {
+    var ctor = "function" == typeof genFun && genFun.constructor;
+    return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
+  }, exports.mark = function (genFun) {
+    return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
+  }, exports.awrap = function (arg) {
+    return {
+      __await: arg
+    };
+  }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    void 0 === PromiseImpl && (PromiseImpl = Promise);
+    var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl);
+    return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) {
+      return result.done ? result.value : iter.next();
+    });
+  }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () {
+    return this;
+  }), define(Gp, "toString", function () {
+    return "[object Generator]";
+  }), exports.keys = function (object) {
+    var keys = [];
+
+    for (var key in object) {
+      keys.push(key);
+    }
+
+    return keys.reverse(), function next() {
+      for (; keys.length;) {
+        var key = keys.pop();
+        if (key in object) return next.value = key, next.done = !1, next;
+      }
+
+      return next.done = !0, next;
+    };
+  }, exports.values = values, Context.prototype = {
+    constructor: Context,
+    reset: function reset(skipTempReset) {
+      if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) {
+        "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined);
+      }
+    },
+    stop: function stop() {
+      this.done = !0;
+      var rootRecord = this.tryEntries[0].completion;
+      if ("throw" === rootRecord.type) throw rootRecord.arg;
+      return this.rval;
+    },
+    dispatchException: function dispatchException(exception) {
+      if (this.done) throw exception;
+      var context = this;
+
+      function handle(loc, caught) {
+        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught;
+      }
+
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i],
+            record = entry.completion;
+        if ("root" === entry.tryLoc) return handle("end");
+
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc"),
+              hasFinally = hasOwn.call(entry, "finallyLoc");
+
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+          } else {
+            if (!hasFinally) throw new Error("try statement without catch or finally");
+            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+          }
+        }
+      }
+    },
+    abrupt: function abrupt(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+
+        if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+
+      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
+      var record = finallyEntry ? finallyEntry.completion : {};
+      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
+    },
+    complete: function complete(record, afterLoc) {
+      if ("throw" === record.type) throw record.arg;
+      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
+    },
+    finish: function finish(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
+      }
+    },
+    "catch": function _catch(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+
+          if ("throw" === record.type) {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+
+          return thrown;
+        }
+      }
+
+      throw new Error("illegal catch attempt");
+    },
+    delegateYield: function delegateYield(iterable, resultName, nextLoc) {
+      return this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      }, "next" === this.method && (this.arg = undefined), ContinueSentinel;
+    }
+  }, exports;
+}
+
+module.exports = _regeneratorRuntime, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 8698:
+/***/ (function(module) {
+
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+
+  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+    return typeof obj;
+  } : function (obj) {
+    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(obj);
+}
+
+module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+
+/***/ 4687:
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+
+// TODO(Babel 8): Remove this file.
+
+var runtime = __webpack_require__(7061)();
+module.exports = runtime;
+
+// Copied from https://github.com/facebook/regenerator/blob/main/packages/runtime/runtime.js#L736=
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+}
+
+
+/***/ }),
+
 /***/ 7326:
 /***/ (function(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
 
@@ -45477,8 +45846,8 @@ function maybeSchedule(scheduler, execute, subscription) {
 //# sourceMappingURL=combineLatest.js.map
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/startWith.js
 var startWith = __webpack_require__(6108);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js
-var concat = __webpack_require__(6362);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/concat.js + 1 modules
+var concat = __webpack_require__(2034);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/switchMap.js
 var switchMap = __webpack_require__(4978);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
@@ -45498,6 +45867,8 @@ function skipWhile(predicate) {
     });
 }
 //# sourceMappingURL=skipWhile.js.map
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/tap.js
+var tap = __webpack_require__(2006);
 // EXTERNAL MODULE: ./src/compat/event_listeners.ts + 1 modules
 var event_listeners = __webpack_require__(1381);
 ;// CONCATENATED MODULE: ./src/compat/get_start_date.ts
@@ -45682,7 +46053,7 @@ var task_canceller = __webpack_require__(288);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js
 var asyncToGenerator = __webpack_require__(5861);
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/regenerator/index.js
-var regenerator = __webpack_require__(7757);
+var regenerator = __webpack_require__(4687);
 var regenerator_default = /*#__PURE__*/__webpack_require__.n(regenerator);
 // EXTERNAL MODULE: ./src/compat/eme/custom_media_keys/index.ts + 7 modules
 var custom_media_keys = __webpack_require__(6139);
@@ -45892,51 +46263,6 @@ function errorSelector(error) {
     defaultReason: "Unknown error when fetching the Manifest"
   });
 }
-;// CONCATENATED MODULE: ./src/compat/is_offline.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Some browsers have a builtin API to know if it's connected at least to a
- * LAN network, at most to the internet.
- *
- * /!\ This feature can be dangerous as you can both have false positives and
- * false negatives.
- *
- * False positives:
- *   - you can still play local contents (on localhost) if isOffline == true
- *   - on some browsers isOffline might be true even if we're connected to a LAN
- *     or a router (it would mean we're just not able to connect to the
- *     Internet). So we can eventually play LAN contents if isOffline == true
- *
- * False negatives:
- *   - in some cases, we even might have isOffline at false when we do not have
- *     any connection:
- *       - in browsers that do not support the feature
- *       - in browsers running in some virtualization softwares where the
- *         network adapters are always connected.
- *
- * Use with these cases in mind.
- * @returns {Boolean}
- */
-function isOffline() {
-  /* eslint-disable @typescript-eslint/no-unnecessary-boolean-literal-compare */
-  return navigator.onLine === false;
-  /* eslint-enable @typescript-eslint/no-unnecessary-boolean-literal-compare */
-}
 // EXTERNAL MODULE: ./src/errors/custom_loader_error.ts
 var custom_loader_error = __webpack_require__(7839);
 // EXTERNAL MODULE: ./src/errors/is_known_error.ts
@@ -45945,7 +46271,9 @@ var is_known_error = __webpack_require__(9822);
 var cancellable_sleep = __webpack_require__(7864);
 // EXTERNAL MODULE: ./src/utils/get_fuzzed_delay.ts
 var get_fuzzed_delay = __webpack_require__(2572);
-;// CONCATENATED MODULE: ./src/core/fetchers/utils/try_urls_with_backoff.ts
+// EXTERNAL MODULE: ./src/utils/noop.ts
+var noop = __webpack_require__(8894);
+;// CONCATENATED MODULE: ./src/core/fetchers/utils/schedule_request.ts
 
 
 
@@ -46011,252 +46339,345 @@ function shouldRetry(error) {
   return (0,is_known_error/* default */.Z)(error) && error.code === "INTEGRITY_ERROR";
 }
 /**
- * Returns true if we're pretty sure that the current error is due to the
- * user being offline.
- * @param {Error} error
- * @returns {Boolean}
- */
-
-
-function isOfflineRequestError(error) {
-  if (error instanceof request_error/* default */.Z) {
-    return error.type === error_codes/* NetworkErrorTypes.ERROR_EVENT */.br.ERROR_EVENT && isOffline();
-  } else if (error instanceof custom_loader_error/* default */.Z) {
-    return error.isOfflineError;
-  }
-
-  return false; // under doubt, return false
-}
-/**
- * Guess the type of error obtained.
- * @param {*} error
- * @returns {number}
- */
-
-
-function getRequestErrorType(error) {
-  return isOfflineRequestError(error) ? 2
-  /* REQUEST_ERROR_TYPES.Offline */
-  : 1
-  /* REQUEST_ERROR_TYPES.Regular */
-  ;
-}
-/**
  * Specific algorithm used to perform segment and manifest requests.
  *
  * Here how it works:
  *
- *   1. You give it one or multiple URLs available for the resource you want to
- *      request (from the most important URL to the least important), the
- *      request callback itself, and some options.
+ *   1. You give it one or multiple of the CDN available for the resource you
+ *      want to request (from the most important one to the least important),
+ *      a callback doing the request with the chosen CDN in argument, and some
+ *      options.
  *
- *   2. it tries to call the request callback with the first URL:
+ *   2. it tries to call the request callback with the most prioritized CDN
+ *      first:
  *        - if it works as expected, it resolves the returned Promise with that
  *          request's response.
  *        - if it fails, it calls ther `onRetry` callback given with the
- *          corresponding error and try with the next URL.
+ *          corresponding error, un-prioritize that CDN and try with the new
+ *          most prioritized CDN.
  *
- *   3. When all URLs have been tested (and failed), it decides - according to
- *      the error counters, configuration and errors received - if it can retry
- *      at least one of them, in the same order:
- *        - If it can, it increments the corresponding error counter, wait a
- *          delay (based on an exponential backoff) and restart the same logic
- *          for all retry-able URL.
- *        - If it can't it just reject the error through the returned Promise.
+ *      Each CDN might be retried multiple times, depending on the nature of the
+ *      error and the Configuration given.
  *
- * Note that there are in fact two separate counters:
- *   - one for "offline" errors
- *   - one for other xhr errors
- * Both counters are resetted if the error type changes from an error to the
- * next.
+ *      Multiple retries of the same CDN are done after a delay to avoid
+ *      overwhelming it, this is what we call a "backoff". That delay raises
+ *      exponentially as multiple consecutive errors are encountered on this
+ *      CDN.
  *
- * @param {Array.<string>} urls
- * @param {Function} performRequest
- * @param {Object} options - Configuration options.
- * @param {Object} cancellationSignal
- * @returns {Promise}
+ * @param {Array.<string>|null} cdns - The different CDN on which the
+ * wanted resource is available. `scheduleRequestWithCdns` will call the
+ * `performRequest` callback with the right element from that array if different
+ * from `null`.
+ *
+ * Can be set to `null` when that resource is not reachable through a CDN, in
+ * which case the `performRequest` callback may be called with `null`.
+ * @param {Object|null} cdnPrioritizer - Interface allowing to give the priority
+ * between multiple CDNs.
+ * @param {Function} performRequest - Callback implementing the request in
+ * itself. Resolving when the resource request succeed and rejecting with the
+ * corresponding error when the request failed.
+ * @param {Object} options - Configuration allowing to tweak the number on which
+ * the algorithm behind `scheduleRequestWithCdns` bases itself.
+ * @param {Object} cancellationSignal - CancellationSignal allowing to cancel
+ * the logic of `scheduleRequestWithCdns`.
+ * To trigger if the resource is not needed anymore.
+ * @returns {Promise} - Promise resolving, with the corresponding
+ * `performRequest`'s data, when the resource request succeed and rejecting in
+ * the following scenarios:
+ *   - `scheduleRequestWithCdns` has been cancelled due to `cancellationSignal`
+ *     being triggered. In that case a `CancellationError` is thrown.
+ *
+ *   - The resource request(s) failed and will not be retried anymore.
  */
 
 
-function tryURLsWithBackoff(urls, performRequest, options, cancellationSignal) {
-  if (cancellationSignal.isCancelled) {
-    return Promise.reject(cancellationSignal.cancellationError);
-  }
-
-  var baseDelay = options.baseDelay,
-      maxDelay = options.maxDelay,
-      maxRetryRegular = options.maxRetryRegular,
-      maxRetryOffline = options.maxRetryOffline,
-      onRetry = options.onRetry;
-  var retryCount = 0;
-  var lastError = 0
-  /* REQUEST_ERROR_TYPES.None */
-  ;
-  var urlsToTry = urls.slice();
-
-  if (urlsToTry.length === 0) {
-    log/* default.warn */.Z.warn("Fetchers: no URL given to `tryURLsWithBackoff`.");
-    return Promise.reject(new Error("No URL to request"));
-  }
-
-  return tryURLsRecursively(urlsToTry[0], 0);
-  /**
-   * Try to do the request of a given `url` which corresponds to the `index`
-   * argument in the `urlsToTry` Array.
-   *
-   * If it fails try the next one.
-   *
-   * If all URLs fail, start a timer and retry the first element in that array
-   * by following the configuration.
-   *
-   * @param {string|null} url
-   * @param {number} index
-   * @returns {Observable}
-   */
-
-  function tryURLsRecursively(_x, _x2) {
-    return _tryURLsRecursively.apply(this, arguments);
-  }
-
-  function _tryURLsRecursively() {
-    _tryURLsRecursively = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(url, index) {
-      var res, newIndex, currentError, maxRetry, _newIndex, delay, fuzzedDelay, nextURL;
-
-      return regenerator_default().wrap(function _callee$(_context) {
-        while (1) {
-          switch (_context.prev = _context.next) {
-            case 0:
-              _context.prev = 0;
-              _context.next = 3;
-              return performRequest(url, cancellationSignal);
-
-            case 3:
-              res = _context.sent;
-              return _context.abrupt("return", res);
-
-            case 7:
-              _context.prev = 7;
-              _context.t0 = _context["catch"](0);
-
-              if (!task_canceller/* default.isCancellationError */.ZP.isCancellationError(_context.t0)) {
-                _context.next = 11;
-                break;
-              }
-
-              throw _context.t0;
-
-            case 11:
-              if (shouldRetry(_context.t0)) {
-                _context.next = 20;
-                break;
-              }
-
-              if (!(urlsToTry.length <= 1)) {
-                _context.next = 14;
-                break;
-              }
-
-              throw _context.t0;
-
-            case 14:
-              // else, remove that element from the array and go the next URL
-              urlsToTry.splice(index, 1);
-              newIndex = index >= urlsToTry.length - 1 ? 0 : index;
-              onRetry(_context.t0);
-
-              if (!cancellationSignal.isCancelled) {
-                _context.next = 19;
-                break;
-              }
-
-              throw cancellationSignal.cancellationError;
-
-            case 19:
-              return _context.abrupt("return", tryURLsRecursively(urlsToTry[newIndex], newIndex));
-
-            case 20:
-              currentError = getRequestErrorType(_context.t0);
-              maxRetry = currentError === 2
-              /* REQUEST_ERROR_TYPES.Offline */
-              ? maxRetryOffline : maxRetryRegular;
-
-              if (currentError !== lastError) {
-                retryCount = 0;
-                lastError = currentError;
-              }
-
-              if (!(index < urlsToTry.length - 1)) {
-                _context.next = 29;
-                break;
-              }
-
-              // there is still URLs to test
-              _newIndex = index + 1;
-              onRetry(_context.t0);
-
-              if (!cancellationSignal.isCancelled) {
-                _context.next = 28;
-                break;
-              }
-
-              throw cancellationSignal.cancellationError;
-
-            case 28:
-              return _context.abrupt("return", tryURLsRecursively(urlsToTry[_newIndex], _newIndex));
-
-            case 29:
-              // Here, we were using the last element of the `urlsToTry` array.
-              // Increment counter and restart with the first URL
-              retryCount++;
-
-              if (!(retryCount > maxRetry)) {
-                _context.next = 32;
-                break;
-              }
-
-              throw _context.t0;
-
-            case 32:
-              delay = Math.min(baseDelay * Math.pow(2, retryCount - 1), maxDelay);
-              fuzzedDelay = (0,get_fuzzed_delay/* default */.Z)(delay);
-              nextURL = urlsToTry[0];
-              onRetry(_context.t0);
-
-              if (!cancellationSignal.isCancelled) {
-                _context.next = 38;
-                break;
-              }
-
-              throw cancellationSignal.cancellationError;
-
-            case 38:
-              _context.next = 40;
-              return (0,cancellable_sleep/* default */.Z)(fuzzedDelay, cancellationSignal);
-
-            case 40:
-              return _context.abrupt("return", tryURLsRecursively(nextURL, 0));
-
-            case 41:
-            case "end":
-              return _context.stop();
-          }
-        }
-      }, _callee, null, [[0, 7]]);
-    }));
-    return _tryURLsRecursively.apply(this, arguments);
-  }
+function scheduleRequestWithCdns(_x, _x2, _x3, _x4, _x5) {
+  return _scheduleRequestWithCdns.apply(this, arguments);
 }
 /**
  * Lightweight version of the request algorithm, this time with only a simple
  * Promise given.
- * @param {Function} request$
+ * @param {Function} performRequest
  * @param {Object} options
- * @returns {Observable}
+ * @returns {Promise}
  */
 
-function tryRequestPromiseWithBackoff(performRequest, options, cancellationSignal) {
-  // same than for a single unknown URL
-  return tryURLsWithBackoff([null], performRequest, options, cancellationSignal);
+function _scheduleRequestWithCdns() {
+  _scheduleRequestWithCdns = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee3(cdns, cdnPrioritizer, performRequest, options, cancellationSignal) {
+    var baseDelay, maxDelay, maxRetry, onRetry, missedAttempts, initialCdnToRequest, getCdnToRequest, requestCdn, _requestCdn, retryWithNextCdn, _retryWithNextCdn, waitPotentialBackoffAndRequest, getPrioritaryRequestableCdnFromSortedList;
+
+    return regenerator_default().wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            getPrioritaryRequestableCdnFromSortedList = function _getPrioritaryRequest(sortedCdns) {
+              var _a;
+
+              if (missedAttempts.size === 0) {
+                return sortedCdns[0];
+              }
+
+              var now = performance.now();
+              return (_a = sortedCdns.filter(function (c) {
+                var _a;
+
+                return ((_a = missedAttempts.get(c)) === null || _a === void 0 ? void 0 : _a.isBlacklisted) !== true;
+              }).reduce(function (acc, x) {
+                var _a;
+
+                var blockedUntil = (_a = missedAttempts.get(x)) === null || _a === void 0 ? void 0 : _a.blockedUntil;
+
+                if (blockedUntil !== undefined && blockedUntil <= now) {
+                  blockedUntil = undefined;
+                }
+
+                if (acc === undefined) {
+                  return [x, blockedUntil];
+                }
+
+                if (blockedUntil === undefined) {
+                  if (acc[1] === undefined) {
+                    return acc;
+                  }
+
+                  return [x, undefined];
+                }
+
+                return acc[1] === undefined ? acc : blockedUntil < acc[1] ? [x, blockedUntil] : acc;
+              }, undefined)) === null || _a === void 0 ? void 0 : _a[0];
+            };
+
+            waitPotentialBackoffAndRequest = function _waitPotentialBackoff(nextWantedCdn, prevRequestError) {
+              var nextCdnAttemptObj = missedAttempts.get(nextWantedCdn);
+
+              if (nextCdnAttemptObj === undefined || nextCdnAttemptObj.blockedUntil === undefined) {
+                return requestCdn(nextWantedCdn);
+              }
+
+              var now = performance.now();
+              var blockedFor = nextCdnAttemptObj.blockedUntil - now;
+
+              if (blockedFor <= 0) {
+                return requestCdn(nextWantedCdn);
+              }
+
+              var canceller = new task_canceller/* default */.ZP({
+                cancelOn: cancellationSignal
+              });
+              return new Promise(function (res, rej) {
+                /* eslint-disable-next-line @typescript-eslint/no-misused-promises */
+                cdnPrioritizer === null || cdnPrioritizer === void 0 ? void 0 : cdnPrioritizer.addEventListener("priorityChange", function () {
+                  var updatedPrioritaryCdn = getCdnToRequest();
+
+                  if (cancellationSignal.isCancelled) {
+                    throw cancellationSignal.cancellationError;
+                  }
+
+                  if (updatedPrioritaryCdn === undefined) {
+                    return rej(prevRequestError);
+                  }
+
+                  if (updatedPrioritaryCdn !== nextWantedCdn) {
+                    canceller.cancel();
+                    waitPotentialBackoffAndRequest(updatedPrioritaryCdn, prevRequestError).then(res, rej);
+                  }
+                }, canceller.signal);
+                (0,cancellable_sleep/* default */.Z)(blockedFor, canceller.signal).then(function () {
+                  return requestCdn(nextWantedCdn).then(res, rej);
+                }, noop/* default */.Z);
+              });
+            };
+
+            _retryWithNextCdn = function _retryWithNextCdn3() {
+              _retryWithNextCdn = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee2(prevRequestError) {
+                var nextCdn;
+                return regenerator_default().wrap(function _callee2$(_context2) {
+                  while (1) {
+                    switch (_context2.prev = _context2.next) {
+                      case 0:
+                        nextCdn = getCdnToRequest();
+
+                        if (!cancellationSignal.isCancelled) {
+                          _context2.next = 3;
+                          break;
+                        }
+
+                        throw cancellationSignal.cancellationError;
+
+                      case 3:
+                        if (!(nextCdn === undefined)) {
+                          _context2.next = 5;
+                          break;
+                        }
+
+                        throw prevRequestError;
+
+                      case 5:
+                        onRetry(prevRequestError);
+
+                        if (!cancellationSignal.isCancelled) {
+                          _context2.next = 8;
+                          break;
+                        }
+
+                        throw cancellationSignal.cancellationError;
+
+                      case 8:
+                        return _context2.abrupt("return", waitPotentialBackoffAndRequest(nextCdn, prevRequestError));
+
+                      case 9:
+                      case "end":
+                        return _context2.stop();
+                    }
+                  }
+                }, _callee2);
+              }));
+              return _retryWithNextCdn.apply(this, arguments);
+            };
+
+            retryWithNextCdn = function _retryWithNextCdn2(_x7) {
+              return _retryWithNextCdn.apply(this, arguments);
+            };
+
+            _requestCdn = function _requestCdn3() {
+              _requestCdn = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(cdn) {
+                var res, missedAttemptsObj, errorCounter, delay, fuzzedDelay;
+                return regenerator_default().wrap(function _callee$(_context) {
+                  while (1) {
+                    switch (_context.prev = _context.next) {
+                      case 0:
+                        _context.prev = 0;
+                        _context.next = 3;
+                        return performRequest(cdn, cancellationSignal);
+
+                      case 3:
+                        res = _context.sent;
+                        return _context.abrupt("return", res);
+
+                      case 7:
+                        _context.prev = 7;
+                        _context.t0 = _context["catch"](0);
+
+                        if (!task_canceller/* default.isCancellationError */.ZP.isCancellationError(_context.t0)) {
+                          _context.next = 11;
+                          break;
+                        }
+
+                        throw _context.t0;
+
+                      case 11:
+                        if (cdn !== null && cdnPrioritizer !== null) {
+                          // We failed requesting the resource on this CDN.
+                          // Globally give priority to the next CDN through the CdnPrioritizer.
+                          cdnPrioritizer.downgradeCdn(cdn);
+                        }
+
+                        missedAttemptsObj = missedAttempts.get(cdn);
+
+                        if (missedAttemptsObj === undefined) {
+                          missedAttemptsObj = {
+                            errorCounter: 1,
+                            blockedUntil: undefined,
+                            isBlacklisted: false
+                          };
+                          missedAttempts.set(cdn, missedAttemptsObj);
+                        } else {
+                          missedAttemptsObj.errorCounter++;
+                        }
+
+                        if (shouldRetry(_context.t0)) {
+                          _context.next = 18;
+                          break;
+                        }
+
+                        missedAttemptsObj.blockedUntil = undefined;
+                        missedAttemptsObj.isBlacklisted = true;
+                        return _context.abrupt("return", retryWithNextCdn(_context.t0));
+
+                      case 18:
+                        if (missedAttemptsObj.errorCounter > maxRetry) {
+                          missedAttemptsObj.blockedUntil = undefined;
+                          missedAttemptsObj.isBlacklisted = true;
+                        } else {
+                          errorCounter = missedAttemptsObj.errorCounter;
+                          delay = Math.min(baseDelay * Math.pow(2, errorCounter - 1), maxDelay);
+                          fuzzedDelay = (0,get_fuzzed_delay/* default */.Z)(delay);
+                          missedAttemptsObj.blockedUntil = performance.now() + fuzzedDelay;
+                        }
+
+                        return _context.abrupt("return", retryWithNextCdn(_context.t0));
+
+                      case 20:
+                      case "end":
+                        return _context.stop();
+                    }
+                  }
+                }, _callee, null, [[0, 7]]);
+              }));
+              return _requestCdn.apply(this, arguments);
+            };
+
+            requestCdn = function _requestCdn2(_x6) {
+              return _requestCdn.apply(this, arguments);
+            };
+
+            getCdnToRequest = function _getCdnToRequest() {
+              if (cdns === null) {
+                var nullAttemptObject = missedAttempts.get(null);
+
+                if (nullAttemptObject !== undefined && nullAttemptObject.isBlacklisted) {
+                  return undefined;
+                }
+
+                return null;
+              } else if (cdnPrioritizer === null) {
+                return getPrioritaryRequestableCdnFromSortedList(cdns);
+              } else {
+                var prioritized = cdnPrioritizer.getCdnPreferenceForResource(cdns);
+                return getPrioritaryRequestableCdnFromSortedList(prioritized);
+              }
+            };
+
+            if (!(cancellationSignal.cancellationError !== null)) {
+              _context3.next = 9;
+              break;
+            }
+
+            return _context3.abrupt("return", Promise.reject(cancellationSignal.cancellationError));
+
+          case 9:
+            baseDelay = options.baseDelay, maxDelay = options.maxDelay, maxRetry = options.maxRetry, onRetry = options.onRetry;
+
+            if (cdns !== null && cdns.length === 0) {
+              log/* default.warn */.Z.warn("Fetchers: no CDN given to `scheduleRequestWithCdns`.");
+            }
+
+            missedAttempts = new Map();
+            initialCdnToRequest = getCdnToRequest();
+
+            if (!(initialCdnToRequest === undefined)) {
+              _context3.next = 15;
+              break;
+            }
+
+            throw new Error("No CDN to request");
+
+          case 15:
+            return _context3.abrupt("return", requestCdn(initialCdnToRequest));
+
+          case 16:
+          case "end":
+            return _context3.stop();
+        }
+      }
+    }, _callee3);
+  }));
+  return _scheduleRequestWithCdns.apply(this, arguments);
+}
+
+function scheduleRequestPromise(performRequest, options, cancellationSignal) {
+  // same than for a single unknown CDN
+  return scheduleRequestWithCdns(null, null, performRequest, options, cancellationSignal);
 }
 ;// CONCATENATED MODULE: ./src/core/fetchers/manifest/manifest_fetcher.ts
 
@@ -46283,6 +46704,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 
@@ -46345,6 +46767,7 @@ var ManifestFetcher = /*#__PURE__*/function () {
     var _this = this;
 
     return new Observable/* Observable */.y(function (obs) {
+      var settings = _this._settings;
       var pipelines = _this._pipelines;
       var requestUrl = url !== null && url !== void 0 ? url : _this._manifestUrl;
       /** `true` if the loading pipeline is already completely executed. */
@@ -46388,18 +46811,25 @@ var ManifestFetcher = /*#__PURE__*/function () {
        * Call the loader part of the pipeline, retrying if it fails according
        * to the current settings.
        * Returns the Promise of the last attempt.
-       * @param {string | undefined}  resolverUrl
+       * @param {string | undefined} manifestUrl
        * @returns {Promise}
        */
 
       function callLoaderWithRetries(manifestUrl) {
         var loadManifest = pipelines.loadManifest;
+        var requestTimeout = (0,is_null_or_undefined/* default */.Z)(settings.requestTimeout) ? config/* default.getCurrent */.Z.getCurrent().DEFAULT_REQUEST_TIMEOUT : settings.requestTimeout;
+
+        if (requestTimeout < 0) {
+          requestTimeout = undefined;
+        }
 
         var callLoader = function callLoader() {
-          return loadManifest(manifestUrl, canceller.signal);
+          return loadManifest(manifestUrl, {
+            timeout: requestTimeout
+          }, canceller.signal);
         };
 
-        return tryRequestPromiseWithBackoff(callLoader, backoffSettings, canceller.signal);
+        return scheduleRequestPromise(callLoader, backoffSettings, canceller.signal);
       }
     });
   }
@@ -46511,7 +46941,7 @@ var ManifestFetcher = /*#__PURE__*/function () {
                 case 0:
                   _context.prev = 0;
                   _context.next = 3;
-                  return tryRequestPromiseWithBackoff(performRequest, backoffSettings, canceller.signal);
+                  return scheduleRequestPromise(performRequest, backoffSettings, canceller.signal);
 
                 case 3:
                   data = _context.sent;
@@ -46600,24 +47030,20 @@ var ManifestFetcher = /*#__PURE__*/function () {
   _proto._getBackoffSetting = function _getBackoffSetting(onRetry) {
     var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
         DEFAULT_MAX_MANIFEST_REQUEST_RETRY = _config$getCurrent.DEFAULT_MAX_MANIFEST_REQUEST_RETRY,
-        DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE = _config$getCurrent.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
         INITIAL_BACKOFF_DELAY_BASE = _config$getCurrent.INITIAL_BACKOFF_DELAY_BASE,
         MAX_BACKOFF_DELAY_BASE = _config$getCurrent.MAX_BACKOFF_DELAY_BASE;
 
     var _this$_settings = this._settings,
         lowLatencyMode = _this$_settings.lowLatencyMode,
-        ogRegular = _this$_settings.maxRetryRegular,
-        ogOffline = _this$_settings.maxRetryOffline;
+        ogRegular = _this$_settings.maxRetry;
     var baseDelay = lowLatencyMode ? INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : INITIAL_BACKOFF_DELAY_BASE.REGULAR;
     var maxDelay = lowLatencyMode ? MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : MAX_BACKOFF_DELAY_BASE.REGULAR;
-    var maxRetryRegular = ogRegular !== null && ogRegular !== void 0 ? ogRegular : DEFAULT_MAX_MANIFEST_REQUEST_RETRY;
-    var maxRetryOffline = ogOffline !== null && ogOffline !== void 0 ? ogOffline : DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE;
+    var maxRetry = ogRegular !== null && ogRegular !== void 0 ? ogRegular : DEFAULT_MAX_MANIFEST_REQUEST_RETRY;
     return {
       onRetry: onRetry,
       baseDelay: baseDelay,
       maxDelay: maxDelay,
-      maxRetryRegular: maxRetryRegular,
-      maxRetryOffline: maxRetryOffline
+      maxRetry: maxRetry
     };
   };
 
@@ -46654,1153 +47080,6 @@ function isPromise(val) {
  */
 
 /* harmony default export */ var fetchers_manifest = (ManifestFetcher);
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/prioritized_segment_fetcher.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * This function basically put in relation:
- *   - an `ISegmentFetcher`, which will be used to perform the segment requests
- *   - a prioritizer, which will handle the priority of a segment request
- *
- * and returns functions to fetch segments with a given priority.
- * @param {Object} prioritizer
- * @param {Object} fetcher
- * @returns {Object}
- */
-
-function applyPrioritizerToSegmentFetcher(prioritizer, fetcher) {
-  /** Map returned task to the task as returned by the `ObservablePrioritizer`. */
-  var taskHandlers = new WeakMap();
-  return {
-    /**
-     * Create a Segment request with a given priority.
-     * @param {Object} content - content to request
-     * @param {Number} priority - priority at which the content should be requested.
-     * Lower number == higher priority.
-     * @returns {Observable}
-     */
-    createRequest: function createRequest(content, priority) {
-      if (priority === void 0) {
-        priority = 0;
-      }
-
-      var task = prioritizer.create(fetcher(content), priority);
-      var flattenTask = task.pipe((0,map/* map */.U)(function (evt) {
-        return evt.type === "data" ? evt.value : evt;
-      }));
-      taskHandlers.set(flattenTask, task);
-      return flattenTask;
-    },
-
-    /**
-     * Update the priority of a pending request, created through
-     * `createRequest`.
-     * @param {Observable} observable - The Observable returned by `createRequest`.
-     * @param {Number} priority - The new priority value.
-     */
-    updatePriority: function updatePriority(observable, priority) {
-      var correspondingTask = taskHandlers.get(observable);
-
-      if (correspondingTask === undefined) {
-        log/* default.warn */.Z.warn("Fetchers: Cannot update the priority of a request: task not found.");
-        return;
-      }
-
-      prioritizer.updatePriority(correspondingTask, priority);
-    }
-  };
-}
-// EXTERNAL MODULE: ./src/utils/array_find_index.ts
-var array_find_index = __webpack_require__(5138);
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/prioritizer.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-/**
- * Create Observables which can be priorized between one another.
- *
- * With this class, you can link an Observables to a priority number.
- * The lower this number is, the more priority the resulting Observable will
- * have.
- *
- * Such returned Observables - called "tasks" - will then basically wait for
- * pending task with more priority (i.e. a lower priority number) to finish
- * before "starting".
- *
- * This only applies for non-pending tasks. For pending tasks, those are usually
- * not interrupted except in the following case:
- *
- * When a task with a "high priority" (which is a configurable priority
- * value) is created, pending tasks with a "low priority" (also configurable)
- * will be interrupted. Those tasks will be restarted when all tasks with a
- * higher priority are finished.
- *
- * You can also update the priority of an already-created task.
- *
- * ```js
- * const observable1 = Observable.timer(100).pipe(mapTo(1));
- * const observable2 = Observable.timer(100).pipe(mapTo(2));
- * const observable3 = Observable.timer(100).pipe(mapTo(3));
- * const observable4 = Observable.timer(100).pipe(mapTo(4));
- * const observable5 = Observable.timer(100).pipe(mapTo(5));
- *
- * // Instanciate ObservablePrioritizer.
- * // Also provide a `high` priority step - the maximum priority number a "high
- * // priority task" has and a `low` priority step - the minimum priority number
- * // a "low priority task" has.
- * const prioritizer = new ObservablePrioritizer({
- *   prioritySteps: { high: 0, low: 20 }
- * });
- *
- * const pObservable1 = prioritizer.create(observable1, 4);
- * const pObservable2 = prioritizer.create(observable2, 2);
- * const pObservable3 = prioritizer.create(observable3, 1);
- * const pObservable4 = prioritizer.create(observable4, 3);
- * const pObservable5 = prioritizer.create(observable5, 2);
- *
- * // start every Observables at the same time
- * observableMerge(
- *   pObservable1,
- *   pObservable2,
- *   pObservable3,
- *   pObservable4,
- *   pObservable5
- * ).subscribe((evt) => {
- *   if (evt.type === "data") {
- *     console.log(i);
- *
- *     // To spice things up, update pObservable1 priority to go before
- *     // pObservable4
- *     if (i === 5) { // if pObservable5 is currently emitting
- *       prioritizer.updatePriority(pObservable1, 1);
- *     }
- *   }
- * });
- *
- * // Result:
- * // 3
- * // 2
- * // 5
- * // 1
- * // 4
- *
- * // Note: here "1" goes before "4" only because the former's priority has been
- * // updated before the latter was started.
- * // It would be the other way around if not.
- * ```
- *
- * @class ObservablePrioritizer
- */
-
-var ObservablePrioritizer = /*#__PURE__*/function () {
-  /**
-   * @param {Options} prioritizerOptions
-   */
-  function ObservablePrioritizer(_ref) {
-    var prioritySteps = _ref.prioritySteps;
-    this._minPendingPriority = null;
-    this._waitingQueue = [];
-    this._pendingTasks = [];
-    this._prioritySteps = prioritySteps;
-
-    if (this._prioritySteps.high >= this._prioritySteps.low) {
-      throw new Error("FP Error: the max high level priority should be given a lower" + "priority number than the min low priority.");
-    }
-  }
-  /**
-   * Create a priorized Observable from a base Observable.
-   *
-   * When subscribed to, this Observable will have its priority compared to
-   * all the already-running Observables created from this class.
-   *
-   * Only if this number is inferior or equal to the priority of the
-   * currently-running Observables will it be immediately started.
-   * In the opposite case, we will wait for higher-priority Observables to
-   * finish before starting it.
-   *
-   * Note that while this Observable is waiting for its turn, it is possible
-   * to update its property through the updatePriority method, by providing
-   * the Observable returned by this function and its new priority number.
-   *
-   * @param {Observable} obs
-   * @param {number} priority
-   * @returns {Observable}
-   */
-
-
-  var _proto = ObservablePrioritizer.prototype;
-
-  _proto.create = function create(obs, priority) {
-    var _this = this;
-
-    var pObs$ = new Observable/* Observable */.y(function (subscriber) {
-      var isStillSubscribed = true; // eslint-disable-next-line prefer-const
-
-      var newTask;
-      /**
-       * Function allowing to start / interrupt the underlying Observable.
-       * @param {Boolean} shouldRun - If `true`, the observable can run. If
-       * `false` it means that it just needs to be interrupted if already
-       * starte.
-       */
-
-      var trigger = function trigger(shouldRun) {
-        if (newTask.subscription !== null) {
-          newTask.subscription.unsubscribe();
-          newTask.subscription = null;
-
-          if (isStillSubscribed) {
-            subscriber.next({
-              type: "interrupted"
-            });
-          }
-        }
-
-        if (!shouldRun) {
-          return;
-        }
-
-        _this._minPendingPriority = _this._minPendingPriority === null ? newTask.priority : Math.min(_this._minPendingPriority, newTask.priority);
-
-        _this._pendingTasks.push(newTask);
-
-        newTask.subscription = obs.subscribe({
-          next: function next(evt) {
-            return subscriber.next({
-              type: "data",
-              value: evt
-            });
-          },
-          error: function error(_error) {
-            subscriber.error(_error);
-            newTask.subscription = null;
-            newTask.finished = true;
-
-            _this._onTaskEnd(newTask);
-          },
-          complete: function complete() {
-            subscriber.next({
-              type: "ended"
-            });
-
-            if (isStillSubscribed) {
-              subscriber.complete();
-            }
-
-            newTask.subscription = null;
-            newTask.finished = true;
-
-            _this._onTaskEnd(newTask);
-          }
-        });
-      };
-
-      newTask = {
-        observable: pObs$,
-        priority: priority,
-        trigger: trigger,
-        subscription: null,
-        finished: false
-      };
-
-      if (!_this._canBeStartedNow(newTask)) {
-        _this._waitingQueue.push(newTask);
-      } else {
-        newTask.trigger(true);
-
-        if (_this._isRunningHighPriorityTasks()) {
-          // Note: we want to begin interrupting low-priority tasks just
-          // after starting the current one because the interrupting
-          // logic can call external code.
-          // This would mean re-entrancy, itself meaning that some weird
-          // half-state could be reached unless we're very careful.
-          // To be sure no harm is done, we put that code at the last
-          // possible position (the previous Observable sould be
-          // performing all its initialization synchronously).
-          _this._interruptCancellableTasks();
-        }
-      }
-      /** Callback called when this Observable is unsubscribed to. */
-
-
-      return function () {
-        isStillSubscribed = false;
-
-        if (newTask.subscription !== null) {
-          newTask.subscription.unsubscribe();
-          newTask.subscription = null;
-        }
-
-        if (newTask.finished) {
-          // Task already finished, we're good
-          return;
-        } // remove it from waiting queue if in it
-
-
-        var waitingQueueIndex = (0,array_find_index/* default */.Z)(_this._waitingQueue, function (elt) {
-          return elt.observable === pObs$;
-        });
-
-        if (waitingQueueIndex >= 0) {
-          // If it was still waiting for its turn
-          _this._waitingQueue.splice(waitingQueueIndex, 1);
-        } else {
-          // remove it from pending queue if in it
-          var pendingTasksIndex = (0,array_find_index/* default */.Z)(_this._pendingTasks, function (elt) {
-            return elt.observable === pObs$;
-          });
-
-          if (pendingTasksIndex < 0) {
-            log/* default.warn */.Z.warn("FP: unsubscribing non-existent task");
-            return;
-          }
-
-          var pendingTask = _this._pendingTasks.splice(pendingTasksIndex, 1)[0];
-
-          if (_this._pendingTasks.length === 0) {
-            _this._minPendingPriority = null;
-
-            _this._loopThroughWaitingQueue();
-          } else if (_this._minPendingPriority === pendingTask.priority) {
-            _this._minPendingPriority = Math.min.apply(Math, _this._pendingTasks.map(function (t) {
-              return t.priority;
-            }));
-
-            _this._loopThroughWaitingQueue();
-          }
-        }
-      };
-    });
-    return pObs$;
-  }
-  /**
-   * Update the priority of an Observable created through the `create` method.
-   * @param {Observable} obs
-   * @param {number} priority
-   */
-  ;
-
-  _proto.updatePriority = function updatePriority(obs, priority) {
-    var waitingQueueIndex = (0,array_find_index/* default */.Z)(this._waitingQueue, function (elt) {
-      return elt.observable === obs;
-    });
-
-    if (waitingQueueIndex >= 0) {
-      // If it was still waiting for its turn
-      var waitingQueueElt = this._waitingQueue[waitingQueueIndex];
-
-      if (waitingQueueElt.priority === priority) {
-        return;
-      }
-
-      waitingQueueElt.priority = priority;
-
-      if (!this._canBeStartedNow(waitingQueueElt)) {
-        return;
-      }
-
-      this._startWaitingQueueTask(waitingQueueIndex);
-
-      if (this._isRunningHighPriorityTasks()) {
-        // Re-check to cancel every "cancellable" pending task
-        //
-        // Note: We start the task before interrupting cancellable tasks on
-        // purpose.
-        // Because both `_startWaitingQueueTask` and
-        // `_interruptCancellableTasks` can emit events and thus call external
-        // code, we could retrieve ourselves in a very weird state at this point
-        // (for example, the different Observable priorities could all be
-        // shuffled up, new Observables could have been started in the
-        // meantime, etc.).
-        //
-        // By starting the task first, we ensure that this is manageable:
-        // `_minPendingPriority` has already been updated to the right value at
-        // the time we reached external code, the priority of the current
-        // Observable has just been updated, and `_interruptCancellableTasks`
-        // will ensure that we're basing ourselves on the last `priority` value
-        // each time.
-        // Doing it in the reverse order is an order of magnitude more difficult
-        // to write and to reason about.
-        this._interruptCancellableTasks();
-      }
-
-      return;
-    }
-
-    var pendingTasksIndex = (0,array_find_index/* default */.Z)(this._pendingTasks, function (elt) {
-      return elt.observable === obs;
-    });
-
-    if (pendingTasksIndex < 0) {
-      log/* default.warn */.Z.warn("FP: request to update the priority of a non-existent task");
-      return;
-    }
-
-    var task = this._pendingTasks[pendingTasksIndex];
-
-    if (task.priority === priority) {
-      return;
-    }
-
-    var prevPriority = task.priority;
-    task.priority = priority;
-
-    if (this._minPendingPriority === null || priority < this._minPendingPriority) {
-      this._minPendingPriority = priority;
-    } else if (this._minPendingPriority === prevPriority) {
-      // was highest priority
-      if (this._pendingTasks.length === 1) {
-        this._minPendingPriority = priority;
-      } else {
-        this._minPendingPriority = Math.min.apply(Math, this._pendingTasks.map(function (t) {
-          return t.priority;
-        }));
-      }
-
-      this._loopThroughWaitingQueue();
-    } else {
-      // We updated a task which already had a priority value higher than the
-      // minimum to a value still superior to the minimum. Nothing can happen.
-      return;
-    }
-
-    if (this._isRunningHighPriorityTasks()) {
-      // Always interrupt cancellable tasks after all other side-effects, to
-      // avoid re-entrancy issues
-      this._interruptCancellableTasks();
-    }
-  }
-  /**
-   * Browse the current waiting queue and start all task in it that needs to be
-   * started: start the ones with the lowest priority value below
-   * `_minPendingPriority`.
-   *
-   * Private properties, such as `_minPendingPriority` are updated accordingly
-   * while this method is called.
-   */
-  ;
-
-  _proto._loopThroughWaitingQueue = function _loopThroughWaitingQueue() {
-    var minWaitingPriority = this._waitingQueue.reduce(function (acc, elt) {
-      return acc === null || acc > elt.priority ? elt.priority : acc;
-    }, null);
-
-    if (minWaitingPriority === null || this._minPendingPriority !== null && this._minPendingPriority < minWaitingPriority) {
-      return;
-    }
-
-    for (var i = 0; i < this._waitingQueue.length; i++) {
-      var priorityToCheck = this._minPendingPriority === null ? minWaitingPriority : Math.min(this._minPendingPriority, minWaitingPriority);
-      var elt = this._waitingQueue[i];
-
-      if (elt.priority <= priorityToCheck) {
-        this._startWaitingQueueTask(i);
-
-        i--; // previous operation should have removed that element from the
-        // the waiting queue
-      }
-    }
-  }
-  /**
-   * Interrupt and move back to the waiting queue all pending tasks that are
-   * low priority (having a higher priority number than
-   * `this._prioritySteps.low`).
-   */
-  ;
-
-  _proto._interruptCancellableTasks = function _interruptCancellableTasks() {
-    for (var i = 0; i < this._pendingTasks.length; i++) {
-      var pendingObj = this._pendingTasks[i];
-
-      if (pendingObj.priority >= this._prioritySteps.low) {
-        this._interruptPendingTask(pendingObj); // The previous call could have a lot of potential side-effects.
-        // It is safer to re-start the function to not miss any pending
-        // task that needs to be cancelled.
-
-
-        return this._interruptCancellableTasks();
-      }
-    }
-  }
-  /**
-   * Start task which is at the given index in the waiting queue.
-   * The task will be removed from the waiting queue in the process.
-   * @param {number} index
-   */
-  ;
-
-  _proto._startWaitingQueueTask = function _startWaitingQueueTask(index) {
-    var task = this._waitingQueue.splice(index, 1)[0];
-
-    task.trigger(true);
-  }
-  /**
-   * Move back pending task to the waiting queue and interrupt it.
-   * @param {object} task
-   */
-  ;
-
-  _proto._interruptPendingTask = function _interruptPendingTask(task) {
-    var pendingTasksIndex = (0,array_find_index/* default */.Z)(this._pendingTasks, function (elt) {
-      return elt.observable === task.observable;
-    });
-
-    if (pendingTasksIndex < 0) {
-      log/* default.warn */.Z.warn("FP: Interrupting a non-existent pending task. Aborting...");
-      return;
-    } // Stop task and put it back in the waiting queue
-
-
-    this._pendingTasks.splice(pendingTasksIndex, 1);
-
-    this._waitingQueue.push(task);
-
-    if (this._pendingTasks.length === 0) {
-      this._minPendingPriority = null;
-    } else if (this._minPendingPriority === task.priority) {
-      this._minPendingPriority = Math.min.apply(Math, this._pendingTasks.map(function (t) {
-        return t.priority;
-      }));
-    }
-
-    task.trigger(false); // Interrupt at last step because it calls external code
-  }
-  /**
-   * Logic ran when a task has ended (either errored or completed).
-   * @param {Object} task
-   */
-  ;
-
-  _proto._onTaskEnd = function _onTaskEnd(task) {
-    var pendingTasksIndex = (0,array_find_index/* default */.Z)(this._pendingTasks, function (elt) {
-      return elt.observable === task.observable;
-    });
-
-    if (pendingTasksIndex < 0) {
-      return; // Happen for example when the task has been interrupted
-    }
-
-    this._pendingTasks.splice(pendingTasksIndex, 1);
-
-    if (this._pendingTasks.length > 0) {
-      if (this._minPendingPriority === task.priority) {
-        this._minPendingPriority = Math.min.apply(Math, this._pendingTasks.map(function (t) {
-          return t.priority;
-        }));
-      }
-
-      return; // still waiting for Observables to finish
-    }
-
-    this._minPendingPriority = null;
-
-    this._loopThroughWaitingQueue();
-  }
-  /**
-   * Return `true` if the given task can be started immediately based on its
-   * priority.
-   * @param {Object} task
-   * @returns {boolean}
-   */
-  ;
-
-  _proto._canBeStartedNow = function _canBeStartedNow(task) {
-    return this._minPendingPriority === null || task.priority <= this._minPendingPriority;
-  }
-  /**
-   * Returns `true` if any running task is considered "high priority".
-   * returns `false` otherwise.
-   * @param {Object} task
-   * @returns {boolean}
-   */
-  ;
-
-  _proto._isRunningHighPriorityTasks = function _isRunningHighPriorityTasks() {
-    return this._minPendingPriority !== null && this._minPendingPriority <= this._prioritySteps.high;
-  };
-
-  return ObservablePrioritizer;
-}();
-
-
-// EXTERNAL MODULE: ./src/manifest/utils.ts
-var utils = __webpack_require__(520);
-// EXTERNAL MODULE: ./src/utils/array_includes.ts
-var array_includes = __webpack_require__(7714);
-// EXTERNAL MODULE: ./src/utils/id_generator.ts
-var id_generator = __webpack_require__(908);
-;// CONCATENATED MODULE: ./src/utils/initialization_segment_cache.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Caching object used to cache initialization segments.
- * This allow to have a faster representation switch and faster seeking.
- * @class InitializationSegmentCache
- */
-var InitializationSegmentCache = /*#__PURE__*/function () {
-  function InitializationSegmentCache() {
-    this._cache = new WeakMap();
-  }
-  /**
-   * @param {Object} obj
-   * @param {*} response
-   */
-
-
-  var _proto = InitializationSegmentCache.prototype;
-
-  _proto.add = function add(_ref, response) {
-    var representation = _ref.representation,
-        segment = _ref.segment;
-
-    if (segment.isInit) {
-      this._cache.set(representation, response);
-    }
-  }
-  /**
-   * @param {Object} obj
-   * @returns {*} response
-   */
-  ;
-
-  _proto.get = function get(_ref2) {
-    var representation = _ref2.representation,
-        segment = _ref2.segment;
-
-    if (segment.isInit) {
-      var value = this._cache.get(representation);
-
-      if (value !== undefined) {
-        return value;
-      }
-    }
-
-    return null;
-  };
-
-  return InitializationSegmentCache;
-}();
-
-/* harmony default export */ var initialization_segment_cache = (InitializationSegmentCache);
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/segment_fetcher.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-
-
-
-
-
-
-
-
-
-var generateRequestID = (0,id_generator/* default */.Z)();
-/**
- * Create an `ISegmentFetcher` object which will allow to easily fetch and parse
- * segments.
- * An `ISegmentFetcher` also implements a retry mechanism, based on the given
- * `options` argument, which may retry a segment request when it fails.
- *
- * @param {string} bufferType
- * @param {Object} pipeline
- * @param {Object} callbacks
- * @param {Object} options
- * @returns {Function}
- */
-
-function segment_fetcher_createSegmentFetcher(bufferType, pipeline, callbacks, options) {
-  /**
-   * Cache audio and video initialization segments.
-   * This allows to avoid doing too many requests for what are usually very
-   * small files.
-   */
-  var cache = (0,array_includes/* default */.Z)(["audio", "video"], bufferType) ? new initialization_segment_cache() : undefined;
-  var loadSegment = pipeline.loadSegment,
-      parseSegment = pipeline.parseSegment;
-  /**
-   * Fetch a specific segment.
-   *
-   * This function returns an Observable which will fetch segments on
-   * subscription.
-   * If the corresponding request fails, it may retry it based on the given
-   * options.
-   *
-   * This Observable will emit various events during that request lifecycle and
-   * throw if the segment request(s) (including potential retries) fail.
-   * The Observable will automatically complete once no events are left to be
-   * sent.
-   * @param {Object} content
-   * @returns {Observable}
-   */
-
-  return function fetchSegment(content) {
-    var segment = content.segment,
-        adaptation = content.adaptation,
-        representation = content.representation,
-        manifest = content.manifest,
-        period = content.period; // used by logs
-
-    var segmentIdString = (0,utils/* getLoggableSegmentId */.K)(content);
-    return new Observable/* Observable */.y(function (obs) {
-      var _a, _b;
-
-      var requestId = generateRequestID();
-      var canceller = new task_canceller/* default */.ZP();
-      /**
-       * If the request succeeded, set to the corresponding
-       * `IChunkCompleteInformation` object.
-       * For any other completion cases: if the request either failed, was
-       * cancelled or just if no request was needed, set to `null`.
-       *
-       * Stays to `undefined` when the request is still pending.
-       */
-
-      var requestInfo;
-      /**
-       * Array containing one entry per loaded chunk, in chronological order.
-       * The boolean indicates if the chunk has been parsed at least once.
-       *
-       * This is used to know when all loaded chunks have been parsed, which
-       * can be useful to e.g. construct metrics about the loaded segment.
-       */
-
-      var parsedChunks = [];
-      /**
-       * Addition of the duration of each encountered and parsed chunks.
-       * Allows to have an idea of the real duration of the full segment once
-       * all chunks have been parsed.
-       *
-       * `undefined` if at least one of the parsed chunks has unknown duration.
-       */
-
-      var segmentDurationAcc = 0;
-      /** Set to `true` once network metrics have been sent. */
-
-      var metricsSent = false;
-      var loaderCallbacks = {
-        /**
-         * Callback called when the segment loader has progress information on
-         * the request.
-         * @param {Object} info
-         */
-        onProgress: function onProgress(info) {
-          var _a;
-
-          if (requestInfo !== undefined) {
-            return; // Request already terminated
-          }
-
-          if (info.totalSize !== undefined && info.size < info.totalSize) {
-            (_a = callbacks.onProgress) === null || _a === void 0 ? void 0 : _a.call(callbacks, {
-              duration: info.duration,
-              size: info.size,
-              totalSize: info.totalSize,
-              timestamp: performance.now(),
-              id: requestId
-            });
-          }
-        },
-
-        /**
-         * Callback called when the segment is communicated by the loader
-         * through decodable sub-segment(s) called chunk(s), with a chunk in
-         * argument.
-         * @param {*} chunkData
-         */
-        onNewChunk: function onNewChunk(chunkData) {
-          obs.next({
-            type: "chunk",
-            parse: generateParserFunction(chunkData, true)
-          });
-        }
-      };
-      /** Segment context given to the transport pipelines. */
-
-      var context = {
-        segment: segment,
-        type: adaptation.type,
-        language: adaptation.language,
-        isLive: manifest.isLive,
-        periodStart: period.start,
-        periodEnd: period.end,
-        mimeType: representation.mimeType,
-        codecs: representation.codec,
-        manifestPublishTime: manifest.publishTime
-      }; // Retrieve from cache if it exists
-
-      var cached = cache !== undefined ? cache.get(content) : null;
-
-      if (cached !== null) {
-        log/* default.debug */.Z.debug("SF: Found wanted segment in cache", segmentIdString);
-        obs.next({
-          type: "chunk",
-          parse: generateParserFunction(cached, false)
-        });
-        obs.next({
-          type: "chunk-complete"
-        });
-        obs.complete();
-        return undefined;
-      }
-
-      log/* default.debug */.Z.debug("SF: Beginning request", segmentIdString);
-      (_a = callbacks.onRequestBegin) === null || _a === void 0 ? void 0 : _a.call(callbacks, {
-        requestTimestamp: performance.now(),
-        id: requestId,
-        content: content
-      });
-      tryURLsWithBackoff((_b = segment.mediaURLs) !== null && _b !== void 0 ? _b : [null], callLoaderWithUrl, (0,object_assign/* default */.Z)({
-        onRetry: onRetry
-      }, options), canceller.signal).then(function (res) {
-        var _a;
-
-        log/* default.debug */.Z.debug("SF: Segment request ended with success", segmentIdString);
-
-        if (res.resultType === "segment-loaded") {
-          var loadedData = res.resultData.responseData;
-
-          if (cache !== undefined) {
-            cache.add(content, res.resultData.responseData);
-          }
-
-          obs.next({
-            type: "chunk",
-            parse: generateParserFunction(loadedData, false)
-          });
-        } else if (res.resultType === "segment-created") {
-          obs.next({
-            type: "chunk",
-            parse: generateParserFunction(res.resultData, false)
-          });
-        }
-
-        log/* default.debug */.Z.debug("SF: Segment request ended with success", segmentIdString);
-        obs.next({
-          type: "chunk-complete"
-        });
-
-        if (res.resultType !== "segment-created") {
-          requestInfo = res.resultData;
-          sendNetworkMetricsIfAvailable();
-        } else {
-          requestInfo = null;
-        }
-
-        if (!canceller.isUsed) {
-          // The current Observable could have been canceled as a result of one
-          // of the previous `next` calls. In that case, we don't want to send
-          // a "requestEnd" again as it has already been sent on cancellation.
-          //
-          // Note that we only perform this check for `onRequestEnd` on
-          // purpose. Observable's events should have been ignored by RxJS if
-          // the Observable has already been canceled and we don't care if
-          // `"metrics"` is sent there.
-          (_a = callbacks.onRequestEnd) === null || _a === void 0 ? void 0 : _a.call(callbacks, {
-            id: requestId
-          });
-        }
-
-        obs.complete();
-      })["catch"](function (err) {
-        log/* default.debug */.Z.debug("SF: Segment request failed", segmentIdString);
-        requestInfo = null;
-        obs.error(errorSelector(err));
-      });
-      return function () {
-        var _a;
-
-        if (requestInfo !== undefined) {
-          return; // Request already terminated
-        }
-
-        log/* default.debug */.Z.debug("SF: Segment request cancelled", segmentIdString);
-        requestInfo = null;
-        canceller.cancel();
-        (_a = callbacks.onRequestEnd) === null || _a === void 0 ? void 0 : _a.call(callbacks, {
-          id: requestId
-        });
-      };
-      /**
-       * Call a segment loader for the given URL with the right arguments.
-       * @param {string|null} url
-       * @param {Object} cancellationSignal
-       * @returns {Promise}
-       */
-
-      function callLoaderWithUrl(url, cancellationSignal) {
-        return loadSegment(url, context, cancellationSignal, loaderCallbacks);
-      }
-      /**
-       * Generate function allowing to parse a loaded segment.
-       * @param {*} data
-       * @param {Boolean} isChunked
-       * @returns {Function}
-       */
-
-
-      function generateParserFunction(data, isChunked) {
-        parsedChunks.push(false);
-        var parsedChunkId = parsedChunks.length - 1;
-        return function parse(initTimescale) {
-          var loaded = {
-            data: data,
-            isChunked: isChunked
-          };
-
-          try {
-            var parsed = parseSegment(loaded, context, initTimescale);
-
-            if (!parsedChunks[parsedChunkId]) {
-              segmentDurationAcc = segmentDurationAcc !== undefined && parsed.segmentType === "media" && parsed.chunkInfos !== null && parsed.chunkInfos.duration !== undefined ? segmentDurationAcc + parsed.chunkInfos.duration : undefined;
-              parsedChunks[parsedChunkId] = true;
-              sendNetworkMetricsIfAvailable();
-            }
-
-            return parsed;
-          } catch (error) {
-            throw (0,format_error/* default */.Z)(error, {
-              defaultCode: "PIPELINE_PARSE_ERROR",
-              defaultReason: "Unknown parsing error"
-            });
-          }
-        };
-      }
-      /**
-       * Function called when the function request is retried.
-       * @param {*} err
-       */
-
-
-      function onRetry(err) {
-        obs.next({
-          type: "retry",
-          value: errorSelector(err)
-        });
-      }
-      /**
-       * Send netork metrics if they haven't yet been sent and if all data to
-       * define them is available.
-       */
-
-
-      function sendNetworkMetricsIfAvailable() {
-        var _a;
-
-        if (metricsSent) {
-          return;
-        }
-
-        if (!(0,is_null_or_undefined/* default */.Z)(requestInfo) && requestInfo.size !== undefined && requestInfo.requestDuration !== undefined && parsedChunks.length > 0 && parsedChunks.every(function (isParsed) {
-          return isParsed;
-        })) {
-          metricsSent = true;
-          (_a = callbacks.onMetrics) === null || _a === void 0 ? void 0 : _a.call(callbacks, {
-            size: requestInfo.size,
-            requestDuration: requestInfo.requestDuration,
-            content: content,
-            segmentDuration: segmentDurationAcc
-          });
-        }
-      }
-    });
-  };
-}
-/**
- * @param {string} bufferType
- * @param {Object}
- * @returns {Object}
- */
-
-function getSegmentFetcherOptions(_ref) {
-  var maxRetryRegular = _ref.maxRetryRegular,
-      maxRetryOffline = _ref.maxRetryOffline,
-      lowLatencyMode = _ref.lowLatencyMode;
-
-  var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
-      DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR = _config$getCurrent.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
-      DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE = _config$getCurrent.DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
-      INITIAL_BACKOFF_DELAY_BASE = _config$getCurrent.INITIAL_BACKOFF_DELAY_BASE,
-      MAX_BACKOFF_DELAY_BASE = _config$getCurrent.MAX_BACKOFF_DELAY_BASE;
-
-  return {
-    maxRetryRegular: maxRetryRegular !== null && maxRetryRegular !== void 0 ? maxRetryRegular : DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
-    maxRetryOffline: maxRetryOffline !== null && maxRetryOffline !== void 0 ? maxRetryOffline : DEFAULT_MAX_REQUESTS_RETRY_ON_OFFLINE,
-    baseDelay: lowLatencyMode ? INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : INITIAL_BACKOFF_DELAY_BASE.REGULAR,
-    maxDelay: lowLatencyMode ? MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : MAX_BACKOFF_DELAY_BASE.REGULAR
-  };
-}
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/segment_fetcher_creator.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-
-
-/**
- * Interact with the transport pipelines to download segments with the right
- * priority.
- *
- * @class SegmentFetcherCreator
- *
- * @example
- * ```js
- * const creator = new SegmentFetcherCreator(transport, {
- *   lowLatencyMode: false,
- *   maxRetryRegular: Infinity,
- *   maxRetryOffline: Infinity,
- * });
- *
- * // 2 - create a new fetcher with its backoff options
- * const fetcher = creator.createSegmentFetcher("audio", {
- *   // ... (lifecycle callbacks if wanted)
- * });
- *
- * // 3 - load a segment with a given priority
- * fetcher.createRequest(myContent, 1)
- *   // 4 - parse it
- *   .pipe(
- *     filter(evt => evt.type === "chunk"),
- *     mergeMap(response => response.parse());
- *   )
- *   // 5 - use it
- *   .subscribe((res) => console.log("audio chunk downloaded:", res));
- * ```
- */
-
-var SegmentFetcherCreator = /*#__PURE__*/function () {
-  /**
-   * @param {Object} transport
-   */
-  function SegmentFetcherCreator(transport, options) {
-    var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
-        MIN_CANCELABLE_PRIORITY = _config$getCurrent.MIN_CANCELABLE_PRIORITY,
-        MAX_HIGH_PRIORITY_LEVEL = _config$getCurrent.MAX_HIGH_PRIORITY_LEVEL;
-
-    this._transport = transport;
-    this._prioritizer = new ObservablePrioritizer({
-      prioritySteps: {
-        high: MAX_HIGH_PRIORITY_LEVEL,
-        low: MIN_CANCELABLE_PRIORITY
-      }
-    });
-    this._backoffOptions = options;
-  }
-  /**
-   * Create a segment fetcher, allowing to easily perform segment requests.
-   * @param {string} bufferType - The type of buffer concerned (e.g. "audio",
-   * "video", etc.)
-   * @param {Object} callbacks
-   * @returns {Object}
-   */
-
-
-  var _proto = SegmentFetcherCreator.prototype;
-
-  _proto.createSegmentFetcher = function createSegmentFetcher(bufferType, callbacks) {
-    var backoffOptions = getSegmentFetcherOptions(this._backoffOptions);
-    var pipelines = this._transport[bufferType]; // Types are very complicated here as they are per-type of buffer.
-
-    var segmentFetcher = segment_fetcher_createSegmentFetcher(bufferType, pipelines, callbacks, backoffOptions);
-
-    return applyPrioritizerToSegmentFetcher(this._prioritizer, segmentFetcher);
-  };
-
-  return SegmentFetcherCreator;
-}();
-
-
-;// CONCATENATED MODULE: ./src/core/fetchers/segment/index.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/* harmony default export */ var segment = (SegmentFetcherCreator);
 ;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/finalize.js
 
 function finalize(callback) {
@@ -47850,10 +47129,10 @@ function shouldReloadMediaSourceOnDecipherabilityUpdate(currentKeySystem) {
 var defer_subscriptions = __webpack_require__(8333);
 // EXTERNAL MODULE: ./src/utils/filter_map.ts
 var filter_map = __webpack_require__(2793);
-// EXTERNAL MODULE: ./src/utils/noop.ts
-var noop = __webpack_require__(8894);
 // EXTERNAL MODULE: ./src/utils/take_first_set.ts
 var take_first_set = __webpack_require__(5278);
+// EXTERNAL MODULE: ./src/utils/array_find_index.ts
+var array_find_index = __webpack_require__(5138);
 ;// CONCATENATED MODULE: ./src/core/adaptive/utils/get_buffer_levels.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -49262,19 +48541,12 @@ var RepresentationScoreCalculator = /*#__PURE__*/function () {
  * bitrates.
  * @param {Array.<Representation>} representations - The representations array,
  * sorted in bitrate ascending order.
- * @param {Number} optimalBitrate - The optimal bitrate the Representation
+ * @param {Number} wantedBitrate - The optimal bitrate the Representation
  * should have under the current condition.
- * @param {Number} minBitrate - The minimum bitrate the chosen Representation
- * should have. We will take the Representation with the maximum bitrate if none
- * is found.
- * @param {Number} maxBitrate - The maximum bitrate the chosen Representation
- * should have. We will take the Representation with the minimum bitrate if none
- * is found.
  * @returns {Representation|undefined}
  */
 
-function selectOptimalRepresentation(representations, optimalBitrate, minBitrate, maxBitrate) {
-  var wantedBitrate = optimalBitrate <= minBitrate ? minBitrate : optimalBitrate >= maxBitrate ? maxBitrate : optimalBitrate;
+function selectOptimalRepresentation(representations, wantedBitrate) {
   var firstIndexTooHigh = (0,array_find_index/* default */.Z)(representations, function (representation) {
     return representation.bitrate > wantedBitrate;
   });
@@ -49334,10 +48606,7 @@ function createAdaptiveRepresentationSelector(options) {
    * One per active media type.
    */
   var bandwidthEstimators = {};
-  var manualBitrates = options.manualBitrates,
-      minAutoBitrates = options.minAutoBitrates,
-      maxAutoBitrates = options.maxAutoBitrates,
-      initialBitrates = options.initialBitrates,
+  var initialBitrates = options.initialBitrates,
       throttlers = options.throttlers,
       lowLatencyMode = options.lowLatencyMode;
   /**
@@ -49358,9 +48627,6 @@ function createAdaptiveRepresentationSelector(options) {
 
     var bandwidthEstimator = _getBandwidthEstimator(type);
 
-    var manualBitrate = (0,take_first_set/* default */.Z)(manualBitrates[type], (0,utils_reference/* default */.ZP)(-1));
-    var minAutoBitrate = (0,take_first_set/* default */.Z)(minAutoBitrates[type], (0,utils_reference/* default */.ZP)(0));
-    var maxAutoBitrate = (0,take_first_set/* default */.Z)(maxAutoBitrates[type], (0,utils_reference/* default */.ZP)(Infinity));
     var initialBitrate = (0,take_first_set/* default */.Z)(initialBitrates[type], 0);
     var filters = {
       limitWidth: (0,take_first_set/* default */.Z)(throttlers.limitWidth[type], (0,utils_reference/* default */.ZP)(undefined)),
@@ -49372,9 +48638,6 @@ function createAdaptiveRepresentationSelector(options) {
       currentRepresentation: currentRepresentation,
       filters: filters,
       initialBitrate: initialBitrate,
-      manualBitrate: manualBitrate,
-      minAutoBitrate: minAutoBitrate,
-      maxAutoBitrate: maxAutoBitrate,
       playbackObserver: playbackObserver,
       representations: representations,
       lowLatencyMode: lowLatencyMode
@@ -49426,9 +48689,6 @@ function getEstimateReference(_ref, stopAllEstimates) {
       filters = _ref.filters,
       initialBitrate = _ref.initialBitrate,
       lowLatencyMode = _ref.lowLatencyMode,
-      manualBitrate = _ref.manualBitrate,
-      maxAutoBitrate = _ref.maxAutoBitrate,
-      minAutoBitrate = _ref.minAutoBitrate,
       playbackObserver = _ref.playbackObserver,
       representationsRef = _ref.representations;
   var scoreCalculator = new RepresentationScoreCalculator();
@@ -49454,10 +48714,7 @@ function getEstimateReference(_ref, stopAllEstimates) {
     cancelOn: stopAllEstimates
   }); // Create `ISharedReference` on which estimates will be emitted.
 
-  var estimateRef = createEstimateReference(manualBitrate.getValue(), representationsRef.getValue(), currentEstimatesCanceller.signal);
-  manualBitrate.onUpdate(restartEstimatesProductionFromCurrentConditions, {
-    clearSignal: stopAllEstimates
-  });
+  var estimateRef = createEstimateReference(representationsRef.getValue(), currentEstimatesCanceller.signal);
   representationsRef.onUpdate(restartEstimatesProductionFromCurrentConditions, {
     clearSignal: stopAllEstimates
   });
@@ -49466,26 +48723,12 @@ function getEstimateReference(_ref, stopAllEstimates) {
     callbacks: callbacks
   };
 
-  function createEstimateReference(manualBitrateVal, representations, innerCancellationSignal) {
-    if (manualBitrateVal >= 0) {
-      // A manual bitrate has been set. Just choose Representation according to it.
-      var manualRepresentation = selectOptimalRepresentation(representations, manualBitrateVal, 0, Infinity);
-      return (0,utils_reference/* default */.ZP)({
-        representation: manualRepresentation,
-        bitrate: undefined,
-        knownStableBitrate: undefined,
-        manual: true,
-        urgent: true // a manual bitrate switch should happen immediately
-
-      });
-    }
-
+  function createEstimateReference(representations, innerCancellationSignal) {
     if (representations.length === 1) {
       // There's only a single Representation. Just choose it.
       return (0,utils_reference/* default */.ZP)({
         bitrate: undefined,
         representation: representations[0],
-        manual: false,
         urgent: true,
         knownStableBitrate: undefined
       });
@@ -49561,12 +48804,6 @@ function getEstimateReference(_ref, stopAllEstimates) {
     innerCancellationSignal.register(function () {
       onAddedSegment = noop/* default */.Z;
     });
-    minAutoBitrate.onUpdate(updateEstimate, {
-      clearSignal: innerCancellationSignal
-    });
-    maxAutoBitrate.onUpdate(updateEstimate, {
-      clearSignal: innerCancellationSignal
-    });
     filters.limitWidth.onUpdate(updateEstimate, {
       clearSignal: innerCancellationSignal
     });
@@ -49589,8 +48826,6 @@ function getEstimateReference(_ref, stopAllEstimates) {
       var widthLimit = filters.limitWidth.getValue();
       var bitrateThrottle = filters.throttleBitrate.getValue();
       var currentRepresentationVal = currentRepresentation.getValue();
-      var minAutoBitrateVal = minAutoBitrate.getValue();
-      var maxAutoBitrateVal = maxAutoBitrate.getValue();
       var filteredReps = getFilteredRepresentations(representations, widthLimit, bitrateThrottle);
       var requests = requestsStore.getRequests();
 
@@ -49614,7 +48849,7 @@ function getEstimateReference(_ref, stopAllEstimates) {
        */
 
 
-      var chosenRepFromBandwidth = selectOptimalRepresentation(filteredReps, bitrateChosen, minAutoBitrateVal, maxAutoBitrateVal);
+      var chosenRepFromBandwidth = selectOptimalRepresentation(filteredReps, bitrateChosen);
       var currentBestBitrate = chosenRepFromBandwidth.bitrate;
       /**
        * Representation chosen when considering the current buffer size.
@@ -49630,7 +48865,7 @@ function getEstimateReference(_ref, stopAllEstimates) {
       var chosenRepFromBufferSize = null;
 
       if (allowBufferBasedEstimates && currentBufferBasedEstimate !== undefined && currentBufferBasedEstimate > currentBestBitrate) {
-        chosenRepFromBufferSize = selectOptimalRepresentation(filteredReps, currentBufferBasedEstimate, minAutoBitrateVal, maxAutoBitrateVal);
+        chosenRepFromBufferSize = selectOptimalRepresentation(filteredReps, currentBufferBasedEstimate);
         currentBestBitrate = chosenRepFromBufferSize.bitrate;
       }
       /**
@@ -49665,7 +48900,6 @@ function getEstimateReference(_ref, stopAllEstimates) {
           bitrate: bandwidthEstimate,
           representation: chosenRepFromGuessMode,
           urgent: currentRepresentationVal === null || chosenRepFromGuessMode.bitrate < currentRepresentationVal.bitrate,
-          manual: false,
           knownStableBitrate: knownStableBitrate
         };
       } else if (chosenRepFromBufferSize !== null) {
@@ -49677,7 +48911,6 @@ function getEstimateReference(_ref, stopAllEstimates) {
           bitrate: bandwidthEstimate,
           representation: chosenRepFromBufferSize,
           urgent: networkAnalyzer.isUrgent(chosenRepFromBufferSize.bitrate, currentRepresentationVal, requests, lastPlaybackObservation),
-          manual: false,
           knownStableBitrate: knownStableBitrate
         };
       } else {
@@ -49689,7 +48922,6 @@ function getEstimateReference(_ref, stopAllEstimates) {
           bitrate: bandwidthEstimate,
           representation: chosenRepFromBandwidth,
           urgent: networkAnalyzer.isUrgent(chosenRepFromBandwidth.bitrate, currentRepresentationVal, requests, lastPlaybackObservation),
-          manual: false,
           knownStableBitrate: knownStableBitrate
         };
       }
@@ -49697,18 +48929,17 @@ function getEstimateReference(_ref, stopAllEstimates) {
   }
   /**
    * Stop previous estimate production (if one) and restart it considering new
-   * conditions (such as a manual bitrate and/or a new list of Representations).
+   * conditions (such as a new list of Representations).
    */
 
 
   function restartEstimatesProductionFromCurrentConditions() {
-    var manualBitrateVal = manualBitrate.getValue();
     var representations = representationsRef.getValue();
     currentEstimatesCanceller.cancel();
     currentEstimatesCanceller = new task_canceller/* default */.ZP({
       cancelOn: stopAllEstimates
     });
-    var newRef = createEstimateReference(manualBitrateVal, representations, currentEstimatesCanceller.signal);
+    var newRef = createEstimateReference(representations, currentEstimatesCanceller.signal);
     newRef.onUpdate(function onNewEstimate(newEstimate) {
       estimateRef.setValue(newEstimate);
     }, {
@@ -49802,6 +49033,1218 @@ function getFilteredRepresentations(representations, widthLimit, bitrateThrottle
  */
 
 /* harmony default export */ var adaptive = (createAdaptiveRepresentationSelector);
+;// CONCATENATED MODULE: ./src/core/fetchers/cdn_prioritizer.ts
+
+
+function cdn_prioritizer_createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = cdn_prioritizer_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function cdn_prioritizer_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return cdn_prioritizer_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return cdn_prioritizer_arrayLikeToArray(o, minLen); }
+
+function cdn_prioritizer_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+/**
+ * Class signaling the priority between multiple CDN available for any given
+ * resource.
+ *
+ * This class might perform requests and schedule timeouts by itself to keep its
+ * internal list of CDN priority up-to-date.
+ * When it is not needed anymore, you should call the `dispose` method to clear
+ * all resources.
+ *
+ * @class CdnPrioritizer
+ */
+
+var CdnPrioritizer = /*#__PURE__*/function (_EventEmitter) {
+  (0,inheritsLoose/* default */.Z)(CdnPrioritizer, _EventEmitter);
+
+  /**
+   * @param {Object} destroySignal
+   */
+  function CdnPrioritizer(destroySignal) {
+    var _this;
+
+    _this = _EventEmitter.call(this) || this;
+    _this._downgradedCdnList = {
+      metadata: [],
+      timeouts: []
+    };
+    destroySignal.register(function () {
+      for (var _iterator = cdn_prioritizer_createForOfIteratorHelperLoose(_this._downgradedCdnList.timeouts), _step; !(_step = _iterator()).done;) {
+        var timeout = _step.value;
+        clearTimeout(timeout);
+      }
+
+      _this._downgradedCdnList = {
+        metadata: [],
+        timeouts: []
+      };
+    });
+    return _this;
+  }
+  /**
+   * From the list of __ALL__ CDNs available to a resource, return them in the
+   * order in which requests should be performed.
+   *
+   * Note: It is VERY important to include all CDN that are able to reach the
+   * wanted resource, even those which will in the end not be used anyway.
+   * If some CDN are not communicated, the `CdnPrioritizer` might wrongly
+   * consider that the current resource don't have any of the CDN prioritized
+   * internally and return other CDN which should have been forbidden if it knew
+   * about the other, non-used, ones.
+   *
+   * @param {Array.<string>} everyCdnForResource - Array of ALL available CDN
+   * able to reach the wanted resource - even those which might not be used in
+   * the end.
+   * @returns {Array.<Object>} - Array of CDN that can be tried to reach the
+   * resource, sorted by order of CDN preference, according to the
+   * `CdnPrioritizer`'s own list of priorities.
+   */
+
+
+  var _proto = CdnPrioritizer.prototype;
+
+  _proto.getCdnPreferenceForResource = function getCdnPreferenceForResource(everyCdnForResource) {
+    if (everyCdnForResource.length <= 1) {
+      // The huge majority of contents have only one CDN available.
+      // Here, prioritizing make no sense.
+      return everyCdnForResource;
+    }
+
+    return this._innerGetCdnPreferenceForResource(everyCdnForResource);
+  }
+  /**
+   * Limit usage of the CDN for a configured amount of time.
+   * Call this method if you encountered an issue with that CDN which leads you
+   * to want to prevent its usage currently.
+   *
+   * Note that the CDN can still be the preferred one if no other CDN exist for
+   * a wanted resource.
+   * @param {string} metadata
+   */
+  ;
+
+  _proto.downgradeCdn = function downgradeCdn(metadata) {
+    var _this2 = this;
+
+    var indexOf = indexOfMetadata(this._downgradedCdnList.metadata, metadata);
+
+    if (indexOf >= 0) {
+      this._removeIndexFromDowngradeList(indexOf);
+    }
+
+    var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
+        DEFAULT_CDN_DOWNGRADE_TIME = _config$getCurrent.DEFAULT_CDN_DOWNGRADE_TIME;
+
+    var downgradeTime = DEFAULT_CDN_DOWNGRADE_TIME;
+
+    this._downgradedCdnList.metadata.push(metadata);
+
+    var timeout = window.setTimeout(function () {
+      var newIndex = indexOfMetadata(_this2._downgradedCdnList.metadata, metadata);
+
+      if (newIndex >= 0) {
+        _this2._removeIndexFromDowngradeList(newIndex);
+      }
+
+      _this2.trigger("priorityChange", null);
+    }, downgradeTime);
+
+    this._downgradedCdnList.timeouts.push(timeout);
+
+    this.trigger("priorityChange", null);
+  }
+  /**
+   * From the list of __ALL__ CDNs available to a resource, return them in the
+   * order in which requests should be performed.
+   *
+   * Note: It is VERY important to include all CDN that are able to reach the
+   * wanted resource, even those which will in the end not be used anyway.
+   * If some CDN are not communicated, the `CdnPrioritizer` might wrongly
+   * consider that the current resource don't have any of the CDN prioritized
+   * internally and return other CDN which should have been forbidden if it knew
+   * about the other, non-used, ones.
+   *
+   * @param {Array.<string>} everyCdnForResource - Array of ALL available CDN
+   * able to reach the wanted resource - even those which might not be used in
+   * the end.
+   * @returns {Array.<string>} - Array of CDN that can be tried to reach the
+   * resource, sorted by order of CDN preference, according to the
+   * `CdnPrioritizer`'s own list of priorities.
+   */
+  ;
+
+  _proto._innerGetCdnPreferenceForResource = function _innerGetCdnPreferenceForResource(everyCdnForResource) {
+    var _this3 = this;
+
+    var _everyCdnForResource$ = everyCdnForResource.reduce(function (acc, elt) {
+      if (_this3._downgradedCdnList.metadata.some(function (c) {
+        return c.id === elt.id && c.baseUrl === elt.baseUrl;
+      })) {
+        acc[1].push(elt);
+      } else {
+        acc[0].push(elt);
+      }
+
+      return acc;
+    }, [[], []]),
+        allowedInOrder = _everyCdnForResource$[0],
+        downgradedInOrder = _everyCdnForResource$[1];
+
+    return allowedInOrder.concat(downgradedInOrder);
+  }
+  /**
+   * @param {number} index
+   */
+  ;
+
+  _proto._removeIndexFromDowngradeList = function _removeIndexFromDowngradeList(index) {
+    this._downgradedCdnList.metadata.splice(index, 1);
+
+    var oldTimeout = this._downgradedCdnList.timeouts.splice(index, 1);
+
+    clearTimeout(oldTimeout[0]);
+  };
+
+  return CdnPrioritizer;
+}(event_emitter/* default */.Z);
+/**
+ * Find the index of the given CDN metadata in a CDN metadata array.
+ * Returns `-1` if not found.
+ * @param {Array.<Object>} arr
+ * @param {Object} elt
+ * @returns {number}
+ */
+
+
+
+
+function indexOfMetadata(arr, elt) {
+  if (arr.length === 0) {
+    return -1;
+  }
+
+  return elt.id !== undefined ? (0,array_find_index/* default */.Z)(arr, function (m) {
+    return m.id === elt.id;
+  }) : (0,array_find_index/* default */.Z)(arr, function (m) {
+    return m.baseUrl === elt.baseUrl;
+  });
+}
+;// CONCATENATED MODULE: ./src/core/fetchers/segment/prioritized_segment_fetcher.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * This function basically put in relation:
+ *   - an `ISegmentFetcher`, which will be used to perform the segment requests
+ *   - a `TaskPrioritizer`, which will handle the priority of a segment request
+ *
+ * and returns functions to fetch segments with a given priority.
+ * @param {Object} prioritizer
+ * @param {Object} fetcher
+ * @returns {Object}
+ */
+
+function applyPrioritizerToSegmentFetcher(prioritizer, fetcher) {
+  /**
+   * Map Promises returned by the `createRequest` method into the actual tasks
+   * used by the `TaskPrioritizer`, allowing to update task priorities just by
+   * using the Promise.
+   */
+  var taskHandlers = new WeakMap();
+  return {
+    /**
+     * Create a Segment request with a given priority.
+     * @param {Object} content - content to request
+     * @param {Number} priority - priority at which the content should be requested.
+     * Lower number == higher priority.
+     * @returns {Promise}
+     */
+    createRequest: function createRequest(content, priority, callbacks, cancelSignal) {
+      if (priority === void 0) {
+        priority = 0;
+      }
+
+      var givenTask = function givenTask(innerCancelSignal) {
+        return fetcher(content, callbacks, innerCancelSignal);
+      };
+
+      var ret = prioritizer.create(givenTask, priority, callbacks, cancelSignal);
+      taskHandlers.set(ret, givenTask);
+      return ret;
+    },
+
+    /**
+     * Update the priority of a pending request, created through
+     * `createRequest`.
+     * @param {Promise} task - The Promise returned by `createRequest`.
+     * @param {Number} priority - The new priority value.
+     */
+    updatePriority: function updatePriority(task, priority) {
+      var correspondingTask = taskHandlers.get(task);
+
+      if (correspondingTask === undefined) {
+        log/* default.warn */.Z.warn("Fetchers: Cannot update the priority of a request: task not found.");
+        return;
+      }
+
+      prioritizer.updatePriority(correspondingTask, priority);
+    }
+  };
+}
+// EXTERNAL MODULE: ./src/manifest/utils.ts
+var utils = __webpack_require__(520);
+// EXTERNAL MODULE: ./src/utils/array_includes.ts
+var array_includes = __webpack_require__(7714);
+// EXTERNAL MODULE: ./src/utils/id_generator.ts
+var id_generator = __webpack_require__(908);
+;// CONCATENATED MODULE: ./src/utils/initialization_segment_cache.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Caching object used to cache initialization segments.
+ * This allow to have a faster representation switch and faster seeking.
+ * @class InitializationSegmentCache
+ */
+var InitializationSegmentCache = /*#__PURE__*/function () {
+  function InitializationSegmentCache() {
+    this._cache = new WeakMap();
+  }
+  /**
+   * @param {Object} obj
+   * @param {*} response
+   */
+
+
+  var _proto = InitializationSegmentCache.prototype;
+
+  _proto.add = function add(_ref, response) {
+    var representation = _ref.representation,
+        segment = _ref.segment;
+
+    if (segment.isInit) {
+      this._cache.set(representation, response);
+    }
+  }
+  /**
+   * @param {Object} obj
+   * @returns {*} response
+   */
+  ;
+
+  _proto.get = function get(_ref2) {
+    var representation = _ref2.representation,
+        segment = _ref2.segment;
+
+    if (segment.isInit) {
+      var value = this._cache.get(representation);
+
+      if (value !== undefined) {
+        return value;
+      }
+    }
+
+    return null;
+  };
+
+  return InitializationSegmentCache;
+}();
+
+/* harmony default export */ var initialization_segment_cache = (InitializationSegmentCache);
+;// CONCATENATED MODULE: ./src/core/fetchers/segment/segment_fetcher.ts
+
+
+
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+/** Allows to generate a unique identifies for each request. */
+
+var generateRequestID = (0,id_generator/* default */.Z)();
+/**
+ * Create an `ISegmentFetcher` object which will allow to easily fetch and parse
+ * segments.
+ * An `ISegmentFetcher` also implements a retry mechanism, based on the given
+ * `options` argument, which may retry a segment request when it fails.
+ *
+ * @param {string} bufferType
+ * @param {Object} pipeline
+ * @param {Object} lifecycleCallbacks
+ * @param {Object} options
+ * @returns {Function}
+ */
+
+function segment_fetcher_createSegmentFetcher(bufferType, pipeline, cdnPrioritizer, lifecycleCallbacks, options) {
+  var requestOptions = {
+    timeout: options.requestTimeout < 0 ? undefined : options.requestTimeout
+  };
+  /**
+   * Cache audio and video initialization segments.
+   * This allows to avoid doing too many requests for what are usually very
+   * small files.
+   */
+
+  var cache = (0,array_includes/* default */.Z)(["audio", "video"], bufferType) ? new initialization_segment_cache() : undefined;
+  var loadSegment = pipeline.loadSegment,
+      parseSegment = pipeline.parseSegment;
+  /**
+   * Fetch a specific segment.
+   * @param {Object} content
+   * @param {Object} fetcherCallbacks
+   * @param {Object} cancellationSignal
+   * @returns {Promise}
+   */
+
+  return /*#__PURE__*/function () {
+    var _fetchSegment = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(content, fetcherCallbacks, cancellationSignal) {
+      var _a, _b, segment, adaptation, representation, manifest, period, segmentIdString, requestId, requestInfo, parsedChunks, segmentDurationAcc, metricsSent, context, loaderCallbacks, cached, res, loadedData, callLoaderWithUrl, generateParserFunction, onRetry, sendNetworkMetricsIfAvailable;
+
+      return regenerator_default().wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              sendNetworkMetricsIfAvailable = function _sendNetworkMetricsIf() {
+                var _a;
+
+                if (metricsSent) {
+                  return;
+                }
+
+                if (!(0,is_null_or_undefined/* default */.Z)(requestInfo) && requestInfo.size !== undefined && requestInfo.requestDuration !== undefined && parsedChunks.length > 0 && parsedChunks.every(function (isParsed) {
+                  return isParsed;
+                })) {
+                  metricsSent = true;
+                  (_a = lifecycleCallbacks.onMetrics) === null || _a === void 0 ? void 0 : _a.call(lifecycleCallbacks, {
+                    size: requestInfo.size,
+                    requestDuration: requestInfo.requestDuration,
+                    content: content,
+                    segmentDuration: segmentDurationAcc
+                  });
+                }
+              };
+
+              onRetry = function _onRetry(err) {
+                fetcherCallbacks.onRetry(errorSelector(err));
+              };
+
+              generateParserFunction = function _generateParserFuncti(data, isChunked) {
+                parsedChunks.push(false);
+                var parsedChunkId = parsedChunks.length - 1;
+                return function parse(initTimescale) {
+                  var loaded = {
+                    data: data,
+                    isChunked: isChunked
+                  };
+
+                  try {
+                    var parsed = parseSegment(loaded, context, initTimescale);
+
+                    if (!parsedChunks[parsedChunkId]) {
+                      segmentDurationAcc = segmentDurationAcc !== undefined && parsed.segmentType === "media" && parsed.chunkInfos !== null && parsed.chunkInfos.duration !== undefined ? segmentDurationAcc + parsed.chunkInfos.duration : undefined;
+                      parsedChunks[parsedChunkId] = true;
+                      sendNetworkMetricsIfAvailable();
+                    }
+
+                    return parsed;
+                  } catch (error) {
+                    throw (0,format_error/* default */.Z)(error, {
+                      defaultCode: "PIPELINE_PARSE_ERROR",
+                      defaultReason: "Unknown parsing error"
+                    });
+                  }
+                };
+              };
+
+              callLoaderWithUrl = function _callLoaderWithUrl(cdnMetadata) {
+                return loadSegment(cdnMetadata, context, requestOptions, cancellationSignal, loaderCallbacks);
+              };
+
+              segment = content.segment, adaptation = content.adaptation, representation = content.representation, manifest = content.manifest, period = content.period; // used by logs
+
+              segmentIdString = (0,utils/* getLoggableSegmentId */.K)(content);
+              requestId = generateRequestID();
+              /**
+               * If the request succeeded, set to the corresponding
+               * `IChunkCompleteInformation` object.
+               * For any other completion cases: if the request either failed, was
+               * cancelled or just if no request was needed, set to `null`.
+               *
+               * Stays to `undefined` when the request is still pending.
+               */
+
+              /**
+               * Array containing one entry per loaded chunk, in chronological order.
+               * The boolean indicates if the chunk has been parsed at least once.
+               *
+               * This is used to know when all loaded chunks have been parsed, which
+               * can be useful to e.g. construct metrics about the loaded segment.
+               */
+              parsedChunks = [];
+              /**
+               * Addition of the duration of each encountered and parsed chunks.
+               * Allows to have an idea of the real duration of the full segment once
+               * all chunks have been parsed.
+               *
+               * `undefined` if at least one of the parsed chunks has unknown duration.
+               */
+
+              segmentDurationAcc = 0;
+              /** Set to `true` once network metrics have been sent. */
+
+              metricsSent = false;
+              /** Segment context given to the transport pipelines. */
+
+              context = {
+                segment: segment,
+                type: adaptation.type,
+                language: adaptation.language,
+                isLive: manifest.isLive,
+                periodStart: period.start,
+                periodEnd: period.end,
+                mimeType: representation.mimeType,
+                codecs: representation.codec,
+                manifestPublishTime: manifest.publishTime
+              };
+              loaderCallbacks = {
+                /**
+                 * Callback called when the segment loader has progress information on
+                 * the request.
+                 * @param {Object} info
+                 */
+                onProgress: function onProgress(info) {
+                  var _a;
+
+                  if (requestInfo !== undefined) {
+                    return; // request already termminated
+                  }
+
+                  if (info.totalSize !== undefined && info.size < info.totalSize) {
+                    (_a = lifecycleCallbacks.onProgress) === null || _a === void 0 ? void 0 : _a.call(lifecycleCallbacks, {
+                      duration: info.duration,
+                      size: info.size,
+                      totalSize: info.totalSize,
+                      timestamp: performance.now(),
+                      id: requestId
+                    });
+                  }
+                },
+
+                /**
+                 * Callback called when the segment is communicated by the loader
+                 * through decodable sub-segment(s) called chunk(s), with a chunk in
+                 * argument.
+                 * @param {*} chunkData
+                 */
+                onNewChunk: function onNewChunk(chunkData) {
+                  fetcherCallbacks.onChunk(generateParserFunction(chunkData, true));
+                }
+              }; // Retrieve from cache if it exists
+
+              cached = cache !== undefined ? cache.get(content) : null;
+
+              if (!(cached !== null)) {
+                _context.next = 17;
+                break;
+              }
+
+              log/* default.debug */.Z.debug("SF: Found wanted segment in cache", segmentIdString);
+              fetcherCallbacks.onChunk(generateParserFunction(cached, false));
+              return _context.abrupt("return", Promise.resolve());
+
+            case 17:
+              log/* default.debug */.Z.debug("SF: Beginning request", segmentIdString);
+              (_a = lifecycleCallbacks.onRequestBegin) === null || _a === void 0 ? void 0 : _a.call(lifecycleCallbacks, {
+                requestTimestamp: performance.now(),
+                id: requestId,
+                content: content
+              });
+              cancellationSignal.register(function () {
+                var _a;
+
+                if (requestInfo !== undefined) {
+                  return; // Request already terminated
+                }
+
+                log/* default.debug */.Z.debug("SF: Segment request cancelled", segmentIdString);
+                requestInfo = null;
+                (_a = lifecycleCallbacks.onRequestEnd) === null || _a === void 0 ? void 0 : _a.call(lifecycleCallbacks, {
+                  id: requestId
+                });
+              });
+              _context.prev = 20;
+              _context.next = 23;
+              return scheduleRequestWithCdns(content.representation.cdnMetadata, cdnPrioritizer, callLoaderWithUrl, (0,object_assign/* default */.Z)({
+                onRetry: onRetry
+              }, options), cancellationSignal);
+
+            case 23:
+              res = _context.sent;
+
+              if (res.resultType === "segment-loaded") {
+                loadedData = res.resultData.responseData;
+
+                if (cache !== undefined) {
+                  cache.add(content, res.resultData.responseData);
+                }
+
+                fetcherCallbacks.onChunk(generateParserFunction(loadedData, false));
+              } else if (res.resultType === "segment-created") {
+                fetcherCallbacks.onChunk(generateParserFunction(res.resultData, false));
+              }
+
+              log/* default.debug */.Z.debug("SF: Segment request ended with success", segmentIdString);
+              fetcherCallbacks.onAllChunksReceived();
+
+              if (res.resultType !== "segment-created") {
+                requestInfo = res.resultData;
+                sendNetworkMetricsIfAvailable();
+              } else {
+                requestInfo = null;
+              }
+
+              if (!cancellationSignal.isCancelled) {
+                // The current task could have been canceled as a result of one
+                // of the previous callbacks call. In that case, we don't want to send
+                // a "requestEnd" again as it has already been sent on cancellation.
+                (_b = lifecycleCallbacks.onRequestEnd) === null || _b === void 0 ? void 0 : _b.call(lifecycleCallbacks, {
+                  id: requestId
+                });
+              }
+
+              _context.next = 39;
+              break;
+
+            case 31:
+              _context.prev = 31;
+              _context.t0 = _context["catch"](20);
+              requestInfo = null;
+
+              if (!(_context.t0 instanceof task_canceller/* CancellationError */.FU)) {
+                _context.next = 37;
+                break;
+              }
+
+              log/* default.debug */.Z.debug("SF: Segment request aborted", segmentIdString);
+              throw _context.t0;
+
+            case 37:
+              log/* default.debug */.Z.debug("SF: Segment request failed", segmentIdString);
+              throw errorSelector(_context.t0);
+
+            case 39:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, null, [[20, 31]]);
+    }));
+
+    function fetchSegment(_x, _x2, _x3) {
+      return _fetchSegment.apply(this, arguments);
+    }
+
+    return fetchSegment;
+  }();
+}
+/**
+ * @param {string} bufferType
+ * @param {Object}
+ * @returns {Object}
+ */
+
+function getSegmentFetcherOptions(_ref) {
+  var maxRetry = _ref.maxRetry,
+      lowLatencyMode = _ref.lowLatencyMode,
+      requestTimeout = _ref.requestTimeout;
+
+  var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
+      DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR = _config$getCurrent.DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
+      DEFAULT_REQUEST_TIMEOUT = _config$getCurrent.DEFAULT_REQUEST_TIMEOUT,
+      INITIAL_BACKOFF_DELAY_BASE = _config$getCurrent.INITIAL_BACKOFF_DELAY_BASE,
+      MAX_BACKOFF_DELAY_BASE = _config$getCurrent.MAX_BACKOFF_DELAY_BASE;
+
+  return {
+    maxRetry: maxRetry !== null && maxRetry !== void 0 ? maxRetry : DEFAULT_MAX_REQUESTS_RETRY_ON_ERROR,
+    baseDelay: lowLatencyMode ? INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY : INITIAL_BACKOFF_DELAY_BASE.REGULAR,
+    maxDelay: lowLatencyMode ? MAX_BACKOFF_DELAY_BASE.LOW_LATENCY : MAX_BACKOFF_DELAY_BASE.REGULAR,
+    requestTimeout: (0,is_null_or_undefined/* default */.Z)(requestTimeout) ? DEFAULT_REQUEST_TIMEOUT : requestTimeout
+  };
+}
+;// CONCATENATED MODULE: ./src/core/fetchers/segment/task_prioritizer.ts
+
+
+
+
+var TaskPrioritizer = /*#__PURE__*/function () {
+  /**
+   * @param {Options} prioritizerOptions
+   */
+  function TaskPrioritizer(_ref) {
+    var prioritySteps = _ref.prioritySteps;
+    this._minPendingPriority = null;
+    this._waitingQueue = [];
+    this._pendingTasks = [];
+    this._prioritySteps = prioritySteps;
+
+    if (this._prioritySteps.high >= this._prioritySteps.low) {
+      throw new Error("TP: the max high level priority should be given a lower" + "priority number than the min low priority.");
+    }
+  }
+  /**
+   * Create a priorized Promise from a base task.
+   *
+   * This task will immediately have its priority compared to all the
+   * already-running ones created from this class.
+   *
+   * Only if this number is inferior or equal to the priority of the
+   * minimum priority number of all currently-running tasks  will it be
+   * immediately started.
+   * In the opposite case, we will wait for higher-priority tasks to
+   * finish before starting it.
+   *
+   * Note that while this task is waiting for its turn, it is possible
+   * to update its property through the updatePriority method, by providing
+   * the task again and its new priority number.
+   *
+   * @param {Function} taskFn
+   * @param {number} priority
+   * @param {Object} callbacks
+   * @param {Object} cancelSignal
+   * @returns {Promise}
+   */
+
+
+  var _proto = TaskPrioritizer.prototype;
+
+  _proto.create = function create(taskFn, priority, callbacks, cancelSignal) {
+    var _this = this;
+
+    var newTask;
+    return new Promise(function (resolve, reject) {
+      /** Function allowing to start the underlying Promise. */
+      var trigger = function trigger() {
+        if (newTask.hasEnded) {
+          unregisterCancelSignal();
+          return;
+        }
+
+        var interrupter = new task_canceller/* default */.ZP({
+          cancelOn: cancelSignal
+        });
+        newTask.interrupter = interrupter;
+        interrupter.signal.register(function () {
+          newTask.interrupter = null;
+
+          if (!cancelSignal.isCancelled) {
+            callbacks.beforeInterrupted();
+          }
+        });
+        _this._minPendingPriority = _this._minPendingPriority === null ? newTask.priority : Math.min(_this._minPendingPriority, newTask.priority);
+
+        _this._pendingTasks.push(newTask);
+
+        newTask.taskFn(interrupter.signal).then(onResolve)["catch"](function (err) {
+          if (!cancelSignal.isCancelled && interrupter.isUsed && err instanceof task_canceller/* CancellationError */.FU) {
+            return;
+          }
+
+          onReject(err);
+        });
+      };
+
+      var unregisterCancelSignal = cancelSignal.register(function (cancellationError) {
+        _this._endTask(newTask);
+
+        reject(cancellationError);
+      });
+
+      var finishTask = function finishTask() {
+        unregisterCancelSignal();
+
+        _this._endTask(newTask);
+      };
+
+      var onResolve = function onResolve(value) {
+        callbacks.beforeEnded();
+        finishTask();
+        resolve(value);
+      };
+
+      var onReject = function onReject(err) {
+        finishTask();
+        reject(err);
+      };
+
+      newTask = {
+        hasEnded: false,
+        priority: priority,
+        trigger: trigger,
+        taskFn: taskFn,
+        interrupter: null
+      };
+
+      if (!_this._canBeStartedNow(newTask)) {
+        _this._waitingQueue.push(newTask);
+      } else {
+        // We can start the task right away
+        newTask.trigger();
+
+        if (_this._isRunningHighPriorityTasks()) {
+          // Note: we want to begin interrupting low-priority tasks just
+          // after starting the current one because the interrupting
+          // logic can call external code.
+          // This would mean re-entrancy, itself meaning that some weird
+          // half-state could be reached unless we're very careful.
+          // To be sure no harm is done, we put that code at the last
+          // possible position.
+          _this._interruptCancellableTasks();
+        }
+      }
+    });
+  };
+
+  _proto._endTask = function _endTask(task) {
+    task.hasEnded = true;
+
+    var waitingQueueIndex = _findTaskIndex(task.taskFn, this._waitingQueue);
+
+    if (waitingQueueIndex >= 0) {
+      // If it was still waiting for its turn
+      this._waitingQueue.splice(waitingQueueIndex, 1);
+    } else {
+      // remove it from pending queue if in it
+      var pendingTasksIndex = _findTaskIndex(task.taskFn, this._pendingTasks);
+
+      if (pendingTasksIndex < 0) {
+        return;
+      }
+
+      this._pendingTasks.splice(pendingTasksIndex, 1);
+
+      if (this._pendingTasks.length > 0) {
+        if (this._minPendingPriority === task.priority) {
+          this._minPendingPriority = Math.min.apply(Math, this._pendingTasks.map(function (t) {
+            return t.priority;
+          }));
+        }
+      } else {
+        this._minPendingPriority = null;
+      }
+
+      this._loopThroughWaitingQueue();
+    }
+  }
+  /**
+   * Update the priority of a promise given to the TaskPrioritizer.
+   * @param {Object} promise
+   * @param {number} priority
+   */
+  ;
+
+  _proto.updatePriority = function updatePriority(promise, priority) {
+    var waitingQueueIndex = _findTaskIndex(promise, this._waitingQueue);
+
+    if (waitingQueueIndex >= 0) {
+      // If it was still waiting for its turn
+      var waitingQueueElt = this._waitingQueue[waitingQueueIndex];
+
+      if (waitingQueueElt.priority === priority) {
+        return;
+      }
+
+      waitingQueueElt.priority = priority;
+
+      if (!this._canBeStartedNow(waitingQueueElt)) {
+        return;
+      }
+
+      this._findAndRunWaitingQueueTask(waitingQueueIndex);
+
+      if (this._isRunningHighPriorityTasks()) {
+        // Re-check to cancel every "cancellable" pending task
+        //
+        // Note: We start the task before interrupting cancellable tasks on
+        // purpose.
+        // Because both `_findAndRunWaitingQueueTask` and
+        // `_interruptCancellableTasks` can emit events and thus call external
+        // code, we could retrieve ourselves in a very weird state at this point
+        //
+        // By starting the task first, we ensure that this is manageable:
+        // `_getMinPendingPriority()` has already been updated to the right value at
+        // the time we reached external code, the priority of the current
+        // Task has just been updated, and `_interruptCancellableTasks`
+        // will ensure that we're basing ourselves on the last `priority` value
+        // each time.
+        // Doing it in the reverse order is an order of magnitude more difficult
+        // to write and to reason about.
+        this._interruptCancellableTasks();
+      }
+
+      return;
+    }
+
+    var pendingTasksIndex = _findTaskIndex(promise, this._pendingTasks);
+
+    if (pendingTasksIndex < 0) {
+      log/* default.warn */.Z.warn("TP: request to update the priority of a non-existent task");
+      return;
+    }
+
+    var task = this._pendingTasks[pendingTasksIndex];
+
+    if (task.priority === priority) {
+      return;
+    }
+
+    var prevPriority = task.priority;
+    task.priority = priority;
+
+    if (this._minPendingPriority === null || priority < this._minPendingPriority) {
+      this._minPendingPriority = priority;
+    } else if (this._minPendingPriority === prevPriority) {
+      // was highest priority
+      if (this._pendingTasks.length === 1) {
+        this._minPendingPriority = priority;
+      } else {
+        this._minPendingPriority = Math.min.apply(Math, this._pendingTasks.map(function (t) {
+          return t.priority;
+        }));
+      }
+
+      this._loopThroughWaitingQueue();
+    }
+
+    if (this._isRunningHighPriorityTasks()) {
+      // Always interrupt cancellable tasks after all other side-effects, to
+      // avoid re-entrancy issues
+      this._interruptCancellableTasks();
+    }
+  }
+  /**
+   * Browse the current waiting queue and start all task in it that needs to be
+   * started: start the ones with the lowest priority value below
+   * `_minPendingPriority`.
+   *
+   * Private properties, such as `_minPendingPriority` are updated accordingly
+   * while this method is called.
+   */
+  ;
+
+  _proto._loopThroughWaitingQueue = function _loopThroughWaitingQueue() {
+    var minWaitingPriority = this._waitingQueue.reduce(function (acc, elt) {
+      return acc === null || acc > elt.priority ? elt.priority : acc;
+    }, null);
+
+    if (minWaitingPriority === null || this._minPendingPriority !== null && this._minPendingPriority < minWaitingPriority) {
+      return;
+    }
+
+    for (var i = 0; i < this._waitingQueue.length; i++) {
+      var priorityToCheck = this._minPendingPriority === null ? minWaitingPriority : Math.min(this._minPendingPriority, minWaitingPriority);
+      var elt = this._waitingQueue[i];
+
+      if (elt.priority <= priorityToCheck) {
+        this._findAndRunWaitingQueueTask(i);
+
+        i--; // previous operation should have removed that element from the
+        // the waiting queue
+      }
+    }
+  }
+  /**
+   * Interrupt and move back to the waiting queue all pending tasks that are
+   * low priority (having a higher priority number than
+   * `this._prioritySteps.low`).
+   */
+  ;
+
+  _proto._interruptCancellableTasks = function _interruptCancellableTasks() {
+    for (var i = 0; i < this._pendingTasks.length; i++) {
+      var pendingObj = this._pendingTasks[i];
+
+      if (pendingObj.priority >= this._prioritySteps.low) {
+        this._interruptPendingTask(pendingObj); // The previous call could have a lot of potential side-effects.
+        // It is safer to re-start the function to not miss any pending
+        // task that needs to be cancelled.
+
+
+        return this._interruptCancellableTasks();
+      }
+    }
+  }
+  /**
+   * Start task which is at the given index in the waiting queue.
+   * The task will be removed from the waiting queue in the process.
+   * @param {number} index
+   */
+  ;
+
+  _proto._findAndRunWaitingQueueTask = function _findAndRunWaitingQueueTask(index) {
+    if (index >= this._waitingQueue.length || index < 0) {
+      log/* default.warn */.Z.warn("TP : Tried to start a non existing task");
+      return false;
+    }
+
+    var task = this._waitingQueue.splice(index, 1)[0];
+
+    task.trigger();
+    return true;
+  }
+  /**
+   * Move back pending task to the waiting queue and interrupt it.
+   * @param {object} task
+   */
+  ;
+
+  _proto._interruptPendingTask = function _interruptPendingTask(task) {
+    var _a;
+
+    var pendingTasksIndex = _findTaskIndex(task.taskFn, this._pendingTasks);
+
+    if (pendingTasksIndex < 0) {
+      log/* default.warn */.Z.warn("TP: Interrupting a non-existent pending task. Aborting...");
+      return;
+    } // Stop task and put it back in the waiting queue
+
+
+    this._pendingTasks.splice(pendingTasksIndex, 1);
+
+    this._waitingQueue.push(task);
+
+    if (this._pendingTasks.length === 0) {
+      this._minPendingPriority = null;
+    } else if (this._minPendingPriority === task.priority) {
+      this._minPendingPriority = Math.min.apply(Math, this._pendingTasks.map(function (t) {
+        return t.priority;
+      }));
+    }
+
+    (_a = task.interrupter) === null || _a === void 0 ? void 0 : _a.cancel(); // Interrupt at last step because it calls external code
+  }
+  /**
+   * Return `true` if the given task can be started immediately based on its
+   * priority.
+   * @param {Object} task
+   * @returns {boolean}
+   */
+  ;
+
+  _proto._canBeStartedNow = function _canBeStartedNow(task) {
+    return this._minPendingPriority === null || task.priority <= this._minPendingPriority;
+  }
+  /**
+   * Returns `true` if any running task is considered "high priority".
+   * returns `false` otherwise.
+   * @returns {boolean}
+   */
+  ;
+
+  _proto._isRunningHighPriorityTasks = function _isRunningHighPriorityTasks() {
+    return this._minPendingPriority !== null && this._minPendingPriority <= this._prioritySteps.high;
+  };
+
+  return TaskPrioritizer;
+}();
+/**
+ * Simple utils function allowing to find a given task function in the given
+ * `queue`.
+ *
+ * Returns `-1` if `taskFn` is not found.
+ * @param {Function} taskFn
+ * @param {Array.<Object>} queue
+ * @returns {number}
+ */
+
+
+
+
+function _findTaskIndex(taskFn, queue) {
+  return (0,array_find_index/* default */.Z)(queue, function (elt) {
+    return elt.taskFn === taskFn;
+  });
+}
+;// CONCATENATED MODULE: ./src/core/fetchers/segment/segment_fetcher_creator.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+
+
+
+/**
+ * Interact with the transport pipelines to download segments with the right
+ * priority.
+ *
+ * @class SegmentFetcherCreator
+ *
+ * @example
+ * ```js
+ * const creator = new SegmentFetcherCreator(transport, {
+ *   lowLatencyMode: false,
+ *   maxRetry: Infinity,
+ * });
+ *
+ * // 2 - create a new fetcher with its backoff options
+ * const fetcher = creator.createSegmentFetcher("audio", {
+ *   // ... (lifecycle callbacks if wanted)
+ * });
+ *
+ * // 3 - load a segment with a given priority
+ * fetcher.createRequest(myContent, 1)
+ *   // 4 - parse it
+ *   .pipe(
+ *     filter(evt => evt.type === "chunk"),
+ *     mergeMap(response => response.parse());
+ *   )
+ *   // 5 - use it
+ *   .subscribe((res) => console.log("audio chunk downloaded:", res));
+ * ```
+ */
+
+var SegmentFetcherCreator = /*#__PURE__*/function () {
+  /**
+   * @param {Object} transport
+   */
+  function SegmentFetcherCreator(transport, options, cancelSignal) {
+    var cdnPrioritizer = new CdnPrioritizer(cancelSignal);
+
+    var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
+        MIN_CANCELABLE_PRIORITY = _config$getCurrent.MIN_CANCELABLE_PRIORITY,
+        MAX_HIGH_PRIORITY_LEVEL = _config$getCurrent.MAX_HIGH_PRIORITY_LEVEL;
+
+    this._transport = transport;
+    this._prioritizer = new TaskPrioritizer({
+      prioritySteps: {
+        high: MAX_HIGH_PRIORITY_LEVEL,
+        low: MIN_CANCELABLE_PRIORITY
+      }
+    });
+    this._cdnPrioritizer = cdnPrioritizer;
+    this._backoffOptions = options;
+  }
+  /**
+   * Create a segment fetcher, allowing to easily perform segment requests.
+   * @param {string} bufferType - The type of buffer concerned (e.g. "audio",
+   * "video", etc.)
+   * @param {Object} callbacks
+   * @returns {Object}
+   */
+
+
+  var _proto = SegmentFetcherCreator.prototype;
+
+  _proto.createSegmentFetcher = function createSegmentFetcher(bufferType, callbacks) {
+    var backoffOptions = getSegmentFetcherOptions(this._backoffOptions);
+    var pipelines = this._transport[bufferType]; // Types are very complicated here as they are per-type of buffer.
+
+    var segmentFetcher = segment_fetcher_createSegmentFetcher(bufferType, pipelines, this._cdnPrioritizer, callbacks, backoffOptions);
+
+    return applyPrioritizerToSegmentFetcher(this._prioritizer, segmentFetcher);
+  };
+
+  return SegmentFetcherCreator;
+}();
+
+
+;// CONCATENATED MODULE: ./src/core/fetchers/segment/index.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* harmony default export */ var segment = (SegmentFetcherCreator);
 // EXTERNAL MODULE: ./src/compat/clear_element_src.ts
 var clear_element_src = __webpack_require__(5767);
 // EXTERNAL MODULE: ./src/compat/browser_compatibility_types.ts
@@ -49891,7 +50334,6 @@ function resetMediaSource(mediaElement, mediaSource, mediaSourceURL) {
  * @param {HTMLMediaElement} mediaElement
  * @returns {Observable}
  */
-
 
 function createMediaSource(mediaElement) {
   return new Observable/* Observable */.y(function (observer) {
@@ -50044,12 +50486,8 @@ function getInitialTime(manifest, lowLatencyMode, startAt) {
 var link_drm_and_content = __webpack_require__(9607);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/throwError.js
 var throwError = __webpack_require__(3610);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/interval.js
-var interval = __webpack_require__(6697);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/tap.js
-var tap = __webpack_require__(2006);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/fromEvent.js
-var fromEvent = __webpack_require__(2401);
+// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js
+var assertThisInitialized = __webpack_require__(7326);
 ;// CONCATENATED MODULE: ./src/compat/change_source_buffer_type.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -50103,6 +50541,7 @@ var types = __webpack_require__(9612);
 ;// CONCATENATED MODULE: ./src/core/segment_buffers/implementations/audio_video/audio_video_segment_buffer.ts
 
 
+
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -50118,6 +50557,7 @@ var types = __webpack_require__(9612);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 
@@ -50147,14 +50587,14 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
    * @constructor
    * @param {string} bufferType
    * @param {string} codec
-   * @param {SourceBuffer} sourceBuffer
+   * @param {MediaSource} mediaSource
    */
   function AudioVideoSegmentBuffer(bufferType, codec, mediaSource) {
     var _this;
 
     _this = _SegmentBuffer.call(this) || this;
     var sourceBuffer = mediaSource.addSourceBuffer(codec);
-    _this._destroy$ = new Subject/* Subject */.x();
+    _this._canceller = new task_canceller/* default */.ZP();
     _this.bufferType = bufferType;
     _this._mediaSource = mediaSource;
     _this._sourceBuffer = sourceBuffer;
@@ -50163,8 +50603,9 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
     _this._lastInitSegment = null;
     _this.codec = codec;
 
-    var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
-        SOURCE_BUFFER_FLUSHING_INTERVAL = _config$getCurrent.SOURCE_BUFFER_FLUSHING_INTERVAL; // Some browsers (happened with firefox 66) sometimes "forget" to send us
+    var onError = _this._onPendingTaskError.bind((0,assertThisInitialized/* default */.Z)(_this));
+
+    var reCheck = _this._flush.bind((0,assertThisInitialized/* default */.Z)(_this)); // Some browsers (happened with firefox 66) sometimes "forget" to send us
     // `update` or `updateend` events.
     // In that case, we're completely unable to continue the queue here and
     // stay locked in a waiting state.
@@ -50172,15 +50613,23 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
     // SourceBuffer is currently updating.
 
 
-    (0,interval/* interval */.F)(SOURCE_BUFFER_FLUSHING_INTERVAL).pipe((0,tap/* tap */.b)(function () {
-      return _this._flush();
-    }), (0,takeUntil/* takeUntil */.R)(_this._destroy$)).subscribe();
-    (0,fromEvent/* fromEvent */.R)(_this._sourceBuffer, "error").pipe((0,tap/* tap */.b)(function (err) {
-      return _this._onPendingTaskError(err);
-    }), (0,takeUntil/* takeUntil */.R)(_this._destroy$)).subscribe();
-    (0,fromEvent/* fromEvent */.R)(_this._sourceBuffer, "updateend").pipe((0,tap/* tap */.b)(function () {
-      return _this._flush();
-    }), (0,takeUntil/* takeUntil */.R)(_this._destroy$)).subscribe();
+    var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
+        SOURCE_BUFFER_FLUSHING_INTERVAL = _config$getCurrent.SOURCE_BUFFER_FLUSHING_INTERVAL;
+
+    var intervalId = setInterval(reCheck, SOURCE_BUFFER_FLUSHING_INTERVAL);
+
+    _this._sourceBuffer.addEventListener("error", onError);
+
+    _this._sourceBuffer.addEventListener("updateend", reCheck);
+
+    _this._canceller.signal.register(function () {
+      clearInterval(intervalId);
+
+      _this._sourceBuffer.removeEventListener("error", onError);
+
+      _this._sourceBuffer.removeEventListener("updateend", reCheck);
+    });
+
     return _this;
   }
   /**
@@ -50207,29 +50656,31 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
    * `data.chunk` argument to null.
    *
    * @param {Object} infos
-   * @returns {Observable}
+   * @param {Object} cancellationSignal
+   * @returns {Promise}
    */
 
 
   var _proto = AudioVideoSegmentBuffer.prototype;
 
-  _proto.pushChunk = function pushChunk(infos) {
+  _proto.pushChunk = function pushChunk(infos, cancellationSignal) {
     assertPushedDataIsBufferSource(infos);
     log/* default.debug */.Z.debug("AVSB: receiving order to push data to the SourceBuffer", this.bufferType, (0,utils/* getLoggableSegmentId */.K)(infos.inventoryInfos));
     return this._addToQueue({
       type: types/* SegmentBufferOperation.Push */.f.Push,
       value: infos
-    });
+    }, cancellationSignal);
   }
   /**
    * Remove buffered data (added to the same FIFO queue than `pushChunk`).
    * @param {number} start - start position, in seconds
    * @param {number} end - end position, in seconds
-   * @returns {Observable}
+   * @param {Object} cancellationSignal
+   * @returns {Promise}
    */
   ;
 
-  _proto.removeBuffer = function removeBuffer(start, end) {
+  _proto.removeBuffer = function removeBuffer(start, end, cancellationSignal) {
     log/* default.debug */.Z.debug("AVSB: receiving order to remove data from the SourceBuffer", this.bufferType, start, end);
     return this._addToQueue({
       type: types/* SegmentBufferOperation.Remove */.f.Remove,
@@ -50237,25 +50688,25 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
         start: start,
         end: end
       }
-    });
+    }, cancellationSignal);
   }
   /**
    * Indicate that every chunks from a Segment has been given to pushChunk so
    * far.
    * This will update our internal Segment inventory accordingly.
-   * The returned Observable will emit and complete successively once the whole
-   * segment has been pushed and this indication is acknowledged.
+   * The returned Promise will resolve once the whole segment has been pushed
+   * and this indication is acknowledged.
    * @param {Object} infos
-   * @returns {Observable}
+   * @returns {Promise}
    */
   ;
 
-  _proto.endOfSegment = function endOfSegment(infos) {
+  _proto.endOfSegment = function endOfSegment(infos, cancellationSignal) {
     log/* default.debug */.Z.debug("AVSB: receiving order for validating end of segment", this.bufferType, (0,utils/* getLoggableSegmentId */.K)(infos));
     return this._addToQueue({
       type: types/* SegmentBufferOperation.EndOfSegment */.f.EndOfSegment,
       value: infos
-    });
+    }, cancellationSignal);
   }
   /**
    * Returns the currently buffered data, in a TimeRanges object.
@@ -50312,12 +50763,10 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
   ;
 
   _proto.dispose = function dispose() {
-    this._destroy$.next();
-
-    this._destroy$.complete();
+    this._canceller.cancel();
 
     if (this._pendingTask !== null) {
-      this._pendingTask.subject.complete();
+      this._pendingTask.reject(new task_canceller/* CancellationError */.FU());
 
       this._pendingTask = null;
     }
@@ -50326,7 +50775,7 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
       var nextElement = this._queue.shift();
 
       if (nextElement !== undefined) {
-        nextElement.subject.complete();
+        nextElement.reject(new task_canceller/* CancellationError */.FU());
       }
     }
 
@@ -50340,7 +50789,7 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
   }
   /**
    * Called when an error arised that made the current task fail.
-   * @param {Event} error
+   * @param {Event} err
    */
   ;
 
@@ -50350,7 +50799,7 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
     if (this._pendingTask !== null) {
       var error = err instanceof Error ? err : new Error("An unknown error occured when doing operations " + "on the SourceBuffer");
 
-      this._pendingTask.subject.error(error);
+      this._pendingTask.reject(error);
     }
   }
   /**
@@ -50361,40 +50810,46 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
    * Cancel queued operation on unsubscription.
    * @private
    * @param {Object} operation
-   * @returns {Observable}
+   * @param {Object} cancellationSignal
+   * @returns {Promise}
    */
   ;
 
-  _proto._addToQueue = function _addToQueue(operation) {
+  _proto._addToQueue = function _addToQueue(operation, cancellationSignal) {
     var _this2 = this;
 
-    return new Observable/* Observable */.y(function (obs) {
+    return new Promise(function (resolve, reject) {
+      if (cancellationSignal.cancellationError !== null) {
+        return reject(cancellationSignal.cancellationError);
+      }
+
       var shouldRestartQueue = _this2._queue.length === 0 && _this2._pendingTask === null;
-      var subject = new Subject/* Subject */.x();
       var queueItem = (0,object_assign/* default */.Z)({
-        subject: subject
+        resolve: resolve,
+        reject: reject
       }, operation);
 
       _this2._queue.push(queueItem);
 
-      var subscription = subject.subscribe(obs);
-
-      if (shouldRestartQueue) {
-        _this2._flush();
-      }
-
-      return function () {
-        subscription.unsubscribe(); // Remove the corresponding element from the AudioVideoSegmentBuffer's
+      cancellationSignal.register(function (error) {
+        // Remove the corresponding element from the AudioVideoSegmentBuffer's
         // queue.
         // If the operation was a pending task, it should still continue to not
         // let the AudioVideoSegmentBuffer in a weird state.
-
         var index = _this2._queue.indexOf(queueItem);
 
         if (index >= 0) {
           _this2._queue.splice(index, 1);
         }
-      };
+
+        queueItem.resolve = noop/* default */.Z;
+        queueItem.reject = noop/* default */.Z;
+        reject(error);
+      });
+
+      if (shouldRestartQueue) {
+        _this2._flush();
+      }
     });
   }
   /**
@@ -50434,10 +50889,9 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
             (0,assert_unreachable/* default */.Z)(task);
         }
 
-        var subject = task.subject;
+        var resolve = task.resolve;
         this._pendingTask = null;
-        subject.next();
-        subject.complete();
+        resolve();
 
         this._flush(); // Go to next item in queue
 
@@ -50466,7 +50920,7 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
           var error = e instanceof Error ? e : new Error("An unknown error occured when preparing a push operation");
           this._lastInitSegment = null; // initialize init segment as a security
 
-          nextItem.subject.error(error);
+          nextItem.reject(error);
           return;
         }
 
@@ -50527,7 +50981,7 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
    *
    * This method allows to "prepare" that push operation so that all is left is
    * to push the returned segment data one after the other (from first to last).
-   * @param {Object} item
+   * @param {Object} data
    * @returns {Object}
    */
   ;
@@ -50541,7 +50995,7 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
         appendWindow = data.appendWindow;
     var hasUpdatedSourceBufferType = false;
 
-    if (codec !== this.codec) {
+    if (codec !== undefined && codec !== this.codec) {
       log/* default.debug */.Z.debug("AVSB: updating codec", codec);
       hasUpdatedSourceBufferType = tryToChangeSourceBufferType(this._sourceBuffer, codec);
 
@@ -50688,7 +51142,6 @@ function assertPushedDataIsBufferSource(pushedData) {
 
 
 
-
 var POSSIBLE_BUFFER_TYPES = ["audio", "video", "text"];
 /**
  * Allows to easily create and dispose SegmentBuffers, which are interfaces to
@@ -50706,7 +51159,7 @@ var POSSIBLE_BUFFER_TYPES = ["audio", "video", "text"];
  * To be able to use a SegmentBuffer linked to a native media buffer, you
  * will first need to create it, but also wait until the other one is either
  * created or explicitely disabled through the `disableSegmentBuffer` method.
- * The Observable returned by `waitForUsableBuffers` will emit when
+ * The Promise returned by `waitForUsableBuffers` will emit when
  * that is the case.
  *
  * @class SegmentBuffersStore
@@ -50806,7 +51259,7 @@ var SegmentBuffersStore = /*#__PURE__*/function () {
    * content need to all be created (by creating SegmentBuffers linked to them)
    * before any one can be used.
    *
-   * This function will return an Observable emitting when any and all native
+   * This function will return a Promise resolving when any and all native
    * SourceBuffers can be used.
    *
    * From https://w3c.github.io/media-source/#methods
@@ -50814,23 +51267,35 @@ var SegmentBuffersStore = /*#__PURE__*/function () {
    *   exception if the media element has reached the HAVE_METADATA
    *   readyState. This can occur if the user agent's media engine
    *   does not support adding more tracks during playback.
-   * @return {Observable}
+   * @param {Object} cancelWaitSignal
+   * @return {Promise}
    */
   ;
 
-  _proto.waitForUsableBuffers = function waitForUsableBuffers() {
+  _proto.waitForUsableBuffers = function waitForUsableBuffers(cancelWaitSignal) {
     var _this = this;
 
     if (this._areNativeBuffersUsable()) {
-      return (0,of.of)(undefined);
+      return Promise.resolve();
     }
 
-    return new Observable/* Observable */.y(function (obs) {
-      _this._onNativeBufferAddedOrDisabled.push(function () {
+    return new Promise(function (res, rej) {
+      var onAddedOrDisabled = function onAddedOrDisabled() {
         if (_this._areNativeBuffersUsable()) {
-          obs.next(undefined);
-          obs.complete();
+          res();
         }
+      };
+
+      _this._onNativeBufferAddedOrDisabled.push(onAddedOrDisabled);
+
+      cancelWaitSignal.register(function (error) {
+        var indexOf = _this._onNativeBufferAddedOrDisabled.indexOf(onAddedOrDisabled);
+
+        if (indexOf >= 0) {
+          _this._onNativeBufferAddedOrDisabled.splice(indexOf, 1);
+        }
+
+        rej(error);
       });
     });
   }
@@ -51071,6 +51536,74 @@ function exhaustMap(project, resultSelector) {
     });
 }
 //# sourceMappingURL=exhaustMap.js.map
+;// CONCATENATED MODULE: ./src/utils/rx-from_cancellable_promise.ts
+/**
+ * Copyright 2015 CANAL+ Group
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Transform a Promise that can be cancelled (through the usage of a
+ * `TaskCanceller`) to an Observable, while keeping the cancellation logic
+ * between both in sync.
+ *
+ * @example
+ * ```js
+ * const canceller = new TaskCanceller();
+ * fromCancellablePromise(
+ *   canceller,
+ *   () => doSomeCancellableTasks(canceller.signal)
+ * ).subscribe(
+ *   (i) => console.log("Emitted: ", i);
+ *   (e) => console.log("Error: ", e);
+ *   () => console.log("Complete.")
+ * );
+ * ```
+ * @param {Object} canceller
+ * @param {Function} fn
+ * @returns {Observable}
+ */
+
+function fromCancellablePromise(canceller, fn) {
+  return new Observable/* Observable */.y(function (obs) {
+    var isUnsubscribedFrom = false;
+    var isComplete = false;
+    fn().then(function (i) {
+      if (isUnsubscribedFrom) {
+        return;
+      }
+
+      isComplete = true;
+      obs.next(i);
+      obs.complete();
+    }, function (err) {
+      isComplete = true;
+
+      if (isUnsubscribedFrom) {
+        return;
+      }
+
+      obs.error(err);
+    });
+    return function () {
+      if (!isComplete) {
+        isUnsubscribedFrom = true;
+        canceller.cancel();
+      }
+    };
+  });
+}
 // EXTERNAL MODULE: ./node_modules/next-tick/index.js
 var next_tick = __webpack_require__(7473);
 var next_tick_default = /*#__PURE__*/__webpack_require__.n(next_tick);
@@ -51428,9 +51961,10 @@ var WeakMapMemory = /*#__PURE__*/function () {
 }();
 
 
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/concatAll.js
-var concatAll = __webpack_require__(9834);
 ;// CONCATENATED MODULE: ./src/core/segment_buffers/garbage_collector.ts
+
+
+
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -51448,27 +51982,48 @@ var concatAll = __webpack_require__(9834);
  */
 
 
-
 /**
  * Perform cleaning of the buffer according to the values set by the user
- * each time `currentTime$` emits and each times the
+ * each time `playbackObserver` emits and each times the
  * maxBufferBehind/maxBufferAhead values change.
  *
+ * Abort this operation when the `cancellationSignal` emits.
+ *
  * @param {Object} opt
+ * @param {Object} cancellationSignal
  * @returns {Observable}
  */
 
-function BufferGarbageCollector(_ref) {
+function BufferGarbageCollector(_ref, cancellationSignal) {
   var segmentBuffer = _ref.segmentBuffer,
-      currentTime$ = _ref.currentTime$,
-      maxBufferBehind$ = _ref.maxBufferBehind$,
-      maxBufferAhead$ = _ref.maxBufferAhead$;
-  return combineLatest([currentTime$, maxBufferBehind$, maxBufferAhead$]).pipe((0,mergeMap/* mergeMap */.z)(function (_ref2) {
-    var currentTime = _ref2[0],
-        maxBufferBehind = _ref2[1],
-        maxBufferAhead = _ref2[2];
-    return clearBuffer(segmentBuffer, currentTime, maxBufferBehind, maxBufferAhead);
-  }));
+      playbackObserver = _ref.playbackObserver,
+      maxBufferBehind = _ref.maxBufferBehind,
+      maxBufferAhead = _ref.maxBufferAhead;
+  var lastPosition;
+  playbackObserver.listen(function (o) {
+    var _a;
+
+    lastPosition = (_a = o.position.pending) !== null && _a !== void 0 ? _a : o.position.last;
+    clean();
+  }, {
+    includeLastObservation: true,
+    clearSignal: cancellationSignal
+  });
+
+  function clean() {
+    clearBuffer(segmentBuffer, lastPosition, maxBufferBehind.getValue(), maxBufferAhead.getValue(), cancellationSignal)["catch"](function (e) {
+      var errMsg = e instanceof Error ? e.message : "Unknown error";
+      log/* default.error */.Z.error("Could not run BufferGarbageCollector:", errMsg);
+    });
+  }
+
+  maxBufferBehind.onUpdate(clean, {
+    clearSignal: cancellationSignal
+  });
+  maxBufferAhead.onUpdate(clean, {
+    clearSignal: cancellationSignal
+  });
+  clean();
 }
 /**
  * Remove buffer from the browser's memory based on the user's
@@ -51484,96 +52039,133 @@ function BufferGarbageCollector(_ref) {
  * @param {Number} position - The current position
  * @param {Number} maxBufferBehind
  * @param {Number} maxBufferAhead
- * @returns {Observable}
+ * @returns {Promise}
  */
 
-function clearBuffer(segmentBuffer, position, maxBufferBehind, maxBufferAhead) {
-  if (!isFinite(maxBufferBehind) && !isFinite(maxBufferAhead)) {
-    return empty/* EMPTY */.E;
-  }
+function clearBuffer(_x, _x2, _x3, _x4, _x5) {
+  return _clearBuffer.apply(this, arguments);
+}
 
-  var cleanedupRanges = [];
+function _clearBuffer() {
+  _clearBuffer = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(segmentBuffer, position, maxBufferBehind, maxBufferAhead, cancellationSignal) {
+    var cleanedupRanges, _getInnerAndOuterTime, innerRange, outerRanges, collectBufferBehind, collectBufferAhead, _i, _cleanedupRanges, range;
 
-  var _getInnerAndOuterTime = (0,ranges/* getInnerAndOuterTimeRanges */.F_)(segmentBuffer.getBufferedRanges(), position),
-      innerRange = _getInnerAndOuterTime.innerRange,
-      outerRanges = _getInnerAndOuterTime.outerRanges;
+    return regenerator_default().wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            if (!(!isFinite(maxBufferBehind) && !isFinite(maxBufferAhead))) {
+              _context.next = 2;
+              break;
+            }
 
-  var collectBufferBehind = function collectBufferBehind() {
-    if (!isFinite(maxBufferBehind)) {
-      return;
-    } // begin from the oldest
+            return _context.abrupt("return", Promise.resolve());
+
+          case 2:
+            cleanedupRanges = [];
+            _getInnerAndOuterTime = (0,ranges/* getInnerAndOuterTimeRanges */.F_)(segmentBuffer.getBufferedRanges(), position), innerRange = _getInnerAndOuterTime.innerRange, outerRanges = _getInnerAndOuterTime.outerRanges;
+
+            collectBufferBehind = function collectBufferBehind() {
+              if (!isFinite(maxBufferBehind)) {
+                return;
+              } // begin from the oldest
 
 
-    for (var i = 0; i < outerRanges.length; i++) {
-      var outerRange = outerRanges[i];
+              for (var i = 0; i < outerRanges.length; i++) {
+                var outerRange = outerRanges[i];
 
-      if (position - maxBufferBehind >= outerRange.end) {
-        cleanedupRanges.push(outerRange);
-      } else if (position >= outerRange.end && position - maxBufferBehind > outerRange.start && position - maxBufferBehind < outerRange.end) {
-        cleanedupRanges.push({
-          start: outerRange.start,
-          end: position - maxBufferBehind
-        });
+                if (position - maxBufferBehind >= outerRange.end) {
+                  cleanedupRanges.push(outerRange);
+                } else if (position >= outerRange.end && position - maxBufferBehind > outerRange.start && position - maxBufferBehind < outerRange.end) {
+                  cleanedupRanges.push({
+                    start: outerRange.start,
+                    end: position - maxBufferBehind
+                  });
+                }
+              }
+
+              if (innerRange != null) {
+                if (position - maxBufferBehind > innerRange.start) {
+                  cleanedupRanges.push({
+                    start: innerRange.start,
+                    end: position - maxBufferBehind
+                  });
+                }
+              }
+            };
+
+            collectBufferAhead = function collectBufferAhead() {
+              if (!isFinite(maxBufferAhead)) {
+                return;
+              } // begin from the oldest
+
+
+              for (var i = 0; i < outerRanges.length; i++) {
+                var outerRange = outerRanges[i];
+
+                if (position + maxBufferAhead <= outerRange.start) {
+                  cleanedupRanges.push(outerRange);
+                } else if (position <= outerRange.start && position + maxBufferAhead < outerRange.end && position + maxBufferAhead > outerRange.start) {
+                  cleanedupRanges.push({
+                    start: position + maxBufferAhead,
+                    end: outerRange.end
+                  });
+                }
+              }
+
+              if (innerRange != null) {
+                if (position + maxBufferAhead < innerRange.end) {
+                  cleanedupRanges.push({
+                    start: position + maxBufferAhead,
+                    end: innerRange.end
+                  });
+                }
+              }
+            };
+
+            collectBufferBehind();
+            collectBufferAhead();
+            _i = 0, _cleanedupRanges = cleanedupRanges;
+
+          case 9:
+            if (!(_i < _cleanedupRanges.length)) {
+              _context.next = 20;
+              break;
+            }
+
+            range = _cleanedupRanges[_i];
+
+            if (!(range.start < range.end)) {
+              _context.next = 17;
+              break;
+            }
+
+            log/* default.debug */.Z.debug("GC: cleaning range from SegmentBuffer", range.start, range.end);
+
+            if (!(cancellationSignal.cancellationError !== null)) {
+              _context.next = 15;
+              break;
+            }
+
+            throw cancellationSignal.cancellationError;
+
+          case 15:
+            _context.next = 17;
+            return segmentBuffer.removeBuffer(range.start, range.end, cancellationSignal);
+
+          case 17:
+            _i++;
+            _context.next = 9;
+            break;
+
+          case 20:
+          case "end":
+            return _context.stop();
+        }
       }
-    }
-
-    if (innerRange != null) {
-      if (position - maxBufferBehind > innerRange.start) {
-        cleanedupRanges.push({
-          start: innerRange.start,
-          end: position - maxBufferBehind
-        });
-      }
-    }
-  };
-
-  var collectBufferAhead = function collectBufferAhead() {
-    if (!isFinite(maxBufferAhead)) {
-      return;
-    } // begin from the oldest
-
-
-    for (var i = 0; i < outerRanges.length; i++) {
-      var outerRange = outerRanges[i];
-
-      if (position + maxBufferAhead <= outerRange.start) {
-        cleanedupRanges.push(outerRange);
-      } else if (position <= outerRange.start && position + maxBufferAhead < outerRange.end && position + maxBufferAhead > outerRange.start) {
-        cleanedupRanges.push({
-          start: position + maxBufferAhead,
-          end: outerRange.end
-        });
-      }
-    }
-
-    if (innerRange != null) {
-      if (position + maxBufferAhead < innerRange.end) {
-        cleanedupRanges.push({
-          start: position + maxBufferAhead,
-          end: innerRange.end
-        });
-      }
-    }
-  };
-
-  collectBufferBehind();
-  collectBufferAhead();
-  var clean$ = (0,from/* from */.D)(cleanedupRanges.map(function (range) {
-    log/* default.debug */.Z.debug("GC: cleaning range from SegmentBuffer", range.start, range.end);
-
-    if (range.start >= range.end) {
-      return (0,of.of)(null);
-    }
-
-    return segmentBuffer.removeBuffer(range.start, range.end);
-  })).pipe((0,concatAll/* concatAll */.u)(), // NOTE As of now (RxJS 7.4.0), RxJS defines `ignoreElements` default
-  // first type parameter as `any` instead of the perfectly fine `unknown`,
-  // leading to linter issues, as it forbids the usage of `any`.
-  // This is why we're disabling the eslint rule.
-
-  /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
-  (0,ignoreElements/* ignoreElements */.l)());
-  return clean$;
+    }, _callee);
+  }));
+  return _clearBuffer.apply(this, arguments);
 }
 // EXTERNAL MODULE: ./src/core/stream/events_generators.ts
 var stream_events_generators = __webpack_require__(8567);
@@ -51682,6 +52274,7 @@ var assert = __webpack_require__(811);
 
 
 
+
 /**
  * Class scheduling segment downloads for a single Representation.
  * @class DownloadingQueue
@@ -51716,17 +52309,17 @@ var DownloadingQueue = /*#__PURE__*/function () {
     this._initSegmentRequest = null;
     this._mediaSegmentRequest = null;
     this._segmentFetcher = segmentFetcher;
-    this._initSegmentMetadata$ = new ReplaySubject/* ReplaySubject */.t(1);
+    this._initSegmentInfoRef = (0,utils_reference/* default */.ZP)(undefined);
     this._mediaSegmentsAwaitingInitMetadata = new Set();
 
     if (!hasInitSegment) {
-      this._initSegmentMetadata$.next(undefined);
+      this._initSegmentInfoRef.setValue(null);
     }
   }
   /**
    * Returns the initialization segment currently being requested.
    * Returns `null` if no initialization segment request is pending.
-   * @returns {Object}
+   * @returns {Object | null}
    */
 
 
@@ -51738,7 +52331,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
   /**
    * Returns the media segment currently being requested.
    * Returns `null` if no media segment request is pending.
-   * @returns {Object}
+   * @returns {Object | null}
    */
   ;
 
@@ -51792,7 +52385,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
         }
 
         if (currentSegmentRequest.priority !== nextItem.priority) {
-          _this._segmentFetcher.updatePriority(currentSegmentRequest.request$, nextItem.priority);
+          _this._segmentFetcher.updatePriority(currentSegmentRequest.request, nextItem.priority);
         }
 
         return false;
@@ -51806,7 +52399,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
 
         if (next.initSegment !== null && initSegmentRequest !== null) {
           if (next.initSegment.priority !== initSegmentRequest.priority) {
-            _this._segmentFetcher.updatePriority(initSegmentRequest.request$, next.initSegment.priority);
+            _this._segmentFetcher.updatePriority(initSegmentRequest.request, next.initSegment.priority);
           }
 
           return false;
@@ -51839,8 +52432,16 @@ var DownloadingQueue = /*#__PURE__*/function () {
         segmentQueue = _this$_downloadQueue$.segmentQueue;
 
     var currentNeededSegment = segmentQueue[0];
+    /* eslint-disable-next-line @typescript-eslint/no-this-alias */
 
-    var recursivelyRequestSegments = function recursivelyRequestSegments(startingSegment) {
+    var self = this;
+    return (0,defer/* defer */.P)(function () {
+      return recursivelyRequestSegments(currentNeededSegment);
+    }).pipe(finalize(function () {
+      _this2._mediaSegmentRequest = null;
+    }));
+
+    function recursivelyRequestSegments(startingSegment) {
       if (startingSegment === undefined) {
         return (0,of.of)({
           type: "end-of-queue",
@@ -51852,81 +52453,187 @@ var DownloadingQueue = /*#__PURE__*/function () {
           priority = startingSegment.priority;
       var context = (0,object_assign/* default */.Z)({
         segment: segment
-      }, _this2._content);
+      }, self._content);
+      return new Observable/* Observable */.y(function (obs) {
+        /** TaskCanceller linked to this Observable's lifecycle. */
+        var canceller = new task_canceller/* default */.ZP();
+        /**
+         * If `true` , the Observable has either errored, completed, or was
+         * unsubscribed from.
+         * This only conserves the Observable for the current segment's request,
+         * not the other recursively-created future ones.
+         */
 
-      var request$ = _this2._segmentFetcher.createRequest(context, priority);
+        var isComplete = false;
+        /**
+         * Subscription to request the following segment (as this function is
+         * recursive).
+         * `undefined` if no following segment has been requested.
+         */
 
-      _this2._mediaSegmentRequest = {
-        segment: segment,
-        priority: priority,
-        request$: request$
-      };
-      return request$.pipe((0,mergeMap/* mergeMap */.z)(function (evt) {
-        switch (evt.type) {
-          case "retry":
-            return (0,of.of)({
+        var nextSegmentSubscription;
+        /**
+         * If true, we're currently waiting for the initialization segment to be
+         * parsed before parsing a received chunk.
+         *
+         * In that case, the `DownloadingQueue` has to remain careful to only
+         * send further events and complete the Observable only once the
+         * initialization segment has been parsed AND the chunk parsing has been
+         * done (this can be done very simply by listening to the same
+         * `ISharedReference`, as its callbacks are called in the same order
+         * than the one in which they are added.
+         */
+
+        var isWaitingOnInitSegment = false;
+        /** Scheduled actual segment request. */
+
+        var request = self._segmentFetcher.createRequest(context, priority, {
+          /**
+           * Callback called when the request has to be retried.
+           * @param {Error} error
+           */
+          onRetry: function onRetry(error) {
+            obs.next({
               type: "retry",
               value: {
                 segment: segment,
-                error: evt.value
+                error: error
               }
             });
+          },
 
-          case "interrupted":
+          /**
+           * Callback called when the request has to be interrupted and
+           * restarted later.
+           */
+          beforeInterrupted: function beforeInterrupted() {
             log/* default.info */.Z.info("Stream: segment request interrupted temporarly.", segment.id, segment.time);
-            return empty/* EMPTY */.E;
+          },
 
-          case "ended":
-            _this2._mediaSegmentRequest = null;
+          /**
+           * Callback called when a decodable chunk of the segment is available.
+           * @param {Function} parse - Function allowing to parse the segment.
+           */
+          onChunk: function onChunk(parse) {
+            var initTimescale = self._initSegmentInfoRef.getValue();
 
-            var lastQueue = _this2._downloadQueue.getValue().segmentQueue;
+            if (initTimescale !== undefined) {
+              emitChunk(parse(initTimescale !== null && initTimescale !== void 0 ? initTimescale : undefined));
+            } else {
+              isWaitingOnInitSegment = true; // We could also technically call `waitUntilDefined` in both cases,
+              // but I found it globally clearer to segregate the two cases,
+              // especially to always have a meaningful `isWaitingOnInitSegment`
+              // boolean which is a very important variable.
 
-            if (lastQueue.length === 0) {
-              return (0,of.of)({
-                type: "end-of-queue",
-                value: null
+              self._initSegmentInfoRef.waitUntilDefined(function (actualTimescale) {
+                emitChunk(parse(actualTimescale !== null && actualTimescale !== void 0 ? actualTimescale : undefined));
+              }, {
+                clearSignal: canceller.signal
               });
-            } else if (lastQueue[0].segment.id === segment.id) {
-              lastQueue.shift();
             }
+          },
 
-            return recursivelyRequestSegments(lastQueue[0]);
+          /** Callback called after all chunks have been sent. */
+          onAllChunksReceived: function onAllChunksReceived() {
+            if (!isWaitingOnInitSegment) {
+              obs.next({
+                type: "end-of-segment",
+                value: {
+                  segment: segment
+                }
+              });
+            } else {
+              self._mediaSegmentsAwaitingInitMetadata.add(segment.id);
 
-          case "chunk":
-          case "chunk-complete":
-            _this2._mediaSegmentsAwaitingInitMetadata.add(segment.id);
-
-            return _this2._initSegmentMetadata$.pipe((0,take/* take */.q)(1), (0,map/* map */.U)(function (initTimescale) {
-              if (evt.type === "chunk-complete") {
-                return {
+              self._initSegmentInfoRef.waitUntilDefined(function () {
+                obs.next({
                   type: "end-of-segment",
                   value: {
                     segment: segment
                   }
-                };
-              }
+                });
 
-              var parsed = evt.parse(initTimescale);
-              (0,assert/* default */.Z)(parsed.segmentType === "media", "Should have loaded a media segment.");
-              return (0,object_assign/* default */.Z)({}, parsed, {
-                type: "parsed-media",
-                segment: segment
+                self._mediaSegmentsAwaitingInitMetadata["delete"](segment.id);
+
+                isWaitingOnInitSegment = false;
+              }, {
+                clearSignal: canceller.signal
               });
-            }), finalize(function () {
-              _this2._mediaSegmentsAwaitingInitMetadata["delete"](segment.id);
-            }));
+            }
+          },
 
-          default:
-            (0,assert_unreachable/* default */.Z)(evt);
+          /**
+           * Callback called right after the request ended but before the next
+           * requests are scheduled. It is used to schedule the next segment.
+           */
+          beforeEnded: function beforeEnded() {
+            self._mediaSegmentRequest = null;
+
+            if (isWaitingOnInitSegment) {
+              self._initSegmentInfoRef.waitUntilDefined(continueToNextSegment, {
+                clearSignal: canceller.signal
+              });
+            } else {
+              continueToNextSegment();
+            }
+          }
+        }, canceller.signal);
+
+        request["catch"](function (error) {
+          if (!isComplete) {
+            isComplete = true;
+            obs.error(error);
+          }
+        });
+        self._mediaSegmentRequest = {
+          segment: segment,
+          priority: priority,
+          request: request
+        };
+        return function () {
+          self._mediaSegmentsAwaitingInitMetadata["delete"](segment.id);
+
+          if (nextSegmentSubscription !== undefined) {
+            nextSegmentSubscription.unsubscribe();
+          }
+
+          if (isComplete) {
+            return;
+          }
+
+          isComplete = true;
+          isWaitingOnInitSegment = false;
+          canceller.cancel();
+        };
+
+        function emitChunk(parsed) {
+          (0,assert/* default */.Z)(parsed.segmentType === "media", "Should have loaded a media segment.");
+          obs.next((0,object_assign/* default */.Z)({}, parsed, {
+            type: "parsed-media",
+            segment: segment
+          }));
         }
-      }));
-    };
 
-    return (0,defer/* defer */.P)(function () {
-      return recursivelyRequestSegments(currentNeededSegment);
-    }).pipe(finalize(function () {
-      _this2._mediaSegmentRequest = null;
-    }));
+        function continueToNextSegment() {
+          var lastQueue = self._downloadQueue.getValue().segmentQueue;
+
+          if (lastQueue.length === 0) {
+            obs.next({
+              type: "end-of-queue",
+              value: null
+            });
+            isComplete = true;
+            obs.complete();
+            return;
+          } else if (lastQueue[0].segment.id === segment.id) {
+            lastQueue.shift();
+          }
+
+          isComplete = true;
+          nextSegmentSubscription = recursivelyRequestSegments(lastQueue[0]).subscribe(obs);
+        }
+      });
+    }
   }
   /**
    * Internal logic performing initialization segment requests.
@@ -51942,70 +52649,89 @@ var DownloadingQueue = /*#__PURE__*/function () {
       this._initSegmentRequest = null;
       return empty/* EMPTY */.E;
     }
+    /* eslint-disable-next-line @typescript-eslint/no-this-alias */
 
-    var segment = queuedInitSegment.segment,
-        priority = queuedInitSegment.priority;
-    var context = (0,object_assign/* default */.Z)({
-      segment: segment
-    }, this._content);
 
-    var request$ = this._segmentFetcher.createRequest(context, priority);
+    var self = this;
+    return new Observable/* Observable */.y(function (obs) {
+      /** TaskCanceller linked to this Observable's lifecycle. */
+      var canceller = new task_canceller/* default */.ZP();
+      var segment = queuedInitSegment.segment,
+          priority = queuedInitSegment.priority;
+      var context = (0,object_assign/* default */.Z)({
+        segment: segment
+      }, _this3._content);
+      /**
+       * If `true` , the Observable has either errored, completed, or was
+       * unsubscribed from.
+       */
 
-    this._initSegmentRequest = {
-      segment: segment,
-      priority: priority,
-      request$: request$
-    };
-    return request$.pipe((0,mergeMap/* mergeMap */.z)(function (evt) {
-      switch (evt.type) {
-        case "retry":
-          return (0,of.of)({
+      var isComplete = false;
+
+      var request = _this3._segmentFetcher.createRequest(context, priority, {
+        onRetry: function onRetry(err) {
+          obs.next({
             type: "retry",
             value: {
               segment: segment,
-              error: evt.value
+              error: err
             }
           });
-
-        case "interrupted":
+        },
+        beforeInterrupted: function beforeInterrupted() {
           log/* default.info */.Z.info("Stream: init segment request interrupted temporarly.", segment.id);
-          return empty/* EMPTY */.E;
+        },
+        beforeEnded: function beforeEnded() {
+          self._initSegmentRequest = null;
+          isComplete = true;
+          obs.complete();
+        },
+        onChunk: function onChunk(parse) {
+          var _a;
 
-        case "chunk":
-          var parsed = evt.parse(undefined);
+          var parsed = parse(undefined);
           (0,assert/* default */.Z)(parsed.segmentType === "init", "Should have loaded an init segment.");
-          return (0,concat/* concat */.z)((0,of.of)((0,object_assign/* default */.Z)({}, parsed, {
+          obs.next((0,object_assign/* default */.Z)({}, parsed, {
             type: "parsed-init",
             segment: segment
-          })), // We want to emit parsing information strictly AFTER the
-          // initialization segment is emitted. Hence why we perform this
-          // side-effect a posteriori in a concat operator
-          (0,defer/* defer */.P)(function () {
-            if (parsed.segmentType === "init") {
-              _this3._initSegmentMetadata$.next(parsed.initTimescale);
-            }
-
-            return empty/* EMPTY */.E;
           }));
 
-        case "chunk-complete":
-          return (0,of.of)({
+          if (parsed.segmentType === "init") {
+            self._initSegmentInfoRef.setValue((_a = parsed.initTimescale) !== null && _a !== void 0 ? _a : null);
+          }
+        },
+        onAllChunksReceived: function onAllChunksReceived() {
+          obs.next({
             type: "end-of-segment",
             value: {
               segment: segment
             }
           });
+        }
+      }, canceller.signal);
 
-        case "ended":
-          return empty/* EMPTY */.E;
-        // Do nothing, just here to check every case
+      request["catch"](function (error) {
+        if (!isComplete) {
+          isComplete = true;
+          obs.error(error);
+        }
+      });
+      _this3._initSegmentRequest = {
+        segment: segment,
+        priority: priority,
+        request: request
+      };
+      return function () {
+        _this3._initSegmentRequest = null;
 
-        default:
-          (0,assert_unreachable/* default */.Z)(evt);
-      }
-    })).pipe(finalize(function () {
-      _this3._initSegmentRequest = null;
-    }));
+        if (isComplete) {
+          return;
+        }
+
+        isComplete = true;
+        canceller.cancel();
+      };
+    });
   };
 
   return DownloadingQueue;
@@ -52097,10 +52823,16 @@ function checkForDiscontinuity(content, checkedRange, nextSegmentStart, hasFinis
   if ( // Next buffered segment starts after the start of the current range
   nextBufferedSegment.bufferedStart !== undefined && nextBufferedSegment.bufferedStart > checkedRange.start && ( // and no segment will fill in that hole
   nextSegmentStart === null || nextBufferedSegment.infos.segment.end <= nextSegmentStart)) {
+    var _discontinuityEnd = nextBufferedSegment.bufferedStart;
+
+    if (!hasFinishedLoading && representation.index.awaitSegmentBetween(checkedRange.start, _discontinuityEnd) !== false) {
+      return null;
+    }
+
     log/* default.debug */.Z.debug("RS: current discontinuity encountered", adaptation.type, nextBufferedSegment.bufferedStart);
     return {
       start: undefined,
-      end: nextBufferedSegment.bufferedStart
+      end: _discontinuityEnd
     };
   } // Check if there's a discontinuity BETWEEN segments of the current range
 
@@ -52108,15 +52840,26 @@ function checkForDiscontinuity(content, checkedRange, nextSegmentStart, hasFinis
   var nextHoleIdx = getIndexOfFirstDiscontinuityBetweenChunks(bufferedSegments, checkedRange, nextBufferedInRangeIdx + 1); // If there was a hole between two consecutives segments, and if this hole
   // comes before the next segment to load, there is a discontinuity (that hole!)
 
-  if (nextHoleIdx !== null && (nextSegmentStart === null || bufferedSegments[nextHoleIdx].infos.segment.end <= nextSegmentStart)) {
-    var start = bufferedSegments[nextHoleIdx - 1].bufferedEnd;
-    var end = bufferedSegments[nextHoleIdx].bufferedStart;
-    log/* default.debug */.Z.debug("RS: future discontinuity encountered", adaptation.type, start, end);
-    return {
-      start: start,
-      end: end
-    };
-  } else if (nextSegmentStart === null) {
+  if (nextHoleIdx !== null) {
+    var segmentInfoBeforeHole = bufferedSegments[nextHoleIdx - 1];
+    var segmentInfoAfterHole = bufferedSegments[nextHoleIdx];
+
+    if (nextSegmentStart === null || segmentInfoAfterHole.infos.segment.end <= nextSegmentStart) {
+      if (!hasFinishedLoading && representation.index.awaitSegmentBetween(segmentInfoBeforeHole.infos.segment.end, segmentInfoAfterHole.infos.segment.time) !== false) {
+        return null;
+      }
+
+      var start = segmentInfoBeforeHole.bufferedEnd;
+      var end = segmentInfoAfterHole.bufferedStart;
+      log/* default.debug */.Z.debug("RS: future discontinuity encountered", adaptation.type, start, end);
+      return {
+        start: start,
+        end: end
+      };
+    }
+  }
+
+  if (nextSegmentStart === null) {
     // If no hole between segments and no segment to load, check for a
     // discontinuity at the end of the Period
     if (hasFinishedLoading && period.end !== undefined) {
@@ -52159,12 +52902,12 @@ function checkForDiscontinuity(content, checkedRange, nextSegmentStart, hasFinis
 
       if (bufSeg.bufferedStart < checkedRange.end) {
         if (bufSeg.bufferedEnd !== undefined && bufSeg.bufferedEnd < checkedRange.end) {
-          var _discontinuityEnd = representation.index.checkDiscontinuity(checkedRange.end);
+          var _discontinuityEnd2 = representation.index.checkDiscontinuity(checkedRange.end);
 
-          if (_discontinuityEnd !== null) {
+          if (_discontinuityEnd2 !== null) {
             return {
               start: bufSeg.bufferedEnd,
-              end: _discontinuityEnd
+              end: _discontinuityEnd2
             };
           }
         }
@@ -52861,7 +53604,8 @@ function getSegmentPriority(segmentTime, wantedStartTimestamp) {
 function getBufferStatus(content, initialWantedTime, playbackObserver, fastSwitchThreshold, bufferGoal, maxBufferSize, segmentBuffer) {
   segmentBuffer.synchronizeInventory();
   var representation = content.representation;
-  var neededRange = getRangeOfNeededSegments(content, initialWantedTime, bufferGoal);
+  var askedStart = playbackObserver.getIsPaused() || playbackObserver.getPlaybackRate() <= 0 ? initialWantedTime - 0.1 : initialWantedTime;
+  var neededRange = getRangeOfNeededSegments(content, askedStart, bufferGoal);
   var shouldRefreshManifest = representation.index.shouldRefresh(neededRange.start, neededRange.end);
   /**
    * Every segment awaiting an "EndOfSegment" operation, which indicates that a
@@ -52901,7 +53645,7 @@ function getBufferStatus(content, initialWantedTime, playbackObserver, fastSwitc
 
   var prioritizedNeededSegments = segmentsToLoad.map(function (segment) {
     return {
-      priority: getSegmentPriority(segment.time, initialWantedTime),
+      priority: getSegmentPriority(segment.time, askedStart),
       segment: segment
     };
   });
@@ -52910,37 +53654,29 @@ function getBufferStatus(content, initialWantedTime, playbackObserver, fastSwitc
    * needed segments for this Representation until the end of the Period.
    */
 
-  var hasFinishedLoading = neededRange.hasReachedPeriodEnd && prioritizedNeededSegments.length === 0 && segmentsOnHold.length === 0;
-  var imminentDiscontinuity;
+  var hasFinishedLoading = representation.index.isInitialized() && representation.index.isFinished() && neededRange.hasReachedPeriodEnd && prioritizedNeededSegments.length === 0 && segmentsOnHold.length === 0;
+  /**
+   * Start time in seconds of the next available not-yet pushed segment.
+   * `null` if no segment is wanted for the current wanted range.
+   */
 
-  if (!representation.index.isInitialized() || // TODO better handle contents not chronologically generated
-  !representation.index.areSegmentsChronologicallyGenerated() && !hasFinishedLoading) {
-    // We might be missing information about future segments
-    imminentDiscontinuity = null;
-  } else {
-    /**
-     * Start time in seconds of the next available not-yet pushed segment.
-     * `null` if no segment is wanted for the current wanted range.
-     */
-    var nextSegmentStart = null;
+  var nextSegmentStart = null;
 
-    if (segmentsBeingPushed.length > 0) {
-      nextSegmentStart = Math.min.apply(Math, segmentsBeingPushed.map(function (info) {
-        return info.segment.time;
-      }));
-    }
-
-    if (segmentsOnHold.length > 0) {
-      nextSegmentStart = nextSegmentStart !== null ? Math.min(nextSegmentStart, segmentsOnHold[0].time) : segmentsOnHold[0].time;
-    }
-
-    if (prioritizedNeededSegments.length > 0) {
-      nextSegmentStart = nextSegmentStart !== null ? Math.min(nextSegmentStart, prioritizedNeededSegments[0].segment.time) : prioritizedNeededSegments[0].segment.time;
-    }
-
-    imminentDiscontinuity = checkForDiscontinuity(content, neededRange, nextSegmentStart, hasFinishedLoading, bufferedSegments);
+  if (segmentsBeingPushed.length > 0) {
+    nextSegmentStart = Math.min.apply(Math, segmentsBeingPushed.map(function (info) {
+      return info.segment.time;
+    }));
   }
 
+  if (segmentsOnHold.length > 0) {
+    nextSegmentStart = nextSegmentStart !== null ? Math.min(nextSegmentStart, segmentsOnHold[0].time) : segmentsOnHold[0].time;
+  }
+
+  if (prioritizedNeededSegments.length > 0) {
+    nextSegmentStart = nextSegmentStart !== null ? Math.min(nextSegmentStart, prioritizedNeededSegments[0].segment.time) : prioritizedNeededSegments[0].segment.time;
+  }
+
+  var imminentDiscontinuity = checkForDiscontinuity(content, neededRange, nextSegmentStart, hasFinishedLoading, bufferedSegments);
   return {
     imminentDiscontinuity: imminentDiscontinuity,
     hasFinishedLoading: hasFinishedLoading,
@@ -52966,7 +53702,7 @@ function getRangeOfNeededSegments(content, initialWantedTime, bufferGoal) {
   var manifest = content.manifest,
       period = content.period,
       representation = content.representation;
-  var lastIndexPosition = representation.index.getLastPosition();
+  var lastIndexPosition = representation.index.getLastAvailablePosition();
   var representationIndex = representation.index; // There is an exception for when the current initially wanted time is already
   // after the last position with segments AND when we're playing the absolute
   // last Period in the Manifest.
@@ -52977,7 +53713,7 @@ function getRangeOfNeededSegments(content, initialWantedTime, bufferGoal) {
   if (!(0,is_null_or_undefined/* default */.Z)(lastIndexPosition) && initialWantedTime >= lastIndexPosition && representationIndex.isInitialized() && representationIndex.isFinished() && isPeriodTheCurrentAndLastOne(manifest, period, initialWantedTime)) {
     wantedStartPosition = lastIndexPosition - 1;
   } else {
-    wantedStartPosition = initialWantedTime;
+    wantedStartPosition = initialWantedTime - 0.1;
   }
 
   var wantedEndPosition = wantedStartPosition + bufferGoal;
@@ -53059,6 +53795,15 @@ function getPlayableBufferedSegments(neededRange, segmentInventory) {
   return overlappingChunks;
 }
 ;// CONCATENATED MODULE: ./src/core/stream/representation/force_garbage_collection.ts
+
+
+
+function force_garbage_collection_createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = force_garbage_collection_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function force_garbage_collection_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return force_garbage_collection_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return force_garbage_collection_arrayLikeToArray(o, minLen); }
+
+function force_garbage_collection_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -53077,44 +53822,20 @@ function getPlayableBufferedSegments(neededRange, segmentInventory) {
 
 
 
-
 /**
  * Run the garbage collector.
  *
  * Try to clean up buffered ranges from a low gcGap at first.
  * If it does not succeed to clean up space, use a higher gcCap.
  *
- * @param {Observable} timings$
+ * @param {number} currentPosition
  * @param {Object} bufferingQueue
- * @returns {Observable}
+ * @param {Object} cancellationSignal
+ * @returns {Promise}
  */
 
-function forceGarbageCollection(currentPosition, bufferingQueue) {
-  return (0,defer/* defer */.P)(function () {
-    var GC_GAP_CALM = config/* default.getCurrent */.Z.getCurrent().BUFFER_GC_GAPS.CALM;
-    var GC_GAP_BEEFY = config/* default.getCurrent */.Z.getCurrent().BUFFER_GC_GAPS.BEEFY;
-    log/* default.warn */.Z.warn("Stream: Running garbage collector");
-    var buffered = bufferingQueue.getBufferedRanges();
-    var cleanedupRanges = selectGCedRanges(currentPosition, buffered, GC_GAP_CALM); // more aggressive GC if we could not find any range to clean
-
-    if (cleanedupRanges.length === 0) {
-      cleanedupRanges = selectGCedRanges(currentPosition, buffered, GC_GAP_BEEFY);
-    }
-
-    if (log/* default.hasLevel */.Z.hasLevel("DEBUG")) {
-      log/* default.debug */.Z.debug("Stream: GC cleaning", cleanedupRanges.map(function (_ref) {
-        var start = _ref.start,
-            end = _ref.end;
-        return "start: " + start + " - end " + end;
-      }).join(", "));
-    }
-
-    return (0,from/* from */.D)(cleanedupRanges.map(function (_ref2) {
-      var start = _ref2.start,
-          end = _ref2.end;
-      return start >= end ? (0,of.of)(null) : bufferingQueue.removeBuffer(start, end);
-    })).pipe((0,concatAll/* concatAll */.u)());
-  });
+function forceGarbageCollection(_x, _x2, _x3) {
+  return _forceGarbageCollection.apply(this, arguments);
 }
 /**
  * Buffer garbage collector algorithm.
@@ -53129,6 +53850,68 @@ function forceGarbageCollection(currentPosition, bufferingQueue) {
  * should consider cleaning up.
  * @returns {Array.<Object>} - Ranges selected for clean up
  */
+
+function _forceGarbageCollection() {
+  _forceGarbageCollection = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(currentPosition, bufferingQueue, cancellationSignal) {
+    var GC_GAP_CALM, GC_GAP_BEEFY, buffered, cleanedupRanges, _iterator, _step, range, start, end;
+
+    return regenerator_default().wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            GC_GAP_CALM = config/* default.getCurrent */.Z.getCurrent().BUFFER_GC_GAPS.CALM;
+            GC_GAP_BEEFY = config/* default.getCurrent */.Z.getCurrent().BUFFER_GC_GAPS.BEEFY;
+            log/* default.warn */.Z.warn("Stream: Running garbage collector");
+            buffered = bufferingQueue.getBufferedRanges();
+            cleanedupRanges = selectGCedRanges(currentPosition, buffered, GC_GAP_CALM); // more aggressive GC if we could not find any range to clean
+
+            if (cleanedupRanges.length === 0) {
+              cleanedupRanges = selectGCedRanges(currentPosition, buffered, GC_GAP_BEEFY);
+            }
+
+            if (log/* default.hasLevel */.Z.hasLevel("DEBUG")) {
+              log/* default.debug */.Z.debug("Stream: GC cleaning", cleanedupRanges.map(function (_ref2) {
+                var start = _ref2.start,
+                    end = _ref2.end;
+                return "start: " + start + " - end " + end;
+              }).join(", "));
+            }
+
+            _iterator = force_garbage_collection_createForOfIteratorHelperLoose(cleanedupRanges);
+
+          case 8:
+            if ((_step = _iterator()).done) {
+              _context.next = 16;
+              break;
+            }
+
+            range = _step.value;
+            start = range.start, end = range.end;
+
+            if (!(start < end)) {
+              _context.next = 14;
+              break;
+            }
+
+            _context.next = 14;
+            return bufferingQueue.removeBuffer(start, end, cancellationSignal);
+
+          case 14:
+            _context.next = 8;
+            break;
+
+          case 16:
+            return _context.abrupt("return");
+
+          case 17:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee);
+  }));
+  return _forceGarbageCollection.apply(this, arguments);
+}
 
 function selectGCedRanges(position, buffered, gcGap) {
   var _getInnerAndOuterTime = (0,ranges/* getInnerAndOuterTimeRanges */.F_)(buffered, position),
@@ -53151,9 +53934,9 @@ function selectGCedRanges(position, buffered, gcGap) {
 
   if (innerRange !== null) {
     if (log/* default.hasLevel */.Z.hasLevel("DEBUG")) {
-      log/* default.debug */.Z.debug("Stream: GC removing part of inner range", cleanedupRanges.map(function (_ref3) {
-        var start = _ref3.start,
-            end = _ref3.end;
+      log/* default.debug */.Z.debug("Stream: GC removing part of inner range", cleanedupRanges.map(function (_ref) {
+        var start = _ref.start,
+            end = _ref.end;
         return "start: " + start + " - end " + end;
       }).join(", "));
     }
@@ -53176,6 +53959,9 @@ function selectGCedRanges(position, buffered, gcGap) {
   return cleanedupRanges;
 }
 ;// CONCATENATED MODULE: ./src/core/stream/representation/append_segment_to_buffer.ts
+
+
+
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -53197,36 +53983,78 @@ function selectGCedRanges(position, buffered, gcGap) {
  */
 
 
-
 /**
  * Append a segment to the given segmentBuffer.
  * If it leads to a QuotaExceededError, try to run our custom range
  * _garbage collector_ then retry.
- *
  * @param {Observable} playbackObserver
  * @param {Object} segmentBuffer
  * @param {Object} dataInfos
- * @returns {Observable}
+ * @param {Object} cancellationSignal
+ * @returns {Promise}
  */
 
-function appendSegmentToBuffer(playbackObserver, segmentBuffer, dataInfos) {
-  var append$ = segmentBuffer.pushChunk(dataInfos);
-  return append$.pipe((0,catchError/* catchError */.K)(function (appendError) {
-    if (!(appendError instanceof Error) || appendError.name !== "QuotaExceededError") {
-      var reason = appendError instanceof Error ? appendError.toString() : "An unknown error happened when pushing content";
-      throw new media_error/* default */.Z("BUFFER_APPEND_ERROR", reason);
-    }
+function appendSegmentToBuffer(_x, _x2, _x3, _x4) {
+  return _appendSegmentToBuffer.apply(this, arguments);
+}
 
-    return playbackObserver.getReference().asObservable().pipe((0,take/* take */.q)(1), (0,mergeMap/* mergeMap */.z)(function (observation) {
-      var _a;
+function _appendSegmentToBuffer() {
+  _appendSegmentToBuffer = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(playbackObserver, segmentBuffer, dataInfos, cancellationSignal) {
+    var _a, reason, _playbackObserver$get, position, currentPos, _reason;
 
-      var currentPos = (_a = observation.position.pending) !== null && _a !== void 0 ? _a : observation.position.last;
-      return (0,concat/* concat */.z)(forceGarbageCollection(currentPos, segmentBuffer).pipe((0,ignoreElements/* ignoreElements */.l)()), append$).pipe((0,catchError/* catchError */.K)(function (forcedGCError) {
-        var reason = forcedGCError instanceof Error ? forcedGCError.toString() : "Could not clean the buffer";
-        throw new media_error/* default */.Z("BUFFER_FULL_ERROR", reason);
-      }));
-    }));
+    return regenerator_default().wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            _context.prev = 0;
+            _context.next = 3;
+            return segmentBuffer.pushChunk(dataInfos, cancellationSignal);
+
+          case 3:
+            _context.next = 23;
+            break;
+
+          case 5:
+            _context.prev = 5;
+            _context.t0 = _context["catch"](0);
+
+            if (!(!(_context.t0 instanceof Error) || _context.t0.name !== "QuotaExceededError")) {
+              _context.next = 10;
+              break;
+            }
+
+            reason = _context.t0 instanceof Error ? _context.t0.toString() : "An unknown error happened when pushing content";
+            throw new media_error/* default */.Z("BUFFER_APPEND_ERROR", reason);
+
+          case 10:
+            _playbackObserver$get = playbackObserver.getReference().getValue(), position = _playbackObserver$get.position;
+            currentPos = (_a = position.pending) !== null && _a !== void 0 ? _a : position.last;
+            _context.prev = 12;
+            _context.next = 15;
+            return forceGarbageCollection(currentPos, segmentBuffer, cancellationSignal);
+
+          case 15:
+            _context.next = 17;
+            return segmentBuffer.pushChunk(dataInfos, cancellationSignal);
+
+          case 17:
+            _context.next = 23;
+            break;
+
+          case 19:
+            _context.prev = 19;
+            _context.t1 = _context["catch"](12);
+            _reason = _context.t1 instanceof Error ? _context.t1.toString() : "Could not clean the buffer";
+            throw new media_error/* default */.Z("BUFFER_FULL_ERROR", _reason);
+
+          case 23:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, _callee, null, [[0, 5], [12, 19]]);
   }));
+  return _appendSegmentToBuffer.apply(this, arguments);
 }
 ;// CONCATENATED MODULE: ./src/core/stream/representation/push_init_segment.ts
 /**
@@ -53244,6 +54072,8 @@ function appendSegmentToBuffer(playbackObserver, segmentBuffer, dataInfos) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 
 
 
@@ -53275,9 +54105,12 @@ function pushInitSegment(_ref) {
       appendWindow: [undefined, undefined],
       codec: codec
     };
-    return appendSegmentToBuffer(playbackObserver, segmentBuffer, {
-      data: data,
-      inventoryInfos: null
+    var canceller = new task_canceller/* default */.ZP();
+    return fromCancellablePromise(canceller, function () {
+      return appendSegmentToBuffer(playbackObserver, segmentBuffer, {
+        data: data,
+        inventoryInfos: null
+      }, canceller.signal);
     }).pipe((0,map/* map */.U)(function () {
       var buffered = segmentBuffer.getBufferedRanges();
       return stream_events_generators/* default.addedSegment */.Z.addedSegment(content, segment, buffered, segmentData);
@@ -53300,6 +54133,8 @@ function pushInitSegment(_ref) {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
 
 
 
@@ -53367,9 +54202,12 @@ function pushMediaSegment(_ref) {
       start: estimatedStart,
       end: estimatedEnd
     }, content);
-    return appendSegmentToBuffer(playbackObserver, segmentBuffer, {
-      data: data,
-      inventoryInfos: inventoryInfos
+    var canceller = new task_canceller/* default */.ZP();
+    return fromCancellablePromise(canceller, function () {
+      return appendSegmentToBuffer(playbackObserver, segmentBuffer, {
+        data: data,
+        inventoryInfos: inventoryInfos
+      }, canceller.signal);
     }).pipe((0,map/* map */.U)(function () {
       var buffered = segmentBuffer.getBufferedRanges();
       return stream_events_generators/* default.addedSegment */.Z.addedSegment(content, segment, buffered, chunkData);
@@ -53407,6 +54245,8 @@ function representation_stream_arrayLikeToArray(arr, len) { if (len == null || l
  * It chooses which segments should be downloaded according to the current
  * position and what is currently buffered.
  */
+
+
 
 
 
@@ -53594,8 +54434,11 @@ function RepresentationStream(_ref) {
       var gcedPosition = Math.max(0, initialWantedTime - UPTO_CURRENT_POSITION_CLEANUP);
 
       if (gcedPosition > 0) {
-        bufferRemoval = segmentBuffer.removeBuffer(0, gcedPosition) // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        .pipe((0,ignoreElements/* ignoreElements */.l)());
+        var removalCanceller = new task_canceller/* default */.ZP();
+        bufferRemoval = fromCancellablePromise(removalCanceller, function () {
+          return segmentBuffer.removeBuffer(0, gcedPosition, removalCanceller.signal);
+        } // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        ).pipe((0,ignoreElements/* ignoreElements */.l)());
       }
     }
 
@@ -53636,9 +54479,12 @@ function RepresentationStream(_ref) {
       case "end-of-segment":
         {
           var segment = evt.value.segment;
-          return segmentBuffer.endOfSegment((0,object_assign/* default */.Z)({
-            segment: segment
-          }, content)) // NOTE As of now (RxJS 7.4.0), RxJS defines `ignoreElements` default
+          var endOfSegmentCanceller = new task_canceller/* default */.ZP();
+          return fromCancellablePromise(endOfSegmentCanceller, function () {
+            return segmentBuffer.endOfSegment((0,object_assign/* default */.Z)({
+              segment: segment
+            }, content), endOfSegmentCanceller.signal);
+          }) // NOTE As of now (RxJS 7.4.0), RxJS defines `ignoreElements` default
           // first type parameter as `any` instead of the perfectly fine `unknown`,
           // leading to linter issues, as it forbids the usage of `any`.
           // This is why we're disabling the eslint rule.
@@ -54034,6 +54880,7 @@ function getBufferedRangesFromRepresentations(inventory, period, adaptation, rep
 
 
 
+
 /**
  * Create new AdaptationStream Observable, which task will be to download the
  * media data for a given Adaptation (i.e. "track").
@@ -54132,7 +54979,7 @@ function AdaptationStream(_ref) {
     }), (0,map/* map */.U)(function (_ref3) {
       var bitrate = _ref3.bitrate;
       log/* default.debug */.Z.debug("Stream: new " + adaptation.type + " bitrate estimate", bitrate);
-      return stream_events_generators/* default.bitrateEstimationChange */.Z.bitrateEstimationChange(adaptation.type, bitrate);
+      return stream_events_generators/* default.bitrateEstimateChange */.Z.bitrateEstimateChange(adaptation.type, bitrate);
     }));
     /**
      * Recursively create `RepresentationStream`s according to the last
@@ -54163,8 +55010,17 @@ function AdaptationStream(_ref) {
         var cleanBuffer$ = concat/* concat.apply */.z.apply(void 0, switchStrat.value.map(function (_ref4) {
           var start = _ref4.start,
               end = _ref4.end;
-          return segmentBuffer.removeBuffer(start, end);
-        })).pipe((0,ignoreElements/* ignoreElements */.l)());
+          var canceller = new task_canceller/* default */.ZP();
+          return fromCancellablePromise(canceller, function () {
+            return segmentBuffer.removeBuffer(start, end, canceller.signal);
+          }) // NOTE As of now (RxJS 7.4.0), RxJS defines `ignoreElements` default
+          // first type parameter as `any` instead of the perfectly fine `unknown`,
+          // leading to linter issues, as it forbids the usage of `any`.
+          // This is why we're disabling the eslint rule.
+
+          /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
+          .pipe((0,ignoreElements/* ignoreElements */.l)());
+        }));
         obs$ = (0,concat/* concat */.z)(cleanBuffer$, needsBufferFlush$, representationStreams$);
     }
 
@@ -54186,7 +55042,7 @@ function AdaptationStream(_ref) {
        */
 
       var terminateCurrentStream$ = lastRepEstimate.asObservable().pipe((0,filter/* filter */.h)(function (newEstimate) {
-        return newEstimate === null || newEstimate.representation.id !== representation.id || newEstimate.manual && !currEstimate.manual;
+        return newEstimate === null || newEstimate.representation.id !== representation.id;
       }), (0,take/* take */.q)(1), (0,map/* map */.U)(function (newEstimate) {
         if (newEstimate === null) {
           log/* default.info */.Z.info("Stream: urgent Representation termination", adaptation.type);
@@ -54711,6 +55567,8 @@ function getBufferedRangesFromAdaptation(inventory, period, adaptation) {
 
 
 
+
+
 /**
  * Create single PeriodStream Observable:
  *   - Lazily create (or reuse) a SegmentBuffer for the given type.
@@ -54764,13 +55622,16 @@ function PeriodStream(_ref) {
           return reloadAfterSwitch(period, bufferType, playbackObserver, 0);
         }
 
-        if (period.end === undefined) {
-          cleanBuffer$ = segmentBufferStatus.value.removeBuffer(period.start, Infinity);
-        } else if (period.end <= period.start) {
-          cleanBuffer$ = (0,of.of)(null);
-        } else {
-          cleanBuffer$ = segmentBufferStatus.value.removeBuffer(period.start, period.end);
-        }
+        var canceller = new task_canceller/* default */.ZP();
+        cleanBuffer$ = fromCancellablePromise(canceller, function () {
+          if (period.end === undefined) {
+            return segmentBufferStatus.value.removeBuffer(period.start, Infinity, canceller.signal);
+          } else if (period.end <= period.start) {
+            return Promise.resolve();
+          } else {
+            return segmentBufferStatus.value.removeBuffer(period.start, period.end, canceller.signal);
+          }
+        });
       } else {
         if (segmentBufferStatus.type === "uninitialized") {
           segmentBuffersStore.disableSegmentBuffer(bufferType);
@@ -54810,11 +55671,17 @@ function PeriodStream(_ref) {
       var cleanBuffer$ = strategy.type === "clean-buffer" || strategy.type === "flush-buffer" ? concat/* concat.apply */.z.apply(void 0, strategy.value.map(function (_ref2) {
         var start = _ref2.start,
             end = _ref2.end;
-        return segmentBuffer.removeBuffer(start, end);
+        var canceller = new task_canceller/* default */.ZP();
+        return fromCancellablePromise(canceller, function () {
+          return segmentBuffer.removeBuffer(start, end, canceller.signal);
+        });
       })).pipe((0,ignoreElements/* ignoreElements */.l)()) : empty/* EMPTY */.E;
       var bufferGarbageCollector$ = garbageCollectors.get(segmentBuffer);
       var adaptationStream$ = createAdaptationStream(adaptation, representations, segmentBuffer);
-      return segmentBuffersStore.waitForUsableBuffers().pipe((0,mergeMap/* mergeMap */.z)(function () {
+      var cancelWait = new task_canceller/* default */.ZP();
+      return fromCancellablePromise(cancelWait, function () {
+        return segmentBuffersStore.waitForUsableBuffers(cancelWait.signal);
+      }).pipe((0,mergeMap/* mergeMap */.z)(function () {
         return (0,concat/* concat */.z)(cleanBuffer$, needsBufferFlush$, (0,merge/* merge */.T)(adaptationStream$, bufferGarbageCollector$));
       }));
     });
@@ -55267,6 +56134,9 @@ function getBlacklistedRanges(segmentBuffer, contents) {
 
 
 
+
+
+
 /**
  * Create and manage the various Stream Observables needed for the content to
  * play:
@@ -55311,19 +56181,21 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
     var bufferType = segmentBuffer.bufferType;
     var defaultMaxBehind = MAXIMUM_MAX_BUFFER_BEHIND[bufferType] != null ? MAXIMUM_MAX_BUFFER_BEHIND[bufferType] : Infinity;
     var defaultMaxAhead = MAXIMUM_MAX_BUFFER_AHEAD[bufferType] != null ? MAXIMUM_MAX_BUFFER_AHEAD[bufferType] : Infinity;
-    return BufferGarbageCollector({
-      segmentBuffer: segmentBuffer,
-      currentTime$: playbackObserver.getReference().asObservable().pipe((0,map/* map */.U)(function (o) {
-        var _a;
-
-        return (_a = o.position.pending) !== null && _a !== void 0 ? _a : o.position.last;
-      })),
-      maxBufferBehind$: maxBufferBehind.asObservable().pipe((0,map/* map */.U)(function (val) {
-        return Math.min(val, defaultMaxBehind);
-      })),
-      maxBufferAhead$: maxBufferAhead.asObservable().pipe((0,map/* map */.U)(function (val) {
-        return Math.min(val, defaultMaxAhead);
-      }))
+    return new Observable/* Observable */.y(function () {
+      var canceller = new task_canceller/* default */.ZP();
+      BufferGarbageCollector({
+        segmentBuffer: segmentBuffer,
+        playbackObserver: playbackObserver,
+        maxBufferBehind: (0,utils_reference/* createMappedReference */.lR)(maxBufferBehind, function (val) {
+          return Math.min(val, defaultMaxBehind);
+        }, canceller.signal),
+        maxBufferAhead: (0,utils_reference/* createMappedReference */.lR)(maxBufferAhead, function (val) {
+          return Math.min(val, defaultMaxAhead);
+        }, canceller.signal)
+      }, canceller.signal);
+      return function () {
+        canceller.cancel();
+      };
     });
   }); // Every PeriodStreams for every possible types
 
@@ -55489,7 +56361,15 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
       return concat/* concat.apply */.z.apply(void 0, rangesToClean.map(function (_ref3) {
         var start = _ref3.start,
             end = _ref3.end;
-        return start >= end ? empty/* EMPTY */.E : segmentBuffer.removeBuffer(start, end).pipe((0,ignoreElements/* ignoreElements */.l)());
+
+        if (start >= end) {
+          return empty/* EMPTY */.E;
+        }
+
+        var canceller = new task_canceller/* default */.ZP();
+        return fromCancellablePromise(canceller, function () {
+          return segmentBuffer.removeBuffer(start, end, canceller.signal);
+        }).pipe((0,ignoreElements/* ignoreElements */.l)());
       }).concat([// Schedule micro task before checking the last playback observation
       // to reduce the risk of race conditions where the next observation
       // was going to be emitted synchronously.
@@ -55673,6 +56553,7 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
 
 
 
+
  // NOTE As of now (RxJS 7.4.0), RxJS defines `ignoreElements` default
 // first type parameter as `any` instead of the perfectly fine `unknown`,
 // leading to linter issues, as it forbids the usage of `any`.
@@ -55689,12 +56570,12 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
  *    theoretically playable.
  *
  * @param {Object} manifest
- * @param {Observable} streams
+ * @param {Object} lastAdaptationChange
  * @param {Object} playbackObserver
  * @returns {Observable}
  */
 
-function ContentTimeBoundariesObserver(manifest, streams, playbackObserver) {
+function ContentTimeBoundariesObserver(manifest, lastAdaptationChange, playbackObserver) {
   /**
    * Allows to calculate the minimum and maximum playable position on the
    * whole content.
@@ -55712,7 +56593,7 @@ function ContentTimeBoundariesObserver(manifest, streams, playbackObserver) {
     if (wantedPosition < manifest.getMinimumSafePosition()) {
       var warning = new media_error/* default */.Z("MEDIA_TIME_BEFORE_MANIFEST", "The current position is behind the " + "earliest time announced in the Manifest.");
       return events_generators/* default.warning */.Z.warning(warning);
-    } else if (wantedPosition > maximumPositionCalculator.getCurrentMaximumPosition()) {
+    } else if (wantedPosition > maximumPositionCalculator.getMaximumAvailablePosition()) {
       var _warning = new media_error/* default */.Z("MEDIA_TIME_AFTER_MANIFEST", "The current position is after the latest " + "time announced in the Manifest.");
 
       return events_generators/* default.warning */.Z.warning(_warning);
@@ -55728,32 +56609,26 @@ function ContentTimeBoundariesObserver(manifest, streams, playbackObserver) {
 
   var contentDuration = (0,utils_reference/* default */.ZP)(undefined);
   var updateDurationOnManifestUpdate$ = (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,startWith/* startWith */.O)(null), (0,tap/* tap */.b)(function () {
-    if (!manifest.isDynamic) {
-      var maxPos = maximumPositionCalculator.getCurrentMaximumPosition();
-      contentDuration.setValue(maxPos);
-    } else {
-      // TODO handle finished dynamic contents?
-      contentDuration.setValue(undefined);
-    }
+    var duration = manifest.isDynamic ? maximumPositionCalculator.getEndingPosition() : maximumPositionCalculator.getMaximumAvailablePosition();
+    contentDuration.setValue(duration);
   }), (0,ignoreElements/* ignoreElements */.l)());
-  var updateDurationAndTimeBoundsOnTrackChange$ = streams.pipe((0,tap/* tap */.b)(function (message) {
-    if (message.type === "adaptationChange") {
-      var lastPeriod = manifest.periods[manifest.periods.length - 1];
+  var updateDurationAndTimeBoundsOnTrackChange$ = lastAdaptationChange.asObservable().pipe((0,tap/* tap */.b)(function (message) {
+    if (message === null || !manifest.isLastPeriodKnown) {
+      return;
+    }
 
-      if (message.value.period.id === (lastPeriod === null || lastPeriod === void 0 ? void 0 : lastPeriod.id)) {
+    var lastPeriod = manifest.periods[manifest.periods.length - 1];
+
+    if (message.value.period.id === (lastPeriod === null || lastPeriod === void 0 ? void 0 : lastPeriod.id)) {
+      if (message.value.type === "audio" || message.value.type === "video") {
         if (message.value.type === "audio") {
           maximumPositionCalculator.updateLastAudioAdaptation(message.value.adaptation);
-
-          if (!manifest.isDynamic) {
-            contentDuration.setValue(maximumPositionCalculator.getCurrentMaximumPosition());
-          }
-        } else if (message.value.type === "video") {
+        } else {
           maximumPositionCalculator.updateLastVideoAdaptation(message.value.adaptation);
-
-          if (!manifest.isDynamic) {
-            contentDuration.setValue(maximumPositionCalculator.getCurrentMaximumPosition());
-          }
         }
+
+        var newDuration = manifest.isDynamic ? maximumPositionCalculator.getMaximumAvailablePosition() : maximumPositionCalculator.getEndingPosition();
+        contentDuration.setValue(newDuration);
       }
     }
   }), (0,ignoreElements/* ignoreElements */.l)());
@@ -55786,7 +56661,7 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
    * If no Adaptation has been set, it should be set to `null`.
    *
    * Allows to calculate the maximum position more precizely in
-   * `getCurrentMaximumPosition`.
+   * `getMaximumAvailablePosition` and `getEndingPosition`.
    * @param {Object|null} adaptation
    */
 
@@ -55801,7 +56676,7 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
    * If no Adaptation has been set, it should be set to `null`.
    *
    * Allows to calculate the maximum position more precizely in
-   * `getCurrentMaximumPosition`.
+   * `getMaximumAvailablePosition` and `getEndingPosition`.
    * @param {Object|null} adaptation
    */
   ;
@@ -55810,13 +56685,13 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
     this._lastVideoAdaptation = adaptation;
   }
   /**
-   * Returns an estimate of the maximum position reachable under the current
-   * circumstances.
+   * Returns an estimate of the maximum position currently reachable (i.e.
+   * segments are available) under the current circumstances.
    * @returns {number}
    */
   ;
 
-  _proto.getCurrentMaximumPosition = function getCurrentMaximumPosition() {
+  _proto.getMaximumAvailablePosition = function getMaximumAvailablePosition() {
     var _a;
 
     if (this._manifest.isDynamic) {
@@ -55829,7 +56704,7 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
       if (this._lastVideoAdaptation === null) {
         return this._manifest.getMaximumSafePosition();
       } else {
-        var lastVideoPosition = getLastPositionFromAdaptation(this._lastVideoAdaptation);
+        var lastVideoPosition = getLastAvailablePositionFromAdaptation(this._lastVideoAdaptation);
 
         if (typeof lastVideoPosition !== "number") {
           return this._manifest.getMaximumSafePosition();
@@ -55838,7 +56713,7 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
         return lastVideoPosition;
       }
     } else if (this._lastVideoAdaptation === null) {
-      var lastAudioPosition = getLastPositionFromAdaptation(this._lastAudioAdaptation);
+      var lastAudioPosition = getLastAvailablePositionFromAdaptation(this._lastAudioAdaptation);
 
       if (typeof lastAudioPosition !== "number") {
         return this._manifest.getMaximumSafePosition();
@@ -55846,9 +56721,9 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
 
       return lastAudioPosition;
     } else {
-      var _lastAudioPosition = getLastPositionFromAdaptation(this._lastAudioAdaptation);
+      var _lastAudioPosition = getLastAvailablePositionFromAdaptation(this._lastAudioAdaptation);
 
-      var _lastVideoPosition = getLastPositionFromAdaptation(this._lastVideoAdaptation);
+      var _lastVideoPosition = getLastAvailablePositionFromAdaptation(this._lastVideoAdaptation);
 
       if (typeof _lastAudioPosition !== "number" || typeof _lastVideoPosition !== "number") {
         return this._manifest.getMaximumSafePosition();
@@ -55856,24 +56731,60 @@ var MaximumPositionCalculator = /*#__PURE__*/function () {
         return Math.min(_lastAudioPosition, _lastVideoPosition);
       }
     }
+  }
+  /**
+   * Returns an estimate of the actual ending position once
+   * the full content is available.
+   * Returns `undefined` if that could not be determined, for various reasons.
+   * @returns {number|undefined}
+   */
+  ;
+
+  _proto.getEndingPosition = function getEndingPosition() {
+    var _a, _b;
+
+    if (!this._manifest.isDynamic) {
+      return this.getMaximumAvailablePosition();
+    }
+
+    if (this._lastVideoAdaptation === undefined || this._lastAudioAdaptation === undefined) {
+      return undefined;
+    } else if (this._lastAudioAdaptation === null) {
+      if (this._lastVideoAdaptation === null) {
+        return undefined;
+      } else {
+        return (_a = getEndingPositionFromAdaptation(this._lastVideoAdaptation)) !== null && _a !== void 0 ? _a : undefined;
+      }
+    } else if (this._lastVideoAdaptation === null) {
+      return (_b = getEndingPositionFromAdaptation(this._lastAudioAdaptation)) !== null && _b !== void 0 ? _b : undefined;
+    } else {
+      var lastAudioPosition = getEndingPositionFromAdaptation(this._lastAudioAdaptation);
+      var lastVideoPosition = getEndingPositionFromAdaptation(this._lastVideoAdaptation);
+
+      if (typeof lastAudioPosition !== "number" || typeof lastVideoPosition !== "number") {
+        return undefined;
+      } else {
+        return Math.min(lastAudioPosition, lastVideoPosition);
+      }
+    }
   };
 
   return MaximumPositionCalculator;
 }();
 /**
- * Returns "last time of reference" from the adaptation given.
+ * Returns last currently available position from the Adaptation given.
  * `undefined` if a time could not be found.
- * Null if the Adaptation has no segments (it could be that it didn't started or
+ * `null` if the Adaptation has no segments (it could be that it didn't started or
  * that it already finished for example).
  *
- * We consider the earliest last time from every representations in the given
- * adaptation.
+ * We consider the earliest last available position from every Representation
+ * in the given Adaptation.
  * @param {Object} adaptation
  * @returns {Number|undefined|null}
  */
 
 
-function getLastPositionFromAdaptation(adaptation) {
+function getLastAvailablePositionFromAdaptation(adaptation) {
   var representations = adaptation.representations;
   var min = null;
   /**
@@ -55888,7 +56799,7 @@ function getLastPositionFromAdaptation(adaptation) {
   for (var i = 0; i < representations.length; i++) {
     if (representations[i].index !== lastIndex) {
       lastIndex = representations[i].index;
-      var lastPosition = representations[i].index.getLastPosition();
+      var lastPosition = representations[i].index.getLastAvailablePosition();
 
       if (lastPosition === undefined) {
         // we cannot tell
@@ -55896,14 +56807,53 @@ function getLastPositionFromAdaptation(adaptation) {
       }
 
       if (lastPosition !== null) {
-        min = min == null ? lastPosition : Math.min(min, lastPosition);
+        min = (0,is_null_or_undefined/* default */.Z)(min) ? lastPosition : Math.min(min, lastPosition);
       }
     }
   }
 
-  if (min === null) {
-    // It means that all positions were null === no segments (yet?)
-    return null;
+  return min;
+}
+/**
+ * Returns ending time from the Adaptation given, once all its segments are
+ * available.
+ * `undefined` if a time could not be found.
+ * `null` if the Adaptation has no segments (it could be that it already
+ * finished for example).
+ *
+ * We consider the earliest ending time from every Representation in the given
+ * Adaptation.
+ * @param {Object} adaptation
+ * @returns {Number|undefined|null}
+ */
+
+
+function getEndingPositionFromAdaptation(adaptation) {
+  var representations = adaptation.representations;
+  var min = null;
+  /**
+   * Some Manifest parsers use the exact same `IRepresentationIndex` reference
+   * for each Representation of a given Adaptation, because in the actual source
+   * Manifest file, indexing data is often defined at Adaptation-level.
+   * This variable allows to optimize the logic here when this is the case.
+   */
+
+  var lastIndex;
+
+  for (var i = 0; i < representations.length; i++) {
+    if (representations[i].index !== lastIndex) {
+      lastIndex = representations[i].index;
+      var lastPosition = representations[i].index.getEnd();
+
+      if (lastPosition === undefined) {
+        // we cannot tell
+        return undefined;
+      }
+
+      if (lastPosition !== null) {
+        min = (0,is_null_or_undefined/* default */.Z)(min) ? lastPosition : Math.min(min, lastPosition);
+      }
+    }
   }
 
   return min;
@@ -56166,10 +57116,26 @@ function maintainEndOfStream(mediaSource) {
     return triggerEndOfStream(mediaSource);
   }));
 }
-// EXTERNAL MODULE: ./src/core/init/initial_seek_and_play.ts + 2 modules
-var initial_seek_and_play = __webpack_require__(7920);
+// EXTERNAL MODULE: ./src/core/init/initial_seek_and_play.ts + 3 modules
+var initial_seek_and_play = __webpack_require__(5936);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/timer.js
 var timer = __webpack_require__(6625);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/fromEvent.js
+var fromEvent = __webpack_require__(2401);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/scheduler/async.js
+var scheduler_async = __webpack_require__(7991);
+;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/interval.js
+
+
+function interval(period, scheduler) {
+    if (period === void 0) { period = 0; }
+    if (scheduler === void 0) { scheduler = scheduler_async/* asyncScheduler */.z; }
+    if (period < 0) {
+        period = 0;
+    }
+    return (0,timer/* timer */.H)(period, period, scheduler);
+}
+//# sourceMappingURL=interval.js.map
 ;// CONCATENATED MODULE: ./src/core/init/media_duration_updater.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -56384,7 +57350,7 @@ function areSourceBuffersUpdating$(sourceBuffers) {
       return true;
     })), (0,fromEvent/* fromEvent */.R)(sourceBuffer, "update").pipe((0,map/* map */.U)(function () {
       return false;
-    })), (0,interval/* interval */.F)(500).pipe((0,map/* map */.U)(function () {
+    })), interval(500).pipe((0,map/* map */.U)(function () {
       return sourceBuffer.updating;
     }))).pipe((0,startWith/* startWith */.O)(sourceBuffer.updating), (0,distinctUntilChanged/* distinctUntilChanged */.x)()));
   };
@@ -56679,7 +57645,7 @@ function streamEventsEmitter(manifest, mediaElement, observation$) {
     var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
         STREAM_EVENT_EMITTER_POLL_INTERVAL = _config$getCurrent.STREAM_EVENT_EMITTER_POLL_INTERVAL;
 
-    return combineLatest([(0,interval/* interval */.F)(STREAM_EVENT_EMITTER_POLL_INTERVAL).pipe((0,startWith/* startWith */.O)(null)), observation$]).pipe((0,map/* map */.U)(function (_ref) {
+    return combineLatest([interval(STREAM_EVENT_EMITTER_POLL_INTERVAL).pipe((0,startWith/* startWith */.O)(null)), observation$]).pipe((0,map/* map */.U)(function (_ref) {
       var _ = _ref[0],
           observation = _ref[1];
       var seeking = observation.seeking;
@@ -56732,6 +57698,7 @@ var update_playback_rate = __webpack_require__(2983);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 
@@ -56818,7 +57785,10 @@ function createMediaSourceLoader(_ref) {
     var discontinuityUpdate$ = new Subject/* Subject */.x();
     /** Emits event when streams are "locked", meaning they cannot load segments. */
 
-    var lockedStream$ = new Subject/* Subject */.x(); // Creates Observable which will manage every Stream for the given Content.
+    var lockedStream$ = new Subject/* Subject */.x();
+    /** Emit each time a new Adaptation is considered by the `StreamOrchestrator`. */
+
+    var lastAdaptationChange = (0,utils_reference/* default */.ZP)(null); // Creates Observable which will manage every Stream for the given Content.
 
     var streams$ = stream({
       manifest: manifest,
@@ -56852,11 +57822,15 @@ function createMediaSourceLoader(_ref) {
           lockedStream$.next(evt.value);
           return empty/* EMPTY */.E;
 
+        case "adaptationChange":
+          lastAdaptationChange.setValue(evt);
+          return (0,of.of)(evt);
+
         default:
           return (0,of.of)(evt);
       }
     }));
-    var contentTimeObserver = ContentTimeBoundariesObserver(manifest, streams$, streamObserver).pipe((0,mergeMap/* mergeMap */.z)(function (evt) {
+    var contentTimeObserver = ContentTimeBoundariesObserver(manifest, lastAdaptationChange, streamObserver).pipe((0,mergeMap/* mergeMap */.z)(function (evt) {
       switch (evt.type) {
         case "contentDurationUpdate":
           log/* default.debug */.Z.debug("Init: Duration has to be updated.", evt.value);
@@ -56879,7 +57853,7 @@ function createMediaSourceLoader(_ref) {
      * events when it cannot, as well as "unstalled" events when it get out of one.
      */
 
-    var stallAvoider$ = (0,stall_avoider/* default */.Z)(playbackObserver, manifest, lockedStream$, discontinuityUpdate$);
+    var stallAvoider$ = (0,stall_avoider/* default */.Z)(playbackObserver, manifest, speed, lockedStream$, discontinuityUpdate$);
     /**
      * Emit a "loaded" events once the initial play has been performed and the
      * media can begin playback.
@@ -57146,7 +58120,7 @@ function manifestUpdateScheduler(_ref) {
         unsafeMode = _ref5.unsafeMode;
     var manifestUpdateUrl = manifest.updateUrl;
     var fullRefresh = completeRefresh || manifestUpdateUrl === undefined;
-    var refreshURL = fullRefresh ? manifest.getUrl() : manifestUpdateUrl;
+    var refreshURL = fullRefresh ? manifest.getUrls()[0] : manifestUpdateUrl;
     var externalClockOffset = manifest.clockOffset;
 
     if (unsafeMode) {
@@ -57266,6 +58240,8 @@ var throw_on_media_error = __webpack_require__(2447);
 
 
 
+
+
 /**
  * Begin content playback.
  *
@@ -57309,13 +58285,15 @@ function InitializeOnMediaSource(_ref) {
       mediaElement = _ref.mediaElement,
       minimumManifestUpdateInterval = _ref.minimumManifestUpdateInterval,
       playbackObserver = _ref.playbackObserver,
-      segmentFetcherCreator = _ref.segmentFetcherCreator,
+      segmentRequestOptions = _ref.segmentRequestOptions,
       speed = _ref.speed,
       startAt = _ref.startAt,
+      transport = _ref.transport,
       textTrackOptions = _ref.textTrackOptions;
 
   /** Choose the right "Representation" for a given "Adaptation". */
   var representationEstimator = adaptive(adaptiveOptions);
+  var playbackCanceller = new task_canceller/* default */.ZP();
   /**
    * Create and open a new MediaSource object on the given media element on
    * subscription.
@@ -57371,6 +58349,12 @@ function InitializeOnMediaSource(_ref) {
     log/* default.debug */.Z.debug("Init: Calculating initial time");
     var initialTime = getInitialTime(manifest, lowLatencyMode, startAt);
     log/* default.debug */.Z.debug("Init: Initial time calculated:", initialTime);
+    var requestOptions = {
+      lowLatencyMode: lowLatencyMode,
+      requestTimeout: segmentRequestOptions.requestTimeout,
+      maxRetry: segmentRequestOptions.maxRetry
+    };
+    var segmentFetcherCreator = new segment(transport, requestOptions, playbackCanceller.signal);
     var mediaSourceLoader = createMediaSourceLoader({
       bufferOptions: (0,object_assign/* default */.Z)({
         textTrackOptions: textTrackOptions,
@@ -57393,9 +58377,9 @@ function InitializeOnMediaSource(_ref) {
       minimumManifestUpdateInterval: minimumManifestUpdateInterval,
       scheduleRefresh$: scheduleRefresh$
     });
-    var manifestEvents$ = (0,merge/* merge */.T)((0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,map/* map */.U)(function () {
+    var manifestEvents$ = (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,map/* map */.U)(function () {
       return events_generators/* default.manifestUpdate */.Z.manifestUpdate();
-    })), (0,event_emitter/* fromEvent */.R)(manifest, "decipherabilityUpdate").pipe((0,map/* map */.U)(events_generators/* default.decipherabilityUpdate */.Z.decipherabilityUpdate)));
+    }));
     return (0,merge/* merge */.T)(manifestEvents$, manifestUpdate$, recursiveLoad$).pipe((0,startWith/* startWith */.O)(events_generators/* default.manifestReady */.Z.manifestReady(manifest)), finalize(function () {
       scheduleRefresh$.complete();
     }));
@@ -57476,7 +58460,9 @@ function InitializeOnMediaSource(_ref) {
       return (0,merge/* merge */.T)(handleReloads$, currentLoad$);
     }
   }));
-  return (0,merge/* merge */.T)(loadContent$, mediaError$, drmEvents$.pipe((0,ignoreElements/* ignoreElements */.l)()));
+  return (0,merge/* merge */.T)(loadContent$, mediaError$, drmEvents$.pipe((0,ignoreElements/* ignoreElements */.l)())).pipe(finalize(function () {
+    playbackCanceller.cancel();
+  }));
 }
 ;// CONCATENATED MODULE: ./src/core/init/index.ts
 /**
@@ -57497,122 +58483,6 @@ function InitializeOnMediaSource(_ref) {
 
 
 /* harmony default export */ var init = (InitializeOnMediaSource);
-;// CONCATENATED MODULE: ./src/core/api/emit_seek_events.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Returns Observable which will emit:
- *   - `"seeking"` when we are seeking in the given mediaElement
- *   - `"seeked"` when a seek is considered as finished by the given observation$
- *     Observable.
- * @param {HTMLMediaElement} mediaElement
- * @param {Observable} observation$
- * @returns {Observable}
- */
-
-function emitSeekEvents(mediaElement, observation$) {
-  return (0,defer/* defer */.P)(function () {
-    if (mediaElement === null) {
-      return empty/* EMPTY */.E;
-    }
-
-    var isSeeking$ = observation$.pipe((0,filter/* filter */.h)(function (observation) {
-      return observation.event === "seeking";
-    }), (0,map/* map */.U)(function () {
-      return "seeking";
-    }));
-
-    if (mediaElement.seeking) {
-      isSeeking$ = isSeeking$.pipe((0,startWith/* startWith */.O)("seeking"));
-    }
-
-    var hasSeeked$ = isSeeking$.pipe((0,switchMap/* switchMap */.w)(function () {
-      return observation$.pipe((0,filter/* filter */.h)(function (observation) {
-        return observation.event === "seeked";
-      }), (0,map/* map */.U)(function () {
-        return "seeked";
-      }), (0,take/* take */.q)(1));
-    }));
-    return (0,merge/* merge */.T)(isSeeking$, hasSeeked$);
-  });
-}
-;// CONCATENATED MODULE: ./src/core/api/get_player_state.ts
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** Player state dictionnary. */
-
-var PLAYER_STATES = {
-  STOPPED: "STOPPED",
-  LOADED: "LOADED",
-  LOADING: "LOADING",
-  PLAYING: "PLAYING",
-  PAUSED: "PAUSED",
-  ENDED: "ENDED",
-  BUFFERING: "BUFFERING",
-  SEEKING: "SEEKING",
-  RELOADING: "RELOADING"
-};
-/**
- * Get state string for a _loaded_ content.
- * @param {HTMLMediaElement} mediaElement
- * @param {Object} stalledStatus - Current stalled state:
- *   - null when not stalled
- *   - a description of the situation if stalled.
- * @returns {string}
- */
-
-function getLoadedContentState(mediaElement, stalledStatus) {
-  var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
-      FORCED_ENDED_THRESHOLD = _config$getCurrent.FORCED_ENDED_THRESHOLD;
-
-  if (mediaElement.ended) {
-    return PLAYER_STATES.ENDED;
-  }
-
-  if (stalledStatus !== null) {
-    // On some old browsers (e.g. Chrome 54), the browser does not
-    // emit an 'ended' event in some conditions. Detect if we
-    // reached the end by comparing the current position and the
-    // duration instead.
-    var gapBetweenDurationAndCurrentTime = Math.abs(mediaElement.duration - mediaElement.currentTime);
-
-    if (FORCED_ENDED_THRESHOLD != null && gapBetweenDurationAndCurrentTime < FORCED_ENDED_THRESHOLD) {
-      return PLAYER_STATES.ENDED;
-    }
-
-    return stalledStatus === "seeking" ? PLAYER_STATES.SEEKING : PLAYER_STATES.BUFFERING;
-  }
-
-  return mediaElement.paused ? PLAYER_STATES.PAUSED : PLAYER_STATES.PLAYING;
-}
 ;// CONCATENATED MODULE: ./src/core/api/option_utils.ts
 function option_utils_createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = option_utils_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
@@ -57661,18 +58531,11 @@ function parseConstructorOptions(options) {
   var wantedBufferAhead;
   var maxVideoBufferSize;
   var videoElement;
-  var initialVideoBitrate;
-  var initialAudioBitrate;
-  var minAudioBitrate;
-  var minVideoBitrate;
-  var maxAudioBitrate;
-  var maxVideoBitrate;
+  var baseBandwidth;
 
   var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
-      DEFAULT_INITIAL_BITRATES = _config$getCurrent.DEFAULT_INITIAL_BITRATES,
+      DEFAULT_BASE_BANDWIDTH = _config$getCurrent.DEFAULT_BASE_BANDWIDTH,
       DEFAULT_LIMIT_VIDEO_WIDTH = _config$getCurrent.DEFAULT_LIMIT_VIDEO_WIDTH,
-      DEFAULT_MIN_BITRATES = _config$getCurrent.DEFAULT_MIN_BITRATES,
-      DEFAULT_MAX_BITRATES = _config$getCurrent.DEFAULT_MAX_BITRATES,
       DEFAULT_MAX_BUFFER_AHEAD = _config$getCurrent.DEFAULT_MAX_BUFFER_AHEAD,
       DEFAULT_MAX_BUFFER_BEHIND = _config$getCurrent.DEFAULT_MAX_BUFFER_BEHIND,
       DEFAULT_MAX_VIDEO_BUFFER_SIZE = _config$getCurrent.DEFAULT_MAX_VIDEO_BUFFER_SIZE,
@@ -57736,71 +58599,15 @@ function parseConstructorOptions(options) {
     /* eslint-enable max-len */
   }
 
-  if ((0,is_null_or_undefined/* default */.Z)(options.initialVideoBitrate)) {
-    initialVideoBitrate = DEFAULT_INITIAL_BITRATES.video;
+  if ((0,is_null_or_undefined/* default */.Z)(options.baseBandwidth)) {
+    baseBandwidth = DEFAULT_BASE_BANDWIDTH;
   } else {
-    initialVideoBitrate = Number(options.initialVideoBitrate);
+    baseBandwidth = Number(options.baseBandwidth);
 
-    if (isNaN(initialVideoBitrate)) {
+    if (isNaN(baseBandwidth)) {
       /* eslint-disable max-len */
-      throw new Error("Invalid initialVideoBitrate parameter. Should be a number.");
+      throw new Error("Invalid baseBandwidth parameter. Should be a number.");
       /* eslint-enable max-len */
-    }
-  }
-
-  if ((0,is_null_or_undefined/* default */.Z)(options.initialAudioBitrate)) {
-    initialAudioBitrate = DEFAULT_INITIAL_BITRATES.audio;
-  } else {
-    initialAudioBitrate = Number(options.initialAudioBitrate);
-
-    if (isNaN(initialAudioBitrate)) {
-      /* eslint-disable max-len */
-      throw new Error("Invalid initialAudioBitrate parameter. Should be a number.");
-      /* eslint-enable max-len */
-    }
-  }
-
-  if ((0,is_null_or_undefined/* default */.Z)(options.minVideoBitrate)) {
-    minVideoBitrate = DEFAULT_MIN_BITRATES.video;
-  } else {
-    minVideoBitrate = Number(options.minVideoBitrate);
-
-    if (isNaN(minVideoBitrate)) {
-      throw new Error("Invalid maxVideoBitrate parameter. Should be a number.");
-    }
-  }
-
-  if ((0,is_null_or_undefined/* default */.Z)(options.minAudioBitrate)) {
-    minAudioBitrate = DEFAULT_MIN_BITRATES.audio;
-  } else {
-    minAudioBitrate = Number(options.minAudioBitrate);
-
-    if (isNaN(minAudioBitrate)) {
-      throw new Error("Invalid minAudioBitrate parameter. Should be a number.");
-    }
-  }
-
-  if ((0,is_null_or_undefined/* default */.Z)(options.maxVideoBitrate)) {
-    maxVideoBitrate = DEFAULT_MAX_BITRATES.video;
-  } else {
-    maxVideoBitrate = Number(options.maxVideoBitrate);
-
-    if (isNaN(maxVideoBitrate)) {
-      throw new Error("Invalid maxVideoBitrate parameter. Should be a number.");
-    } else if (minVideoBitrate > maxVideoBitrate) {
-      throw new Error("Invalid maxVideoBitrate parameter. Its value, \"" + (maxVideoBitrate + "\", is inferior to the set minVideoBitrate, \"") + (minVideoBitrate + "\""));
-    }
-  }
-
-  if ((0,is_null_or_undefined/* default */.Z)(options.maxAudioBitrate)) {
-    maxAudioBitrate = DEFAULT_MAX_BITRATES.audio;
-  } else {
-    maxAudioBitrate = Number(options.maxAudioBitrate);
-
-    if (isNaN(maxAudioBitrate)) {
-      throw new Error("Invalid maxAudioBitrate parameter. Should be a number.");
-    } else if (minAudioBitrate > maxAudioBitrate) {
-      throw new Error("Invalid maxAudioBitrate parameter. Its value, \"" + (maxAudioBitrate + "\", is inferior to the set minAudioBitrate, \"") + (minAudioBitrate + "\""));
     }
   }
 
@@ -57812,12 +58619,7 @@ function parseConstructorOptions(options) {
     wantedBufferAhead: wantedBufferAhead,
     maxVideoBufferSize: maxVideoBufferSize,
     throttleVideoBitrateWhenHidden: throttleVideoBitrateWhenHidden,
-    initialAudioBitrate: initialAudioBitrate,
-    initialVideoBitrate: initialVideoBitrate,
-    minAudioBitrate: minAudioBitrate,
-    minVideoBitrate: minVideoBitrate,
-    maxAudioBitrate: maxAudioBitrate,
-    maxVideoBitrate: maxVideoBitrate
+    baseBandwidth: baseBandwidth
   };
 }
 /**
@@ -57855,13 +58657,12 @@ function checkReloadOptions(options) {
  *
  * Throws if any mandatory option is not set.
  * @param {Object|undefined} options
- * @param {Object} ctx - The player context, needed for some default values.
  * @returns {Object}
  */
 
 
 function parseLoadVideoOptions(options) {
-  var _a, _b, _c, _d, _e, _f;
+  var _a, _b, _c;
 
   var url;
   var transport;
@@ -57874,7 +58675,6 @@ function parseLoadVideoOptions(options) {
       DEFAULT_AUTO_PLAY = _config$getCurrent2.DEFAULT_AUTO_PLAY,
       DEFAULT_CODEC_SWITCHING_BEHAVIOR = _config$getCurrent2.DEFAULT_CODEC_SWITCHING_BEHAVIOR,
       DEFAULT_ENABLE_FAST_SWITCHING = _config$getCurrent2.DEFAULT_ENABLE_FAST_SWITCHING,
-      DEFAULT_MANUAL_BITRATE_SWITCHING_MODE = _config$getCurrent2.DEFAULT_MANUAL_BITRATE_SWITCHING_MODE,
       DEFAULT_TEXT_TRACK_MODE = _config$getCurrent2.DEFAULT_TEXT_TRACK_MODE;
 
   if ((0,is_null_or_undefined/* default */.Z)(options)) {
@@ -57883,8 +58683,8 @@ function parseLoadVideoOptions(options) {
 
   if (!(0,is_null_or_undefined/* default */.Z)(options.url)) {
     url = String(options.url);
-  } else if ((0,is_null_or_undefined/* default */.Z)((_a = options.transportOptions) === null || _a === void 0 ? void 0 : _a.initialManifest) && (0,is_null_or_undefined/* default */.Z)((_b = options.transportOptions) === null || _b === void 0 ? void 0 : _b.manifestLoader)) {
-    throw new Error("Unable to load a content: no url set on loadVideo.\n" + "Please provide at least either an `url` argument, a " + "`transportOptions.initialManifest` option or a " + "`transportOptions.manifestLoader` option so the RxPlayer " + "can load the content.");
+  } else if ((0,is_null_or_undefined/* default */.Z)(options.initialManifest) && (0,is_null_or_undefined/* default */.Z)(options.manifestLoader)) {
+    throw new Error("Unable to load a content: no url set on loadVideo.\n" + "Please provide at least either an `url` argument, a " + "`initialManifest` option or a " + "`manifestLoader` option so the RxPlayer " + "can load the content.");
   }
 
   if ((0,is_null_or_undefined/* default */.Z)(options.transport)) {
@@ -57910,22 +58710,21 @@ function parseLoadVideoOptions(options) {
   }
 
   var lowLatencyMode = options.lowLatencyMode === undefined ? false : !!options.lowLatencyMode;
-  var transportOptsArg = typeof options.transportOptions === "object" && options.transportOptions !== null ? options.transportOptions : {};
-  var initialManifest = (_c = options.transportOptions) === null || _c === void 0 ? void 0 : _c.initialManifest;
-  var minimumManifestUpdateInterval = (_e = (_d = options.transportOptions) === null || _d === void 0 ? void 0 : _d.minimumManifestUpdateInterval) !== null && _e !== void 0 ? _e : 0;
+  var initialManifest = options.initialManifest;
+  var minimumManifestUpdateInterval = (_a = options.minimumManifestUpdateInterval) !== null && _a !== void 0 ? _a : 0;
+  var defaultAudioTrackSwitchingMode = (_b = options.defaultAudioTrackSwitchingMode) !== null && _b !== void 0 ? _b : undefined;
+
+  if (defaultAudioTrackSwitchingMode !== undefined && !(0,array_includes/* default */.Z)(["seamless", "direct", "reload"], defaultAudioTrackSwitchingMode)) {
+    log/* default.warn */.Z.warn("The `defaultAudioTrackSwitchingMode` loadVideo option must match one of " + "the following strategy name:\n" + "- `seamless`\n" + "- `direct`\n" + "- `reload`");
+    defaultAudioTrackSwitchingMode = undefined;
+  }
+
   var onCodecSwitch = (0,is_null_or_undefined/* default */.Z)(options.onCodecSwitch) ? DEFAULT_CODEC_SWITCHING_BEHAVIOR : options.onCodecSwitch;
 
   if (!(0,array_includes/* default */.Z)(["continue", "reload"], onCodecSwitch)) {
     log/* default.warn */.Z.warn("The `onCodecSwitch` loadVideo option must match one of " + "the following string:\n" + "- `continue`\n" + "- `reload`\n" + "If badly set, " + DEFAULT_CODEC_SWITCHING_BEHAVIOR + " will be used as default");
     onCodecSwitch = DEFAULT_CODEC_SWITCHING_BEHAVIOR;
   }
-
-  var transportOptions = (0,object_assign/* default */.Z)({}, transportOptsArg, {
-    lowLatencyMode: lowLatencyMode
-  }); // remove already parsed data to simplify the `transportOptions` object
-
-  delete transportOptions.initialManifest;
-  delete transportOptions.minimumManifestUpdateInterval;
 
   if ((0,is_null_or_undefined/* default */.Z)(options.textTrackMode)) {
     textTrackMode = DEFAULT_TEXT_TRACK_MODE;
@@ -57937,7 +58736,6 @@ function parseLoadVideoOptions(options) {
     textTrackMode = options.textTrackMode;
   }
 
-  var manualBitrateSwitchingMode = (_f = options.manualBitrateSwitchingMode) !== null && _f !== void 0 ? _f : DEFAULT_MANUAL_BITRATE_SWITCHING_MODE;
   var enableFastSwitching = (0,is_null_or_undefined/* default */.Z)(options.enableFastSwitching) ? DEFAULT_ENABLE_FAST_SWITCHING : options.enableFastSwitching;
 
   if (textTrackMode === "html") {
@@ -57965,32 +58763,45 @@ function parseLoadVideoOptions(options) {
     }
   }
 
-  var networkConfig = (0,is_null_or_undefined/* default */.Z)(options.networkConfig) ? {} : {
-    manifestRetry: options.networkConfig.manifestRetry,
-    offlineRetry: options.networkConfig.offlineRetry,
-    segmentRetry: options.networkConfig.segmentRetry
-  }; // TODO without cast
+  var requestConfig = (_c = options.requestConfig) !== null && _c !== void 0 ? _c : {}; // All those eslint disable are needed because the option is voluntarily
+  // hidden from the base type to limit discovery of this hidden API.
 
-  /* eslint-disable @typescript-eslint/consistent-type-assertions */
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+
+  /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
+  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
   return {
+    __priv_patchLastSegmentInSidx: options.__priv_patchLastSegmentInSidx,
+
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment */
+
+    /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+    checkMediaSegmentIntegrity: options.checkMediaSegmentIntegrity,
     autoPlay: autoPlay,
+    defaultAudioTrackSwitchingMode: defaultAudioTrackSwitchingMode,
     enableFastSwitching: enableFastSwitching,
-    keySystems: keySystems,
     initialManifest: initialManifest,
+    keySystems: keySystems,
     lowLatencyMode: lowLatencyMode,
-    manualBitrateSwitchingMode: manualBitrateSwitchingMode,
+    manifestLoader: options.manifestLoader,
+    manifestUpdateUrl: options.manifestUpdateUrl,
     minimumManifestUpdateInterval: minimumManifestUpdateInterval,
-    networkConfig: networkConfig,
+    requestConfig: requestConfig,
     onCodecSwitch: onCodecSwitch,
+    referenceDateTime: options.referenceDateTime,
+    representationFilter: options.representationFilter,
+    segmentLoader: options.segmentLoader,
+    serverSyncInfos: options.serverSyncInfos,
     startAt: startAt,
     textTrackElement: textTrackElement,
     textTrackMode: textTrackMode,
     transport: transport,
-    transportOptions: transportOptions,
     url: url
   };
-  /* eslint-enable @typescript-eslint/consistent-type-assertions */
 }
 
 
@@ -58050,7 +58861,7 @@ var PlaybackObserver = /*#__PURE__*/function () {
    * @param {Object} options
    */
   function PlaybackObserver(mediaElement, options) {
-    this._internalSeekingEventsIncomingCounter = 0;
+    this._internalSeeksIncoming = [];
     this._mediaElement = mediaElement;
     this._withMediaSource = options.withMediaSource;
     this._lowLatencyMode = options.lowLatencyMode;
@@ -58085,6 +58896,15 @@ var PlaybackObserver = /*#__PURE__*/function () {
     return this._mediaElement.currentTime;
   }
   /**
+   * Returns the current playback rate advertised by the `HTMLMediaElement`.
+   * @returns {number}
+   */
+  ;
+
+  _proto.getPlaybackRate = function getPlaybackRate() {
+    return this._mediaElement.playbackRate;
+  }
+  /**
    * Returns the current `paused` status advertised by the `HTMLMediaElement`.
    *
    * Use this instead of the same status emitted on an observation when you want
@@ -58109,7 +58929,8 @@ var PlaybackObserver = /*#__PURE__*/function () {
   ;
 
   _proto.setCurrentTime = function setCurrentTime(time) {
-    this._internalSeekingEventsIncomingCounter += 1;
+    this._internalSeeksIncoming.push(time);
+
     this._mediaElement.currentTime = time;
   }
   /**
@@ -58201,18 +59022,26 @@ var PlaybackObserver = /*#__PURE__*/function () {
 
     var getCurrentObservation = function getCurrentObservation(event) {
       var tmpEvt = event;
+      var startedInternalSeekTime;
 
-      if (tmpEvt === "seeking" && _this._internalSeekingEventsIncomingCounter > 0) {
+      if (tmpEvt === "seeking" && _this._internalSeeksIncoming.length > 0) {
         tmpEvt = "internal-seeking";
-        _this._internalSeekingEventsIncomingCounter -= 1;
+        startedInternalSeekTime = _this._internalSeeksIncoming.shift();
       }
 
       var _lastObservation = lastObservation !== null && lastObservation !== void 0 ? lastObservation : _this._generateInitialObservation();
 
       var mediaTimings = getMediaInfos(_this._mediaElement, tmpEvt);
-      var internalSeeking = mediaTimings.seeking && ( // We've just received the event for internally seeking
-      tmpEvt === "internal-seeking" || // or We're still waiting on the previous internal-seek
-      _lastObservation.internalSeeking && tmpEvt !== "seeking");
+      var pendingInternalSeek = null;
+
+      if (mediaTimings.seeking) {
+        if (typeof startedInternalSeekTime === "number") {
+          pendingInternalSeek = startedInternalSeekTime;
+        } else if (_lastObservation.pendingInternalSeek !== null && event !== "seeking") {
+          pendingInternalSeek = _lastObservation.pendingInternalSeek;
+        }
+      }
+
       var rebufferingStatus = getRebufferingStatus(_lastObservation, mediaTimings, {
         lowLatencyMode: _this._lowLatencyMode,
         withMediaSource: _this._withMediaSource
@@ -58221,11 +59050,11 @@ var PlaybackObserver = /*#__PURE__*/function () {
       var timings = (0,object_assign/* default */.Z)({}, {
         rebuffering: rebufferingStatus,
         freezing: freezingStatus,
-        internalSeeking: internalSeeking
+        pendingInternalSeek: pendingInternalSeek
       }, mediaTimings);
 
       if (log/* default.hasLevel */.Z.hasLevel("DEBUG")) {
-        log/* default.debug */.Z.debug("API: current media element state tick", "event", timings.event, "position", timings.position, "seeking", timings.seeking, "internalSeeking", timings.internalSeeking, "rebuffering", timings.rebuffering !== null, "freezing", timings.freezing !== null, "ended", timings.ended, "paused", timings.paused, "playbackRate", timings.playbackRate, "readyState", timings.readyState);
+        log/* default.debug */.Z.debug("API: current media element state tick", "event", timings.event, "position", timings.position, "seeking", timings.seeking, "internalSeek", timings.pendingInternalSeek, "rebuffering", timings.rebuffering !== null, "freezing", timings.freezing !== null, "ended", timings.ended, "paused", timings.paused, "playbackRate", timings.playbackRate, "readyState", timings.readyState);
       }
 
       return timings;
@@ -58283,7 +59112,7 @@ var PlaybackObserver = /*#__PURE__*/function () {
     return (0,object_assign/* default */.Z)(getMediaInfos(this._mediaElement, "init"), {
       rebuffering: null,
       freezing: null,
-      internalSeeking: false
+      pendingInternalSeek: null
     });
   };
 
@@ -58589,6 +59418,9 @@ function generateReadOnlyObserver(src, transform, cancellationSignal) {
     getReadyState: function getReadyState() {
       return src.getReadyState();
     },
+    getPlaybackRate: function getPlaybackRate() {
+      return src.getPlaybackRate();
+    },
     getIsPaused: function getIsPaused() {
       return src.getIsPaused();
     },
@@ -58612,8 +59444,6 @@ function generateReadOnlyObserver(src, transform, cancellationSignal) {
     }
   };
 }
-// EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js
-var assertThisInitialized = __webpack_require__(7326);
 ;// CONCATENATED MODULE: ./src/core/api/track_management/track_dispatcher.ts
 
 
@@ -58862,11 +59692,14 @@ var TracksStore = /*#__PURE__*/function (_EventEmitter) {
   function TracksStore(args) {
     var _this;
 
+    var _a;
+
     _this = _EventEmitter.call(this) || this;
     _this._storedPeriodInfo = [];
     _this._isDisposed = false;
     _this._cachedPeriodInfo = new WeakMap();
     _this._isTrickModeTrackEnabled = args.preferTrickModeTracks;
+    _this._defaultAudioTrackSwitchingMode = (_a = args.defaultAudioTrackSwitchingMode) !== null && _a !== void 0 ? _a : config/* default.getCurrent */.Z.getCurrent().DEFAULT_AUDIO_TRACK_SWITCHING_MODE;
     return _this;
   }
   /**
@@ -58897,6 +59730,9 @@ var TracksStore = /*#__PURE__*/function (_EventEmitter) {
     var _this2 = this;
 
     var _a, _b, _c;
+
+    var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
+        DEFAULT_VIDEO_TRACK_SWITCHING_MODE = _config$getCurrent.DEFAULT_VIDEO_TRACK_SWITCHING_MODE;
 
     var periods = manifest.periods; // We assume that they are always sorted chronologically
     // In dev mode, perform a runtime check that this is the case
@@ -58982,7 +59818,7 @@ var TracksStore = /*#__PURE__*/function (_EventEmitter) {
                 storedSettings = {
                   adaptationBase: adaptationBase,
                   adaptation: adaptation,
-                  switchingMode: "seamless",
+                  switchingMode: DEFAULT_VIDEO_TRACK_SWITCHING_MODE,
                   lockedRepresentations: lockedRepresentations
                 };
               }
@@ -59026,7 +59862,7 @@ var TracksStore = /*#__PURE__*/function (_EventEmitter) {
 
               var _storedSettings = audioAdaptations.length === 0 ? null : {
                 adaptation: audioAdaptations[0],
-                switchingMode: "seamless",
+                switchingMode: _this2._defaultAudioTrackSwitchingMode,
                 lockedRepresentations: (0,utils_reference/* default */.ZP)(null)
               };
 
@@ -59067,7 +59903,7 @@ var TracksStore = /*#__PURE__*/function (_EventEmitter) {
           _i--;
         }
       } else {
-        var newPeriodInfo = generatePeriodInfo(newPeriod, true, this._isTrickModeTrackEnabled); // oldPeriod.start > newPeriod.start: insert newPeriod before
+        var newPeriodInfo = generatePeriodInfo(newPeriod, true, this._isTrickModeTrackEnabled, this._defaultAudioTrackSwitchingMode); // oldPeriod.start > newPeriod.start: insert newPeriod before
 
         this._storedPeriodInfo.splice(_i, 0, newPeriodInfo);
 
@@ -59082,7 +59918,7 @@ var TracksStore = /*#__PURE__*/function (_EventEmitter) {
 
       // Add further new Period
       var periodsToAdd = periods.slice(newPListIdx).map(function (p) {
-        return generatePeriodInfo(p, true, _this2._isTrickModeTrackEnabled);
+        return generatePeriodInfo(p, true, _this2._isTrickModeTrackEnabled, _this2._defaultAudioTrackSwitchingMode);
       });
 
       (_this$_storedPeriodIn = this._storedPeriodInfo).push.apply(_this$_storedPeriodIn, periodsToAdd);
@@ -59126,7 +59962,7 @@ var TracksStore = /*#__PURE__*/function (_EventEmitter) {
 
     if (periodObj === undefined) {
       // The Period has not yet been added.
-      periodObj = this._manuallyAddPeriod(period);
+      periodObj = this._addPeriod(period);
       this.trigger("newAvailablePeriods", [{
         id: period.id,
         start: period.start,
@@ -59301,10 +60137,7 @@ var TracksStore = /*#__PURE__*/function (_EventEmitter) {
   ;
 
   _proto.setAudioTrack = function setAudioTrack(periodObj, wantedId, switchingMode, reprsToLock) {
-    var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
-        DEFAULT_AUDIO_TRACK_SWITCHING_MODE = _config$getCurrent.DEFAULT_AUDIO_TRACK_SWITCHING_MODE;
-
-    return this._setAudioOrTextTrack("audio", periodObj, wantedId, switchingMode !== null && switchingMode !== void 0 ? switchingMode : DEFAULT_AUDIO_TRACK_SWITCHING_MODE, reprsToLock);
+    return this._setAudioOrTextTrack("audio", periodObj, wantedId, switchingMode !== null && switchingMode !== void 0 ? switchingMode : this._defaultAudioTrackSwitchingMode, reprsToLock);
   }
   /**
    * Set text track based on the ID of its Adaptation for a given added Period.
@@ -59345,12 +60178,9 @@ var TracksStore = /*#__PURE__*/function (_EventEmitter) {
     if (reprsToLock === null) {
       lockedRepresentations = (0,utils_reference/* default */.ZP)(null);
     } else {
-      var _config$getCurrent2 = config/* default.getCurrent */.Z.getCurrent(),
-          DEFAULT_AUDIO_TRACK_SWITCHING_MODE = _config$getCurrent2.DEFAULT_AUDIO_TRACK_SWITCHING_MODE;
-
       var representationsToLock = this._getRepresentationsToLock(wantedAdaptation, reprsToLock);
 
-      var repSwitchingMode = bufferType === "audio" ? DEFAULT_AUDIO_TRACK_SWITCHING_MODE : "direct";
+      var repSwitchingMode = bufferType === "audio" ? this._defaultAudioTrackSwitchingMode : "direct";
       lockedRepresentations = (0,utils_reference/* default */.ZP)({
         representations: representationsToLock,
         switchingMode: repSwitchingMode
@@ -59390,8 +60220,8 @@ var TracksStore = /*#__PURE__*/function (_EventEmitter) {
       throw new Error("Wanted video track not found.");
     }
 
-    var _config$getCurrent3 = config/* default.getCurrent */.Z.getCurrent(),
-        DEFAULT_VIDEO_TRACK_SWITCHING_MODE = _config$getCurrent3.DEFAULT_VIDEO_TRACK_SWITCHING_MODE;
+    var _config$getCurrent2 = config/* default.getCurrent */.Z.getCurrent(),
+        DEFAULT_VIDEO_TRACK_SWITCHING_MODE = _config$getCurrent2.DEFAULT_VIDEO_TRACK_SWITCHING_MODE;
 
     var typeInfo = periodObj.video;
     var newAdaptation = getRightVideoTrack(wantedAdaptation, this._isTrickModeTrackEnabled);
@@ -59648,8 +60478,8 @@ var TracksStore = /*#__PURE__*/function (_EventEmitter) {
       return;
     }
 
-    var _config$getCurrent4 = config/* default.getCurrent */.Z.getCurrent(),
-        DEFAULT_AUDIO_REPRESENTATIONS_SWITCHING_MODE = _config$getCurrent4.DEFAULT_AUDIO_REPRESENTATIONS_SWITCHING_MODE;
+    var _config$getCurrent3 = config/* default.getCurrent */.Z.getCurrent(),
+        DEFAULT_AUDIO_REPRESENTATIONS_SWITCHING_MODE = _config$getCurrent3.DEFAULT_AUDIO_REPRESENTATIONS_SWITCHING_MODE;
 
     var filtered = this._getRepresentationsToLock(storedSettings.adaptation, lockSettings.representations);
 
@@ -59669,8 +60499,8 @@ var TracksStore = /*#__PURE__*/function (_EventEmitter) {
       return;
     }
 
-    var _config$getCurrent5 = config/* default.getCurrent */.Z.getCurrent(),
-        DEFAULT_VIDEO_REPRESENTATIONS_SWITCHING_MODE = _config$getCurrent5.DEFAULT_VIDEO_REPRESENTATIONS_SWITCHING_MODE;
+    var _config$getCurrent4 = config/* default.getCurrent */.Z.getCurrent(),
+        DEFAULT_VIDEO_REPRESENTATIONS_SWITCHING_MODE = _config$getCurrent4.DEFAULT_VIDEO_REPRESENTATIONS_SWITCHING_MODE;
 
     var filtered = this._getRepresentationsToLock(storedSettings.adaptation, lockSettings.representations);
 
@@ -59720,8 +60550,8 @@ var TracksStore = /*#__PURE__*/function (_EventEmitter) {
    */
   ;
 
-  _proto._manuallyAddPeriod = function _manuallyAddPeriod(period) {
-    var periodObj = generatePeriodInfo(period, false, this._isTrickModeTrackEnabled);
+  _proto._addPeriod = function _addPeriod(period) {
+    var periodObj = generatePeriodInfo(period, false, this._isTrickModeTrackEnabled, this._defaultAudioTrackSwitchingMode);
 
     for (var i = 0; i < this._storedPeriodInfo.length; i++) {
       if (this._storedPeriodInfo[i].period.start > period.start) {
@@ -59914,18 +60744,17 @@ function getRightVideoTrack(adaptation, isTrickModeEnabled) {
  */
 
 
-function generatePeriodInfo(period, inManifest, isTrickModeTrackEnabled) {
+function generatePeriodInfo(period, inManifest, isTrickModeTrackEnabled, defaultAudioTrackSwitchingMode) {
   var audioAdaptation = period.getSupportedAdaptations("audio")[0];
   var baseVideoAdaptation = period.getSupportedAdaptations("video")[0];
   var videoAdaptation = getRightVideoTrack(baseVideoAdaptation, isTrickModeTrackEnabled);
 
-  var _config$getCurrent6 = config/* default.getCurrent */.Z.getCurrent(),
-      DEFAULT_AUDIO_TRACK_SWITCHING_MODE = _config$getCurrent6.DEFAULT_AUDIO_TRACK_SWITCHING_MODE,
-      DEFAULT_VIDEO_TRACK_SWITCHING_MODE = _config$getCurrent6.DEFAULT_VIDEO_TRACK_SWITCHING_MODE;
+  var _config$getCurrent5 = config/* default.getCurrent */.Z.getCurrent(),
+      DEFAULT_VIDEO_TRACK_SWITCHING_MODE = _config$getCurrent5.DEFAULT_VIDEO_TRACK_SWITCHING_MODE;
 
   var audioSettings = audioAdaptation !== undefined ? {
     adaptation: audioAdaptation,
-    switchingMode: DEFAULT_AUDIO_TRACK_SWITCHING_MODE,
+    switchingMode: defaultAudioTrackSwitchingMode,
     lockedRepresentations: (0,utils_reference/* default */.ZP)(null)
   } : null;
   var videoSettings = videoAdaptation !== undefined ? {
@@ -60043,7 +60872,7 @@ function toExposedPeriod(p) {
     id: p.id
   };
 }
-;// CONCATENATED MODULE: ./src/core/api/track_management/index.ts
+;// CONCATENATED MODULE: ./src/core/api/utils.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -60060,8 +60889,90 @@ function toExposedPeriod(p) {
  * limitations under the License.
  */
 
-/* harmony default export */ var track_management = (TracksStore);
 
+/**
+ * Returns Observable which will emit:
+ *   - `"seeking"` when we are seeking in the given mediaElement
+ *   - `"seeked"` when a seek is considered as finished by the given observation$
+ *     Observable.
+ * @param {HTMLMediaElement} mediaElement
+ * @param {Observable} observation$
+ * @returns {Observable}
+ */
+
+function emitSeekEvents(mediaElement, observation$) {
+  return (0,defer/* defer */.P)(function () {
+    if (mediaElement === null) {
+      return empty/* EMPTY */.E;
+    }
+
+    var isSeeking$ = observation$.pipe((0,filter/* filter */.h)(function (observation) {
+      return observation.event === "seeking";
+    }), (0,map/* map */.U)(function () {
+      return "seeking";
+    }));
+
+    if (mediaElement.seeking) {
+      isSeeking$ = isSeeking$.pipe((0,startWith/* startWith */.O)("seeking"));
+    }
+
+    var hasSeeked$ = isSeeking$.pipe((0,switchMap/* switchMap */.w)(function () {
+      return observation$.pipe((0,filter/* filter */.h)(function (observation) {
+        return observation.event === "seeked";
+      }), (0,map/* map */.U)(function () {
+        return "seeked";
+      }), (0,take/* take */.q)(1));
+    }));
+    return (0,merge/* merge */.T)(isSeeking$, hasSeeked$);
+  });
+}
+/**
+ * Get state string for a _loaded_ content.
+ * @param {HTMLMediaElement} mediaElement
+ * @param {Object} stalledStatus - Current stalled state:
+ *   - null when not stalled
+ *   - a description of the situation if stalled.
+ * @returns {string}
+ */
+
+function getLoadedContentState(mediaElement, stalledStatus) {
+  var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
+      FORCED_ENDED_THRESHOLD = _config$getCurrent.FORCED_ENDED_THRESHOLD;
+
+  if (mediaElement.ended) {
+    return "ENDED"
+    /* PLAYER_STATES.ENDED */
+    ;
+  }
+
+  if (stalledStatus !== null) {
+    // On some old browsers (e.g. Chrome 54), the browser does not
+    // emit an 'ended' event in some conditions. Detect if we
+    // reached the end by comparing the current position and the
+    // duration instead.
+    var gapBetweenDurationAndCurrentTime = Math.abs(mediaElement.duration - mediaElement.currentTime);
+
+    if (FORCED_ENDED_THRESHOLD != null && gapBetweenDurationAndCurrentTime < FORCED_ENDED_THRESHOLD) {
+      return "ENDED"
+      /* PLAYER_STATES.ENDED */
+      ;
+    }
+
+    return stalledStatus === "seeking" ? "SEEKING"
+    /* PLAYER_STATES.SEEKING */
+    : stalledStatus === "freezing" ? "FREEZING"
+    /* PLAYER_STATES.FREEZING */
+    : "BUFFERING"
+    /* PLAYER_STATES.BUFFERING */
+    ;
+  }
+
+  return mediaElement.paused ? "PAUSED"
+  /* PLAYER_STATES.PAUSED */
+  : "PLAYING"
+  /* PLAYER_STATES.PLAYING */
+  ;
+}
 ;// CONCATENATED MODULE: ./src/core/api/public_api.ts
 
 
@@ -60109,7 +61020,6 @@ function toExposedPeriod(p) {
 
 
 
-
 /* eslint-disable @typescript-eslint/naming-convention */
 
 var getPictureOnPictureStateRef = event_listeners/* getPictureOnPictureStateRef */.w0,
@@ -60137,15 +61047,10 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     _this = _EventEmitter.call(this) || this;
 
     var _parseConstructorOpti = parseConstructorOptions(options),
-        initialAudioBitrate = _parseConstructorOpti.initialAudioBitrate,
-        initialVideoBitrate = _parseConstructorOpti.initialVideoBitrate,
+        baseBandwidth = _parseConstructorOpti.baseBandwidth,
         limitVideoWidth = _parseConstructorOpti.limitVideoWidth,
-        minAudioBitrate = _parseConstructorOpti.minAudioBitrate,
-        minVideoBitrate = _parseConstructorOpti.minVideoBitrate,
-        maxAudioBitrate = _parseConstructorOpti.maxAudioBitrate,
         maxBufferAhead = _parseConstructorOpti.maxBufferAhead,
         maxBufferBehind = _parseConstructorOpti.maxBufferBehind,
-        maxVideoBitrate = _parseConstructorOpti.maxVideoBitrate,
         throttleVideoBitrateWhenHidden = _parseConstructorOpti.throttleVideoBitrateWhenHidden,
         videoElement = _parseConstructorOpti.videoElement,
         wantedBufferAhead = _parseConstructorOpti.wantedBufferAhead,
@@ -60159,7 +61064,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     videoElement.preload = "auto";
     _this.version =
     /* PLAYER_VERSION */
-    "3.28.0";
+    "4.0.0-alpha.2022100600";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -60182,20 +61087,8 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     };
     _this._priv_bitrateInfos = {
       lastBitrates: {
-        audio: initialAudioBitrate,
-        video: initialVideoBitrate
-      },
-      minAutoBitrates: {
-        audio: (0,utils_reference/* default */.ZP)(minAudioBitrate),
-        video: (0,utils_reference/* default */.ZP)(minVideoBitrate)
-      },
-      maxAutoBitrates: {
-        audio: (0,utils_reference/* default */.ZP)(maxAudioBitrate),
-        video: (0,utils_reference/* default */.ZP)(maxVideoBitrate)
-      },
-      manualBitrates: {
-        audio: (0,utils_reference/* default */.ZP)(-1),
-        video: (0,utils_reference/* default */.ZP)(-1)
+        audio: baseBandwidth,
+        video: baseBandwidth
       }
     };
     _this._priv_throttleVideoBitrateWhenHidden = throttleVideoBitrateWhenHidden;
@@ -60207,9 +61100,11 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     _this._priv_contentInfos = null;
     _this._priv_contentEventsMemory = {};
 
-    _this._priv_setPlayerState(PLAYER_STATES.STOPPED);
+    _this._priv_setPlayerState("STOPPED"
+    /* PLAYER_STATES.STOPPED */
+    );
 
-    _this._priv_lastContentPlaybackInfos = {};
+    _this._priv_reloadingMetadata = {};
     return _this;
   }
   /** All possible Error types emitted by the RxPlayer. */
@@ -60244,8 +61139,12 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
     this._priv_cleanUpCurrentContentState();
 
-    if (this.state !== PLAYER_STATES.STOPPED) {
-      this._priv_setPlayerState(PLAYER_STATES.STOPPED);
+    if (this.state !== "STOPPED"
+    /* PLAYER_STATES.STOPPED */
+    ) {
+      this._priv_setPlayerState("STOPPED"
+      /* PLAYER_STATES.STOPPED */
+      );
     }
   }
   /**
@@ -60284,19 +61183,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
     this._priv_bufferOptions.maxBufferBehind.finish();
 
-    this._priv_bitrateInfos.manualBitrates.video.finish();
-
-    this._priv_bitrateInfos.manualBitrates.audio.finish();
-
-    this._priv_bitrateInfos.minAutoBitrates.video.finish();
-
-    this._priv_bitrateInfos.minAutoBitrates.audio.finish();
-
-    this._priv_bitrateInfos.maxAutoBitrates.video.finish();
-
-    this._priv_bitrateInfos.maxAutoBitrates.audio.finish();
-
-    this._priv_lastContentPlaybackInfos = {}; // un-attach video element
+    this._priv_reloadingMetadata = {}; // un-attach video element
 
     this.videoElement = null;
   }
@@ -60309,60 +61196,71 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   _proto.loadVideo = function loadVideo(opts) {
     var options = parseLoadVideoOptions(opts);
     log/* default.info */.Z.info("API: Calling loadvideo", options.url, options.transport);
-    this._priv_lastContentPlaybackInfos = {
+    this._priv_reloadingMetadata = {
       options: options
     };
 
     this._priv_initializeContentPlayback(options);
   }
   /**
-   * Reload last content. Init media playback without fetching again
-   * the manifest.
+   * Reload the last loaded content.
    * @param {Object} reloadOpts
    */
   ;
 
   _proto.reload = function reload(reloadOpts) {
-    var _this$_priv_lastConte = this._priv_lastContentPlaybackInfos,
-        options = _this$_priv_lastConte.options,
-        manifest = _this$_priv_lastConte.manifest,
-        lastPlaybackPosition = _this$_priv_lastConte.lastPlaybackPosition;
+    var _a, _b;
 
-    if (options === undefined || manifest === undefined || lastPlaybackPosition === undefined) {
+    var _this$_priv_reloading = this._priv_reloadingMetadata,
+        options = _this$_priv_reloading.options,
+        manifest = _this$_priv_reloading.manifest,
+        reloadPosition = _this$_priv_reloading.reloadPosition,
+        reloadInPause = _this$_priv_reloading.reloadInPause;
+
+    if (options === undefined) {
       throw new Error("API: Can't reload without having previously loaded a content.");
     }
 
     checkReloadOptions(reloadOpts);
-    var startAtPositon;
+    var startAt;
 
-    if (reloadOpts !== undefined && reloadOpts.reloadAt !== undefined && reloadOpts.reloadAt.position !== undefined) {
-      startAtPositon = reloadOpts.reloadAt.position;
-    } else {
-      var playbackPosition;
-
-      if (this.state === "STOPPED" || this.state === "ENDED") {
-        playbackPosition = lastPlaybackPosition;
+    if (((_a = reloadOpts === null || reloadOpts === void 0 ? void 0 : reloadOpts.reloadAt) === null || _a === void 0 ? void 0 : _a.position) !== undefined) {
+      startAt = {
+        position: reloadOpts.reloadAt.position
+      };
+    } else if (((_b = reloadOpts === null || reloadOpts === void 0 ? void 0 : reloadOpts.reloadAt) === null || _b === void 0 ? void 0 : _b.relative) !== undefined) {
+      if (reloadPosition === undefined) {
+        throw new Error("Can't reload to a relative position when previous content was not loaded.");
       } else {
-        if (this.videoElement === null) {
-          throw new Error("Can't reload when video element does not exist.");
-        }
-
-        playbackPosition = this.videoElement.currentTime;
+        startAt = {
+          position: reloadOpts.reloadAt.relative + reloadPosition
+        };
       }
+    } else if (reloadPosition !== undefined) {
+      startAt = {
+        position: reloadPosition
+      };
+    }
 
-      if (reloadOpts !== undefined && reloadOpts.reloadAt !== undefined && reloadOpts.reloadAt.relative !== undefined) {
-        startAtPositon = reloadOpts.reloadAt.relative + playbackPosition;
-      } else {
-        startAtPositon = playbackPosition;
-      }
+    var autoPlay;
+
+    if ((reloadOpts === null || reloadOpts === void 0 ? void 0 : reloadOpts.autoPlay) !== undefined) {
+      autoPlay = reloadOpts.autoPlay;
+    } else if (reloadInPause !== undefined) {
+      autoPlay = !reloadInPause;
     }
 
     var newOptions = Object.assign(Object.assign({}, options), {
       initialManifest: manifest
     });
-    newOptions.startAt = {
-      position: startAtPositon
-    };
+
+    if (startAt !== undefined) {
+      newOptions.startAt = startAt;
+    }
+
+    if (autoPlay !== undefined) {
+      newOptions.autoPlay = autoPlay;
+    }
 
     this._priv_initializeContentPlayback(newOptions);
   }
@@ -60375,20 +61273,27 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   _proto._priv_initializeContentPlayback = function _priv_initializeContentPlayback(options) {
     var _this2 = this;
 
-    var _a, _b, _c;
+    var _a, _b, _c, _d, _e, _f, _g;
 
     var autoPlay = options.autoPlay,
+        defaultAudioTrackSwitchingMode = options.defaultAudioTrackSwitchingMode,
         enableFastSwitching = options.enableFastSwitching,
         initialManifest = options.initialManifest,
         keySystems = options.keySystems,
         lowLatencyMode = options.lowLatencyMode,
-        manualBitrateSwitchingMode = options.manualBitrateSwitchingMode,
         minimumManifestUpdateInterval = options.minimumManifestUpdateInterval,
-        networkConfig = options.networkConfig,
+        requestConfig = options.requestConfig,
         onCodecSwitch = options.onCodecSwitch,
         startAt = options.startAt,
         transport = options.transport,
-        transportOptions = options.transportOptions,
+        checkMediaSegmentIntegrity = options.checkMediaSegmentIntegrity,
+        manifestLoader = options.manifestLoader,
+        manifestUpdateUrl = options.manifestUpdateUrl,
+        referenceDateTime = options.referenceDateTime,
+        representationFilter = options.representationFilter,
+        segmentLoader = options.segmentLoader,
+        serverSyncInfos = options.serverSyncInfos,
+        __priv_patchLastSegmentInSidx = options.__priv_patchLastSegmentInSidx,
         url = options.url; // Perform multiple checks on the given options
 
     if (this.videoElement === null) {
@@ -60412,6 +61317,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
     var contentInfos = {
       url: url,
+      defaultAudioTrackSwitchingMode: defaultAudioTrackSwitchingMode,
       currentContentCanceller: currentContentCanceller,
       isDirectFile: isDirectFile,
       segmentBuffersStore: null,
@@ -60444,23 +61350,23 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         throw new Error("transport \"" + transport + "\" not supported");
       }
 
-      var transportPipelines = transportFn(transportOptions);
-      var offlineRetry = networkConfig.offlineRetry,
-          segmentRetry = networkConfig.segmentRetry,
-          manifestRetry = networkConfig.manifestRetry;
+      var transportPipelines = transportFn({
+        lowLatencyMode: lowLatencyMode,
+        checkMediaSegmentIntegrity: checkMediaSegmentIntegrity,
+        manifestLoader: manifestLoader,
+        manifestUpdateUrl: manifestUpdateUrl,
+        referenceDateTime: referenceDateTime,
+        representationFilter: representationFilter,
+        segmentLoader: segmentLoader,
+        serverSyncInfos: serverSyncInfos,
+        __priv_patchLastSegmentInSidx: __priv_patchLastSegmentInSidx
+      });
       /** Interface used to load and refresh the Manifest. */
 
       var manifestFetcher = new fetchers_manifest(url, transportPipelines, {
         lowLatencyMode: lowLatencyMode,
-        maxRetryRegular: manifestRetry,
-        maxRetryOffline: offlineRetry
-      });
-      /** Interface used to download segments. */
-
-      var segmentFetcherCreator = new segment(transportPipelines, {
-        lowLatencyMode: lowLatencyMode,
-        maxRetryOffline: offlineRetry,
-        maxRetryRegular: segmentRetry
+        maxRetry: (_a = requestConfig.manifest) === null || _a === void 0 ? void 0 : _a.maxRetry,
+        requestTimeout: (_b = requestConfig.manifest) === null || _b === void 0 ? void 0 : _b.timeout
       });
       /** Observable emitting the initial Manifest */
 
@@ -60529,9 +61435,6 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       var adaptiveOptions = {
         initialBitrates: this._priv_bitrateInfos.lastBitrates,
         lowLatencyMode: lowLatencyMode,
-        manualBitrates: this._priv_bitrateInfos.manualBitrates,
-        minAutoBitrates: this._priv_bitrateInfos.minAutoBitrates,
-        maxAutoBitrates: this._priv_bitrateInfos.maxAutoBitrates,
         throttlers: throttlers
       };
       /** Options used by the TextTrack SegmentBuffer. */
@@ -60544,9 +61447,12 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       };
       var bufferOptions = (0,object_assign/* default */.Z)({
         enableFastSwitching: enableFastSwitching,
-        manualBitrateSwitchingMode: manualBitrateSwitchingMode,
         onCodecSwitch: onCodecSwitch
-      }, this._priv_bufferOptions); // We've every options set up. Start everything now
+      }, this._priv_bufferOptions);
+      var segmentRequestOptions = {
+        maxRetry: (_c = requestConfig.segment) === null || _c === void 0 ? void 0 : _c.maxRetry,
+        requestTimeout: (_d = requestConfig.segment) === null || _d === void 0 ? void 0 : _d.timeout
+      }; // We've every options set up. Start everything now
 
       var init$ = init({
         adaptiveOptions: adaptiveOptions,
@@ -60559,9 +61465,10 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         manifestFetcher: manifestFetcher,
         mediaElement: videoElement,
         minimumManifestUpdateInterval: minimumManifestUpdateInterval,
-        segmentFetcherCreator: segmentFetcherCreator,
+        segmentRequestOptions: segmentRequestOptions,
         speed: this._priv_speed,
         startAt: startAt,
+        transport: transportPipelines,
         textTrackOptions: textTrackOptions
       }).pipe((0,takeUntil/* takeUntil */.R)(stoppedContent$));
       playback$ = connectable(init$, {
@@ -60584,9 +61491,9 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       this.trigger("availableAudioTracksChange", this._priv_mediaElementTracksStore.getAvailableAudioTracks());
       this.trigger("availableVideoTracksChange", this._priv_mediaElementTracksStore.getAvailableVideoTracks());
       this.trigger("availableTextTracksChange", this._priv_mediaElementTracksStore.getAvailableTextTracks());
-      this.trigger("audioTrackChange", (_a = this._priv_mediaElementTracksStore.getChosenAudioTrack()) !== null && _a !== void 0 ? _a : null);
-      this.trigger("textTrackChange", (_b = this._priv_mediaElementTracksStore.getChosenTextTrack()) !== null && _b !== void 0 ? _b : null);
-      this.trigger("videoTrackChange", (_c = this._priv_mediaElementTracksStore.getChosenVideoTrack()) !== null && _c !== void 0 ? _c : null);
+      this.trigger("audioTrackChange", (_e = this._priv_mediaElementTracksStore.getChosenAudioTrack()) !== null && _e !== void 0 ? _e : null);
+      this.trigger("textTrackChange", (_f = this._priv_mediaElementTracksStore.getChosenTextTrack()) !== null && _f !== void 0 ? _f : null);
+      this.trigger("videoTrackChange", (_g = this._priv_mediaElementTracksStore.getChosenVideoTrack()) !== null && _g !== void 0 ? _g : null);
 
       this._priv_mediaElementTracksStore.addEventListener("availableVideoTracksChange", function (val) {
         return _this2.trigger("availableVideoTracksChange", val);
@@ -60662,32 +61569,77 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     }));
     /** Emit all player "state" updates. */
 
-    var playerState$ = (0,concat/* concat */.z)((0,of.of)(PLAYER_STATES.LOADING), // Begin with LOADING
+    var playerState$ = (0,concat/* concat */.z)((0,of.of)("LOADING"
+    /* PLAYER_STATES.LOADING */
+    ), // Begin with LOADING
     loaded$.pipe((0,switchMap/* switchMap */.w)(function (_, i) {
       var isFirstLoad = i === 0;
       return (0,merge/* merge */.T)( // Purposely subscribed first so a RELOADING triggered synchronously
       // after a LOADED state is catched.
       reloading$.pipe((0,map/* map */.U)(function () {
-        return PLAYER_STATES.RELOADING;
-      })), // Only switch to LOADED state for the first (i.e. non-RELOADING) load
-      isFirstLoad ? (0,of.of)(PLAYER_STATES.LOADED) : empty/* EMPTY */.E, // Purposely put last so any other state change happens after we've
+        return "RELOADING";
+      }
+      /* PLAYER_STATES.RELOADING */
+      )), // Only switch to LOADED state for the first (i.e. non-RELOADING) load
+      isFirstLoad ? (0,of.of)("LOADED"
+      /* PLAYER_STATES.LOADED */
+      ) : empty/* EMPTY */.E, // Purposely put last so any other state change happens after we've
       // already switched to LOADED
       loadedStateUpdates$.pipe((0,takeUntil/* takeUntil */.R)(reloading$), // For the first load, we prefer staying at the LOADED state over
       // PAUSED when autoPlay is disabled.
       // For consecutive loads however, there's no LOADED state.
       skipWhile(function (state) {
-        return isFirstLoad && state === PLAYER_STATES.PAUSED;
-      })));
+        return isFirstLoad && state === "PAUSED";
+      }
+      /* PLAYER_STATES.PAUSED */
+      )));
     }))).pipe((0,distinctUntilChanged/* distinctUntilChanged */.x)());
     var playbackSubscription;
     stoppedContent$.subscribe(function () {
       if (playbackSubscription !== undefined) {
         playbackSubscription.unsubscribe();
       }
-    }); // Link "positionUpdate" events to the PlaybackObserver
+    });
+    /**
+     * Function updating `this._priv_reloadingMetadata` in function of the
+     * current state and playback conditions.
+     * To call when either might change.
+     * @param {string} state - The player state we're about to switch to.
+     */
 
-    observation$.pipe((0,takeUntil/* takeUntil */.R)(stoppedContent$)).subscribe(function (o) {
-      return _this2._priv_triggerPositionUpdate(o);
+    var updateReloadingMetadata = function updateReloadingMetadata(state) {
+      switch (state) {
+        case "STOPPED":
+        case "RELOADING":
+        case "LOADING":
+          break;
+        // keep previous metadata
+
+        case "ENDED":
+          _this2._priv_reloadingMetadata.reloadInPause = true;
+          _this2._priv_reloadingMetadata.reloadPosition = playbackObserver.getReference().getValue().position;
+          break;
+
+        default:
+          var o = playbackObserver.getReference().getValue();
+          _this2._priv_reloadingMetadata.reloadInPause = o.paused;
+          _this2._priv_reloadingMetadata.reloadPosition = o.position;
+          break;
+      }
+    };
+
+    playerState$.pipe((0,tap/* tap */.b)(function (newState) {
+      updateReloadingMetadata(newState);
+
+      _this2._priv_setPlayerState(newState);
+    }), (0,map/* map */.U)(function (state) {
+      return state !== "RELOADING" && state !== "STOPPED";
+    }), (0,distinctUntilChanged/* distinctUntilChanged */.x)(), (0,switchMap/* switchMap */.w)(function (canSendObservation) {
+      return canSendObservation ? observation$ : empty/* EMPTY */.E;
+    }), (0,takeUntil/* takeUntil */.R)(stoppedContent$)).subscribe(function (o) {
+      updateReloadingMetadata(_this2.state);
+
+      _this2._priv_triggerPositionUpdate(o);
     }); // Link "seeking" and "seeked" events (once the content is loaded)
 
     loaded$.pipe((0,switchMap/* switchMap */.w)(function () {
@@ -60696,10 +61648,6 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       log/* default.info */.Z.info("API: Triggering \"" + evt + "\" event");
 
       _this2.trigger(evt, null);
-    }); // Handle state updates
-
-    playerState$.pipe((0,takeUntil/* takeUntil */.R)(stoppedContent$)).subscribe(function (x) {
-      return _this2._priv_setPlayerState(x);
     }); // Link playback events to the corresponding callbacks
 
     playback$.subscribe({
@@ -60716,7 +61664,9 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
           _this2._priv_cleanUpCurrentContentState();
 
-          _this2._priv_setPlayerState(PLAYER_STATES.STOPPED);
+          _this2._priv_setPlayerState("STOPPED"
+          /* PLAYER_STATES.STOPPED */
+          );
         }
       }
     }); // initialize the content only when the lock is inactive
@@ -60795,12 +61745,12 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   }
   /**
    * Returns the url of the content's manifest
-   * @returns {string|undefined} - Current URL. `undefined` if not known or no
+   * @returns {Array.<string>|undefined} - Current URL. `undefined` if not known or no
    * URL yet.
    */
   ;
 
-  _proto.getUrl = function getUrl() {
+  _proto.getContentUrls = function getContentUrls() {
     if (this._priv_contentInfos === null) {
       return undefined;
     }
@@ -60811,11 +61761,11 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         url = _this$_priv_contentIn2.url;
 
     if (isDirectFile) {
-      return url;
+      return url === undefined ? undefined : [url];
     }
 
     if (manifest !== null) {
-      return manifest.getUrl();
+      return manifest.getUrls();
     }
 
     return undefined;
@@ -60970,9 +61920,9 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
    *
    * Note that switching to or getting out of a trickmode video track may
    * lead to the player being a brief instant in a `"RELOADING"` state (notified
-   * through `playerStateChange` events and the `getPlayerState` method). When in
-   * that state, a black screen may be displayed and multiple RxPlayer APIs will
-   * not be usable.
+   * through `playerStateChange` events and the `getLoadedContentState` method).
+   * When in that state, a black screen may be displayed and multiple RxPlayer
+   * APIs will not be usable.
    *
    * @param {Number} rate
    * @param {Object} opts
@@ -61001,70 +61951,44 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     }
   }
   /**
-   * Returns currently considered bitrate for video segments.
-   * @returns {Number|undefined}
+   * Returns video Representation currently considered for the current Period.
+   *
+   * Returns `null` if no video track is playing for the current Period.
+   *
+   * Returns `undefined` either when are not currently playing any Period or
+   * when we don't know which Representation is playing.
+   * @returns {Object|null|undefined}
    */
   ;
 
-  _proto.getVideoBitrate = function getVideoBitrate() {
+  _proto.getVideoRepresentation = function getVideoRepresentation() {
     var representations = this._priv_getCurrentRepresentations();
 
-    if (representations === null || (0,is_null_or_undefined/* default */.Z)(representations.video)) {
+    if (representations === null) {
       return undefined;
     }
 
-    return representations.video.bitrate;
+    return representations.video;
   }
   /**
-   * Returns currently considered bitrate for audio segments.
-   * @returns {Number|undefined}
+   * Returns audio Representation currently considered for the current Period.
+   *
+   * Returns `null` if no audio track is playing for the current Period.
+   *
+   * Returns `undefined` either when are not currently playing any Period or
+   * when we don't know which Representation is playing.
+   * @returns {Object|null|undefined}
    */
   ;
 
-  _proto.getAudioBitrate = function getAudioBitrate() {
+  _proto.getAudioRepresentation = function getAudioRepresentation() {
     var representations = this._priv_getCurrentRepresentations();
 
-    if (representations === null || (0,is_null_or_undefined/* default */.Z)(representations.audio)) {
+    if (representations === null) {
       return undefined;
     }
 
-    return representations.audio.bitrate;
-  }
-  /**
-   * Returns minimum wanted video bitrate currently set.
-   * @returns {Number}
-   */
-  ;
-
-  _proto.getMinVideoBitrate = function getMinVideoBitrate() {
-    return this._priv_bitrateInfos.minAutoBitrates.video.getValue();
-  }
-  /**
-   * Returns minimum wanted audio bitrate currently set.
-   * @returns {Number}
-   */
-  ;
-
-  _proto.getMinAudioBitrate = function getMinAudioBitrate() {
-    return this._priv_bitrateInfos.minAutoBitrates.audio.getValue();
-  }
-  /**
-   * Returns maximum wanted video bitrate currently set.
-   * @returns {Number}
-   */
-  ;
-
-  _proto.getMaxVideoBitrate = function getMaxVideoBitrate() {
-    return this._priv_bitrateInfos.maxAutoBitrates.video.getValue();
-  }
-  /**
-   * Returns maximum wanted audio bitrate currently set.
-   * @returns {Number}
-   */
-  ;
-
-  _proto.getMaxAudioBitrate = function getMaxAudioBitrate() {
-    return this._priv_bitrateInfos.maxAutoBitrates.audio.getValue();
+    return representations.audio;
   }
   /**
    * Play/Resume the current video.
@@ -61238,66 +62162,6 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     if (vol === 0) {
       this.setVolume(this._priv_mutedMemory === 0 ? DEFAULT_UNMUTED_VOLUME : this._priv_mutedMemory);
     }
-  }
-  /**
-   * Update the minimum video bitrate the user can switch to.
-   * @param {Number} btr
-   */
-  ;
-
-  _proto.setMinVideoBitrate = function setMinVideoBitrate(btr) {
-    var maxVideoBitrate = this._priv_bitrateInfos.maxAutoBitrates.video.getValue();
-
-    if (btr > maxVideoBitrate) {
-      throw new Error("Invalid minimum video bitrate given. " + ("Its value, \"" + btr + "\" is superior the current maximum ") + ("video birate, \"" + maxVideoBitrate + "\"."));
-    }
-
-    this._priv_bitrateInfos.minAutoBitrates.video.setValue(btr);
-  }
-  /**
-   * Update the minimum audio bitrate the user can switch to.
-   * @param {Number} btr
-   */
-  ;
-
-  _proto.setMinAudioBitrate = function setMinAudioBitrate(btr) {
-    var maxAudioBitrate = this._priv_bitrateInfos.maxAutoBitrates.audio.getValue();
-
-    if (btr > maxAudioBitrate) {
-      throw new Error("Invalid minimum audio bitrate given. " + ("Its value, \"" + btr + "\" is superior the current maximum ") + ("audio birate, \"" + maxAudioBitrate + "\"."));
-    }
-
-    this._priv_bitrateInfos.minAutoBitrates.audio.setValue(btr);
-  }
-  /**
-   * Update the maximum video bitrate the user can switch to.
-   * @param {Number} btr
-   */
-  ;
-
-  _proto.setMaxVideoBitrate = function setMaxVideoBitrate(btr) {
-    var minVideoBitrate = this._priv_bitrateInfos.minAutoBitrates.video.getValue();
-
-    if (btr < minVideoBitrate) {
-      throw new Error("Invalid maximum video bitrate given. " + ("Its value, \"" + btr + "\" is inferior the current minimum ") + ("video birate, \"" + minVideoBitrate + "\"."));
-    }
-
-    this._priv_bitrateInfos.maxAutoBitrates.video.setValue(btr);
-  }
-  /**
-   * Update the maximum audio bitrate the user can switch to.
-   * @param {Number} btr
-   */
-  ;
-
-  _proto.setMaxAudioBitrate = function setMaxAudioBitrate(btr) {
-    var minAudioBitrate = this._priv_bitrateInfos.minAutoBitrates.audio.getValue();
-
-    if (btr < minAudioBitrate) {
-      throw new Error("Invalid maximum audio bitrate given. " + ("Its value, \"" + btr + "\" is inferior the current minimum ") + ("audio birate, \"" + minAudioBitrate + "\"."));
-    }
-
-    this._priv_bitrateInfos.maxAutoBitrates.audio.setValue(btr);
   }
   /**
    * Set the max buffer size for the buffer behind the current position.
@@ -62089,8 +62953,8 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
         break;
 
-      case "bitrateEstimationChange":
-        this._priv_onBitrateEstimationChange(event.value);
+      case "bitrateEstimateChange":
+        this._priv_onBitrateEstimateChange(event.value);
 
         break;
 
@@ -62111,22 +62975,6 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         }
 
         this._priv_contentInfos.segmentBuffersStore = event.value.segmentBuffersStore;
-        break;
-
-      case "decipherabilityUpdate":
-        this.trigger("decipherabilityUpdate", event.value.map(function (i) {
-          return {
-            periodInfo: {
-              start: i.period.start,
-              end: i.period.end,
-              id: i.period.id
-            },
-            trackType: i.adaptation.type,
-            trackId: i.adaptation.id,
-            representationId: i.representation.id,
-            isDecipherable: i.representation.decipherable
-          };
-        }));
         break;
     }
   }
@@ -62153,7 +63001,9 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     this._priv_currentError = formattedError;
     log/* default.error */.Z.error("API: The player stopped because of an error", error instanceof Error ? error : "");
 
-    this._priv_setPlayerState(PLAYER_STATES.STOPPED); // TODO This condition is here because the eventual callback called when the
+    this._priv_setPlayerState("STOPPED"
+    /* PLAYER_STATES.STOPPED */
+    ); // TODO This condition is here because the eventual callback called when the
     // player state is updated can launch a new content, thus the error will not
     // be here anymore, in which case triggering the "error" event is unwanted.
     // This is very ugly though, and we should probable have a better solution
@@ -62197,9 +63047,10 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     }
 
     contentInfos.manifest = manifest;
-    this._priv_lastContentPlaybackInfos.manifest = manifest;
-    this._priv_tracksStore = new track_management({
-      preferTrickModeTracks: this._priv_preferTrickModeTracks
+    this._priv_reloadingMetadata.manifest = manifest;
+    this._priv_tracksStore = new TracksStore({
+      preferTrickModeTracks: this._priv_preferTrickModeTracks,
+      defaultAudioTrackSwitchingMode: contentInfos.defaultAudioTrackSwitchingMode
     });
 
     this._priv_tracksStore.addEventListener("newAvailablePeriods", function (p) {
@@ -62488,15 +63339,18 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
    */
   ;
 
-  _proto._priv_onBitrateEstimationChange = function _priv_onBitrateEstimationChange(_ref6) {
+  _proto._priv_onBitrateEstimateChange = function _priv_onBitrateEstimateChange(_ref6) {
     var type = _ref6.type,
         bitrate = _ref6.bitrate;
 
     if (bitrate !== undefined) {
       this._priv_bitrateInfos.lastBitrates[type] = bitrate;
-    }
+    } // !!! undocumented API :O !!!
 
-    this.trigger("bitrateEstimationChange", {
+    /* eslint-disable-next-line */
+
+
+    this.trigger("__priv_bitrateEstimateChange", {
       type: type,
       bitrate: bitrate
     });
@@ -62534,10 +63388,6 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       return;
     }
 
-    if (this.state === PLAYER_STATES.RELOADING) {
-      return;
-    }
-
     var _this$_priv_contentIn9 = this._priv_contentInfos,
         isDirectFile = _this$_priv_contentIn9.isDirectFile,
         manifest = _this$_priv_contentIn9.manifest;
@@ -62546,7 +63396,6 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       return;
     }
 
-    this._priv_lastContentPlaybackInfos.lastPlaybackPosition = observation.position;
     var maximumPosition = manifest !== null ? manifest.getMaximumSafePosition() : undefined;
     var positionData = {
       position: observation.position,
@@ -62655,7 +63504,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
 
 Player.version =
 /* PLAYER_VERSION */
-"3.28.0";
+"4.0.0-alpha.2022100600";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
@@ -62687,7 +63536,7 @@ var features_object = __webpack_require__(7273);
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *j    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -62703,9 +63552,7 @@ var features_object = __webpack_require__(7273);
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 /**
- * Selects the features to include based on environment variables.
- *
- * @param {Object} features
+ * Selects the features to include.
  */
 
 function initializeFeaturesObject() {
@@ -62717,12 +63564,12 @@ function initializeFeaturesObject() {
   var HAS_NATIVE_MODE = 1 || 0 || 0 || 0;
 
   if (true) {
-    features_object/* default.transports.smooth */.Z.transports.smooth = (__webpack_require__(9774)/* ["default"] */ .Z);
+    features_object/* default.transports.smooth */.Z.transports.smooth = (__webpack_require__(5418)/* ["default"] */ .Z);
   }
 
   if (true) {
-    features_object/* default.transports.dash */.Z.transports.dash = (__webpack_require__(6779)/* ["default"] */ .Z);
-    features_object/* default.dashParsers.js */.Z.dashParsers.js = (__webpack_require__(7144)/* ["default"] */ .Z);
+    features_object/* default.transports.dash */.Z.transports.dash = (__webpack_require__(2047)/* ["default"] */ .Z);
+    features_object/* default.dashParsers.js */.Z.dashParsers.js = (__webpack_require__(5904)/* ["default"] */ .Z);
   }
 
   if (false) {}
@@ -62801,14 +63648,11 @@ function initializeFeaturesObject() {
  */
 
 /**
- * This file exports a Player class with a default feature set (depends on the
- * environment variables set at build).
- *
+ * This file exports a Player class with a default feature set.
  * This is the class used from a regular build.
  */
 
 
- // set initial features according to environment variables
 
 initializeFeaturesObject();
 
