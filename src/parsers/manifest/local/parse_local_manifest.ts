@@ -54,6 +54,7 @@ export default function parseLocalManifest(
     .map(period => parsePeriod(period, { periodIdGenerator }));
 
   return { availabilityStartTime: 0,
+           contentSteering: null,
            expired: localManifest.expired,
            transportType: "local",
            isDynamic: !isFinished,

@@ -365,7 +365,8 @@ describe("DASH Node Parsers - AdaptationSet", () => {
       .toEqual([
         {
           attributes: {},
-          children: { baseURLs: [{ value: "a" }],
+          children: { baseURLs: [{ attributes: { serviceLocation: "foo" },
+                                   value: "a" }],
                       representations: [] },
         },
         [],
@@ -381,7 +382,8 @@ describe("DASH Node Parsers - AdaptationSet", () => {
       .toEqual([
         {
           attributes: {},
-          children: { baseURLs: [{ value: "foo bar" }],
+          children: { baseURLs: [{ attributes: { serviceLocation: "4" },
+                                   value: "foo bar" }],
                       representations: [] },
         },
         [],
@@ -397,8 +399,10 @@ describe("DASH Node Parsers - AdaptationSet", () => {
       .toEqual([
         {
           attributes: {},
-          children: { baseURLs: [ { value: "a" },
-                                  { value: "b" } ],
+          children: { baseURLs: [ { attributes: { serviceLocation: "" },
+                                    value: "a" },
+                                  { attributes: { serviceLocation: "http://test.com" },
+                                    value: "b" } ],
                       representations: [] },
         },
         [],

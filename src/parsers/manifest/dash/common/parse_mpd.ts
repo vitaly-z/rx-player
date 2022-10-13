@@ -19,7 +19,10 @@ import log from "../../../../log";
 import Manifest from "../../../../manifest";
 import arrayFind from "../../../../utils/array_find";
 import { getFilenameIndexInUrl } from "../../../../utils/resolve_url";
-import { IParsedManifest } from "../../types";
+import {
+  IContentSteeringMetadata,
+  IParsedManifest,
+} from "../../types";
 import {
   IMPDIntermediateRepresentation,
   IPeriodIntermediateRepresentation,
@@ -273,6 +276,16 @@ function parseCompleteIntermediateRepresentation(
                           livePosition : number | undefined;
                           time : number; };
 
+  let contentSteering : IContentSteeringMetadata | null = null;
+  if (rootChildren.contentSteering !== undefined) {
+    const { attributes } = rootChildren.contentSteering;
+    contentSteering = { url: rootChildren.contentSteering.value,
+                        defaultId: attributes.defaultServiceLocation,
+                        queryBeforeStart: attributes.queryBeforeStart === true,
+                        proxyUrl: attributes.proxyServerUrl };
+
+  }
+
   if (rootAttributes.minimumUpdatePeriod !== undefined &&
       rootAttributes.minimumUpdatePeriod >= 0)
   {
@@ -367,6 +380,7 @@ function parseCompleteIntermediateRepresentation(
   const parsedMPD : IParsedManifest = {
     availabilityStartTime,
     clockOffset: args.externalClockOffset,
+    contentSteering,
     isDynamic,
     isLive: isDynamic,
     isLastPeriodKnown,

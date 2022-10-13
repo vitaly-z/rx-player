@@ -301,6 +301,7 @@ export default class MediaSourceContentInitializer extends ContentInitializer {
                                           bufferOptions);
 
     const segmentFetcherCreator = new SegmentFetcherCreator(transport,
+                                                            manifest,
                                                             segmentRequestOptions,
                                                             initCanceller.signal);
 

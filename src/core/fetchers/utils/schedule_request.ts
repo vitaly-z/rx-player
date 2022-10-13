@@ -26,6 +26,9 @@ import { ICdnMetadata } from "../../../parsers/manifest";
 import cancellableSleep from "../../../utils/cancellable_sleep";
 import getFuzzedDelay from "../../../utils/get_fuzzed_delay";
 import noop from "../../../utils/noop";
+import SyncOrAsync, {
+  ISyncOrAsyncValue,
+} from "../../../utils/sync_or_async";
 import TaskCanceller, {
   CancellationSignal,
 } from "../../../utils/task_canceller";
@@ -204,7 +207,9 @@ export async function scheduleRequestWithCdns<T>(
   }
 
   const missedAttempts : Map<ICdnMetadata | null, ICdnAttemptMetadata> = new Map();
-  const initialCdnToRequest = getCdnToRequest();
+  const cdnsResponse = getCdnToRequest();
+  const initialCdnToRequest = cdnsResponse.syncValue ??
+                              await cdnsResponse.getValueAsAsync();
   if (initialCdnToRequest === undefined) {
     throw new Error("No CDN to request");
   }
@@ -220,18 +225,25 @@ export async function scheduleRequestWithCdns<T>(
    * the resource.
    * @returns {Object|null|undefined}
    */
-  function getCdnToRequest() : ICdnMetadata | null | undefined {
+  function getCdnToRequest() : ISyncOrAsyncValue<ICdnMetadata | null | undefined> {
     if (cdns === null) {
       const nullAttemptObject = missedAttempts.get(null);
       if (nullAttemptObject !== undefined && nullAttemptObject.isBlacklisted) {
-        return undefined;
+        return SyncOrAsync.createSync(undefined);
       }
-      return null;
+      return SyncOrAsync.createSync(null);
     } else if (cdnPrioritizer === null) {
-      return getPrioritaryRequestableCdnFromSortedList(cdns);
+      return SyncOrAsync.createSync(getPrioritaryRequestableCdnFromSortedList(cdns));
     } else {
       const prioritized = cdnPrioritizer.getCdnPreferenceForResource(cdns);
-      return getPrioritaryRequestableCdnFromSortedList(prioritized);
+      // TODO order by `blockedUntil` DESC if `missedAttempts` is not empty
+      if (prioritized.syncValue !== null) {
+        return SyncOrAsync.createSync(
+          getPrioritaryRequestableCdnFromSortedList(prioritized.syncValue)
+        );
+      }
+      return SyncOrAsync.createAsync(prioritized.getValueAsAsync()
+        .then(v => getPrioritaryRequestableCdnFromSortedList(v)));
     }
   }
 
@@ -313,7 +325,9 @@ export async function scheduleRequestWithCdns<T>(
    * @returns {Promise}
    */
   async function retryWithNextCdn(prevRequestError : unknown) : Promise<T> {
-    const nextCdn = getCdnToRequest();
+    const currCdnResponse = getCdnToRequest();
+    const nextCdn = currCdnResponse.syncValue ??
+                    await currCdnResponse.getValueAsAsync();
 
     if (cancellationSignal.isCancelled()) {
       throw cancellationSignal.cancellationError;
@@ -362,8 +376,10 @@ export async function scheduleRequestWithCdns<T>(
     const unlinkCanceller = canceller.linkToSignal(cancellationSignal);
     return new Promise<T>((res, rej) => {
       /* eslint-disable-next-line @typescript-eslint/no-misused-promises */
-      cdnPrioritizer?.addEventListener("priorityChange", () => {
-        const updatedPrioritaryCdn = getCdnToRequest();
+      cdnPrioritizer?.addEventListener("priorityChange", async () => {
+        const newCdnsResponse = getCdnToRequest();
+        const updatedPrioritaryCdn = newCdnsResponse.syncValue ??
+                                     await newCdnsResponse.getValueAsAsync();
         if (cancellationSignal.isCancelled()) {
           throw cancellationSignal.cancellationError;
         }
