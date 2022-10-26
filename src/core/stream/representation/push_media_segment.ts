@@ -35,7 +35,7 @@ import { IReadOnlyPlaybackObserver } from "../../api";
 import { SegmentBuffer } from "../../segment_buffers";
 import EVENTS from "../events_generators";
 import { IStreamEventAddedSegment } from "../types";
-import appendSegmentToBuffer from "./append_segment_to_buffer";
+import { appendMediaSegmentToBuffer } from "./append_segment_to_buffer";
 import { IRepresentationStreamPlaybackObservation } from "./representation_stream";
 
 
@@ -50,7 +50,6 @@ import { IRepresentationStreamPlaybackObservation } from "./representation_strea
 export default function pushMediaSegment<T>(
   { playbackObserver,
     content,
-    initSegmentData,
     parsedSegment,
     segment,
     segmentBuffer } :
@@ -61,7 +60,6 @@ export default function pushMediaSegment<T>(
                manifest : Manifest;
                period : Period;
                representation : Representation; };
-    initSegmentData : T | null;
     parsedSegment : ISegmentParserParsedMediaChunk<T>;
     segment : ISegment;
     segmentBuffer : SegmentBuffer; }
@@ -89,7 +87,11 @@ export default function pushMediaSegment<T>(
         undefined,
     ];
 
-    const data = { initSegment: initSegmentData,
+    // XXX TODO
+    const initSegmentUniqueId = content.representation.index.getInitSegment() === null ?
+      null :
+      content.representation.id;
+    const data = { initSegmentUniqueId,
                    chunk: chunkData,
                    timestampOffset: chunkOffset,
                    appendWindow: safeAppendWindow,
@@ -113,10 +115,10 @@ export default function pushMediaSegment<T>(
     const canceller = new TaskCanceller();
 
     return fromCancellablePromise(canceller, () =>
-      appendSegmentToBuffer(playbackObserver,
-                            segmentBuffer,
-                            { data, inventoryInfos },
-                            canceller.signal))
+      appendMediaSegmentToBuffer(playbackObserver,
+                                 segmentBuffer,
+                                 { data, inventoryInfos },
+                                 canceller.signal))
       .pipe(map(() => {
         const buffered = segmentBuffer.getBufferedRanges();
         return EVENTS.addedSegment(content, segment, buffered, chunkData);

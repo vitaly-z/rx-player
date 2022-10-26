@@ -29,6 +29,7 @@ import {
   concat as observableConcat,
   defer as observableDefer,
   EMPTY,
+  finalize,
   ignoreElements,
   merge as observableMerge,
   mergeMap,
@@ -70,6 +71,7 @@ import {
   IInbandEventsEvent,
   IStreamWarningEvent,
 } from "../types";
+import addInitSegment from "./add_init_segment";
 import DownloadingQueue, {
   IDownloadingQueueEvent,
   IDownloadQueueItem,
@@ -78,7 +80,6 @@ import DownloadingQueue, {
 } from "./downloading_queue";
 import getBufferStatus from "./get_buffer_status";
 import getSegmentPriority from "./get_segment_priority";
-import pushInitSegment from "./push_init_segment";
 import pushMediaSegment from "./push_media_segment";
 
 /**
@@ -112,9 +113,8 @@ export default function RepresentationStream<TSegmentDataType>({
   const bufferType = adaptation.type;
 
   /** Saved initialization segment state for this representation. */
-  const initSegmentState : IInitSegmentState<TSegmentDataType> = {
+  const initSegmentState : IInitSegmentState = {
     segment: representation.index.getInitSegment(),
-    segmentData: null,
     isLoaded: false,
   };
 
@@ -135,7 +135,6 @@ export default function RepresentationStream<TSegmentDataType>({
                                                 hasInitSegment);
 
   if (!hasInitSegment) {
-    initSegmentState.segmentData = null;
     initSegmentState.isLoaded = true;
   }
 
@@ -284,7 +283,11 @@ export default function RepresentationStream<TSegmentDataType>({
     takeWhile((e) => e.type !== "stream-terminating", true)
   );
 
-  return observableMerge(status$, queue$, encryptionEvent$).pipe(share());
+  return observableMerge(status$, queue$, encryptionEvent$).pipe(
+    // XXX TODO
+    finalize(() => segmentBuffer.freeInitSegment(content.representation.id)),
+    share()
+  );
 
   /**
    * React to event from the `DownloadingQueue`.
@@ -361,7 +364,6 @@ export default function RepresentationStream<TSegmentDataType>({
       nextTick(() => {
         reCheckNeededSegments$.next();
       });
-      initSegmentState.segmentData = evt.initializationData;
       initSegmentState.isLoaded = true;
 
       // Now that the initialization segment has been parsed - which may have
@@ -373,11 +375,11 @@ export default function RepresentationStream<TSegmentDataType>({
         observableOf(...allEncryptionData.map(p =>
           EVENTS.encryptionDataEncountered(p, content))) :
         EMPTY;
-      const pushEvent$ = pushInitSegment({ playbackObserver,
-                                           content,
-                                           segment: evt.segment,
-                                           segmentData: evt.initializationData,
-                                           segmentBuffer });
+      const pushEvent$ = addInitSegment({ playbackObserver,
+                                          content,
+                                          segment: evt.segment,
+                                          segmentData: evt.initializationData,
+                                          segmentBuffer });
       return observableMerge(initEncEvt$, pushEvent$);
     } else {
       const { inbandEvents,
@@ -401,10 +403,8 @@ export default function RepresentationStream<TSegmentDataType>({
                        value: inbandEvents }) :
         EMPTY;
 
-      const initSegmentData = initSegmentState.segmentData;
       const pushMediaSegment$ = pushMediaSegment({ playbackObserver,
                                                    content,
-                                                   initSegmentData,
                                                    parsedSegment: evt,
                                                    segment: evt.segment,
                                                    segmentBuffer });
@@ -540,17 +540,12 @@ export interface IRepresentationStreamOptions {
  * Information about the initialization segment linked to the Representation
  * which the RepresentationStream try to download segments for.
  */
-interface IInitSegmentState<T> {
+interface IInitSegmentState {
   /**
    * Segment Object describing that initialization segment.
    * `null` if there's no initialization segment for that Representation.
    */
   segment : ISegment | null;
-  /**
-   * Initialization segment data.
-   * `null` either when it doesn't exist or when it has not been loaded yet.
-   */
-  segmentData : T | null;
   /** `true` if the initialization segment has been loaded and parsed. */
   isLoaded : boolean;
 }

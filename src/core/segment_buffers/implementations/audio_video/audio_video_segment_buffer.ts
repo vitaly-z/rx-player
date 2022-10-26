@@ -44,6 +44,14 @@ import {
   SegmentBufferOperation,
 } from "../types";
 
+/** Future "operations" scheduled by an `AudioVideoSegmentBuffer`. */
+type IAVSBOperation = ISBOperation<BufferSource> | {
+  type : "InitSegmentPush";
+  value : {
+    data : BufferSource;
+    initSegmentUniqueId : string;
+  };
+};
 
 /**
  * Item added to the AudioVideoSegmentBuffer's queue before being processed into
@@ -53,7 +61,7 @@ import {
  * AudioVideoSegmentBuffer to emit an event when the corresponding queued
  * operation is completely processed.
  */
-type IAVSBQueueItem = ISBOperation<BufferSource> & {
+type IAVSBQueueItem = IAVSBOperation & {
   resolve : () => void;
   reject : (err : Error) => void;
 };
@@ -116,6 +124,10 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer {
   /** SourceBuffer implementation. */
   private readonly _sourceBuffer : ICompatSourceBuffer;
 
+  private _initializationSegmentMap : Map<string, BufferSource>;
+
+  private _lastPushedInitSegmentId : string | null;
+
   /**
    * Helps to clean-up resource taken at the AudioVideoSegmentBuffer creation.
    */
@@ -176,6 +188,8 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer {
     this._pendingTask = null;
     this._lastInitSegment = null;
     this.codec = codec;
+    this._initializationSegmentMap = new Map();
+    this._lastPushedInitSegmentId = null;
 
     const onError = this._onPendingTaskError.bind(this);
     const reCheck = this._flush.bind(this);
@@ -196,6 +210,38 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer {
       this._sourceBuffer.removeEventListener("error", onError);
       this._sourceBuffer.removeEventListener("updateend", reCheck);
     });
+  }
+
+  public declareInitSegment(
+    uniqueId : string,
+    initSegmentData : unknown,
+    codec : string,
+    pushToQueue : boolean,
+    cancelSignal : CancellationSignal
+  ) : Promise<void> {
+    assertPushedDataIsBufferSource(initSegmentData);
+    log.debug("AVSB: receiving order to declare init segment",
+              this.bufferType,
+              uniqueId,
+              pushToQueue);
+    if (this._initializationSegmentMap.has(uniqueId)) {
+      log.warn("AVSB: Declaring an already-declared initialization segment.");
+    }
+    this._initializationSegmentMap.set(uniqueId, initSegmentData);
+    if (!pushToQueue) {
+      return Promise.resolve();
+    }
+
+    // XXX TODO
+    return Promise.reject();
+  }
+
+  public freeInitSegment(uniqueId : string) : boolean {
+    if (this._initializationSegmentMap.has(uniqueId)) {
+      this._initializationSegmentMap.delete(uniqueId);
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -229,7 +275,7 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer {
     infos : IPushChunkInfos<unknown>,
     cancellationSignal : CancellationSignal
   ) : Promise<void> {
-    assertPushedDataIsBufferSource(infos);
+    checkPushedChunkInfo(infos);
     log.debug("AVSB: receiving order to push data to the SourceBuffer",
               this.bufferType,
               getLoggableSegmentId(infos.inventoryInfos));
@@ -295,22 +341,11 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer {
    * @returns {Array.<Object>}
    */
   public getPendingOperations() : Array<ISBOperation<BufferSource>> {
-    const parseQueuedOperation =
-      (op : IAVSBQueueItem | IAVSBPendingTask) : ISBOperation<BufferSource> => {
-        // Had to be written that way for TypeScript
-        switch (op.type) {
-          case SegmentBufferOperation.Push:
-            return { type: op.type, value: op.value };
-          case SegmentBufferOperation.Remove:
-            return { type: op.type, value: op.value };
-          case SegmentBufferOperation.EndOfSegment:
-            return { type: op.type, value: op.value };
-        }
-      };
-    const queued = this._queue.map(parseQueuedOperation);
-    return this._pendingTask === null ?
-      queued :
-      [parseQueuedOperation(this._pendingTask)].concat(queued);
+    const pendingOps = this._pendingTask === null ?
+      [] :
+      audioVideoSegmentBufferOperationReducerFunction([], this._pendingTask);
+    return this._queue.reduce(audioVideoSegmentBufferOperationReducerFunction,
+                              pendingOps);
   }
 
   /**
@@ -372,7 +407,7 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer {
    * @returns {Promise}
    */
   private _addToQueue(
-    operation : ISBOperation<BufferSource>,
+    operation : IAVSBOperation,
     cancellationSignal : CancellationSignal
   ) : Promise<void> {
     return new Promise((resolve, reject) => {
@@ -615,29 +650,63 @@ export default class AudioVideoSegmentBuffer extends SegmentBuffer {
  * Throw if the given input is not in the expected format.
  * Allows to enforce runtime type-checking as compile-time type-checking here is
  * difficult to enforce.
- * @param {Object} pushedData
+ * @param {*} info
+ */
+function checkPushedChunkInfo(
+  info : IPushChunkInfos<unknown>
+) : asserts info is IPushChunkInfos<BufferSource> {
+  assertPushedDataIsBufferSource(info.data.chunk);
+}
+
+/**
+ * Throw if the given input is not in the expected format.
+ * Allows to enforce runtime type-checking as compile-time type-checking here is
+ * difficult to enforce.
+ * @param {*} data
  */
 function assertPushedDataIsBufferSource(
-  pushedData : IPushChunkInfos<unknown>
-) : asserts pushedData is IPushChunkInfos<BufferSource> {
+  data : unknown
+) : asserts data is BufferSource {
   if (__ENVIRONMENT__.CURRENT_ENV === __ENVIRONMENT__.PRODUCTION as number) {
     return;
   }
-  const { chunk, initSegment } = pushedData.data;
   if (
-    typeof chunk !== "object" ||
-    typeof initSegment !== "object" ||
+    typeof data !== "object" ||
+    data === null ||
     (
-      chunk !== null &&
-      !(chunk instanceof ArrayBuffer) &&
-      !((chunk as ArrayBufferView).buffer instanceof ArrayBuffer)
-    ) ||
-    (
-      initSegment !== null &&
-      !(initSegment instanceof ArrayBuffer) &&
-      !((initSegment as ArrayBufferView).buffer instanceof ArrayBuffer)
+      data !== null &&
+      !(data instanceof ArrayBuffer) &&
+      !((data as ArrayBufferView).buffer instanceof ArrayBuffer)
     )
   ) {
     throw new Error("Invalid data given to the AudioVideoSegmentBuffer");
+  }
+}
+
+/**
+ * Function that can be used on an Array of `IAVSBQueueItem`,
+ * `IAVSBPendingTask` or both in a `reduce` function to convert it to an
+ * array of `ISBOperation`.
+ * @param {Array.<Object>} acc
+ * @param {Object} val
+ * @returns {Array.<Object>}
+ */
+function audioVideoSegmentBufferOperationReducerFunction(
+  acc : Array<ISBOperation<BufferSource>>,
+  val : IAVSBQueueItem | IAVSBPendingTask
+) : Array<ISBOperation<BufferSource>> {
+  // Had to be written that way for TypeScript
+  switch (val.type) {
+    case SegmentBufferOperation.Push:
+      acc.push({ type: val.type, value: val.value });
+      return acc;
+    case SegmentBufferOperation.Remove:
+      acc.push({ type: val.type, value: val.value });
+      return acc;
+    case SegmentBufferOperation.EndOfSegment:
+      acc.push({ type: val.type, value: val.value });
+      return acc;
+    case "InitSegmentPush":
+      return acc;
   }
 }

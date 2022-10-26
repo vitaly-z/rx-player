@@ -39,6 +39,29 @@ export default class ImageSegmentBuffer extends SegmentBuffer {
   }
 
   /**
+   * Function used to declare a new exploitable initialization segment.
+   * Rejects directly as no notion of an image initialization segment should
+   * exist.
+   * @returns {Promise}
+   */
+  public declareInitSegment(): Promise<void> {
+    const err = new Error("Cannot push an image initialization segment.");
+    return Promise.reject(err);
+  }
+
+  /**
+   * Function used to free the resources of a previously-declared initialization
+   * segment.
+   * Returns whether the corresponding initialization segment existed.
+   * Returns always `false` here as no notion of an image initialization segment
+   * should exist.
+   * @returns {boolean}
+   */
+  public freeInitSegment(): boolean {
+    return false;
+  }
+
+  /**
    * @param {Object} data
    * @returns {Promise}
    */

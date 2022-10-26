@@ -88,6 +88,74 @@ export abstract class SegmentBuffer {
   }
 
   /**
+   * Depending on the data appended on this SegmentBuffer, chunk/segments
+   * containing media data might depend on another segment, without any data,
+   * called the initialization segment. The role of the initialization segment
+   * is usually to initialize the media decoders and prepare them for the
+   * incoming media segments linked to it.
+   *
+   * This method allows to push and "declare" a new initialization segment, whose
+   * `uniqueId` can then be refered in one of the arguments of the `pushChunk`
+   * method, to signal that the corresponding media chunk / segment depends on
+   * that initialization segment.
+   *
+   * Note that you _have to_ call this method before the corresponding media
+   * data depending on it is pushed through `pushChunk`. Not doing so will lead
+   * to an error.
+   * Of course, if media data pushed through `pushChunk` does not depend on an
+   * initialization segment, `declareInitSegment` shouldn't be called.
+   *
+   * It is also important to note that calling this method reserves space for
+   * storing the initialization segment in JavaScript memory. To protect against
+   * memory leaks and/or free memory resources, you can call `freeInitSegment`
+   * with the same `uniqueId` as soon as the corresponding initialization
+   * segment is not needed anymore.
+   *
+   * Calling multiple times `declareInitSegment` with the same `uniqueId`
+   * without previously freeing it through the `freeInitSegment` method should
+   * be avoided or at least should always be linked to the same data.
+   * Not doing so may lead to unexpected errors.
+   *
+   * @param {string} uniqueId - Identifier identifying the initialization
+   * segment. The same identifier may then be used in `freeInitSegment` or
+   * `pushChunk` to refer to that initialization segment.
+   * @param {*} initSegmentData - The corresponding initialization
+   * segment's data.
+   * @param {string} codec - Codec the initialization segment is in.
+   * @param {boolean} pushToQueue - If set to `true` the initialization segment
+   * will be pushed to the buffer just after all current operations (push,
+   * remove, initialization segment declarations) have ended.
+   * If set to `false`, it is only pushed lazily once the first media chunk
+   * segment that depends on it is pushed.
+   * @param {Object} cancelSignal - If `pushToQueue` is set to `false`, this
+   * CancellationSignal won't have any effect.
+   * If `pushToQueue` is set to `true`, this CancellationSignal will allow to
+   * abort the pushing operation.
+   * @returns {Promise} - The returned promise resolves immediately if the
+   * `pushToQueue` argument is set to `false`, but only once the initialization
+   * segment has been pushed if the `pushToQueue` argument is set to `true`.
+   * It may reject if `pushToQueue` is set to `true` and the append operation
+   * fails, in which case it will reject the corresponding error.
+   */
+  public abstract declareInitSegment(
+    uniqueId : string,
+    initSegmentData : unknown,
+    codec : string,
+    pushToQueue : boolean,
+    cancelSignal : CancellationSignal
+  ) : Promise<void>;
+
+  /**
+   * Removes from JavaScript memory an initialization segment, based on its
+   * `uniqueId` originally communicated through `declareInitSegment`.
+   * @param {string} uniqueId - The same identifier than the one communicated
+   * through `declareInitSegment`.
+   * @returns {boolean} - If `true` the corresponding `uniqueId` has been found
+   * and removed. If `false`, that `uniqueId` didn't exist.
+   */
+  public abstract freeInitSegment(uniqueId : string) : boolean;
+
+  /**
    * Push a chunk of the media segment given to the attached buffer, in a
    * FIFO queue.
    *
@@ -96,20 +164,10 @@ export abstract class SegmentBuffer {
    * pushed.
    *
    * Depending on the type of data appended, the pushed chunk might rely on an
-   * initialization segment, given through the `data.initSegment` property.
-   *
-   * Such initialization segment will be first pushed to the buffer if the
-   * last pushed segment was associated to another initialization segment.
-   * This detection might rely on the initialization segment's reference so you
-   * might want to avoid mutating in-place a initialization segment given to
-   * that function (to avoid having two different values which have the same
-   * reference).
-   *
-   * If you don't need any initialization segment to push the wanted chunk, you
-   * can just set `data.initSegment` to `null`.
-   *
-   * You can also only push an initialization segment by setting the
-   * `data.chunk` argument to null.
+   * initialization segment, in which case this initialization segment should
+   * already have been communicated through `declareInitSegment` and its
+   * corresponding identifier should be communicated through `pushChunk`'s
+   * argument.
    *
    * @param {Object} infos
    * @param {Object} cancellationSignal
@@ -230,19 +288,19 @@ export type IBufferType = "audio" |
  */
 export interface IPushedChunkData<T> {
   /**
-   * The whole initialization segment's data related to the chunk you want to
-   * push.
-   * To set to `null` either if no initialization data is needed, or if you are
-   * confident that the last pushed one is compatible.
+   * Identifier used to identify the initialization segment linked to this
+   * chunk.
+   * `null` if this chunk does not depend on any initialization segment.
+   *
+   * See the SegmentBuffer's methods for more information.
    */
-  initSegment: T | null;
+  initSegmentUniqueId: string | null;
   /**
    * Chunk you want to push.
    * This can be the whole decodable segment's data or just a decodable sub-part
    * of it.
-   * `null` if you just want to push the initialization segment.
    */
-  chunk : T | null;
+  chunk : T;
   /**
    * String corresponding to the mime-type + codec of the last segment pushed.
    * This might then be used by a SourceBuffer to infer the right codec to use.

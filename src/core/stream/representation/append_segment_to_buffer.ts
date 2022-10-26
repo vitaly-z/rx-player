@@ -29,40 +29,91 @@ import forceGarbageCollection from "./force_garbage_collection";
 import { IRepresentationStreamPlaybackObservation } from "./representation_stream";
 
 /**
- * Append a segment to the given segmentBuffer.
+ * Append a media (non-initialization) segment to the given segmentBuffer.
  * If it leads to a QuotaExceededError, try to run our custom range
  * _garbage collector_ then retry.
  * @param {Observable} playbackObserver
  * @param {Object} segmentBuffer
  * @param {Object} dataInfos
- * @param {Object} cancellationSignal
+ * @param {Object} cancelSignal
  * @returns {Promise}
  */
-export default async function appendSegmentToBuffer<T>(
+export async function appendMediaSegmentToBuffer<T>(
   playbackObserver : IReadOnlyPlaybackObserver<IRepresentationStreamPlaybackObservation>,
   segmentBuffer : SegmentBuffer,
   dataInfos : IPushChunkInfos<T>,
-  cancellationSignal : CancellationSignal
+  cancelSignal : CancellationSignal
 ) : Promise<void> {
   try {
-    await segmentBuffer.pushChunk(dataInfos, cancellationSignal);
+    await segmentBuffer.pushChunk(dataInfos, cancelSignal);
   } catch (appendError : unknown) {
-    if (!(appendError instanceof Error) || appendError.name !== "QuotaExceededError") {
-      const reason = appendError instanceof Error ?
-        appendError.toString() :
-        "An unknown error happened when pushing content";
-      throw new MediaError("BUFFER_APPEND_ERROR", reason);
-    }
-    const { position } = playbackObserver.getReference().getValue();
-    const currentPos = position.pending ?? position.last;
-    try {
-      await forceGarbageCollection(currentPos, segmentBuffer, cancellationSignal);
-      await segmentBuffer.pushChunk(dataInfos, cancellationSignal);
-    } catch (err2) {
-      const reason = err2 instanceof Error ? err2.toString() :
-                                             "Could not clean the buffer";
+    await handlePushError(appendError, playbackObserver, segmentBuffer, cancelSignal);
+    await segmentBuffer.pushChunk(dataInfos, cancelSignal);
+  }
+}
 
-      throw new MediaError("BUFFER_FULL_ERROR", reason);
-    }
+/**
+ * Append a media (non-initialization) segment to the given segmentBuffer.
+ * If it leads to a QuotaExceededError, try to run our custom range
+ * _garbage collector_ then retry.
+ * @param {Observable} playbackObserver
+ * @param {Object} segmentBuffer
+ * @param {Object} dataInfos
+ * @param {Object} cancelSignal
+ * @returns {Promise}
+ */
+export async function appendInitSegmentToBuffer<T>(
+  playbackObserver : IReadOnlyPlaybackObserver<IRepresentationStreamPlaybackObservation>,
+  segmentBuffer : SegmentBuffer,
+  dataInfos : {
+    uniqueId : string;
+    codec : string;
+    data : T;
+  },
+  cancelSignal : CancellationSignal
+) : Promise<void> {
+  try {
+    await segmentBuffer.declareInitSegment(dataInfos.uniqueId,
+                                           dataInfos.data,
+                                           dataInfos.codec,
+                                           true,
+                                           cancelSignal);
+  } catch (appendError : unknown) {
+    await handlePushError(appendError, playbackObserver, segmentBuffer, cancelSignal);
+    await segmentBuffer.declareInitSegment(dataInfos.uniqueId,
+                                           dataInfos.data,
+                                           dataInfos.codec,
+                                           true,
+                                           cancelSignal);
+  }
+}
+
+/**
+ * @param {Observable} playbackObserver
+ * @param {Object} segmentBuffer
+ * @param {Object} cancelSignal
+ * @returns {Promise}
+ */
+export async function handlePushError(
+  error : unknown,
+  playbackObserver : IReadOnlyPlaybackObserver<IRepresentationStreamPlaybackObservation>,
+  segmentBuffer : SegmentBuffer,
+  cancelSignal : CancellationSignal
+) : Promise<void> {
+  if (!(error instanceof Error) || error.name !== "QuotaExceededError") {
+    const reason = error instanceof Error ?
+      error.toString() :
+      "An unknown error happened when pushing content";
+    throw new MediaError("BUFFER_APPEND_ERROR", reason);
+  }
+  const { position } = playbackObserver.getReference().getValue();
+  const currentPos = position.pending ?? position.last;
+  try {
+    await forceGarbageCollection(currentPos, segmentBuffer, cancelSignal);
+  } catch (err2) {
+    const reason = err2 instanceof Error ? err2.toString() :
+                                           "Could not clean the buffer";
+
+    throw new MediaError("BUFFER_FULL_ERROR", reason);
   }
 }

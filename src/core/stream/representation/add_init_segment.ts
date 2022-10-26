@@ -29,24 +29,26 @@ import Manifest, {
 import fromCancellablePromise from "../../../utils/rx-from_cancellable_promise";
 import TaskCanceller from "../../../utils/task_canceller";
 import { IReadOnlyPlaybackObserver } from "../../api";
-import {
-  IPushedChunkData,
-  SegmentBuffer,
-} from "../../segment_buffers";
+import { SegmentBuffer } from "../../segment_buffers";
 import EVENTS from "../events_generators";
 import { IStreamEventAddedSegment } from "../types";
-import appendSegmentToBuffer from "./append_segment_to_buffer";
+import { appendInitSegmentToBuffer } from "./append_segment_to_buffer";
 import { IRepresentationStreamPlaybackObservation } from "./representation_stream";
 
 /**
- * Push the initialization segment to the SegmentBuffer.
+ * Declare and push a new initialization segment to the SegmentBuffer.
  * The Observable returned:
  *   - emit an event once the segment has been pushed.
  *   - throws on Error.
+ *
+ * Note that this reserves resources to store the corresponding initialization
+ * segment on the SegmentBuffer.
+ * You should free that segment through the SegmentBuffer's methods once this is
+ * not needed anymore.
  * @param {Object} args
  * @returns {Observable}
  */
-export default function pushInitSegment<T>(
+export default function add_init_segment<T>(
   { playbackObserver,
     content,
     segment,
@@ -68,17 +70,14 @@ export default function pushInitSegment<T>(
       return EMPTY;
     }
     const codec = content.representation.getMimeTypeString();
-    const data : IPushedChunkData<T> = { initSegment: segmentData,
-                                         chunk: null,
-                                         timestampOffset: 0,
-                                         appendWindow: [ undefined, undefined ],
-                                         codec };
     const canceller = new TaskCanceller();
     return fromCancellablePromise(canceller, () =>
-      appendSegmentToBuffer(playbackObserver,
-                            segmentBuffer,
-                            { data, inventoryInfos: null },
-                            canceller.signal))
+      appendInitSegmentToBuffer(playbackObserver,
+                                segmentBuffer,
+                                { data: segmentData,
+                                  codec,
+                                  uniqueId: content.representation.id },
+                                canceller.signal))
       .pipe(map(() => {
         const buffered = segmentBuffer.getBufferedRanges();
         return EVENTS.addedSegment(content, segment, buffered, segmentData);
