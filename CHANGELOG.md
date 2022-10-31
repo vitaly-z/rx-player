@@ -26,6 +26,7 @@
   - Compat/Directfile: For `"directfile"` contents, also consider `AudioTrack` with a `description` (without an "s") as audio-description audio tracks to work-around what seems to be a Safari typo [#1160]
   - DRM: When using persistent licenses, create new MediaKeySession when `load` resolves with `false`, instead of relying the same, to fix issues with such persistent sessions if the browser cleaned it up [#1139]
   - Only call "MediaSource.endOfStream" once, the most visible side-effect should have been repeated logs [#1163]
+  - TTML: put saner values for extent and origins when weird ones are found
 
 ### Other improvements
 
