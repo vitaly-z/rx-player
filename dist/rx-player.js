@@ -2213,7 +2213,7 @@ var DEFAULT_CONFIG = {
    * small enough so this (arguably rare) situation won't lead to too much
    * waiting time.
    */
-  FORCE_DISCONTINUITY_SEEK_DELAY: 3000,
+  FORCE_DISCONTINUITY_SEEK_DELAY: 5000,
   /**
    * Ratio used to know if an already loaded segment should be re-buffered.
    * We re-load the given segment if the current one times that ratio is
@@ -9595,8 +9595,6 @@ __webpack_require__.d(__webpack_exports__, {
 var empty = __webpack_require__(1545);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/share.js
 var share = __webpack_require__(5583);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/ignoreElements.js
-var ignoreElements = __webpack_require__(533);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/filter.js
 var filter = __webpack_require__(4975);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/take.js
@@ -9609,6 +9607,8 @@ var switchMap = __webpack_require__(4978);
 var of = __webpack_require__(2817);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
 var merge = __webpack_require__(3071);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/ignoreElements.js
+var ignoreElements = __webpack_require__(533);
 // EXTERNAL MODULE: ./src/compat/clear_element_src.ts
 var clear_element_src = __webpack_require__(5767);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
@@ -9661,12 +9661,10 @@ var emit_loaded_event = __webpack_require__(5039);
 var initial_seek_and_play = __webpack_require__(7920);
 // EXTERNAL MODULE: ./src/core/init/link_drm_and_content.ts + 1 modules
 var link_drm_and_content = __webpack_require__(9607);
-// EXTERNAL MODULE: ./src/core/init/stall_avoider.ts + 1 modules
-var stall_avoider = __webpack_require__(467);
+// EXTERNAL MODULE: ./src/core/init/rebuffering_controller.ts + 1 modules
+var rebuffering_controller = __webpack_require__(342);
 // EXTERNAL MODULE: ./src/core/init/throw_on_media_error.ts
 var throw_on_media_error = __webpack_require__(2447);
-// EXTERNAL MODULE: ./src/core/init/update_playback_rate.ts
-var update_playback_rate = __webpack_require__(2983);
 ;// CONCATENATED MODULE: ./src/core/init/initialize_directfile.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -9687,7 +9685,6 @@ var update_playback_rate = __webpack_require__(2983);
  * /!\ This file is feature-switchable.
  * It always should be imported through the `features` object.
  */
-
 
 
 
@@ -9776,14 +9773,11 @@ function initializeDirectfileContent(_ref) {
   // through a throwing Observable.
   var mediaError$ = (0,throw_on_media_error/* default */.Z)(mediaElement);
   var observation$ = playbackObserver.getReference().asObservable();
-  // Set the speed set by the user on the media element while pausing a
-  // little longer while the buffer is empty.
-  var playbackRate$ = (0,update_playback_rate/* default */.Z)(mediaElement, speed, observation$).pipe((0,ignoreElements/* ignoreElements */.l)());
   /**
    * Observable trying to avoid various stalling situations, emitting "stalled"
    * events when it cannot, as well as "unstalled" events when it get out of one.
    */
-  var stallAvoider$ = (0,stall_avoider/* default */.Z)(playbackObserver, null, speed, empty/* EMPTY */.E, empty/* EMPTY */.E);
+  var rebuffer$ = (0,rebuffering_controller/* default */.Z)(playbackObserver, null, speed, empty/* EMPTY */.E, empty/* EMPTY */.E);
   /**
    * Emit a "loaded" events once the initial play has been performed and the
    * media can begin playback.
@@ -9799,7 +9793,7 @@ function initializeDirectfileContent(_ref) {
     }
     return (0,emit_loaded_event/* default */.Z)(observation$, mediaElement, null, true);
   }));
-  return (0,merge/* merge */.T)(loadingEvts$, drmEvents$.pipe((0,ignoreElements/* ignoreElements */.l)()), mediaError$, playbackRate$, stallAvoider$);
+  return (0,merge/* merge */.T)(loadingEvts$, drmEvents$.pipe((0,ignoreElements/* ignoreElements */.l)()), mediaError$, rebuffer$);
 }
 
 /***/ }),
@@ -9978,14 +9972,14 @@ function linkDrmAndContent(mediaElement, keySystems, contentProtections$, linkin
 
 /***/ }),
 
-/***/ 467:
+/***/ 342:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 
 // EXPORTS
 __webpack_require__.d(__webpack_exports__, {
-  "Z": function() { return /* binding */ StallAvoider; }
+  "Z": function() { return /* binding */ RebufferingController; }
 });
 
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/withLatestFrom.js
@@ -10000,6 +9994,8 @@ var ignoreElements = __webpack_require__(533);
 var map = __webpack_require__(9127);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/merge.js
 var merge = __webpack_require__(3071);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/finalize.js
+var finalize = __webpack_require__(3286);
 // EXTERNAL MODULE: ./src/compat/browser_detection.ts
 var browser_detection = __webpack_require__(3666);
 ;// CONCATENATED MODULE: ./src/compat/is_seeking_approximate.ts
@@ -10040,9 +10036,11 @@ var media_error = __webpack_require__(3714);
 var log = __webpack_require__(3887);
 // EXTERNAL MODULE: ./src/utils/ranges.ts
 var ranges = __webpack_require__(2829);
+// EXTERNAL MODULE: ./src/utils/task_canceller.ts
+var task_canceller = __webpack_require__(288);
 // EXTERNAL MODULE: ./src/core/stream/events_generators.ts
 var events_generators = __webpack_require__(8567);
-;// CONCATENATED MODULE: ./src/core/init/stall_avoider.ts
+;// CONCATENATED MODULE: ./src/core/init/rebuffering_controller.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -10065,13 +10063,17 @@ var events_generators = __webpack_require__(8567);
 
 
 
+
 /**
  * Work-around rounding errors with floating points by setting an acceptable,
  * very short, deviation when checking equalities.
  */
 var EPSILON = 1 / 60;
 /**
- * Monitor situations where playback is stalled and try to get out of those.
+ * Monitor playback, trying to avoid stalling situation.
+ * If stopping the player to build buffer is needed, temporarily set the
+ * playback rate (i.e. speed) at `0` until enough buffer is available again.
+ *
  * Emit "stalled" then "unstalled" respectively when an unavoidable stall is
  * encountered and exited.
  * @param {object} playbackObserver - emit the current playback conditions.
@@ -10083,7 +10085,7 @@ var EPSILON = 1 / 60;
  * discontinuities for loaded Period and buffer types.
  * @returns {Observable}
  */
-function StallAvoider(playbackObserver, manifest, speed, lockedStream$, discontinuityUpdate$) {
+function RebufferingController(playbackObserver, manifest, speed, lockedStream$, discontinuityUpdate$) {
   var initialDiscontinuitiesStore = [];
   /**
    * Emit every known audio and video buffer discontinuities in chronological
@@ -10145,6 +10147,7 @@ function StallAvoider(playbackObserver, manifest, speed, lockedStream$, disconti
   // This is why we're disabling the eslint rule.
   /* eslint-disable-next-line @typescript-eslint/no-unsafe-argument */
   (0,ignoreElements/* ignoreElements */.l)());
+  var playbackRateUpdater = new PlaybackRateUpdater(playbackObserver, speed);
   var stall$ = playbackObserver.getReference().asObservable().pipe((0,withLatestFrom/* withLatestFrom */.M)(discontinuitiesStore$), (0,map/* map */.U)(function (_ref3) {
     var observation = _ref3[0],
       discontinuitiesStore = _ref3[1];
@@ -10177,6 +10180,11 @@ function StallAvoider(playbackObserver, manifest, speed, lockedStream$, disconti
         };
       }
       if (_now - freezing.timestamp > FREEZING_STALLED_DELAY) {
+        if (rebuffering === null || ignoredStallTimeStamp !== null) {
+          playbackRateUpdater.stopRebuffering();
+        } else {
+          playbackRateUpdater.startRebuffering();
+        }
         return {
           type: "stalled",
           value: "freezing"
@@ -10186,6 +10194,7 @@ function StallAvoider(playbackObserver, manifest, speed, lockedStream$, disconti
       prevFreezingState = null;
     }
     if (rebuffering === null) {
+      playbackRateUpdater.stopRebuffering();
       if (readyState === 1) {
         // With a readyState set to 1, we should still not be able to play:
         // Return that we're stalled
@@ -10211,6 +10220,7 @@ function StallAvoider(playbackObserver, manifest, speed, lockedStream$, disconti
     if (ignoredStallTimeStamp !== null) {
       var _now2 = performance.now();
       if (_now2 - ignoredStallTimeStamp < FORCE_DISCONTINUITY_SEEK_DELAY) {
+        playbackRateUpdater.stopRebuffering();
         log/* default.debug */.Z.debug("Init: letting the device get out of a stall by itself");
         return {
           type: "stalled",
@@ -10221,6 +10231,7 @@ function StallAvoider(playbackObserver, manifest, speed, lockedStream$, disconti
       }
     }
     ignoredStallTimeStamp = null;
+    playbackRateUpdater.startRebuffering();
     if (manifest === null) {
       return {
         type: "stalled",
@@ -10277,7 +10288,9 @@ function StallAvoider(playbackObserver, manifest, speed, lockedStream$, disconti
       value: stalledReason
     };
   }));
-  return (0,merge/* merge */.T)(unlock$, stall$);
+  return (0,merge/* merge */.T)(unlock$, stall$).pipe((0,finalize/* finalize */.x)(function () {
+    playbackRateUpdater.dispose();
+  }));
 }
 /**
  * @param {Array.<Object>} discontinuitiesStore
@@ -10387,6 +10400,82 @@ function updateDiscontinuitiesStore(discontinuitiesStore, evt, observation) {
 function generateDiscontinuityError(stalledPosition, seekTo) {
   return new media_error/* default */.Z("DISCONTINUITY_ENCOUNTERED", "A discontinuity has been encountered at position " + String(stalledPosition) + ", seeked at position " + String(seekTo));
 }
+/**
+ * Manage playback speed, allowing to force a playback rate of `0` when
+ * rebuffering is wanted.
+ *
+ * Only one `PlaybackRateUpdater` should be created per HTMLMediaElement.
+ * Note that the `PlaybackRateUpdater` reacts to playback event and wanted
+ * speed change. You should call its `dispose` method once you don't need it
+ * anymore.
+ * @class PlaybackRateUpdater
+ */
+var PlaybackRateUpdater = /*#__PURE__*/function () {
+  /**
+   * Create a new `PlaybackRateUpdater`.
+   * @param {Object} playbackObserver
+   * @param {Object} speed
+   */
+  function PlaybackRateUpdater(playbackObserver, speed) {
+    this._speedUpdateCanceller = new task_canceller/* default */.ZP();
+    this._isRebuffering = false;
+    this._playbackObserver = playbackObserver;
+    this._isDisposed = false;
+    this._speed = speed;
+    this._updateSpeed();
+  }
+  /**
+   * Force the playback rate to `0`, to start a rebuffering phase.
+   *
+   * You can call `stopRebuffering` when you want the rebuffering phase to end.
+   */
+  var _proto = PlaybackRateUpdater.prototype;
+  _proto.startRebuffering = function startRebuffering() {
+    if (this._isRebuffering || this._isDisposed) {
+      return;
+    }
+    this._isRebuffering = true;
+    this._speedUpdateCanceller.cancel();
+    log/* default.info */.Z.info("Init: Pause playback to build buffer");
+    this._playbackObserver.setPlaybackRate(0);
+  }
+  /**
+   * If in a rebuffering phase (during which the playback rate is forced to
+   * `0`), exit that phase to apply the wanted playback rate instead.
+   *
+   * Do nothing if not in a rebuffering phase.
+   */;
+  _proto.stopRebuffering = function stopRebuffering() {
+    if (!this._isRebuffering || this._isDisposed) {
+      return;
+    }
+    this._isRebuffering = false;
+    this._speedUpdateCanceller = new task_canceller/* default */.ZP();
+    this._updateSpeed();
+  }
+  /**
+   * The `PlaybackRateUpdater` allocate resources to for example listen to
+   * wanted speed changes and react to it.
+   *
+   * Consequently, you should call the `dispose` method, when you don't want the
+   * `PlaybackRateUpdater` to have an effect anymore.
+   */;
+  _proto.dispose = function dispose() {
+    this._speedUpdateCanceller.cancel();
+    this._isDisposed = true;
+  };
+  _proto._updateSpeed = function _updateSpeed() {
+    var _this = this;
+    this._speed.onUpdate(function (lastSpeed) {
+      log/* default.info */.Z.info("Init: Resume playback speed", lastSpeed);
+      _this._playbackObserver.setPlaybackRate(lastSpeed);
+    }, {
+      clearSignal: this._speedUpdateCanceller.signal,
+      emitCurrentValue: true
+    });
+  };
+  return PlaybackRateUpdater;
+}();
 
 /***/ }),
 
@@ -10451,69 +10540,6 @@ function throwOnMediaError(mediaElement) {
         errorMessage = errorMessage !== null && errorMessage !== void 0 ? errorMessage : "The HTMLMediaElement errored due to an unknown reason.";
         throw new _errors__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .Z("MEDIA_ERR_UNKNOWN", errorMessage);
     }
-  }));
-}
-
-/***/ }),
-
-/***/ 2983:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Z": function() { return /* binding */ updatePlaybackRate; }
-/* harmony export */ });
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(9127);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(6108);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3741);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(4978);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(9917);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(2817);
-/* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(2006);
-/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(3887);
-/**
- * Copyright 2015 CANAL+ Group
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
-/**
- * Manage playback speed.
- * Set playback rate set by the user, pause playback when the player appear to
- * rebuffering and restore the speed once it appears to exit rebuffering status.
- *
- * @param {HTMLMediaElement} mediaElement
- * @param {Observable} speed - last speed set by the user
- * @param {Observable} observation$ - Current playback conditions
- * @returns {Observable}
- */
-function updatePlaybackRate(mediaElement, speed, observation$) {
-  var forcePause$ = observation$.pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_0__/* .map */ .U)(function (observation) {
-    return observation.rebuffering !== null;
-  }), (0,rxjs__WEBPACK_IMPORTED_MODULE_1__/* .startWith */ .O)(false), (0,rxjs__WEBPACK_IMPORTED_MODULE_2__/* .distinctUntilChanged */ .x)());
-  return forcePause$.pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_3__/* .switchMap */ .w)(function (shouldForcePause) {
-    if (shouldForcePause) {
-      return (0,rxjs__WEBPACK_IMPORTED_MODULE_4__/* .defer */ .P)(function () {
-        _log__WEBPACK_IMPORTED_MODULE_5__/* ["default"].info */ .Z.info("Init: Pause playback to build buffer");
-        mediaElement.playbackRate = 0;
-        return (0,rxjs__WEBPACK_IMPORTED_MODULE_6__.of)(0);
-      });
-    }
-    return speed.asObservable().pipe((0,rxjs__WEBPACK_IMPORTED_MODULE_7__/* .tap */ .b)(function (lastSpeed) {
-      _log__WEBPACK_IMPORTED_MODULE_5__/* ["default"].info */ .Z.info("Init: Resume playback speed", lastSpeed);
-      mediaElement.playbackRate = lastSpeed;
-    }));
   }));
 }
 
@@ -39317,42 +39343,6 @@ function catchError(selector) {
 
 /***/ }),
 
-/***/ 3741:
-/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "x": function() { return /* binding */ distinctUntilChanged; }
-/* harmony export */ });
-/* harmony import */ var _util_identity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(278);
-/* harmony import */ var _util_lift__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(6798);
-/* harmony import */ var _OperatorSubscriber__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2566);
-
-
-
-function distinctUntilChanged(comparator, keySelector) {
-    if (keySelector === void 0) { keySelector = _util_identity__WEBPACK_IMPORTED_MODULE_0__/* .identity */ .y; }
-    comparator = comparator !== null && comparator !== void 0 ? comparator : defaultCompare;
-    return (0,_util_lift__WEBPACK_IMPORTED_MODULE_1__/* .operate */ .e)(function (source, subscriber) {
-        var previousKey;
-        var first = true;
-        source.subscribe((0,_OperatorSubscriber__WEBPACK_IMPORTED_MODULE_2__/* .createOperatorSubscriber */ .x)(subscriber, function (value) {
-            var currentKey = keySelector(value);
-            if (first || !comparator(previousKey, currentKey)) {
-                first = false;
-                previousKey = currentKey;
-                subscriber.next(value);
-            }
-        }));
-    });
-}
-function defaultCompare(a, b) {
-    return a === b;
-}
-//# sourceMappingURL=distinctUntilChanged.js.map
-
-/***/ }),
-
 /***/ 4975:
 /***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
@@ -39371,6 +39361,29 @@ function filter(predicate, thisArg) {
     });
 }
 //# sourceMappingURL=filter.js.map
+
+/***/ }),
+
+/***/ 3286:
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "x": function() { return /* binding */ finalize; }
+/* harmony export */ });
+/* harmony import */ var _util_lift__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6798);
+
+function finalize(callback) {
+    return (0,_util_lift__WEBPACK_IMPORTED_MODULE_0__/* .operate */ .e)(function (source, subscriber) {
+        try {
+            source.subscribe(subscriber);
+        }
+        finally {
+            subscriber.add(callback);
+        }
+    });
+}
+//# sourceMappingURL=finalize.js.map
 
 /***/ }),
 
@@ -41673,8 +41686,36 @@ var take = __webpack_require__(4727);
 var takeUntil = __webpack_require__(3505);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/map.js
 var map = __webpack_require__(9127);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/distinctUntilChanged.js
-var distinctUntilChanged = __webpack_require__(3741);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/identity.js
+var identity = __webpack_require__(278);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/lift.js
+var lift = __webpack_require__(6798);
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/OperatorSubscriber.js
+var OperatorSubscriber = __webpack_require__(2566);
+;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/distinctUntilChanged.js
+
+
+
+function distinctUntilChanged(comparator, keySelector) {
+    if (keySelector === void 0) { keySelector = identity/* identity */.y; }
+    comparator = comparator !== null && comparator !== void 0 ? comparator : defaultCompare;
+    return (0,lift/* operate */.e)(function (source, subscriber) {
+        var previousKey;
+        var first = true;
+        source.subscribe((0,OperatorSubscriber/* createOperatorSubscriber */.x)(subscriber, function (value) {
+            var currentKey = keySelector(value);
+            if (first || !comparator(previousKey, currentKey)) {
+                first = false;
+                previousKey = currentKey;
+                subscriber.next(value);
+            }
+        }));
+    });
+}
+function defaultCompare(a, b) {
+    return a === b;
+}
+//# sourceMappingURL=distinctUntilChanged.js.map
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/Observable.js + 1 modules
 var Observable = __webpack_require__(1480);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/of.js
@@ -41742,8 +41783,6 @@ function isPOJO(obj) {
 //# sourceMappingURL=argsArgArrayOrObject.js.map
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/from.js + 8 modules
 var from = __webpack_require__(3102);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/identity.js
-var identity = __webpack_require__(278);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/mapOneOrManyArgs.js
 var mapOneOrManyArgs = __webpack_require__(3211);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/args.js
@@ -41753,8 +41792,6 @@ function createObject(keys, values) {
     return keys.reduce(function (result, key, i) { return ((result[key] = values[i]), result); }, {});
 }
 //# sourceMappingURL=createObject.js.map
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/OperatorSubscriber.js
-var OperatorSubscriber = __webpack_require__(2566);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/executeSchedule.js
 var executeSchedule = __webpack_require__(7845);
 ;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/combineLatest.js
@@ -41838,8 +41875,6 @@ var switchMap = __webpack_require__(4978);
 var merge = __webpack_require__(3071);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/observable/empty.js
 var empty = __webpack_require__(1545);
-// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/util/lift.js
-var lift = __webpack_require__(6798);
 ;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/skipWhile.js
 
 
@@ -43091,19 +43126,8 @@ function isPromise(val) {
  */
 
 /* harmony default export */ var fetchers_manifest = (ManifestFetcher);
-;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/finalize.js
-
-function finalize(callback) {
-    return (0,lift/* operate */.e)(function (source, subscriber) {
-        try {
-            source.subscribe(subscriber);
-        }
-        finally {
-            subscriber.add(callback);
-        }
-    });
-}
-//# sourceMappingURL=finalize.js.map
+// EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/finalize.js
+var finalize = __webpack_require__(3286);
 // EXTERNAL MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/ignoreElements.js
 var ignoreElements = __webpack_require__(533);
 ;// CONCATENATED MODULE: ./src/compat/should_reload_media_source_on_decipherability_update.ts
@@ -47736,7 +47760,7 @@ var DownloadingQueue = /*#__PURE__*/function () {
     var self = this;
     return (0,defer/* defer */.P)(function () {
       return recursivelyRequestSegments(currentNeededSegment);
-    }).pipe(finalize(function () {
+    }).pipe((0,finalize/* finalize */.x)(function () {
       _this2._mediaSegmentRequest = null;
     }));
     function recursivelyRequestSegments(startingSegment) {
@@ -49798,7 +49822,7 @@ function AdaptationStream(_ref) {
   var bitrateEstimate$ = abrEstimate$.pipe((0,filter/* filter */.h)(function (_ref2) {
     var bitrate = _ref2.bitrate;
     return bitrate != null;
-  }), (0,distinctUntilChanged/* distinctUntilChanged */.x)(function (old, current) {
+  }), distinctUntilChanged(function (old, current) {
     return old.bitrate === current.bitrate;
   }), (0,map/* map */.U)(function (_ref3) {
     var bitrate = _ref3.bitrate;
@@ -49877,7 +49901,7 @@ function AdaptationStream(_ref) {
     // Do not fast-switch anything
     lastEstimate.asObservable().pipe((0,map/* map */.U)(function (estimate) {
       return estimate === null ? undefined : estimate.knownStableBitrate;
-    }), (0,distinctUntilChanged/* distinctUntilChanged */.x)());
+    }), distinctUntilChanged());
     var representationChange$ = (0,of.of)(stream_events_generators/* default.representationChange */.Z.representationChange(adaptation.type, period, representation));
     return (0,concat/* concat */.z)(representationChange$, createRepresentationStream(representation, terminateCurrentStream$, fastSwitchThreshold$)).pipe((0,tap/* tap */.b)(function (evt) {
       if (evt.type === "added-segment") {
@@ -50695,7 +50719,7 @@ function ActivePeriodEmitter(buffers$) {
       }
       return period.start < acc.start ? period : acc;
     }, null);
-  }), (0,distinctUntilChanged/* distinctUntilChanged */.x)(function (a, b) {
+  }), distinctUntilChanged(function (a, b) {
     return a === null && b === null || a !== null && b !== null && a.id === b.id;
   }));
 }
@@ -50748,13 +50772,13 @@ function areStreamsComplete() {
       return evt.type === "complete-stream" || evt.type === "stream-status" && !evt.value.hasFinishedLoading;
     }), (0,map/* map */.U)(function (evt) {
       return evt.type === "complete-stream";
-    }), (0,startWith/* startWith */.O)(false), (0,distinctUntilChanged/* distinctUntilChanged */.x)());
+    }), (0,startWith/* startWith */.O)(false), distinctUntilChanged());
   });
   return combineLatest(isCompleteArray).pipe((0,map/* map */.U)(function (areComplete) {
     return areComplete.every(function (isComplete) {
       return isComplete;
     });
-  }), (0,distinctUntilChanged/* distinctUntilChanged */.x)());
+  }), distinctUntilChanged());
 }
 ;// CONCATENATED MODULE: ./src/core/stream/orchestrator/get_time_ranges_for_content.ts
 /**
@@ -50934,14 +50958,14 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
   }));
   var isLastPeriodKnown$ = (0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,map/* map */.U)(function () {
     return manifest.isLastPeriodKnown;
-  }), (0,startWith/* startWith */.O)(manifest.isLastPeriodKnown), (0,distinctUntilChanged/* distinctUntilChanged */.x)());
+  }), (0,startWith/* startWith */.O)(manifest.isLastPeriodKnown), distinctUntilChanged());
   // Emits an "end-of-stream" event once every PeriodStream are complete.
   // Emits a 'resume-stream" when it's not
   var endOfStream$ = combineLatest([areStreamsComplete.apply(void 0, streamsArray), isLastPeriodKnown$]).pipe((0,map/* map */.U)(function (_ref) {
     var areComplete = _ref[0],
       isLastPeriodKnown = _ref[1];
     return areComplete && isLastPeriodKnown;
-  }), (0,distinctUntilChanged/* distinctUntilChanged */.x)(), (0,map/* map */.U)(function (emitEndOfStream) {
+  }), distinctUntilChanged(), (0,map/* map */.U)(function (emitEndOfStream) {
     return emitEndOfStream ? stream_events_generators/* default.endOfStream */.Z.endOfStream() : stream_events_generators/* default.resumeStream */.Z.resumeStream();
   }));
   return merge/* merge.apply */.T.apply(void 0, streamsArray.concat([activePeriodChanged$, endOfStream$]));
@@ -51352,7 +51376,7 @@ function ContentTimeBoundariesObserver(manifest, lastAdaptationChange, playbackO
   }), (0,ignoreElements/* ignoreElements */.l)());
   return (0,merge/* merge */.T)(updateDurationOnManifestUpdate$, updateDurationAndTimeBoundsOnTrackChange$, outOfManifest$, contentDuration.asObservable().pipe(skipWhile(function (val) {
     return val === undefined;
-  }), (0,distinctUntilChanged/* distinctUntilChanged */.x)(), (0,map/* map */.U)(function (value) {
+  }), distinctUntilChanged(), (0,map/* map */.U)(function (value) {
     return {
       type: "contentDurationUpdate",
       value: value
@@ -51974,7 +51998,7 @@ function areSourceBuffersUpdating$(sourceBuffers) {
       return false;
     })), interval(500).pipe((0,map/* map */.U)(function () {
       return sourceBuffer.updating;
-    }))).pipe((0,startWith/* startWith */.O)(sourceBuffer.updating), (0,distinctUntilChanged/* distinctUntilChanged */.x)()));
+    }))).pipe((0,startWith/* startWith */.O)(sourceBuffer.updating), distinctUntilChanged()));
   };
   for (var i = 0; i < sourceBuffers.length; i++) {
     _loop(i);
@@ -51983,7 +52007,7 @@ function areSourceBuffersUpdating$(sourceBuffers) {
     return areUpdating.some(function (isUpdating) {
       return isUpdating;
     });
-  }), (0,distinctUntilChanged/* distinctUntilChanged */.x)());
+  }), distinctUntilChanged());
 }
 /**
  * Emit a boolean that tells if the media source is opened or not.
@@ -51997,10 +52021,10 @@ function isMediaSourceOpened$(mediaSource) {
     return false;
   })), (0,event_listeners/* onSourceClose$ */.UG)(mediaSource).pipe((0,map/* map */.U)(function () {
     return false;
-  }))).pipe((0,startWith/* startWith */.O)(mediaSource.readyState === "open"), (0,distinctUntilChanged/* distinctUntilChanged */.x)());
+  }))).pipe((0,startWith/* startWith */.O)(mediaSource.readyState === "open"), distinctUntilChanged());
 }
-// EXTERNAL MODULE: ./src/core/init/stall_avoider.ts + 1 modules
-var stall_avoider = __webpack_require__(467);
+// EXTERNAL MODULE: ./src/core/init/rebuffering_controller.ts + 1 modules
+var rebuffering_controller = __webpack_require__(342);
 ;// CONCATENATED MODULE: ./node_modules/rxjs/dist/esm5/internal/operators/pairwise.js
 
 
@@ -52235,7 +52259,7 @@ function streamEventsEmitter(manifest, mediaElement, observation$) {
     return lastScheduledEvents = scheduledEvents;
   }), (0,map/* map */.U)(function (evt) {
     return evt.length > 0;
-  }), (0,distinctUntilChanged/* distinctUntilChanged */.x)(), (0,switchMap/* switchMap */.w)(function (hasEvents) {
+  }), distinctUntilChanged(), (0,switchMap/* switchMap */.w)(function (hasEvents) {
     if (!hasEvents) {
       return empty/* EMPTY */.E;
     }
@@ -52275,8 +52299,6 @@ function streamEventsEmitter(manifest, mediaElement, observation$) {
  */
 
 /* harmony default export */ var init_stream_events_emitter = (stream_events_emitter);
-// EXTERNAL MODULE: ./src/core/init/update_playback_rate.ts
-var update_playback_rate = __webpack_require__(2983);
 ;// CONCATENATED MODULE: ./src/core/init/load_on_media_source.ts
 /**
  * Copyright 2015 CANAL+ Group
@@ -52293,7 +52315,6 @@ var update_playback_rate = __webpack_require__(2983);
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 
 
 
@@ -52418,16 +52439,10 @@ function createMediaSourceLoader(_ref) {
       }
     }));
     /**
-     * On subscription, keep the playback speed synchronized to the speed set by
-     * the user on the media element and force a speed of `0` when the buffer is
-     * empty, so it can build back buffer.
-     */
-    var playbackRate$ = (0,update_playback_rate/* default */.Z)(mediaElement, speed, observation$).pipe((0,ignoreElements/* ignoreElements */.l)());
-    /**
      * Observable trying to avoid various stalling situations, emitting "stalled"
      * events when it cannot, as well as "unstalled" events when it get out of one.
      */
-    var stallAvoider$ = (0,stall_avoider/* default */.Z)(playbackObserver, manifest, speed, lockedStream$, discontinuityUpdate$);
+    var rebuffer$ = (0,rebuffering_controller/* default */.Z)(playbackObserver, manifest, speed, lockedStream$, discontinuityUpdate$);
     /**
      * Emit a "loaded" events once the initial play has been performed and the
      * media can begin playback.
@@ -52436,7 +52451,7 @@ function createMediaSourceLoader(_ref) {
     var loadingEvts$ = seekAndPlay$.pipe((0,switchMap/* switchMap */.w)(function (evt) {
       return evt.type === "warning" ? (0,of.of)(evt) : (0,emit_loaded_event/* default */.Z)(observation$, mediaElement, segmentBuffersStore, false);
     }));
-    return (0,merge/* merge */.T)(loadingEvts$, playbackRate$, stallAvoider$, streams$, contentTimeObserver, streamEvents$).pipe(finalize(function () {
+    return (0,merge/* merge */.T)(loadingEvts$, rebuffer$, streams$, contentTimeObserver, streamEvents$).pipe((0,finalize/* finalize */.x)(function () {
       mediaDurationUpdater.stop();
       // clean-up every created SegmentBuffers
       segmentBuffersStore.disposeAll();
@@ -52918,7 +52933,7 @@ function InitializeOnMediaSource(_ref) {
     var manifestEvents$ = (0,merge/* merge */.T)((0,event_emitter/* fromEvent */.R)(manifest, "manifestUpdate").pipe((0,map/* map */.U)(function () {
       return events_generators/* default.manifestUpdate */.Z.manifestUpdate();
     })), (0,event_emitter/* fromEvent */.R)(manifest, "decipherabilityUpdate").pipe((0,map/* map */.U)(events_generators/* default.decipherabilityUpdate */.Z.decipherabilityUpdate)));
-    return (0,merge/* merge */.T)(manifestEvents$, manifestUpdate$, recursiveLoad$).pipe((0,startWith/* startWith */.O)(events_generators/* default.manifestReady */.Z.manifestReady(manifest)), finalize(function () {
+    return (0,merge/* merge */.T)(manifestEvents$, manifestUpdate$, recursiveLoad$).pipe((0,startWith/* startWith */.O)(events_generators/* default.manifestReady */.Z.manifestReady(manifest)), (0,finalize/* finalize */.x)(function () {
       scheduleRefresh$.complete();
     }));
     /**
@@ -52986,7 +53001,7 @@ function InitializeOnMediaSource(_ref) {
       return (0,merge/* merge */.T)(handleReloads$, currentLoad$);
     }
   }));
-  return (0,merge/* merge */.T)(loadContent$, mediaError$, drmEvents$.pipe((0,ignoreElements/* ignoreElements */.l)())).pipe(finalize(function () {
+  return (0,merge/* merge */.T)(loadContent$, mediaError$, drmEvents$.pipe((0,ignoreElements/* ignoreElements */.l)())).pipe((0,finalize/* finalize */.x)(function () {
     playbackCanceller.cancel();
   }));
 }
@@ -53557,6 +53572,13 @@ var PlaybackObserver = /*#__PURE__*/function () {
   _proto.setCurrentTime = function setCurrentTime(time) {
     this._internalSeeksIncoming.push(time);
     this._mediaElement.currentTime = time;
+  }
+  /**
+   * Update the playback rate of the `HTMLMediaElement`.
+   * @param {number} playbackRate
+   */;
+  _proto.setPlaybackRate = function setPlaybackRate(playbackRate) {
+    this._mediaElement.playbackRate = playbackRate;
   }
   /**
    * Returns the current `readyState` advertised by the `HTMLMediaElement`.
@@ -55247,7 +55269,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     // Workaround to support Firefox autoplay on FF 42.
     // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1194624
     videoElement.preload = "auto";
-    _this.version = /* PLAYER_VERSION */"3.29.0-dev.2022103101";
+    _this.version = /* PLAYER_VERSION */"3.29.0-dev.2022110200";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -55277,7 +55299,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     // payload when we perform multiple texttrack operations before the event
     // loop is freed.
     // In that case we only want to fire one time the observable.
-    (0,distinctUntilChanged/* distinctUntilChanged */.x)(function (textTracksA, textTracksB) {
+    distinctUntilChanged(function (textTracksA, textTracksB) {
       if (textTracksA.length !== textTracksB.length) {
         return false;
       }
@@ -55724,7 +55746,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       return evt.type === "stalled" || evt.type === "unstalled";
     }), (0,map/* map */.U)(function (x) {
       return x.value;
-    }), (0,distinctUntilChanged/* distinctUntilChanged */.x)(function (prevStallReason, currStallReason) {
+    }), distinctUntilChanged(function (prevStallReason, currStallReason) {
       return prevStallReason === null && currStallReason === null || prevStallReason !== null && currStallReason !== null && prevStallReason === currStallReason;
     }));
     /** Emit when the content is considered "loaded". */
@@ -55767,7 +55789,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       skipWhile(function (state) {
         return isFirstLoad && state === "PAUSED";
       } /* PLAYER_STATES.PAUSED */)));
-    }))).pipe((0,distinctUntilChanged/* distinctUntilChanged */.x)());
+    }))).pipe(distinctUntilChanged());
     var playbackSubscription;
     stoppedContent$.subscribe(function () {
       if (playbackSubscription !== undefined) {
@@ -55808,7 +55830,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       }
     }), (0,map/* map */.U)(function (state) {
       return state !== "RELOADING" && state !== "STOPPED";
-    }), (0,distinctUntilChanged/* distinctUntilChanged */.x)(), (0,switchMap/* switchMap */.w)(function (canSendObservation) {
+    }), distinctUntilChanged(), (0,switchMap/* switchMap */.w)(function (canSendObservation) {
       return canSendObservation ? observation$ : empty/* EMPTY */.E;
     }), (0,takeUntil/* takeUntil */.R)(stoppedContent$)).subscribe(function (o) {
       updateReloadingMetadata(_this2.state);
@@ -57544,7 +57566,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   }]);
   return Player;
 }(event_emitter/* default */.Z);
-Player.version = /* PLAYER_VERSION */"3.29.0-dev.2022103101";
+Player.version = /* PLAYER_VERSION */"3.29.0-dev.2022110200";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
