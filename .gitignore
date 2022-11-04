@@ -1,39 +1,25 @@
 /*.keys
 /*.log
+/.eslintignore
+/.eslintrc
 /.scannerwork
+/.sonar-project.properties
 /localhost.crt
 /localhost.key
+/.travis.yml
 /node_modules
 /test-output.xml
+/tslint.json
+/webpack-demo.config.js
+/webpack-tests.config.js
+/webpack.config.js
 
-/demo/full/bundle.js
-/demo/full/lib.js
-/demo/full/bundle.js.LICENSE.txt
-/demo/full/lib.js.LICENSE.txt
-/demo/standalone/lib.js
-/demo/bundle.js
+/demo
 
-/tests/integration/coverage
+/tests
 /coverage
 
-/tests/performance/node_modules
-/tests/performance/bundle1.js
-/tests/performance/bundle2.js
-/tests/performance/package.json
-/tests/performance/package-lock.json
-
-/dist/_esm5.processed
 /dist/_esm5.raw
 
-/doc/generated
-
-/features
-/logger
-/minimal
-/experimental
-/types
-/tools
-
+/doc
 /src/parsers/manifest/dash/wasm-parser/target
-
-/.idea
