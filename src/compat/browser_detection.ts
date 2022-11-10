@@ -53,9 +53,9 @@ const isTizen : boolean = !isNode &&
 const isWebOs : boolean = !isNode &&
                           /Web0S/.test(navigator.userAgent);
 const isWebOs2021 : boolean = !isNode &&
-                              /WebOS.TV-2021/.test(navigator.userAgent);
+                              /(W|w)eb(O|0)S.TV-2021/.test(navigator.userAgent);
 const isWebOs2022 : boolean = !isNode &&
-                              /WebOS.TV-2022/.test(navigator.userAgent);
+                              /(W|w)eb(O|0)S.TV-2022/.test(navigator.userAgent);
 
 interface ISafariWindowObject extends Window {
   safari? : { pushNotification? : { toString() : string } };
