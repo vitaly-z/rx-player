@@ -26,6 +26,7 @@
         let licenseRequestStatus = "None yet";
 		const licenseServerUrl = "https://secure-webtv.canal-bis.com/WebPortal-vabf/TestDRMDASH/api/PlayReady";
         const player = new window.RxPlayer({ videoElement });
+        window.RxPlayer.LogLevel = "DEBUG";
 
         window.player = player;
 		player.setVideoBitrate(0);
