@@ -15,7 +15,7 @@
  */
 
 import { Subject } from "rxjs";
-import Manifest, {
+import {
   Adaptation,
   ISegment,
   Period,
@@ -23,6 +23,7 @@ import Manifest, {
 } from "../../manifest";
 import { IPlayerError } from "../../public_types";
 import EventEmitter from "../../utils/event_emitter";
+import { ISentManifest } from "../../worker";
 import { PlaybackObserver } from "../api";
 import SegmentBuffersStore, {
   IBufferType,
@@ -98,7 +99,7 @@ export interface IContentInitializerEvents {
   /** A fatal error occured, leading to the current content being stopped. */
   error : unknown;
   /** Event sent after the Manifest has been loaded and parsed for the first time. */
-  manifestReady : Manifest;
+  manifestReady : ISentManifest;
   /** Event sent after the Manifest has been updated. */
   manifestUpdate: null;
   /**
@@ -121,7 +122,7 @@ export interface IContentInitializerEvents {
    * This generally means that some Representation(s) were detected to be
    * undecipherable on the current device.
    */
-  decipherabilityUpdate: Array<{ manifest : Manifest;
+  decipherabilityUpdate: Array<{ manifest : ISentManifest;
                                  period : Period;
                                  adaptation : Adaptation;
                                  representation : Representation; }>;

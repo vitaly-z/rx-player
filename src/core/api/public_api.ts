@@ -46,11 +46,16 @@ import {
 } from "../../errors";
 import features from "../../features";
 import log from "../../log";
-import Manifest, {
+import {
   Adaptation,
   Period,
   Representation,
 } from "../../manifest";
+import {
+  getLivePosition,
+  getMaximumSafePosition,
+  getMinimumSafePosition,
+} from "../../manifest/utils";
 import {
   IAdaptation,
   IAudioTrack,
@@ -61,7 +66,7 @@ import {
   IBifThumbnail,
   IBitrateEstimate,
   IConstructorOptions,
-  IDecipherabilityUpdateContent,
+  // IDecipherabilityUpdateContent,
   ILoadVideoOptions,
   IPeriod,
   IPlayerError,
@@ -95,6 +100,7 @@ import createSharedReference, {
 } from "../../utils/reference";
 import TaskCanceller from "../../utils/task_canceller";
 import warnOnce from "../../utils/warn_once";
+import { ISentManifest } from "../../worker";
 import { IABRThrottlers } from "../adaptive";
 import {
   clearOnStop,
@@ -102,7 +108,7 @@ import {
   getCurrentKeySystem,
 } from "../decrypt";
 import { ContentInitializer } from "../init";
-import MediaSourceContentInitializer from "../init/media_source_content_initializer";
+import WorkerContentInitializer from "../init/worker_content_initializer";
 import SegmentBuffersStore, {
   IBufferedChunk,
   IBufferType,
@@ -223,6 +229,8 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                        video : ISharedReference<number>; };
   };
 
+  private _priv_worker : Worker | null;
+
   /**
    * Current fatal error which STOPPED the player.
    * `null` if no fatal error was received for the current or last content.
@@ -292,7 +300,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
      * Manifest loaded for the last content that should be used once `reload`
      * is called.
      */
-    manifest?: Manifest;
+    manifest?: ISentManifest;
     /**
      * If `true`, the player should be paused after reloading.
      * If `false`, the player should be playing after reloading.
@@ -340,7 +348,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @constructor
    * @param {Object} options
    */
-  constructor(options : IConstructorOptions = {}) {
+  constructor(options : IConstructorOptions = {}, workerUrl : string) {
     super();
     const { initialAudioBitrate,
             initialVideoBitrate,
@@ -459,6 +467,12 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     this._priv_preferredVideoTracks = preferredVideoTracks;
 
     this._priv_reloadingMetadata = {};
+
+    this._priv_worker = new Worker(workerUrl);
+
+    /* eslint-disable-next-line no-console */
+    // XXX TODO
+    this._priv_worker.onerror = console.error.bind(console);
   }
 
   /**
@@ -592,7 +606,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     if (autoPlay !== undefined) {
       newOptions.autoPlay = autoPlay;
     }
-    this._priv_initializeContentPlayback(newOptions);
+    // this._priv_initializeContentPlayback(newOptions);
   }
 
   /**
@@ -614,7 +628,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
             onCodecSwitch,
             startAt,
             transport,
-            transportOptions,
+            // transportOptions,
             url } = options;
 
     // Perform multiple checks on the given options
@@ -645,16 +659,6 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     let mediaElementTrackChoiceManager : MediaElementTrackChoiceManager | null =
       null;
     if (!isDirectFile) {
-      const transportFn = features.transports[transport];
-      if (typeof transportFn !== "function") {
-        // Stop previous content and reset its state
-        this.stop();
-        this._priv_currentError = null;
-        throw new Error(`transport "${transport}" not supported`);
-      }
-
-      const transportPipelines = transportFn(transportOptions);
-
       const { offlineRetry,
               segmentRetry,
               manifestRetry,
@@ -742,18 +746,19 @@ class Player extends EventEmitter<IPublicAPIEvent> {
                                       requestTimeout: segmentRequestTimeout,
                                       maxRetryOffline: offlineRetry };
 
-      initializer = new MediaSourceContentInitializer({
+      initializer = new WorkerContentInitializer({
         adaptiveOptions,
         autoPlay,
         bufferOptions,
         keySystems,
         lowLatencyMode,
         manifestRequestSettings,
-        transport: transportPipelines,
+        // transport: transportPipelines,
         segmentRequestOptions,
         speed: this._priv_speed,
         startAt,
         textTrackOptions,
+        worker: this._priv_worker as Worker,
         url,
       });
     } else {
@@ -833,8 +838,8 @@ class Player extends EventEmitter<IPublicAPIEvent> {
       this.trigger("streamEvent", streamEvent));
     initializer.addEventListener("streamEventSkip", (streamEventSkip) =>
       this.trigger("streamEventSkip", streamEventSkip));
-    initializer.addEventListener("decipherabilityUpdate", (decipherabilityUpdate) =>
-      this.trigger("decipherabilityUpdate", decipherabilityUpdate));
+    // initializer.addEventListener("decipherabilityUpdate", (decipherabilityUpdate) =>
+    //   this.trigger("decipherabilityUpdate", decipherabilityUpdate));
     initializer.addEventListener("activePeriodChanged", (periodInfo) =>
       this._priv_onActivePeriodChanged(contentInfos, periodInfo));
     initializer.addEventListener("periodStreamReady", (periodReadyInfo) =>
@@ -996,7 +1001,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @deprecated
    * @returns {Manifest|null} - The current Manifest (`null` when not known).
    */
-  getManifest() : Manifest|null {
+  getManifest() : ISentManifest|null {
     warnOnce("getManifest is deprecated." +
              " Please open an issue if you used this API.");
     if (this._priv_contentInfos === null) {
@@ -1124,7 +1129,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
       return originalUrl;
     }
     if (manifest !== null) {
-      return manifest.getUrl();
+      return manifest.uris[0];
     }
     return undefined;
   }
@@ -2191,7 +2196,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
 
     const { manifest } = this._priv_contentInfos;
     if (manifest !== null) {
-      return manifest.getMinimumSafePosition();
+      return getMinimumSafePosition(manifest);
     }
     return null;
   }
@@ -2218,7 +2223,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
       if (!manifest.isDynamic && this.videoElement !== null) {
         return this.videoElement.duration;
       }
-      return manifest.getMaximumSafePosition();
+      return getMaximumSafePosition(manifest);
     }
     return null;
   }
@@ -2291,7 +2296,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    */
   private _priv_onManifestReady(
     contentInfos : IPublicApiContentInfos,
-    manifest : Manifest
+    manifest : ISentManifest
   ) : void {
     if (contentInfos.contentId !== this._priv_contentInfos?.contentId) {
       return; // Event for another content
@@ -2317,12 +2322,13 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     contentInfos.trackChoiceManager
       .setPreferredVideoTracks(this._priv_preferredVideoTracks,
                                true);
-    manifest.addEventListener("manifestUpdate", () => {
-      // Update the tracks chosen if it changed
-      if (contentInfos.trackChoiceManager !== null) {
-        contentInfos.trackChoiceManager.update();
-      }
-    }, contentInfos.currentContentCanceller.signal);
+    // XXX TODO
+    // manifest.addEventListener("manifestUpdate", () => {
+    //   // Update the tracks chosen if it changed
+    //   if (contentInfos.trackChoiceManager !== null) {
+    //     contentInfos.trackChoiceManager.update();
+    //   }
+    // }, contentInfos.currentContentCanceller.signal);
   }
 
   /**
@@ -2662,7 +2668,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
       return;
     }
 
-    const maximumPosition = manifest !== null ? manifest.getMaximumSafePosition() :
+    const maximumPosition = manifest !== null ? getMaximumSafePosition(manifest) :
                                                 undefined;
     const positionData : IPositionUpdate = {
       position: observation.position,
@@ -2683,7 +2689,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     ) {
       const ast = manifest.availabilityStartTime ?? 0;
       positionData.wallClockTime = observation.position + ast;
-      const livePosition = manifest.getLivePosition();
+      const livePosition = getLivePosition(manifest);
       if (livePosition !== undefined) {
         positionData.liveGap = livePosition - observation.position;
       }
@@ -2833,7 +2839,7 @@ interface IPublicAPIEvent {
   availableAudioTracksChange : IAvailableAudioTrack[];
   availableTextTracksChange : IAvailableTextTrack[];
   availableVideoTracksChange : IAvailableVideoTrack[];
-  decipherabilityUpdate : IDecipherabilityUpdateContent[];
+  // decipherabilityUpdate : IDecipherabilityUpdateContent[];
   seeking : null;
   seeked : null;
   streamEvent : IStreamEvent;
@@ -2869,7 +2875,7 @@ interface IPublicApiContentInfos {
    * `null` if the current content loaded has no manifest or if the content is
    * not yet loaded.
    */
-  manifest : Manifest|null;
+  manifest : ISentManifest|null;
   /**
    * Current Period being played.
    * `null` if no Period is being played.

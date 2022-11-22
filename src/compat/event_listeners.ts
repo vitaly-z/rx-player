@@ -138,7 +138,7 @@ function createCompatibleEventListener(
 
     // if the element is a HTMLElement we can detect
     // the supported event, and memoize it in `mem`
-    if (element instanceof HTMLElement) {
+    if (typeof HTMLElement === "function" && element instanceof HTMLElement) {
       if (typeof mem === "undefined") {
         mem = findSupportedEvent(element, prefixedEvents);
       }
@@ -181,10 +181,10 @@ function compatibleListener<T extends Event>(
 ) : (element : IEventTargetLike) => Observable<T> {
   let mem : string|undefined;
   const prefixedEvents = eventPrefixed(eventNames, prefixes);
-  return (element : IEventTargetLike) => {
+  return (element : IEventTargetLike) : Observable<T> => {
     // if the element is a HTMLElement we can detect
     // the supported event, and memoize it in `mem`
-    if (element instanceof HTMLElement) {
+    if (typeof HTMLElement === "function" && element instanceof HTMLElement) {
       if (typeof mem === "undefined") {
         mem = findSupportedEvent(element, prefixedEvents);
       }

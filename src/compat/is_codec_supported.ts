@@ -26,15 +26,16 @@ import { MediaSource_ } from "./browser_compatibility_types";
  * @returns {Boolean}
  */
 export default function isCodecSupported(mimeType : string) : boolean {
-  if (MediaSource_ == null) {
-    return false;
-  }
+  return mimeType.indexOf("ec-3") < 0;
+  // if (MediaSource_ == null) {
+  //   return false;
+  // }
 
-  /* eslint-disable @typescript-eslint/unbound-method */
-  if (typeof MediaSource_.isTypeSupported === "function") {
-  /* eslint-enable @typescript-eslint/unbound-method */
-    return MediaSource_.isTypeSupported(mimeType);
-  }
+  // /* eslint-disable @typescript-eslint/unbound-method */
+  // if (typeof MediaSource_.isTypeSupported === "function") {
+  // /* eslint-enable @typescript-eslint/unbound-method */
+  //   return MediaSource_.isTypeSupported(mimeType);
+  // }
 
-  return true;
+  // return true;
 }

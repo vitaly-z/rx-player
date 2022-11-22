@@ -80,7 +80,7 @@ export default class SegmentBuffersStore {
   }
 
   /** HTMLMediaElement on which the MediaSource is attached.  */
-  private readonly _mediaElement : HTMLMediaElement;
+  private readonly _mediaElement : HTMLMediaElement | null;
 
   /** MediaSource on which SourceBuffer objects will be attached. */
   private readonly _mediaSource : MediaSource;
@@ -105,7 +105,7 @@ export default class SegmentBuffersStore {
    * @param {MediaSource} mediaSource
    * @constructor
    */
-  constructor(mediaElement : HTMLMediaElement, mediaSource : MediaSource) {
+  constructor(mediaElement : HTMLMediaElement | null, mediaSource : MediaSource) {
     this._mediaElement = mediaElement;
     this._mediaSource = mediaSource;
     this._initializedSegmentBuffers = {};
@@ -136,6 +136,9 @@ export default class SegmentBuffersStore {
    * @returns {Array.<string>}
    */
   public getNativeBufferTypes() : IBufferType[] {
+    if (this._mediaElement === null) {
+      return ["video", "audio"];
+    }
     return this._mediaElement.nodeName === "AUDIO" ? ["audio"] :
                                                      ["video", "audio"];
   }
@@ -281,6 +284,9 @@ export default class SegmentBuffersStore {
 
     let segmentBuffer : SegmentBuffer;
     if (bufferType === "text") {
+      if (this._mediaElement === null) {
+        throw new Error("XXX TODO NO TEXT");
+      }
       log.info("SB: Creating a new text SegmentBuffer");
 
       if (options.textTrackMode === "html") {

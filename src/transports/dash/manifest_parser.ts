@@ -75,7 +75,10 @@ export default function generateManifestParser(
                              referenceDateTime,
                              externalClockOffset };
 
-    const parsers = features.dashParsers;
+    const parsers = {
+      wasm: (globalThis as any).parser,
+      js: null,
+    };
     if (parsers.wasm === null ||
         parsers.wasm.status === "uninitialized" ||
         parsers.wasm.status === "failure")

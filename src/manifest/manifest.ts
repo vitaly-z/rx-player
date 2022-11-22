@@ -246,7 +246,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * Data allowing to calculate the minimum and maximum seekable positions at
    * any given time.
    */
-  private _timeBounds : {
+  public timeBounds : {
     /**
      * This is the theoretical minimum playable position on the content
      * regardless of the current Adaptation chosen, as estimated at parsing
@@ -369,7 +369,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
                                                        this.periods[0].adaptations;
     /* eslint-enable import/no-deprecated */
 
-    this._timeBounds = parsedManifest.timeBounds;
+    this.timeBounds = parsedManifest.timeBounds;
     this.isDynamic = parsedManifest.isDynamic;
     this.isLive = parsedManifest.isLive;
     this.isLastPeriodKnown = parsedManifest.isLastPeriodKnown;
@@ -485,7 +485,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @returns {number}
    */
   public getMinimumSafePosition() : number {
-    const windowData = this._timeBounds;
+    const windowData = this.timeBounds;
     if (windowData.timeshiftDepth === null) {
       return windowData.minimumSafePosition ?? 0;
     }
@@ -508,7 +508,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @returns {number|undefined}
    */
   public getLivePosition() : number | undefined {
-    const { maximumTimeData } = this._timeBounds;
+    const { maximumTimeData } = this.timeBounds;
     if (!this.isLive || maximumTimeData.livePosition === undefined) {
       return undefined;
     }
@@ -525,7 +525,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * time.
    */
   public getMaximumSafePosition() : number {
-    const { maximumTimeData } = this._timeBounds;
+    const { maximumTimeData } = this.timeBounds;
     if (!maximumTimeData.isLinear) {
       return maximumTimeData.maximumSafePosition;
     }
@@ -727,11 +727,11 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
     this.publishTime = newManifest.publishTime;
 
     if (updateType === MANIFEST_UPDATE_TYPE.Full) {
-      this._timeBounds = newManifest._timeBounds;
+      this.timeBounds = newManifest.timeBounds;
       this.uris = newManifest.uris;
       replacePeriods(this.periods, newManifest.periods);
     } else {
-      this._timeBounds.maximumTimeData = newManifest._timeBounds.maximumTimeData;
+      this.timeBounds.maximumTimeData = newManifest.timeBounds.maximumTimeData;
       this.updateUrl = newManifest.uris[0];
       updatePeriods(this.periods, newManifest.periods);
 

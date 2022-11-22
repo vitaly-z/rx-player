@@ -16,8 +16,13 @@
 
 import config from "../../../config";
 import log from "../../../log";
-import Manifest from "../../../manifest";
+import {
+  getLivePosition,
+  getMaximumSafePosition,
+  getMinimumSafePosition,
+} from "../../../manifest/utils";
 import isNullOrUndefined from "../../../utils/is_null_or_undefined";
+import { ISentManifest } from "../../../worker";
 
 /**
  * All possible initial time options that can be set.
@@ -66,18 +71,18 @@ export interface IInitialTimeOptions {
  * @returns {Number}
  */
 export default function getInitialTime(
-  manifest : Manifest,
+  manifest : ISentManifest,
   lowLatencyMode : boolean,
   startAt? : IInitialTimeOptions
 ) : number {
   if (!isNullOrUndefined(startAt)) {
-    const min = manifest.getMinimumSafePosition();
+    const min = getMinimumSafePosition(manifest);
     let max;
     if (manifest.isLive) {
-      max = manifest.getLivePosition();
+      max = getLivePosition(manifest);
     }
     if (max === undefined) {
-      max = manifest.getMaximumSafePosition();
+      max = getMaximumSafePosition(manifest);
     }
     if (!isNullOrUndefined(startAt.position)) {
       log.debug("Init: using startAt.minimumPosition");
@@ -116,11 +121,11 @@ export default function getInitialTime(
     }
   }
 
-  const minimumPosition = manifest.getMinimumSafePosition();
+  const minimumPosition = getMinimumSafePosition(manifest);
   if (manifest.isLive) {
     const { suggestedPresentationDelay,
             clockOffset } = manifest;
-    const maximumPosition = manifest.getMaximumSafePosition();
+    const maximumPosition = getMaximumSafePosition(manifest);
     let liveTime : number;
     const { DEFAULT_LIVE_GAP } = config.getCurrent();
 

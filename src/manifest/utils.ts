@@ -15,6 +15,7 @@
  */
 
 import isNullOrUndefined from "../utils/is_null_or_undefined";
+import { ISentManifest } from "../worker";
 import Adaptation from "./adaptation";
 import Period from "./period";
 import Representation from "./representation";
@@ -59,4 +60,63 @@ export function getLoggableSegmentId(
          (segment.isInit   ? "init" :
           segment.complete ? `${segment.time}-${segment.duration}` :
                              `${segment.time}`);
+}
+
+/**
+ * Returns the theoretical minimum playable position on the content
+ * regardless of the current Adaptation chosen, as estimated at parsing
+ * time.
+ * @param {Object} manifest
+ * @returns {number}
+ */
+export function getMinimumSafePosition(manifest : ISentManifest) : number {
+  const windowData = manifest.timeBounds;
+  if (windowData.timeshiftDepth === null) {
+    return windowData.minimumSafePosition ?? 0;
+  }
+
+  const { maximumTimeData } = windowData;
+  let maximumTime : number;
+  if (!windowData.maximumTimeData.isLinear) {
+    maximumTime = maximumTimeData.maximumSafePosition;
+  } else {
+    const timeDiff = performance.now() - maximumTimeData.time;
+    maximumTime = maximumTimeData.maximumSafePosition + timeDiff / 1000;
+  }
+  const theoricalMinimum = maximumTime - windowData.timeshiftDepth;
+  return Math.max(windowData.minimumSafePosition ?? 0, theoricalMinimum);
+}
+
+/**
+ * Get the position of the live edge - that is, the position of what is
+ * currently being broadcasted, in seconds.
+ * @param {Object} manifest
+ * @returns {number|undefined}
+ */
+export function getLivePosition(manifest : ISentManifest) : number | undefined {
+  const { maximumTimeData } = manifest.timeBounds;
+  if (!manifest.isLive || maximumTimeData.livePosition === undefined) {
+    return undefined;
+  }
+  if (!maximumTimeData.isLinear) {
+    return maximumTimeData.livePosition;
+  }
+  const timeDiff = performance.now() - maximumTimeData.time;
+  return maximumTimeData.livePosition + timeDiff / 1000;
+}
+
+/**
+ * Returns the theoretical maximum playable position on the content
+ * regardless of the current Adaptation chosen, as estimated at parsing
+ * time.
+ * @param {Object} manifest
+ * @returns {number}
+ */
+export function getMaximumSafePosition(manifest : ISentManifest) : number {
+  const { maximumTimeData } = manifest.timeBounds;
+  if (!maximumTimeData.isLinear) {
+    return maximumTimeData.maximumSafePosition;
+  }
+  const timeDiff = performance.now() - maximumTimeData.time;
+  return maximumTimeData.maximumSafePosition + timeDiff / 1000;
 }

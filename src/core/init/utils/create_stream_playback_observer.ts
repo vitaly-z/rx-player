@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { IWorkerPlaybackObservation } from "../../../main";
 import Manifest from "../../../manifest";
 import createSharedReference, {
   IReadOnlySharedReference,
@@ -22,22 +23,13 @@ import { CancellationSignal } from "../../../utils/task_canceller";
 import {
   IPlaybackObservation,
   IReadOnlyPlaybackObserver,
-  PlaybackObserver,
 } from "../../api";
 import { IStreamOrchestratorPlaybackObservation } from "../../stream";
 
 /** Arguments needed to create the Stream's version of the PlaybackObserver. */
 export interface IStreamPlaybackObserverArguments {
-  /** If true, the player will auto-play when `initialPlayPerformed` becomes `true`. */
-  autoPlay : boolean;
-  /** Becomes `true` after the initial play has been taken care of. */
-  initialPlayPerformed : IReadOnlySharedReference<boolean>;
-  /** Becomes `true` after the initial seek has been taken care of. */
-  initialSeekPerformed : IReadOnlySharedReference<boolean>;
   /** The last speed requested by the user. */
   speed : IReadOnlySharedReference<number>;
-  /** The time the player will seek when `initialSeekPerformed` becomes `true`. */
-  startTime : number;
 }
 
 /**
@@ -49,12 +41,8 @@ export interface IStreamPlaybackObserverArguments {
  */
 export default function createStreamPlaybackObserver(
   manifest : Manifest,
-  playbackObserver : PlaybackObserver,
-  { autoPlay,
-    initialPlayPerformed,
-    initialSeekPerformed,
-    speed,
-    startTime } : IStreamPlaybackObserverArguments
+  playbackObserver : IReadOnlyPlaybackObserver<IWorkerPlaybackObservation>,
+  { speed } : IStreamPlaybackObserverArguments
 ) : IReadOnlyPlaybackObserver<IStreamOrchestratorPlaybackObservation> {
   return playbackObserver.deriveReadOnlyObserver(function transform(
     observationRef : IReadOnlySharedReference<IPlaybackObservation>,
@@ -81,39 +69,31 @@ export default function createStreamPlaybackObserver(
     function constructStreamPlaybackObservation() {
       const observation = observationRef.getValue();
       const lastSpeed = speed.getValue();
-      let pendingPosition : number | undefined;
-      if (!initialSeekPerformed.getValue()) {
-        pendingPosition = startTime;
-      } else if (!manifest.isDynamic || manifest.isLastPeriodKnown) {
-        // HACK: When the position is actually further than the maximum
-        // position for a finished content, we actually want to be loading
-        // the last segment before ending.
-        // For now, this behavior is implicitely forced by making as if we
-        // want to seek one second before the period's end (despite never
-        // doing it).
-        const lastPeriod = manifest.periods[manifest.periods.length - 1];
-        if (lastPeriod !== undefined &&
-            lastPeriod.end !== undefined &&
-            observation.position > lastPeriod.end)
-        {
-          pendingPosition = lastPeriod.end - 1;
-        }
-      }
+      // let pendingPosition : number | undefined;
+      // if (!initialSeekPerformed.getValue()) {
+      //   pendingPosition = startTime;
+      // } else if (!manifest.isDynamic || manifest.isLastPeriodKnown) {
+      //   // HACK: When the position is actually further than the maximum
+      //   // position for a finished content, we actually want to be loading
+      //   // the last segment before ending.
+      //   // For now, this behavior is implicitely forced by making as if we
+      //   // want to seek one second before the period's end (despite never
+      //   // doing it).
+      //   const lastPeriod = manifest.periods[manifest.periods.length - 1];
+      //   if (lastPeriod !== undefined &&
+      //       lastPeriod.end !== undefined &&
+      //       observation.position > lastPeriod.end)
+      //   {
+      //     pendingPosition = lastPeriod.end - 1;
+      //   }
+      // }
 
       return {
         // TODO more exact according to the current Adaptation chosen?
         maximumPosition: manifest.getMaximumSafePosition(),
-        position: {
-          last: observation.position,
-          pending: pendingPosition,
-        },
+        position: observation.position,
         duration: observation.duration,
-        paused: {
-          last: observation.paused,
-          pending: initialPlayPerformed.getValue()  ? undefined :
-                   !autoPlay === observation.paused ? undefined :
-                                                      !autoPlay,
-        },
+        paused: observation.paused,
         readyState: observation.readyState,
         speed: lastSpeed,
       };
