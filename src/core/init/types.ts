@@ -23,7 +23,7 @@ import {
 } from "../../manifest";
 import { IPlayerError } from "../../public_types";
 import EventEmitter from "../../utils/event_emitter";
-import { ISentManifest } from "../../worker";
+import { ISentAdaptation, ISentManifest } from "../../worker";
 import { PlaybackObserver } from "../api";
 import SegmentBuffersStore, {
   IBufferType,
@@ -154,7 +154,7 @@ export interface IContentInitializerEvents {
      * You can send `null` through it to tell this `PeriodStream` that you don't
      * want any `Adaptation`.
      */
-    adaptation$ : Subject<Adaptation|null>;
+    adaptation$ : Subject<ISentAdaptation|null>;
   };
   /**
    * A `PeriodStream` has been removed.

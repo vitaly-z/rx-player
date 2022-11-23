@@ -138,7 +138,7 @@ function createCompatibleEventListener(
 
     // if the element is a HTMLElement we can detect
     // the supported event, and memoize it in `mem`
-    if (typeof HTMLElement === "function" && element instanceof HTMLElement) {
+    if (typeof HTMLElement !== "undefined" && element instanceof HTMLElement) {
       if (typeof mem === "undefined") {
         mem = findSupportedEvent(element, prefixedEvents);
       }
@@ -184,7 +184,7 @@ function compatibleListener<T extends Event>(
   return (element : IEventTargetLike) : Observable<T> => {
     // if the element is a HTMLElement we can detect
     // the supported event, and memoize it in `mem`
-    if (typeof HTMLElement === "function" && element instanceof HTMLElement) {
+    if (typeof HTMLElement !== "undefined" && element instanceof HTMLElement) {
       if (typeof mem === "undefined") {
         mem = findSupportedEvent(element, prefixedEvents);
       }
@@ -204,7 +204,7 @@ function compatibleListener<T extends Event>(
     // otherwise, we need to listen to all the events
     // and merge them into one observable sequence
     return observableMerge(...prefixedEvents.map(eventName =>
-      observableFromEvent(element, eventName)));
+      observableFromEvent(element as IEventEmitterLike, eventName))) as Observable<T>;
   };
 }
 

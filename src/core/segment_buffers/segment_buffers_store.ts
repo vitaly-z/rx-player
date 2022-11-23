@@ -137,6 +137,7 @@ export default class SegmentBuffersStore {
    */
   public getNativeBufferTypes() : IBufferType[] {
     if (this._mediaElement === null) {
+      // XXX TODO
       return ["video", "audio"];
     }
     return this._mediaElement.nodeName === "AUDIO" ? ["audio"] :

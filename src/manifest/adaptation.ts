@@ -20,6 +20,10 @@ import arrayFind from "../utils/array_find";
 import isNullOrUndefined from "../utils/is_null_or_undefined";
 import normalizeLanguage from "../utils/languages";
 import uniq from "../utils/uniq";
+import {
+  ISentAdaptation,
+  ISentRepresentation,
+} from "../worker";
 import Representation from "./representation";
 import { IAdaptationType } from "./types";
 
@@ -197,5 +201,26 @@ export default class Adaptation {
    */
   getRepresentation(wantedId : number|string) : Representation|undefined {
     return arrayFind(this.representations, ({ id }) => wantedId === id);
+  }
+
+  getShareableAdaptation() : ISentAdaptation {
+    const representations : ISentRepresentation[] = [];
+    const baseRepresentations = this.representations;
+    for (const representation of baseRepresentations) {
+      representations.push(representation.getShareableRepresentation());
+    }
+    return {
+      id: this.id,
+      type: this.type,
+      isSupported: this.isSupported,
+      language: this.language,
+      isClosedCaption: this.isClosedCaption,
+      isAudioDescription: this.isAudioDescription,
+      isSignInterpreted: this.isSignInterpreted,
+      normalizedLanguage: this.normalizedLanguage,
+      representations,
+      label: this.label,
+      isDub: this.isDub,
+    };
   }
 }

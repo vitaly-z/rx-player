@@ -15,7 +15,13 @@
  */
 
 import isNullOrUndefined from "../utils/is_null_or_undefined";
-import { ISentManifest } from "../worker";
+import { objectValues } from "../utils/object_values";
+import {
+  IAdaptationType,
+  ISentAdaptation,
+  ISentManifest,
+  ISentPeriod,
+} from "../worker";
 import Adaptation from "./adaptation";
 import Period from "./period";
 import Representation from "./representation";
@@ -119,4 +125,54 @@ export function getMaximumSafePosition(manifest : ISentManifest) : number {
   }
   const timeDiff = performance.now() - maximumTimeData.time;
   return maximumTimeData.maximumSafePosition + timeDiff / 1000;
+}
+
+/**
+ * Returns Adaptations that contain Representations in supported codecs.
+ * @param {string|undefined} type - If set filter on a specific Adaptation's
+ * type. Will return for all types if `undefined`.
+ * @returns {Array.<Adaptation>}
+ */
+export function getSupportedAdaptations(
+  period : Period,
+  type? : IAdaptationType | undefined
+) : Adaptation[];
+export function getSupportedAdaptations(
+  period : ISentPeriod,
+  type? : IAdaptationType | undefined
+) : ISentAdaptation[];
+export function getSupportedAdaptations(
+  period : Period | ISentPeriod,
+  type? : IAdaptationType | undefined
+) : ISentAdaptation[] | Adaptation[] {
+  if (type === undefined) {
+    return getAdaptations(period).filter(ada => {
+      return ada.isSupported;
+    });
+  }
+  const adaptationsForType = period.adaptations[type];
+  if (adaptationsForType === undefined) {
+    return [];
+  }
+  return adaptationsForType.filter(ada => {
+    return ada.isSupported;
+  });
+}
+
+/**
+ * Returns every `Adaptations` (or `tracks`) linked to that Period, in an
+ * Array.
+ * @returns {Array.<Object>}
+ */
+export function getAdaptations(period : Period) : Adaptation[];
+export function getAdaptations(period : ISentPeriod) : ISentAdaptation[];
+export function getAdaptations(
+  period : ISentPeriod | Period
+) : ISentAdaptation[] | Adaptation[] {
+  const adaptationsByType = period.adaptations;
+  return objectValues(adaptationsByType).reduce<ISentAdaptation[]>(
+    // Note: the second case cannot happen. TS is just being dumb here
+    (acc, adaptations) => adaptations != null ? acc.concat(adaptations) :
+                                                acc,
+    []);
 }

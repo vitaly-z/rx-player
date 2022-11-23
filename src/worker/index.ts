@@ -5,6 +5,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { ManifestFetcher } from "../core/fetchers";
+/* eslint-disable-next-line max-len */
+import ContentTimeBoundariesObserver from "../core/init/utils/content_time_boundaries_observer";
+/* eslint-disable-next-line max-len */
+import createStreamPlaybackObserver from "../core/init/utils/create_stream_playback_observer";
+import { maintainEndOfStream } from "../core/init/utils/end_of_stream";
+import StreamOrchestrator, {
+  IAdaptationChangeEvent,
+  IStreamOrchestratorEvent,
+} from "../core/stream";
 import {
   MediaError,
   OtherError,
@@ -16,9 +26,6 @@ import {
   IOtherErrorCode,
 } from "../errors/error_codes";
 import log from "../log";
-import { IPlayerError } from "../public_types";
-import createSharedReference from "../utils/reference";
-import TaskCanceller from "../utils/task_canceller";
 import {
   IContentInitializationData,
   IMainThreadMessage,
@@ -26,16 +33,17 @@ import {
   IStartContentMessageValue,
   IWorkerPlaybackObservation,
 } from "../main";
+import Manifest, {
+  Adaptation,
+  Period,
+  Representation,
+} from "../manifest";
+import DashWasmParser from "../parsers/manifest/dash/wasm-parser";
+import { IPlayerError } from "../public_types";
+import createDashPipeline from "../transports/dash";
+import createSharedReference from "../utils/reference";
+import TaskCanceller from "../utils/task_canceller";
 /* eslint-disable-next-line max-len */
-import ContentTimeBoundariesObserver from "../core/init/utils/content_time_boundaries_observer";
-import { ManifestFetcher } from "../core/fetchers";
-import StreamOrchestrator, {
-  IAdaptationChangeEvent,
-  IStreamOrchestratorEvent,
-} from "../core/stream";
-/* eslint-disable-next-line max-len */
-import createStreamPlaybackObserver from "../core/init/utils/create_stream_playback_observer";
-import { maintainEndOfStream } from "../core/init/utils/end_of_stream";
 import {
   limitVideoWidth,
   manualAudioBitrate,
@@ -52,20 +60,7 @@ import {
   throttleVideoBitrate,
   wantedBufferAhead,
 } from "./globals";
-import Manifest, {
-  Adaptation,
-  IAdaptationType,
-  Period,
-  Representation,
-} from "../manifest";
-import DashWasmParser from "../parsers/manifest/dash/wasm-parser";
-import sendMessage, {
-  ISentAdaptation,
-  ISentManifest,
-  ISentPeriod,
-  ISentRepresentation,
-} from "./send_message";
-import createDashPipeline from "../transports/dash";
+import sendMessage from "./send_message";
 import WorkerContentStore from "./worker_content_store";
 import WorkerPlaybackObserver from "./worker_playback_observer";
 import {
@@ -114,6 +109,26 @@ onmessage = function (e: MessageEvent<IMainThreadMessage>) {
 
     case "reference-update":
       updateGlobalReference(msg);
+      break;
+
+    case "decipherabilityStatusChange":
+      const currentContent = currentContentStore.getCurrentContent();
+      if (currentContent === null) {
+        return;
+      }
+      const updates = msg.value;
+      currentContent.manifest.updateRepresentationsDeciperability((content) => {
+        for (const update of updates) {
+          if (
+            content.manifest.id === update.manifestId &&
+            content.period.id === update.periodId &&
+            content.adaptation.id === update.adaptationId &&
+            content.representation.id === update.representationId
+          ) {
+            return update.decipherable;
+          }
+        }
+      });
       break;
 
     default:
@@ -165,7 +180,7 @@ function prepareNewContent(
       return;
     }
 
-    const sentManifest = formatManifestBeforeSend(manifest);
+    const sentManifest = manifest.getShareableManifest();
     sendMessage({ type: "ready-to-start",
                   contentId,
                   value: { manifest: sentManifest } });
@@ -287,13 +302,29 @@ function startCurrentContent(val : IStartContentMessageValue) {
         }
         break;
       case "encryption-data-encountered":
+        const originalContent = event.value.content;
+        const content = { ...originalContent };
+        if (content.manifest instanceof Manifest) {
+          content.manifest = content.manifest.getShareableManifest();
+        }
+        if (content.period instanceof Period) {
+          content.period = content.period.getShareablePeriod();
+        }
+        if (content.adaptation instanceof Adaptation) {
+          content.adaptation = content.adaptation.getShareableAdaptation();
+        }
+        if (content.representation instanceof Representation) {
+          content.representation = content.representation.getShareableRepresentation();
+        }
+
         sendMessage({ type: event.type,
                       value: { keyIds: event.value.keyIds,
                                values: event.value.values,
+                               content,
                                type: event.value.type } });
         break;
       case "activePeriodChanged":
-        const sentPeriod = formatPeriodBeforeSend(event.value.period);
+        const sentPeriod = event.value.period.getShareablePeriod();
         sendMessage({ type: "activePeriodChanged",
                       value: { period: sentPeriod } });
         break;
@@ -446,80 +477,3 @@ export {
   IBufferType,
 } from "../core/segment_buffers";
 export { IAdaptationType } from "../manifest";
-
-function formatManifestBeforeSend(
-  manifest : Manifest
-) : ISentManifest {
-  const periods : ISentPeriod[] = [];
-  for (const period of manifest.periods) {
-    periods.push(formatPeriodBeforeSend(period));
-  }
-
-  return {
-    id: manifest.id,
-    periods,
-    isDynamic: manifest.isDynamic,
-    isLive: manifest.isLive,
-    isLastPeriodKnown: manifest.isLastPeriodKnown,
-    suggestedPresentationDelay: manifest.suggestedPresentationDelay,
-    clockOffset: manifest.clockOffset,
-    uris: manifest.uris,
-    availabilityStartTime: manifest.availabilityStartTime,
-    timeBounds: manifest.timeBounds,
-  };
-}
-
-function formatPeriodBeforeSend(
-  period : Period
-) : ISentPeriod {
-  const adaptations : Partial<Record<IAdaptationType, ISentAdaptation[]>> = {};
-  const baseAdaptations = period.getAdaptations();
-  for (const adaptation of baseAdaptations) {
-    let currentAdaps : ISentAdaptation[] | undefined = adaptations[adaptation.type];
-    if (currentAdaps === undefined) {
-      currentAdaps = [];
-      adaptations[adaptation.type] = currentAdaps;
-    }
-    currentAdaps.push(formatAdaptationBeforeSend(adaptation));
-  }
-  return { start: period.start,
-           end: period.end,
-           id: period.id,
-           adaptations };
-}
-
-function formatAdaptationBeforeSend(
-  adaptation : Adaptation
-) : ISentAdaptation {
-  const representations : ISentRepresentation[] = [];
-  const baseRepresentations = adaptation.representations;
-  for (const representation of baseRepresentations) {
-    representations.push(formatRepresentationBeforeSend(representation));
-  }
-  return {
-    id: adaptation.id,
-    type: adaptation.type,
-    isSupported: adaptation.isSupported,
-    language: adaptation.language,
-    isClosedCaption: adaptation.isClosedCaption,
-    isAudioDescription: adaptation.isAudioDescription,
-    isSignInterpreted: adaptation.isSignInterpreted,
-    normalizedLanguage: adaptation.normalizedLanguage,
-    representations,
-    label: adaptation.label,
-    isDub: adaptation.isDub,
-  };
-}
-
-function formatRepresentationBeforeSend(
-  representation : Representation
-) : ISentRepresentation {
-  return { id: representation.id,
-           bitrate: representation.bitrate,
-           codec: representation.codec,
-           width: representation.width,
-           height: representation.height,
-           frameRate: representation.frameRate,
-           hdrInfo: representation.hdrInfo,
-           decipherable: representation.decipherable };
-}

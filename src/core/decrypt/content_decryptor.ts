@@ -26,9 +26,6 @@ import {
   OtherError,
 } from "../../errors";
 import log from "../../log";
-import Manifest, {
-  Period,
-} from "../../manifest";
 import {
   IKeySystemOption,
   IPlayerError,
@@ -38,8 +35,15 @@ import arrayFind from "../../utils/array_find";
 import arrayIncludes from "../../utils/array_includes";
 import EventEmitter from "../../utils/event_emitter";
 import isNullOrUndefined from "../../utils/is_null_or_undefined";
+import { objectValues } from "../../utils/object_values";
 import { bytesToHex } from "../../utils/string_parsing";
 import TaskCanceller from "../../utils/task_canceller";
+import {
+  ISentAdaptation,
+  ISentManifest,
+  ISentPeriod,
+  ISentRepresentation,
+} from "../../worker";
 import attachMediaKeys from "./attach_media_keys";
 import createOrLoadSession from "./create_or_load_session";
 import { IMediaKeysInfos } from "./get_media_keys";
@@ -381,8 +385,10 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
           if (initializationData.content === undefined) {
             log.warn("DRM: Unable to fallback from a non-decipherable quality.");
           } else {
-            blackListProtectionData(initializationData.content.manifest,
-                                    initializationData);
+            const decipherabilityUpdates = blackListProtectionData(
+              initializationData.content.manifest,
+              initializationData);
+            this.trigger("decipherabilityStatusChange", decipherabilityUpdates);
           }
           return ;
         }
@@ -394,7 +400,13 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
               .reduce((acc, kid) => `${acc}, ${bytesToHex(kid)}`, "");
             log.debug("DRM: Blacklisting new key ids", hexKids);
           }
-          updateDecipherability(initializationData.content.manifest, [], keyIds, []);
+          const decipherabilityUpdates = updateDecipherability(
+            initializationData.content.manifest,
+            [],
+            keyIds,
+            []
+          );
+          this.trigger("decipherabilityStatusChange", decipherabilityUpdates);
         }
         return ;
       }
@@ -422,10 +434,13 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
                 createdSess.keyStatuses.blacklisted.push(innerKid);
               }
             }
-            updateDecipherability(initializationData.content.manifest,
-                                  createdSess.keyStatuses.whitelisted,
-                                  createdSess.keyStatuses.blacklisted,
-                                  []);
+            const decipherabilityUpdates = updateDecipherability(
+              initializationData.content.manifest,
+              createdSess.keyStatuses.whitelisted,
+              createdSess.keyStatuses.blacklisted,
+              []
+            );
+            this.trigger("decipherabilityStatusChange", decipherabilityUpdates);
             return;
           }
         }
@@ -521,10 +536,12 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
           }
 
           if (initializationData.content !== undefined) {
-            updateDecipherability(initializationData.content.manifest,
-                                  linkedKeys.whitelisted,
-                                  linkedKeys.blacklisted,
-                                  []);
+            const decipherabilityUpdates = updateDecipherability(
+              initializationData.content.manifest,
+              linkedKeys.whitelisted,
+              linkedKeys.blacklisted,
+              []);
+            this.trigger("decipherabilityStatusChange", decipherabilityUpdates);
           }
 
           this._unlockInitDataQueue();
@@ -539,10 +556,12 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
               this._currentSessions.splice(indexOf);
             }
             if (initializationData.content !== undefined) {
-              updateDecipherability(initializationData.content.manifest,
-                                    [],
-                                    [],
-                                    sessionInfo.record.getAssociatedKeyIds());
+              const decipherabilityUpdates = updateDecipherability(
+                initializationData.content.manifest,
+                [],
+                [],
+                sessionInfo.record.getAssociatedKeyIds());
+              this.trigger("decipherabilityStatusChange", decipherabilityUpdates);
             }
             stores.persistentSessionsStore?.delete(mediaKeySession.sessionId);
             stores.loadedSessionsStore.closeSession(mediaKeySession)
@@ -692,10 +711,12 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
         }
         log.info("DRM: Current initialization data is linked to blacklisted keys. " +
                  "Marking Representations as not decipherable");
-        updateDecipherability(initializationData.content.manifest,
-                              [],
-                              initializationData.keyIds,
-                              []);
+        const decipherabilityUpdates = updateDecipherability(
+          initializationData.content.manifest,
+          [],
+          initializationData.keyIds,
+          []);
+        this.trigger("decipherabilityStatusChange", decipherabilityUpdates);
         return true;
       }
     }
@@ -841,12 +862,12 @@ function canCreatePersistentSession(
  * @param {Array.<Uint8Array>} delistedKeyIds
  */
 function updateDecipherability(
-  manifest : Manifest,
+  manifest : ISentManifest,
   whitelistedKeyIds : Uint8Array[],
   blacklistedKeyIds : Uint8Array[],
   delistedKeyIds : Uint8Array[]
-) : void {
-  manifest.updateRepresentationsDeciperability((representation) => {
+) : IDecipherabilityStatusChangedElement[] {
+  return updateRepresentationsDeciperability(manifest, (representation) => {
     if (representation.contentProtections === undefined) {
       return representation.decipherable;
     }
@@ -881,10 +902,10 @@ function updateDecipherability(
  * @param {Object} initData
  */
 function blackListProtectionData(
-  manifest : Manifest,
+  manifest : ISentManifest,
   initData : IProcessedProtectionData
-) : void {
-  manifest.updateRepresentationsDeciperability((representation) => {
+) : IDecipherabilityStatusChangedElement[] {
+  return updateRepresentationsDeciperability(manifest, (representation) => {
     if (representation.decipherable === false) {
       return false;
     }
@@ -933,6 +954,8 @@ export interface IContentDecryptorEvent {
    * ContentDecryptorState type.
    */
   stateChange: ContentDecryptorState;
+
+  decipherabilityStatusChange: IDecipherabilityStatusChangedElement[];
 }
 
 /** Enumeration of the various "state" the `ContentDecryptor` can be in. */
@@ -1287,9 +1310,15 @@ function mergeKeyIdSetIntoArray(
  */
 function addKeyIdsFromPeriod(
   set : Set<Uint8Array>,
-  period : Period
+  period : ISentPeriod
 ) {
-  for (const adaptation of period.getAdaptations()) {
+  const adaptationsByType = period.adaptations;
+  const adaptations = objectValues(adaptationsByType).reduce<ISentAdaptation[]>(
+    // Note: the second case cannot happen. TS is just being dumb here
+    (acc, adaps) => adaps != null ? acc.concat(adaps) :
+                                    acc,
+    []);
+  for (const adaptation of adaptations) {
     for (const representation of adaptation.representations) {
       if (representation.contentProtections !== undefined &&
           representation.contentProtections.keyIds !== undefined)
@@ -1300,4 +1329,57 @@ function addKeyIdsFromPeriod(
       }
     }
   }
+}
+
+/**
+ * Update `decipherable` property of every `Representation` found in the
+ * Manifest based on the result of a `isDecipherable` callback:
+ *   - When that callback returns `true`, update `decipherable` to `true`
+ *   - When that callback returns `false`, update `decipherable` to `false`
+ *   - When that callback returns `undefined`, update `decipherable` to
+ *     `undefined`
+ * @param {Manifest} manifest
+ * @param {Function} isDecipherable
+ * @returns {Array.<Object>}
+ */
+function updateRepresentationsDeciperability(
+  manifest : ISentManifest,
+  isDecipherable : (rep : ISentRepresentation) => boolean | undefined
+) : IDecipherabilityStatusChangedElement[] {
+  const updates : IDecipherabilityStatusChangedElement[] = [];
+  for (const period of manifest.periods) {
+    const adaptationsByType = period.adaptations;
+    const adaptations = objectValues(adaptationsByType).reduce<ISentAdaptation[]>(
+      // Note: the second case cannot happen. TS is just being dumb here
+      (acc, adaps) => adaps != null ? acc.concat(adaps) :
+                                      acc,
+      []);
+    for (const adaptation of adaptations) {
+      for (const representation of adaptation.representations) {
+        const result = isDecipherable(representation);
+        if (result !== representation.decipherable) {
+          updates.push({ manifestId: manifest.id,
+                         periodId: period.id,
+                         adaptationId: adaptation.id,
+                         representationId: representation.id,
+                         decipherable: result });
+          // XXX TODO race condition possible here after an update...
+          // What do? WeakMap? Something else?
+          representation.decipherable = result;
+        }
+      }
+    }
+  }
+  return updates;
+}
+
+/**
+ * Information on a Representation affected by a `decipherabilityUpdates` event.
+ */
+export interface IDecipherabilityStatusChangedElement {
+  manifestId : string;
+  periodId : string;
+  adaptationId : string;
+  representationId : string;
+  decipherable : boolean | undefined;
 }

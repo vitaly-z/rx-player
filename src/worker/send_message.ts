@@ -1,8 +1,9 @@
-import { IHDRInformation } from "../public_types";
 import {
   IEncryptionDataEncounteredEvent as IEncryptionDataEncounteredWorkerMessage,
 } from "../core/stream";
 import { IAdaptationType } from "../manifest";
+import { IContentProtections } from "../parsers/manifest";
+import { IHDRInformation } from "../public_types";
 import { ISentError } from ".";
 
 export default function sendMessage(
@@ -12,7 +13,9 @@ export default function sendMessage(
   if (transferables === undefined) {
     postMessage(msg);
   } else {
-    postMessage(msg, transferables);
+    // TypeScript made a mistake here, and 2busy2fix
+    /* eslint-disable-next-line */
+    (postMessage as any)(msg, transferables);
   }
 }
 
@@ -49,6 +52,14 @@ export interface IErrorWorkerMessage {
   value : ISentError;
 }
 
+/**
+ * Manifest structure describing the content that may be shared to the various
+ * modules in the RxPlayer, even communicated through Web Workers.
+ *
+ * An `ISentManifest` is much cheaper to deeply clone than the full `Manifest`
+ * class, while still containing its more important metadata, making it a better
+ * candidate when a Manifest has to be cloned, such as when using `postMessage`.
+ */
 export interface ISentManifest {
   /**
    * ID uniquely identifying this Manifest.
@@ -57,6 +68,7 @@ export interface ISentManifest {
    * created.
    */
   id : string;
+
   /**
    * List every Period in that Manifest chronologically (from start to end).
    * A Period contains information about the content available for a specific
@@ -100,7 +112,21 @@ export interface ISentManifest {
    * time.
    */
   availabilityStartTime : number | undefined;
+
+  /**
+   * Suggested delay from the "live edge" (i.e. the position corresponding to
+   * the current broadcast for a live content) the content is suggested to start
+   * from.
+   * This only applies to live contents.
+   */
   suggestedPresentationDelay? : number | undefined;
+
+  /*
+   * Difference between the server's clock in milliseconds and the return of the
+   * JS function `performance.now`.
+   * This property allows to calculate the server time at any moment.
+   * `undefined` if we did not obtain the server's time
+   */
   clockOffset? : number | undefined;
 
   /**
@@ -235,6 +261,7 @@ export interface ISentRepresentation {
   frameRate? : string | undefined;
   hdrInfo? : IHDRInformation | undefined;
   decipherable? : boolean | undefined;
+  contentProtections? : IContentProtections | undefined;
 }
 
 export type IWorkerMessage = IWarningWorkerMessage |

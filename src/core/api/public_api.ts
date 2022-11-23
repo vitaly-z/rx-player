@@ -100,7 +100,7 @@ import createSharedReference, {
 } from "../../utils/reference";
 import TaskCanceller from "../../utils/task_canceller";
 import warnOnce from "../../utils/warn_once";
-import { ISentManifest } from "../../worker";
+import { ISentAdaptation, ISentManifest, ISentPeriod } from "../../worker";
 import { IABRThrottlers } from "../adaptive";
 import {
   clearOnStop,
@@ -348,7 +348,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    * @constructor
    * @param {Object} options
    */
-  constructor(options : IConstructorOptions = {}, workerUrl : string) {
+  constructor(options : IConstructorOptions = {}) {
     super();
     const { initialAudioBitrate,
             initialVideoBitrate,
@@ -367,6 +367,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
             videoElement,
             wantedBufferAhead,
             maxVideoBufferSize,
+            workerUrl,
             stopAtEnd } = parseConstructorOptions(options);
     const { DEFAULT_UNMUTED_VOLUME } = config.getCurrent();
     // Workaround to support Firefox autoplay on FF 42.
@@ -468,11 +469,17 @@ class Player extends EventEmitter<IPublicAPIEvent> {
 
     this._priv_reloadingMetadata = {};
 
-    this._priv_worker = new Worker(workerUrl);
+    if (workerUrl !== undefined) {
+      this._priv_worker = new Worker(workerUrl);
 
-    /* eslint-disable-next-line no-console */
-    // XXX TODO
-    this._priv_worker.onerror = console.error.bind(console);
+      /* eslint-disable-next-line no-console */
+      // XXX TODO
+      this._priv_worker.onerror = (evt: ErrorEvent) => {
+        log.error("UNEXPECTED WORKER ERROR:", evt.error as Error);
+      };
+    } else {
+      this._priv_worker = null;
+    }
   }
 
   /**
@@ -2340,7 +2347,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
    */
   private _priv_onActivePeriodChanged(
     contentInfos : IPublicApiContentInfos,
-    { period } : { period : Period }
+    { period } : { period : ISentPeriod }
   ) : void {
     if (contentInfos.contentId !== this._priv_contentInfos?.contentId) {
       return; // Event for another content
@@ -2396,7 +2403,7 @@ class Player extends EventEmitter<IPublicAPIEvent> {
     value : {
       type : IBufferType;
       period : Period;
-      adaptation$ : Subject<Adaptation|null>;
+      adaptation$ : Subject<ISentAdaptation|null>;
     }
   ) : void {
     if (contentInfos.contentId !== this._priv_contentInfos?.contentId) {
@@ -2880,7 +2887,7 @@ interface IPublicApiContentInfos {
    * Current Period being played.
    * `null` if no Period is being played.
    */
-  currentPeriod : Period|null;
+  currentPeriod : ISentPeriod|null;
   /**
    * Store currently considered adaptations, per active period.
    * `null` if no Adaptation is active

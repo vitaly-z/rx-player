@@ -61,6 +61,7 @@ export interface IConstructorOptions {
   maxAudioBitrate? : number;
   maxVideoBitrate? : number;
   stopAtEnd? : boolean;
+  workerUrl? : string | undefined;
 }
 
 /** Every options that can be given to the RxPlayer's `loadVideo` method. */
@@ -246,12 +247,6 @@ export interface IAdaptation {
   isClosedCaption? : boolean | undefined;
   isTrickModeTrack? : boolean | undefined;
   representations : IRepresentation[];
-
-  getAvailableBitrates() : number[];
-}
-
-interface IRepresentationIndex {
-  getSegments(up : number, duration : number) : IExposedSegment[];
 }
 
 /** Segment, as documented in the API documentation. */
@@ -300,8 +295,7 @@ export interface IRepresentation {
    */
   frameRate? : string | undefined;
   /** If the track is HDR, gives the HDR characteristics of the content */
-  hdrInfo? : IHDRInformation;
-  index : IRepresentationIndex;
+  hdrInfo? : IHDRInformation | undefined;
 }
 
 export interface IHDRInformation {

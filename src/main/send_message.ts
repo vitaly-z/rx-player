@@ -1,3 +1,4 @@
+import { IDecipherabilityStatusChangedElement } from "../core/decrypt/content_decryptor";
 import {
   IManifestFetcherSettings,
   ISegmentFetcherCreatorBackoffOptions,
@@ -68,6 +69,11 @@ export interface IPlaybackObservationMessage {
   value : IWorkerPlaybackObservation;
 }
 
+export interface IDecipherabilityStatusChangedMessage {
+  type : "decipherabilityStatusChange";
+  value : IDecipherabilityStatusChangedElement[];
+}
+
 export interface IWorkerPlaybackObservation {
   position: { last : number;
              pending? : number | undefined; };
@@ -99,4 +105,5 @@ export type IMainThreadMessage =
   /** The last prepared content can now begin. */
   IStartContentMessage |
   IReferenceUpdateMessage |
-  IPlaybackObservationMessage;
+  IPlaybackObservationMessage |
+  IDecipherabilityStatusChangedMessage;

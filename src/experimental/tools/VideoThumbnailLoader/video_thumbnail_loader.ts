@@ -91,6 +91,12 @@ export default class VideoThumbnailLoader {
         new VideoThumbnailLoaderError("NO_MANIFEST", "No manifest available.")
       );
     }
+    if (!(manifest instanceof Manifest)) {
+      throw new Error(
+        "Impossible to run VideoThumbnailLoader in the current context.\n" +
+        "Are you running the RxPlayer in a WebWorker?"
+      );
+    }
     const content = getTrickModeInfo(time, manifest);
     if (content === null) {
       if (this._lastRepresentationInfo !== null) {

@@ -298,6 +298,10 @@ export default class WorkerContentInitializer extends ContentInitializer {
     log.debug("Init: Creating ContentDecryptor");
     const contentDecryptor = new ContentDecryptor(mediaElement, keySystems);
 
+    contentDecryptor.addEventListener("decipherabilityStatusChange", (statuses) => {
+      sendMessage(this._settings.worker, { type: "decipherabilityStatusChange",
+                                           value: statuses });
+    });
     contentDecryptor.addEventListener("stateChange", (state) => {
       if (state === ContentDecryptorState.WaitingForAttachment) {
         const mediaSourceStatusListenerCanceller = new TaskCanceller({
@@ -423,8 +427,6 @@ export default class WorkerContentInitializer extends ContentInitializer {
           .onUpdate((isLoaded, stopListening) => {
             if (isLoaded) {
               stopListening();
-
-              // XXX TODO?
               this.trigger("loaded", { segmentBuffersStore: null });
             }
           }, { emitCurrentValue: true, clearSignal: this._initCanceller.signal });
