@@ -68,27 +68,26 @@ import {
   WASM_URL,
 } from "./worker_utils";
 
+// Some code might be relying on `window` still for now, just define `window` as
+// the Worker's global scope
 (globalThis as any).window = globalThis;
 
 const currentContentStore = new WorkerContentStore();
 
 const parser = new DashWasmParser();
 // XXX TODO proper way to expose WASM Parser
+// Trough features object?
 (globalThis as any).parser = parser;
 parser.initialize({ wasmUrl: WASM_URL }).catch((err) => {
   console.error(err);
 });
 
+let currentContentCanceller = new TaskCanceller();
+
 // XXX TODO proper way of creating PlaybackObserver
-const playbackObservationRef = createSharedReference<IWorkerPlaybackObservation>(
+let playbackObservationRef = createSharedReference<IWorkerPlaybackObservation>(
   INITIAL_OBSERVATION
 );
-
-const canceller = new TaskCanceller();
-const playbackObserver = new WorkerPlaybackObserver(playbackObservationRef,
-                                                    canceller.signal);
-
-let currentContentCanceller = new TaskCanceller();
 
 onmessage = function (e: MessageEvent<IMainThreadMessage>) {
   log.debug("Worker: received message", e.type);
@@ -212,6 +211,14 @@ function startCurrentContent(val : IStartContentMessageValue) {
           manualBitrateSwitchingMode,
           onCodecSwitch } = val;
 
+  playbackObservationRef = createSharedReference<IWorkerPlaybackObservation>(
+    INITIAL_OBSERVATION
+  );
+  currentContentCanceller.signal.register(() => {
+    playbackObservationRef.finish();
+  });
+  const playbackObserver = new WorkerPlaybackObserver(playbackObservationRef,
+                                                      currentContentCanceller.signal);
   const streamPlaybackObserver =
     createStreamPlaybackObserver(manifest, playbackObserver, { speed });
 
@@ -316,7 +323,6 @@ function startCurrentContent(val : IStartContentMessageValue) {
         if (content.representation instanceof Representation) {
           content.representation = content.representation.getShareableRepresentation();
         }
-
         sendMessage({ type: event.type,
                       value: { keyIds: event.value.keyIds,
                                values: event.value.values,

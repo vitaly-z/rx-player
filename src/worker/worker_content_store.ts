@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-import { IContentInitializationData } from "../main";
 import createAdaptiveRepresentationSelector, {
   IRepresentationEstimator,
 } from "../core/adaptive/adaptive_representation_selector";
 import { SegmentFetcherCreator } from "../core/fetchers";
+import MediaDurationUpdater from "../core/init/utils/media_duration_updater";
 import SegmentBuffersStore from "../core/segment_buffers";
+import { IContentInitializationData } from "../main";
+import Manifest from "../manifest";
+import { ITransportPipelines } from "../transports";
+import TaskCanceller from "../utils/task_canceller";
 import {
   limitVideoWidth,
   manualAudioBitrate,
@@ -31,10 +35,6 @@ import {
   throttleVideo,
   throttleVideoBitrate,
 } from "./globals";
-import Manifest from "../manifest";
-import { ITransportPipelines } from "../transports";
-import TaskCanceller from "../utils/task_canceller";
-import MediaDurationUpdater from "../core/init/utils/media_duration_updater";
 
 export default class WorkerContentStore {
   private _currentContent : IPreparedContentData | null;

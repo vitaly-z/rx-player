@@ -1,11 +1,10 @@
+// XXX TODO better import
+import { IReadOnlyPlaybackObserver } from "../core/api";
+import { generateReadOnlyObserver } from "../core/api/playback_observer";
+import log from "../log";
+import { IWorkerPlaybackObservation } from "../main";
 import { IReadOnlySharedReference } from "../utils/reference";
 import { CancellationSignal } from "../utils/task_canceller";
-import { IWorkerPlaybackObservation } from "../main";
-
-// XXX TODO better import
-import { generateReadOnlyObserver } from "../core/api/playback_observer";
-import { IReadOnlyPlaybackObserver } from "../core/api";
-import log from "../log";
 
 export default class WorkerPlaybackObserver implements IReadOnlyPlaybackObserver<
   IWorkerPlaybackObservation
