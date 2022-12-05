@@ -58,18 +58,17 @@ var READY_STATES = {
 
 "use strict";
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "$u": function() { return /* binding */ isWebOs; },
 /* harmony export */   "SB": function() { return /* binding */ isSafariMobile; },
 /* harmony export */   "YM": function() { return /* binding */ isIEOrEdge; },
 /* harmony export */   "fq": function() { return /* binding */ isIE11; },
-/* harmony export */   "gM": function() { return /* binding */ isWebOs2021; },
 /* harmony export */   "kD": function() { return /* binding */ isEdgeChromium; },
 /* harmony export */   "op": function() { return /* binding */ isSamsungBrowser; },
-/* harmony export */   "uz": function() { return /* binding */ isWebOs2022; },
 /* harmony export */   "vS": function() { return /* binding */ isSafariDesktop; },
 /* harmony export */   "vU": function() { return /* binding */ isFirefox; },
 /* harmony export */   "yS": function() { return /* binding */ isTizen; }
 /* harmony export */ });
-/* unused harmony export isWebOs */
+/* unused harmony exports isWebOs2021, isWebOs2022 */
 /* harmony import */ var _is_node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2203);
 /**
  * Copyright 2015 CANAL+ Group
@@ -4687,13 +4686,14 @@ var browser_detection = __webpack_require__(3666);
  *
  * This should usually be the case but we found rare devices where this would
  * cause problem:
- *   - (2022-10-26): WebOS (LG TVs) 2021 and 2022 just rebuffered indefinitely
- *     when loading a content already-loaded on the HTMLMediaElement.
+ *   - (2022-11-21): WebOS (LG TVs), for some encrypted contents, just
+ *     rebuffered indefinitely when loading a content already-loaded on the
+ *     HTMLMediaElement.
  *
  * @returns {boolean}
  */
 function canReuseMediaKeys() {
-  return !(browser_detection/* isWebOs2021 */.gM || browser_detection/* isWebOs2022 */.uz);
+  return !browser_detection/* isWebOs */.$u;
 }
 ;// CONCATENATED MODULE: ./src/compat/should_renew_media_key_system_access.ts
 /**
@@ -24923,7 +24923,12 @@ function applyExtent(element, extent) {
       log/* default.warn */.Z.warn("TTML Parser: unhandled extent unit:", firstExtent[2]);
     }
     if (secondExtent[2] === "px" || secondExtent[2] === "%" || secondExtent[2] === "em") {
-      element.style.height = secondExtent[1] + secondExtent[2];
+      var toNum = Number(secondExtent[1]);
+      if (secondExtent[2] === "%" && !isNaN(toNum) && (toNum < 0 || toNum > 100)) {
+        element.style.width = "80%";
+      } else {
+        element.style.height = secondExtent[1] + secondExtent[2];
+      }
     } else if (secondExtent[2] === "c") {
       addClassName(element, "proportional-style");
       element.setAttribute("data-proportional-height", secondExtent[1]);
@@ -25070,7 +25075,13 @@ function applyOrigin(element, origin) {
       log/* default.warn */.Z.warn("TTML Parser: unhandled origin unit:", firstOrigin[2]);
     }
     if (secondOrigin[2] === "px" || secondOrigin[2] === "%" || secondOrigin[2] === "em") {
-      element.style.top = secondOrigin[1] + secondOrigin[2];
+      var toNum = Number(secondOrigin[1]);
+      if (secondOrigin[2] === "%" && !isNaN(toNum) && (toNum < 0 || toNum > 100)) {
+        element.style.bottom = "5%";
+        element.style.left = "10%";
+      } else {
+        element.style.top = secondOrigin[1] + secondOrigin[2];
+      }
     } else if (secondOrigin[2] === "c") {
       addClassName(element, "proportional-style");
       element.setAttribute("data-proportional-top", secondOrigin[1]);
@@ -55268,7 +55279,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     // Workaround to support Firefox autoplay on FF 42.
     // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1194624
     videoElement.preload = "auto";
-    _this.version = /* PLAYER_VERSION */"3.29.0";
+    _this.version = /* PLAYER_VERSION */"3.29.1-canal.2022120500";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -57565,7 +57576,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   }]);
   return Player;
 }(event_emitter/* default */.Z);
-Player.version = /* PLAYER_VERSION */"3.29.0";
+Player.version = /* PLAYER_VERSION */"3.29.1-canal.2022120500";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
