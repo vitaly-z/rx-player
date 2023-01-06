@@ -344,13 +344,14 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
         let xml = utf16LEToStr(value.data);
         const xmlBeginning = xml.indexOf("<WRMHEADER");
         if (xmlBeginning >= 0) {
+          xml = xml.substring(xmlBeginning);
           xml = xml.replace(/version="[\d\.]+"/, "version=\"4.3.0.0\"");
           const indexOf = xml.indexOf("</DATA>");
           if (indexOf >= 0) {
             console.warn("!!!!!!!! FOUND closing tag");
             const insert = "<DECRYPTORSETUP>ONDEMAND</DECRYPTORSETUP>";
             xml = xml.substring(0, indexOf) + insert + xml.substring(indexOf);
-            const len = (xml.length - xmlBeginning) * 2;
+            const len = xml.length * 2;
             const leLen = itole2(len);
             const newXml = strToUtf16LE(xml);
             value.data = concat(
