@@ -354,7 +354,7 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
             const leLen = itole2(len);
             const newXml = strToUtf16LE(xml);
             value.data = concat(
-              value.data.subarray(0, xmlBeginning),
+              value.data.subarray(0, xmlBeginning - 2),
               leLen,
               newXml
             );
