@@ -36,9 +36,14 @@ import {
 import areArraysOfNumbersEqual from "../../utils/are_arrays_of_numbers_equal";
 import arrayFind from "../../utils/array_find";
 import arrayIncludes from "../../utils/array_includes";
+import {
+  concat,
+  itobe4,
+  itole2,
+} from "../../utils/byte_parsing";
 import EventEmitter from "../../utils/event_emitter";
 import isNullOrUndefined from "../../utils/is_null_or_undefined";
-import { bytesToHex } from "../../utils/string_parsing";
+import { bytesToHex, strToUtf16LE, utf16LEToStr } from "../../utils/string_parsing";
 import TaskCanceller from "../../utils/task_canceller";
 import attachMediaKeys from "./attach_media_keys";
 import createOrLoadSession from "./create_or_load_session";
@@ -333,6 +338,34 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
       }
       this._initDataQueue.push(initializationData);
       return;
+    }
+    for (const value of initializationData.values) {
+      if (value.systemId?.toLowerCase() === "9a04f07998404286ab92e65be0885f95") {
+        let xml = utf16LEToStr(value.data);
+        const xmlBeginning = xml.indexOf("<WRMHEADER");
+        if (xmlBeginning >= 0) {
+          xml = xml.replace(/version="[\d\.]+"/, "version=\"4.3.0.0\"");
+          const indexOf = xml.indexOf("</DATA>");
+          if (indexOf >= 0) {
+            console.warn("!!!!!!!! FOUND closing tag");
+            const insert = "<DECRYPTORSETUP>ONDEMAND</DECRYPTORSETUP>";
+            xml = xml.substring(0, indexOf) + insert + xml.substring(indexOf);
+            const len = (xml.length - xmlBeginning) * 2;
+            const leLen = itole2(len);
+            const newXml = strToUtf16LE(xml);
+            value.data = concat(
+              value.data.subarray(0, xmlBeginning),
+              leLen,
+              newXml
+            );
+            const newLen = itobe4(value.data.byteLength);
+            value.data[0] = newLen[0];
+            value.data[1] = newLen[1];
+            value.data[2] = newLen[2];
+            value.data[3] = newLen[3];
+          }
+        }
+      }
     }
 
     const { mediaKeysData } = this._stateData.data;
