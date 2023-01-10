@@ -40,6 +40,7 @@ import {
   concat,
   itobe4,
   itole2,
+  itole4,
 } from "../../utils/byte_parsing";
 import EventEmitter from "../../utils/event_emitter";
 import isNullOrUndefined from "../../utils/is_null_or_undefined";
@@ -345,25 +346,76 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
         const xmlBeginning = xml.indexOf("<WRMHEADER");
         if (xmlBeginning >= 0) {
           xml = xml.substring(xmlBeginning);
-          xml = xml.replace(/version="[\d\.]+"/, "version=\"4.3.0.0\"");
+
+          // Get and remove KID
+          const match = xml.match(/<KID>([A-z0-9=]+)<\/KID>/);
+          if (match === null) {
+            throw new Error("Malformed PR PSSH 1");
+          }
+          const endOfKid = xml.indexOf("</KID>");
+          const kid = match[1];
+          xml = xml.substring(0, match.index) + xml.substring(endOfKid + "</KID>".length);
+
+          // Get and remove ALGID
+          const match2 = xml.match(/<ALGID>([A-z0-9=]+)<\/ALGID>/);
+          if (match2 === null) {
+            throw new Error("Malformed PR PSSH 1");
+          }
+          const endOfAlgId = xml.indexOf("</ALGID>");
+          const algId = match2[1];
+          xml = xml.substring(0, match2.index) +
+          xml.substring(endOfAlgId + "</ALGID>".length);
+
+          // Remove KEYLEN
+          const klStart = xml.indexOf("<KEYLEN");
+          const klEnd = xml.indexOf("</KEYLEN>");
+          xml = xml.substring(0, klStart) + xml.substring(klEnd + "</KEYLEN>".length);
+
+          // Remove Checksum
+          const checkSumStart = xml.indexOf("<CHECKSUM");
+          const checksumEnd = xml.indexOf("</CHECKSUM>");
+          xml = xml.substring(0, checkSumStart) +
+            xml.substring(checksumEnd + "</CHECKSUM>".length);
+
+          // Construct KID
+          const newKID = `<KID ALGID="${algId}" VALUE="${kid}"></KID>`;
+          const indexOfProtectInfo = xml.indexOf("</PROTECTINFO>");
+          xml = xml.substring(0, indexOfProtectInfo) + newKID +
+            xml.substring(indexOfProtectInfo);
+
+          // Replace version
+          xml = xml.replace(/version="[\d\.]+"/, "version=\"4.1.0.0\"");
+
+          // Add DECRYPTORSETUP
           const indexOf = xml.indexOf("</DATA>");
           if (indexOf >= 0) {
-            console.warn("!!!!!!!! FOUND closing tag");
             const insert = "<DECRYPTORSETUP>ONDEMAND</DECRYPTORSETUP>";
             xml = xml.substring(0, indexOf) + insert + xml.substring(indexOf);
+            console.warn("!!!!!!!! NEW XML", xml);
             const len = xml.length * 2;
             const leLen = itole2(len);
             const newXml = strToUtf16LE(xml);
             value.data = concat(
-              value.data.subarray(0, xmlBeginning - 2),
+              value.data.subarray(0, xmlBeginning * 2 - 2),
               leLen,
               newXml
             );
             const newLen = itobe4(value.data.byteLength);
+            const newLongueur = value.data.byteLength - xmlBeginning * 2 + 10;
+            const le = itole4(newLongueur);
+            const be = itobe4(newLongueur);
             value.data[0] = newLen[0];
             value.data[1] = newLen[1];
             value.data[2] = newLen[2];
             value.data[3] = newLen[3];
+            value.data[xmlBeginning * 2 - 14] = be[0];
+            value.data[xmlBeginning * 2 - 13] = be[1];
+            value.data[xmlBeginning * 2 - 12] = be[2];
+            value.data[xmlBeginning * 2 - 11] = be[3];
+            value.data[xmlBeginning * 2 - 10] = le[0];
+            value.data[xmlBeginning * 2 - 9] = le[1];
+            value.data[xmlBeginning * 2 - 8] = le[2];
+            value.data[xmlBeginning * 2 - 7] = le[3];
           }
         }
       }
