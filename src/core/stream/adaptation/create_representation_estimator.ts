@@ -68,6 +68,10 @@ export default function getRepresentationEstimate(
   const { manifest, adaptation } = content;
   const representations = createSharedReference<Representation[]>([]);
   updateRepresentationsReference();
+  if (representations.getValue().length === 0) {
+    // The only way for representations to be empty here
+    return;
+  }
   manifest.addEventListener("decipherabilityUpdate", updateRepresentationsReference);
   const unregisterCleanUp = cancellationSignal.register(cleanUp);
   const { estimates: estimateRef,
