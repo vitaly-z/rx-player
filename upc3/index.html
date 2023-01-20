@@ -65,7 +65,7 @@
                 // /*
                 keySystems: [
                   {
-                    type: "com.microsoft.playready",
+                    type: "com.microsoft.playready.recommendation",
                     fallbackOn: { keyInternalError: true, keyOutputRestricted: true },
                     getLicense,
                   }
@@ -82,7 +82,7 @@
                 // /*
                 keySystems: [
                   {
-                    type: "com.microsoft.playready",
+                    type: "com.microsoft.playready.recommendation",
                     fallbackOn: { keyInternalError: true, keyOutputRestricted: true },
                     getLicense,
                   }
@@ -99,7 +99,7 @@
                 // /*
                 keySystems: [
                   {
-                    type: "com.microsoft.playready",
+                    type: "com.microsoft.playready.recommendation",
                     fallbackOn: { keyInternalError: true, keyOutputRestricted: true },
                     getLicense,
                   }
@@ -116,7 +116,7 @@
                 // /*
                 keySystems: [
                   {
-                    type: "com.microsoft.playready",
+                    type: "com.microsoft.playready.recommendation",
                     fallbackOn: { keyInternalError: true, keyOutputRestricted: true },
                     getLicense,
                   }
@@ -134,7 +134,7 @@
                 // /*
                 keySystems: [
                   {
-                    type: "com.microsoft.playready",
+                    type: "com.microsoft.playready.recommendation",
                     fallbackOn: { keyInternalError: true, keyOutputRestricted: true },
                     getLicense,
                   }
@@ -152,7 +152,7 @@
                 // /*
                 keySystems: [
                   {
-                    type: "com.microsoft.playready",
+                    type: "com.microsoft.playready.recommendation",
                     fallbackOn: { keyInternalError: true, keyOutputRestricted: true },
                     getLicense,
                   }
@@ -201,14 +201,6 @@
 
     }
     function onStateChange(state) {
-      // Work-around PlayReady SL2000 Issue
-      if (state === "LOADING" || state === "STOPPED") {
-        player.setMaxVideoBitrate(3000000);
-        player.setMaxAudioBitrate(0);
-      } else if (state === "LOADED") {
-        player.setMaxVideoBitrate(3000000);
-        player.setMaxAudioBitrate(Infinity);
-      }
       switch (state) {
         case "STOPPED":
         case "LOADING":
