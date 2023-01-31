@@ -28,12 +28,14 @@ describe("Features list - LOCAL_MANIFEST", () => {
 
   it("should add LOCAL_MANIFEST in the current features", () => {
     const feat = {};
-    jest.mock("../../../transports/local", () => ({ __esModule: true as const,
-                                                    default: feat }));
+    jest.mock("../../../transports/local", () => ({
+      __esModule: true as const,
+      default: feat,
+    }));
     const addDASHFeature = jest.requireActual("../local").default;
 
-    const featureObject : {
-      transports : { [featureName : string] : unknown };
+    const featureObject: {
+      transports: { [featureName: string]: unknown };
     } = { transports: {} };
 
     addDASHFeature(featureObject);

@@ -15,8 +15,7 @@
  */
 
 // examples: 00:00:40:07 (7 frames) or 00:00:40:07.1 (7 frames, 1 subframe)
-const REGXP_TIME_COLON_FRAMES =
-  /^(\d{2,}):(\d{2}):(\d{2}):(\d{2})\.?(\d+)?$/;
+const REGXP_TIME_COLON_FRAMES = /^(\d{2,}):(\d{2}):(\d{2}):(\d{2})\.?(\d+)?$/;
 
 // examples: 00:00:40:07 (7 frames) or 00:00:40:07.1 (7 frames, 1 subframe)
 const REGXP_TIME_COLON = /^(?:(\d{2,}):)?(\d{2}):(\d{2})$/;
@@ -43,11 +42,9 @@ const REGXP_8_HEX_COLOR =
   /^#([0-9A-f]{2})([0-9A-f]{2})([0-9A-f]{2})([0-9A-f]{2})$/;
 const REGXP_4_HEX_COLOR = /^#([0-9A-f])([0-9A-f])([0-9A-f])([0-9A-f])$/;
 
-const REGXP_RGB_COLOR =
-  /^rgb\( *(\d+) *, *(\d+) *, *(\d+) *\)/;
+const REGXP_RGB_COLOR = /^rgb\( *(\d+) *, *(\d+) *, *(\d+) *\)/;
 
-const REGXP_RGBA_COLOR =
-  /^rgba\( *(\d+) *, *(\d+) *, *(\d+) *, *(\d+) *\)/;
+const REGXP_RGBA_COLOR = /^rgba\( *(\d+) *, *(\d+) *, *(\d+) *, *(\d+) *\)/;
 
 export {
   REGXP_4_HEX_COLOR,

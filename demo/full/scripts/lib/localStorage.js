@@ -3,8 +3,10 @@ export const hasLocalStorage = !!localStorage;
 
 if (!hasLocalStorage) {
   /* eslint-disable-next-line no-console */
-  console.warn("`localStorage` is not available." +
-               " You will not be able to store content information.");
+  console.warn(
+    "`localStorage` is not available." +
+      " You will not be able to store content information."
+  );
 }
 
 /**
@@ -27,7 +29,7 @@ export function getLocalStorageContents() {
   if (localContentItems) {
     try {
       localStorageContents.push(...JSON.parse(localContentItems));
-    } catch(err) {
+    } catch (err) {
       /* eslint-disable-next-line */
       console.warn("Demo: Can't parse local storage content.");
     }
@@ -44,8 +46,10 @@ export function saveLocalStorageContents(localStorageContents) {
     JS_LOCAL_STORAGE = localStorageContents;
     return;
   }
-  localStorage.setItem("rxPlayerLocalContents",
-                       JSON.stringify(localStorageContents));
+  localStorage.setItem(
+    "rxPlayerLocalContents",
+    JSON.stringify(localStorageContents)
+  );
 }
 
 /**
@@ -59,7 +63,7 @@ export function storeContent(content) {
   let id = content.id;
   let index;
   if (content.id != null) {
-    index = localStorageContents.findIndex(e => e.id === id);
+    index = localStorageContents.findIndex((e) => e.id === id);
   } else {
     const lastContentID = localStorageContents.reduce((acc, val) => {
       const contentId = val.id || 0;
@@ -69,16 +73,17 @@ export function storeContent(content) {
     index = -1;
   }
 
-  const localContent = { drmInfos: content.drmInfos,
-                         fallbackKeyError: content.fallbackKeyError,
-                         fallbackLicenseRequest: content.fallbackLicenseRequest,
-                         id,
-                         localContent: true,
-                         lowLatency: content.lowLatency,
-                         name: content.name,
-                         transport: content.transport,
-                         url: content.url };
-
+  const localContent = {
+    drmInfos: content.drmInfos,
+    fallbackKeyError: content.fallbackKeyError,
+    fallbackLicenseRequest: content.fallbackLicenseRequest,
+    id,
+    localContent: true,
+    lowLatency: content.lowLatency,
+    name: content.name,
+    transport: content.transport,
+    url: content.url,
+  };
 
   if (index > -1) {
     localStorageContents.splice(index, 1, localContent);
@@ -96,7 +101,7 @@ export function storeContent(content) {
  */
 export function removeStoredContent(id) {
   const localStorageContents = getLocalStorageContents();
-  const idx = localStorageContents.findIndex(e => e.id === id);
+  const idx = localStorageContents.findIndex((e) => e.id === id);
 
   if (idx < 0) {
     return false;

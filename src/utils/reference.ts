@@ -57,13 +57,13 @@ export interface ISharedReference<T> {
    * Get the last set value for this shared reference.
    * @returns {*}
    */
-  getValue() : T;
+  getValue(): T;
 
   /**
    * Update the value of this shared reference.
    * @param {*} newVal
    */
-  setValue(newVal : T) : void;
+  setValue(newVal: T): void;
 
   /**
    * Update the value of this shared reference only if the value changed.
@@ -73,7 +73,7 @@ export interface ISharedReference<T> {
    * thus be considered different.
    * @param {*} newVal
    */
-  setValueIfChanged(newVal : T) : void;
+  setValueIfChanged(newVal: T): void;
 
   /**
    * Allows to register a callback to be called each time the value inside the
@@ -88,12 +88,14 @@ export interface ISharedReference<T> {
    * also be immediately (synchronously) called with the current value.
    */
   onUpdate(
-    cb : (val : T, stopListening : () => void) => void,
-    options? : {
-      clearSignal?: CancellationSignal | undefined;
-      emitCurrentValue?: boolean | undefined;
-    } | undefined,
-  ) : void;
+    cb: (val: T, stopListening: () => void) => void,
+    options?:
+      | {
+          clearSignal?: CancellationSignal | undefined;
+          emitCurrentValue?: boolean | undefined;
+        }
+      | undefined
+  ): void;
 
   /**
    * Variant of `onUpdate` which will only call the callback once, once the
@@ -120,17 +122,16 @@ export interface ISharedReference<T> {
    * CancellationSignal which will unregister the callback when it emits.
    */
   waitUntilDefined(
-    cb : (val : Exclude<T, undefined>) => void,
-    options? : { clearSignal?: CancellationSignal | undefined } |
-               undefined,
-  ) : void;
+    cb: (val: Exclude<T, undefined>) => void,
+    options?: { clearSignal?: CancellationSignal | undefined } | undefined
+  ): void;
 
   /**
    * Indicate that no new values will be emitted.
    * Allows to automatically close all listeners listening to this
    * `ISharedReference`.
    */
-  finish() : void;
+  finish(): void;
 }
 
 /**
@@ -155,11 +156,10 @@ export interface ISharedReference<T> {
  * shouldOnlyReadIt(myReference); // output: "current value: 12"
  * ```
  */
-export type IReadOnlySharedReference<T> =
-  Pick<ISharedReference<T>,
-       "getValue" |
-       "onUpdate" |
-       "waitUntilDefined">;
+export type IReadOnlySharedReference<T> = Pick<
+  ISharedReference<T>,
+  "getValue" | "onUpdate" | "waitUntilDefined"
+>;
 
 /**
  * Create an `ISharedReference` object encapsulating the mutable `initialValue`
@@ -176,9 +176,9 @@ export type IReadOnlySharedReference<T> =
  * @returns {Object}
  */
 export default function createSharedReference<T>(
-  initialValue : T,
-  cancelSignal? : CancellationSignal
-) : ISharedReference<T> {
+  initialValue: T,
+  cancelSignal?: CancellationSignal
+): ISharedReference<T> {
   /** Current value referenced by this `ISharedReference`. */
   let value = initialValue;
 
@@ -198,9 +198,11 @@ export default function createSharedReference<T>(
    *     function call.
    *   - `complete`: Callback to call when the current Reference is "finished".
    */
-  const cbs : Array<{ trigger : (a: T, stopListening: () => void) => void;
-                      complete : () => void;
-                      hasBeenCleared : boolean; }> = [];
+  const cbs: Array<{
+    trigger: (a: T, stopListening: () => void) => void;
+    complete: () => void;
+    hasBeenCleared: boolean;
+  }> = [];
 
   let isFinished = false;
 
@@ -213,7 +215,7 @@ export default function createSharedReference<T>(
      * Returns the current value of this shared reference.
      * @returns {*}
      */
-    getValue() : T {
+    getValue(): T {
       return value;
     },
 
@@ -221,9 +223,9 @@ export default function createSharedReference<T>(
      * Update the value of this shared reference.
      * @param {*} newVal
      */
-    setValue(newVal : T) : void {
+    setValue(newVal: T): void {
       if (isFinished) {
-        if (__ENVIRONMENT__.CURRENT_ENV === __ENVIRONMENT__.DEV as number) {
+        if (__ENVIRONMENT__.CURRENT_ENV === (__ENVIRONMENT__.DEV as number)) {
           /* eslint-disable-next-line no-console */
           console.error("Finished shared references cannot be updated");
         }
@@ -250,7 +252,7 @@ export default function createSharedReference<T>(
      * Update the value of this shared reference only if it changed.
      * @param {*} newVal
      */
-    setValueIfChanged(newVal : T) : void {
+    setValueIfChanged(newVal: T): void {
       if (newVal !== value) {
         this.setValue(newVal);
       }
@@ -269,15 +271,15 @@ export default function createSharedReference<T>(
      * callback will also be immediately called with the current value.
      */
     onUpdate(
-      cb : (val : T, stopListening : () => void) => void,
-      options? : {
-        clearSignal?: CancellationSignal | undefined;
-        emitCurrentValue?: boolean | undefined;
-      } | undefined
-    ) : void {
-      const cbObj = { trigger: cb,
-                      complete: unlisten,
-                      hasBeenCleared: false };
+      cb: (val: T, stopListening: () => void) => void,
+      options?:
+        | {
+            clearSignal?: CancellationSignal | undefined;
+            emitCurrentValue?: boolean | undefined;
+          }
+        | undefined
+    ): void {
+      const cbObj = { trigger: cb, complete: unlisten, hasBeenCleared: false };
       cbs.push(cbObj);
 
       if (options?.emitCurrentValue === true) {
@@ -286,14 +288,14 @@ export default function createSharedReference<T>(
 
       if (isFinished || cbObj.hasBeenCleared) {
         unlisten();
-        return ;
+        return;
       }
       if (options?.clearSignal === undefined) {
         return;
       }
       options.clearSignal.register(unlisten);
 
-      function unlisten() : void {
+      function unlisten(): void {
         if (cbObj.hasBeenCleared) {
           return;
         }
@@ -320,16 +322,18 @@ export default function createSharedReference<T>(
      * CancellationSignal which will unregister the callback when it emits.
      */
     waitUntilDefined(
-      cb : (val : Exclude<T, undefined>) => void,
-      options? : { clearSignal?: CancellationSignal | undefined } |
-                 undefined
-    ) : void {
-      this.onUpdate((val : T, stopListening) => {
-        if (val !== undefined) {
-          stopListening();
-          cb(value as Exclude<T, undefined>);
-        }
-      }, { clearSignal: options?.clearSignal, emitCurrentValue: true });
+      cb: (val: Exclude<T, undefined>) => void,
+      options?: { clearSignal?: CancellationSignal | undefined } | undefined
+    ): void {
+      this.onUpdate(
+        (val: T, stopListening) => {
+          if (val !== undefined) {
+            stopListening();
+            cb(value as Exclude<T, undefined>);
+          }
+        },
+        { clearSignal: options?.clearSignal, emitCurrentValue: true }
+      );
     },
 
     /**
@@ -367,15 +371,20 @@ export default function createSharedReference<T>(
  * @returns {Object} - The new, mapped, reference.
  */
 export function createMappedReference<T, U>(
-  originalRef : IReadOnlySharedReference<T>,
-  mappingFn : (x : T) => U,
-  cancellationSignal : CancellationSignal
-) : IReadOnlySharedReference<U> {
-  const newRef = createSharedReference(mappingFn(originalRef.getValue()),
-                                       cancellationSignal);
-  originalRef.onUpdate(function mapOriginalReference(x) {
-    newRef.setValue(mappingFn(x));
-  }, { clearSignal: cancellationSignal });
+  originalRef: IReadOnlySharedReference<T>,
+  mappingFn: (x: T) => U,
+  cancellationSignal: CancellationSignal
+): IReadOnlySharedReference<U> {
+  const newRef = createSharedReference(
+    mappingFn(originalRef.getValue()),
+    cancellationSignal
+  );
+  originalRef.onUpdate(
+    function mapOriginalReference(x) {
+      newRef.setValue(mappingFn(x));
+    },
+    { clearSignal: cancellationSignal }
+  );
 
   // TODO nothing is done if `originalRef` is finished, though the returned
   // reference could also be finished in that case. To do?

@@ -27,7 +27,7 @@ describe("parsers - webvtt - convertPayloadToHTML", () => {
   });
 
   const win = window as {
-    DOMParser : unknown;
+    DOMParser: unknown;
   };
   it("should return empty payload when input text is empty", () => {
     const spyParseFromString = jest.fn(() => {
@@ -54,7 +54,9 @@ describe("parsers - webvtt - convertPayloadToHTML", () => {
       default: spy,
     }));
 
-    const convertPayloadToHTML = jest.requireActual("../convert_payload_to_html").default;
+    const convertPayloadToHTML = jest.requireActual(
+      "../convert_payload_to_html"
+    ).default;
     expect(convertPayloadToHTML("", {})).toEqual([]);
     expect(spyParseFromString).toHaveBeenCalledTimes(1);
     expect(spy).not.toHaveBeenCalled();
@@ -97,7 +99,9 @@ describe("parsers - webvtt - convertPayloadToHTML", () => {
       }
     };
 
-    const convertPayloadToHTML = jest.requireActual("../convert_payload_to_html").default;
+    const convertPayloadToHTML = jest.requireActual(
+      "../convert_payload_to_html"
+    ).default;
     expect(convertPayloadToHTML(innerText, {})).toEqual([bNode, span]);
     expect(spyParseFromString).toHaveBeenCalledTimes(1);
     expect(spyCreateStyledElement).toHaveBeenCalledTimes(2);

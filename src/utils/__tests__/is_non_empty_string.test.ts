@@ -33,9 +33,13 @@ describe("utils - isNonEmptyString", () => {
     expect(isNonEmptyString("\n")).toBe(true);
     expect(isNonEmptyString("a")).toBe(true);
     expect(isNonEmptyString("I Am Damo Suzuki")).toBe(true);
-    expect(isNonEmptyString("My new house\nYou should see my house")).toBe(true);
-    expect(isNonEmptyString(`Became a recluse
+    expect(isNonEmptyString("My new house\nYou should see my house")).toBe(
+      true
+    );
+    expect(
+      isNonEmptyString(`Became a recluse
                              And bought a computer
-                             Set it up in the home`)).toBe(true);
+                             Set it up in the home`)
+    ).toBe(true);
   });
 });

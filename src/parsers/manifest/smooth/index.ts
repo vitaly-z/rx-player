@@ -20,7 +20,4 @@ import createSmoothStreamingParser, {
 import SmoothRepresentationIndex from "./representation_index";
 
 export default createSmoothStreamingParser;
-export {
-  IHSSParserConfiguration,
-  SmoothRepresentationIndex,
-};
+export { IHSSParserConfiguration, SmoothRepresentationIndex };

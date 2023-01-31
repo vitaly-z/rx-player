@@ -25,9 +25,7 @@ import {
   setMediaKeys,
 } from "./custom_media_keys";
 import generateKeyRequest from "./generate_key_request";
-import getInitData, {
-  IEncryptedEventData,
-} from "./get_init_data";
+import getInitData, { IEncryptedEventData } from "./get_init_data";
 import loadSession from "./load_session";
 
 export {

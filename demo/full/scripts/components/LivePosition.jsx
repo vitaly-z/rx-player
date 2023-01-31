@@ -5,14 +5,8 @@ import React from "react";
  * @param {Object} props
  * @returns {Object}
  */
-function LivePosition({
-  className = "",
-}) {
-  return (
-    <div className={"position-infos live " + className}>
-      Live
-    </div>
-  );
+function LivePosition({ className = "" }) {
+  return <div className={"position-infos live " + className}>Live</div>;
 }
 
 export default React.memo(LivePosition);

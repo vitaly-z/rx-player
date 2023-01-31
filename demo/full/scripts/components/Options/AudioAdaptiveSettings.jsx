@@ -28,8 +28,7 @@ function AudioAdaptiveSettings({
         "Smooth transition when audio Representations are manually changed";
       break;
     default:
-      defaultAudioRepresentationsSwitchingModeDescMsg =
-        "Unknown value";
+      defaultAudioRepresentationsSwitchingModeDescMsg = "Unknown value";
       break;
   }
 
@@ -40,11 +39,12 @@ function AudioAdaptiveSettings({
           className="playerOptionInput"
           name="defaultAudioRepresentationsSwitchingMode"
           onChange={({ value }) =>
-            onDefaultAudioRepresentationsSwitchingModeChange(value)}
+            onDefaultAudioRepresentationsSwitchingModeChange(value)
+          }
           selected={{ value: defaultAudioRepresentationsSwitchingMode }}
           options={["seamless", "lazy", "direct", "reload"]}
         >
-            Default Audio Representations switching mode
+          Default Audio Representations switching mode
         </Select>
         <span className="option-desc">
           {defaultAudioRepresentationsSwitchingModeDescMsg}

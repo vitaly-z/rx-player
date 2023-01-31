@@ -15,19 +15,16 @@
  */
 
 import { requestMediaKeySystemAccess } from "../../../../compat";
-import {
-  IMediaConfiguration,
-  ProberStatus,
-} from "../types";
+import { IMediaConfiguration, ProberStatus } from "../types";
 
 export type IMediaKeyStatus =
-  "usable" |
-  "expired" |
-  "released" |
-  "output-restricted" |
-  "output-downscaled" |
-  "status-pending" |
-  "internal-error";
+  | "usable"
+  | "expired"
+  | "released"
+  | "output-restricted"
+  | "output-downscaled"
+  | "status-pending"
+  | "internal-error";
 
 /**
  * @param {Object} config
@@ -37,12 +34,15 @@ export default function probeHDCPPolicy(
   config: IMediaConfiguration
 ): Promise<[ProberStatus]> {
   if (requestMediaKeySystemAccess == null) {
-    return Promise.reject("MediaCapabilitiesProber >>> API_CALL: " +
-      "API not available");
+    return Promise.reject(
+      "MediaCapabilitiesProber >>> API_CALL: " + "API not available"
+    );
   }
   if (config.hdcp == null) {
-    return Promise.reject("MediaCapabilitiesProber >>> API_CALL: " +
-      "Missing policy argument for calling getStatusForPolicy.");
+    return Promise.reject(
+      "MediaCapabilitiesProber >>> API_CALL: " +
+        "Missing policy argument for calling getStatusForPolicy."
+    );
   }
 
   const hdcp = "hdcp-" + config.hdcp;
@@ -51,38 +51,53 @@ export default function probeHDCPPolicy(
   const keySystem = "org.w3.clearkey";
   const drmConfig = {
     initDataTypes: ["cenc"],
-    audioCapabilities: [{
-      contentType: "audio/mp4;codecs=\"mp4a.40.2\"",
-    }],
-    videoCapabilities: [{
-      contentType: "video/mp4;codecs=\"avc1.42E01E\"",
-    }],
+    audioCapabilities: [
+      {
+        contentType: 'audio/mp4;codecs="mp4a.40.2"',
+      },
+    ],
+    videoCapabilities: [
+      {
+        contentType: 'video/mp4;codecs="avc1.42E01E"',
+      },
+    ],
   };
 
-  return requestMediaKeySystemAccess(keySystem, [drmConfig])
-    .then((mediaKeysSystemAccess) => {
-      return mediaKeysSystemAccess.createMediaKeys().then((mediaKeys) => {
-        if (!("getStatusForPolicy" in mediaKeys)) {
-          // do the check here, as mediaKeys can be either be native MediaKeys or
-          // custom MediaKeys from compat.
-          throw new Error("MediaCapabilitiesProber >>> API_CALL: " +
-            "getStatusForPolicy API not available");
-        }
-        return (mediaKeys as { getStatusForPolicy: (policy: {
-          minHdcpVersion: string;
-        }) => Promise<IMediaKeyStatus>; }).getStatusForPolicy(policy)
-          .then((result: IMediaKeyStatus) => {
-            let status: [ProberStatus];
-            if (result === "usable") {
-              status = [ProberStatus.Supported];
-            } else {
-              status = [ProberStatus.NotSupported];
+  return requestMediaKeySystemAccess(keySystem, [drmConfig]).then(
+    (mediaKeysSystemAccess) => {
+      return mediaKeysSystemAccess
+        .createMediaKeys()
+        .then((mediaKeys) => {
+          if (!("getStatusForPolicy" in mediaKeys)) {
+            // do the check here, as mediaKeys can be either be native MediaKeys or
+            // custom MediaKeys from compat.
+            throw new Error(
+              "MediaCapabilitiesProber >>> API_CALL: " +
+                "getStatusForPolicy API not available"
+            );
+          }
+          return (
+            mediaKeys as {
+              getStatusForPolicy: (policy: {
+                minHdcpVersion: string;
+              }) => Promise<IMediaKeyStatus>;
             }
-            return status;
-          });
-      }).catch(() => {
-        const status: [ProberStatus] = [ProberStatus.Unknown];
-        return status;
-      });
-    });
+          )
+            .getStatusForPolicy(policy)
+            .then((result: IMediaKeyStatus) => {
+              let status: [ProberStatus];
+              if (result === "usable") {
+                status = [ProberStatus.Supported];
+              } else {
+                status = [ProberStatus.NotSupported];
+              }
+              return status;
+            });
+        })
+        .catch(() => {
+          const status: [ProberStatus] = [ProberStatus.Unknown];
+          return status;
+        });
+    }
+  );
 }

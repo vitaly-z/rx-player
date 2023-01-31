@@ -12,11 +12,15 @@ test();
 async function test() {
   await sleep(200);
   const timeBeforeLoad = performance.now();
-  player = new RxPlayer({ initialVideoBitrate: Infinity,
-                          initialAudioBitrate: Infinity,
-                          videoElement: document.getElementsByTagName("video")[0] });
-  player.loadVideo({ url: manifestInfos.url,
-                     transport: manifestInfos.transport });
+  player = new RxPlayer({
+    initialVideoBitrate: Infinity,
+    initialAudioBitrate: Infinity,
+    videoElement: document.getElementsByTagName("video")[0],
+  });
+  player.loadVideo({
+    url: manifestInfos.url,
+    transport: manifestInfos.transport,
+  });
   await waitForLoadedStateAfterLoadVideo(player);
   const timeToLoad = performance.now() - timeBeforeLoad;
   sendTestResult("loading", timeToLoad);
@@ -33,8 +37,10 @@ function sendTestResult(testName, testResult) {
   fetch("http://127.0.0.1:6789", {
     headers: { "Content-Type": "application/json" },
     method: "POST",
-    body: JSON.stringify({ type: "value",
-                           data: { name: testName, value: testResult } }),
+    body: JSON.stringify({
+      type: "value",
+      data: { name: testName, value: testResult },
+    }),
   });
 }
 
@@ -54,7 +60,6 @@ function reloadIfNeeded() {
   } else {
     sendDone();
   }
-
 }
 
 function sendDone() {

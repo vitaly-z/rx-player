@@ -28,11 +28,11 @@ import log from "../../../../../log";
  * @throws Error - Throw if no parser is found for the given type
  */
 export default function parseTextTrackToCues(
-  type : string,
-  data : string,
-  timestampOffset : number,
-  language? : string
-) : Array<ICompatVTTCue|TextTrackCue> {
+  type: string,
+  data: string,
+  timestampOffset: number,
+  language?: string
+): Array<ICompatVTTCue | TextTrackCue> {
   log.debug("NTSB: Finding parser for native text tracks:", type);
   const parser = features.nativeTextTracksParsers[type];
 

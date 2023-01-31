@@ -15,10 +15,7 @@
  */
 
 import assert from "../../../../../utils/assert";
-import {
-  ICuesGroup,
-  IHTMLCue,
-} from "./types";
+import { ICuesGroup, IHTMLCue } from "./types";
 import {
   areNearlyEqual,
   getCuesAfter,
@@ -32,7 +29,7 @@ import {
  * @class TextTrackCuesStore
  */
 export default class TextTrackCuesStore {
-  private _cuesBuffer : ICuesGroup[];
+  private _cuesBuffer: ICuesGroup[];
 
   constructor() {
     this._cuesBuffer = [];
@@ -57,7 +54,7 @@ export default class TextTrackCuesStore {
    * @returns {Array.<HTMLElement>} - The cues that need to be displayed at that
    * time.
    */
-  get(time : number) : HTMLElement[] {
+  get(time: number): HTMLElement[] {
     const cuesBuffer = this._cuesBuffer;
     const ret = [];
 
@@ -83,8 +80,8 @@ export default class TextTrackCuesStore {
    * @param {Number} from
    * @param {Number} to
    */
-  remove(from : number, _to : number) : void {
-    if (__ENVIRONMENT__.CURRENT_ENV === __ENVIRONMENT__.DEV as number) {
+  remove(from: number, _to: number): void {
+    if (__ENVIRONMENT__.CURRENT_ENV === (__ENVIRONMENT__.DEV as number)) {
       assert(from >= 0);
       assert(_to >= 0);
       assert(_to > from);
@@ -108,10 +105,11 @@ export default class TextTrackCuesStore {
             startCuesInfos.start = to;
           } else {
             // from -> to is in the middle part of startCuesInfos
-            const [ cuesInfos1,
-                    cuesInfos2 ] = removeCuesInfosBetween(startCuesInfos,
-                                                          from,
-                                                          to);
+            const [cuesInfos1, cuesInfos2] = removeCuesInfosBetween(
+              startCuesInfos,
+              from,
+              to
+            );
             this._cuesBuffer[cueIdx] = cuesInfos1;
             cuesBuffer.splice(cueIdx + 1, 0, cuesInfos2);
           }
@@ -160,7 +158,7 @@ export default class TextTrackCuesStore {
    * If those requirements are not met, we could delete some cues when adding
    * a CuesGroup before/after. Find a solution.
    */
-  insert(cues : IHTMLCue[], start : number, end : number) : void {
+  insert(cues: IHTMLCue[], start: number, end: number): void {
     const cuesBuffer = this._cuesBuffer;
     const cuesInfosToInsert = { start, end, cues };
 
@@ -172,11 +170,13 @@ export default class TextTrackCuesStore {
      * accordingly.
      * @param {number} indexOfNextCue
      */
-    function onIndexOfNextCueFound(indexOfNextCue : number) : void {
+    function onIndexOfNextCueFound(indexOfNextCue: number): void {
       const nextCue = cuesBuffer[indexOfNextCue];
-      if (nextCue === undefined || // no cue
-          areNearlyEqual(cuesInfosToInsert.end, nextCue.end)) // samey end
-      {
+      if (
+        nextCue === undefined || // no cue
+        areNearlyEqual(cuesInfosToInsert.end, nextCue.end)
+      ) {
+        // samey end
         //   ours:            |AAAAA|
         //   the current one: |BBBBB|
         //   Result:          |AAAAA|
@@ -309,8 +309,11 @@ export default class TextTrackCuesStore {
           //   ours:              |AAAAAA|
           //   the current one: |BBBBBBBBBBB|
           //   Result:          |BBAAAAAABBB|
-          const [ cuesInfos1,
-                  cuesInfos2 ] = removeCuesInfosBetween(cuesInfos, start, end);
+          const [cuesInfos1, cuesInfos2] = removeCuesInfosBetween(
+            cuesInfos,
+            start,
+            end
+          );
           this._cuesBuffer[cueIdx] = cuesInfos1;
           cuesBuffer.splice(cueIdx + 1, 0, cuesInfosToInsert);
           cuesBuffer.splice(cueIdx + 2, 0, cuesInfos2);

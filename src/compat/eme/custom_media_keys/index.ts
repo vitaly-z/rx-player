@@ -30,19 +30,18 @@ import getMozMediaKeysCallbacks, {
 import getOldKitWebKitMediaKeyCallbacks, {
   isOldWebkitMediaElement,
 } from "./old_webkit_media_keys";
-import {
-  ICustomMediaKeys,
-  ICustomMediaKeySession,
-} from "./types";
+import { ICustomMediaKeys, ICustomMediaKeySession } from "./types";
 import getWebKitMediaKeysCallbacks from "./webkit_media_keys";
 import { WebKitMediaKeysConstructor } from "./webkit_media_keys_constructor";
 
 /** Generic implementation of the navigator.requestMediaKeySystemAccess API. */
-type ICompatRequestMediaKeySystemAccessFn =
-  (keyType : string, config : MediaKeySystemConfiguration[]) =>
-    Promise<MediaKeySystemAccess | CustomMediaKeySystemAccess>;
+type ICompatRequestMediaKeySystemAccessFn = (
+  keyType: string,
+  config: MediaKeySystemConfiguration[]
+) => Promise<MediaKeySystemAccess | CustomMediaKeySystemAccess>;
 
-let requestMediaKeySystemAccess : ICompatRequestMediaKeySystemAccessFn | null = null;
+let requestMediaKeySystemAccess: ICompatRequestMediaKeySystemAccessFn | null =
+  null;
 
 /**
  * Set the given MediaKeys on the given HTMLMediaElement.
@@ -50,34 +49,35 @@ let requestMediaKeySystemAccess : ICompatRequestMediaKeySystemAccessFn | null = 
  * @param {HTMLMediaElement} elt
  * @param {Object} mediaKeys
  */
-let setMediaKeys :
-((elt: HTMLMediaElement, mediaKeys: MediaKeys | ICustomMediaKeys | null) => unknown) =
-  function defaultSetMediaKeys(
-    mediaElement: HTMLMediaElement,
-    mediaKeys: MediaKeys | ICustomMediaKeys | null
-  ) {
-    const elt : ICompatHTMLMediaElement = mediaElement;
-    /* eslint-disable @typescript-eslint/unbound-method */
-    if (typeof elt.setMediaKeys === "function") {
-      return elt.setMediaKeys(mediaKeys as MediaKeys);
-    }
-    /* eslint-enable @typescript-eslint/unbound-method */
+let setMediaKeys: (
+  elt: HTMLMediaElement,
+  mediaKeys: MediaKeys | ICustomMediaKeys | null
+) => unknown = function defaultSetMediaKeys(
+  mediaElement: HTMLMediaElement,
+  mediaKeys: MediaKeys | ICustomMediaKeys | null
+) {
+  const elt: ICompatHTMLMediaElement = mediaElement;
+  /* eslint-disable @typescript-eslint/unbound-method */
+  if (typeof elt.setMediaKeys === "function") {
+    return elt.setMediaKeys(mediaKeys as MediaKeys);
+  }
+  /* eslint-enable @typescript-eslint/unbound-method */
 
-    // If we get in the following code, it means that no compat case has been
-    // found and no standard setMediaKeys API exists. This case is particulary
-    // rare. We will try to call each API with native media keys.
-    if (typeof elt.webkitSetMediaKeys === "function") {
-      return elt.webkitSetMediaKeys(mediaKeys);
-    }
+  // If we get in the following code, it means that no compat case has been
+  // found and no standard setMediaKeys API exists. This case is particulary
+  // rare. We will try to call each API with native media keys.
+  if (typeof elt.webkitSetMediaKeys === "function") {
+    return elt.webkitSetMediaKeys(mediaKeys);
+  }
 
-    if (typeof elt.mozSetMediaKeys === "function") {
-      return elt.mozSetMediaKeys(mediaKeys);
-    }
+  if (typeof elt.mozSetMediaKeys === "function") {
+    return elt.mozSetMediaKeys(mediaKeys);
+  }
 
-    if (typeof elt.msSetMediaKeys === "function" && mediaKeys !== null) {
-      return elt.msSetMediaKeys(mediaKeys);
-    }
-  };
+  if (typeof elt.msSetMediaKeys === "function" && mediaKeys !== null) {
+    return elt.msSetMediaKeys(mediaKeys);
+  }
+};
 
 /**
  * Since Safari 12.1, EME APIs are available without webkit prefix.
@@ -88,8 +88,10 @@ let setMediaKeys :
  * Therefore, we prefer not to use requestMediaKeySystemAccess on Safari when webkit API
  * is available.
  */
-if (isNode ||
-    (navigator.requestMediaKeySystemAccess != null && !shouldFavourCustomSafariEME())
+if (
+  isNode ||
+  (navigator.requestMediaKeySystemAccess != null &&
+    !shouldFavourCustomSafariEME())
 ) {
   requestMediaKeySystemAccess = (...args) =>
     navigator.requestMediaKeySystemAccess(...args);
@@ -103,7 +105,7 @@ if (isNode ||
     isTypeSupported = callbacks.isTypeSupported;
     createCustomMediaKeys = callbacks.createCustomMediaKeys;
     setMediaKeys = callbacks.setMediaKeys;
-  // This is for WebKit with prefixed EME api
+    // This is for WebKit with prefixed EME api
   } else if (WebKitMediaKeysConstructor !== undefined) {
     const callbacks = getWebKitMediaKeysCallbacks();
     isTypeSupported = callbacks.isTypeSupported;
@@ -121,19 +123,21 @@ if (isNode ||
     setMediaKeys = callbacks.setMediaKeys;
   } else {
     const MK = window.MediaKeys as unknown as typeof MediaKeys & {
-      isTypeSupported? : (keyType : string) => boolean;
-      new(keyType? : string) : ICustomMediaKeys;
+      isTypeSupported?: (keyType: string) => boolean;
+      new (keyType?: string): ICustomMediaKeys;
     };
     const checkForStandardMediaKeys = () => {
       if (MK === undefined) {
-        throw new MediaError("MEDIA_KEYS_NOT_SUPPORTED",
-                             "No `MediaKeys` implementation found " +
-                             "in the current browser.");
+        throw new MediaError(
+          "MEDIA_KEYS_NOT_SUPPORTED",
+          "No `MediaKeys` implementation found " + "in the current browser."
+        );
       }
       if (typeof MK.isTypeSupported === "undefined") {
-        const message = "This browser seems to be unable to play encrypted contents " +
-                        "currently. Note: Some browsers do not allow decryption " +
-                        "in some situations, like when not using HTTPS.";
+        const message =
+          "This browser seems to be unable to play encrypted contents " +
+          "currently. Note: Some browsers do not allow decryption " +
+          "in some situations, like when not using HTTPS.";
         throw new Error(message);
       }
     };
@@ -148,28 +152,30 @@ if (isNode ||
     };
   }
 
-  requestMediaKeySystemAccess = function(
-    keyType : string,
-    keySystemConfigurations : MediaKeySystemConfiguration[]
-  ) : Promise<MediaKeySystemAccess|CustomMediaKeySystemAccess> {
+  requestMediaKeySystemAccess = function (
+    keyType: string,
+    keySystemConfigurations: MediaKeySystemConfiguration[]
+  ): Promise<MediaKeySystemAccess | CustomMediaKeySystemAccess> {
     if (!isTypeSupported(keyType)) {
       return Promise.reject(new Error("Unsupported key type"));
     }
 
     for (let i = 0; i < keySystemConfigurations.length; i++) {
       const keySystemConfiguration = keySystemConfigurations[i];
-      const { videoCapabilities,
-              audioCapabilities,
-              initDataTypes,
-              distinctiveIdentifier } = keySystemConfiguration;
+      const {
+        videoCapabilities,
+        audioCapabilities,
+        initDataTypes,
+        distinctiveIdentifier,
+      } = keySystemConfiguration;
       let supported = true;
-      supported = supported &&
-                  (initDataTypes == null ||
-                   initDataTypes.some((idt) => idt === "cenc"));
-      supported = supported && (distinctiveIdentifier !== "required");
+      supported =
+        supported &&
+        (initDataTypes == null || initDataTypes.some((idt) => idt === "cenc"));
+      supported = supported && distinctiveIdentifier !== "required";
 
       if (supported) {
-        const keySystemConfigurationResponse : MediaKeySystemConfiguration = {
+        const keySystemConfigurationResponse: MediaKeySystemConfiguration = {
           initDataTypes: ["cenc"],
           distinctiveIdentifier: "not-allowed" as const,
           persistentState: "required" as const,
@@ -185,9 +191,11 @@ if (isNode ||
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const customMediaKeys = createCustomMediaKeys(keyType);
         return Promise.resolve(
-          new CustomMediaKeySystemAccess(keyType,
-                                         customMediaKeys,
-                                         keySystemConfigurationResponse)
+          new CustomMediaKeySystemAccess(
+            keyType,
+            customMediaKeys,
+            keySystemConfigurationResponse
+          )
         );
       }
     }

@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  addTextTrack,
-  ICompatTextTrack,
-} from "../../../../../compat";
+import { addTextTrack, ICompatTextTrack } from "../../../../../compat";
 import removeCue from "../../../../../compat/remove_cue";
 import log from "../../../../../log";
 import { ITextTrackSegmentData } from "../../../../../transports";
@@ -36,18 +33,18 @@ import parseTextTrackToCues from "./parsers";
  * @class NativeTextSegmentBuffer
  */
 export default class NativeTextSegmentBuffer extends SegmentBuffer {
-  public readonly bufferType : "text";
+  public readonly bufferType: "text";
 
-  private readonly _videoElement : HTMLMediaElement;
-  private readonly _track : ICompatTextTrack;
-  private readonly _trackElement : HTMLTrackElement | undefined;
+  private readonly _videoElement: HTMLMediaElement;
+  private readonly _track: ICompatTextTrack;
+  private readonly _trackElement: HTMLTrackElement | undefined;
 
-  private _buffered : ManualTimeRanges;
+  private _buffered: ManualTimeRanges;
 
   /**
    * @param {HTMLMediaElement} videoElement
    */
-  constructor(videoElement : HTMLMediaElement) {
+  constructor(videoElement: HTMLMediaElement) {
     log.debug("NTSB: Creating NativeTextSegmentBuffer");
     super();
     const { track, trackElement } = addTextTrack(videoElement);
@@ -65,25 +62,30 @@ export default class NativeTextSegmentBuffer extends SegmentBuffer {
    * @param {Object} infos
    * @returns {Promise}
    */
-  public pushChunk(infos : IPushChunkInfos<unknown>) : Promise<void> {
+  public pushChunk(infos: IPushChunkInfos<unknown>): Promise<void> {
     log.debug("NTSB: Appending new native text tracks");
     if (infos.data.chunk === null) {
       return Promise.resolve();
     }
-    const { timestampOffset,
-            appendWindow,
-            chunk } = infos.data;
+    const { timestampOffset, appendWindow, chunk } = infos.data;
     assertChunkIsTextTrackSegmentData(chunk);
-    const { start: startTime,
-            end: endTime,
-            data: dataString,
-            type,
-            language } = chunk;
+    const {
+      start: startTime,
+      end: endTime,
+      data: dataString,
+      type,
+      language,
+    } = chunk;
     const appendWindowStart = appendWindow[0] ?? 0;
     const appendWindowEnd = appendWindow[1] ?? Infinity;
 
     try {
-      const cues = parseTextTrackToCues(type, dataString, timestampOffset, language);
+      const cues = parseTextTrackToCues(
+        type,
+        dataString,
+        timestampOffset,
+        language
+      );
 
       if (appendWindowStart !== 0 && appendWindowEnd !== Infinity) {
         // Removing before window start
@@ -114,24 +116,28 @@ export default class NativeTextSegmentBuffer extends SegmentBuffer {
         }
       }
 
-      let start : number;
+      let start: number;
       if (startTime !== undefined) {
         start = Math.max(appendWindowStart, startTime);
       } else {
         if (cues.length <= 0) {
-          log.warn("NTSB: Current text tracks have no cues nor start time. Aborting");
+          log.warn(
+            "NTSB: Current text tracks have no cues nor start time. Aborting"
+          );
           return Promise.resolve();
         }
         log.warn("NTSB: No start time given. Guessing from cues.");
         start = cues[0].startTime;
       }
 
-      let end : number;
+      let end: number;
       if (endTime !== undefined) {
         end = Math.min(appendWindowEnd, endTime);
       } else {
         if (cues.length <= 0) {
-          log.warn("NTSB: Current text tracks have no cues nor end time. Aborting");
+          log.warn(
+            "NTSB: Current text tracks have no cues nor end time. Aborting"
+          );
           return Promise.resolve();
         }
         log.warn("NTSB: No end time given. Guessing from cues.");
@@ -139,8 +145,10 @@ export default class NativeTextSegmentBuffer extends SegmentBuffer {
       }
 
       if (end <= start) {
-        log.warn("NTSB: Invalid text track appended: ",
-                 "the start time is inferior or equal to the end time.");
+        log.warn(
+          "NTSB: Invalid text track appended: ",
+          "the start time is inferior or equal to the end time."
+        );
         return Promise.resolve();
       }
 
@@ -181,7 +189,7 @@ export default class NativeTextSegmentBuffer extends SegmentBuffer {
    * @param {number} end - end position, in seconds
    * @returns {Promise}
    */
-  public removeBuffer(start : number, end : number) : Promise<void> {
+  public removeBuffer(start: number, end: number): Promise<void> {
     this._removeData(start, end);
     return Promise.resolve();
   }
@@ -190,7 +198,7 @@ export default class NativeTextSegmentBuffer extends SegmentBuffer {
    * @param {Object} infos
    * @returns {Promise}
    */
-  public endOfSegment(_infos : IEndOfSegmentInfos) : Promise<void> {
+  public endOfSegment(_infos: IEndOfSegmentInfos): Promise<void> {
     this._segmentInventory.completeSegment(_infos, this._buffered);
     return Promise.resolve();
   }
@@ -199,15 +207,14 @@ export default class NativeTextSegmentBuffer extends SegmentBuffer {
    * Returns the currently buffered data, in a TimeRanges object.
    * @returns {TimeRanges}
    */
-  public getBufferedRanges() : ManualTimeRanges {
+  public getBufferedRanges(): ManualTimeRanges {
     return this._buffered;
   }
 
-  public dispose() : void {
+  public dispose(): void {
     log.debug("NTSB: Aborting NativeTextSegmentBuffer");
     this._removeData(0, Infinity);
-    const { _trackElement,
-            _videoElement } = this;
+    const { _trackElement, _videoElement } = this;
 
     if (_trackElement !== undefined && _videoElement.hasChildNodes()) {
       try {
@@ -224,7 +231,7 @@ export default class NativeTextSegmentBuffer extends SegmentBuffer {
     }
   }
 
-  private _removeData(start : number, end : number) : void {
+  private _removeData(start: number, end: number): void {
     log.debug("NTSB: Removing native text track data", start, end);
     const track = this._track;
     const cues = track.cues;
@@ -244,19 +251,19 @@ export default class NativeTextSegmentBuffer extends SegmentBuffer {
 /** Data of chunks that should be pushed to the NativeTextSegmentBuffer. */
 export interface INativeTextTracksBufferSegmentData {
   /** The text track data, in the format indicated in `type`. */
-  data : string;
+  data: string;
   /** The format of `data` (examples: "ttml", "srt" or "vtt") */
-  type : string;
+  type: string;
   /**
    * Language in which the text track is, as a language code.
    * This is mostly needed for "sami" subtitles, to know which cues can / should
    * be parsed.
    */
-  language? : string | undefined;
+  language?: string | undefined;
   /** start time from which the segment apply, in seconds. */
-  start? : number | undefined;
+  start?: number | undefined;
   /** end time until which the segment apply, in seconds. */
-  end? : number | undefined;
+  end?: number | undefined;
 }
 
 /**
@@ -266,9 +273,9 @@ export interface INativeTextTracksBufferSegmentData {
  * @param {Object} chunk
  */
 function assertChunkIsTextTrackSegmentData(
-  chunk : unknown
-) : asserts chunk is INativeTextTracksBufferSegmentData {
-  if (__ENVIRONMENT__.CURRENT_ENV === __ENVIRONMENT__.PRODUCTION as number) {
+  chunk: unknown
+): asserts chunk is INativeTextTracksBufferSegmentData {
+  if (__ENVIRONMENT__.CURRENT_ENV === (__ENVIRONMENT__.PRODUCTION as number)) {
     return;
   }
   if (
@@ -276,18 +283,14 @@ function assertChunkIsTextTrackSegmentData(
     chunk === null ||
     typeof (chunk as INativeTextTracksBufferSegmentData).data !== "string" ||
     typeof (chunk as INativeTextTracksBufferSegmentData).type !== "string" ||
-    (
-      (chunk as INativeTextTracksBufferSegmentData).language !== undefined &&
-      typeof (chunk as INativeTextTracksBufferSegmentData).language !== "string"
-    ) ||
-    (
-      (chunk as INativeTextTracksBufferSegmentData).start !== undefined &&
-      typeof (chunk as INativeTextTracksBufferSegmentData).start !== "number"
-    ) ||
-    (
-      (chunk as INativeTextTracksBufferSegmentData).end !== undefined &&
-      typeof (chunk as INativeTextTracksBufferSegmentData).end !== "number"
-    )
+    ((chunk as INativeTextTracksBufferSegmentData).language !== undefined &&
+      typeof (chunk as INativeTextTracksBufferSegmentData).language !==
+        "string") ||
+    ((chunk as INativeTextTracksBufferSegmentData).start !== undefined &&
+      typeof (chunk as INativeTextTracksBufferSegmentData).start !==
+        "number") ||
+    ((chunk as INativeTextTracksBufferSegmentData).end !== undefined &&
+      typeof (chunk as INativeTextTracksBufferSegmentData).end !== "number")
   ) {
     throw new Error("Invalid format given to a NativeTextSegmentBuffer");
   }
@@ -302,14 +305,12 @@ function assertChunkIsTextTrackSegmentData(
  * It doesn't correspond at all to real code that will be called. This is just
  * a hack to tell TypeScript to perform that check.
  */
-if (__ENVIRONMENT__.CURRENT_ENV === __ENVIRONMENT__.DEV as number) {
+if (__ENVIRONMENT__.CURRENT_ENV === (__ENVIRONMENT__.DEV as number)) {
   /* eslint-disable @typescript-eslint/no-unused-vars */
   /* eslint-disable @typescript-eslint/ban-ts-comment */
   // @ts-ignore
-  function _checkType(
-    input : ITextTrackSegmentData
-  ) : void {
-    function checkEqual(_arg : INativeTextTracksBufferSegmentData) : void {
+  function _checkType(input: ITextTrackSegmentData): void {
+    function checkEqual(_arg: INativeTextTracksBufferSegmentData): void {
       /* nothing */
     }
     checkEqual(input);

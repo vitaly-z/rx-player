@@ -26,18 +26,28 @@ import { parseString } from "../utils";
  * @returns {Function}
  */
 export function generateSchemeAttrParser(
-  schemeAttrs : IScheme,
-  linearMemory : WebAssembly.Memory
-)  : IAttributeParser {
+  schemeAttrs: IScheme,
+  linearMemory: WebAssembly.Memory
+): IAttributeParser {
   const textDecoder = new TextDecoder();
-  return function onMPDAttribute(attr : number, ptr : number, len : number) {
+  return function onMPDAttribute(attr: number, ptr: number, len: number) {
     switch (attr) {
       case AttributeName.SchemeIdUri:
-        schemeAttrs.schemeIdUri = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        schemeAttrs.schemeIdUri = parseString(
+          textDecoder,
+          linearMemory.buffer,
+          ptr,
+          len
+        );
         break;
 
       case AttributeName.SchemeValue:
-        schemeAttrs.value = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        schemeAttrs.value = parseString(
+          textDecoder,
+          linearMemory.buffer,
+          ptr,
+          len
+        );
         break;
     }
   };

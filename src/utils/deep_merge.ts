@@ -5,18 +5,20 @@ import objectAssign from "./object_assign";
  * @param item
  * @returns {boolean}
  */
-function isObject(item: unknown) : boolean {
-  return (item !== null
-          && item !== undefined
-          && !Array.isArray(item)
-          && typeof item === "object");
+function isObject(item: unknown): boolean {
+  return (
+    item !== null &&
+    item !== undefined &&
+    !Array.isArray(item) &&
+    typeof item === "object"
+  );
 }
 
 type IDeepPartial<T> = {
-  [P in keyof T]?: IDeepPartial<T[P]> ;
+  [P in keyof T]?: IDeepPartial<T[P]>;
 };
 
-type ISourcesArgument<T> = Array<IDeepPartial<T>|unknown>;
+type ISourcesArgument<T> = Array<IDeepPartial<T> | unknown>;
 
 /**
  * Deeply merge nested objects
@@ -34,10 +36,14 @@ export default function deepMerge<
   if (isObject(target) && isObject(source)) {
     for (const key in source) {
       if (isObject(source[key])) {
-        let newTarget = target[key] as Record<string | number | symbol, unknown>;
+        let newTarget = target[key] as Record<
+          string | number | symbol,
+          unknown
+        >;
         if (newTarget === undefined) {
           newTarget = {};
-          (target[key] as Record<string | number | symbol, unknown>) = newTarget;
+          (target[key] as Record<string | number | symbol, unknown>) =
+            newTarget;
         }
         deepMerge(newTarget, source[key] as IDeepPartial<typeof newTarget>);
       } else {

@@ -28,12 +28,11 @@ import { ICompatVTTCue } from "./browser_compatibility_types";
  * were invalid.
  */
 export default function makeCue(
-  startTime : number,
-  endTime : number,
-  payload : string
-) : ICompatVTTCue|TextTrackCue|null {
+  startTime: number,
+  endTime: number,
+  payload: string
+): ICompatVTTCue | TextTrackCue | null {
   if (startTime >= endTime) {
-
     // IE/Edge will throw in this case.
     // See issue #501
     log.warn(`Compat: Invalid cue times: ${startTime} - ${endTime}`);
@@ -44,7 +43,11 @@ export default function makeCue(
     if (isNullOrUndefined(window.TextTrackCue)) {
       throw new Error("VTT cues not supported in your target");
     }
-    return new (TextTrackCue as unknown as typeof VTTCue)(startTime, endTime, payload);
+    return new (TextTrackCue as unknown as typeof VTTCue)(
+      startTime,
+      endTime,
+      payload
+    );
   } else {
     return new VTTCue(startTime, endTime, payload);
   }

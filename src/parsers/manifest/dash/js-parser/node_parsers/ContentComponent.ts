@@ -23,8 +23,8 @@ import { IContentComponentAttributes } from "../../node_parser_types";
  */
 export default function parseContentComponent(
   root: Element
-) : IContentComponentAttributes {
-  const ret : IContentComponentAttributes = {};
+): IContentComponentAttributes {
+  const ret: IContentComponentAttributes = {};
 
   for (let i = 0; i < root.attributes.length; i++) {
     const attribute = root.attributes[i];

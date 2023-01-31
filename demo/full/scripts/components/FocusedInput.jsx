@@ -1,7 +1,4 @@
-import React, {
-  useEffect,
-  useRef,
-} from "react";
+import React, { useEffect, useRef } from "react";
 
 /**
  * Simple text input which is focused when mounted.
@@ -15,11 +12,14 @@ function FocusedInput({
   placeholder = "",
 }) {
   const inputEl = useRef(null);
-  useEffect(() => {
-    if (inputEl.current != null) {
-      inputEl.current.focus();
-    }
-  }, [] /* trigger only when mounted */);
+  useEffect(
+    () => {
+      if (inputEl.current != null) {
+        inputEl.current.focus();
+      }
+    },
+    [] /* trigger only when mounted */
+  );
   return (
     <input
       ref={inputEl}

@@ -25,8 +25,9 @@
  * @returns {Boolean}
  */
 export default function shouldReloadMediaSourceOnDecipherabilityUpdate(
-  currentKeySystem : string | undefined
-) : boolean {
-  return currentKeySystem === undefined ||
-         currentKeySystem.indexOf("widevine") < 0;
+  currentKeySystem: string | undefined
+): boolean {
+  return (
+    currentKeySystem === undefined || currentKeySystem.indexOf("widevine") < 0
+  );
 }

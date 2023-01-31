@@ -19,25 +19,27 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-declare const __FEATURES__ : {
-  IS_ENABLED : number;
-  IS_DISABLED : number;
+declare const __FEATURES__:
+  | {
+      IS_ENABLED: number;
+      IS_DISABLED: number;
 
-  DASH : number;
-  DIRECTFILE : number;
-  EME : number;
-  HTML_SAMI : number;
-  HTML_SRT : number;
-  HTML_TTML : number;
-  HTML_VTT : number;
-  LOCAL_MANIFEST : number;
-  METAPLAYLIST : number;
-  NATIVE_SAMI : number;
-  NATIVE_SRT : number;
-  NATIVE_TTML : number;
-  NATIVE_VTT : number;
-  SMOOTH : number;
-} | typeof FEATURES_ENUM;
+      DASH: number;
+      DIRECTFILE: number;
+      EME: number;
+      HTML_SAMI: number;
+      HTML_SRT: number;
+      HTML_TTML: number;
+      HTML_VTT: number;
+      LOCAL_MANIFEST: number;
+      METAPLAYLIST: number;
+      NATIVE_SAMI: number;
+      NATIVE_SRT: number;
+      NATIVE_TTML: number;
+      NATIVE_VTT: number;
+      SMOOTH: number;
+    }
+  | typeof FEATURES_ENUM;
 
 declare const enum FEATURES_ENUM {
   IS_DISABLED,
@@ -59,11 +61,13 @@ declare const enum FEATURES_ENUM {
   SMOOTH,
 }
 
-declare const __ENVIRONMENT__ : {
-  CURRENT_ENV : number;
-  DEV : number;
-  PRODUCTION : number;
-} | typeof ENVIRONMENT_ENUM;
+declare const __ENVIRONMENT__:
+  | {
+      CURRENT_ENV: number;
+      DEV: number;
+      PRODUCTION: number;
+    }
+  | typeof ENVIRONMENT_ENUM;
 
 declare const enum ENVIRONMENT_ENUM {
   CURRENT_ENV,
@@ -71,8 +75,8 @@ declare const enum ENVIRONMENT_ENUM {
   PRODUCTION,
 }
 
-declare const __LOGGER_LEVEL__ : {
-  CURRENT_LEVEL : string;
+declare const __LOGGER_LEVEL__: {
+  CURRENT_LEVEL: string;
 };
 
-declare const __RX_PLAYER_DEBUG_MODE__ : boolean | undefined;
+declare const __RX_PLAYER_DEBUG_MODE__: boolean | undefined;

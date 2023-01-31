@@ -33,16 +33,22 @@ import PersistentSessionsStore from "./persistent_sessions_store";
  *     will in most cases have a maximum storage size.
  */
 export default function cleanOldStoredPersistentInfo(
-  persistentSessionsStore : PersistentSessionsStore,
-  limit : number
-) : void {
-  if (isNaN(limit) || limit < 0 || limit >= persistentSessionsStore.getLength()) {
+  persistentSessionsStore: PersistentSessionsStore,
+  limit: number
+): void {
+  if (
+    isNaN(limit) ||
+    limit < 0 ||
+    limit >= persistentSessionsStore.getLength()
+  ) {
     return;
   }
   const numberOfPersistentSessions = persistentSessionsStore.getLength();
   const toDelete = numberOfPersistentSessions - limit;
-  log.info("DRM: Too many stored persistent sessions, removing some.",
-           numberOfPersistentSessions,
-           toDelete);
+  log.info(
+    "DRM: Too many stored persistent sessions, removing some.",
+    numberOfPersistentSessions,
+    toDelete
+  );
   persistentSessionsStore.deleteOldSessions(toDelete);
 }

@@ -29,13 +29,15 @@ jest.mock("../../../transports/dash", () => ({
 describe("Features list - DASH", () => {
   it("should add DASH in the current features", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const featureObject : any = { transports: {},
-                                  dashParsers: { js: null,
-                                                 wasm: null } };
+    const featureObject: any = {
+      transports: {},
+      dashParsers: { js: null, wasm: null },
+    };
     addDASHFeature(featureObject);
-    expect(featureObject).toEqual({ transports: { dash: DASHFeature },
-                                    dashParsers: { js: dashJsParser,
-                                                   wasm: null } });
+    expect(featureObject).toEqual({
+      transports: { dash: DASHFeature },
+      dashParsers: { js: dashJsParser, wasm: null },
+    });
     expect(featureObject.transports.dash).toBe(DASHFeature);
   });
 });

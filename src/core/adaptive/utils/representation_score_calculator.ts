@@ -48,13 +48,14 @@ import EWMA from "./ewma";
  * @class RepresentationScoreCalculator
  */
 export default class RepresentationScoreCalculator {
-  private _currentRepresentationData : { representation : Representation;
-                                         ewma : EWMA;
-                                         loadedSegments : number;
-                                         loadedDuration : number; } |
-                                       null;
+  private _currentRepresentationData: {
+    representation: Representation;
+    ewma: EWMA;
+    loadedSegments: number;
+    loadedDuration: number;
+  } | null;
 
-  private _lastRepresentationWithGoodScore : Representation | null;
+  private _lastRepresentationWithGoodScore: Representation | null;
 
   constructor() {
     this._currentRepresentationData = null;
@@ -70,14 +71,17 @@ export default class RepresentationScoreCalculator {
    * seconds.
    */
   public addSample(
-    representation : Representation,
-    requestDuration : number,
-    segmentDuration : number
-  ) : void {
+    representation: Representation,
+    requestDuration: number,
+    segmentDuration: number
+  ): void {
     const ratio = segmentDuration / requestDuration;
     const currentRep = this._currentRepresentationData;
-    let currentEWMA : EWMA;
-    if (currentRep !== null && currentRep.representation.id === representation.id) {
+    let currentEWMA: EWMA;
+    if (
+      currentRep !== null &&
+      currentRep.representation.id === representation.id
+    ) {
       currentEWMA = currentRep.ewma;
       currentRep.ewma.addSample(requestDuration, ratio);
       currentRep.loadedDuration += segmentDuration;
@@ -85,14 +89,17 @@ export default class RepresentationScoreCalculator {
     } else {
       currentEWMA = new EWMA(5);
       currentEWMA.addSample(requestDuration, ratio);
-      this._currentRepresentationData = { representation,
-                                          ewma: currentEWMA,
-                                          loadedDuration: segmentDuration,
-                                          loadedSegments: 0 };
+      this._currentRepresentationData = {
+        representation,
+        ewma: currentEWMA,
+        loadedDuration: segmentDuration,
+        loadedSegments: 0,
+      };
     }
 
-    if (currentEWMA.getEstimate() > 1 &&
-        this._lastRepresentationWithGoodScore !== representation
+    if (
+      currentEWMA.getEstimate() > 1 &&
+      this._lastRepresentationWithGoodScore !== representation
     ) {
       log.debug("ABR: New last stable representation", representation.bitrate);
       this._lastRepresentationWithGoodScore = representation;
@@ -106,18 +113,21 @@ export default class RepresentationScoreCalculator {
    * @returns {number|undefined}
    */
   public getEstimate(
-    representation : Representation
-  ) : [number, ScoreConfidenceLevel] | undefined {
-    if (this._currentRepresentationData === null ||
-        this._currentRepresentationData.representation.id !== representation.id)
-    {
+    representation: Representation
+  ): [number, ScoreConfidenceLevel] | undefined {
+    if (
+      this._currentRepresentationData === null ||
+      this._currentRepresentationData.representation.id !== representation.id
+    ) {
       return undefined;
     }
-    const { ewma, loadedSegments, loadedDuration } = this._currentRepresentationData;
+    const { ewma, loadedSegments, loadedDuration } =
+      this._currentRepresentationData;
     const estimate = ewma.getEstimate();
-    const confidenceLevel = loadedSegments >= 5 &&
-                            loadedDuration >= 10 ? ScoreConfidenceLevel.HIGH :
-                                                   ScoreConfidenceLevel.LOW;
+    const confidenceLevel =
+      loadedSegments >= 5 && loadedDuration >= 10
+        ? ScoreConfidenceLevel.HIGH
+        : ScoreConfidenceLevel.LOW;
 
     return [estimate, confidenceLevel];
   }
@@ -130,7 +140,7 @@ export default class RepresentationScoreCalculator {
    * `null` if no Representation ever reach that score.
    * @returns {Representation|null}
    */
-  public getLastStableRepresentation() : Representation | null {
+  public getLastStableRepresentation(): Representation | null {
     return this._lastRepresentationWithGoodScore;
   }
 }

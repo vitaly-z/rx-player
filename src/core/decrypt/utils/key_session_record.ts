@@ -15,10 +15,7 @@
  */
 
 import { IProcessedProtectionData } from "../types";
-import {
-  areKeyIdsEqual,
-  areAllKeyIdsContainedIn,
-} from "./key_id_comparison";
+import { areKeyIdsEqual, areAllKeyIdsContainedIn } from "./key_id_comparison";
 
 /**
  * Class storing key-related information linked to a created `MediaKeySession`.
@@ -61,15 +58,15 @@ import {
  * @class KeySessionRecord
  */
 export default class KeySessionRecord {
-  private readonly _initializationData : IProcessedProtectionData;
-  private _keyIds : Uint8Array[] | null;
+  private readonly _initializationData: IProcessedProtectionData;
+  private _keyIds: Uint8Array[] | null;
 
   /**
    * Create a new `KeySessionRecord`, linked to its corresponding initialization
    * data,
    * @param {Object} initializationData
    */
-  constructor(initializationData : IProcessedProtectionData) {
+  constructor(initializationData: IProcessedProtectionData) {
     this._initializationData = initializationData;
     this._keyIds = null;
   }
@@ -85,8 +82,8 @@ export default class KeySessionRecord {
    * @param {Array.<Uint8Array>} keyIds
    */
   public associateKeyIds(
-    keyIds : Uint8Array[] | IterableIterator<Uint8Array>
-  ) : void {
+    keyIds: Uint8Array[] | IterableIterator<Uint8Array>
+  ): void {
     if (this._keyIds === null) {
       this._keyIds = [];
     }
@@ -102,7 +99,7 @@ export default class KeySessionRecord {
    * @param {Uint8Array} keyId
    * @returns {boolean}
    */
-  public isAssociatedWithKeyId(keyId : Uint8Array) : boolean {
+  public isAssociatedWithKeyId(keyId: Uint8Array): boolean {
     if (this._keyIds === null) {
       return false;
     }
@@ -117,7 +114,7 @@ export default class KeySessionRecord {
   /**
    * @returns {Array.<Uint8Array>}
    */
-  public getAssociatedKeyIds() : Uint8Array[] {
+  public getAssociatedKeyIds(): Uint8Array[] {
     if (this._keyIds === null) {
       return [];
     }
@@ -141,11 +138,14 @@ export default class KeySessionRecord {
    * @returns {boolean}
    */
   public isCompatibleWith(
-    initializationData : IProcessedProtectionData
-  ) : boolean {
+    initializationData: IProcessedProtectionData
+  ): boolean {
     const { keyIds } = initializationData;
     if (keyIds !== undefined && keyIds.length > 0) {
-      if (this._keyIds !== null && areAllKeyIdsContainedIn(keyIds, this._keyIds)) {
+      if (
+        this._keyIds !== null &&
+        areAllKeyIdsContainedIn(keyIds, this._keyIds)
+      ) {
         return true;
       }
       if (this._initializationData.keyIds !== undefined) {
@@ -156,21 +156,25 @@ export default class KeySessionRecord {
   }
 
   private _checkInitializationDataCompatibility(
-    initializationData : IProcessedProtectionData
-  ) : boolean {
-    if (initializationData.keyIds !== undefined &&
-        initializationData.keyIds.length > 0 &&
-        this._initializationData.keyIds !== undefined)
-    {
-      return areAllKeyIdsContainedIn(initializationData.keyIds,
-                                     this._initializationData.keyIds);
+    initializationData: IProcessedProtectionData
+  ): boolean {
+    if (
+      initializationData.keyIds !== undefined &&
+      initializationData.keyIds.length > 0 &&
+      this._initializationData.keyIds !== undefined
+    ) {
+      return areAllKeyIdsContainedIn(
+        initializationData.keyIds,
+        this._initializationData.keyIds
+      );
     }
 
     if (this._initializationData.type !== initializationData.type) {
       return false;
     }
 
-    return this._initializationData.values
-      .isCompatibleWith(initializationData.values);
+    return this._initializationData.values.isCompatibleWith(
+      initializationData.values
+    );
   }
 }

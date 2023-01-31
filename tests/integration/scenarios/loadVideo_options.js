@@ -18,8 +18,8 @@ import { expect } from "chai";
 import RxPlayer from "../../../src";
 import { manifestInfos } from "../../contents/DASH_static_SegmentTimeline";
 import sleep from "../../utils/sleep.js";
-import /* waitForState, */ {
-  waitForLoadedStateAfterLoadVideo,
+import {
+  /* waitForState, */ waitForLoadedStateAfterLoadVideo,
 } from "../../utils/waitForPlayerState";
 import XHRMock from "../../utils/request_mock";
 
@@ -163,8 +163,10 @@ describe("loadVideo Options", () => {
         await waitForLoadedStateAfterLoadVideo(player);
         expect(player.getPlayerState()).to.equal("LOADED");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be
-          .closeTo(player.getMinimumPosition() + startAt, 0.5);
+        expect(initialPosition).to.be.closeTo(
+          player.getMinimumPosition() + startAt,
+          0.5
+        );
         await sleep(500);
         expect(player.getPosition()).to.equal(initialPosition);
       });
@@ -175,13 +177,15 @@ describe("loadVideo Options", () => {
           transport: manifestInfos.transport,
           url: manifestInfos.url,
           autoPlay: false,
-          startAt: { fromLastPosition: - startAt },
+          startAt: { fromLastPosition: -startAt },
         });
         await waitForLoadedStateAfterLoadVideo(player);
         expect(player.getPlayerState()).to.equal("LOADED");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be
-          .closeTo(player.getMaximumPosition() - startAt, 0.5);
+        expect(initialPosition).to.be.closeTo(
+          player.getMaximumPosition() - startAt,
+          0.5
+        );
         await sleep(500);
         expect(player.getPosition()).to.equal(initialPosition);
       });
@@ -196,8 +200,10 @@ describe("loadVideo Options", () => {
         await waitForLoadedStateAfterLoadVideo(player);
         expect(player.getPlayerState()).to.equal("LOADED");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be
-          .closeTo(player.getMaximumPosition() * 0.3, 0.5);
+        expect(initialPosition).to.be.closeTo(
+          player.getMaximumPosition() * 0.3,
+          0.5
+        );
         await sleep(500);
         expect(player.getPosition()).to.equal(initialPosition);
       });
@@ -245,8 +251,10 @@ describe("loadVideo Options", () => {
         await waitForLoadedStateAfterLoadVideo(player);
         expect(player.getPlayerState()).to.equal("PLAYING");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be
-          .closeTo(player.getMinimumPosition() + startAt, 0.5);
+        expect(initialPosition).to.be.closeTo(
+          player.getMinimumPosition() + startAt,
+          0.5
+        );
         await sleep(500);
         expect(player.getPosition()).to.be.above(initialPosition);
       });
@@ -257,13 +265,15 @@ describe("loadVideo Options", () => {
           transport: manifestInfos.transport,
           url: manifestInfos.url,
           autoPlay: true,
-          startAt: { fromLastPosition: - startAt },
+          startAt: { fromLastPosition: -startAt },
         });
         await waitForLoadedStateAfterLoadVideo(player);
         expect(player.getPlayerState()).to.equal("PLAYING");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be
-          .closeTo(player.getMaximumPosition() - startAt, 0.5);
+        expect(initialPosition).to.be.closeTo(
+          player.getMaximumPosition() - startAt,
+          0.5
+        );
         await sleep(500);
         expect(player.getPosition()).to.be.above(initialPosition);
       });
@@ -278,8 +288,10 @@ describe("loadVideo Options", () => {
         await waitForLoadedStateAfterLoadVideo(player);
         expect(player.getPlayerState()).to.equal("PLAYING");
         const initialPosition = player.getPosition();
-        expect(initialPosition).to.be
-          .closeTo(player.getMaximumPosition() * 0.3, 0.5);
+        expect(initialPosition).to.be.closeTo(
+          player.getMaximumPosition() * 0.3,
+          0.5
+        );
         await sleep(500);
         expect(player.getPosition()).to.be.above(initialPosition);
       });
@@ -288,13 +300,12 @@ describe("loadVideo Options", () => {
 
   describe("representationFilter", () => {
     it("should filter out Representations", async () => {
-      const videoRepresentations = manifestInfos
-        .periods[0].adaptations.video[0].representations;
+      const videoRepresentations =
+        manifestInfos.periods[0].adaptations.video[0].representations;
       const initialNumberOfRepresentations = videoRepresentations.length;
       expect(initialNumberOfRepresentations).to.be.above(1);
-      const representationInTheMiddle = videoRepresentations[
-        Math.floor(initialNumberOfRepresentations / 2)
-      ];
+      const representationInTheMiddle =
+        videoRepresentations[Math.floor(initialNumberOfRepresentations / 2)];
 
       let numberOfTimeRepresentationFilterIsCalledForVideo = 0;
       player.loadVideo({
@@ -303,19 +314,20 @@ describe("loadVideo Options", () => {
         representationFilter(representation, infos) {
           if (infos.trackType === "video") {
             numberOfTimeRepresentationFilterIsCalledForVideo++;
-            return representation.bitrate <
-              representationInTheMiddle.bitrate;
+            return representation.bitrate < representationInTheMiddle.bitrate;
           }
           return true;
         },
       });
       await waitForLoadedStateAfterLoadVideo(player);
 
-      expect(numberOfTimeRepresentationFilterIsCalledForVideo)
-        .to.equal(initialNumberOfRepresentations);
+      expect(numberOfTimeRepresentationFilterIsCalledForVideo).to.equal(
+        initialNumberOfRepresentations
+      );
 
-      const currentVideoTrack = player.getAvailableVideoTracks()
-        .find(track => track.active);
+      const currentVideoTrack = player
+        .getAvailableVideoTracks()
+        .find((track) => track.active);
 
       expect(currentVideoTrack.representations).to.have.length(
         Math.floor(initialNumberOfRepresentations / 2)
@@ -364,7 +376,6 @@ describe("loadVideo Options", () => {
       };
     };
 
-
     it("should pass through the custom manifestLoader for manifest requests", async () => {
       player.loadVideo({
         transport: manifestInfos.transport,
@@ -373,8 +384,7 @@ describe("loadVideo Options", () => {
       });
       await waitForLoadedStateAfterLoadVideo(player);
 
-      expect(numberOfTimeCustomManifestLoaderWasCalled)
-        .to.equal(1);
+      expect(numberOfTimeCustomManifestLoaderWasCalled).to.equal(1);
     });
 
     it("should pass through the custom segmentLoader even when no hint is given about the URL", () => {
@@ -414,8 +424,9 @@ minBufferTime="PT2.0S">
             callbacks.resolve({ data: fakeMpdWithoutBaseURLs });
           },
           segmentLoader(infos) {
-            expect(infos.url).to.satisfy((s) => s.includes("init-stream") ||
-                                                s.includes("chunk-stream"));
+            expect(infos.url).to.satisfy(
+              (s) => s.includes("init-stream") || s.includes("chunk-stream")
+            );
             player.stop();
             res();
           },

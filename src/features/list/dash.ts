@@ -22,7 +22,7 @@ import { IFeaturesObject } from "../types";
  * Add ability to play DASH contents.
  * @param {Object} features
  */
-function addDASHFeature(features : IFeaturesObject) : void {
+function addDASHFeature(features: IFeaturesObject): void {
   if (features.transports.dash === undefined) {
     features.transports.dash = dash;
   }

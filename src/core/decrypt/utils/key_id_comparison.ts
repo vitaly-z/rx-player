@@ -23,9 +23,9 @@ import areArraysOfNumbersEqual from "../../../utils/are_arrays_of_numbers_equal"
  * @returns {boolean}
  */
 export function areKeyIdsEqual(
-  keyId1 : Uint8Array,
-  keyId2 : Uint8Array
-) : boolean {
+  keyId1: Uint8Array,
+  keyId2: Uint8Array
+): boolean {
   return keyId1 === keyId2 || areArraysOfNumbersEqual(keyId1, keyId2);
 }
 
@@ -35,10 +35,10 @@ export function areKeyIdsEqual(
  * @returns {boolean}
  */
 export function isKeyIdContainedIn(
-  wantedKeyId : Uint8Array,
-  keyIdsArr : Uint8Array[]
-) : boolean {
-  return keyIdsArr.some(k => areKeyIdsEqual(k, wantedKeyId));
+  wantedKeyId: Uint8Array,
+  keyIdsArr: Uint8Array[]
+): boolean {
+  return keyIdsArr.some((k) => areKeyIdsEqual(k, wantedKeyId));
 }
 
 /**
@@ -49,11 +49,11 @@ export function isKeyIdContainedIn(
  * @returns {boolean}
  */
 export function areAllKeyIdsContainedIn(
-  wantedKeyIds : Uint8Array[],
-  keyIdsArr : Uint8Array[]
-) : boolean {
+  wantedKeyIds: Uint8Array[],
+  keyIdsArr: Uint8Array[]
+): boolean {
   for (const keyId of wantedKeyIds) {
-    const found = keyIdsArr.some(k => areKeyIdsEqual(k, keyId));
+    const found = keyIdsArr.some((k) => areKeyIdsEqual(k, keyId));
     if (!found) {
       return false;
     }
@@ -69,11 +69,11 @@ export function areAllKeyIdsContainedIn(
  * @returns {boolean}
  */
 export function areSomeKeyIdsContainedIn(
-  wantedKeyIds : Uint8Array[],
-  keyIdsArr : Uint8Array[]
-) : boolean {
+  wantedKeyIds: Uint8Array[],
+  keyIdsArr: Uint8Array[]
+): boolean {
   for (const keyId of wantedKeyIds) {
-    const found = keyIdsArr.some(k => areKeyIdsEqual(k, keyId));
+    const found = keyIdsArr.some((k) => areKeyIdsEqual(k, keyId));
     if (found) {
       return true;
     }

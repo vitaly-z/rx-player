@@ -55,21 +55,25 @@ import {
  * doing.
  */
 export default function AdaptationStream<T>(
-  { playbackObserver,
+  {
+    playbackObserver,
     content,
     options,
     representationEstimator,
     segmentBuffer,
     segmentFetcherCreator,
     wantedBufferAhead,
-    maxVideoBufferSize } : IAdaptationStreamArguments,
-  callbacks : IAdaptationStreamCallbacks<T>,
-  parentCancelSignal : CancellationSignal
-) : void {
+    maxVideoBufferSize,
+  }: IAdaptationStreamArguments,
+  callbacks: IAdaptationStreamCallbacks<T>,
+  parentCancelSignal: CancellationSignal
+): void {
   const { manifest, period, adaptation } = content;
 
   /** Allows to cancel everything the `AdaptationStream` is doing. */
-  const adapStreamCanceller = new TaskCanceller({ cancelOn: parentCancelSignal });
+  const adapStreamCanceller = new TaskCanceller({
+    cancelOn: parentCancelSignal,
+  });
 
   /**
    * The buffer goal ratio base itself on the value given by `wantedBufferAhead`
@@ -91,70 +95,86 @@ export default function AdaptationStream<T>(
   );
 
   /** Stores the last emitted bitrate. */
-  let previouslyEmittedBitrate : number | undefined;
+  let previouslyEmittedBitrate: number | undefined;
 
   /** Emit the list of Representation for the adaptive logic. */
   const representationsList = createSharedReference(
     content.representations.getValue().representations,
-    adapStreamCanceller.signal);
+    adapStreamCanceller.signal
+  );
 
   // Start-up Adaptive logic
   const { estimates: estimateRef, callbacks: abrCallbacks } =
-    representationEstimator({ manifest, period, adaptation },
-                            currentRepresentation,
-                            representationsList,
-                            playbackObserver,
-                            adapStreamCanceller.signal);
+    representationEstimator(
+      { manifest, period, adaptation },
+      currentRepresentation,
+      representationsList,
+      playbackObserver,
+      adapStreamCanceller.signal
+    );
 
   /** Allows a `RepresentationStream` to easily fetch media segments. */
-  const segmentFetcher = segmentFetcherCreator
-    .createSegmentFetcher(adaptation.type,
-                          /* eslint-disable @typescript-eslint/unbound-method */
-                          { onRequestBegin: abrCallbacks.requestBegin,
-                            onRequestEnd: abrCallbacks.requestEnd,
-                            onProgress: abrCallbacks.requestProgress,
-                            onMetrics: abrCallbacks.metrics });
-                          /* eslint-enable @typescript-eslint/unbound-method */
-
+  const segmentFetcher = segmentFetcherCreator.createSegmentFetcher(
+    adaptation.type,
+    /* eslint-disable @typescript-eslint/unbound-method */
+    {
+      onRequestBegin: abrCallbacks.requestBegin,
+      onRequestEnd: abrCallbacks.requestEnd,
+      onProgress: abrCallbacks.requestProgress,
+      onMetrics: abrCallbacks.metrics,
+    }
+  );
+  /* eslint-enable @typescript-eslint/unbound-method */
 
   /** Used to determine when "fast-switching" is possible. */
   const fastSwitchThreshold = createSharedReference<number | undefined>(0);
 
-  estimateRef.onUpdate(({ bitrate, knownStableBitrate }) => {
-    if (options.enableFastSwitching) {
-      fastSwitchThreshold.setValueIfChanged(knownStableBitrate);
-    }
-    if (bitrate === undefined || bitrate === previouslyEmittedBitrate) {
-      return ;
-    }
-    previouslyEmittedBitrate = bitrate;
-    log.debug(`Stream: new ${adaptation.type} bitrate estimate`, bitrate);
-    callbacks.bitrateEstimateChange({ type: adaptation.type, bitrate });
-  }, { emitCurrentValue: true, clearSignal: adapStreamCanceller.signal });
+  estimateRef.onUpdate(
+    ({ bitrate, knownStableBitrate }) => {
+      if (options.enableFastSwitching) {
+        fastSwitchThreshold.setValueIfChanged(knownStableBitrate);
+      }
+      if (bitrate === undefined || bitrate === previouslyEmittedBitrate) {
+        return;
+      }
+      previouslyEmittedBitrate = bitrate;
+      log.debug(`Stream: new ${adaptation.type} bitrate estimate`, bitrate);
+      callbacks.bitrateEstimateChange({ type: adaptation.type, bitrate });
+    },
+    { emitCurrentValue: true, clearSignal: adapStreamCanceller.signal }
+  );
 
   /**
    * When triggered, cancel all `RepresentationStream`s currently created.
    * Set to `undefined` initially.
    */
-  let cancelCurrentStreams : TaskCanceller | undefined;
+  let cancelCurrentStreams: TaskCanceller | undefined;
 
   // Each time the list of wanted Representations changes, we restart the logic
-  content.representations.onUpdate((val) => {
-    if (cancelCurrentStreams !== undefined) {
-      cancelCurrentStreams.cancel();
-    }
-    representationsList.setValueIfChanged(val.representations);
-    cancelCurrentStreams = new TaskCanceller({ cancelOn: adapStreamCanceller.signal });
-    onRepresentationsChoiceChange(val, cancelCurrentStreams.signal).catch((err) => {
-      if (cancelCurrentStreams?.isUsed === true &&
-          TaskCanceller.isCancellationError(err))
-      {
-        return;
+  content.representations.onUpdate(
+    (val) => {
+      if (cancelCurrentStreams !== undefined) {
+        cancelCurrentStreams.cancel();
       }
-      adapStreamCanceller.cancel();
-      callbacks.error(err);
-    });
-  }, { clearSignal: adapStreamCanceller.signal, emitCurrentValue: true });
+      representationsList.setValueIfChanged(val.representations);
+      cancelCurrentStreams = new TaskCanceller({
+        cancelOn: adapStreamCanceller.signal,
+      });
+      onRepresentationsChoiceChange(val, cancelCurrentStreams.signal).catch(
+        (err) => {
+          if (
+            cancelCurrentStreams?.isUsed === true &&
+            TaskCanceller.isCancellationError(err)
+          ) {
+            return;
+          }
+          adapStreamCanceller.cancel();
+          callbacks.error(err);
+        }
+      );
+    },
+    { clearSignal: adapStreamCanceller.signal, emitCurrentValue: true }
+  );
 
   return;
 
@@ -170,16 +190,18 @@ export default function AdaptationStream<T>(
    * everything this function is doing and free all related resources.
    */
   async function onRepresentationsChoiceChange(
-    choice : IRepresentationsChoice,
-    fnCancelSignal : CancellationSignal
-  ) : Promise<void> {
+    choice: IRepresentationsChoice,
+    fnCancelSignal: CancellationSignal
+  ): Promise<void> {
     // First check if we should perform any action regarding what was previously
     // in the buffer
-    const switchStrat = getRepresentationsSwitchingStrategy(period,
-                                                            adaptation,
-                                                            choice,
-                                                            segmentBuffer,
-                                                            playbackObserver);
+    const switchStrat = getRepresentationsSwitchingStrategy(
+      period,
+      adaptation,
+      choice,
+      segmentBuffer,
+      playbackObserver
+    );
 
     switch (switchStrat.type) {
       case "continue":
@@ -187,14 +209,29 @@ export default function AdaptationStream<T>(
       case "needs-reload": // Just ask to reload
         const { DELTA_POSITION_AFTER_RELOAD } = config.getCurrent();
         const bufferType = adaptation.type;
-        return createReloadRequest(playbackObserver, ({ position, autoPlay }) => {
-          callbacks.waitingMediaSourceReload({ bufferType, period, position, autoPlay });
-        }, DELTA_POSITION_AFTER_RELOAD.bitrateSwitch, period, fnCancelSignal);
+        return createReloadRequest(
+          playbackObserver,
+          ({ position, autoPlay }) => {
+            callbacks.waitingMediaSourceReload({
+              bufferType,
+              period,
+              position,
+              autoPlay,
+            });
+          },
+          DELTA_POSITION_AFTER_RELOAD.bitrateSwitch,
+          period,
+          fnCancelSignal
+        );
 
       case "flush-buffer": // Clean + flush
       case "clean-buffer": // Just clean
         for (const range of switchStrat.value) {
-          await segmentBuffer.removeBuffer(range.start, range.end, fnCancelSignal);
+          await segmentBuffer.removeBuffer(
+            range.start,
+            range.end,
+            fnCancelSignal
+          );
           if (fnCancelSignal.isCancelled) {
             return;
           }
@@ -222,14 +259,16 @@ export default function AdaptationStream<T>(
    * anything this function is doing and free allocated resources.
    */
   function recursivelyCreateRepresentationStreams(
-    fnCancelSignal : CancellationSignal
-  ) : void {
+    fnCancelSignal: CancellationSignal
+  ): void {
     /**
      * `TaskCanceller` triggered when the current `RepresentationStream` is
      * terminating and as such the next one might be immediately created
      * recursively.
      */
-    const repStreamTerminatingCanceller = new TaskCanceller({ cancelOn: fnCancelSignal });
+    const repStreamTerminatingCanceller = new TaskCanceller({
+      cancelOn: fnCancelSignal,
+    });
     const { representation } = estimateRef.getValue();
     if (representation === null) {
       return;
@@ -240,45 +279,53 @@ export default function AdaptationStream<T>(
      * This allows to easily rely on that value in inner Observables which might also
      * need the last already-considered value.
      */
-    const terminateCurrentStream = createSharedReference<ITerminationOrder | null>(
-      null,
-      repStreamTerminatingCanceller.signal
-    );
+    const terminateCurrentStream =
+      createSharedReference<ITerminationOrder | null>(
+        null,
+        repStreamTerminatingCanceller.signal
+      );
 
     /** Allows to stop listening to estimateRef on the following line. */
-    estimateRef.onUpdate((estimate) => {
-      if (estimate.representation === null ||
-          estimate.representation.id === representation.id)
+    estimateRef.onUpdate(
+      (estimate) => {
+        if (
+          estimate.representation === null ||
+          estimate.representation.id === representation.id
+        ) {
+          return;
+        }
+        if (estimate.urgent) {
+          log.info("Stream: urgent Representation switch", adaptation.type);
+          return terminateCurrentStream.setValue({ urgent: true });
+        } else {
+          log.info("Stream: slow Representation switch", adaptation.type);
+          return terminateCurrentStream.setValue({ urgent: false });
+        }
+      },
       {
-        return;
+        clearSignal: repStreamTerminatingCanceller.signal,
+        emitCurrentValue: true,
       }
-      if (estimate.urgent) {
-        log.info("Stream: urgent Representation switch", adaptation.type);
-        return terminateCurrentStream.setValue({ urgent: true });
-      } else {
-        log.info("Stream: slow Representation switch", adaptation.type);
-        return terminateCurrentStream.setValue({ urgent: false });
-      }
-    }, { clearSignal: repStreamTerminatingCanceller.signal, emitCurrentValue: true });
+    );
 
     const repInfo = { type: adaptation.type, period, representation };
     currentRepresentation.setValue(representation);
     if (adapStreamCanceller.isUsed) {
-      return ; // previous callback has stopped everything by side-effect
+      return; // previous callback has stopped everything by side-effect
     }
     callbacks.representationChange(repInfo);
     if (adapStreamCanceller.isUsed) {
-      return ; // previous callback has stopped everything by side-effect
+      return; // previous callback has stopped everything by side-effect
     }
 
-    const representationStreamCallbacks : IRepresentationStreamCallbacks<T> = {
+    const representationStreamCallbacks: IRepresentationStreamCallbacks<T> = {
       streamStatusUpdate: callbacks.streamStatusUpdate,
       encryptionDataEncountered: callbacks.encryptionDataEncountered,
       manifestMightBeOufOfSync: callbacks.manifestMightBeOufOfSync,
       needsManifestRefresh: callbacks.needsManifestRefresh,
       inbandEvent: callbacks.inbandEvent,
       warning: callbacks.warning,
-      error(err : unknown) {
+      error(err: unknown) {
         adapStreamCanceller.cancel();
         callbacks.error(err);
       },
@@ -298,10 +345,12 @@ export default function AdaptationStream<T>(
       },
     };
 
-    createRepresentationStream(representation,
-                               terminateCurrentStream,
-                               representationStreamCallbacks,
-                               fnCancelSignal);
+    createRepresentationStream(
+      representation,
+      terminateCurrentStream,
+      representationStreamCallbacks,
+      fnCancelSignal
+    );
   }
 
   /**
@@ -317,39 +366,49 @@ export default function AdaptationStream<T>(
    * anything this function is doing and free allocated resources.
    */
   function createRepresentationStream(
-    representation : Representation,
-    terminateCurrentStream : IReadOnlySharedReference<ITerminationOrder | null>,
-    representationStreamCallbacks : IRepresentationStreamCallbacks<T>,
-    fnCancelSignal : CancellationSignal
-  ) : void {
+    representation: Representation,
+    terminateCurrentStream: IReadOnlySharedReference<ITerminationOrder | null>,
+    representationStreamCallbacks: IRepresentationStreamCallbacks<T>,
+    fnCancelSignal: CancellationSignal
+  ): void {
     const bufferGoalCanceller = new TaskCanceller({ cancelOn: fnCancelSignal });
-    const bufferGoal = createMappedReference(wantedBufferAhead, prev => {
-      return prev * getBufferGoalRatio(representation);
-    }, bufferGoalCanceller.signal);
-    const maxBufferSize = adaptation.type === "video" ?
-      maxVideoBufferSize :
-      createSharedReference(Infinity);
-    log.info("Stream: changing representation",
-             adaptation.type,
-             representation.id,
-             representation.bitrate);
+    const bufferGoal = createMappedReference(
+      wantedBufferAhead,
+      (prev) => {
+        return prev * getBufferGoalRatio(representation);
+      },
+      bufferGoalCanceller.signal
+    );
+    const maxBufferSize =
+      adaptation.type === "video"
+        ? maxVideoBufferSize
+        : createSharedReference(Infinity);
+    log.info(
+      "Stream: changing representation",
+      adaptation.type,
+      representation.id,
+      representation.bitrate
+    );
     const updatedCallbacks = objectAssign({}, representationStreamCallbacks, {
-      error(err : unknown) {
+      error(err: unknown) {
         const formattedError = formatError(err, {
           defaultCode: "NONE",
           defaultReason: "Unknown `RepresentationStream` error",
         });
         if (formattedError.code === "BUFFER_FULL_ERROR") {
           const wba = wantedBufferAhead.getValue();
-          const lastBufferGoalRatio = bufferGoalRatioMap.get(representation.id) ?? 1;
+          const lastBufferGoalRatio =
+            bufferGoalRatioMap.get(representation.id) ?? 1;
           if (lastBufferGoalRatio <= 0.25 || wba * lastBufferGoalRatio <= 2) {
             throw formattedError;
           }
           bufferGoalRatioMap.set(representation.id, lastBufferGoalRatio - 0.25);
-          return createRepresentationStream(representation,
-                                            terminateCurrentStream,
-                                            representationStreamCallbacks,
-                                            fnCancelSignal);
+          return createRepresentationStream(
+            representation,
+            terminateCurrentStream,
+            representationStreamCallbacks,
+            fnCancelSignal
+          );
         }
         representationStreamCallbacks.error(err);
       },
@@ -358,49 +417,66 @@ export default function AdaptationStream<T>(
         representationStreamCallbacks.terminating();
       },
     });
-    RepresentationStream({ playbackObserver,
-                           content: { representation,
-                                      adaptation,
-                                      period,
-                                      manifest },
-                           segmentBuffer,
-                           segmentFetcher,
-                           terminate: terminateCurrentStream,
-                           options: { bufferGoal,
-                                      maxBufferSize,
-                                      drmSystemId: options.drmSystemId,
-                                      fastSwitchThreshold } },
-                         updatedCallbacks,
-                         fnCancelSignal);
+    RepresentationStream(
+      {
+        playbackObserver,
+        content: { representation, adaptation, period, manifest },
+        segmentBuffer,
+        segmentFetcher,
+        terminate: terminateCurrentStream,
+        options: {
+          bufferGoal,
+          maxBufferSize,
+          drmSystemId: options.drmSystemId,
+          fastSwitchThreshold,
+        },
+      },
+      updatedCallbacks,
+      fnCancelSignal
+    );
 
     // reload if the Representation disappears from the Manifest
-    manifest.addEventListener("manifestUpdate", updates => {
-      for (const element of updates.updatedPeriods) {
-        if (element.period.id === period.id) {
-          for (const adap of element.result.removedAdaptations) {
-            if (adap.id === adaptation.id) {
-              const bufferType = adaptation.type;
-              return createReloadRequest(playbackObserver, ({ position, autoPlay }) => {
-                callbacks
-                  .waitingMediaSourceReload({ bufferType, period, position, autoPlay });
-              }, 0, period, fnCancelSignal);
+    manifest.addEventListener(
+      "manifestUpdate",
+      (updates) => {
+        for (const element of updates.updatedPeriods) {
+          if (element.period.id === period.id) {
+            for (const adap of element.result.removedAdaptations) {
+              if (adap.id === adaptation.id) {
+                const bufferType = adaptation.type;
+                return createReloadRequest(
+                  playbackObserver,
+                  ({ position, autoPlay }) => {
+                    callbacks.waitingMediaSourceReload({
+                      bufferType,
+                      period,
+                      position,
+                      autoPlay,
+                    });
+                  },
+                  0,
+                  period,
+                  fnCancelSignal
+                );
+              }
             }
+          } else if (element.period.start > period.start) {
+            break;
           }
-        } else if (element.period.start > period.start) {
-          break;
         }
-      }
-    }, fnCancelSignal);
+      },
+      fnCancelSignal
+    );
   }
 
   /**
    * @param {Object} representation
    * @returns {number}
    */
-  function getBufferGoalRatio(representation : Representation) : number {
+  function getBufferGoalRatio(representation: Representation): number {
     const oldBufferGoalRatio = bufferGoalRatioMap.get(representation.id);
-    const bufferGoalRatio = oldBufferGoalRatio !== undefined ? oldBufferGoalRatio :
-                                                               1;
+    const bufferGoalRatio =
+      oldBufferGoalRatio !== undefined ? oldBufferGoalRatio : 1;
     if (oldBufferGoalRatio === undefined) {
       bufferGoalRatioMap.set(representation.id, bufferGoalRatio);
     }

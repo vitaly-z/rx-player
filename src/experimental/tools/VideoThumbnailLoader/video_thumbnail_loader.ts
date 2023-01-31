@@ -21,9 +21,7 @@ import createSegmentFetcher, {
 } from "../../../core/fetchers/segment/segment_fetcher";
 import { AudioVideoSegmentBuffer } from "../../../core/segment_buffers/implementations";
 import log from "../../../log";
-import Manifest, {
-  ISegment,
-} from "../../../manifest";
+import Manifest, { ISegment } from "../../../manifest";
 import arrayFind from "../../../utils/array_find";
 import isNullOrUndefined from "../../../utils/is_null_or_undefined";
 import objectAssign from "../../../utils/object_assign";
@@ -33,15 +31,12 @@ import TaskCanceller, {
 import loadAndPushSegment from "./load_and_push_segment";
 import prepareSourceBuffer from "./prepare_source_buffer";
 import removeBufferAroundTime from "./remove_buffer_around_time";
-import {
-  IContentInfo,
-  ILoaders,
-} from "./types";
+import { IContentInfo, ILoaders } from "./types";
 import VideoThumbnailLoaderError from "./video_thumbnail_loader_error";
 
 const MIN_NEEDED_DATA_AFTER_TIME = 2;
 
-const loaders : ILoaders = {};
+const loaders: ILoaders = {};
 
 /**
  * This tool, as a supplement to the RxPlayer, intent to help creating thumbnails
@@ -53,7 +48,7 @@ const loaders : ILoaders = {};
 export default class VideoThumbnailLoader {
   private readonly _videoElement: HTMLVideoElement;
   private _player: Player;
-  private _lastRepresentationInfo : IVideoThumbnailLoaderRepresentationInfo | null;
+  private _lastRepresentationInfo: IVideoThumbnailLoaderRepresentationInfo | null;
 
   constructor(videoElement: HTMLVideoElement, player: Player) {
     this._videoElement = videoElement;
@@ -99,20 +94,25 @@ export default class VideoThumbnailLoader {
         this._lastRepresentationInfo = null;
       }
       return Promise.reject(
-        new VideoThumbnailLoaderError("NO_TRACK",
-                                      "Couldn't find a trickmode track for this time.")
+        new VideoThumbnailLoaderError(
+          "NO_TRACK",
+          "Couldn't find a trickmode track for this time."
+        )
       );
     }
 
-    if (this._lastRepresentationInfo !== null &&
-        !areSameRepresentation(this._lastRepresentationInfo.content, content))
-    {
+    if (
+      this._lastRepresentationInfo !== null &&
+      !areSameRepresentation(this._lastRepresentationInfo.content, content)
+    ) {
       this._lastRepresentationInfo.cleaner.cancel();
       this._lastRepresentationInfo = null;
     }
 
-    const neededSegments = content.representation.index
-      .getSegments(time, MIN_NEEDED_DATA_AFTER_TIME);
+    const neededSegments = content.representation.index.getSegments(
+      time,
+      MIN_NEEDED_DATA_AFTER_TIME
+    );
 
     if (neededSegments.length === 0) {
       if (this._lastRepresentationInfo !== null) {
@@ -120,8 +120,10 @@ export default class VideoThumbnailLoader {
         this._lastRepresentationInfo = null;
       }
       return Promise.reject(
-        new VideoThumbnailLoaderError("NO_THUMBNAIL",
-                                      "Couldn't find any thumbnail for the given time.")
+        new VideoThumbnailLoaderError(
+          "NO_THUMBNAIL",
+          "Couldn't find any thumbnail for the given time."
+        )
       );
     }
 
@@ -129,11 +131,12 @@ export default class VideoThumbnailLoader {
     for (let j = 0; j < neededSegments.length; j++) {
       const { time: stime, duration, timescale } = neededSegments[j];
       const start = stime / timescale;
-      const end = start + (duration / timescale);
+      const end = start + duration / timescale;
       for (let i = 0; i < this._videoElement.buffered.length; i++) {
-        if (this._videoElement.buffered.start(i) - 0.001 <= start &&
-            this._videoElement.buffered.end(i) + 0.001 >= end)
-        {
+        if (
+          this._videoElement.buffered.start(i) - 0.001 <= start &&
+          this._videoElement.buffered.end(i) + 0.001 >= end
+        ) {
           neededSegments.splice(j, 1);
           j--;
           break;
@@ -148,9 +151,11 @@ export default class VideoThumbnailLoader {
     }
 
     if (log.hasLevel("DEBUG")) {
-      log.debug("VTL: Found thumbnail for time", time, neededSegments.map(s =>
-        `start: ${s.time} - end: ${s.end}`
-      ).join(", "));
+      log.debug(
+        "VTL: Found thumbnail for time",
+        time,
+        neededSegments.map((s) => `start: ${s.time} - end: ${s.end}`).join(", ")
+      );
     }
 
     const loader = loaders[content.manifest.transport];
@@ -159,13 +164,16 @@ export default class VideoThumbnailLoader {
         this._lastRepresentationInfo.cleaner.cancel();
         this._lastRepresentationInfo = null;
       }
-      return Promise.reject(new VideoThumbnailLoaderError(
-        "NO_LOADER",
-        "VideoThumbnailLoaderError: No imported loader for this transport type: " +
-          content.manifest.transport));
+      return Promise.reject(
+        new VideoThumbnailLoaderError(
+          "NO_LOADER",
+          "VideoThumbnailLoaderError: No imported loader for this transport type: " +
+            content.manifest.transport
+        )
+      );
     }
 
-    let lastRepInfo : IVideoThumbnailLoaderRepresentationInfo;
+    let lastRepInfo: IVideoThumbnailLoaderRepresentationInfo;
     if (this._lastRepresentationInfo === null) {
       const cleaner = new TaskCanceller();
       const segmentFetcher = createSegmentFetcher(
@@ -174,10 +182,12 @@ export default class VideoThumbnailLoader {
         null,
         // We don't care about the SegmentFetcher's lifecycle events
         {},
-        { baseDelay: 0,
+        {
+          baseDelay: 0,
           maxDelay: 0,
           maxRetry: 0,
-          requestTimeout: config.getCurrent().DEFAULT_REQUEST_TIMEOUT }
+          requestTimeout: config.getCurrent().DEFAULT_REQUEST_TIMEOUT,
+        }
       ) as ISegmentFetcher<ArrayBuffer | Uint8Array>;
       const segmentBufferProm = prepareSourceBuffer(
         this._videoElement,
@@ -188,12 +198,13 @@ export default class VideoThumbnailLoader {
         if (initSegment === null) {
           return segmentBuffer;
         }
-        const segmentInfo = objectAssign({ segment: initSegment },
-                                         content);
-        await loadAndPushSegment(segmentInfo,
-                                 segmentBuffer,
-                                 lastRepInfo.segmentFetcher,
-                                 cleaner.signal);
+        const segmentInfo = objectAssign({ segment: initSegment }, content);
+        await loadAndPushSegment(
+          segmentInfo,
+          segmentBuffer,
+          lastRepInfo.segmentFetcher,
+          cleaner.signal
+        );
         return segmentBuffer;
       });
       lastRepInfo = {
@@ -225,33 +236,43 @@ export default class VideoThumbnailLoader {
         );
       })
       .then(async (segmentBuffer) => {
-        abortUnlistedSegmentRequests(lastRepInfo.pendingRequests, neededSegments);
+        abortUnlistedSegmentRequests(
+          lastRepInfo.pendingRequests,
+          neededSegments
+        );
 
         log.debug("VTL: Removing buffer around time.", time);
-        await removeBufferAroundTime(this._videoElement,
-                                     segmentBuffer,
-                                     time,
-                                     undefined,
-                                     currentTaskCanceller.signal);
+        await removeBufferAroundTime(
+          this._videoElement,
+          segmentBuffer,
+          time,
+          undefined,
+          currentTaskCanceller.signal
+        );
 
-
-        abortUnlistedSegmentRequests(lastRepInfo.pendingRequests, neededSegments);
-        const promises : Array<Promise<unknown>> = [];
+        abortUnlistedSegmentRequests(
+          lastRepInfo.pendingRequests,
+          neededSegments
+        );
+        const promises: Array<Promise<unknown>> = [];
         for (const segment of neededSegments) {
-          const pending = arrayFind(lastRepInfo.pendingRequests,
-                                    ({ segmentId }) => segmentId === segment.id);
+          const pending = arrayFind(
+            lastRepInfo.pendingRequests,
+            ({ segmentId }) => segmentId === segment.id
+          );
           if (pending !== undefined) {
             promises.push(pending.promise);
           } else {
             const requestCanceller = new TaskCanceller({
               cancelOn: lastRepInfo.cleaner.signal,
             });
-            const segmentInfo = objectAssign({ segment },
-                                             content);
-            const prom = loadAndPushSegment(segmentInfo,
-                                            segmentBuffer,
-                                            lastRepInfo.segmentFetcher,
-                                            requestCanceller.signal);
+            const segmentInfo = objectAssign({ segment }, content);
+            const prom = loadAndPushSegment(
+              segmentInfo,
+              segmentBuffer,
+              lastRepInfo.segmentFetcher,
+              requestCanceller.signal
+            );
             const newReq = {
               segmentId: segment.id,
               canceller: requestCanceller,
@@ -275,8 +296,10 @@ export default class VideoThumbnailLoader {
       })
       .catch((err) => {
         if (err instanceof CancellationError) {
-          throw new VideoThumbnailLoaderError("ABORTED",
-                                              "VideoThumbnailLoaderError: Aborted job.");
+          throw new VideoThumbnailLoaderError(
+            "ABORTED",
+            "VideoThumbnailLoaderError: Aborted job."
+          );
         }
         throw err;
       });
@@ -303,10 +326,12 @@ function areSameRepresentation(
   contentInfo1: IContentInfo,
   contentInfo2: IContentInfo
 ): boolean {
-  return (contentInfo1.representation.id === contentInfo2.representation.id &&
-          contentInfo1.adaptation.id === contentInfo2.adaptation.id &&
-          contentInfo1.period.id === contentInfo2.period.id &&
-          contentInfo1.manifest.id === contentInfo2.manifest.id);
+  return (
+    contentInfo1.representation.id === contentInfo2.representation.id &&
+    contentInfo1.adaptation.id === contentInfo2.adaptation.id &&
+    contentInfo1.period.id === contentInfo2.period.id &&
+    contentInfo1.manifest.id === contentInfo2.manifest.id
+  );
 }
 
 /**
@@ -321,18 +346,18 @@ function getTrickModeInfo(
   manifest: Manifest
 ): IContentInfo | null {
   const period = manifest.getPeriodForTime(time);
-  if (period === undefined ||
-      period.adaptations.video === undefined ||
-      period.adaptations.video.length === 0) {
+  if (
+    period === undefined ||
+    period.adaptations.video === undefined ||
+    period.adaptations.video.length === 0
+  ) {
     return null;
   }
   for (const videoAdaptation of period.adaptations.video) {
-    const representation = videoAdaptation.trickModeTracks?.[0].representations?.[0];
+    const representation =
+      videoAdaptation.trickModeTracks?.[0].representations?.[0];
     if (!isNullOrUndefined(representation)) {
-      return { manifest,
-               period,
-               adaptation: videoAdaptation,
-               representation };
+      return { manifest, period, adaptation: videoAdaptation, representation };
     }
   }
   return null;
@@ -343,8 +368,8 @@ function abortUnlistedSegmentRequests(
   neededSegments: ISegment[]
 ): void {
   pendingRequests
-    .filter(req => !neededSegments.some(({ id }) => id === req.segmentId))
-    .forEach(req => {
+    .filter((req) => !neededSegments.some(({ id }) => id === req.segmentId))
+    .forEach((req) => {
       req.canceller.cancel();
     });
 }
@@ -359,7 +384,7 @@ interface IVideoThumbnailLoaderRepresentationInfo {
    * allocated for the current Manifest and remove MediaSource from the video
    * Element the VideoThumbnailLoader is associated with.
    */
-  cleaner : TaskCanceller;
+  cleaner: TaskCanceller;
   /**
    * Promise encapsulating the task of creating the MediaSource, the video
    * AudioVideoSegmentBuffer, and pushing the initialization segment of the
@@ -367,17 +392,17 @@ interface IVideoThumbnailLoaderRepresentationInfo {
    *
    * Resolves when done, rejects if any of those steps fail.
    */
-  segmentBuffer : Promise<AudioVideoSegmentBuffer>;
+  segmentBuffer: Promise<AudioVideoSegmentBuffer>;
   /**
    * Information on the content considered in this
    * `IVideoThumbnailLoaderRepresentationInfo`.
    */
-  content : IContentInfo;
+  content: IContentInfo;
   /**
    * `ISegmentFetcher` used to fetch video media segments for the current
    * Representation.
    */
-  segmentFetcher : ISegmentFetcher<ArrayBuffer | Uint8Array>;
+  segmentFetcher: ISegmentFetcher<ArrayBuffer | Uint8Array>;
   /**
    * List video media segment requests AND pushing (on the buffer) operations
    * that are currently pending.
@@ -385,7 +410,7 @@ interface IVideoThumbnailLoaderRepresentationInfo {
    * Once a segment is loaded and pushed with success, it is removed from
    * `pendingRequests`.
    */
-  pendingRequests : IPendingRequestInfo[];
+  pendingRequests: IPendingRequestInfo[];
 }
 
 interface IPendingRequestInfo {

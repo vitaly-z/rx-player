@@ -1,20 +1,18 @@
 import { expect } from "chai";
 import RxPlayer from "../../../src";
-import {
-  forcedSubtitles,
-} from "../../contents/DASH_static_SegmentTimeline";
+import { forcedSubtitles } from "../../contents/DASH_static_SegmentTimeline";
 import XHRMock from "../../utils/request_mock";
-import {
-  waitForLoadedStateAfterLoadVideo,
-} from "../../utils/waitForPlayerState";
+import { waitForLoadedStateAfterLoadVideo } from "../../utils/waitForPlayerState";
 
 describe("DASH forced-subtitles content (SegmentTimeline)", function () {
   let player;
   let xhrMock;
 
   async function loadContent() {
-    player.loadVideo({ url: forcedSubtitles.url,
-                       transport: forcedSubtitles.transport });
+    player.loadVideo({
+      url: forcedSubtitles.url,
+      transport: forcedSubtitles.transport,
+    });
     await waitForLoadedStateAfterLoadVideo(player);
   }
 
@@ -34,11 +32,13 @@ describe("DASH forced-subtitles content (SegmentTimeline)", function () {
     expect(currentTextTrack.closedCaption).to.equal(
       props.closedCaption,
       `"closedCaption" not set to "${props.closedCaption}" but ` +
-      `to "${currentTextTrack.closedCaption}"`);
+        `to "${currentTextTrack.closedCaption}"`
+    );
     expect(currentTextTrack.forced).to.equal(
       props.forced,
       `"forced" not set to "${props.forced}" but ` +
-      `to "${currentTextTrack.forced}"`);
+        `to "${currentTextTrack.forced}"`
+    );
   }
 
   beforeEach(() => {
@@ -60,11 +60,11 @@ describe("DASH forced-subtitles content (SegmentTimeline)", function () {
     checkTextTrack("fr", "fra", { closedCaption: false, forced: true });
   });
 
-  it("should list the corresponding text tracks as \"forced\"", function () {
+  it('should list the corresponding text tracks as "forced"', function () {
     return new Promise((resolve, reject) => {
       player = new RxPlayer();
 
-      player.addEventListener("error", err => {
+      player.addEventListener("error", (err) => {
         reject(err);
       });
       player.addEventListener("newAvailablePeriods", (periods) => {
@@ -72,11 +72,11 @@ describe("DASH forced-subtitles content (SegmentTimeline)", function () {
           expect(periods).to.have.length(1);
           const tracksPeriod1 = player.getAvailableTextTracks(periods[0].id);
           expect(tracksPeriod1).to.have.length(5);
-          const forcedTracksPeriod1 = tracksPeriod1
-            .filter(t => t.forced);
+          const forcedTracksPeriod1 = tracksPeriod1.filter((t) => t.forced);
           expect(forcedTracksPeriod1).to.have.length(3);
-          const forcedTracksLanguages = forcedTracksPeriod1
-            .map(t => t.language);
+          const forcedTracksLanguages = forcedTracksPeriod1.map(
+            (t) => t.language
+          );
           expect(forcedTracksLanguages).to.include("fr");
           expect(forcedTracksLanguages).to.include("de");
           expect(forcedTracksLanguages).to.include("");

@@ -28,11 +28,11 @@ import parseSegmentURL from "./SegmentURL";
  */
 export default function parseSegmentList(
   root: Element
-) : [ISegmentListIntermediateRepresentation, Error[]] {
+): [ISegmentListIntermediateRepresentation, Error[]] {
   const [base, baseWarnings] = parseSegmentBase(root);
-  let warnings : Error[] = baseWarnings;
+  let warnings: Error[] = baseWarnings;
 
-  const list : ISegmentUrlIntermediateRepresentation[] = [];
+  const list: ISegmentUrlIntermediateRepresentation[] = [];
 
   const segmentListChildren = root.childNodes;
   for (let i = 0; i < segmentListChildren.length; i++) {

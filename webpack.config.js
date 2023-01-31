@@ -9,7 +9,8 @@
  * preferred "Minimal" version of the player is imported.
  */
 
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin =
+  require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const TerserPlugin = require("terser-webpack-plugin");
 const webpack = require("webpack");
 
@@ -32,26 +33,26 @@ module.exports = (env) => {
 
   const plugins = [
     new webpack.DefinePlugin({
-      "__FEATURES__": {
-        IS_DISABLED: +(false), // === 0 (wrote this way to be explicit)
-        IS_ENABLED: +(true), // === 1 (wrote this way to be explicit)
+      __FEATURES__: {
+        IS_DISABLED: +false, // === 0 (wrote this way to be explicit)
+        IS_ENABLED: +true, // === 1 (wrote this way to be explicit)
 
         // Each following feature is compared to IS_ENABLED or IS_DISABLED in
         // code to check whether the feature is enabled or not.
-        SMOOTH: +(true),
-        DASH: +(true),
-        LOCAL_MANIFEST: +(false),
-        METAPLAYLIST: +(false),
-        DIRECTFILE: +(true),
-        NATIVE_TTML: +(true),
-        NATIVE_SAMI: +(true),
-        NATIVE_VTT: +(true),
-        NATIVE_SRT: +(true),
-        HTML_TTML: +(true),
-        HTML_SAMI: +(true),
-        HTML_VTT: +(true),
-        HTML_SRT: +(true),
-        EME: +(true),
+        SMOOTH: +true,
+        DASH: +true,
+        LOCAL_MANIFEST: +false,
+        METAPLAYLIST: +false,
+        DIRECTFILE: +true,
+        NATIVE_TTML: +true,
+        NATIVE_SAMI: +true,
+        NATIVE_VTT: +true,
+        NATIVE_SRT: +true,
+        HTML_TTML: +true,
+        HTML_SAMI: +true,
+        HTML_VTT: +true,
+        HTML_SRT: +true,
+        EME: +true,
       },
       __ENVIRONMENT__: {
         PRODUCTION: 0,
@@ -59,7 +60,7 @@ module.exports = (env) => {
         CURRENT_ENV: isDevMode ? 1 : 0,
       },
       __LOGGER_LEVEL__: {
-        CURRENT_LEVEL: isDevMode ? "\"INFO\"" : "\"ERROR\"",
+        CURRENT_LEVEL: isDevMode ? '"INFO"' : '"ERROR"',
       },
     }),
   ];
@@ -106,10 +107,8 @@ module.exports = (env) => {
               loader: "babel-loader",
               options: {
                 cacheDirectory: true,
-                presets: [
-                  [ "@babel/env", { loose: true, modules: false } ],
-                ],
-                plugins: [[ "@babel/plugin-transform-runtime" ]],
+                presets: [["@babel/env", { loose: true, modules: false }]],
+                plugins: [["@babel/plugin-transform-runtime"]],
               },
             },
             { loader: "ts-loader" },

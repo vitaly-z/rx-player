@@ -19,15 +19,15 @@ import isNode from "../../is_node";
 import { ICustomMediaKeys } from "./types";
 
 interface IMozMediaKeysConstructor {
-  new(keySystem: string): ICustomMediaKeys;
+  new (keySystem: string): ICustomMediaKeys;
   isTypeSupported(keySystem: string, type?: string | null): boolean;
 }
 
-let MozMediaKeysConstructor: IMozMediaKeysConstructor|undefined;
+let MozMediaKeysConstructor: IMozMediaKeysConstructor | undefined;
 if (!isNode) {
-  const { MozMediaKeys } = (window as Window & {
-    MozMediaKeys? : IMozMediaKeysConstructor;
-  });
+  const { MozMediaKeys } = window as Window & {
+    MozMediaKeys?: IMozMediaKeysConstructor;
+  };
   if (
     MozMediaKeys !== undefined &&
     MozMediaKeys.prototype !== undefined &&
@@ -41,15 +41,15 @@ if (!isNode) {
 }
 export { MozMediaKeysConstructor };
 
-export default function getMozMediaKeysCallbacks() : {
+export default function getMozMediaKeysCallbacks(): {
   isTypeSupported: (keyType: string) => boolean;
   createCustomMediaKeys: (keyType: string) => ICustomMediaKeys;
   setMediaKeys: (
     elt: HTMLMediaElement,
-    mediaKeys: MediaKeys|ICustomMediaKeys|null
+    mediaKeys: MediaKeys | ICustomMediaKeys | null
   ) => void;
 } {
-  const isTypeSupported = (keySystem: string, type?: string|null) => {
+  const isTypeSupported = (keySystem: string, type?: string | null) => {
     if (MozMediaKeysConstructor === undefined) {
       throw new Error("No MozMediaKeys API.");
     }
@@ -66,10 +66,13 @@ export default function getMozMediaKeysCallbacks() : {
   };
   const setMediaKeys = (
     mediaElement: HTMLMediaElement,
-    mediaKeys: MediaKeys|ICustomMediaKeys|null
+    mediaKeys: MediaKeys | ICustomMediaKeys | null
   ): void => {
-    const elt : ICompatHTMLMediaElement = mediaElement;
-    if (elt.mozSetMediaKeys === undefined || typeof elt.mozSetMediaKeys !== "function") {
+    const elt: ICompatHTMLMediaElement = mediaElement;
+    if (
+      elt.mozSetMediaKeys === undefined ||
+      typeof elt.mozSetMediaKeys !== "function"
+    ) {
       throw new Error("Can't set video on MozMediaKeys.");
     }
     return elt.mozSetMediaKeys(mediaKeys);

@@ -26,22 +26,18 @@ import { INetworkErrorType } from "./error_codes";
  * @extends Error
  */
 export default class RequestError extends Error {
-  public readonly name : "RequestError";
-  public readonly type : INetworkErrorType;
-  public readonly message : string;
-  public readonly url : string;
-  public readonly status : number;
+  public readonly name: "RequestError";
+  public readonly type: INetworkErrorType;
+  public readonly message: string;
+  public readonly url: string;
+  public readonly status: number;
 
   /**
    * @param {string} url
    * @param {number} status
    * @param {string} type
    */
-  constructor(
-    url : string,
-    status : number,
-    type : INetworkErrorType
-  ) {
+  constructor(url: string, status: number, type: INetworkErrorType) {
     super();
     // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
     Object.setPrototypeOf(this, RequestError.prototype);

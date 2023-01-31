@@ -30,11 +30,11 @@ import { MANIFEST_UPDATE_TYPE } from "./types";
  * @returns {Object}
  */
 export default function updatePeriodInPlace(
-  oldPeriod : Period,
-  newPeriod : Period,
-  updateType : MANIFEST_UPDATE_TYPE
-) : IUpdatedPeriodResult {
-  const res : IUpdatedPeriodResult = {
+  oldPeriod: Period,
+  newPeriod: Period,
+  updateType: MANIFEST_UPDATE_TYPE
+): IUpdatedPeriodResult {
+  const res: IUpdatedPeriodResult = {
     updatedAdaptations: [],
     removedAdaptations: [],
     addedAdaptations: [],
@@ -49,42 +49,55 @@ export default function updatePeriodInPlace(
 
   for (let j = 0; j < oldAdaptations.length; j++) {
     const oldAdaptation = oldAdaptations[j];
-    const newAdaptationIdx = arrayFindIndex(newAdaptations,
-                                            a => a.id === oldAdaptation.id);
+    const newAdaptationIdx = arrayFindIndex(
+      newAdaptations,
+      (a) => a.id === oldAdaptation.id
+    );
 
     if (newAdaptationIdx === -1) {
-      log.warn("Manifest: Adaptation \"" +
-               oldAdaptations[j].id +
-               "\" not found when merging.");
+      log.warn(
+        'Manifest: Adaptation "' +
+          oldAdaptations[j].id +
+          '" not found when merging.'
+      );
       const [removed] = oldAdaptations.splice(j, 1);
       j--;
       res.removedAdaptations.push(removed);
     } else {
       const [newAdaptation] = newAdaptations.splice(newAdaptationIdx, 1);
-      const updatedRepresentations : Representation[] = [];
-      const addedRepresentations : Representation[] = [];
-      const removedRepresentations : Representation[] = [];
-      res.updatedAdaptations.push({ adaptation: oldAdaptation,
-                                    updatedRepresentations,
-                                    addedRepresentations,
-                                    removedRepresentations });
+      const updatedRepresentations: Representation[] = [];
+      const addedRepresentations: Representation[] = [];
+      const removedRepresentations: Representation[] = [];
+      res.updatedAdaptations.push({
+        adaptation: oldAdaptation,
+        updatedRepresentations,
+        addedRepresentations,
+        removedRepresentations,
+      });
 
       const oldRepresentations = oldAdaptation.representations;
       const newRepresentations = newAdaptation.representations.slice();
 
       for (let k = 0; k < oldRepresentations.length; k++) {
         const oldRepresentation = oldRepresentations[k];
-        const newRepresentationIdx = arrayFindIndex(newRepresentations, representation =>
-          representation.id === oldRepresentation.id);
+        const newRepresentationIdx = arrayFindIndex(
+          newRepresentations,
+          (representation) => representation.id === oldRepresentation.id
+        );
 
         if (newRepresentationIdx === -1) {
-          log.warn(`Manifest: Representation "${oldRepresentations[k].id}" ` +
-                   "not found when merging.");
+          log.warn(
+            `Manifest: Representation "${oldRepresentations[k].id}" ` +
+              "not found when merging."
+          );
           const [removed] = oldRepresentations.splice(k, 1);
           k--;
           removedRepresentations.push(removed);
         } else {
-          const [newRepresentation] = newRepresentations.splice(newRepresentationIdx, 1);
+          const [newRepresentation] = newRepresentations.splice(
+            newRepresentationIdx,
+            1
+          );
           updatedRepresentations.push(oldRepresentation);
           oldRepresentation.cdnMetadata = newRepresentation.cdnMetadata;
           if (updateType === MANIFEST_UPDATE_TYPE.Full) {
@@ -96,16 +109,20 @@ export default function updatePeriodInPlace(
       }
 
       if (newRepresentations.length > 0) {
-        log.warn(`Manifest: ${newRepresentations.length} new Representations ` +
-                 "found when merging.");
+        log.warn(
+          `Manifest: ${newRepresentations.length} new Representations ` +
+            "found when merging."
+        );
         oldAdaptation.representations.push(...newRepresentations);
         addedRepresentations.push(...newRepresentations);
       }
     }
   }
   if (newAdaptations.length > 0) {
-    log.warn(`Manifest: ${newAdaptations.length} new Adaptations ` +
-             "found when merging.");
+    log.warn(
+      `Manifest: ${newAdaptations.length} new Adaptations ` +
+        "found when merging."
+    );
     for (const adap of newAdaptations) {
       const prevAdaps = oldPeriod.adaptations[adap.type];
       if (prevAdaps === undefined) {
@@ -125,18 +142,18 @@ export default function updatePeriodInPlace(
  */
 export interface IUpdatedPeriodResult {
   /** Information on Adaptations that have been updated. */
-  updatedAdaptations : Array<{
+  updatedAdaptations: Array<{
     /** The concerned Adaptation. */
     adaptation: Adaptation;
     /** Representations that have been updated. */
-    updatedRepresentations : Representation[];
+    updatedRepresentations: Representation[];
     /** Representations that have been removed from the Adaptation. */
-    removedRepresentations : Representation[];
+    removedRepresentations: Representation[];
     /** Representations that have been added to the Adaptation. */
-    addedRepresentations : Representation[];
+    addedRepresentations: Representation[];
   }>;
   /** Adaptation that have been removed from the Period. */
-  removedAdaptations : Adaptation[];
+  removedAdaptations: Adaptation[];
   /** Adaptation that have been added to the Period. */
-  addedAdaptations : Adaptation[];
+  addedAdaptations: Adaptation[];
 }

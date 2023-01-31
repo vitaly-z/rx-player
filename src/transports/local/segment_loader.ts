@@ -38,9 +38,9 @@ import {
  * @returns {Promise}
  */
 function loadInitSegment(
-  customSegmentLoader : ILocalManifestInitSegmentLoader,
-  cancelSignal : CancellationSignal
-) : Promise<ISegmentLoaderResultSegmentLoaded<ArrayBuffer | null>> {
+  customSegmentLoader: ILocalManifestInitSegmentLoader,
+  cancelSignal: CancellationSignal
+): Promise<ISegmentLoaderResultSegmentLoaded<ArrayBuffer | null>> {
   return new Promise((res, rej) => {
     /** `true` when the custom segmentLoader should not be active anymore. */
     let hasFinished = false;
@@ -49,27 +49,31 @@ function loadInitSegment(
      * Callback triggered when the custom segment loader has a response.
      * @param {Object} _args
      */
-    const resolve = (_args : {
-      data : ArrayBuffer | null;
-      size? : number;
-      duration? : number;
+    const resolve = (_args: {
+      data: ArrayBuffer | null;
+      size?: number;
+      duration?: number;
     }) => {
       if (hasFinished || cancelSignal.isCancelled) {
         return;
       }
       hasFinished = true;
       cancelSignal.deregister(abortLoader);
-      res({ resultType: "segment-loaded",
-            resultData: { responseData: _args.data,
-                          size: _args.size,
-                          requestDuration: _args.duration } });
+      res({
+        resultType: "segment-loaded",
+        resultData: {
+          responseData: _args.data,
+          size: _args.size,
+          requestDuration: _args.duration,
+        },
+      });
     };
 
     /**
      * Callback triggered when the custom segment loader fails
      * @param {*} err - The corresponding error encountered
      */
-    const reject = (err? : Error) => {
+    const reject = (err?: Error) => {
       if (hasFinished || cancelSignal.isCancelled) {
         return;
       }
@@ -85,7 +89,7 @@ function loadInitSegment(
      * The logic to run when this loader is cancelled while pending.
      * @param {Error} err
      */
-    function abortLoader(err : CancellationError) {
+    function abortLoader(err: CancellationError) {
       if (hasFinished) {
         return;
       }
@@ -105,10 +109,10 @@ function loadInitSegment(
  * @returns {Promise.<Object>}
  */
 function loadSegment(
-  segment : { time : number; duration : number; timestampOffset? : number },
-  customSegmentLoader : ILocalManifestSegmentLoader,
-  cancelSignal : CancellationSignal
-) : Promise< ISegmentLoaderResultSegmentLoaded<ArrayBuffer | null>> {
+  segment: { time: number; duration: number; timestampOffset?: number },
+  customSegmentLoader: ILocalManifestSegmentLoader,
+  cancelSignal: CancellationSignal
+): Promise<ISegmentLoaderResultSegmentLoaded<ArrayBuffer | null>> {
   return new Promise((res, rej) => {
     /** `true` when the custom segmentLoader should not be active anymore. */
     let hasFinished = false;
@@ -117,27 +121,31 @@ function loadSegment(
      * Callback triggered when the custom segment loader has a response.
      * @param {Object} _args
      */
-    const resolve = (_args : {
-      data : ArrayBuffer | null;
-      size? : number;
-      duration? : number;
+    const resolve = (_args: {
+      data: ArrayBuffer | null;
+      size?: number;
+      duration?: number;
     }) => {
       if (hasFinished || cancelSignal.isCancelled) {
         return;
       }
       hasFinished = true;
       cancelSignal.deregister(abortLoader);
-      res({ resultType: "segment-loaded",
-            resultData: { responseData: _args.data,
-                          size: _args.size,
-                          requestDuration: _args.duration } });
+      res({
+        resultType: "segment-loaded",
+        resultData: {
+          responseData: _args.data,
+          size: _args.size,
+          requestDuration: _args.duration,
+        },
+      });
     };
 
     /**
      * Callback triggered when the custom segment loader fails
      * @param {*} err - The corresponding error encountered
      */
-    const reject = (err? : Error) => {
+    const reject = (err?: Error) => {
       if (hasFinished || cancelSignal.isCancelled) {
         return;
       }
@@ -145,15 +153,19 @@ function loadSegment(
       cancelSignal.deregister(abortLoader);
 
       // Format error and send it
-      const castedErr = err as (null | undefined | { message? : string;
-                                                     canRetry? : boolean;
-                                                     xhr? : XMLHttpRequest; });
-      const message = castedErr?.message ??
-                      "Unknown error when fetching a local segment through a " +
-                      "custom segmentLoader.";
-      const emittedErr = new CustomLoaderError(message,
-                                               castedErr?.canRetry ?? false,
-                                               castedErr?.xhr);
+      const castedErr = err as
+        | null
+        | undefined
+        | { message?: string; canRetry?: boolean; xhr?: XMLHttpRequest };
+      const message =
+        castedErr?.message ??
+        "Unknown error when fetching a local segment through a " +
+          "custom segmentLoader.";
+      const emittedErr = new CustomLoaderError(
+        message,
+        castedErr?.canRetry ?? false,
+        castedErr?.xhr
+      );
       rej(emittedErr);
     };
 
@@ -164,7 +176,7 @@ function loadSegment(
      * The logic to run when this loader is cancelled while pending.
      * @param {Error} err
      */
-    function abortLoader(err : CancellationError) {
+    function abortLoader(err: CancellationError) {
       if (hasFinished) {
         return;
       }
@@ -186,27 +198,35 @@ function loadSegment(
  * @returns {Promise}
  */
 export default function segmentLoader(
-  _wantedCdn : ICdnMetadata | null,
-  content : ISegmentContext,
-  _loaderOptions : ISegmentLoaderOptions, // TODO use timeout?
-  cancelSignal : CancellationSignal,
-  _callbacks : ISegmentLoaderCallbacks<ArrayBuffer | null>
-) : Promise<ISegmentLoaderResultSegmentLoaded<ArrayBuffer | null>> {
+  _wantedCdn: ICdnMetadata | null,
+  content: ISegmentContext,
+  _loaderOptions: ISegmentLoaderOptions, // TODO use timeout?
+  cancelSignal: CancellationSignal,
+  _callbacks: ISegmentLoaderCallbacks<ArrayBuffer | null>
+): Promise<ISegmentLoaderResultSegmentLoaded<ArrayBuffer | null>> {
   const { segment } = content;
   const privateInfos = segment.privateInfos;
   if (segment.isInit) {
-    if (privateInfos === undefined ||
-        isNullOrUndefined(privateInfos.localManifestInitSegment)) {
+    if (
+      privateInfos === undefined ||
+      isNullOrUndefined(privateInfos.localManifestInitSegment)
+    ) {
       throw new Error("Segment is not a local Manifest segment");
     }
-    return loadInitSegment(privateInfos.localManifestInitSegment.load,
-                           cancelSignal);
+    return loadInitSegment(
+      privateInfos.localManifestInitSegment.load,
+      cancelSignal
+    );
   }
-  if (privateInfos === undefined ||
-      isNullOrUndefined(privateInfos.localManifestSegment)) {
+  if (
+    privateInfos === undefined ||
+    isNullOrUndefined(privateInfos.localManifestSegment)
+  ) {
     throw new Error("Segment is not an local Manifest segment");
   }
-  return loadSegment(privateInfos.localManifestSegment.segment,
-                     privateInfos.localManifestSegment.load,
-                     cancelSignal);
+  return loadSegment(
+    privateInfos.localManifestSegment.segment,
+    privateInfos.localManifestSegment.load,
+    cancelSignal
+  );
 }

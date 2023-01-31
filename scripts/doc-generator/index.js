@@ -6,7 +6,7 @@ if (process.argv.length < 4) {
   /* eslint-disable no-console */
   console.error(
     "Error: The documentation generator needs at least two arguments: " +
-    "the input directory and the output directory"
+      "the input directory and the output directory"
   );
   /* eslint-enable no-console */
   process.exit(1);
@@ -21,11 +21,12 @@ async function main() {
   createDocumentation(inDir, outDir, {
     css: [
       path.join(__dirname, "styles/style.css"),
-      path.join(__dirname, "styles/code.css")
+      path.join(__dirname, "styles/code.css"),
     ],
 
     // Add suffix to each page title
-    getPageTitle: originalTitle => originalTitle + " - RxPlayer Documentation",
+    getPageTitle: (originalTitle) =>
+      originalTitle + " - RxPlayer Documentation",
 
     version,
   });

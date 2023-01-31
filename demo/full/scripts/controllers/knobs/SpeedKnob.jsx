@@ -4,18 +4,15 @@ import Knob from "../../components/Knob.jsx";
 
 const AVAILABLE_RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3];
 
-const PlaybackRateKnob = ({
-  player,
-  className,
-  playbackRate,
-}) => {
+const PlaybackRateKnob = ({ player, className, playbackRate }) => {
   const aliases = { 1: "Normal" };
   const options = AVAILABLE_RATES.map((rate) => {
     return aliases[rate] || rate;
   });
 
-  let selectedIndex = AVAILABLE_RATES
-    .findIndex((rate) => playbackRate === rate);
+  let selectedIndex = AVAILABLE_RATES.findIndex(
+    (rate) => playbackRate === rate
+  );
 
   const onPlaybackRateChange = ({ index }) => {
     if (index > -1) {
@@ -38,8 +35,10 @@ const PlaybackRateKnob = ({
   );
 };
 
-export default React.memo(withModulesState({
-  player: {
-    playbackRate: "playbackRate",
-  },
-})(PlaybackRateKnob));
+export default React.memo(
+  withModulesState({
+    player: {
+      playbackRate: "playbackRate",
+    },
+  })(PlaybackRateKnob)
+);

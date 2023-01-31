@@ -39,14 +39,14 @@ import {
  * @returns {Object}
  */
 function parseRepresentationChildren(
-  representationChildren : NodeList
-) : [IRepresentationChildren, Error[]] {
-  const children : IRepresentationChildren = {
+  representationChildren: NodeList
+): [IRepresentationChildren, Error[]] {
+  const children: IRepresentationChildren = {
     baseURLs: [],
   };
   const contentProtections = [];
 
-  let warnings : Error[] = [];
+  let warnings: Error[] = [];
   for (let i = 0; i < representationChildren.length; i++) {
     if (representationChildren[i].nodeType === Node.ELEMENT_NODE) {
       const currentElement = representationChildren[i] as Element;
@@ -66,27 +66,29 @@ function parseRepresentationChildren(
           children.inbandEventStreams.push(parseScheme(currentElement));
           break;
         case "SegmentBase":
-          const [segmentBase, segmentBaseWarnings] = parseSegmentBase(currentElement);
+          const [segmentBase, segmentBaseWarnings] =
+            parseSegmentBase(currentElement);
           children.segmentBase = segmentBase;
           if (segmentBaseWarnings.length > 0) {
             warnings = warnings.concat(segmentBaseWarnings);
           }
           break;
         case "SegmentList":
-          const [segmentList, segmentListWarnings] = parseSegmentList(currentElement);
+          const [segmentList, segmentListWarnings] =
+            parseSegmentList(currentElement);
           warnings = warnings.concat(segmentListWarnings);
           children.segmentList = segmentList;
           break;
         case "SegmentTemplate":
-          const [ segmentTemplate,
-                  segmentTemplateWarnings ] = parseSegmentTemplate(currentElement);
+          const [segmentTemplate, segmentTemplateWarnings] =
+            parseSegmentTemplate(currentElement);
           warnings = warnings.concat(segmentTemplateWarnings);
           children.segmentTemplate = segmentTemplate;
           break;
 
         case "ContentProtection":
-          const [ contentProtection,
-                  contentProtectionWarnings ] = parseContentProtection(currentElement);
+          const [contentProtection, contentProtectionWarnings] =
+            parseContentProtection(currentElement);
           if (contentProtectionWarnings.length > 0) {
             warnings = warnings.concat(contentProtectionWarnings);
           }
@@ -108,24 +110,25 @@ function parseRepresentationChildren(
  * @returns {Array}
  */
 function parseRepresentationAttributes(
-  representationElement : Element
-) : [IRepresentationAttributes, Error[]] {
-  const attributes : IRepresentationAttributes = {};
-  const warnings : Error[] = [];
+  representationElement: Element
+): [IRepresentationAttributes, Error[]] {
+  const attributes: IRepresentationAttributes = {};
+  const warnings: Error[] = [];
   const parseValue = ValueParser(attributes, warnings);
   for (let i = 0; i < representationElement.attributes.length; i++) {
     const attr = representationElement.attributes[i];
 
     switch (attr.name) {
-
       case "audioSamplingRate":
         attributes.audioSamplingRate = attr.value;
         break;
 
       case "bandwidth":
-        parseValue(attr.value, { asKey: "bitrate",
-                                 parser: parseMPDInteger,
-                                 dashName: "bandwidth" });
+        parseValue(attr.value, {
+          asKey: "bitrate",
+          parser: parseMPDInteger,
+          dashName: "bandwidth",
+        });
         break;
 
       case "codecs":
@@ -133,21 +136,27 @@ function parseRepresentationAttributes(
         break;
 
       case "codingDependency":
-        parseValue(attr.value, { asKey: "codingDependency",
-                                 parser: parseBoolean,
-                                 dashName: "codingDependency" });
+        parseValue(attr.value, {
+          asKey: "codingDependency",
+          parser: parseBoolean,
+          dashName: "codingDependency",
+        });
         break;
 
       case "frameRate":
-        parseValue(attr.value, { asKey: "frameRate",
-                                 parser: parseMaybeDividedNumber,
-                                 dashName: "frameRate" });
+        parseValue(attr.value, {
+          asKey: "frameRate",
+          parser: parseMaybeDividedNumber,
+          dashName: "frameRate",
+        });
         break;
 
       case "height":
-        parseValue(attr.value, { asKey: "height",
-                                 parser: parseMPDInteger,
-                                 dashName: "height" });
+        parseValue(attr.value, {
+          asKey: "height",
+          parser: parseMPDInteger,
+          dashName: "height",
+        });
         break;
 
       case "id":
@@ -155,15 +164,19 @@ function parseRepresentationAttributes(
         break;
 
       case "maxPlayoutRate":
-        parseValue(attr.value, { asKey: "maxPlayoutRate",
-                                 parser: parseMPDFloat,
-                                 dashName: "maxPlayoutRate" });
+        parseValue(attr.value, {
+          asKey: "maxPlayoutRate",
+          parser: parseMPDFloat,
+          dashName: "maxPlayoutRate",
+        });
         break;
 
       case "maximumSAPPeriod":
-        parseValue(attr.value, { asKey: "maximumSAPPeriod",
-                                 parser: parseMPDFloat,
-                                 dashName: "maximumSAPPeriod" });
+        parseValue(attr.value, {
+          asKey: "maximumSAPPeriod",
+          parser: parseMPDFloat,
+          dashName: "maximumSAPPeriod",
+        });
         break;
 
       case "mimeType":
@@ -175,9 +188,11 @@ function parseRepresentationAttributes(
         break;
 
       case "qualityRanking":
-        parseValue(attr.value, { asKey: "qualityRanking",
-                                 parser: parseMPDInteger,
-                                 dashName: "qualityRanking" });
+        parseValue(attr.value, {
+          asKey: "qualityRanking",
+          parser: parseMPDInteger,
+          dashName: "qualityRanking",
+        });
         break;
 
       case "segmentProfiles":
@@ -185,27 +200,32 @@ function parseRepresentationAttributes(
         break;
 
       case "width":
-        parseValue(attr.value, { asKey: "width",
-                                 parser: parseMPDInteger,
-                                 dashName: "width" });
+        parseValue(attr.value, {
+          asKey: "width",
+          parser: parseMPDInteger,
+          dashName: "width",
+        });
         break;
 
       case "availabilityTimeOffset":
-        parseValue(attr.value, { asKey: "availabilityTimeOffset",
-                                 parser: parseMPDFloat,
-                                 dashName: "availabilityTimeOffset" });
+        parseValue(attr.value, {
+          asKey: "availabilityTimeOffset",
+          parser: parseMPDFloat,
+          dashName: "availabilityTimeOffset",
+        });
         break;
 
       case "availabilityTimeComplete":
-        parseValue(attr.value, { asKey: "availabilityTimeComplete",
-                                 parser: parseBoolean,
-                                 dashName: "availabilityTimeComplete" });
+        parseValue(attr.value, {
+          asKey: "availabilityTimeComplete",
+          parser: parseBoolean,
+          dashName: "availabilityTimeComplete",
+        });
         break;
     }
   }
   if (attributes.bitrate === undefined) {
-    warnings.push(
-      new MPDError("No bitrate found on a Representation"));
+    warnings.push(new MPDError("No bitrate found on a Representation"));
   }
   return [attributes, warnings];
 }
@@ -215,12 +235,14 @@ function parseRepresentationAttributes(
  * @returns {Array}
  */
 export function createRepresentationIntermediateRepresentation(
-  representationElement : Element
-) : [IRepresentationIntermediateRepresentation, Error[]] {
-  const [children, childrenWarnings] =
-    parseRepresentationChildren(representationElement.childNodes);
-  const [attributes, attrsWarnings] =
-    parseRepresentationAttributes(representationElement);
+  representationElement: Element
+): [IRepresentationIntermediateRepresentation, Error[]] {
+  const [children, childrenWarnings] = parseRepresentationChildren(
+    representationElement.childNodes
+  );
+  const [attributes, attrsWarnings] = parseRepresentationAttributes(
+    representationElement
+  );
   const warnings = childrenWarnings.concat(attrsWarnings);
   return [{ children, attributes }, warnings];
 }

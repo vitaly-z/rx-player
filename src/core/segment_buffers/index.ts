@@ -41,28 +41,20 @@ import SegmentBuffersStore, {
 export default SegmentBuffersStore;
 export {
   BufferGarbageCollector,
-
   ISegmentBufferOptions,
   ITextTrackSegmentBufferOptions,
-
   SegmentBuffer,
-
   IBufferType,
-
   IBufferedChunk,
   IChunkContext,
-
   IPushChunkInfos,
   IPushedChunkData,
-
   IEndOfSegmentInfos,
-
   SegmentBufferOperation,
   ISBOperation,
   IEndOfSegmentOperation,
   IPushOperation,
   IRemoveOperation,
-
   getFirstSegmentAfterPeriod,
   getLastSegmentBeforePeriod,
 };

@@ -17,9 +17,9 @@
   </AdaptationSet>
  </Period>
 
- <Period start="PT0H02M00S" duration="PT0H02M0.00S">
+ <Period start="PT0S" duration="PT51S">
   <AdaptationSet segmentAlignment="true" maxWidth="1920" maxHeight="1080" maxFrameRate="25" par="16:9">
-   <SegmentTemplate timescale="25000" media="mp4-live-periods-$RepresentationID$-$Number$.m4s" startNumber="1" endNumber="3" duration="250000" initialization="mp4-live-periods-$RepresentationID$-.mp4"/>
+   <SegmentTemplate timescale="1000" media="mp4-live-periods-$RepresentationID$-$Number$.m4s" startNumber="1" endNumber="5" duration="10000" initialization="mp4-live-periods-$RepresentationID$-.mp4"/>
    <Representation id="h264bl_low" mimeType="video/mp4" codecs="avc1.42c00d" width="320" height="180" frameRate="25" sar="1:1" startWithSAP="1" bandwidth="50842">
    </Representation>
    <Representation id="h264bl_mid" mimeType="video/mp4" codecs="avc1.42c01e" width="640" height="360" frameRate="25" sar="1:1" startWithSAP="1" bandwidth="194834">

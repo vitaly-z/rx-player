@@ -1,13 +1,5 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  Subject,
-  takeUntil,
-} from "rxjs";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Subject, takeUntil } from "rxjs";
 import { createModule } from "../lib/vespertine.js";
 import PlayerModule from "../modules/player";
 import ControlBar from "./ControlBar.jsx";
@@ -16,7 +8,7 @@ import Settings from "./Settings.jsx";
 import ErrorDisplayer from "./ErrorDisplayer.jsx";
 import ChartsManager from "./charts/index.jsx";
 import PlayerKnobsSettings from "./PlayerKnobsSettings.jsx";
-import isEqual from "../lib/isEqual"
+import isEqual from "../lib/isEqual";
 
 // time in ms while seeking/loading/buffering after which the spinner is shown
 const SPINNER_TIMEOUT = 300;
@@ -39,15 +31,14 @@ function Player() {
   const playerWrapperElement = useRef(null);
   const optionsComp = useRef(null);
 
-  const onOptionToggle = () =>
-    setShowOptions((prevState) => !prevState);
+  const onOptionToggle = () => setShowOptions((prevState) => !prevState);
 
   const createNewPlayerModule = (videoContent) => {
     const { initOpts } = optionsComp.current.getOptions();
     const playerMod = createModule(PlayerModule, {
       videoElement: videoElementRef.current,
       textTrackElement: textTrackElement.current,
-      ...initOpts
+      ...initOpts,
     });
     initOptsRef.current = initOpts;
 
@@ -55,46 +46,51 @@ function Player() {
     $destroySubjectRef.current.subscribe(() => playerMod.destroy());
 
     // update isStopped and displaySpinner
-    playerMod.$get("autoPlayBlocked" ,
-                   "isSeeking",
-                   "isBuffering",
-                   "isLoading",
-                   "isReloading",
-                   "isStopped",
-                   "videoTrackHasTrickMode",
-                   "videoElement")
+    playerMod
+      .$get(
+        "autoPlayBlocked",
+        "isSeeking",
+        "isBuffering",
+        "isLoading",
+        "isReloading",
+        "isStopped",
+        "videoTrackHasTrickMode",
+        "videoElement"
+      )
       .pipe(takeUntil($destroySubjectRef.current))
-      .subscribe(([
-        newAutoPlayBlocked,
-        isSeeking,
-        isBuffering,
-        isLoading,
-        isReloading,
-        newIsStopped,
-        videoTrackHasTrickMode,
-      ]) => {
-        setAutoPlayBlocked(newAutoPlayBlocked);
-        setIsStopped(newIsStopped);
-        if (isLoading || isReloading) {
-          setDisplaySpinner(true);
-        } else if (isSeeking || isBuffering) {
-          if (displaySpinnerTimeoutRef.current) {
-            clearTimeout(displaySpinnerTimeoutRef.current);
-          }
-          displaySpinnerTimeoutRef.current = setTimeout(() => {
+      .subscribe(
+        ([
+          newAutoPlayBlocked,
+          isSeeking,
+          isBuffering,
+          isLoading,
+          isReloading,
+          newIsStopped,
+          videoTrackHasTrickMode,
+        ]) => {
+          setAutoPlayBlocked(newAutoPlayBlocked);
+          setIsStopped(newIsStopped);
+          if (isLoading || isReloading) {
             setDisplaySpinner(true);
-          }, SPINNER_TIMEOUT);
-        } else {
-          if (displaySpinnerTimeoutRef.current) {
-            clearTimeout(displaySpinnerTimeoutRef.current);
-            displaySpinnerTimeoutRef.current = 0;
+          } else if (isSeeking || isBuffering) {
+            if (displaySpinnerTimeoutRef.current) {
+              clearTimeout(displaySpinnerTimeoutRef.current);
+            }
+            displaySpinnerTimeoutRef.current = setTimeout(() => {
+              setDisplaySpinner(true);
+            }, SPINNER_TIMEOUT);
+          } else {
+            if (displaySpinnerTimeoutRef.current) {
+              clearTimeout(displaySpinnerTimeoutRef.current);
+              displaySpinnerTimeoutRef.current = 0;
+            }
+            setDisplaySpinner(false);
           }
-          setDisplaySpinner(false);
+          if (enableVideoThumbnails !== videoTrackHasTrickMode) {
+            setEnableVideoThumbnails(videoTrackHasTrickMode);
+          }
         }
-        if (enableVideoThumbnails !== videoTrackHasTrickMode) {
-          setEnableVideoThumbnails(videoTrackHasTrickMode);
-        }
-      });
+      );
     if (videoContent) {
       const { loadVideoOpts } = optionsComp.current.getOptions();
       if (videoContent.lowLatencyMode) {
@@ -103,11 +99,10 @@ function Player() {
         playerMod.dispatch("DISABLE_LIVE_CATCH_UP");
       }
       playerMod.dispatch("SET_PLAYBACK_RATE", 1);
-      playerMod.dispatch("LOAD", { ...videoContent,
-                                   ...loadVideoOpts });
-      }
+      playerMod.dispatch("LOAD", { ...videoContent, ...loadVideoOpts });
+    }
     setPlayer(playerMod);
-  }
+  };
 
   const cleanCurrentPlayer = () => {
     if ($destroySubjectRef.current) {
@@ -118,13 +113,13 @@ function Player() {
       clearTimeout(displaySpinnerTimeoutRef.current);
     }
     setPlayer(null);
-  }
+  };
 
   useEffect(() => {
     createNewPlayerModule();
     return () => {
       cleanCurrentPlayer();
-    }
+    };
   }, []);
 
   const onVideoClick = useCallback(() => {
@@ -142,24 +137,26 @@ function Player() {
     }
   }, [player]);
 
-  const loadVideo = useCallback((video) => {
-    const { initOpts: newInitOpts, loadVideoOpts } = optionsComp.current.getOptions();
-    if (!isEqual(initOptsRef.current, newInitOpts)) {
-      initOptsRef.current = newInitOpts;
-      cleanCurrentPlayer();
-      createNewPlayerModule(video);
-    } else {
-      if (video.lowLatencyMode) {
-        player.dispatch("ENABLE_LIVE_CATCH_UP");
+  const loadVideo = useCallback(
+    (video) => {
+      const { initOpts: newInitOpts, loadVideoOpts } =
+        optionsComp.current.getOptions();
+      if (!isEqual(initOptsRef.current, newInitOpts)) {
+        initOptsRef.current = newInitOpts;
+        cleanCurrentPlayer();
+        createNewPlayerModule(video);
       } else {
-        player.dispatch("DISABLE_LIVE_CATCH_UP");
+        if (video.lowLatencyMode) {
+          player.dispatch("ENABLE_LIVE_CATCH_UP");
+        } else {
+          player.dispatch("DISABLE_LIVE_CATCH_UP");
+        }
+        player.dispatch("SET_PLAYBACK_RATE", 1);
+        player.dispatch("LOAD", { ...video, ...loadVideoOpts });
       }
-      player.dispatch("SET_PLAYBACK_RATE", 1);
-      player.dispatch("LOAD", { ...video,
-                                ...loadVideoOpts });
-    }
-  }, [player]);
-
+    },
+    [player]
+  );
 
   const stopVideo = useCallback(() => player.dispatch("STOP"), [player]);
 
@@ -181,60 +178,45 @@ function Player() {
           onOptionToggle={onOptionToggle}
         />
         <Settings showOptions={showOptions} ref={optionsComp} />
-        <div
-          className="video-player-wrapper"
-          ref={playerWrapperElement}
-        >
+        <div className="video-player-wrapper" ref={playerWrapperElement}>
           <div className="video-screen-parent">
-            <div
-              className="video-screen"
-              onClick={() => onVideoClick()}
-            >
-              { player ? <ErrorDisplayer player={player} /> : null }
-              {
-                autoPlayBlocked ?
-                  <div className="video-player-manual-play-container" >
-                    <img
-                      className="video-player-manual-play"
-                      alt="Play"
-                      src="./assets/play.svg"/>
-                  </div> :
-                  null
-              }
-              {
-                !autoPlayBlocked && displaySpinner ?
+            <div className="video-screen" onClick={() => onVideoClick()}>
+              {player ? <ErrorDisplayer player={player} /> : null}
+              {autoPlayBlocked ? (
+                <div className="video-player-manual-play-container">
                   <img
-                    src="./assets/spinner.gif"
-                    className="video-player-spinner"
-                  /> :
-                  null
-              }
-              <div
-                className="text-track"
-                ref={textTrackElement}
-              />
+                    className="video-player-manual-play"
+                    alt="Play"
+                    src="./assets/play.svg"
+                  />
+                </div>
+              ) : null}
+              {!autoPlayBlocked && displaySpinner ? (
+                <img
+                  src="./assets/spinner.gif"
+                  className="video-player-spinner"
+                />
+              ) : null}
+              <div className="text-track" ref={textTrackElement} />
               <video ref={videoElementRef} />
-
             </div>
-            { player ? 
-                <PlayerKnobsSettings
-                  close={closeSettings}
-                  shouldDisplay={displaySettings}
-                  player={player}
-                /> :
-                null
-            }
-          </div>
-          {
-            player ?
-              <ControlBar
+            {player ? (
+              <PlayerKnobsSettings
+                close={closeSettings}
+                shouldDisplay={displaySettings}
                 player={player}
-                videoElement={playerWrapperElement.current}
-                toggleSettings={toggleSettings}
-                stopVideo={stopVideo}
-                enableVideoThumbnails={enableVideoThumbnails}
-              /> : null
-          }
+              />
+            ) : null}
+          </div>
+          {player ? (
+            <ControlBar
+              player={player}
+              videoElement={playerWrapperElement.current}
+              toggleSettings={toggleSettings}
+              stopVideo={stopVideo}
+              enableVideoThumbnails={enableVideoThumbnails}
+            />
+          ) : null}
         </div>
         <ChartsManager player={player} />
       </div>

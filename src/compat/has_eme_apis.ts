@@ -21,6 +21,6 @@ import { requestMediaKeySystemAccess } from "./eme";
  * content.
  * @returns {Boolean}
  */
-export default function hasEMEAPIs() : boolean {
+export default function hasEMEAPIs(): boolean {
   return typeof requestMediaKeySystemAccess === "function";
 }

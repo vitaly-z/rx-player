@@ -15,10 +15,7 @@
  */
 
 import { IEncryptedMediaErrorKeyStatusObject } from "../public_types";
-import {
-  ErrorTypes,
-  IEncryptedMediaErrorCode,
-} from "./error_codes";
+import { ErrorTypes, IEncryptedMediaErrorCode } from "./error_codes";
 import errorMessage from "./error_message";
 
 /**
@@ -28,30 +25,30 @@ import errorMessage from "./error_message";
  * @extends Error
  */
 export default class EncryptedMediaError extends Error {
-  public readonly name : "EncryptedMediaError";
-  public readonly type : "ENCRYPTED_MEDIA_ERROR";
-  public readonly code : IEncryptedMediaErrorCode;
-  public readonly keyStatuses? : IEncryptedMediaErrorKeyStatusObject[];
-  public message : string;
-  public fatal : boolean;
+  public readonly name: "EncryptedMediaError";
+  public readonly type: "ENCRYPTED_MEDIA_ERROR";
+  public readonly code: IEncryptedMediaErrorCode;
+  public readonly keyStatuses?: IEncryptedMediaErrorKeyStatusObject[];
+  public message: string;
+  public fatal: boolean;
 
   /**
    * @param {string} code
    * @param {string} reason
    */
   constructor(
-    code : "KEY_STATUS_CHANGE_ERROR",
-    reason : string,
-    supplementaryInfos : { keyStatuses : IEncryptedMediaErrorKeyStatusObject[] }
+    code: "KEY_STATUS_CHANGE_ERROR",
+    reason: string,
+    supplementaryInfos: { keyStatuses: IEncryptedMediaErrorKeyStatusObject[] }
   );
   constructor(
-    code : Omit<IEncryptedMediaErrorCode, "KEY_STATUS_CHANGE_ERROR">,
-    reason : string
+    code: Omit<IEncryptedMediaErrorCode, "KEY_STATUS_CHANGE_ERROR">,
+    reason: string
   );
   constructor(
-    code : IEncryptedMediaErrorCode,
-    reason : string,
-    supplementaryInfos? : { keyStatuses? : IEncryptedMediaErrorKeyStatusObject[] }
+    code: IEncryptedMediaErrorCode,
+    reason: string,
+    supplementaryInfos?: { keyStatuses?: IEncryptedMediaErrorKeyStatusObject[] }
   ) {
     super();
     // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class

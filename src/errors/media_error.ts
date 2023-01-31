@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  ErrorTypes,
-  IMediaErrorCode,
-} from "./error_codes";
+import { ErrorTypes, IMediaErrorCode } from "./error_codes";
 import errorMessage from "./error_message";
 
 /**
@@ -27,17 +24,17 @@ import errorMessage from "./error_message";
  * @extends Error
  */
 export default class MediaError extends Error {
-  public readonly name : "MediaError";
-  public readonly type : "MEDIA_ERROR";
-  public readonly message : string;
-  public readonly code : IMediaErrorCode;
-  public fatal : boolean;
+  public readonly name: "MediaError";
+  public readonly type: "MEDIA_ERROR";
+  public readonly message: string;
+  public readonly code: IMediaErrorCode;
+  public fatal: boolean;
 
   /**
    * @param {string} code
    * @param {string} reason
    */
-  constructor(code : IMediaErrorCode, reason : string) {
+  constructor(code: IMediaErrorCode, reason: string) {
     super();
     // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
     Object.setPrototypeOf(this, MediaError.prototype);

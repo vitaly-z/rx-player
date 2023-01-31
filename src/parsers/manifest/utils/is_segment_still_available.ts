@@ -29,11 +29,11 @@ import { IIndexSegment } from "./index_helpers";
  * @returns {Boolean|undefined}
  */
 export default function isSegmentStillAvailable(
-  segment : ISegment,
-  timeline : IIndexSegment[],
-  timescale : number,
-  indexTimeOffset : number
-) : boolean | undefined {
+  segment: ISegment,
+  timeline: IIndexSegment[],
+  timescale: number,
+  indexTimeOffset: number
+): boolean | undefined {
   for (let i = 0; i < timeline.length; i++) {
     const tSegment = timeline[i];
     const tSegmentTime = (tSegment.start - indexTimeOffset) / timescale;
@@ -43,13 +43,16 @@ export default function isSegmentStillAvailable(
       if (tSegment.range === undefined) {
         return segment.range === undefined;
       }
-      return segment.range != null &&
-             tSegment.range[0] === segment.range[0] &&
-             tSegment.range[1] === segment.range[1];
-    } else { // tSegment.start < segment.time
+      return (
+        segment.range != null &&
+        tSegment.range[0] === segment.range[0] &&
+        tSegment.range[1] === segment.range[1]
+      );
+    } else {
+      // tSegment.start < segment.time
       if (tSegment.repeatCount >= 0 && tSegment.duration !== undefined) {
         const timeDiff = tSegmentTime - tSegment.start;
-        const repeat = (timeDiff / tSegment.duration) - 1;
+        const repeat = timeDiff / tSegment.duration - 1;
         return repeat % 1 === 0 && repeat <= tSegment.repeatCount;
       }
     }

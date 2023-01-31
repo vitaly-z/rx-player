@@ -6,17 +6,13 @@ module.exports = {
   roots: ["<rootDir>/src"],
   preset: "ts-jest",
   testEnvironment: "jsdom",
-    // Without this, Jest just fails when importing rxjs, for some arcane
-    // ESM-vs-CommonJS reasons linked to how it works internally.
-    moduleNameMapper: {
-      "^rxjs$": require.resolve("rxjs"),
+  // Without this, Jest just fails when importing rxjs, for some arcane
+  // ESM-vs-CommonJS reasons linked to how it works internally.
+  moduleNameMapper: {
+    "^rxjs$": require.resolve("rxjs"),
   },
   testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
-  collectCoverageFrom: [
-    "src/**/*.ts",
-    "!src/**/index.ts",
-    "!**/__tests__/**",
-  ],
+  collectCoverageFrom: ["src/**/*.ts", "!src/**/index.ts", "!**/__tests__/**"],
   transform: {
     "^.+\\.tsx?$": [
       "ts-jest",
@@ -36,10 +32,7 @@ module.exports = {
           module: "es2015",
           moduleResolution: "node",
           esModuleInterop: true,
-          typeRoots: [
-            "./src/typings",
-            "./node_modules/@types",
-          ],
+          typeRoots: ["./src/typings", "./node_modules/@types"],
         },
       },
     ],
@@ -71,7 +64,7 @@ module.exports = {
       CURRENT_ENV: 1,
     },
     __LOGGER_LEVEL__: {
-      CURRENT_LEVEL: "\"NONE\"",
+      CURRENT_LEVEL: '"NONE"',
     },
   },
 };

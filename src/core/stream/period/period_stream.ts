@@ -15,15 +15,9 @@
  */
 
 import config from "../../../config";
-import {
-  formatError,
-  MediaError,
-} from "../../../errors";
+import { formatError, MediaError } from "../../../errors";
 import log from "../../../log";
-import {
-  Adaptation,
-  Period,
-} from "../../../manifest";
+import { Adaptation, Period } from "../../../manifest";
 import objectAssign from "../../../utils/object_assign";
 import { getLeftSizeOfRange } from "../../../utils/ranges";
 import createSharedReference, {
@@ -85,7 +79,8 @@ import getAdaptationSwitchStrategy from "./utils/get_adaptation_switch_strategy"
  * doing.
  */
 export default function PeriodStream(
-  { bufferType,
+  {
+    bufferType,
     content,
     garbageCollectors,
     playbackObserver,
@@ -94,10 +89,11 @@ export default function PeriodStream(
     segmentBuffersStore,
     options,
     wantedBufferAhead,
-    maxVideoBufferSize } : IPeriodStreamArguments,
-  callbacks : IPeriodStreamCallbacks,
-  parentCancelSignal : CancellationSignal
-) : void {
+    maxVideoBufferSize,
+  }: IPeriodStreamArguments,
+  callbacks: IPeriodStreamCallbacks,
+  parentCancelSignal: CancellationSignal
+): void {
   const { manifest, period } = content;
 
   /**
@@ -105,176 +101,262 @@ export default function PeriodStream(
    * `null` when no Adaptation is chosen (e.g. no subtitles)
    * `undefined` at the beginning (it can be ignored.).
    */
-  const adaptationRef = createSharedReference<IAdaptationChoice|null|undefined>(
-    undefined,
-    parentCancelSignal
-  );
+  const adaptationRef = createSharedReference<
+    IAdaptationChoice | null | undefined
+  >(undefined, parentCancelSignal);
 
-  callbacks.periodStreamReady({ type: bufferType, manifest, period, adaptationRef });
+  callbacks.periodStreamReady({
+    type: bufferType,
+    manifest,
+    period,
+    adaptationRef,
+  });
   if (parentCancelSignal.isCancelled) {
     return;
   }
 
-  let currentStreamCanceller : TaskCanceller | undefined;
+  let currentStreamCanceller: TaskCanceller | undefined;
   let isFirstAdaptationSwitch = true;
 
-  adaptationRef.onUpdate((choice : IAdaptationChoice | null | undefined) => {
-    // As an IIFE to profit from async/await while respecting onUpdate's signature
-    (async () : Promise<void> => {
-      if (choice === undefined) {
-        return;
-      }
-      const streamCanceller = new TaskCanceller({ cancelOn: parentCancelSignal });
-      currentStreamCanceller?.cancel(); // Cancel oreviously created stream if one
-      currentStreamCanceller = streamCanceller;
+  adaptationRef.onUpdate(
+    (choice: IAdaptationChoice | null | undefined) => {
+      // As an IIFE to profit from async/await while respecting onUpdate's signature
+      (async (): Promise<void> => {
+        if (choice === undefined) {
+          return;
+        }
+        const streamCanceller = new TaskCanceller({
+          cancelOn: parentCancelSignal,
+        });
+        currentStreamCanceller?.cancel(); // Cancel oreviously created stream if one
+        currentStreamCanceller = streamCanceller;
 
-      if (choice === null) { // Current type is disabled for that Period
-        log.info(`Stream: Set no ${bufferType} Adaptation. P:`, period.start);
-        const segmentBufferStatus = segmentBuffersStore.getStatus(bufferType);
+        if (choice === null) {
+          // Current type is disabled for that Period
+          log.info(`Stream: Set no ${bufferType} Adaptation. P:`, period.start);
+          const segmentBufferStatus = segmentBuffersStore.getStatus(bufferType);
 
-        if (segmentBufferStatus.type === "initialized") {
-          log.info(`Stream: Clearing previous ${bufferType} SegmentBuffer`);
-          if (SegmentBuffersStore.isNative(bufferType)) {
-            return createReloadRequest(playbackObserver, ({ position, autoPlay }) => {
-              callbacks
-                .waitingMediaSourceReload({ bufferType, period, position, autoPlay });
-            }, 0, period, streamCanceller.signal);
-          } else {
-            const periodEnd = period.end ?? Infinity;
-            if (period.start > periodEnd) {
-              log.warn("Stream: Can't free buffer: period's start is after its end");
+          if (segmentBufferStatus.type === "initialized") {
+            log.info(`Stream: Clearing previous ${bufferType} SegmentBuffer`);
+            if (SegmentBuffersStore.isNative(bufferType)) {
+              return createReloadRequest(
+                playbackObserver,
+                ({ position, autoPlay }) => {
+                  callbacks.waitingMediaSourceReload({
+                    bufferType,
+                    period,
+                    position,
+                    autoPlay,
+                  });
+                },
+                0,
+                period,
+                streamCanceller.signal
+              );
             } else {
-              await segmentBufferStatus.value.removeBuffer(period.start,
-                                                           periodEnd,
-                                                           streamCanceller.signal);
-              if (streamCanceller.isUsed) {
-                return; // The stream has been cancelled
+              const periodEnd = period.end ?? Infinity;
+              if (period.start > periodEnd) {
+                log.warn(
+                  "Stream: Can't free buffer: period's start is after its end"
+                );
+              } else {
+                await segmentBufferStatus.value.removeBuffer(
+                  period.start,
+                  periodEnd,
+                  streamCanceller.signal
+                );
+                if (streamCanceller.isUsed) {
+                  return; // The stream has been cancelled
+                }
               }
             }
+          } else if (segmentBufferStatus.type === "uninitialized") {
+            segmentBuffersStore.disableSegmentBuffer(bufferType);
+            if (streamCanceller.isUsed) {
+              return; // The stream has been cancelled
+            }
           }
-        } else if (segmentBufferStatus.type === "uninitialized") {
-          segmentBuffersStore.disableSegmentBuffer(bufferType);
+
+          callbacks.adaptationChange({
+            type: bufferType,
+            adaptation: null,
+            period,
+          });
           if (streamCanceller.isUsed) {
-            return; // The stream has been cancelled
+            return; // Previous call has provoken Stream cancellation by side-effect
           }
+
+          return createEmptyAdaptationStream(
+            playbackObserver,
+            wantedBufferAhead,
+            bufferType,
+            { period },
+            callbacks,
+            streamCanceller.signal
+          );
         }
 
-        callbacks.adaptationChange({ type: bufferType, adaptation: null, period });
+        /**
+         * If this is not the first Adaptation choice, we might want to apply a
+         * delta to the current position so we can re-play back some media in the
+         * new Adaptation to give some context back.
+         * This value contains this relative position, in seconds.
+         * @see createMediaSourceReloadRequester
+         */
+        const { DELTA_POSITION_AFTER_RELOAD } = config.getCurrent();
+        const relativePosAfterSwitch = isFirstAdaptationSwitch
+          ? 0
+          : bufferType === "audio"
+          ? DELTA_POSITION_AFTER_RELOAD.trackSwitch.audio
+          : bufferType === "video"
+          ? DELTA_POSITION_AFTER_RELOAD.trackSwitch.video
+          : DELTA_POSITION_AFTER_RELOAD.trackSwitch.other;
+        isFirstAdaptationSwitch = false;
+
+        if (
+          SegmentBuffersStore.isNative(bufferType) &&
+          segmentBuffersStore.getStatus(bufferType).type === "disabled"
+        ) {
+          return createReloadRequest(
+            playbackObserver,
+            ({ position, autoPlay }) => {
+              callbacks.waitingMediaSourceReload({
+                bufferType,
+                period,
+                position,
+                autoPlay,
+              });
+            },
+            relativePosAfterSwitch,
+            period,
+            streamCanceller.signal
+          );
+        }
+
+        // Reload if the Adaptation disappears from the manifest
+        manifest.addEventListener(
+          "manifestUpdate",
+          (updates) => {
+            // If current period has been unexpectedly removed, ask to reload
+            for (const element of updates.updatedPeriods) {
+              if (element.period.id === period.id) {
+                for (const adap of element.result.removedAdaptations) {
+                  if (adap.id === adaptation.id) {
+                    return createReloadRequest(
+                      playbackObserver,
+                      ({ position, autoPlay }) => {
+                        callbacks.waitingMediaSourceReload({
+                          bufferType,
+                          period,
+                          position,
+                          autoPlay,
+                        });
+                      },
+                      relativePosAfterSwitch,
+                      period,
+                      streamCanceller.signal
+                    );
+                  }
+                }
+              } else if (element.period.start > period.start) {
+                break;
+              }
+            }
+          },
+          currentStreamCanceller.signal
+        );
+
+        const { adaptation, representations } = choice;
+        log.info(
+          `Stream: Updating ${bufferType} adaptation`,
+          `A: ${adaptation.id}`,
+          `P: ${period.start}`
+        );
+
+        callbacks.adaptationChange({ type: bufferType, adaptation, period });
         if (streamCanceller.isUsed) {
-          return; // Previous call has provoken Stream cancellation by side-effect
+          return; // Previous call has provoken cancellation by side-effect
         }
 
-        return createEmptyAdaptationStream(playbackObserver,
-                                           wantedBufferAhead,
-                                           bufferType,
-                                           { period },
-                                           callbacks,
-                                           streamCanceller.signal);
-      }
+        const readyState = playbackObserver.getReadyState();
+        const segmentBuffer = createOrReuseSegmentBuffer(
+          segmentBuffersStore,
+          bufferType,
+          adaptation,
+          options
+        );
+        const playbackInfos = {
+          currentTime: playbackObserver.getCurrentTime(),
+          readyState,
+        };
+        const strategy = getAdaptationSwitchStrategy(
+          segmentBuffer,
+          period,
+          adaptation,
+          choice.switchingMode,
+          playbackInfos,
+          options
+        );
+        if (strategy.type === "needs-reload") {
+          return createReloadRequest(
+            playbackObserver,
+            ({ position, autoPlay }) => {
+              callbacks.waitingMediaSourceReload({
+                bufferType,
+                period,
+                position,
+                autoPlay,
+              });
+            },
+            relativePosAfterSwitch,
+            period,
+            streamCanceller.signal
+          );
+        }
 
-      /**
-       * If this is not the first Adaptation choice, we might want to apply a
-       * delta to the current position so we can re-play back some media in the
-       * new Adaptation to give some context back.
-       * This value contains this relative position, in seconds.
-       * @see createMediaSourceReloadRequester
-       */
-      const { DELTA_POSITION_AFTER_RELOAD } = config.getCurrent();
-      const relativePosAfterSwitch =
-        isFirstAdaptationSwitch ? 0 :
-        bufferType === "audio"  ? DELTA_POSITION_AFTER_RELOAD.trackSwitch.audio :
-        bufferType === "video"  ? DELTA_POSITION_AFTER_RELOAD.trackSwitch.video :
-                                  DELTA_POSITION_AFTER_RELOAD.trackSwitch.other;
-      isFirstAdaptationSwitch = false;
-
-      if (SegmentBuffersStore.isNative(bufferType) &&
-          segmentBuffersStore.getStatus(bufferType).type === "disabled")
-      {
-        return createReloadRequest(playbackObserver, ({ position, autoPlay }) => {
-          callbacks.waitingMediaSourceReload({ bufferType, period, position, autoPlay });
-        }, relativePosAfterSwitch, period, streamCanceller.signal);
-      }
-
-      // Reload if the Adaptation disappears from the manifest
-      manifest.addEventListener("manifestUpdate", updates => {
-        // If current period has been unexpectedly removed, ask to reload
-        for (const element of updates.updatedPeriods) {
-          if (element.period.id === period.id) {
-            for (const adap of element.result.removedAdaptations) {
-              if (adap.id === adaptation.id) {
-                return createReloadRequest(playbackObserver, ({ position, autoPlay }) => {
-                  callbacks
-                    .waitingMediaSourceReload({ bufferType, period, position, autoPlay });
-                }, relativePosAfterSwitch, period, streamCanceller.signal);
-              }
+        await segmentBuffersStore.waitForUsableBuffers(streamCanceller.signal);
+        if (streamCanceller.isUsed) {
+          return; // The Stream has since been cancelled
+        }
+        if (
+          strategy.type === "flush-buffer" ||
+          strategy.type === "clean-buffer"
+        ) {
+          for (const { start, end } of strategy.value) {
+            await segmentBuffer.removeBuffer(
+              start,
+              end,
+              streamCanceller.signal
+            );
+            if (streamCanceller.isUsed) {
+              return; // The Stream has since been cancelled
             }
-          } else if (element.period.start > period.start) {
-            break;
+          }
+          if (strategy.type === "flush-buffer") {
+            callbacks.needsBufferFlush();
+            if (streamCanceller.isUsed) {
+              return; // Previous callback cancelled the Stream by side-effect
+            }
           }
         }
-      }, currentStreamCanceller.signal);
 
-      const { adaptation, representations } = choice;
-      log.info(`Stream: Updating ${bufferType} adaptation`,
-               `A: ${adaptation.id}`,
-               `P: ${period.start}`);
-
-      callbacks.adaptationChange({ type: bufferType, adaptation, period });
-      if (streamCanceller.isUsed) {
-        return; // Previous call has provoken cancellation by side-effect
-      }
-
-      const readyState = playbackObserver.getReadyState();
-      const segmentBuffer = createOrReuseSegmentBuffer(segmentBuffersStore,
-                                                       bufferType,
-                                                       adaptation,
-                                                       options);
-      const playbackInfos = { currentTime: playbackObserver.getCurrentTime(),
-                              readyState };
-      const strategy = getAdaptationSwitchStrategy(segmentBuffer,
-                                                   period,
-                                                   adaptation,
-                                                   choice.switchingMode,
-                                                   playbackInfos,
-                                                   options);
-      if (strategy.type === "needs-reload") {
-        return createReloadRequest(playbackObserver, ({ position, autoPlay }) => {
-          callbacks.waitingMediaSourceReload({ bufferType, period, position, autoPlay });
-        }, relativePosAfterSwitch, period, streamCanceller.signal);
-      }
-
-      await segmentBuffersStore.waitForUsableBuffers(streamCanceller.signal);
-      if (streamCanceller.isUsed) {
-        return; // The Stream has since been cancelled
-      }
-      if (strategy.type === "flush-buffer" || strategy.type === "clean-buffer") {
-        for (const { start, end } of strategy.value) {
-          await segmentBuffer.removeBuffer(start, end, streamCanceller.signal);
-          if (streamCanceller.isUsed) {
-            return; // The Stream has since been cancelled
-          }
+        garbageCollectors.get(segmentBuffer)(streamCanceller.signal);
+        createAdaptationStream(
+          adaptation,
+          representations,
+          segmentBuffer,
+          streamCanceller.signal
+        );
+      })().catch((err) => {
+        if (err instanceof CancellationError) {
+          return;
         }
-        if (strategy.type === "flush-buffer") {
-          callbacks.needsBufferFlush();
-          if (streamCanceller.isUsed) {
-            return ; // Previous callback cancelled the Stream by side-effect
-          }
-        }
-      }
-
-      garbageCollectors.get(segmentBuffer)(streamCanceller.signal);
-      createAdaptationStream(adaptation,
-                             representations,
-                             segmentBuffer,
-                             streamCanceller.signal);
-    })().catch((err) => {
-      if (err instanceof CancellationError) {
-        return;
-      }
-      currentStreamCanceller?.cancel();
-      callbacks.error(err);
-    });
-  }, { clearSignal: parentCancelSignal, emitCurrentValue: true });
+        currentStreamCanceller?.cancel();
+        callbacks.error(err);
+      });
+    },
+    { clearSignal: parentCancelSignal, emitCurrentValue: true }
+  );
 
   /**
    * @param {Object} adaptation
@@ -283,35 +365,40 @@ export default function PeriodStream(
    * @param {Object} cancelSignal
    */
   function createAdaptationStream(
-    adaptation : Adaptation,
-    representations : IReadOnlySharedReference<IRepresentationsChoice>,
-    segmentBuffer : SegmentBuffer,
-    cancelSignal : CancellationSignal
-  ) : void {
-    const adaptationPlaybackObserver =
-      createAdaptationStreamPlaybackObserver(playbackObserver, segmentBuffer);
+    adaptation: Adaptation,
+    representations: IReadOnlySharedReference<IRepresentationsChoice>,
+    segmentBuffer: SegmentBuffer,
+    cancelSignal: CancellationSignal
+  ): void {
+    const adaptationPlaybackObserver = createAdaptationStreamPlaybackObserver(
+      playbackObserver,
+      segmentBuffer
+    );
 
-    AdaptationStream({ content: { manifest,
-                                  period,
-                                  adaptation,
-                                  representations },
-                       options,
-                       playbackObserver: adaptationPlaybackObserver,
-                       representationEstimator,
-                       segmentBuffer,
-                       segmentFetcherCreator,
-                       wantedBufferAhead,
-                       maxVideoBufferSize },
-                     { ...callbacks, error: onAdaptationStreamError },
-                     cancelSignal);
+    AdaptationStream(
+      {
+        content: { manifest, period, adaptation, representations },
+        options,
+        playbackObserver: adaptationPlaybackObserver,
+        representationEstimator,
+        segmentBuffer,
+        segmentFetcherCreator,
+        wantedBufferAhead,
+        maxVideoBufferSize,
+      },
+      { ...callbacks, error: onAdaptationStreamError },
+      cancelSignal
+    );
 
-    function onAdaptationStreamError(error : unknown) : void {
+    function onAdaptationStreamError(error: unknown): void {
       // Stream linked to a non-native media buffer should not impact the
       // stability of the player. ie: if a text buffer sends an error, we want
       // to continue playing without any subtitles
       if (!SegmentBuffersStore.isNative(bufferType)) {
-        log.error(`Stream: ${bufferType} Stream crashed. Aborting it.`,
-                  error instanceof Error ? error : "");
+        log.error(
+          `Stream: ${bufferType} Stream crashed. Aborting it.`,
+          error instanceof Error ? error : ""
+        );
         segmentBuffersStore.disposeSegmentBuffer(bufferType);
 
         const formattedError = formatError(error, {
@@ -320,18 +407,22 @@ export default function PeriodStream(
         });
         callbacks.warning(formattedError);
         if (cancelSignal.isCancelled) {
-          return ; // Previous callback cancelled the Stream by side-effect
+          return; // Previous callback cancelled the Stream by side-effect
         }
 
-        return createEmptyAdaptationStream(playbackObserver,
-                                           wantedBufferAhead,
-                                           bufferType,
-                                           { period },
-                                           callbacks,
-                                           cancelSignal);
+        return createEmptyAdaptationStream(
+          playbackObserver,
+          wantedBufferAhead,
+          bufferType,
+          { period },
+          callbacks,
+          cancelSignal
+        );
       }
-      log.error(`Stream: ${bufferType} Stream crashed. Stopping playback.`,
-                error instanceof Error ? error : "");
+      log.error(
+        `Stream: ${bufferType} Stream crashed. Stopping playback.`,
+        error instanceof Error ? error : ""
+      );
       callbacks.error(error);
     }
   }
@@ -343,19 +434,23 @@ export default function PeriodStream(
  * @returns {Object}
  */
 function createOrReuseSegmentBuffer(
-  segmentBuffersStore : SegmentBuffersStore,
-  bufferType : IBufferType,
-  adaptation : Adaptation,
-  options: { textTrackOptions? : ITextTrackSegmentBufferOptions }
-) : SegmentBuffer {
+  segmentBuffersStore: SegmentBuffersStore,
+  bufferType: IBufferType,
+  adaptation: Adaptation,
+  options: { textTrackOptions?: ITextTrackSegmentBufferOptions }
+): SegmentBuffer {
   const segmentBufferStatus = segmentBuffersStore.getStatus(bufferType);
   if (segmentBufferStatus.type === "initialized") {
-    log.info("Stream: Reusing a previous SegmentBuffer for the type", bufferType);
+    log.info(
+      "Stream: Reusing a previous SegmentBuffer for the type",
+      bufferType
+    );
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return segmentBufferStatus.value;
   }
   const codec = getFirstDeclaredMimeType(adaptation);
-  const sbOptions = bufferType === "text" ?  options.textTrackOptions : undefined;
+  const sbOptions =
+    bufferType === "text" ? options.textTrackOptions : undefined;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return segmentBuffersStore.createSegmentBuffer(bufferType, codec, sbOptions);
 }
@@ -366,12 +461,15 @@ function createOrReuseSegmentBuffer(
  * @param {Adaptation} adaptation
  * @returns {string}
  */
-function getFirstDeclaredMimeType(adaptation : Adaptation) : string {
+function getFirstDeclaredMimeType(adaptation: Adaptation): string {
   const representations = adaptation.getPlayableRepresentations();
   if (representations.length === 0) {
-    const noRepErr = new MediaError("NO_PLAYABLE_REPRESENTATION",
-                                    "No Representation in the chosen " +
-                                    adaptation.type + " Adaptation can be played");
+    const noRepErr = new MediaError(
+      "NO_PLAYABLE_REPRESENTATION",
+      "No Representation in the chosen " +
+        adaptation.type +
+        " Adaptation can be played"
+    );
     throw noRepErr;
   }
   return representations[0].getMimeTypeString();
@@ -384,15 +482,17 @@ function getFirstDeclaredMimeType(adaptation : Adaptation) : string {
  * @returns {Object}
  */
 function createAdaptationStreamPlaybackObserver(
-  initialPlaybackObserver : IReadOnlyPlaybackObserver<IPeriodStreamPlaybackObservation>,
-  segmentBuffer : SegmentBuffer
-) : IReadOnlyPlaybackObserver<IAdaptationStreamPlaybackObservation> {
+  initialPlaybackObserver: IReadOnlyPlaybackObserver<IPeriodStreamPlaybackObservation>,
+  segmentBuffer: SegmentBuffer
+): IReadOnlyPlaybackObserver<IAdaptationStreamPlaybackObservation> {
   return initialPlaybackObserver.deriveReadOnlyObserver(function transform(
-    observationRef : IReadOnlySharedReference<IPeriodStreamPlaybackObservation>,
-    cancellationSignal : CancellationSignal
-  ) : IReadOnlySharedReference<IAdaptationStreamPlaybackObservation> {
-    const newRef = createSharedReference(constructAdaptationStreamPlaybackObservation(),
-                                         cancellationSignal);
+    observationRef: IReadOnlySharedReference<IPeriodStreamPlaybackObservation>,
+    cancellationSignal: CancellationSignal
+  ): IReadOnlySharedReference<IAdaptationStreamPlaybackObservation> {
+    const newRef = createSharedReference(
+      constructAdaptationStreamPlaybackObservation(),
+      cancellationSignal
+    );
 
     observationRef.onUpdate(emitAdaptationStreamPlaybackObservation, {
       clearSignal: cancellationSignal,
@@ -400,11 +500,13 @@ function createAdaptationStreamPlaybackObserver(
     });
     return newRef;
 
-    function constructAdaptationStreamPlaybackObservation(
-    ) : IAdaptationStreamPlaybackObservation {
+    function constructAdaptationStreamPlaybackObservation(): IAdaptationStreamPlaybackObservation {
       const baseObservation = observationRef.getValue();
       const buffered = segmentBuffer.getBufferedRanges();
-      const bufferGap = getLeftSizeOfRange(buffered, baseObservation.position.last);
+      const bufferGap = getLeftSizeOfRange(
+        buffered,
+        baseObservation.position.last
+      );
       return objectAssign({}, baseObservation, { bufferGap });
     }
 
@@ -412,7 +514,6 @@ function createAdaptationStreamPlaybackObserver(
       newRef.setValue(constructAdaptationStreamPlaybackObservation());
     }
   });
-
 }
 
 /**
@@ -427,35 +528,41 @@ function createAdaptationStreamPlaybackObserver(
  * @param {Object} cancelSignal
  */
 function createEmptyAdaptationStream(
-  playbackObserver : IReadOnlyPlaybackObserver<IPeriodStreamPlaybackObservation>,
-  wantedBufferAhead : IReadOnlySharedReference<number>,
-  bufferType : IBufferType,
-  content : { period : Period },
-  callbacks : Pick<IAdaptationStreamCallbacks<unknown>, "streamStatusUpdate">,
-  cancelSignal : CancellationSignal
-) : void {
+  playbackObserver: IReadOnlyPlaybackObserver<IPeriodStreamPlaybackObservation>,
+  wantedBufferAhead: IReadOnlySharedReference<number>,
+  bufferType: IBufferType,
+  content: { period: Period },
+  callbacks: Pick<IAdaptationStreamCallbacks<unknown>, "streamStatusUpdate">,
+  cancelSignal: CancellationSignal
+): void {
   const { period } = content;
   let hasFinishedLoading = false;
-  wantedBufferAhead.onUpdate(sendStatus,
-                             { emitCurrentValue: false, clearSignal: cancelSignal });
-  playbackObserver.listen(sendStatus,
-                          { includeLastObservation: false, clearSignal: cancelSignal });
+  wantedBufferAhead.onUpdate(sendStatus, {
+    emitCurrentValue: false,
+    clearSignal: cancelSignal,
+  });
+  playbackObserver.listen(sendStatus, {
+    includeLastObservation: false,
+    clearSignal: cancelSignal,
+  });
   sendStatus();
 
-  function sendStatus() : void {
+  function sendStatus(): void {
     const observation = playbackObserver.getReference().getValue();
     const wba = wantedBufferAhead.getValue();
     const position = observation.position.last;
     if (period.end !== undefined && position + wba >= period.end) {
-      log.debug("Stream: full \"empty\" AdaptationStream", bufferType);
+      log.debug('Stream: full "empty" AdaptationStream', bufferType);
       hasFinishedLoading = true;
     }
-    callbacks.streamStatusUpdate({ period,
-                                   bufferType,
-                                   position,
-                                   imminentDiscontinuity: null,
-                                   isEmptyStream: true,
-                                   hasFinishedLoading,
-                                   neededSegments: [] });
+    callbacks.streamStatusUpdate({
+      period,
+      bufferType,
+      position,
+      imminentDiscontinuity: null,
+      isEmptyStream: true,
+      hasFinishedLoading,
+      neededSegments: [],
+    });
   }
 }

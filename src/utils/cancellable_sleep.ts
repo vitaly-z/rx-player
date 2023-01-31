@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  CancellationError,
-  CancellationSignal,
-} from "./task_canceller";
+import { CancellationError, CancellationSignal } from "./task_canceller";
 
 /**
  * Wait the given `delay`, resolving the Promise when finished.
@@ -35,16 +32,17 @@ import {
 export default function cancellableSleep(
   delay: number,
   cancellationSignal: CancellationSignal
-) : Promise<void> {
+): Promise<void> {
   return new Promise((res, rej) => {
     const timeout = setTimeout(() => {
       unregisterCancelSignal();
       res();
     }, delay);
-    const unregisterCancelSignal = cancellationSignal
-      .register(function onCancel(cancellationError : CancellationError) {
+    const unregisterCancelSignal = cancellationSignal.register(
+      function onCancel(cancellationError: CancellationError) {
         clearTimeout(timeout);
         rej(cancellationError);
-      });
+      }
+    );
   });
 }

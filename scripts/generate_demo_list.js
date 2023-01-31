@@ -43,8 +43,8 @@ const INITIAL_PATH = "./versions";
 
 function sortVersions(versions) {
   return versions
-    .filter(v => semver.valid(v) != null)
-    .sort((a, b) => semver.gt(a, b) ? -1 : 1);
+    .filter((v) => semver.valid(v) != null)
+    .sort((a, b) => (semver.gt(a, b) ? -1 : 1));
 }
 
 function isDirectory(source) {
@@ -88,18 +88,13 @@ if (versions.length <= 0) {
     const version = sortedVersions[i];
     // const versionAsNumber = +version.split(".").join();
     const dirPath = path.join(INITIAL_PATH, version, "demo/index.html");
-    body += `<li><a href=${encode(dirPath)}>` +
-      encode(version) +
-      "</a></li>";
+    body += `<li><a href=${encode(dirPath)}>` + encode(version) + "</a></li>";
   }
   body += "</ul>";
 }
 
 body += "<body/>";
 
-const html = "<html>" +
-  head +
-  body +
-  "<html>";
+const html = "<html>" + head + body + "<html>";
 
 fs.writeFileSync("./demo_page_by_version.html", html);

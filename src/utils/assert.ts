@@ -24,12 +24,16 @@ import isNullOrUndefined from "./is_null_or_undefined";
  * @throws AssertionError - Throws if the assertion given is false
  */
 export default function assert(
-  assertion : boolean,
-  message? : string
-) : asserts assertion {
-  if (__ENVIRONMENT__.DEV === __ENVIRONMENT__.CURRENT_ENV as number && !assertion) {
-    throw new AssertionError(message === undefined ? "invalid assertion" :
-                                                     message);
+  assertion: boolean,
+  message?: string
+): asserts assertion {
+  if (
+    __ENVIRONMENT__.DEV === (__ENVIRONMENT__.CURRENT_ENV as number) &&
+    !assertion
+  ) {
+    throw new AssertionError(
+      message === undefined ? "invalid assertion" : message
+    );
   }
 }
 
@@ -48,13 +52,16 @@ export function assertInterface<T>(
   o: T,
   iface: IObjectInterface<T>,
   name: string = "object"
-) : void {
+): void {
   assert(!isNullOrUndefined(o), `${name} should be an object`);
   for (const k in iface) {
     if (iface.hasOwnProperty(k)) {
       /* eslint-disable max-len  */
       /* eslint-disable @typescript-eslint/restrict-template-expressions */
-      assert(typeof o[k] === iface[k], `${name} should have property ${k} as a ${iface[k]}`);
+      assert(
+        typeof o[k] === iface[k],
+        `${name} should have property ${k} as a ${iface[k]}`
+      );
       /* eslint-enable max-len */
       /* eslint-enable @typescript-eslint/restrict-template-expressions */
     }

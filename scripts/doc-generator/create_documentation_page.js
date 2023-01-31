@@ -6,10 +6,7 @@ const getSearchDataForContent = require("./get_search_data_for_content.js");
 const convertMDToHTML = require("./convert_MD_to_HMTL.js");
 const constructTableOfContents = require("./construct_table_of_contents.js");
 const generatePageHtml = require("./generate_page_html.js");
-const {
-  mkdirParent,
-  toUriCompatibleRelativePath,
-} = require("./utils.js");
+const { mkdirParent, toUriCompatibleRelativePath } = require("./utils.js");
 
 /**
  * Create and write HTML page output file from the markdown input file.
@@ -74,9 +71,7 @@ module.exports = async function createDocumentationPage({
   });
   contentHtml += constructNextPreviousPage(prevPageInfo, nextPageInfo);
 
-  const tocHtml = nbTocElements > 1 ?
-    constructTocBarHtml(tocMd) :
-    "";
+  const tocHtml = nbTocElements > 1 ? constructTocBarHtml(tocMd) : "";
   const html = generatePageHtml({
     contentHtml,
     cssUrls,
@@ -100,7 +95,6 @@ module.exports = async function createDocumentationPage({
   }
 };
 
-
 async function updateMediaTag(mediaTag, inputDir, outputDir) {
   if (!mediaTag.attr("src")) {
     return;
@@ -117,7 +111,9 @@ async function updateMediaTag(mediaTag, inputDir, outputDir) {
       await mkdirParent(outDir);
     } catch (err) {
       const srcMessage = (err ?? {}).message ?? "Unknown error";
-      console.error(`Error: Could not create "${outDir}" directory: ${srcMessage}`);
+      console.error(
+        `Error: Could not create "${outDir}" directory: ${srcMessage}`
+      );
       process.exit(1);
     }
   }
@@ -131,23 +127,29 @@ function constructNextPreviousPage(prevPageInfo, nextPageInfo) {
 
   const prevPageElt = createNextPrevElt(prevPageInfo, false);
   const nextPageElt = createNextPrevElt(nextPageInfo, true);
-  return `<nav class="next-previous-page-wrapper" aria-label="Navigate between pages">` +
+  return (
+    `<nav class="next-previous-page-wrapper" aria-label="Navigate between pages">` +
     prevPageElt +
     nextPageElt +
-    `</nav>`;
+    `</nav>`
+  );
 
   function createNextPrevElt(pageInfo, isNext) {
-    const base = `<div class="next-or-previous-page${isNext ? " next-page" : ""}">`;
+    const base = `<div class="next-or-previous-page${
+      isNext ? " next-page" : ""
+    }">`;
     if (pageInfo === null) {
       return base + "</div>";
     }
-    return base +
+    return (
+      base +
       `<a class="next-or-previous-page-link" href="${pageInfo.link}">` +
       `<div class="next-or-previous-page-link-label">` +
       (isNext ? "Next" : "Previous") +
       "</div>" +
       `<div class="next-or-previous-page-link-name">${pageInfo.name}</div>` +
-      "</a></div>";
+      "</a></div>"
+    );
   }
 }
 
@@ -201,9 +203,11 @@ async function parseMD(data, inputDir, outputDir, linkTranslator) {
  */
 function constructTocBarHtml(tocMd) {
   const tocHtml = convertMDToHTML(tocMd);
-  return "<div class=\"tocbar-wrapper\">" +
-           "<div class=\"tocbar\">" +
-             tocHtml +
-           "</div>" +
-         "</div>";
+  return (
+    '<div class="tocbar-wrapper">' +
+    '<div class="tocbar">' +
+    tocHtml +
+    "</div>" +
+    "</div>"
+  );
 }

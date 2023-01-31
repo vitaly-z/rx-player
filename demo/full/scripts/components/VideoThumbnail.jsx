@@ -32,26 +32,26 @@ class VideoThumbnail extends React.Component {
     this.state = {
       style: {},
       divSpinnerStyle: {
-        "backgroundColor": "gray",
-        "position": "absolute",
-        "width": "100%",
-        "height": "100%",
-        "opacity": "50%",
-        "display": "flex",
-        "justifyContent": "center",
-        "alignItems": "center",
+        backgroundColor: "gray",
+        position: "absolute",
+        width: "100%",
+        height: "100%",
+        opacity: "50%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
       },
       spinnerStyle: {
-        "width": "50%",
-        "margin": "auto",
+        width: "50%",
+        margin: "auto",
       },
-      displaySpinner : true,
+      displaySpinner: true,
     };
     this.lastSetTime = undefined;
     if (this.props.videoThumbnailsData === null) {
       this.props.player.dispatch("ATTACH_VIDEO_THUMBNAIL_LOADER");
     }
-    this.element  = React.createRef();
+    this.element = React.createRef();
   }
 
   correctImagePosition() {
@@ -127,11 +127,13 @@ class VideoThumbnail extends React.Component {
   }
 
   _placeVideoThumbnail() {
-    if (this.props.videoThumbnailsData !== null &&
-        this.element.current !== null)
-    {
-      this.element.current
-        .appendChild(this.props.videoThumbnailsData.videoElement);
+    if (
+      this.props.videoThumbnailsData !== null &&
+      this.element.current !== null
+    ) {
+      this.element.current.appendChild(
+        this.props.videoThumbnailsData.videoElement
+      );
     }
     this.correctImagePosition();
   }
@@ -160,9 +162,14 @@ class VideoThumbnail extends React.Component {
       // when the user quickly moves its pointer or whatever is calling this
       this._loadThumbnailTimeout = setTimeout(() => {
         this._loadThumbnailTimeout = null;
-        thumbnailsData.videoThumbnailLoader.setTime(roundedTime)
+        thumbnailsData.videoThumbnailLoader
+          .setTime(roundedTime)
           .catch((err) => {
-            if (typeof err === "object" && err !== null && err.code === "ABORTED") {
+            if (
+              typeof err === "object" &&
+              err !== null &&
+              err.code === "ABORTED"
+            ) {
               return;
             } else {
               /* eslint-disable-next-line no-console */
@@ -178,27 +185,22 @@ class VideoThumbnail extends React.Component {
       }, 40);
     }
 
-    return (<div
-      className="thumbnail-wrapper"
-      style={style}
-      ref={this.element}
-    >
-      {
-        this.state.displaySpinner ?
+    return (
+      <div className="thumbnail-wrapper" style={style} ref={this.element}>
+        {this.state.displaySpinner ? (
           <div style={divSpinnerStyle}>
-            <img
-              src="./assets/spinner.gif"
-              style={spinnerStyle}
-            />
-          </div> :
-          null
-      }
-    </div>);
+            <img src="./assets/spinner.gif" style={spinnerStyle} />
+          </div>
+        ) : null}
+      </div>
+    );
   }
 }
 
-export default React.memo(withModulesState({
-  player: {
-    videoThumbnailsData: "videoThumbnailsData"
-  },
-})(VideoThumbnail));
+export default React.memo(
+  withModulesState({
+    player: {
+      videoThumbnailsData: "videoThumbnailsData",
+    },
+  })(VideoThumbnail)
+);

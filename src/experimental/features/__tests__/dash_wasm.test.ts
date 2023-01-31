@@ -28,7 +28,8 @@ jest.mock("../../../transports/dash", () => ({
 
 describe("Features list - DASH WASM Parser", () => {
   it("should add DASH WASM parser in the current features", () => {
-    const mockInitialize = jest.spyOn(DashWasmParser.prototype, "initialize")
+    const mockInitialize = jest
+      .spyOn(DashWasmParser.prototype, "initialize")
       .mockImplementation(jest.fn());
 
     const DASH_WASM = dashWasmFeature;
@@ -41,9 +42,10 @@ describe("Features list - DASH WASM Parser", () => {
     expect(mockInitialize).toHaveBeenCalledTimes(1);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const featureObject : any = { transports: {},
-                                  dashParsers: { js: null,
-                                                 wasm: null } };
+    const featureObject: any = {
+      transports: {},
+      dashParsers: { js: null, wasm: null },
+    };
     DASH_WASM._addFeature(featureObject);
     expect(featureObject.transports).toEqual({ dash: DASHFeature });
     expect(featureObject.dashParsers.js).toEqual(null);

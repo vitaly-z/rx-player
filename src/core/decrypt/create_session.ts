@@ -44,25 +44,28 @@ import PersistentSessionsStore from "./utils/persistent_sessions_store";
  * @returns {Promise}
  */
 export default function createSession(
-  stores : IMediaKeySessionStores,
-  initData : IProcessedProtectionData,
-  wantedSessionType : MediaKeySessionType,
-  cancelSignal : CancellationSignal
-) : Promise<ICreateSessionEvent> {
-  const { loadedSessionsStore,
-          persistentSessionsStore } = stores;
+  stores: IMediaKeySessionStores,
+  initData: IProcessedProtectionData,
+  wantedSessionType: MediaKeySessionType,
+  cancelSignal: CancellationSignal
+): Promise<ICreateSessionEvent> {
+  const { loadedSessionsStore, persistentSessionsStore } = stores;
 
   if (wantedSessionType === "temporary") {
     return createTemporarySession(loadedSessionsStore, initData);
   } else if (persistentSessionsStore === null) {
-    log.warn("DRM: Cannot create persistent MediaKeySession, " +
-             "PersistentSessionsStore not created.");
+    log.warn(
+      "DRM: Cannot create persistent MediaKeySession, " +
+        "PersistentSessionsStore not created."
+    );
     return createTemporarySession(loadedSessionsStore, initData);
   }
-  return createAndTryToRetrievePersistentSession(loadedSessionsStore,
-                                                 persistentSessionsStore,
-                                                 initData,
-                                                 cancelSignal);
+  return createAndTryToRetrievePersistentSession(
+    loadedSessionsStore,
+    persistentSessionsStore,
+    initData,
+    cancelSignal
+  );
 }
 
 /**
@@ -73,13 +76,15 @@ export default function createSession(
  * @returns {Promise}
  */
 function createTemporarySession(
-  loadedSessionsStore : LoadedSessionsStore,
-  initData : IProcessedProtectionData
-) : Promise<INewSessionCreatedEvent> {
+  loadedSessionsStore: LoadedSessionsStore,
+  initData: IProcessedProtectionData
+): Promise<INewSessionCreatedEvent> {
   log.info("DRM: Creating a new temporary session");
   const entry = loadedSessionsStore.createSession(initData, "temporary");
-  return Promise.resolve({ type: MediaKeySessionLoadingType.Created,
-                           value: entry });
+  return Promise.resolve({
+    type: MediaKeySessionLoadingType.Created,
+    value: entry,
+  });
 }
 
 /**
@@ -92,21 +97,23 @@ function createTemporarySession(
  * @returns {Promise}
  */
 async function createAndTryToRetrievePersistentSession(
-  loadedSessionsStore : LoadedSessionsStore,
-  persistentSessionsStore : PersistentSessionsStore,
-  initData : IProcessedProtectionData,
-  cancelSignal : CancellationSignal
-) : Promise<INewSessionCreatedEvent | IPersistentSessionRecoveryEvent> {
+  loadedSessionsStore: LoadedSessionsStore,
+  persistentSessionsStore: PersistentSessionsStore,
+  initData: IProcessedProtectionData,
+  cancelSignal: CancellationSignal
+): Promise<INewSessionCreatedEvent | IPersistentSessionRecoveryEvent> {
   if (cancelSignal.cancellationError !== null) {
     throw cancelSignal.cancellationError;
   }
   log.info("DRM: Creating persistent MediaKeySession");
 
-  const entry = loadedSessionsStore.createSession(initData, "persistent-license");
+  const entry = loadedSessionsStore.createSession(
+    initData,
+    "persistent-license"
+  );
   const storedEntry = persistentSessionsStore.getAndReuse(initData);
   if (storedEntry === null) {
-    return { type: MediaKeySessionLoadingType.Created,
-             value: entry };
+    return { type: MediaKeySessionLoadingType.Created, value: entry };
   }
 
   try {
@@ -125,26 +132,34 @@ async function createAndTryToRetrievePersistentSession(
       // Thus, we're creating another `"persistent-license"` `MediaKeySession`
       // in that specific case.
       loadedSessionsStore.removeSessionWithoutClosingIt(entry.mediaKeySession);
-      const newEntry = loadedSessionsStore.createSession(initData,
-                                                         "persistent-license");
-      return { type: MediaKeySessionLoadingType.Created,
-               value: newEntry };
+      const newEntry = loadedSessionsStore.createSession(
+        initData,
+        "persistent-license"
+      );
+      return { type: MediaKeySessionLoadingType.Created, value: newEntry };
     }
 
     if (hasLoadedSession && isSessionUsable(entry.mediaKeySession)) {
-      persistentSessionsStore.add(initData, initData.keyIds, entry.mediaKeySession);
+      persistentSessionsStore.add(
+        initData,
+        initData.keyIds,
+        entry.mediaKeySession
+      );
       log.info("DRM: Succeeded to load persistent session.");
-      return { type: MediaKeySessionLoadingType.LoadedPersistentSession,
-               value: entry };
+      return {
+        type: MediaKeySessionLoadingType.LoadedPersistentSession,
+        value: entry,
+      };
     }
 
     // Unusable persistent session: recreate a new session from scratch.
     log.warn("DRM: Previous persistent session not usable anymore.");
     return recreatePersistentSession();
   } catch (err) {
-    log.warn("DRM: Unable to load persistent session: " +
-             (err instanceof Error ? err.toString() :
-                                     "Unknown Error"));
+    log.warn(
+      "DRM: Unable to load persistent session: " +
+        (err instanceof Error ? err.toString() : "Unknown Error")
+    );
     return recreatePersistentSession();
   }
 
@@ -153,7 +168,7 @@ async function createAndTryToRetrievePersistentSession(
    * considered, and re-create it from scratch.
    * @returns {Promise.<Object>}
    */
-  async function recreatePersistentSession() : Promise<INewSessionCreatedEvent> {
+  async function recreatePersistentSession(): Promise<INewSessionCreatedEvent> {
     if (cancelSignal.cancellationError !== null) {
       throw cancelSignal.cancellationError;
     }
@@ -183,32 +198,32 @@ async function createAndTryToRetrievePersistentSession(
     if (cancelSignal.cancellationError !== null) {
       throw cancelSignal.cancellationError;
     }
-    const newEntry = loadedSessionsStore.createSession(initData,
-                                                       "persistent-license");
-    return { type: MediaKeySessionLoadingType.Created,
-             value: newEntry };
+    const newEntry = loadedSessionsStore.createSession(
+      initData,
+      "persistent-license"
+    );
+    return { type: MediaKeySessionLoadingType.Created, value: newEntry };
   }
 }
 
 export interface INewSessionCreatedEvent {
-  type : MediaKeySessionLoadingType.Created;
-  value : {
-    mediaKeySession : MediaKeySession |
-                      ICustomMediaKeySession;
-    sessionType : MediaKeySessionType;
-    keySessionRecord : KeySessionRecord;
+  type: MediaKeySessionLoadingType.Created;
+  value: {
+    mediaKeySession: MediaKeySession | ICustomMediaKeySession;
+    sessionType: MediaKeySessionType;
+    keySessionRecord: KeySessionRecord;
   };
 }
 
 export interface IPersistentSessionRecoveryEvent {
-  type : MediaKeySessionLoadingType.LoadedPersistentSession;
-  value : {
-    mediaKeySession : MediaKeySession |
-                      ICustomMediaKeySession;
-    sessionType : MediaKeySessionType;
-    keySessionRecord : KeySessionRecord;
+  type: MediaKeySessionLoadingType.LoadedPersistentSession;
+  value: {
+    mediaKeySession: MediaKeySession | ICustomMediaKeySession;
+    sessionType: MediaKeySessionType;
+    keySessionRecord: KeySessionRecord;
   };
 }
 
-export type ICreateSessionEvent = INewSessionCreatedEvent |
-                                  IPersistentSessionRecoveryEvent;
+export type ICreateSessionEvent =
+  | INewSessionCreatedEvent
+  | IPersistentSessionRecoveryEvent;

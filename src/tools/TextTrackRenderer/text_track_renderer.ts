@@ -17,24 +17,21 @@
 /* eslint-disable max-len */
 import HTMLTextSegmentBuffer from "../../core/segment_buffers/implementations/text/html";
 /* eslint-enable max-len */
-import {
-  addFeatures,
-  IFeature,
-} from "../../features";
+import { addFeatures, IFeature } from "../../features";
 
 /** Argument for the `setTextTrack` method. */
 export interface ISetTextTrackArguments {
   /** The text track content. Should be a string in the format indicated by `type`. */
-  data : string;
+  data: string;
   /** The format the text track is in (e.g. "ttml" or "vtt") */
-  type : string;
+  type: string;
   /** Offset, in seconds, that will be added to each subtitle's start and end time. */
-  timeOffset? : number;
+  timeOffset?: number;
   /**
    * Language the text track is in. This is sometimes needed to properly parse
    * the text track. For example for tracks in the "sami" format.
    */
-  language? : string;
+  language?: string;
 }
 
 /**
@@ -47,11 +44,11 @@ export default class TextTrackRenderer {
    * Add a given parser from the list of features.
    * @param {Array.<Function>} parsersList
    */
-  static addParsers(parsersList : IFeature[]) : void {
+  static addParsers(parsersList: IFeature[]): void {
     addFeatures(parsersList);
   }
 
-  private _segmentBuffer : HTMLTextSegmentBuffer;
+  private _segmentBuffer: HTMLTextSegmentBuffer;
 
   /**
    * @param {Object} opts
@@ -60,12 +57,17 @@ export default class TextTrackRenderer {
    * @param {HTMLElement} opt.textTrackElement - The HTML element which will
    * contain the text tracks.
    */
-  constructor(
-    { videoElement,
-      textTrackElement } : { videoElement : HTMLMediaElement;
-                             textTrackElement : HTMLElement; }
-  ) {
-    this._segmentBuffer = new HTMLTextSegmentBuffer(videoElement, textTrackElement);
+  constructor({
+    videoElement,
+    textTrackElement,
+  }: {
+    videoElement: HTMLMediaElement;
+    textTrackElement: HTMLElement;
+  }) {
+    this._segmentBuffer = new HTMLTextSegmentBuffer(
+      videoElement,
+      textTrackElement
+    );
   }
 
   /**
@@ -73,27 +75,32 @@ export default class TextTrackRenderer {
    * Replace previous one if one was already set.
    * @param {Object} args
    */
-  public setTextTrack(args : ISetTextTrackArguments) : void {
+  public setTextTrack(args: ISetTextTrackArguments): void {
     this._segmentBuffer.removeBufferSync(0, Number.MAX_VALUE);
-    const timestampOffset = typeof args.timeOffset === "number" ?
-      args.timeOffset :
-      0;
-    this._segmentBuffer.pushChunkSync({ inventoryInfos: null,
-                                        data: { initSegment: null,
-                                                codec: args.type,
-                                                timestampOffset,
-                                                appendWindow: [0, Infinity],
-                                                chunk : { start: 0,
-                                                          end: Number.MAX_VALUE,
-                                                          data: args.data,
-                                                          language: args.language,
-                                                          type: args.type } } });
+    const timestampOffset =
+      typeof args.timeOffset === "number" ? args.timeOffset : 0;
+    this._segmentBuffer.pushChunkSync({
+      inventoryInfos: null,
+      data: {
+        initSegment: null,
+        codec: args.type,
+        timestampOffset,
+        appendWindow: [0, Infinity],
+        chunk: {
+          start: 0,
+          end: Number.MAX_VALUE,
+          data: args.data,
+          language: args.language,
+          type: args.type,
+        },
+      },
+    });
   }
 
   /**
    * Completely remove the current text track.
    */
-  public removeTextTrack() : void {
+  public removeTextTrack(): void {
     this._segmentBuffer.removeBufferSync(0, Number.MAX_VALUE);
   }
 
@@ -102,7 +109,7 @@ export default class TextTrackRenderer {
    * /!\ The TextTrackRenderer will be unusable after this method has been
    * called.
    */
-  public dispose() : void {
+  public dispose(): void {
     this._segmentBuffer.dispose();
   }
 }

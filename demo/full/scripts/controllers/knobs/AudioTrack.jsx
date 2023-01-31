@@ -6,7 +6,7 @@ import Knob from "../../components/Knob.jsx";
 const AUDIO_DESCRIPTION_ICON = "(AD)"; // String.fromCharCode(0xf29e);
 
 const findAudioTrackIndex = (audioTrack, allAudioTracks) => {
-  return allAudioTracks.findIndex(ln => ln.id === audioTrack.id);
+  return allAudioTracks.findIndex((ln) => ln.id === audioTrack.id);
 };
 
 const AudioTrackKnobBase = ({
@@ -22,15 +22,18 @@ const AudioTrackKnobBase = ({
     options = ["Not available"];
     selectedIndex = 0;
   } else {
-    options = availableAudioTracks
-      .map(audioTrack => {
-        return translateLanguageCode(audioTrack.normalized) +
-          (audioTrack.audioDescription ?
-            (" " + AUDIO_DESCRIPTION_ICON) : "");
-      });
+    options = availableAudioTracks.map((audioTrack) => {
+      return (
+        translateLanguageCode(audioTrack.normalized) +
+        (audioTrack.audioDescription ? " " + AUDIO_DESCRIPTION_ICON : "")
+      );
+    });
 
-    selectedIndex = currentAudioTrack ?
-      Math.max(findAudioTrackIndex(currentAudioTrack, availableAudioTracks), 0)
+    selectedIndex = currentAudioTrack
+      ? Math.max(
+          findAudioTrackIndex(currentAudioTrack, availableAudioTracks),
+          0
+        )
       : 0;
   }
 
@@ -52,9 +55,11 @@ const AudioTrackKnobBase = ({
   );
 };
 
-export default React.memo(withModulesState({
-  player: {
-    audioTrack: "currentAudioTrack",
-    availableAudioTracks: "availableAudioTracks",
-  },
-})(AudioTrackKnobBase));
+export default React.memo(
+  withModulesState({
+    player: {
+      audioTrack: "currentAudioTrack",
+      availableAudioTracks: "availableAudioTracks",
+    },
+  })(AudioTrackKnobBase)
+);

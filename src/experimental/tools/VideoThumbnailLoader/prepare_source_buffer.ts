@@ -35,12 +35,13 @@ export default function prepareSourceBuffer(
 ): Promise<AudioVideoSegmentBuffer> {
   return new Promise((resolve, reject) => {
     if (MediaSource_ == null) {
-      throw new Error("No MediaSource Object was found in the current browser.");
+      throw new Error(
+        "No MediaSource Object was found in the current browser."
+      );
     }
 
     // make sure the media has been correctly reset
-    const oldSrc = isNonEmptyString(videoElement.src) ? videoElement.src :
-                                                        null;
+    const oldSrc = isNonEmptyString(videoElement.src) ? videoElement.src : null;
     resetMediaSource(videoElement, null, oldSrc);
 
     log.info("Init: Creating MediaSource");

@@ -22,8 +22,12 @@ describe("transports utils - byteRange", () => {
     expect(byteRange([8, 40])).toEqual("bytes=8-40");
     expect(byteRange([888, 40])).toEqual("bytes=888-40");
     expect(byteRange([-Infinity, 40])).toEqual("bytes=-Infinity-40");
-    expect(byteRange([-Infinity, -Infinity])).toEqual("bytes=-Infinity--Infinity");
-    expect(byteRange([Infinity, -Infinity])).toEqual("bytes=Infinity--Infinity");
+    expect(byteRange([-Infinity, -Infinity])).toEqual(
+      "bytes=-Infinity--Infinity"
+    );
+    expect(byteRange([Infinity, -Infinity])).toEqual(
+      "bytes=Infinity--Infinity"
+    );
   });
   it("should not add ending byte if end is equal to +Infinity ", () => {
     expect(byteRange([0, Infinity])).toEqual("bytes=0-");

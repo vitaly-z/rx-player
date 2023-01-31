@@ -28,7 +28,7 @@ jest.mock("../../../core/decrypt", () => ({
 describe("Features list - EME", () => {
   it("should add the ContentDecryptor in the current features", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const featureObject : any = {};
+    const featureObject: any = {};
     addEMEFeature(featureObject);
     expect(featureObject).toEqual({ ContentDecryptor });
     expect(featureObject.ContentDecryptor).toBe(ContentDecryptor);

@@ -24,7 +24,6 @@
 
 import { ProberStatus } from "../../types";
 
-
 describe("MediaCapabilitiesProber probers - HDCPPolicy", () => {
   beforeEach(() => {
     jest.resetModules();
@@ -34,10 +33,13 @@ describe("MediaCapabilitiesProber probers - HDCPPolicy", () => {
     jest.mock("../../../../../compat", () => ({
       requestMediaKeySystemAccess: null,
     }));
-    const probeHDCPPolicy = jest.requireActual("../../probers/HDCPPolicy").default;
+    const probeHDCPPolicy = jest.requireActual(
+      "../../probers/HDCPPolicy"
+    ).default;
     /* eslint-disable @typescript-eslint/no-floating-promises */
     expect(probeHDCPPolicy({})).rejects.toEqual(
-      "MediaCapabilitiesProber >>> API_CALL: API not available");
+      "MediaCapabilitiesProber >>> API_CALL: API not available"
+    );
     /* eslint-enable @typescript-eslint/no-floating-promises */
   });
 
@@ -45,11 +47,13 @@ describe("MediaCapabilitiesProber probers - HDCPPolicy", () => {
     jest.mock("../../../../../compat", () => ({
       requestMediaKeySystemAccess: {},
     }));
-    const probeHDCPPolicy = jest.requireActual("../../probers/HDCPPolicy").default;
+    const probeHDCPPolicy = jest.requireActual(
+      "../../probers/HDCPPolicy"
+    ).default;
     /* eslint-disable @typescript-eslint/no-floating-promises */
     expect(probeHDCPPolicy({})).rejects.toEqual(
       "MediaCapabilitiesProber >>> API_CALL: " +
-      "Missing policy argument for calling getStatusForPolicy."
+        "Missing policy argument for calling getStatusForPolicy."
     );
     /* eslint-enable @typescript-eslint/no-floating-promises */
   });
@@ -67,7 +71,9 @@ describe("MediaCapabilitiesProber probers - HDCPPolicy", () => {
       requestMediaKeySystemAccess: mockRequestMediaKeySystemAcces,
     }));
 
-    const probeHDCPPolicy = jest.requireActual("../../probers/HDCPPolicy").default;
+    const probeHDCPPolicy = jest.requireActual(
+      "../../probers/HDCPPolicy"
+    ).default;
 
     expect.assertions(3);
     probeHDCPPolicy({ hdcp: "1.1" })
@@ -97,7 +103,9 @@ describe("MediaCapabilitiesProber probers - HDCPPolicy", () => {
       requestMediaKeySystemAccess: mockRequestMediaKeySystemAcces,
     }));
 
-    const probeHDCPPolicy = jest.requireActual("../../probers/HDCPPolicy").default;
+    const probeHDCPPolicy = jest.requireActual(
+      "../../probers/HDCPPolicy"
+    ).default;
 
     expect.assertions(3);
     probeHDCPPolicy({ hdcp: "1.1" })
@@ -127,7 +135,9 @@ describe("MediaCapabilitiesProber probers - HDCPPolicy", () => {
       requestMediaKeySystemAccess: mockRequestMediaKeySystemAcces,
     }));
 
-    const probeHDCPPolicy = jest.requireActual("../../probers/HDCPPolicy").default;
+    const probeHDCPPolicy = jest.requireActual(
+      "../../probers/HDCPPolicy"
+    ).default;
 
     expect.assertions(3);
     probeHDCPPolicy({ hdcp: "1.1" })
@@ -142,4 +152,3 @@ describe("MediaCapabilitiesProber probers - HDCPPolicy", () => {
       });
   });
 });
-

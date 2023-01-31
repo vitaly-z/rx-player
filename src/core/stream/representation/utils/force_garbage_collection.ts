@@ -32,15 +32,19 @@ import { SegmentBuffer } from "../../../segment_buffers";
  * @returns {Promise}
  */
 export default async function forceGarbageCollection(
-  currentPosition : number,
-  bufferingQueue : SegmentBuffer,
-  cancellationSignal : CancellationSignal
-) : Promise<void> {
+  currentPosition: number,
+  bufferingQueue: SegmentBuffer,
+  cancellationSignal: CancellationSignal
+): Promise<void> {
   const GC_GAP_CALM = config.getCurrent().BUFFER_GC_GAPS.CALM;
   const GC_GAP_BEEFY = config.getCurrent().BUFFER_GC_GAPS.BEEFY;
   log.warn("Stream: Running garbage collector");
   const buffered = bufferingQueue.getBufferedRanges();
-  let cleanedupRanges = selectGCedRanges(currentPosition, buffered, GC_GAP_CALM);
+  let cleanedupRanges = selectGCedRanges(
+    currentPosition,
+    buffered,
+    GC_GAP_CALM
+  );
 
   // more aggressive GC if we could not find any range to clean
   if (cleanedupRanges.length === 0) {
@@ -48,9 +52,12 @@ export default async function forceGarbageCollection(
   }
 
   if (log.hasLevel("DEBUG")) {
-    log.debug("Stream: GC cleaning",
-              cleanedupRanges.map(({ start, end }) => `start: ${start} - end ${end}`)
-                .join(", "));
+    log.debug(
+      "Stream: GC cleaning",
+      cleanedupRanges
+        .map(({ start, end }) => `start: ${start} - end ${end}`)
+        .join(", ")
+    );
   }
   for (const range of cleanedupRanges) {
     const { start, end } = range;
@@ -74,20 +81,24 @@ export default async function forceGarbageCollection(
  * @returns {Array.<Object>} - Ranges selected for clean up
  */
 function selectGCedRanges(
-  position : number,
-  buffered : TimeRanges,
-  gcGap : number
-) : Array<{ start : number; end : number }> {
-  const { innerRange, outerRanges } = getInnerAndOuterTimeRanges(buffered,
-                                                                 position);
-  const cleanedupRanges : Array<{ start : number;
-                                  end: number; }> = [];
+  position: number,
+  buffered: TimeRanges,
+  gcGap: number
+): Array<{ start: number; end: number }> {
+  const { innerRange, outerRanges } = getInnerAndOuterTimeRanges(
+    buffered,
+    position
+  );
+  const cleanedupRanges: Array<{ start: number; end: number }> = [];
 
   // start by trying to remove all ranges that do not contain the
   // current time and respect the gcGap
   for (let i = 0; i < outerRanges.length; i++) {
     const outerRange = outerRanges[i];
-    if ((position - gcGap > outerRange.end) || (position + gcGap < outerRange.start)) {
+    if (
+      position - gcGap > outerRange.end ||
+      position + gcGap < outerRange.start
+    ) {
       cleanedupRanges.push(outerRange);
     }
   }
@@ -95,18 +106,19 @@ function selectGCedRanges(
   // try to clean up some space in the current range
   if (innerRange !== null) {
     if (log.hasLevel("DEBUG")) {
-      log.debug("Stream: GC removing part of inner range",
-                cleanedupRanges.map(({ start, end }) => `start: ${start} - end ${end}`)
-                  .join(", "));
+      log.debug(
+        "Stream: GC removing part of inner range",
+        cleanedupRanges
+          .map(({ start, end }) => `start: ${start} - end ${end}`)
+          .join(", ")
+      );
     }
     if (position - gcGap > innerRange.start) {
-      cleanedupRanges.push({ start: innerRange.start,
-                             end: position - gcGap });
+      cleanedupRanges.push({ start: innerRange.start, end: position - gcGap });
     }
 
     if (position + gcGap < innerRange.end) {
-      cleanedupRanges.push({ start: position + gcGap,
-                             end: innerRange.end });
+      cleanedupRanges.push({ start: position + gcGap, end: innerRange.end });
     }
   }
   return cleanedupRanges;

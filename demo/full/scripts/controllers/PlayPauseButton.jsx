@@ -23,12 +23,10 @@ function PlayPauseButton({
   hasEnded,
 }) {
   const disabled = !isContentLoaded && !cannotLoadMetadata;
-  const displayPause = !isPaused && isContentLoaded &&
-    !hasEnded;
+  const displayPause = !isPaused && isContentLoaded && !hasEnded;
 
-  const completeClassName = "play-pause-button " +
-    className +
-    (disabled  ? " disabled" : "");
+  const completeClassName =
+    "play-pause-button " + className + (disabled ? " disabled" : "");
 
   const play = () => player.dispatch("PLAY");
   const pause = () => {
@@ -47,11 +45,13 @@ function PlayPauseButton({
   );
 }
 
-export default React.memo(withModulesState({
-  player: {
-    cannotLoadMetadata: "cannotLoadMetadata",
-    isPaused: "isPaused",
-    isContentLoaded: "isContentLoaded",
-    hasEnded: "hasEnded",
-  },
-})(PlayPauseButton));
+export default React.memo(
+  withModulesState({
+    player: {
+      cannotLoadMetadata: "cannotLoadMetadata",
+      isPaused: "isPaused",
+      isContentLoaded: "isContentLoaded",
+      hasEnded: "hasEnded",
+    },
+  })(PlayPauseButton)
+);

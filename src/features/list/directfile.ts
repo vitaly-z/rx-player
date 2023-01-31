@@ -24,9 +24,8 @@ import { IFeaturesObject } from "../types";
  * (`directfile` transport)
  * @param {Object} features
  */
-function addDirectfileFeature(features : IFeaturesObject) : void {
-  features.directfile = { initDirectFile: directfile,
-                          mediaElementTracksStore };
+function addDirectfileFeature(features: IFeaturesObject): void {
+  features.directfile = { initDirectFile: directfile, mediaElementTracksStore };
 }
 
 export { addDirectfileFeature as DIRECTFILE };

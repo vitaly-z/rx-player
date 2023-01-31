@@ -30,45 +30,52 @@ import { CancellationSignal } from "../../../utils/task_canceller";
  * @returns {Promise}
  */
 export default function loadAndPushSegment(
-  segmentInfo : ISegmentLoaderContent,
+  segmentInfo: ISegmentLoaderContent,
   segmentBuffer: AudioVideoSegmentBuffer,
   segmentFetcher: ISegmentFetcher<ArrayBuffer | Uint8Array>,
   cancelSignal: CancellationSignal
 ): Promise<unknown> {
-  const pushOperations : Array<Promise<unknown>> = [];
-  return segmentFetcher(segmentInfo, {
-    onChunk(parseChunk) {
-      const parsed = parseChunk(undefined);
-      let isIsInitSegment : boolean;
-      let data : BufferSource | null;
-      let timestampOffset : number;
-      const codec = segmentInfo.representation.getMimeTypeString();
-      if (parsed.segmentType === "init") {
-        isIsInitSegment = true;
-        data = parsed.initializationData;
-        timestampOffset = 0;
-      } else {
-        isIsInitSegment = false;
-        data = parsed.chunkData;
-        timestampOffset = parsed.chunkOffset;
-      }
-      const pushOperation = segmentBuffer.pushChunk({
-        data: { initSegment: isIsInitSegment ? data :
-                                               null,
-                chunk: isIsInitSegment ? null :
-                                         data,
-                appendWindow: [segmentInfo.period.start, segmentInfo.period.end],
-                timestampOffset,
-                codec },
-        inventoryInfos: null,
-      }, cancelSignal);
-      pushOperations.push(pushOperation);
+  const pushOperations: Array<Promise<unknown>> = [];
+  return segmentFetcher(
+    segmentInfo,
+    {
+      onChunk(parseChunk) {
+        const parsed = parseChunk(undefined);
+        let isIsInitSegment: boolean;
+        let data: BufferSource | null;
+        let timestampOffset: number;
+        const codec = segmentInfo.representation.getMimeTypeString();
+        if (parsed.segmentType === "init") {
+          isIsInitSegment = true;
+          data = parsed.initializationData;
+          timestampOffset = 0;
+        } else {
+          isIsInitSegment = false;
+          data = parsed.chunkData;
+          timestampOffset = parsed.chunkOffset;
+        }
+        const pushOperation = segmentBuffer.pushChunk(
+          {
+            data: {
+              initSegment: isIsInitSegment ? data : null,
+              chunk: isIsInitSegment ? null : data,
+              appendWindow: [segmentInfo.period.start, segmentInfo.period.end],
+              timestampOffset,
+              codec,
+            },
+            inventoryInfos: null,
+          },
+          cancelSignal
+        );
+        pushOperations.push(pushOperation);
+      },
+      onAllChunksReceived() {
+        return;
+      },
+      onRetry(error) {
+        log.warn("Retrying segment request", error);
+      },
     },
-    onAllChunksReceived() {
-      return ;
-    },
-    onRetry(error) {
-      log.warn("Retrying segment request", error);
-    },
-  }, cancelSignal).then(() => Promise.all(pushOperations));
+    cancelSignal
+  ).then(() => Promise.all(pushOperations));
 }

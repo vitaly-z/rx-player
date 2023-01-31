@@ -45,16 +45,15 @@ import KeySessionRecord from "./utils/key_session_record";
  * @returns {Promise}
  */
 export default async function createOrLoadSession(
-  initializationData : IProcessedProtectionData,
-  stores : IMediaKeySessionStores,
-  wantedSessionType : MediaKeySessionType,
-  maxSessionCacheSize : number,
-  cancelSignal : CancellationSignal
-) : Promise<ICreateOrLoadSessionResult> {
+  initializationData: IProcessedProtectionData,
+  stores: IMediaKeySessionStores,
+  wantedSessionType: MediaKeySessionType,
+  maxSessionCacheSize: number,
+  cancelSignal: CancellationSignal
+): Promise<ICreateOrLoadSessionResult> {
   /** Store previously-loaded compatible MediaKeySession, if one. */
-  let previousLoadedSession : MediaKeySession |
-                              ICustomMediaKeySession |
-                              null = null;
+  let previousLoadedSession: MediaKeySession | ICustomMediaKeySession | null =
+    null;
 
   const { loadedSessionsStore, persistentSessionsStore } = stores;
   const entry = loadedSessionsStore.reuse(initializationData);
@@ -62,10 +61,14 @@ export default async function createOrLoadSession(
     previousLoadedSession = entry.mediaKeySession;
     if (isSessionUsable(previousLoadedSession)) {
       log.info("DRM: Reuse loaded session", previousLoadedSession.sessionId);
-      return { type: MediaKeySessionLoadingType.LoadedOpenSession,
-               value: { mediaKeySession: previousLoadedSession,
-                        sessionType: entry.sessionType,
-                        keySessionRecord: entry.keySessionRecord } };
+      return {
+        type: MediaKeySessionLoadingType.LoadedOpenSession,
+        value: {
+          mediaKeySession: previousLoadedSession,
+          sessionType: entry.sessionType,
+          keySessionRecord: entry.keySessionRecord,
+        },
+      };
     } else if (persistentSessionsStore !== null) {
       // If the session is not usable anymore, we can also remove it from the
       // PersistentSessionsStore.
@@ -88,46 +91,52 @@ export default async function createOrLoadSession(
     throw cancelSignal.cancellationError; // stop here if cancelled since
   }
 
-  const evt = await createSession(stores,
-                                  initializationData,
-                                  wantedSessionType,
-                                  cancelSignal);
-  return { type: evt.type,
-           value: { mediaKeySession: evt.value.mediaKeySession,
-                    sessionType: evt.value.sessionType,
-                    keySessionRecord: evt.value.keySessionRecord } };
+  const evt = await createSession(
+    stores,
+    initializationData,
+    wantedSessionType,
+    cancelSignal
+  );
+  return {
+    type: evt.type,
+    value: {
+      mediaKeySession: evt.value.mediaKeySession,
+      sessionType: evt.value.sessionType,
+      keySessionRecord: evt.value.keySessionRecord,
+    },
+  };
 }
 
 /** Information concerning a MediaKeySession. */
 export interface IMediaKeySessionContext {
   /** The MediaKeySession itself. */
-  mediaKeySession : MediaKeySession |
-                    ICustomMediaKeySession;
+  mediaKeySession: MediaKeySession | ICustomMediaKeySession;
   /** The type of MediaKeySession (e.g. "temporary"). */
-  sessionType : MediaKeySessionType;
+  sessionType: MediaKeySessionType;
   /** `KeySessionRecord` assiociated to this MediaKeySession. */
-  keySessionRecord : KeySessionRecord;
+  keySessionRecord: KeySessionRecord;
 }
 
 /** Event emitted when a new MediaKeySession has been created. */
 export interface ICreatedSession {
-  type : MediaKeySessionLoadingType.Created;
-  value : IMediaKeySessionContext;
+  type: MediaKeySessionLoadingType.Created;
+  value: IMediaKeySessionContext;
 }
 
 /** Event emitted when an already-loaded MediaKeySession is used. */
 export interface ILoadedOpenSession {
-  type : MediaKeySessionLoadingType.LoadedOpenSession;
-  value : IMediaKeySessionContext;
+  type: MediaKeySessionLoadingType.LoadedOpenSession;
+  value: IMediaKeySessionContext;
 }
 
 /** Event emitted when a persistent MediaKeySession has been loaded. */
 export interface ILoadedPersistentSessionEvent {
-  type : MediaKeySessionLoadingType.LoadedPersistentSession;
-  value : IMediaKeySessionContext;
+  type: MediaKeySessionLoadingType.LoadedPersistentSession;
+  value: IMediaKeySessionContext;
 }
 
 /** Every possible result returned by `createOrLoadSession`. */
-export type ICreateOrLoadSessionResult = ICreatedSession |
-                                         ILoadedOpenSession |
-                                         ILoadedPersistentSessionEvent;
+export type ICreateOrLoadSessionResult =
+  | ICreatedSession
+  | ILoadedOpenSession
+  | ILoadedPersistentSessionEvent;

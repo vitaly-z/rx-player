@@ -16,10 +16,7 @@
 
 import Manifest from "../../../../manifest";
 import areSameStreamEvents from "./are_same_stream_events";
-import {
-  INonFiniteStreamEventPayload,
-  IStreamEventPayload,
-} from "./types";
+import { INonFiniteStreamEventPayload, IStreamEventPayload } from "./types";
 
 /**
  * Refresh local scheduled events list
@@ -28,10 +25,12 @@ import {
  * @returns {Array.<Object>}
  */
 function refreshScheduledEventsList(
-  oldScheduledEvents: Array<IStreamEventPayload|INonFiniteStreamEventPayload>,
+  oldScheduledEvents: Array<IStreamEventPayload | INonFiniteStreamEventPayload>,
   manifest: Manifest
-): Array<IStreamEventPayload|INonFiniteStreamEventPayload> {
-  const scheduledEvents: Array<IStreamEventPayload|INonFiniteStreamEventPayload> = [];
+): Array<IStreamEventPayload | INonFiniteStreamEventPayload> {
+  const scheduledEvents: Array<
+    IStreamEventPayload | INonFiniteStreamEventPayload
+  > = [];
   const { periods } = manifest;
   for (let i = 0; i < periods.length; i++) {
     const period = periods[i];
@@ -46,23 +45,23 @@ function refreshScheduledEventsList(
       }
 
       if (end === undefined) {
-        const newScheduledEvent = { start,
-                                    id,
-                                    data,
-                                    publicEvent: { start,
-                                                   data } };
+        const newScheduledEvent = {
+          start,
+          id,
+          data,
+          publicEvent: { start, data },
+        };
         scheduledEvents.push(newScheduledEvent);
       } else {
-        const newScheduledEvent = { start,
-                                    end,
-                                    id,
-                                    data,
-                                    publicEvent: { start,
-                                                   end,
-                                                   data } };
+        const newScheduledEvent = {
+          start,
+          end,
+          id,
+          data,
+          publicEvent: { start, end, data },
+        };
         scheduledEvents.push(newScheduledEvent);
       }
-
     });
   }
   return scheduledEvents;

@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  IMediaConfiguration,
-  ProberStatus,
-} from "../types";
+import { IMediaConfiguration, ProberStatus } from "../types";
 
 /**
  * @param {Object} config
@@ -29,24 +26,33 @@ export default function probeMatchMedia(
   return new Promise((resolve) => {
     /* eslint-disable @typescript-eslint/unbound-method */
     if (typeof window.matchMedia !== "function") {
-    /* eslint-enable @typescript-eslint/unbound-method */
-      throw new Error("MediaCapabilitiesProber >>> API_CALL: " +
-        "matchMedia not available");
+      /* eslint-enable @typescript-eslint/unbound-method */
+      throw new Error(
+        "MediaCapabilitiesProber >>> API_CALL: " + "matchMedia not available"
+      );
     }
-    if (config.display == null ||
-        config.display.colorSpace === undefined ||
-        config.display.colorSpace.length === 0) {
-      throw new Error("MediaCapabilitiesProber >>> API_CALL: " +
-        "Not enough arguments for calling matchMedia.");
+    if (
+      config.display == null ||
+      config.display.colorSpace === undefined ||
+      config.display.colorSpace.length === 0
+    ) {
+      throw new Error(
+        "MediaCapabilitiesProber >>> API_CALL: " +
+          "Not enough arguments for calling matchMedia."
+      );
     }
 
-    const match = window.matchMedia(`(color-gamut: ${config.display.colorSpace})`);
+    const match = window.matchMedia(
+      `(color-gamut: ${config.display.colorSpace})`
+    );
     if (match.media === "not all") {
-      throw new Error("MediaCapabilitiesProber >>> API_CALL: " +
-        "Bad arguments for calling matchMedia.");
+      throw new Error(
+        "MediaCapabilitiesProber >>> API_CALL: " +
+          "Bad arguments for calling matchMedia."
+      );
     }
 
-    const result : [ProberStatus] = [
+    const result: [ProberStatus] = [
       match.matches ? ProberStatus.Supported : ProberStatus.NotSupported,
     ];
     resolve(result);

@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  ErrorTypes,
-  IOtherErrorCode,
-} from "./error_codes";
+import { ErrorTypes, IOtherErrorCode } from "./error_codes";
 import errorMessage from "./error_message";
 
 /**
@@ -25,17 +22,17 @@ import errorMessage from "./error_message";
  * @extends Error
  */
 export default class OtherError extends Error {
-  public readonly name : "OtherError";
-  public readonly type : "OTHER_ERROR";
-  public readonly message : string;
-  public readonly code : IOtherErrorCode;
-  public fatal : boolean;
+  public readonly name: "OtherError";
+  public readonly type: "OTHER_ERROR";
+  public readonly message: string;
+  public readonly code: IOtherErrorCode;
+  public fatal: boolean;
 
   /**
    * @param {string} code
    * @param {string} reason
    */
-  constructor(code : IOtherErrorCode, reason : string) {
+  constructor(code: IOtherErrorCode, reason: string) {
     super();
     // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
     Object.setPrototypeOf(this, OtherError.prototype);

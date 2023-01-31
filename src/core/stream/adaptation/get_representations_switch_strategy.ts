@@ -15,11 +15,7 @@
  */
 
 import config from "../../../config";
-import {
-  Adaptation,
-  Period,
-  Representation,
-} from "../../../manifest";
+import { Adaptation, Period, Representation } from "../../../manifest";
 import {
   convertToRanges,
   excludeFromRanges,
@@ -38,12 +34,12 @@ import {
 import { IRepresentationsChoice } from "../representation";
 
 export default function getRepresentationsSwitchingStrategy(
-  period : Period,
-  adaptation : Adaptation,
-  settings : IRepresentationsChoice,
-  segmentBuffer : SegmentBuffer,
-  playbackObserver : IReadOnlyPlaybackObserver<unknown>
-) : IRepresentationSwitchStrategy {
+  period: Period,
+  adaptation: Adaptation,
+  settings: IRepresentationsChoice,
+  segmentBuffer: SegmentBuffer,
+  playbackObserver: IReadOnlyPlaybackObserver<unknown>
+): IRepresentationSwitchStrategy {
   if (settings.switchingMode === "lazy") {
     return { type: "continue", value: undefined };
   }
@@ -53,8 +49,7 @@ export default function getRepresentationsSwitchingStrategy(
   }
   const bufferedRanges = convertToRanges(buffered);
   const start = period.start;
-  const end = period.end == null ? Infinity :
-                                   period.end;
+  const end = period.end == null ? Infinity : period.end;
   const intersection = keepRangeIntersection(bufferedRanges, [{ start, end }]);
   if (intersection.length === 0) {
     return { type: "continue", value: undefined };
@@ -64,11 +59,12 @@ export default function getRepresentationsSwitchingStrategy(
   const inventory = segmentBuffer.getInventory();
 
   /** Data already in the right Adaptation */
-  const rangesWithReps =
-    getBufferedRangesFromRepresentations(inventory,
-                                         period,
-                                         adaptation,
-                                         settings.representations);
+  const rangesWithReps = getBufferedRangesFromRepresentations(
+    inventory,
+    period,
+    adaptation,
+    settings.representations
+  );
 
   /**
    * Data different from the wanted Adaptation in the Period's range.
@@ -83,14 +79,15 @@ export default function getRepresentationsSwitchingStrategy(
 
   const currentTime = playbackObserver.getCurrentTime();
   const readyState = playbackObserver.getReadyState();
-  if (settings.switchingMode === "reload" &&
-      // We're playing the current Period
-      isTimeInRange({ start, end }, currentTime) &&
-      // There is data for the current position
-      readyState > 1 &&
-      // We're not playing the current wanted video Adaptation
-      !isTimeInRanges(rangesWithReps, currentTime))
-  {
+  if (
+    settings.switchingMode === "reload" &&
+    // We're playing the current Period
+    isTimeInRange({ start, end }, currentTime) &&
+    // There is data for the current position
+    readyState > 1 &&
+    // We're not playing the current wanted video Adaptation
+    !isTimeInRanges(rangesWithReps, currentTime)
+  ) {
     return { type: "needs-reload", value: undefined };
   }
 
@@ -104,14 +101,15 @@ export default function getRepresentationsSwitchingStrategy(
 
   /** Last segment before one for the current period. */
   const lastSegmentBefore = getLastSegmentBeforePeriod(inventory, period);
-  if (lastSegmentBefore !== null &&
+  if (
+    lastSegmentBefore !== null &&
     (lastSegmentBefore.bufferedEnd === undefined ||
-      period.start - lastSegmentBefore.bufferedEnd < 1)) // Close to Period's start
-  {
+      period.start - lastSegmentBefore.bufferedEnd < 1)
+  ) {
+    // Close to Period's start
     // Exclude data close to the period's start to avoid cleaning
     // to much
-    rangesToExclude.push({ start: 0,
-                           end: period.start + 1 });
+    rangesToExclude.push({ start: 0, end: period.start + 1 });
   }
 
   if (!shouldFlush) {
@@ -128,8 +126,10 @@ export default function getRepresentationsSwitchingStrategy(
     if (paddingAfter == null) {
       paddingAfter = 0;
     }
-    rangesToExclude.push({ start: currentTime - paddingBefore,
-                           end: currentTime + paddingAfter });
+    rangesToExclude.push({
+      start: currentTime - paddingBefore,
+      end: currentTime + paddingAfter,
+    });
   }
 
   // Now remove possible small range from the end if there is a segment from the
@@ -137,13 +137,13 @@ export default function getRepresentationsSwitchingStrategy(
   if (period.end !== undefined) {
     /** first segment after for the current period. */
     const firstSegmentAfter = getFirstSegmentAfterPeriod(inventory, period);
-    if (firstSegmentAfter !== null &&
-        (firstSegmentAfter.bufferedStart === undefined ||
-         // Close to Period's end
-         (firstSegmentAfter.bufferedStart - period.end) < 1))
-    {
-      rangesToExclude.push({ start: period.end - 1,
-                             end: Number.MAX_VALUE });
+    if (
+      firstSegmentAfter !== null &&
+      (firstSegmentAfter.bufferedStart === undefined ||
+        // Close to Period's end
+        firstSegmentAfter.bufferedStart - period.end < 1)
+    ) {
+      rangesToExclude.push({ start: period.end - 1, end: Number.MAX_VALUE });
     }
   }
 
@@ -153,15 +153,16 @@ export default function getRepresentationsSwitchingStrategy(
     return { type: "continue", value: undefined };
   }
 
-  return shouldFlush ? { type: "flush-buffer", value: toRemove } :
-                       { type: "clean-buffer", value: toRemove };
+  return shouldFlush
+    ? { type: "flush-buffer", value: toRemove }
+    : { type: "clean-buffer", value: toRemove };
 }
 
 export type IRepresentationSwitchStrategy =
-  { type: "continue"; value: undefined } |
-  { type: "clean-buffer"; value: Array<{ start: number; end: number }> } |
-  { type: "flush-buffer"; value: Array<{ start: number; end: number }> } |
-  { type: "needs-reload"; value: undefined };
+  | { type: "continue"; value: undefined }
+  | { type: "clean-buffer"; value: Array<{ start: number; end: number }> }
+  | { type: "flush-buffer"; value: Array<{ start: number; end: number }> }
+  | { type: "needs-reload"; value: undefined };
 
 /**
  * Returns buffered ranges of what we know correspond to the given `adaptation`
@@ -172,16 +173,17 @@ export type IRepresentationSwitchStrategy =
  * @returns {Array.<Object>}
  */
 function getBufferedRangesFromRepresentations(
-  inventory : IBufferedChunk[],
-  period : Period,
-  adaptation : Adaptation,
-  representations : Representation[]
-) : IRange[] {
-  return inventory.reduce<IRange[]>((acc : IRange[], chunk) : IRange[] => {
-    if (chunk.infos.period.id !== period.id ||
-        chunk.infos.adaptation.id !== adaptation.id ||
-        !representations.some(rep => rep.id === chunk.infos.representation.id))
-    {
+  inventory: IBufferedChunk[],
+  period: Period,
+  adaptation: Adaptation,
+  representations: Representation[]
+): IRange[] {
+  return inventory.reduce<IRange[]>((acc: IRange[], chunk): IRange[] => {
+    if (
+      chunk.infos.period.id !== period.id ||
+      chunk.infos.adaptation.id !== adaptation.id ||
+      !representations.some((rep) => rep.id === chunk.infos.representation.id)
+    ) {
       return acc;
     }
     const { bufferedStart, bufferedEnd } = chunk;

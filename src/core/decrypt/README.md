@@ -1,7 +1,6 @@
-# The ContentDecryptor #########################################################
+# The ContentDecryptor
 
-
-## Overview ####################################################################
+## Overview
 
 This directory exports the `ContentDecryptor`, which allows to easily interface
 with the browser APIs for decrypting an encrypted content, it follows the

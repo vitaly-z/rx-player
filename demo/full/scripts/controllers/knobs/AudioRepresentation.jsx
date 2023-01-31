@@ -13,9 +13,9 @@ const AudioRepresentationKnobBase = ({
   let selectedIndex;
 
   const availableAudioRepresentations =
-    audioTrack === null || audioTrack === undefined ?
-      [] :
-      audioTrack.representations;
+    audioTrack === null || audioTrack === undefined
+      ? []
+      : audioTrack.representations;
 
   if (!availableAudioRepresentations.length) {
     options = ["Not available"];
@@ -29,17 +29,20 @@ const AudioRepresentationKnobBase = ({
       }
     }
 
-    const correspondingInfo = availableAudioRepresentations
-      .map(r => getAudioRepresentationInfo(r).join(", "));
+    const correspondingInfo = availableAudioRepresentations.map((r) =>
+      getAudioRepresentationInfo(r).join(", ")
+    );
     options = [autoValue, ...correspondingInfo];
 
-    selectedIndex = audioRepresentationsLocked ?
-      (availableAudioRepresentations
-        .findIndex(r => r.id === audioRepresentation.id) + 1 || 0) :
-      0;
+    selectedIndex = audioRepresentationsLocked
+      ? availableAudioRepresentations.findIndex(
+          (r) => r.id === audioRepresentation.id
+        ) + 1 || 0
+      : 0;
   } else {
-    options = availableAudioRepresentations
-      .map(r => getAudioRepresentationInfo(r).join(", "));
+    options = availableAudioRepresentations.map((r) =>
+      getAudioRepresentationInfo(r).join(", ")
+    );
     selectedIndex = 0;
   }
 
@@ -65,13 +68,15 @@ const AudioRepresentationKnobBase = ({
   );
 };
 
-export default React.memo(withModulesState({
-  player: {
-    audioRepresentationsLocked: "audioRepresentationsLocked",
-    audioRepresentation: "audioRepresentation",
-    audioTrack: "audioTrack",
-  },
-})(AudioRepresentationKnobBase));
+export default React.memo(
+  withModulesState({
+    player: {
+      audioRepresentationsLocked: "audioRepresentationsLocked",
+      audioRepresentation: "audioRepresentation",
+      audioTrack: "audioTrack",
+    },
+  })(AudioRepresentationKnobBase)
+);
 
 function getAudioRepresentationInfo(audioRepresentation) {
   const info = [];
@@ -83,4 +88,3 @@ function getAudioRepresentationInfo(audioRepresentation) {
   }
   return info;
 }
-

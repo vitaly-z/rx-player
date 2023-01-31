@@ -15,10 +15,7 @@
  */
 
 import { IInitializationAttributes } from "../../node_parser_types";
-import {
-  parseByteRange,
-  ValueParser,
-} from "./utils";
+import { parseByteRange, ValueParser } from "./utils";
 
 /**
  * @param {Element} root
@@ -26,17 +23,19 @@ import {
  */
 export default function parseInitialization(
   root: Element
-) : [IInitializationAttributes, Error[]] {
-  const parsedInitialization : IInitializationAttributes = {};
-  const warnings : Error[] = [];
+): [IInitializationAttributes, Error[]] {
+  const parsedInitialization: IInitializationAttributes = {};
+  const warnings: Error[] = [];
   const parseValue = ValueParser(parsedInitialization, warnings);
   for (let i = 0; i < root.attributes.length; i++) {
     const attribute = root.attributes[i];
     switch (attribute.name) {
       case "range":
-        parseValue(attribute.value, { asKey: "range",
-                                      parser: parseByteRange,
-                                      dashName: "range" });
+        parseValue(attribute.value, {
+          asKey: "range",
+          parser: parseByteRange,
+          dashName: "range",
+        });
         break;
 
       case "sourceURL":

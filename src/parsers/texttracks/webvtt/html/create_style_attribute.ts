@@ -21,16 +21,17 @@ import objectValues from "../../../../utils/object_values";
  * @param {Partial<Record<string, string>>} settings
  * @returns {Attr}
  */
-export default function createStyleAttribute (
-  settings : Partial<Record<string, string>>
-) : Attr {
+export default function createStyleAttribute(
+  settings: Partial<Record<string, string>>
+): Attr {
   const pAttr = document.createAttribute("style");
   pAttr.value = getAttrValue(settings);
   return pAttr;
 }
 
 const getAttrValue = (settings: Partial<Record<string, string>>) => {
-  const hasSettings = settings !== undefined && objectValues(settings).length !== 0;
+  const hasSettings =
+    settings !== undefined && objectValues(settings).length !== 0;
   if (!hasSettings) {
     return "text-align:center";
   }
@@ -44,7 +45,9 @@ const getAttrValue = (settings: Partial<Record<string, string>>) => {
     `transform: translate(${xPositioning.offset}%,${yPositioning.offset}%);` +
     `width: ${getSizePercentage(settings.size)}%;` +
     `left: ${xPositioning.position}%;` +
-    `top: ${yPositioning.position !== null ? `${yPositioning.position}%` : "auto"};` +
+    `top: ${
+      yPositioning.position !== null ? `${yPositioning.position}%` : "auto"
+    };` +
     `text-align: ${getAlignValue(settings.align)};`
   );
 };
@@ -72,14 +75,18 @@ interface IXPosition {
   offset: number;
 }
 
-const getPositioningX = (settings: Partial<Record<string, string>>): IXPosition => {
+const getPositioningX = (
+  settings: Partial<Record<string, string>>
+): IXPosition => {
   return {
     position: getXPositionPercentage(settings),
     offset: getXOffsetPercentage(settings),
   };
 };
 
-const getXPositionPercentage = (settings: Partial<Record<string, string>>): number => {
+const getXPositionPercentage = (
+  settings: Partial<Record<string, string>>
+): number => {
   const positionPercentage = getPercentageValue(settings.position);
   if (positionPercentage !== null) {
     return positionPercentage;
@@ -95,8 +102,12 @@ const getXPositionPercentage = (settings: Partial<Record<string, string>>): numb
   return alignMap[align];
 };
 
-const getXOffsetPercentage = (settings: Partial<Record<string, string>>): number => {
-  const getPositionAlignment = (positionSetting: string): PositionAlignment | null => {
+const getXOffsetPercentage = (
+  settings: Partial<Record<string, string>>
+): number => {
+  const getPositionAlignment = (
+    positionSetting: string
+  ): PositionAlignment | null => {
     const positionRegex = /,(line-left|line-right|center)/;
     const matches = positionRegex.exec(positionSetting);
 
@@ -113,9 +124,10 @@ const getXOffsetPercentage = (settings: Partial<Record<string, string>>): number
     [PositionAlignment.LINE_RIGHT]: -100,
   };
 
-  const positionAlignment = settings.position !== undefined ?
-    getPositionAlignment(settings.position) :
-    null;
+  const positionAlignment =
+    settings.position !== undefined
+      ? getPositionAlignment(settings.position)
+      : null;
 
   if (positionAlignment !== null) {
     return positionAlignmentMap[positionAlignment];
@@ -127,9 +139,8 @@ const getXOffsetPercentage = (settings: Partial<Record<string, string>>): number
     [Align.RIGHT]: -100,
   };
 
-  const align = settings.align !== undefined ?
-    getAlignValue(settings.align)
-    : Align.CENTER;
+  const align =
+    settings.align !== undefined ? getAlignValue(settings.align) : Align.CENTER;
 
   return alignMap[align];
 };
@@ -139,14 +150,18 @@ interface IYPosition {
   offset: number;
 }
 
-const getPositioningY = (settings: Partial<Record<string, string>>): IYPosition => {
+const getPositioningY = (
+  settings: Partial<Record<string, string>>
+): IYPosition => {
   return {
     position: getYPositionPercentage(settings.line),
     offset: getYOffsetPercentage(settings.line),
   };
 };
 
-const getYPositionPercentage = (lineSetting: string | undefined): number | null => {
+const getYPositionPercentage = (
+  lineSetting: string | undefined
+): number | null => {
   return getPercentageValue(lineSetting);
 };
 
@@ -174,9 +189,9 @@ const getYOffsetPercentage = (lineSetting: string | undefined) => {
 
   const lineAlignment = getLineAlignment(lineSetting);
 
-  return lineAlignment !== null ?
-    lineAlignmentMap[lineAlignment] :
-    lineAlignmentMap[LineAlignment.START];
+  return lineAlignment !== null
+    ? lineAlignmentMap[lineAlignment]
+    : lineAlignmentMap[LineAlignment.START];
 };
 
 const getAlignValue = (alignSetting: string | undefined): Align => {
@@ -198,16 +213,17 @@ const getSizePercentage = (sizeSetting: string | undefined) => {
 };
 
 const getPercentageValueOrDefault = (
-  percentageString: string | undefined, defaultValue: number
+  percentageString: string | undefined,
+  defaultValue: number
 ): number => {
   const value = getPercentageValue(percentageString);
 
-  return value !== null ?
-    value :
-    defaultValue;
+  return value !== null ? value : defaultValue;
 };
 
-const getPercentageValue = (percentageString: string | undefined): number | null => {
+const getPercentageValue = (
+  percentageString: string | undefined
+): number | null => {
   if (percentageString === undefined) {
     return null;
   }

@@ -5,10 +5,7 @@ import Checkbox from "../CheckBox";
  * @param {Object} props
  * @returns {Object}
  */
-function PlaybackConfig({
-  onAutoPlayClick,
-  autoPlay,
-}) {
+function PlaybackConfig({ onAutoPlayClick, autoPlay }) {
   return (
     <Fragment>
       <li>
@@ -22,9 +19,9 @@ function PlaybackConfig({
           Auto Play
         </Checkbox>
         <span className="option-desc">
-          {autoPlay ?
-            "Playing directly when the content is loaded." :
-            "Staying in pause when the content is loaded."}
+          {autoPlay
+            ? "Playing directly when the content is loaded."
+            : "Staying in pause when the content is loaded."}
         </span>
       </li>
     </Fragment>

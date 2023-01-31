@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import Adaptation, {
-  SUPPORTED_ADAPTATIONS_TYPE,
-} from "./adaptation";
+import Adaptation, { SUPPORTED_ADAPTATIONS_TYPE } from "./adaptation";
 import Manifest, {
   IDecipherabilityUpdateElement,
   IManifestParsingOptions,

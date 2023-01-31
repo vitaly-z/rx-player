@@ -2,8 +2,8 @@ import { expect } from "chai";
 import RxPlayer from "../../../src";
 import { streamEventsInfos } from "../../contents/DASH_static_SegmentTimeline";
 import sleep from "../../utils/sleep.js";
-import /* waitForPlayerState, */ {
-  waitForLoadedStateAfterLoadVideo,
+import {
+  /* waitForPlayerState, */ waitForLoadedStateAfterLoadVideo,
 } from "../../utils/waitForPlayerState";
 
 const EVENTS = streamEventsInfos.events;
@@ -12,9 +12,11 @@ describe("DASH Stream events", function () {
   let player;
 
   async function loadContent(position) {
-    player.loadVideo({ url: streamEventsInfos.url,
-                       transport: streamEventsInfos.transport,
-                       startAt: { position } });
+    player.loadVideo({
+      url: streamEventsInfos.url,
+      transport: streamEventsInfos.transport,
+      startAt: { position },
+    });
     await waitForLoadedStateAfterLoadVideo(player);
   }
 
@@ -36,10 +38,10 @@ describe("DASH Stream events", function () {
     expect(receivedEvent.start).to.equal(wantedEvent.start);
     expect(receivedEvent.end).to.equal(wantedEvent.end);
     expect(receivedEvent.data.type).to.equal(wantedEvent.type);
-    expect(receivedEvent.data.value.schemeIdUri)
-      .to.equal(wantedEvent.schemeIdUri);
-    expect(receivedEvent.data.value.timescale)
-      .to.equal(wantedEvent.timescale);
+    expect(receivedEvent.data.value.schemeIdUri).to.equal(
+      wantedEvent.schemeIdUri
+    );
+    expect(receivedEvent.data.value.timescale).to.equal(wantedEvent.timescale);
 
     const elt = receivedEvent.data.value.element;
     expect(elt).to.be.instanceOf(Element);
@@ -69,13 +71,20 @@ describe("DASH Stream events", function () {
     await sleep(3000);
     player.pause();
 
-    expect(player.getPosition()).to.be
-      .within(startAt + 1, startAt + 5, "The initial position is not right");
+    expect(player.getPosition()).to.be.within(
+      startAt + 1,
+      startAt + 5,
+      "The initial position is not right"
+    );
 
-    expect(streamEventsReceived).to.have
-      .lengthOf(0, "We should not have received any streamEvent event");
-    expect(streamEventSkipReceived).to.have
-      .lengthOf(0, "We should not have received any streamEventSkipReceived event");
+    expect(streamEventsReceived).to.have.lengthOf(
+      0,
+      "We should not have received any streamEvent event"
+    );
+    expect(streamEventSkipReceived).to.have.lengthOf(
+      0,
+      "We should not have received any streamEventSkipReceived event"
+    );
   }
 
   it("should not send any event if none have been reached yet", async function () {
@@ -110,11 +119,15 @@ describe("DASH Stream events", function () {
     await loadContent(wantedEvent.start + 2);
     await sleep(100);
 
-    expect(streamEventSkipReceived).to.have
-      .lengthOf(0, "We should not have received any streamEventSkipReceived event");
+    expect(streamEventSkipReceived).to.have.lengthOf(
+      0,
+      "We should not have received any streamEventSkipReceived event"
+    );
 
-    expect(streamEventsReceived).to.have
-      .lengthOf(1, "We should have received one streamEvent event");
+    expect(streamEventsReceived).to.have.lengthOf(
+      1,
+      "We should have received one streamEvent event"
+    );
 
     const streamEvent = streamEventsReceived[0];
     checkEvent(streamEvent, wantedEvent);
@@ -131,7 +144,7 @@ describe("DASH Stream events", function () {
     expect(streamEventsReceived).to.have.lengthOf(1);
   });
 
-  it("should receive an event when playing through one", async function() {
+  it("should receive an event when playing through one", async function () {
     this.timeout(10000);
     const streamEventsReceived = [];
     const streamEventSkipReceived = [];
@@ -153,7 +166,11 @@ describe("DASH Stream events", function () {
     player.play();
 
     await sleep(1500);
-    expect(player.getPosition()).to.be.within(142, 144, "The position 1 is not right");
+    expect(player.getPosition()).to.be.within(
+      142,
+      144,
+      "The position 1 is not right"
+    );
 
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(1);
@@ -167,13 +184,17 @@ describe("DASH Stream events", function () {
     };
 
     await sleep(2500);
-    expect(player.getPosition()).to.be.within(145, 150, "The position 2 is not right");
+    expect(player.getPosition()).to.be.within(
+      145,
+      150,
+      "The position 2 is not right"
+    );
     expect(hasExited).to.equal(true);
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(1);
   });
 
-  it("should call onExit when seeking out of an event", async function() {
+  it("should call onExit when seeking out of an event", async function () {
     this.timeout(10000);
     const streamEventsReceived = [];
     const streamEventSkipReceived = [];
@@ -195,7 +216,11 @@ describe("DASH Stream events", function () {
     player.play();
 
     await sleep(1500);
-    expect(player.getPosition()).to.be.within(142, 144, "The position 1 is not right");
+    expect(player.getPosition()).to.be.within(
+      142,
+      144,
+      "The position 1 is not right"
+    );
 
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(1);
@@ -216,7 +241,7 @@ describe("DASH Stream events", function () {
     expect(streamEventsReceived).to.have.lengthOf(1);
   });
 
-  it("should authorize setting no onExit function", async function() {
+  it("should authorize setting no onExit function", async function () {
     this.timeout(10000);
     const streamEventsReceived = [];
     const streamEventSkipReceived = [];
@@ -238,7 +263,11 @@ describe("DASH Stream events", function () {
     player.play();
 
     await sleep(1500);
-    expect(player.getPosition()).to.be.within(142, 144, "The position 1 is not right");
+    expect(player.getPosition()).to.be.within(
+      142,
+      144,
+      "The position 1 is not right"
+    );
 
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(1);
@@ -247,12 +276,16 @@ describe("DASH Stream events", function () {
     checkEvent(eventReceived, wantedEvent);
 
     await sleep(2500);
-    expect(player.getPosition()).to.be.within(145, 150, "The position 2 is not right");
+    expect(player.getPosition()).to.be.within(
+      145,
+      150,
+      "The position 2 is not right"
+    );
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(1);
   });
 
-  it("should do nothing if seeking multiple times in the same event", async function() {
+  it("should do nothing if seeking multiple times in the same event", async function () {
     this.timeout(5000);
     const streamEventsReceived = [];
     const streamEventSkipReceived = [];
@@ -274,7 +307,11 @@ describe("DASH Stream events", function () {
     player.play();
 
     await sleep(1500);
-    expect(player.getPosition()).to.be.within(142, 144, "The position 1 is not right");
+    expect(player.getPosition()).to.be.within(
+      142,
+      144,
+      "The position 1 is not right"
+    );
 
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(1);
@@ -301,7 +338,11 @@ describe("DASH Stream events", function () {
     expect(hasExited).to.equal(false);
 
     await sleep(1500);
-    expect(player.getPosition()).to.be.within(145, 150, "The position 2 is not right");
+    expect(player.getPosition()).to.be.within(
+      145,
+      150,
+      "The position 2 is not right"
+    );
 
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(1);
@@ -310,7 +351,7 @@ describe("DASH Stream events", function () {
     expect(streamEventsReceived).to.have.lengthOf(1);
   });
 
-  it("should receive an event when seeking right into one", async function() {
+  it("should receive an event when seeking right into one", async function () {
     this.timeout(5000);
     const streamEventsReceived = [];
     const streamEventSkipReceived = [];
@@ -333,7 +374,11 @@ describe("DASH Stream events", function () {
     player.seekTo(142);
 
     await sleep(500);
-    expect(player.getPosition()).to.be.within(142, 144, "The position 1 is not right");
+    expect(player.getPosition()).to.be.within(
+      142,
+      144,
+      "The position 1 is not right"
+    );
 
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(1);
@@ -347,13 +392,17 @@ describe("DASH Stream events", function () {
     };
 
     await sleep(2500);
-    expect(player.getPosition()).to.be.within(145, 150, "The position 2 is not right");
+    expect(player.getPosition()).to.be.within(
+      145,
+      150,
+      "The position 2 is not right"
+    );
     expect(hasExited).to.equal(true);
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(1);
   });
 
-  it("should receive multiple events when playing through a position with multiple events", async function() {
+  it("should receive multiple events when playing through a position with multiple events", async function () {
     this.timeout(15000);
     const streamEventsReceived = [];
     const streamEventSkipReceived = [];
@@ -374,7 +423,11 @@ describe("DASH Stream events", function () {
     player.play();
 
     await sleep(2000);
-    expect(player.getPosition()).to.be.within(40, 44, "The position 1 is not right");
+    expect(player.getPosition()).to.be.within(
+      40,
+      44,
+      "The position 1 is not right"
+    );
 
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(1);
@@ -389,9 +442,16 @@ describe("DASH Stream events", function () {
 
     let leftToWait = 45 - player.getPosition();
     await sleep(leftToWait * 700);
-    expect(player.getPosition()).to.be.within(45, 49, "The position 2 is not right");
+    expect(player.getPosition()).to.be.within(
+      45,
+      49,
+      "The position 2 is not right"
+    );
 
-    expect(hasExited1).to.equal(false, "should not have exited the first event");
+    expect(hasExited1).to.equal(
+      false,
+      "should not have exited the first event"
+    );
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(2);
 
@@ -405,23 +465,34 @@ describe("DASH Stream events", function () {
 
     leftToWait = 50 - player.getPosition();
     await sleep(leftToWait * 700);
-    expect(player.getPosition()).to.be.within(50, 54, "The position 3 is not right");
+    expect(player.getPosition()).to.be.within(
+      50,
+      54,
+      "The position 3 is not right"
+    );
 
     expect(hasExited1).to.equal(true, "should have exited the first event");
-    expect(hasExited2).to.equal(false, "should not have exited the second event");
+    expect(hasExited2).to.equal(
+      false,
+      "should not have exited the second event"
+    );
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(2);
 
     leftToWait = 54 - player.getPosition();
     await sleep(leftToWait * 700);
-    expect(player.getPosition()).to.be.within(54, 58, "The position 4 is not right");
+    expect(player.getPosition()).to.be.within(
+      54,
+      58,
+      "The position 4 is not right"
+    );
 
     expect(hasExited2).to.equal(true, "should have exited the second event");
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(2);
   });
 
-  it("should receive multiple events when seeking in a position with multiple events", async function() {
+  it("should receive multiple events when seeking in a position with multiple events", async function () {
     this.timeout(15000);
     const streamEventsReceived = [];
     const streamEventSkipReceived = [];
@@ -463,7 +534,6 @@ describe("DASH Stream events", function () {
     checkEvent(eventReceived1, wantedEvent1);
     checkEvent(eventReceived2, wantedEvent2);
 
-
     let hasExited1 = false;
     eventReceived1.onExit = () => {
       hasExited1 = true;
@@ -476,7 +546,11 @@ describe("DASH Stream events", function () {
 
     let leftToWait = 50 - player.getPosition();
     await sleep(leftToWait * 1300);
-    expect(player.getPosition()).to.be.within(50, 54, "The position 3 is not right");
+    expect(player.getPosition()).to.be.within(
+      50,
+      54,
+      "The position 3 is not right"
+    );
 
     expect(hasExited1).to.equal(true);
     expect(hasExited2).to.equal(false);
@@ -485,14 +559,18 @@ describe("DASH Stream events", function () {
 
     leftToWait = 54 - player.getPosition();
     await sleep(leftToWait * 1300);
-    expect(player.getPosition()).to.be.within(54, 58, "The position 4 is not right");
+    expect(player.getPosition()).to.be.within(
+      54,
+      58,
+      "The position 4 is not right"
+    );
 
     expect(hasExited2).to.equal(true);
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(2);
   });
 
-  it("should receive multiple events when loading in a position with multiple events", async function() {
+  it("should receive multiple events when loading in a position with multiple events", async function () {
     this.timeout(15000);
     const streamEventsReceived = [];
     const streamEventSkipReceived = [];
@@ -539,10 +617,13 @@ describe("DASH Stream events", function () {
 
     player.play();
 
-
     let leftToWait = 50 - player.getPosition();
     await sleep(leftToWait * 700);
-    expect(player.getPosition()).to.be.within(50, 54, "The position 3 is not right");
+    expect(player.getPosition()).to.be.within(
+      50,
+      54,
+      "The position 3 is not right"
+    );
 
     expect(hasExited1).to.equal(true);
     expect(hasExited2).to.equal(false);
@@ -551,27 +632,31 @@ describe("DASH Stream events", function () {
 
     leftToWait = 54 - player.getPosition();
     await sleep(leftToWait * 700);
-    expect(player.getPosition()).to.be.within(54, 58, "The position 4 is not right");
+    expect(player.getPosition()).to.be.within(
+      54,
+      58,
+      "The position 4 is not right"
+    );
 
     expect(hasExited2).to.equal(true);
     expect(streamEventSkipReceived).to.have.lengthOf(0);
     expect(streamEventsReceived).to.have.lengthOf(2);
   });
 
-  it("should receive an event when skipping one", async function() {
+  it("should receive an event when skipping one", async function () {
     const streamEventsReceived = [];
     const streamEventSkipReceived = [];
 
     let hasExitedSomething = false;
     function onStreamEvent(evt) {
       streamEventsReceived.push(evt);
-      evt.onExit = function() {
+      evt.onExit = function () {
         hasExitedSomething = true;
       };
     }
     function onStreamEventSkip(evt) {
       streamEventSkipReceived.push(evt);
-      evt.onExit = function() {
+      evt.onExit = function () {
         hasExitedSomething = true;
       };
     }
@@ -593,20 +678,20 @@ describe("DASH Stream events", function () {
     checkEvent(eventReceived, wantedEvent);
   });
 
-  it("should receive multiple events when skipping multiple ones", async function() {
+  it("should receive multiple events when skipping multiple ones", async function () {
     const streamEventsReceived = [];
     const streamEventSkipReceived = [];
 
     let hasExitedSomething = false;
     function onStreamEvent(evt) {
       streamEventsReceived.push(evt);
-      evt.onExit = function() {
+      evt.onExit = function () {
         hasExitedSomething = true;
       };
     }
     function onStreamEventSkip(evt) {
       streamEventSkipReceived.push(evt);
-      evt.onExit = function() {
+      evt.onExit = function () {
         hasExitedSomething = true;
       };
     }
@@ -640,7 +725,7 @@ describe("DASH Stream events", function () {
     checkEvent(eventReceived2, wantedEvent2);
   });
 
-  it("should not exit events without a duration", async function() {
+  it("should not exit events without a duration", async function () {
     this.timeout(5000);
     const streamEventsReceived = [];
     const streamEventSkipReceived = [];
@@ -648,13 +733,13 @@ describe("DASH Stream events", function () {
     let hasExitedSomething = false;
     function onStreamEvent(evt) {
       streamEventsReceived.push(evt);
-      evt.onExit = function() {
+      evt.onExit = function () {
         hasExitedSomething = true;
       };
     }
     function onStreamEventSkip(evt) {
       streamEventSkipReceived.push(evt);
-      evt.onExit = function() {
+      evt.onExit = function () {
         hasExitedSomething = true;
       };
     }
@@ -676,7 +761,7 @@ describe("DASH Stream events", function () {
     checkEvent(eventReceived, wantedEvent);
   });
 
-  it("should receive an event and be able to set an exit even when the event is very short", async function() {
+  it("should receive an event and be able to set an exit even when the event is very short", async function () {
     this.timeout(5000);
     const streamEventsReceived = [];
     const streamEventSkipReceived = [];
@@ -684,13 +769,13 @@ describe("DASH Stream events", function () {
     let hasExitedSomething = false;
     function onStreamEvent(evt) {
       streamEventsReceived.push(evt);
-      evt.onExit = function() {
+      evt.onExit = function () {
         hasExitedSomething = true;
       };
     }
     function onStreamEventSkip(evt) {
       streamEventSkipReceived.push(evt);
-      evt.onExit = function() {
+      evt.onExit = function () {
         hasExitedSomething = true;
       };
     }
@@ -706,11 +791,18 @@ describe("DASH Stream events", function () {
     player.setPlaybackRate(2);
     player.play();
     await sleep(3000);
-    expect(player.getPosition()).to.be.within(163, 167, "The position 1 is not right");
+    expect(player.getPosition()).to.be.within(
+      163,
+      167,
+      "The position 1 is not right"
+    );
 
     expect(streamEventsReceived).to.have.lengthOf(1);
     expect(streamEventSkipReceived).to.have.lengthOf(0);
-    expect(hasExitedSomething).to.equal(true, "should have called the onExit function");
+    expect(hasExitedSomething).to.equal(
+      true,
+      "should have called the onExit function"
+    );
 
     const eventReceived = streamEventsReceived[0];
     checkEvent(eventReceived, wantedEvent);

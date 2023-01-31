@@ -42,15 +42,15 @@ import createInitSegment from "./create_init_segment";
  * @returns {Uint8Array}
  */
 export default function createVideoInitSegment(
-  timescale : number,
-  width : number,
-  height : number,
-  hRes : number,
-  vRes : number,
-  nalLength : number,
-  codecPrivateData : string,
-  keyId? : Uint8Array
-) : Uint8Array {
+  timescale: number,
+  width: number,
+  height: number,
+  hRes: number,
+  vRes: number,
+  nalLength: number,
+  codecPrivateData: string,
+  keyId?: Uint8Array
+): Uint8Array {
   const [, spsHex, ppsHex] = codecPrivateData.split("00000001");
   if (spsHex === undefined || ppsHex === undefined) {
     throw new Error("Smooth: unsupported codec private data.");
@@ -62,7 +62,15 @@ export default function createVideoInitSegment(
   const avcc = createAVCCBox(sps, pps, nalLength);
   let stsd;
   if (keyId === undefined) {
-    const avc1 = createAVC1Box(width, height, hRes, vRes, "AVC Coding", 24, avcc);
+    const avc1 = createAVC1Box(
+      width,
+      height,
+      hRes,
+      vRes,
+      "AVC Coding",
+      24,
+      avcc
+    );
     stsd = createSTSDBox([avc1]);
   } else {
     const tenc = createTENCBox(1, 8, keyId);
@@ -70,9 +78,25 @@ export default function createVideoInitSegment(
     const schm = createSCHMBox("cenc", 65536);
     const frma = createFRMABox("avc1");
     const sinf = createBoxWithChildren("sinf", [frma, schm, schi]);
-    const encv = createENCVBox(width, height, hRes, vRes, "AVC Coding", 24, avcc, sinf);
+    const encv = createENCVBox(
+      width,
+      height,
+      hRes,
+      vRes,
+      "AVC Coding",
+      24,
+      avcc,
+      sinf
+    );
     stsd = createSTSDBox([encv]);
   }
 
-  return createInitSegment(timescale, "video", stsd, createVMHDBox(), width, height);
+  return createInitSegment(
+    timescale,
+    "video",
+    stsd,
+    createVMHDBox(),
+    width,
+    height
+  );
 }

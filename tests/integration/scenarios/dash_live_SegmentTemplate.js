@@ -7,7 +7,7 @@ import {
 import sleep from "../../utils/sleep.js";
 import XHRMock from "../../utils/request_mock";
 
-describe("DASH live content (SegmentTemplate)", function() {
+describe("DASH live content (SegmentTemplate)", function () {
   let player;
   let xhrMock;
 
@@ -21,7 +21,7 @@ describe("DASH live content (SegmentTemplate)", function() {
     xhrMock.restore();
   });
 
-  it("should fetch and parse the manifest", async function() {
+  it("should fetch and parse the manifest", async function () {
     xhrMock.lock();
 
     player.loadVideo({
@@ -60,8 +60,9 @@ describe("DASH live content (SegmentTemplate)", function() {
       const audioTracks = player.getAvailableAudioTracks();
 
       const audioAdaptations = manifestInfos.periods[0].adaptations.audio;
-      expect(audioTracks.length).to
-        .equal(audioAdaptations ? audioAdaptations.length : 0);
+      expect(audioTracks.length).to.equal(
+        audioAdaptations ? audioAdaptations.length : 0
+      );
 
       if (audioAdaptations) {
         for (let i = 0; i < audioAdaptations.length; i++) {
@@ -73,15 +74,17 @@ describe("DASH live content (SegmentTemplate)", function() {
             if (audioTrack.id === adaptation.id) {
               found = true;
               expect(audioTrack.language).to.equal(adaptation.language || "");
-              expect(audioTrack.normalized).to
-                .equal(adaptation.normalizedLanguage || "");
-              expect(audioTrack.audioDescription)
-                .to.equal(!!adaptation.isAudioDescription);
+              expect(audioTrack.normalized).to.equal(
+                adaptation.normalizedLanguage || ""
+              );
+              expect(audioTrack.audioDescription).to.equal(
+                !!adaptation.isAudioDescription
+              );
 
               const activeAudioTrack = player.getAudioTrack();
-              expect(audioTrack.active).to
-                .equal(activeAudioTrack ?
-                  activeAudioTrack.id === audioTrack.id : false);
+              expect(audioTrack.active).to.equal(
+                activeAudioTrack ? activeAudioTrack.id === audioTrack.id : false
+              );
             }
             expect(found).to.equal(true);
           }
@@ -108,8 +111,9 @@ describe("DASH live content (SegmentTemplate)", function() {
       const textTracks = player.getAvailableTextTracks();
 
       const textAdaptations = manifestInfos.periods[0].adaptations.text;
-      expect(textTracks.length).to
-        .equal(textAdaptations ? textAdaptations.length : 0);
+      expect(textTracks.length).to.equal(
+        textAdaptations ? textAdaptations.length : 0
+      );
 
       if (textAdaptations) {
         for (let i = 0; i < textAdaptations.length; i++) {
@@ -121,15 +125,17 @@ describe("DASH live content (SegmentTemplate)", function() {
             if (textTrack.id === adaptation.id) {
               found = true;
               expect(textTrack.language).to.equal(adaptation.language || "");
-              expect(textTrack.normalized).to
-                .equal(adaptation.normalizedLanguage || "");
-              expect(textTrack.closedCaption)
-                .to.equal(!!adaptation.isClosedCaption);
+              expect(textTrack.normalized).to.equal(
+                adaptation.normalizedLanguage || ""
+              );
+              expect(textTrack.closedCaption).to.equal(
+                !!adaptation.isClosedCaption
+              );
 
               const activeTextTrack = player.getTextTrack();
-              expect(textTrack.active).to
-                .equal(activeTextTrack ?
-                  activeTextTrack.id === textTrack.id : false);
+              expect(textTrack.active).to.equal(
+                activeTextTrack ? activeTextTrack.id === textTrack.id : false
+              );
             }
             expect(found).to.equal(true);
           }
@@ -144,7 +150,7 @@ describe("DASH live content (SegmentTemplate)", function() {
 
       player.loadVideo({
         url: manifestInfos.url,
-        transport:manifestInfos.transport,
+        transport: manifestInfos.transport,
       });
       expect(player.getAvailableVideoTracks()).to.eql([]);
 
@@ -156,8 +162,9 @@ describe("DASH live content (SegmentTemplate)", function() {
       const videoTracks = player.getAvailableVideoTracks();
 
       const videoAdaptations = manifestInfos.periods[0].adaptations.video;
-      expect(videoTracks.length).to
-        .equal(videoAdaptations ? videoAdaptations.length : 0);
+      expect(videoTracks.length).to.equal(
+        videoAdaptations ? videoAdaptations.length : 0
+      );
 
       if (videoAdaptations) {
         for (let i = 0; i < videoAdaptations.length; i++) {
@@ -174,21 +181,21 @@ describe("DASH live content (SegmentTemplate)", function() {
                 representationIndex < videoTrack.representations.length;
                 representationIndex++
               ) {
-                const reprTrack = videoTrack
-                  .representations[representationIndex];
-                const representation = adaptation.representations
-                  .find(({ id }) => id === reprTrack.id);
+                const reprTrack =
+                  videoTrack.representations[representationIndex];
+                const representation = adaptation.representations.find(
+                  ({ id }) => id === reprTrack.id
+                );
                 expect(reprTrack.bitrate).to.equal(representation.bitrate);
-                expect(reprTrack.frameRate).to
-                  .equal(representation.frameRate);
+                expect(reprTrack.frameRate).to.equal(representation.frameRate);
                 expect(reprTrack.width).to.equal(representation.width);
                 expect(reprTrack.height).to.equal(representation.height);
               }
 
               const activeVideoTrack = player.getVideoTrack();
-              expect(videoTrack.active).to
-                .equal(activeVideoTrack ?
-                  activeVideoTrack.id === videoTrack.id : false);
+              expect(videoTrack.active).to.equal(
+                activeVideoTrack ? activeVideoTrack.id === videoTrack.id : false
+              );
             }
             expect(found).to.equal(true);
           }
@@ -203,7 +210,7 @@ describe("DASH live content (SegmentTemplate)", function() {
 
       player.loadVideo({
         url: manifestInfos.url,
-        transport:manifestInfos.transport,
+        transport: manifestInfos.transport,
       });
 
       await sleep(1);
@@ -219,7 +226,7 @@ describe("DASH live content (SegmentTemplate)", function() {
 
       player.loadVideo({
         url: manifestInfos.url,
-        transport:manifestInfos.transport,
+        transport: manifestInfos.transport,
       });
 
       await sleep(1);
@@ -230,7 +237,7 @@ describe("DASH live content (SegmentTemplate)", function() {
   });
 });
 
-describe("DASH live content without timeShiftBufferDepth (SegmentTemplate)", function() {
+describe("DASH live content without timeShiftBufferDepth (SegmentTemplate)", function () {
   let player;
   let xhrMock;
 
@@ -244,7 +251,7 @@ describe("DASH live content without timeShiftBufferDepth (SegmentTemplate)", fun
     xhrMock.restore();
   });
 
-  it("should fetch and parse the manifest", async function() {
+  it("should fetch and parse the manifest", async function () {
     xhrMock.lock();
 
     player.loadVideo({
@@ -260,8 +267,9 @@ describe("DASH live content without timeShiftBufferDepth (SegmentTemplate)", fun
     expect(player.getPlayerState()).to.equal("LOADING");
 
     expect(player.isLive()).to.equal(true);
-    expect(player.getContentUrls())
-      .to.eql([noTimeShiftBufferDepthManifestInfos.url]);
+    expect(player.getContentUrls()).to.eql([
+      noTimeShiftBufferDepthManifestInfos.url,
+    ]);
 
     expect(xhrMock.getLockedXHR().length).to.be.at.least(2);
   });
@@ -284,8 +292,9 @@ describe("DASH live content without timeShiftBufferDepth (SegmentTemplate)", fun
       const audioTracks = player.getAvailableAudioTracks();
 
       const audioAdaptations = manifestInfos.periods[0].adaptations.audio;
-      expect(audioTracks.length).to
-        .equal(audioAdaptations ? audioAdaptations.length : 0);
+      expect(audioTracks.length).to.equal(
+        audioAdaptations ? audioAdaptations.length : 0
+      );
 
       if (audioAdaptations) {
         for (let i = 0; i < audioAdaptations.length; i++) {
@@ -297,15 +306,17 @@ describe("DASH live content without timeShiftBufferDepth (SegmentTemplate)", fun
             if (audioTrack.id === adaptation.id) {
               found = true;
               expect(audioTrack.language).to.equal(adaptation.language || "");
-              expect(audioTrack.normalized).to
-                .equal(adaptation.normalizedLanguage || "");
-              expect(audioTrack.audioDescription)
-                .to.equal(!!adaptation.isAudioDescription);
+              expect(audioTrack.normalized).to.equal(
+                adaptation.normalizedLanguage || ""
+              );
+              expect(audioTrack.audioDescription).to.equal(
+                !!adaptation.isAudioDescription
+              );
 
               const activeAudioTrack = player.getAudioTrack();
-              expect(audioTrack.active).to
-                .equal(activeAudioTrack ?
-                  activeAudioTrack.id === audioTrack.id : false);
+              expect(audioTrack.active).to.equal(
+                activeAudioTrack ? activeAudioTrack.id === audioTrack.id : false
+              );
             }
             expect(found).to.equal(true);
           }
@@ -332,8 +343,9 @@ describe("DASH live content without timeShiftBufferDepth (SegmentTemplate)", fun
       const textTracks = player.getAvailableTextTracks();
 
       const textAdaptations = manifestInfos.periods[0].adaptations.text;
-      expect(textTracks.length).to
-        .equal(textAdaptations ? textAdaptations.length : 0);
+      expect(textTracks.length).to.equal(
+        textAdaptations ? textAdaptations.length : 0
+      );
 
       if (textAdaptations) {
         for (let i = 0; i < textAdaptations.length; i++) {
@@ -345,15 +357,17 @@ describe("DASH live content without timeShiftBufferDepth (SegmentTemplate)", fun
             if (textTrack.id === adaptation.id) {
               found = true;
               expect(textTrack.language).to.equal(adaptation.language || "");
-              expect(textTrack.normalized).to
-                .equal(adaptation.normalizedLanguage || "");
-              expect(textTrack.closedCaption)
-                .to.equal(!!adaptation.isClosedCaption);
+              expect(textTrack.normalized).to.equal(
+                adaptation.normalizedLanguage || ""
+              );
+              expect(textTrack.closedCaption).to.equal(
+                !!adaptation.isClosedCaption
+              );
 
               const activeTextTrack = player.getTextTrack();
-              expect(textTrack.active).to
-                .equal(activeTextTrack ?
-                  activeTextTrack.id === textTrack.id : false);
+              expect(textTrack.active).to.equal(
+                activeTextTrack ? activeTextTrack.id === textTrack.id : false
+              );
             }
             expect(found).to.equal(true);
           }
@@ -368,7 +382,7 @@ describe("DASH live content without timeShiftBufferDepth (SegmentTemplate)", fun
 
       player.loadVideo({
         url: noTimeShiftBufferDepthManifestInfos.url,
-        transport:noTimeShiftBufferDepthManifestInfos.transport,
+        transport: noTimeShiftBufferDepthManifestInfos.transport,
       });
       expect(player.getAvailableVideoTracks()).to.eql([]);
 
@@ -380,8 +394,9 @@ describe("DASH live content without timeShiftBufferDepth (SegmentTemplate)", fun
       const videoTracks = player.getAvailableVideoTracks();
 
       const videoAdaptations = manifestInfos.periods[0].adaptations.video;
-      expect(videoTracks.length).to
-        .equal(videoAdaptations ? videoAdaptations.length : 0);
+      expect(videoTracks.length).to.equal(
+        videoAdaptations ? videoAdaptations.length : 0
+      );
 
       if (videoAdaptations) {
         for (let i = 0; i < videoAdaptations.length; i++) {
@@ -398,21 +413,21 @@ describe("DASH live content without timeShiftBufferDepth (SegmentTemplate)", fun
                 representationIndex < videoTrack.representations.length;
                 representationIndex++
               ) {
-                const reprTrack = videoTrack
-                  .representations[representationIndex];
-                const representation = adaptation.representations
-                  .find(({ id }) => id === reprTrack.id);
+                const reprTrack =
+                  videoTrack.representations[representationIndex];
+                const representation = adaptation.representations.find(
+                  ({ id }) => id === reprTrack.id
+                );
                 expect(reprTrack.bitrate).to.equal(representation.bitrate);
-                expect(reprTrack.frameRate).to
-                  .equal(representation.frameRate);
+                expect(reprTrack.frameRate).to.equal(representation.frameRate);
                 expect(reprTrack.width).to.equal(representation.width);
                 expect(reprTrack.height).to.equal(representation.height);
               }
 
               const activeVideoTrack = player.getVideoTrack();
-              expect(videoTrack.active).to
-                .equal(activeVideoTrack ?
-                  activeVideoTrack.id === videoTrack.id : false);
+              expect(videoTrack.active).to.equal(
+                activeVideoTrack ? activeVideoTrack.id === videoTrack.id : false
+              );
             }
             expect(found).to.equal(true);
           }
@@ -427,7 +442,7 @@ describe("DASH live content without timeShiftBufferDepth (SegmentTemplate)", fun
 
       player.loadVideo({
         url: noTimeShiftBufferDepthManifestInfos.url,
-        transport:noTimeShiftBufferDepthManifestInfos.transport,
+        transport: noTimeShiftBufferDepthManifestInfos.transport,
       });
 
       await sleep(1);
@@ -443,14 +458,13 @@ describe("DASH live content without timeShiftBufferDepth (SegmentTemplate)", fun
 
       player.loadVideo({
         url: noTimeShiftBufferDepthManifestInfos.url,
-        transport:noTimeShiftBufferDepthManifestInfos.transport,
+        transport: noTimeShiftBufferDepthManifestInfos.transport,
       });
 
       await sleep(1);
       await xhrMock.flush();
       await sleep(1);
-      expect(player.getMaximumPosition()).to.be
-        .closeTo(1553521448, 3);
+      expect(player.getMaximumPosition()).to.be.closeTo(1553521448, 3);
     });
   });
 });

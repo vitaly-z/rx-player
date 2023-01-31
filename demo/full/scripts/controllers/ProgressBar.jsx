@@ -31,22 +31,29 @@ class Progressbar extends React.Component {
       seconds = date.getSeconds();
     } else {
       hours = Math.floor(wallClockTime / 3600);
-      minutes = Math.floor((wallClockTime - (hours * 3600)) / 60);
-      seconds = Math.floor(wallClockTime - ((minutes * 60) + (hours * 3600)));
+      minutes = Math.floor((wallClockTime - hours * 3600) / 60);
+      seconds = Math.floor(wallClockTime - (minutes * 60 + hours * 3600));
     }
-    const currentReadableTime = hours.toString().padStart(2, "0") + ":" +
-      minutes.toString().padStart(2, "0") + ":" +
+    const currentReadableTime =
+      hours.toString().padStart(2, "0") +
+      ":" +
+      minutes.toString().padStart(2, "0") +
+      ":" +
       seconds.toString().padStart(2, "0");
 
-    this.setState({ timeIndicatorVisible: true,
-                    timeIndicatorPosition: clientX,
-                    timeIndicatorText: currentReadableTime });
+    this.setState({
+      timeIndicatorVisible: true,
+      timeIndicatorPosition: clientX,
+      timeIndicatorText: currentReadableTime,
+    });
   }
 
   hideTimeIndicator() {
-    this.setState({ timeIndicatorVisible: false,
-                    timeIndicatorPosition: 0,
-                    timeIndicatorText: "" });
+    this.setState({
+      timeIndicatorVisible: false,
+      timeIndicatorPosition: 0,
+      timeIndicatorText: "",
+    });
   }
 
   showVideoTumbnail(ts, clientX) {
@@ -91,7 +98,7 @@ class Progressbar extends React.Component {
       player,
       enableVideoThumbnails,
     } = this.props;
-    const seek = position => player.dispatch("SEEK", position);
+    const seek = (position) => player.dispatch("SEEK", position);
     const hideToolTips = () => {
       this.hideTimeIndicator();
       this.hideTumbnail();
@@ -103,12 +110,16 @@ class Progressbar extends React.Component {
       this.showThumbnail(position, event.clientX, enableVideoThumbnails);
     };
 
-    const toolTipOffset = this.wrapperElement ?
-      this.wrapperElement.getBoundingClientRect().left : 0;
+    const toolTipOffset = this.wrapperElement
+      ? this.wrapperElement.getBoundingClientRect().left
+      : 0;
 
     if (!isContentLoaded) {
       return (
-        <div className="progress-bar-parent" ref={el => this.wrapperElement = el}>
+        <div
+          className="progress-bar-parent"
+          ref={(el) => (this.wrapperElement = el)}
+        >
           <div className="progress-bar-wrapper" />
         </div>
       );
@@ -118,26 +129,23 @@ class Progressbar extends React.Component {
     return (
       <div
         className="progress-bar-parent"
-        ref={el => this.wrapperElement = el}
+        ref={(el) => (this.wrapperElement = el)}
       >
-        {
-          timeIndicatorVisible ?
-            <ToolTip
-              className="progress-tip"
-              text={timeIndicatorText}
-              xPosition={timeIndicatorPosition}
-              offset={toolTipOffset}
-            /> : null
-        }
-        {
-          thumbnailIsVisible && enableVideoThumbnails ?
-            <VideoThumbnail
-              xPosition={xThumbnailPosition}
-              time={imageTime}
-              player={player}
-            /> :
-            null
-        }
+        {timeIndicatorVisible ? (
+          <ToolTip
+            className="progress-tip"
+            text={timeIndicatorText}
+            xPosition={timeIndicatorPosition}
+            offset={toolTipOffset}
+          />
+        ) : null}
+        {thumbnailIsVisible && enableVideoThumbnails ? (
+          <VideoThumbnail
+            xPosition={xThumbnailPosition}
+            time={imageTime}
+            player={player}
+          />
+        ) : null}
         <ProgressbarComponent
           seek={seek}
           onMouseOut={hideToolTips}
@@ -152,13 +160,15 @@ class Progressbar extends React.Component {
   }
 }
 
-export default React.memo(withModulesState({
-  player: {
-    bufferGap: "bufferGap",
-    currentTime: "currentTime",
-    isContentLoaded: "isContentLoaded",
-    isLive: "isLive",
-    minimumPosition: "minimumPosition",
-    maximumPosition: "maximumPosition",
-  },
-})(Progressbar));
+export default React.memo(
+  withModulesState({
+    player: {
+      bufferGap: "bufferGap",
+      currentTime: "currentTime",
+      isContentLoaded: "isContentLoaded",
+      isLive: "isLive",
+      minimumPosition: "minimumPosition",
+      maximumPosition: "maximumPosition",
+    },
+  })(Progressbar)
+);

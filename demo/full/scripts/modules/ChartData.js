@@ -5,7 +5,7 @@ export default ({ state }, { maxSize }) => {
   return {
     ADD_DATA: (val) => {
       if (data.length >= maxSize) {
-        data.splice(0, (data.length + 1) - maxSize);
+        data.splice(0, data.length + 1 - maxSize);
       }
       data.push({
         date: performance.now(),

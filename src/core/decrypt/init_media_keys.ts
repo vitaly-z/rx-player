@@ -18,9 +18,7 @@ import log from "../../log";
 import { IKeySystemOption } from "../../public_types";
 import { CancellationSignal } from "../../utils/task_canceller";
 import { disableMediaKeys } from "./attach_media_keys";
-import getMediaKeysInfos, {
-  IMediaKeysInfos,
-} from "./get_media_keys";
+import getMediaKeysInfos, { IMediaKeysInfos } from "./get_media_keys";
 
 /**
  * Get media keys infos from key system configs then attach media keys to media element.
@@ -34,8 +32,11 @@ export default async function initMediaKeys(
   keySystemsConfigs: IKeySystemOption[],
   cancelSignal: CancellationSignal
 ): Promise<IMediaKeysInfos> {
-  const mediaKeysInfo =
-    await getMediaKeysInfos(mediaElement, keySystemsConfigs, cancelSignal);
+  const mediaKeysInfo = await getMediaKeysInfos(
+    mediaElement,
+    keySystemsConfigs,
+    cancelSignal
+  );
 
   const { mediaKeys } = mediaKeysInfo;
   const shouldDisableOldMediaKeys =

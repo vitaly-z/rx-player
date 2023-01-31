@@ -31,14 +31,14 @@ jest.mock("../../../core/init/directfile_content_initializer", () => ({
 describe("Features list - Directfile", () => {
   it("should add Directfile in the current features", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const featureObject : any = {};
+    const featureObject: any = {};
     addDirectfileFeature(featureObject);
     expect(featureObject).toEqual({
-      directfile: { initDirectFile,
-                    mediaElementTracksStore },
+      directfile: { initDirectFile, mediaElementTracksStore },
     });
     expect(featureObject.directfile.initDirectFile).toEqual(initDirectFile);
-    expect(featureObject.directfile.mediaElementTracksStore)
-      .toEqual(mediaElementTracksStore);
+    expect(featureObject.directfile.mediaElementTracksStore).toEqual(
+      mediaElementTracksStore
+    );
   });
 });

@@ -34,43 +34,45 @@ export type IDirectFileInit = typeof DirectFileContentInitializer;
 
 export type IContentDecryptorClass = typeof ContentDecryptor;
 
-export type IHTMLTextTracksBuffer =
-  new(mediaElement : HTMLMediaElement,
-      textTrackElement : HTMLElement) => SegmentBuffer;
+export type IHTMLTextTracksBuffer = new (
+  mediaElement: HTMLMediaElement,
+  textTrackElement: HTMLElement
+) => SegmentBuffer;
 
-export type INativeTextTracksBuffer =
-  new(mediaElement : HTMLMediaElement) => SegmentBuffer;
+export type INativeTextTracksBuffer = new (
+  mediaElement: HTMLMediaElement
+) => SegmentBuffer;
 
 export type IMediaElementTracksStore = typeof MediaElementTracksStore;
 
 export type IDashJsParser = (
   document: Document,
-  args : IMPDParserArguments
+  args: IMPDParserArguments
 ) => IDashParserResponse<string>;
 
 // interface of the global `features` object through which features are
 // accessed.
 export interface IFeaturesObject {
-  directfile : { initDirectFile: IDirectFileInit;
-                 mediaElementTracksStore : IMediaElementTracksStore; } |
-               null;
-  ContentDecryptor : IContentDecryptorClass|null;
-  htmlTextTracksBuffer : IHTMLTextTracksBuffer|null;
-  htmlTextTracksParsers : Partial<Record<string, IHTMLTextTracksParserFn>>;
-  transports : Partial<Record<string, ITransportFunction>>;
-  dashParsers : {
-    wasm : DashWasmParser | null;
-    js : IDashJsParser | null;
+  directfile: {
+    initDirectFile: IDirectFileInit;
+    mediaElementTracksStore: IMediaElementTracksStore;
+  } | null;
+  ContentDecryptor: IContentDecryptorClass | null;
+  htmlTextTracksBuffer: IHTMLTextTracksBuffer | null;
+  htmlTextTracksParsers: Partial<Record<string, IHTMLTextTracksParserFn>>;
+  transports: Partial<Record<string, ITransportFunction>>;
+  dashParsers: {
+    wasm: DashWasmParser | null;
+    js: IDashJsParser | null;
   };
-  nativeTextTracksBuffer : INativeTextTracksBuffer|null;
-  nativeTextTracksParsers : Partial<Record<string, INativeTextTracksParserFn>>;
+  nativeTextTracksBuffer: INativeTextTracksBuffer | null;
+  nativeTextTracksParsers: Partial<Record<string, INativeTextTracksParserFn>>;
 }
 
 export interface IFeatureObject {
-  _addFeature(features : IFeaturesObject) : void;
+  _addFeature(features: IFeaturesObject): void;
 }
 
-export type IFeatureFunction = (features : IFeaturesObject) => void;
+export type IFeatureFunction = (features: IFeaturesObject) => void;
 
-export type IFeature = IFeatureObject |
-                       IFeatureFunction;
+export type IFeature = IFeatureObject | IFeatureFunction;

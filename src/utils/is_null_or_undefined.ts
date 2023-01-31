@@ -22,6 +22,8 @@
  * @param {*} x
  * @returns {*}
  */
-export default function isNullOrUndefined(x : unknown) : x is null | undefined | void {
+export default function isNullOrUndefined(
+  x: unknown
+): x is null | undefined | void {
   return x === null || x === undefined;
 }

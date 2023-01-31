@@ -1,7 +1,6 @@
-# RepresentationStream #########################################################
+# RepresentationStream
 
-
-## Overview ####################################################################
+## Overview
 
 The `RepresentationStream` download and push segments linked to a given
 Representation.

@@ -28,12 +28,14 @@ describe("Features list - METAPLAYLIST", () => {
 
   it("should add METAPLAYLIST in the current features", () => {
     const feat = {};
-    jest.mock("../../../transports/metaplaylist", () => ({ __esModule: true as const,
-                                                           default: feat }));
+    jest.mock("../../../transports/metaplaylist", () => ({
+      __esModule: true as const,
+      default: feat,
+    }));
     const addDASHFeature = jest.requireActual("../metaplaylist").default;
 
-    const featureObject : {
-      transports : { [featureName : string] : unknown };
+    const featureObject: {
+      transports: { [featureName: string]: unknown };
     } = { transports: {} };
     addDASHFeature(featureObject);
     expect(featureObject).toEqual({ transports: { metaplaylist: {} } });

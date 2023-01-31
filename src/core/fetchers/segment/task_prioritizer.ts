@@ -10,7 +10,7 @@ export default class TaskPrioritizer<T> {
    * Priority of the most prioritary task currently running.
    * `null` if no task is currently running.
    */
-  private _minPendingPriority : number | null;
+  private _minPendingPriority: number | null;
   /** Queue of tasks currently waiting for more prioritary ones to finish. */
   private _waitingQueue: Array<IPrioritizerTask<T>>;
   /** Tasks currently pending.  */
@@ -72,7 +72,7 @@ export default class TaskPrioritizer<T> {
           unregisterCancelSignal();
           return;
         }
-        const interrupter =  new TaskCanceller({ cancelOn: cancelSignal });
+        const interrupter = new TaskCanceller({ cancelOn: cancelSignal });
         newTask.interrupter = interrupter;
         interrupter.signal.register(() => {
           newTask.interrupter = null;
@@ -81,18 +81,21 @@ export default class TaskPrioritizer<T> {
           }
         });
 
-        this._minPendingPriority = this._minPendingPriority === null ?
-          newTask.priority :
-          Math.min(this._minPendingPriority, newTask.priority);
+        this._minPendingPriority =
+          this._minPendingPriority === null
+            ? newTask.priority
+            : Math.min(this._minPendingPriority, newTask.priority);
         this._pendingTasks.push(newTask);
 
-        newTask.taskFn(interrupter.signal)
+        newTask
+          .taskFn(interrupter.signal)
           .then(onResolve)
           .catch((err) => {
-            if (!cancelSignal.isCancelled &&
-                interrupter.isUsed &&
-                err instanceof CancellationError)
-            {
+            if (
+              !cancelSignal.isCancelled &&
+              interrupter.isUsed &&
+              err instanceof CancellationError
+            ) {
               return;
             }
             onReject(err);
@@ -165,7 +168,9 @@ export default class TaskPrioritizer<T> {
 
       if (this._pendingTasks.length > 0) {
         if (this._minPendingPriority === task.priority) {
-          this._minPendingPriority = Math.min(...this._pendingTasks.map(t => t.priority));
+          this._minPendingPriority = Math.min(
+            ...this._pendingTasks.map((t) => t.priority)
+          );
         }
       } else {
         this._minPendingPriority = null;
@@ -182,7 +187,8 @@ export default class TaskPrioritizer<T> {
   public updatePriority(promise: ITaskFn<T>, priority: number): void {
     const waitingQueueIndex = _findTaskIndex(promise, this._waitingQueue);
 
-    if (waitingQueueIndex >= 0) { // If it was still waiting for its turn
+    if (waitingQueueIndex >= 0) {
+      // If it was still waiting for its turn
       const waitingQueueElt = this._waitingQueue[waitingQueueIndex];
       if (waitingQueueElt.priority === priority) {
         return;
@@ -231,13 +237,19 @@ export default class TaskPrioritizer<T> {
     const prevPriority = task.priority;
     task.priority = priority;
 
-    if (this._minPendingPriority === null || priority < this._minPendingPriority) {
+    if (
+      this._minPendingPriority === null ||
+      priority < this._minPendingPriority
+    ) {
       this._minPendingPriority = priority;
-    } else if (this._minPendingPriority === prevPriority) { // was highest priority
+    } else if (this._minPendingPriority === prevPriority) {
+      // was highest priority
       if (this._pendingTasks.length === 1) {
         this._minPendingPriority = priority;
       } else {
-        this._minPendingPriority = Math.min(...this._pendingTasks.map(t => t.priority));
+        this._minPendingPriority = Math.min(
+          ...this._pendingTasks.map((t) => t.priority)
+        );
       }
       this._loopThroughWaitingQueue();
     }
@@ -258,25 +270,29 @@ export default class TaskPrioritizer<T> {
    * while this method is called.
    */
   private _loopThroughWaitingQueue(): void {
-    const minWaitingPriority = this._waitingQueue.reduce((acc : number | null, elt) => {
-      return acc === null || acc > elt.priority ? elt.priority :
-                                                  acc;
-    }, null);
-    if (minWaitingPriority === null ||
-        (this._minPendingPriority !== null &&
-         this._minPendingPriority < minWaitingPriority))
-    {
+    const minWaitingPriority = this._waitingQueue.reduce(
+      (acc: number | null, elt) => {
+        return acc === null || acc > elt.priority ? elt.priority : acc;
+      },
+      null
+    );
+    if (
+      minWaitingPriority === null ||
+      (this._minPendingPriority !== null &&
+        this._minPendingPriority < minWaitingPriority)
+    ) {
       return;
     }
     for (let i = 0; i < this._waitingQueue.length; i++) {
-      const priorityToCheck = this._minPendingPriority === null ?
-        minWaitingPriority :
-        Math.min(this._minPendingPriority, minWaitingPriority);
+      const priorityToCheck =
+        this._minPendingPriority === null
+          ? minWaitingPriority
+          : Math.min(this._minPendingPriority, minWaitingPriority);
       const elt = this._waitingQueue[i];
       if (elt.priority <= priorityToCheck) {
         this._findAndRunWaitingQueueTask(i);
         i--; // previous operation should have removed that element from the
-             // the waiting queue
+        // the waiting queue
       }
     }
   }
@@ -332,7 +348,9 @@ export default class TaskPrioritizer<T> {
     if (this._pendingTasks.length === 0) {
       this._minPendingPriority = null;
     } else if (this._minPendingPriority === task.priority) {
-      this._minPendingPriority = Math.min(...this._pendingTasks.map(t => t.priority));
+      this._minPendingPriority = Math.min(
+        ...this._pendingTasks.map((t) => t.priority)
+      );
     }
     task.interrupter?.cancel(); // Interrupt at last step because it calls external code
   }
@@ -344,8 +362,10 @@ export default class TaskPrioritizer<T> {
    * @returns {boolean}
    */
   private _canBeStartedNow(task: IPrioritizerTask<T>): boolean {
-    return this._minPendingPriority === null ||
-           task.priority <= this._minPendingPriority;
+    return (
+      this._minPendingPriority === null ||
+      task.priority <= this._minPendingPriority
+    );
   }
 
   /**
@@ -353,9 +373,11 @@ export default class TaskPrioritizer<T> {
    * returns `false` otherwise.
    * @returns {boolean}
    */
-  private _isRunningHighPriorityTasks() : boolean {
-    return this._minPendingPriority !== null &&
-           this._minPendingPriority <= this._prioritySteps.high;
+  private _isRunningHighPriorityTasks(): boolean {
+    return (
+      this._minPendingPriority !== null &&
+      this._minPendingPriority <= this._prioritySteps.high
+    );
   }
 }
 

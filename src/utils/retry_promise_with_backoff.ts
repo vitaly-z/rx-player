@@ -40,20 +40,16 @@ import { CancellationSignal } from "./task_canceller";
  * calling code via a catch (much simpler to use and to understand).
  */
 export default function retryPromiseWithBackoff<T>(
-  runProm : () => Promise<T>,
-  options : IBackoffOptions,
-  cancelSignal : CancellationSignal
-) : Promise<T> {
-  const { baseDelay,
-          maxDelay,
-          totalRetry,
-          shouldRetry,
-          onRetry } = options;
+  runProm: () => Promise<T>,
+  options: IBackoffOptions,
+  cancelSignal: CancellationSignal
+): Promise<T> {
+  const { baseDelay, maxDelay, totalRetry, shouldRetry, onRetry } = options;
 
   let retryCount = 0;
 
   return iterate();
-  async function iterate() : Promise<T> {
+  async function iterate(): Promise<T> {
     if (cancelSignal.cancellationError !== null) {
       throw cancelSignal.cancellationError;
     }
@@ -64,9 +60,10 @@ export default function retryPromiseWithBackoff<T>(
       if (cancelSignal.cancellationError !== null) {
         throw cancelSignal.cancellationError;
       }
-      if ((!isNullOrUndefined(shouldRetry) && !shouldRetry(error)) ||
-           retryCount++ >= totalRetry)
-      {
+      if (
+        (!isNullOrUndefined(shouldRetry) && !shouldRetry(error)) ||
+        retryCount++ >= totalRetry
+      ) {
         throw error;
       }
 
@@ -74,8 +71,7 @@ export default function retryPromiseWithBackoff<T>(
         onRetry(error, retryCount);
       }
 
-      const delay = Math.min(baseDelay * Math.pow(2, retryCount - 1),
-                             maxDelay);
+      const delay = Math.min(baseDelay * Math.pow(2, retryCount - 1), maxDelay);
 
       const fuzzedDelay = getFuzzedDelay(delay);
       await sleep(fuzzedDelay);
@@ -86,10 +82,10 @@ export default function retryPromiseWithBackoff<T>(
 }
 
 export interface IBackoffOptions {
-  baseDelay : number;
-  maxDelay : number;
-  totalRetry : number;
-  shouldRetry? : (error : unknown) => boolean;
-  errorSelector? : (error : unknown, retryCount : number) => Error | IPlayerError;
-  onRetry? : (error : unknown, retryCount : number) => void;
+  baseDelay: number;
+  maxDelay: number;
+  totalRetry: number;
+  shouldRetry?: (error: unknown) => boolean;
+  errorSelector?: (error: unknown, retryCount: number) => Error | IPlayerError;
+  onRetry?: (error: unknown, retryCount: number) => void;
 }

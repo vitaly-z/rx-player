@@ -36,18 +36,22 @@ export default function probeDRMInfos(
 ): Promise<[ProberStatus, ICompatibleKeySystem?]> {
   const keySystem = mediaConfig.keySystem;
   if (keySystem == null || keySystem.type == null) {
-    return Promise.reject("MediaCapabilitiesProber >>> API_CALL: " +
-      "Missing a type argument to request a media key system access.");
+    return Promise.reject(
+      "MediaCapabilitiesProber >>> API_CALL: " +
+        "Missing a type argument to request a media key system access."
+    );
   }
 
   const type = keySystem.type;
-  const configuration = keySystem.configuration === undefined ? {} :
-                                                                keySystem.configuration;
+  const configuration =
+    keySystem.configuration === undefined ? {} : keySystem.configuration;
   const result: ICompatibleKeySystem = { type, configuration };
 
   if (requestMediaKeySystemAccess == null) {
-    log.debug("MediaCapabilitiesProber >>> API_CALL: " +
-      "Your browser has no API to request a media key system access.");
+    log.debug(
+      "MediaCapabilitiesProber >>> API_CALL: " +
+        "Your browser has no API to request a media key system access."
+    );
     // In that case, the API lack means that no EME workflow may be started.
     // So, the DRM configuration is not supported.
     return Promise.resolve([ProberStatus.NotSupported, result]);
@@ -56,8 +60,10 @@ export default function probeDRMInfos(
   return requestMediaKeySystemAccess(type, [configuration])
     .then((keySystemAccess) => {
       result.compatibleConfiguration = keySystemAccess.getConfiguration();
-      const status : [ProberStatus, ICompatibleKeySystem?] =
-        [ProberStatus.Supported, result];
+      const status: [ProberStatus, ICompatibleKeySystem?] = [
+        ProberStatus.Supported,
+        result,
+      ];
       return status;
     })
     .catch(() => {

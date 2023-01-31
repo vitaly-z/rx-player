@@ -67,10 +67,10 @@ import SegmentInventory, {
  */
 export abstract class SegmentBuffer {
   /** "Type" of the buffer (e.g. "audio", "video", "text"). */
-  public readonly abstract bufferType : IBufferType;
+  public abstract readonly bufferType: IBufferType;
 
   /** Default implementation of an inventory of segment metadata. */
-  protected _segmentInventory : SegmentInventory;
+  protected _segmentInventory: SegmentInventory;
 
   /**
    * Mimetype+codec combination the SegmentBuffer is currently working with.
@@ -80,7 +80,7 @@ export abstract class SegmentBuffer {
    * `undefined` if unknown and if this property does not matter for this
    * SegmentBuffer implementation.
    */
-  public codec : string | undefined;
+  public codec: string | undefined;
 
   constructor() {
     // Use SegmentInventory by default for inventory purposes
@@ -116,9 +116,9 @@ export abstract class SegmentBuffer {
    * @returns {Promise}
    */
   public abstract pushChunk(
-    infos : IPushChunkInfos<unknown>,
-    cancellationSignal : CancellationSignal
-  ) : Promise<void>;
+    infos: IPushChunkInfos<unknown>,
+    cancellationSignal: CancellationSignal
+  ): Promise<void>;
 
   /**
    * Remove buffered data (added to the same FIFO queue than `pushChunk`).
@@ -128,10 +128,10 @@ export abstract class SegmentBuffer {
    * @returns {Promise}
    */
   public abstract removeBuffer(
-    start : number,
-    end : number,
-    cancellationSignal : CancellationSignal
-  ) : Promise<void>;
+    start: number,
+    end: number,
+    cancellationSignal: CancellationSignal
+  ): Promise<void>;
 
   /**
    * Indicate that every chunks from a Segment has been given to pushChunk so
@@ -144,15 +144,15 @@ export abstract class SegmentBuffer {
    * @returns {Promise}
    */
   public abstract endOfSegment(
-    infos : IEndOfSegmentInfos,
-    cancellationSignal : CancellationSignal
-  ) : Promise<void>;
+    infos: IEndOfSegmentInfos,
+    cancellationSignal: CancellationSignal
+  ): Promise<void>;
 
   /**
    * Returns the currently buffered data, in a TimeRanges object.
    * @returns {TimeRanges}
    */
-  public abstract getBufferedRanges() : TimeRanges;
+  public abstract getBufferedRanges(): TimeRanges;
 
   /**
    * The maintained inventory can fall out of sync from garbage collection or
@@ -162,7 +162,7 @@ export abstract class SegmentBuffer {
    * called before retrieving Segment information from it (e.g. with
    * `getInventory`).
    */
-  public synchronizeInventory() : void {
+  public synchronizeInventory(): void {
     // The default implementation just use the SegmentInventory
     this._segmentInventory.synchronizeBuffered(this.getBufferedRanges());
   }
@@ -175,7 +175,7 @@ export abstract class SegmentBuffer {
    * synchronized.
    * @returns {Array.<Object>}
    */
-  public getInventory() : IBufferedChunk[] {
+  public getInventory(): IBufferedChunk[] {
     // The default implementation just use the SegmentInventory
     return this._segmentInventory.getInventory();
   }
@@ -186,7 +186,7 @@ export abstract class SegmentBuffer {
    * processed)
    * @returns {Array.<Object>}
    */
-  public getPendingOperations() : Array<ISBOperation<unknown>> {
+  public getPendingOperations(): Array<ISBOperation<unknown>> {
     // Return no pending operation by default (for synchronous SegmentBuffers)
     return [];
   }
@@ -204,7 +204,7 @@ export abstract class SegmentBuffer {
    * @param {Object} context
    * @returns {Array.<Object>}
    */
-  public getSegmentHistory(context : IChunkContext) : IBufferedHistoryEntry[] {
+  public getSegmentHistory(context: IChunkContext): IBufferedHistoryEntry[] {
     return this._segmentInventory.getHistoryFor(context);
   }
 
@@ -213,13 +213,11 @@ export abstract class SegmentBuffer {
    * /!\ You won't be able to use the SegmentBuffer after calling this
    * function.
    */
-  public abstract dispose() : void;
+  public abstract dispose(): void;
 }
 
 /** Every SegmentBuffer types. */
-export type IBufferType = "audio" |
-                          "video" |
-                          "text";
+export type IBufferType = "audio" | "video" | "text";
 
 /**
  * Content of the `data` property when pushing a new chunk.
@@ -241,7 +239,7 @@ export interface IPushedChunkData<T> {
    * of it.
    * `null` if you just want to push the initialization segment.
    */
-  chunk : T | null;
+  chunk: T | null;
   /**
    * String corresponding to the mime-type + codec of the last segment pushed.
    * This might then be used by a SourceBuffer to infer the right codec to use.
@@ -249,14 +247,14 @@ export interface IPushedChunkData<T> {
    * If set to `undefined`, the SegmentBuffer implementation will just rely on
    * a default codec it is linked to, if one.
    */
-  codec : string | undefined;
+  codec: string | undefined;
   /**
    * Time offset in seconds to apply to this segment.
    * A `timestampOffset` set to `5` will mean that the segment will be decoded
    * 5 seconds after its decode time which was found from the segment data
    * itself.
    */
-  timestampOffset : number;
+  timestampOffset: number;
   /**
    * Append windows for the segment. This is a tuple of two elements.
    *
@@ -272,8 +270,7 @@ export interface IPushedChunkData<T> {
    * This can be set to `0` or `undefined` to not apply any end append window
    * to that chunk.
    */
-  appendWindow: [ number | undefined,
-                  number | undefined ];
+  appendWindow: [number | undefined, number | undefined];
 }
 
 /**
@@ -282,13 +279,13 @@ export interface IPushedChunkData<T> {
  */
 export interface IEndOfSegmentInfos {
   /** Adaptation object linked to the chunk. */
-  adaptation : Adaptation;
+  adaptation: Adaptation;
   /** Period object linked to the chunk. */
-  period : Period;
+  period: Period;
   /** Representation object linked to the chunk. */
-  representation : Representation;
+  representation: Representation;
   /** The segment object linked to the pushed chunk. */
-  segment : ISegment;
+  segment: ISegment;
 }
 
 /**
@@ -297,7 +294,7 @@ export interface IEndOfSegmentInfos {
  */
 export interface IPushChunkInfos<T> {
   /** Chunk that should be pushed with the associated metadata */
-  data : IPushedChunkData<T>;
+  data: IPushedChunkData<T>;
   /**
    * Context about the chunk that will be added to the inventory once it is
    * pushed.
@@ -309,22 +306,24 @@ export interface IPushChunkInfos<T> {
    * with the real media buffer if some buffered segments are not added to
    * the inventory afterwise.
    */
-   inventoryInfos : IInsertedChunkInfos |
-                    null;
+  inventoryInfos: IInsertedChunkInfos | null;
 }
 
 /** "Operations" scheduled by a SegmentBuffer. */
-export type ISBOperation<T> = IPushOperation<T> |
-                              IRemoveOperation |
-                              IEndOfSegmentOperation;
+export type ISBOperation<T> =
+  | IPushOperation<T>
+  | IRemoveOperation
+  | IEndOfSegmentOperation;
 
 /**
  * Enum used by a SegmentBuffer as a discriminant in its queue of
  * "operations".
  */
-export enum SegmentBufferOperation { Push,
-                                     Remove,
-                                     EndOfSegment }
+export enum SegmentBufferOperation {
+  Push,
+  Remove,
+  EndOfSegment,
+}
 
 /**
  * "Operation" created by a `SegmentBuffer` when asked to push a chunk.
@@ -334,9 +333,9 @@ export enum SegmentBufferOperation { Push,
  */
 export interface IPushOperation<T> {
   /** Discriminant (allows to tell its a "Push operation"). */
-  type : SegmentBufferOperation.Push;
+  type: SegmentBufferOperation.Push;
   /** Arguments for that push. */
-  value : IPushChunkInfos<T>;
+  value: IPushChunkInfos<T>;
 }
 
 /**
@@ -347,10 +346,10 @@ export interface IPushOperation<T> {
  */
 export interface IRemoveOperation {
   /** Discriminant (allows to tell its a "Remove operation"). */
-  type : SegmentBufferOperation.Remove;
+  type: SegmentBufferOperation.Remove;
   /** Arguments for that remove (absolute start and end time, in seconds). */
-  value : { start : number;
-            end : number; }; }
+  value: { start: number; end: number };
+}
 
 /**
  * "Operation" created by a `SegmentBuffer` when asked to validate that a full
@@ -362,7 +361,7 @@ export interface IRemoveOperation {
  */
 export interface IEndOfSegmentOperation {
   /** Discriminant (allows to tell its an "EndOfSegment operation"). */
-  type : SegmentBufferOperation.EndOfSegment;
+  type: SegmentBufferOperation.EndOfSegment;
   /** Arguments for that operation. */
-  value : IEndOfSegmentInfos;
+  value: IEndOfSegmentInfos;
 }

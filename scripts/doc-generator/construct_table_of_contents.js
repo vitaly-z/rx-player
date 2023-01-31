@@ -57,7 +57,7 @@ function constructTableOfContents(md) {
   };
 
   function generateAnchorName(title) {
-    const baseUri = encodeURI(title.toLowerCase().replace(/ /g, "_"))
+    const baseUri = encodeURI(title.toLowerCase().replace(/ /g, "_"));
     if (generatedAnchors[baseUri] !== true) {
       generatedAnchors[baseUri] = true;
       return baseUri;
@@ -71,6 +71,6 @@ function constructTableOfContents(md) {
     generatedAnchors[resultUri] = true;
     return resultUri;
   }
-};
+}
 
 module.exports = constructTableOfContents;

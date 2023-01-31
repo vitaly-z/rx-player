@@ -54,13 +54,13 @@ const searchEngine = elasticlunr(function () {
 if (searchIconElts.length > 0) {
   for (let i = 0; i < searchIconElts.length; i++) {
     const searchIconElt = searchIconElts[i];
-    searchIconElt.onclick = function() {
+    searchIconElt.onclick = function () {
       lastSearch = null;
       searchResultsElt.innerHTML = "";
       searchBarElt.value = "";
       if (searchWrapperElt.classList.contains("active")) {
         searchParams.delete("search");
-        history.replaceState(null, null, window.location.href.split("?")[0])
+        history.replaceState(null, null, window.location.href.split("?")[0]);
         searchWrapperElt.classList.remove("active");
         searchIconElt.classList.remove("active");
       } else {
@@ -75,7 +75,7 @@ if (searchIconElts.length > 0) {
         searchBarElt.focus();
         updateSearchResults();
       }
-    }
+    };
   }
 }
 
@@ -88,7 +88,8 @@ if (searchIconElts.length > 0) {
     }
     searchBarElt.value = initialSearch;
     searchBarElt.focus();
-    searchBarElt.selectionStart = searchBarElt.selectionEnd = searchBarElt.value.length;
+    searchBarElt.selectionStart = searchBarElt.selectionEnd =
+      searchBarElt.value.length;
     updateSearchResults();
     initializeSearchEngine().then(() => {
       updateSearchResults();
@@ -99,10 +100,12 @@ if (searchIconElts.length > 0) {
 function initializeSearchEngine() {
   searchInitStatus = "loading";
   return fetch(rootUrl + "/searchIndex.json")
-    .then(res => res.json())
-    .then(res => {
+    .then((res) => res.json())
+    .then((res) => {
       if (!Array.isArray(res)) {
-        console.error("Failed to initialize search: index has an invalid format.");
+        console.error(
+          "Failed to initialize search: index has an invalid format."
+        );
         return;
       }
       searchIndexLinks = [];
@@ -128,18 +131,18 @@ function initializeSearchEngine() {
       }
       searchInitStatus = "loaded";
     })
-    .catch(err => {
+    .catch((err) => {
       searchInitStatus = "failed";
       console.error("Could not initialize search:", err);
     });
 }
 
 if (searchBarElt !== null) {
-  searchBarElt.oninput = function() {
+  searchBarElt.oninput = function () {
     searchParams.set("search", searchBarElt.value);
     history.replaceState(null, null, "?" + searchParams.toString());
     updateSearchResults();
-  }
+  };
 }
 
 function updateSearchResults() {
@@ -150,21 +153,22 @@ function updateSearchResults() {
 
   if (value === "") {
     lastSearch = "";
-    searchResultsElt.innerHTML = "<div class=\"message\">" +
+    searchResultsElt.innerHTML =
+      '<div class="message">' +
       "Enter text to search in all documentation pages." +
       "</div>";
     return;
   }
   if (searchInitStatus === "not-loaded") {
     lastSearch = null;
-    searchResultsElt.innerHTML = "<div class=\"message\">" +
-      "Loading the search index..." +
-      "</div>";
+    searchResultsElt.innerHTML =
+      '<div class="message">' + "Loading the search index..." + "</div>";
     return;
   }
   if (searchInitStatus === "failed") {
     lastSearch = null;
-    searchResultsElt.innerHTML = "<div class=\"message\">" +
+    searchResultsElt.innerHTML =
+      '<div class="message">' +
       "Error: an error happened while initializing the search index" +
       "</div>";
     return;
@@ -176,14 +180,13 @@ function updateSearchResults() {
       h1: { boost: 5, bool: "AND" },
       h2: { boost: 4, bool: "AND" },
       h3: { boost: 3, bool: "AND" },
-      body: { boost: 1 }
-     },
+      body: { boost: 1 },
+    },
     expand: true,
   });
   if (searchResults.length === 0) {
-    searchResultsElt.innerHTML = "<div class=\"message\">" +
-      "No result for that search." +
-      "</div>";
+    searchResultsElt.innerHTML =
+      '<div class="message">' + "No result for that search." + "</div>";
     return;
   }
   searchResultsElt.innerHTML = "";
@@ -291,7 +294,7 @@ for (let groupElt of groupElts) {
     } else {
       progressivelyDisplayElt();
     }
-  }
+  };
 
   function progressivelyDisplayElt() {
     clearTimeout(openingTimeout);
@@ -353,8 +356,10 @@ const active = document.querySelector(".sidebar-link.active");
 if (active !== null) {
   const activeRect = active.getBoundingClientRect();
   if (activeRect.y + activeRect.height + 20 > window.innerHeight) {
-    const sidebarWrapperElt = document.getElementsByClassName("sidebar-wrapper")[0];
-    const scrollYBy = activeRect.y + activeRect.height  - window.innerHeight + 50;
+    const sidebarWrapperElt =
+      document.getElementsByClassName("sidebar-wrapper")[0];
+    const scrollYBy =
+      activeRect.y + activeRect.height - window.innerHeight + 50;
     sidebarWrapperElt.scrollTo(0, scrollYBy);
   }
 }
@@ -383,7 +388,7 @@ function onScroll() {
     showHeader();
   }
   prevScroll = curScroll;
-};
+}
 
 function hideHeader() {
   if (isHeaderShown) {
@@ -405,7 +410,7 @@ if (window.location.hash !== "") {
   hideHeader();
 }
 
-window.onhashchange = function() {
+window.onhashchange = function () {
   hideHeader();
   prevScroll = window.scrollY;
 };
@@ -416,19 +421,22 @@ let opacityTimeout;
 const overlay = document.createElement("div");
 overlay.className = "overlay";
 
-const hamburgerOpenerElt = document.getElementsByClassName("hamburger-opener")[0];
+const hamburgerOpenerElt =
+  document.getElementsByClassName("hamburger-opener")[0];
 const hamburgerBarElt = document.getElementsByClassName("hamburger-bar")[0];
-const hamburgerCloserElt = document.getElementsByClassName("hamburger-bar-closer")[0];
+const hamburgerCloserElt = document.getElementsByClassName(
+  "hamburger-bar-closer"
+)[0];
 
 hamburgerOpenerElt.onclick = openMenu;
 hamburgerCloserElt.onclick = closeMenu;
 
 let isOverlayVisible = false;
-overlay.onclick = function() {
+overlay.onclick = function () {
   if (isOverlayVisible) {
     closeMenu();
   }
-}
+};
 
 function openMenu() {
   clearTimeout(opacityTimeout);

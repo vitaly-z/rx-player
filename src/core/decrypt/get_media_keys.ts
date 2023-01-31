@@ -37,17 +37,18 @@ import ServerCertificateStore from "./utils/server_certificate_store";
  * @returns {Object|null}
  */
 function createPersistentSessionsStorage(
-  keySystemOptions : IKeySystemOption
-) : PersistentSessionsStore|null {
+  keySystemOptions: IKeySystemOption
+): PersistentSessionsStore | null {
   if (isNullOrUndefined(keySystemOptions.persistentLicenseConfig)) {
     return null;
   }
 
   const { persistentLicenseConfig } = keySystemOptions;
   if (persistentLicenseConfig == null) {
-    throw new EncryptedMediaError("INVALID_KEY_SYSTEM",
-                                  "No `persistentLicenseConfig` found for " +
-                                  "persistent license.");
+    throw new EncryptedMediaError(
+      "INVALID_KEY_SYSTEM",
+      "No `persistentLicenseConfig` found for " + "persistent license."
+    );
   }
 
   log.debug("DRM: Set the given license storage");
@@ -57,15 +58,13 @@ function createPersistentSessionsStorage(
 /** Object returned by `getMediaKeysInfos`. */
 export interface IMediaKeysInfos {
   /** The MediaKeySystemAccess which allowed to create the MediaKeys instance. */
-  mediaKeySystemAccess: MediaKeySystemAccess |
-                        ICustomMediaKeySystemAccess;
+  mediaKeySystemAccess: MediaKeySystemAccess | ICustomMediaKeySystemAccess;
   /** The MediaKeys instance. */
-  mediaKeys : MediaKeys |
-              ICustomMediaKeys;
+  mediaKeys: MediaKeys | ICustomMediaKeys;
   /** Stores allowing to create and retrieve MediaKeySessions. */
-  stores : IMediaKeySessionStores;
+  stores: IMediaKeySessionStores;
   /** IKeySystemOption compatible to the created MediaKeys instance. */
-  options : IKeySystemOption;
+  options: IKeySystemOption;
 }
 
 /**
@@ -82,13 +81,15 @@ export interface IMediaKeysInfos {
  * @returns {Promise.<Object>}
  */
 export default async function getMediaKeysInfos(
-  mediaElement : HTMLMediaElement,
+  mediaElement: HTMLMediaElement,
   keySystemsConfigs: IKeySystemOption[],
-  cancelSignal : CancellationSignal
-) : Promise<IMediaKeysInfos> {
-  const evt = await getMediaKeySystemAccess(mediaElement,
-                                            keySystemsConfigs,
-                                            cancelSignal);
+  cancelSignal: CancellationSignal
+): Promise<IMediaKeysInfos> {
+  const evt = await getMediaKeySystemAccess(
+    mediaElement,
+    keySystemsConfigs,
+    cancelSignal
+  );
   if (cancelSignal.cancellationError !== null) {
     throw cancelSignal.cancellationError;
   }
@@ -97,34 +98,39 @@ export default async function getMediaKeysInfos(
   const currentState = MediaKeysInfosStore.getState(mediaElement);
   const persistentSessionsStore = createPersistentSessionsStorage(options);
 
-  if (canReuseMediaKeys() &&
-      currentState !== null &&
-      evt.type === "reuse-media-key-system-access")
-  {
+  if (
+    canReuseMediaKeys() &&
+    currentState !== null &&
+    evt.type === "reuse-media-key-system-access"
+  ) {
     const { mediaKeys, loadedSessionsStore } = currentState;
 
     // We might just rely on the currently attached MediaKeys instance.
     // First check if server certificate parameters are the same than in the
     // current MediaKeys instance. If not, re-create MediaKeys from scratch.
-    if (ServerCertificateStore.hasOne(mediaKeys) === false ||
-        (!isNullOrUndefined(options.serverCertificate) &&
-         ServerCertificateStore.has(mediaKeys, options.serverCertificate)))
-    {
-      return { mediaKeys,
-               mediaKeySystemAccess,
-               stores: { loadedSessionsStore, persistentSessionsStore },
-               options };
-
+    if (
+      ServerCertificateStore.hasOne(mediaKeys) === false ||
+      (!isNullOrUndefined(options.serverCertificate) &&
+        ServerCertificateStore.has(mediaKeys, options.serverCertificate))
+    ) {
+      return {
+        mediaKeys,
+        mediaKeySystemAccess,
+        stores: { loadedSessionsStore, persistentSessionsStore },
+        options,
+      };
     }
   }
 
   const mediaKeys = await createMediaKeys(mediaKeySystemAccess);
   log.info("DRM: MediaKeys created with success");
   const loadedSessionsStore = new LoadedSessionsStore(mediaKeys);
-  return { mediaKeys,
-           mediaKeySystemAccess,
-           stores: { loadedSessionsStore, persistentSessionsStore },
-           options };
+  return {
+    mediaKeys,
+    mediaKeySystemAccess,
+    stores: { loadedSessionsStore, persistentSessionsStore },
+    options,
+  };
 }
 
 /**
@@ -134,15 +140,17 @@ export default async function getMediaKeysInfos(
  * @returns {Promise.<MediaKeys>}
  */
 async function createMediaKeys(
-  mediaKeySystemAccess : MediaKeySystemAccess | ICustomMediaKeySystemAccess
-) : Promise<MediaKeys | ICustomMediaKeys> {
+  mediaKeySystemAccess: MediaKeySystemAccess | ICustomMediaKeySystemAccess
+): Promise<MediaKeys | ICustomMediaKeys> {
   log.info("DRM: Calling createMediaKeys on the MediaKeySystemAccess");
   try {
     const mediaKeys = await mediaKeySystemAccess.createMediaKeys();
     return mediaKeys;
   } catch (error) {
-    const message = error instanceof Error ? error.message :
-                                             "Unknown error when creating MediaKeys.";
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Unknown error when creating MediaKeys.";
     throw new EncryptedMediaError("CREATE_MEDIA_KEYS_ERROR", message);
   }
 }

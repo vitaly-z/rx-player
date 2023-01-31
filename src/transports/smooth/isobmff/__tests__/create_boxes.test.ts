@@ -108,13 +108,48 @@ describe("Smooth - ISOBMFF - boxes creation", () => {
       const createHDLRBox = jest.requireActual("../create_boxes").createHDLRBox;
       expect(createHDLRBox("audio")).toBe(box);
       expect(mockCreateBox).toHaveBeenCalledTimes(1);
-      expect(mockCreateBox).toHaveBeenCalledWith("hdlr", new Uint8Array([
-        0, 0, 0, 0, 0, 0, 0, 0,
-        115, 111, 117, 110, // "soun"
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        83, 111, 117, 110, 100, 72, 97, 110, 100, 108, 101, 114, // "SoundHandler"
-        0,
-      ]));
+      expect(mockCreateBox).toHaveBeenCalledWith(
+        "hdlr",
+        new Uint8Array([
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          115,
+          111,
+          117,
+          110, // "soun"
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          83,
+          111,
+          117,
+          110,
+          100,
+          72,
+          97,
+          110,
+          100,
+          108,
+          101,
+          114, // "SoundHandler"
+          0,
+        ])
+      );
     });
 
     it("should always create the same video box", () => {
@@ -126,13 +161,48 @@ describe("Smooth - ISOBMFF - boxes creation", () => {
       const createHDLRBox = jest.requireActual("../create_boxes").createHDLRBox;
       expect(createHDLRBox("video")).toBe(box);
       expect(mockCreateBox).toHaveBeenCalledTimes(1);
-      expect(mockCreateBox).toHaveBeenCalledWith("hdlr", new Uint8Array([
-        0, 0, 0, 0, 0, 0, 0, 0,
-        118, 105, 100, 101, // "vide"
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        86, 105, 100, 101, 111, 72, 97, 110, 100, 108, 101, 114, // "VideoHandler"
-        0,
-      ]));
+      expect(mockCreateBox).toHaveBeenCalledWith(
+        "hdlr",
+        new Uint8Array([
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          118,
+          105,
+          100,
+          101, // "vide"
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          86,
+          105,
+          100,
+          101,
+          111,
+          72,
+          97,
+          110,
+          100,
+          108,
+          101,
+          114, // "VideoHandler"
+          0,
+        ])
+      );
     });
 
     it("should always create the same hint box", () => {
@@ -144,12 +214,36 @@ describe("Smooth - ISOBMFF - boxes creation", () => {
       const createHDLRBox = jest.requireActual("../create_boxes").createHDLRBox;
       expect(createHDLRBox("hint")).toBe(box);
       expect(mockCreateBox).toHaveBeenCalledTimes(1);
-      expect(mockCreateBox).toHaveBeenCalledWith("hdlr", new Uint8Array([
-        0, 0, 0, 0, 0, 0, 0, 0,
-        104, 105, 110, 116, // "soun"
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0,
-      ]));
+      expect(mockCreateBox).toHaveBeenCalledWith(
+        "hdlr",
+        new Uint8Array([
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          104,
+          105,
+          110,
+          116, // "soun"
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ])
+      );
     });
   });
 
@@ -158,7 +252,9 @@ describe("Smooth - ISOBMFF - boxes creation", () => {
       const translatedTimeScale = new Uint8Array([4, 3, 2, 1]);
       const concatenated = new Uint8Array([9, 10, 11, 12]);
       const box = new Uint8Array([1, 2, 3, 4]);
-      const mockItobe4 = jest.fn().mockImplementation(() => translatedTimeScale);
+      const mockItobe4 = jest
+        .fn()
+        .mockImplementation(() => translatedTimeScale);
       const mockConcat = jest.fn().mockImplementation(() => concatenated);
       const mockCreateBox = jest.fn().mockImplementation(() => box);
       jest.mock("../../../../utils/byte_parsing", () => {
@@ -212,7 +308,9 @@ describe("Smooth - ISOBMFF - boxes creation", () => {
     it("should just integrate the data format", () => {
       const dataFormatToBytes = new Uint8Array([4, 3, 2, 1]);
       const box = new Uint8Array([1, 2, 3, 4]);
-      const mockStrToUtf8 = jest.fn().mockImplementation(() => dataFormatToBytes);
+      const mockStrToUtf8 = jest
+        .fn()
+        .mockImplementation(() => dataFormatToBytes);
       const mockCreateBox = jest.fn().mockImplementation(() => box);
       jest.mock("../../../../utils/string_parsing", () => {
         return { strToUtf8: mockStrToUtf8 };

@@ -13,9 +13,9 @@ const VideoRepresentationKnobBase = ({
   let selectedIndex;
 
   const availableVideoRepresentations =
-    videoTrack === null || videoTrack === undefined ?
-      [] :
-      videoTrack.representations;
+    videoTrack === null || videoTrack === undefined
+      ? []
+      : videoTrack.representations;
 
   if (!availableVideoRepresentations.length) {
     options = ["Not available"];
@@ -29,17 +29,20 @@ const VideoRepresentationKnobBase = ({
       }
     }
 
-    const correspondingInfo = availableVideoRepresentations
-      .map(r => getVideoRepresentationInfo(r).join(", "));
+    const correspondingInfo = availableVideoRepresentations.map((r) =>
+      getVideoRepresentationInfo(r).join(", ")
+    );
     options = [autoValue, ...correspondingInfo];
 
-    selectedIndex = videoRepresentationsLocked ?
-      (availableVideoRepresentations
-        .findIndex(r => r.id === videoRepresentation.id) + 1 || 0) :
-      0
+    selectedIndex = videoRepresentationsLocked
+      ? availableVideoRepresentations.findIndex(
+          (r) => r.id === videoRepresentation.id
+        ) + 1 || 0
+      : 0;
   } else {
-    options = availableVideoRepresentations
-      .map(r => getVideoRepresentationInfo(r).join(", "));
+    options = availableVideoRepresentations.map((r) =>
+      getVideoRepresentationInfo(r).join(", ")
+    );
     selectedIndex = 0;
   }
 
@@ -65,13 +68,15 @@ const VideoRepresentationKnobBase = ({
   );
 };
 
-export default React.memo(withModulesState({
-  player: {
-    videoRepresentationsLocked: "videoRepresentationsLocked",
-    videoRepresentation: "videoRepresentation",
-    videoTrack: "videoTrack",
-  },
-})(VideoRepresentationKnobBase));
+export default React.memo(
+  withModulesState({
+    player: {
+      videoRepresentationsLocked: "videoRepresentationsLocked",
+      videoRepresentation: "videoRepresentation",
+      videoTrack: "videoTrack",
+    },
+  })(VideoRepresentationKnobBase)
+);
 
 function getVideoRepresentationInfo(videoRepresentation) {
   const info = [];

@@ -30,9 +30,9 @@ import {
 } from "./create_boxes";
 
 export type IPSSList = Array<{
-  systemId : string;
-  privateData? : Uint8Array;
-  keyIds? : Uint8Array;
+  systemId: string;
+  privateData?: Uint8Array;
+  keyIds?: Uint8Array;
 }>;
 
 /**
@@ -42,10 +42,10 @@ export type IPSSList = Array<{
  * @returns {Array.<Uint8Array>}
  */
 function createMOOVBox(
-  mvhd : Uint8Array,
-  mvex : Uint8Array,
-  trak : Uint8Array
-) : Uint8Array {
+  mvhd: Uint8Array,
+  mvex: Uint8Array,
+  trak: Uint8Array
+): Uint8Array {
   const children = [mvhd, mvex, trak];
   return createBoxWithChildren("moov", children);
 }
@@ -63,23 +63,22 @@ function createMOOVBox(
  * @returns {Uint8Array}
  */
 export default function createInitSegment(
-  timescale : number,
-  type : "audio"|"video",
-  stsd : Uint8Array,
-  mhd : Uint8Array,
-  width : number,
-  height : number
-) : Uint8Array {
-
+  timescale: number,
+  type: "audio" | "video",
+  stsd: Uint8Array,
+  mhd: Uint8Array,
+  width: number,
+  height: number
+): Uint8Array {
   const stbl = createBoxWithChildren("stbl", [
     stsd,
     createBox("stts", new Uint8Array(0x08)),
     createBox("stsc", new Uint8Array(0x08)),
-    createBox("stsz", new Uint8Array(0x0C)),
+    createBox("stsz", new Uint8Array(0x0c)),
     createBox("stco", new Uint8Array(0x08)),
   ]);
 
-  const url  = createBox("url ", new Uint8Array([0, 0, 0, 1]));
+  const url = createBox("url ", new Uint8Array([0, 0, 0, 1]));
   const dref = createDREFBox(url);
   const dinf = createBoxWithChildren("dinf", [dref]);
   const minf = createBoxWithChildren("minf", [mhd, dinf, stbl]);
@@ -91,7 +90,7 @@ export default function createInitSegment(
   const trex = createTREXBox(1);
   const mvex = createBoxWithChildren("mvex", [trex]);
   const mvhd = createMVHDBox(timescale, 1); // in fact, we don't give a sh** about
-                                            // this value :O
+  // this value :O
 
   const moov = createMOOVBox(mvhd, mvex, trak);
   const ftyp = createFTYPBox("isom", ["isom", "iso2", "iso6", "avc1", "dash"]);

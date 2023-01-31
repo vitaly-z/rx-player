@@ -20,14 +20,15 @@ import { IFeaturesObject } from "./types";
  * Initial features object, with no feature activated by default.
  * @type {Object}
  */
-const features : IFeaturesObject = { dashParsers: { wasm: null,
-                                                    js: null },
-                                     directfile: null,
-                                     ContentDecryptor: null,
-                                     htmlTextTracksBuffer: null,
-                                     htmlTextTracksParsers: {},
-                                     nativeTextTracksBuffer: null,
-                                     nativeTextTracksParsers: {},
-                                     transports: {} };
+const features: IFeaturesObject = {
+  dashParsers: { wasm: null, js: null },
+  directfile: null,
+  ContentDecryptor: null,
+  htmlTextTracksBuffer: null,
+  htmlTextTracksParsers: {},
+  nativeTextTracksBuffer: null,
+  nativeTextTracksParsers: {},
+  transports: {},
+};
 
 export default features;

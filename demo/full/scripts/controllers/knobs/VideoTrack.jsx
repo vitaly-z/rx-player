@@ -3,7 +3,7 @@ import withModulesState from "../../lib/withModulesState.jsx";
 import Knob from "../../components/Knob.jsx";
 
 const findVideoTrackIndex = (track, tracks) => {
-  return tracks.findIndex(ln => ln.id === track.id);
+  return tracks.findIndex((ln) => ln.id === track.id);
 };
 
 const VideoTrackKnobBase = ({
@@ -19,7 +19,7 @@ const VideoTrackKnobBase = ({
     options = ["Not available"];
   } else {
     options = ["no video track"].concat(
-      availableVideoTracks.map((track, i) => `track ${i}: ${track.id}`),
+      availableVideoTracks.map((track, i) => `track ${i}: ${track.id}`)
     );
 
     if (currentVideoTrack) {
@@ -50,9 +50,11 @@ const VideoTrackKnobBase = ({
   );
 };
 
-export default React.memo(withModulesState({
-  player: {
-    videoTrack: "currentVideoTrack",
-    availableVideoTracks: "availableVideoTracks",
-  },
-})(VideoTrackKnobBase));
+export default React.memo(
+  withModulesState({
+    player: {
+      videoTrack: "currentVideoTrack",
+      availableVideoTracks: "availableVideoTracks",
+    },
+  })(VideoTrackKnobBase)
+);

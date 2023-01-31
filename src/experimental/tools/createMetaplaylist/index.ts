@@ -17,9 +17,11 @@
 import { IMetaPlaylist } from "../../../parsers/manifest/metaplaylist";
 import getDurationFromManifest from "./get_duration_from_manifest";
 
-interface IMetaplaylistContentInfos { url: string;
-                                      transport: "dash" | "smooth";
-                                      duration?: number; }
+interface IMetaplaylistContentInfos {
+  url: string;
+  transport: "dash" | "smooth";
+  duration?: number;
+}
 
 /**
  * From given information about wanted metaplaylist and contents,
@@ -36,37 +38,40 @@ function createMetaplaylist(
   const completeContentsInfoProms = contentsInfos.map((contentInfos) => {
     const { url, transport, duration } = contentInfos;
     if (duration !== undefined) {
-      return Promise.resolve({ url,
-                               transport,
-                               duration });
+      return Promise.resolve({ url, transport, duration });
     }
     return getDurationFromManifest(url, transport).then((manifestDuration) => {
-      return { url,
-               duration: manifestDuration,
-               transport };
+      return { url, duration: manifestDuration, transport };
     });
   });
 
-  return Promise.all(completeContentsInfoProms).then((completeContentsInfos) => {
-    const contents = completeContentsInfos
-      .reduce((acc: Array<{ url: string;
-                            transport: "dash" | "smooth" | "metaplaylist";
-                            startTime: number;
-                            endTime: number; }>,
-               val) => {
-        const lastElement = acc[acc.length - 1];
-        const startTime = lastElement?.endTime ?? playlistStartTime;
-        acc.push({ url: val.url,
-                   transport: val.transport,
-                   startTime,
-                   endTime: startTime + val.duration });
-        return acc;
-      }, []);
-    return { type: "MPL" as const,
-             version: "0.1",
-             dynamic: false,
-             contents };
-  });
+  return Promise.all(completeContentsInfoProms).then(
+    (completeContentsInfos) => {
+      const contents = completeContentsInfos.reduce(
+        (
+          acc: Array<{
+            url: string;
+            transport: "dash" | "smooth" | "metaplaylist";
+            startTime: number;
+            endTime: number;
+          }>,
+          val
+        ) => {
+          const lastElement = acc[acc.length - 1];
+          const startTime = lastElement?.endTime ?? playlistStartTime;
+          acc.push({
+            url: val.url,
+            transport: val.transport,
+            startTime,
+            endTime: startTime + val.duration,
+          });
+          return acc;
+        },
+        []
+      );
+      return { type: "MPL" as const, version: "0.1", dynamic: false, contents };
+    }
+  );
 }
 
 export default createMetaplaylist;

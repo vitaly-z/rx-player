@@ -15,37 +15,30 @@
  */
 
 import { CustomLoaderError } from "../../errors";
-import {
-  IManifestLoader,
-  ILoadedManifestFormat,
-} from "../../public_types";
+import { IManifestLoader, ILoadedManifestFormat } from "../../public_types";
 import {
   CancellationError,
   CancellationSignal,
 } from "../../utils/task_canceller";
-import {
-  IManifestLoaderOptions,
-  IRequestedData,
-} from "../types";
+import { IManifestLoaderOptions, IRequestedData } from "../types";
 
 export default function callCustomManifestLoader(
-  customManifestLoader : IManifestLoader,
-  fallbackManifestLoader : (
-    url : string | undefined,
-    loaderOptions : IManifestLoaderOptions,
-    cancelSignal : CancellationSignal
-  ) => Promise< IRequestedData<ILoadedManifestFormat> >
-) : (
-    url : string | undefined,
-    loaderOptions : IManifestLoaderOptions,
-    cancelSignal : CancellationSignal
-  ) => Promise< IRequestedData<ILoadedManifestFormat> >
-{
+  customManifestLoader: IManifestLoader,
+  fallbackManifestLoader: (
+    url: string | undefined,
+    loaderOptions: IManifestLoaderOptions,
+    cancelSignal: CancellationSignal
+  ) => Promise<IRequestedData<ILoadedManifestFormat>>
+): (
+  url: string | undefined,
+  loaderOptions: IManifestLoaderOptions,
+  cancelSignal: CancellationSignal
+) => Promise<IRequestedData<ILoadedManifestFormat>> {
   return (
-    url : string | undefined,
-    loaderOptions : IManifestLoaderOptions,
-    cancelSignal : CancellationSignal
-  ) : Promise< IRequestedData<ILoadedManifestFormat> > => {
+    url: string | undefined,
+    loaderOptions: IManifestLoaderOptions,
+    cancelSignal: CancellationSignal
+  ): Promise<IRequestedData<ILoadedManifestFormat>> => {
     return new Promise((res, rej) => {
       const timeAPIsDelta = Date.now() - performance.now();
       /** `true` when the custom segmentLoader should not be active anymore. */
@@ -55,13 +48,14 @@ export default function callCustomManifestLoader(
        * Callback triggered when the custom manifest loader has a response.
        * @param {Object} args
        */
-      const resolve = (_args : { data : ILoadedManifestFormat;
-                                 size? : number | undefined;
-                                 duration? : number | undefined;
-                                 url? : string | undefined;
-                                 receivingTime? : number | undefined;
-                                 sendingTime? : number | undefined; }) =>
-      {
+      const resolve = (_args: {
+        data: ILoadedManifestFormat;
+        size?: number | undefined;
+        duration?: number | undefined;
+        url?: string | undefined;
+        receivingTime?: number | undefined;
+        sendingTime?: number | undefined;
+      }) => {
         if (hasFinished || cancelSignal.isCancelled) {
           return;
         }
@@ -69,24 +63,29 @@ export default function callCustomManifestLoader(
         cancelSignal.deregister(abortCustomLoader);
 
         const receivedTime =
-          _args.receivingTime !== undefined ? _args.receivingTime - timeAPIsDelta :
-                                              undefined;
+          _args.receivingTime !== undefined
+            ? _args.receivingTime - timeAPIsDelta
+            : undefined;
         const sendingTime =
-          _args.sendingTime !== undefined ? _args.sendingTime - timeAPIsDelta :
-                                            undefined;
+          _args.sendingTime !== undefined
+            ? _args.sendingTime - timeAPIsDelta
+            : undefined;
 
-        res({ responseData: _args.data,
-              size: _args.size,
-              requestDuration: _args.duration,
-              url: _args.url,
-              receivedTime, sendingTime });
+        res({
+          responseData: _args.data,
+          size: _args.size,
+          requestDuration: _args.duration,
+          url: _args.url,
+          receivedTime,
+          sendingTime,
+        });
       };
 
       /**
        * Callback triggered when the custom manifest loader fails
        * @param {*} err - The corresponding error encountered
        */
-      const reject = (err : unknown) : void => {
+      const reject = (err: unknown): void => {
         if (hasFinished || cancelSignal.isCancelled) {
           return;
         }
@@ -94,15 +93,19 @@ export default function callCustomManifestLoader(
         cancelSignal.deregister(abortCustomLoader);
 
         // Format error and send it
-        const castedErr = err as (null | undefined | { message? : string;
-                                                       canRetry? : boolean;
-                                                       xhr? : XMLHttpRequest; });
-        const message = castedErr?.message ??
-                        "Unknown error when fetching the Manifest through a " +
-                        "custom manifestLoader.";
-        const emittedErr = new CustomLoaderError(message,
-                                                 castedErr?.canRetry ?? false,
-                                                 castedErr?.xhr);
+        const castedErr = err as
+          | null
+          | undefined
+          | { message?: string; canRetry?: boolean; xhr?: XMLHttpRequest };
+        const message =
+          castedErr?.message ??
+          "Unknown error when fetching the Manifest through a " +
+            "custom manifestLoader.";
+        const emittedErr = new CustomLoaderError(
+          message,
+          castedErr?.canRetry ?? false,
+          castedErr?.xhr
+        );
         rej(emittedErr);
       };
 
@@ -120,9 +123,10 @@ export default function callCustomManifestLoader(
       };
 
       const callbacks = { reject, resolve, fallback };
-      const abort = customManifestLoader({ url,
-                                           timeout: loaderOptions.timeout },
-                                         callbacks);
+      const abort = customManifestLoader(
+        { url, timeout: loaderOptions.timeout },
+        callbacks
+      );
 
       cancelSignal.register(abortCustomLoader);
 
@@ -130,7 +134,7 @@ export default function callCustomManifestLoader(
        * The logic to run when the custom loader is cancelled while pending.
        * @param {Error} err
        */
-      function abortCustomLoader(err : CancellationError) {
+      function abortCustomLoader(err: CancellationError) {
         if (hasFinished) {
           return;
         }

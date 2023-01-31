@@ -22,16 +22,16 @@ import { IPositionPlaybackObservation } from "../representation";
  * @param {Object} cancelSignal - When it emits, we stop asking for the
  * MediaSource to be reloaded.
  */
-export default function createReloadRequest (
-  playbackObserver : IReadOnlyPlaybackObserver<{
-    position : IPositionPlaybackObservation;
-    paused : IPausedPlaybackObservation;
+export default function createReloadRequest(
+  playbackObserver: IReadOnlyPlaybackObserver<{
+    position: IPositionPlaybackObservation;
+    paused: IPausedPlaybackObservation;
   }>,
-  fn : (arg : { position : number; autoPlay : boolean }) => void,
-  deltaPos : number,
-  timeBounds : { start : number | undefined; end : number | undefined },
-  cancelSignal : CancellationSignal
-) : void {
+  fn: (arg: { position: number; autoPlay: boolean }) => void,
+  deltaPos: number,
+  timeBounds: { start: number | undefined; end: number | undefined },
+  cancelSignal: CancellationSignal
+): void {
   if (cancelSignal.isCancelled) {
     return;
   }
@@ -57,13 +57,20 @@ export default function createReloadRequest (
   // At last, because reloading is such an aggressive situation, we prefer to
   // trigger it always asynchronously so behavior is better predictible.
   nextTick(() => {
-    playbackObserver.listen((observation) => {
-      const currentTime = playbackObserver.getCurrentTime();
-      let position = currentTime + deltaPos;
-      position = Math.min(Math.max(timeBounds.start ?? 0, position),
-                          timeBounds.end ?? Infinity);
-      const autoPlay = !(observation.paused.pending ?? playbackObserver.getIsPaused());
-      fn({ position, autoPlay });
-    }, { includeLastObservation: true, clearSignal: cancelSignal });
+    playbackObserver.listen(
+      (observation) => {
+        const currentTime = playbackObserver.getCurrentTime();
+        let position = currentTime + deltaPos;
+        position = Math.min(
+          Math.max(timeBounds.start ?? 0, position),
+          timeBounds.end ?? Infinity
+        );
+        const autoPlay = !(
+          observation.paused.pending ?? playbackObserver.getIsPaused()
+        );
+        fn({ position, autoPlay });
+      },
+      { includeLastObservation: true, clearSignal: cancelSignal }
+    );
   });
 }

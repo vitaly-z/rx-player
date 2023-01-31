@@ -30,7 +30,7 @@ export interface IEncryptedEventData {
    *
    * `undefined` if not known.
    */
-  type : string | undefined;
+  type: string | undefined;
   /** Every initialization data for that type. */
   values: Array<{
     /**
@@ -41,7 +41,7 @@ export interface IEncryptedEventData {
      * In that case, the initialization data might even be a concatenation of
      * the initialization data from multiple system ids.
      */
-    systemId : string | undefined;
+    systemId: string | undefined;
     /**
      * The initialization data itself for that type and systemId.
      * For example, with ISOBMFF "cenc" initialization data, this will be the
@@ -63,25 +63,24 @@ export interface IEncryptedEventData {
  * @returns {Array.<Object>}
  */
 function getInitializationDataValues(
-  initData : Uint8Array
-) : Array<{ systemId : string | undefined; data : Uint8Array }> {
-  const result : Array<{ systemId : string | undefined; data : Uint8Array }> = [];
+  initData: Uint8Array
+): Array<{ systemId: string | undefined; data: Uint8Array }> {
+  const result: Array<{ systemId: string | undefined; data: Uint8Array }> = [];
   let offset = 0;
 
   while (offset < initData.length) {
-    if (initData.length < offset + 8 ||
-        be4toi(initData, offset + 4) !== PSSH_TO_INTEGER
+    if (
+      initData.length < offset + 8 ||
+      be4toi(initData, offset + 4) !== PSSH_TO_INTEGER
     ) {
       log.warn("Compat: Unrecognized initialization data. Use as is.");
-      return [ { systemId: undefined,
-                 data: initData } ];
+      return [{ systemId: undefined, data: initData }];
     }
 
     const len = be4toi(new Uint8Array(initData), offset);
     if (offset + len > initData.length) {
       log.warn("Compat: Unrecognized initialization data. Use as is.");
-      return [ { systemId: undefined,
-                 data: initData } ];
+      return [{ systemId: undefined, data: initData }];
     }
     const currentPSSH = initData.subarray(offset, offset + len);
     const systemId = getPsshSystemID(currentPSSH, 8);
@@ -92,7 +91,9 @@ function getInitializationDataValues(
       // event (but not when the corresponding segment has been pushed to the
       // SourceBuffer).
       // We prefer filtering them out, to avoid further issues.
-      log.warn("Compat: Duplicated PSSH found in initialization data, removing it.");
+      log.warn(
+        "Compat: Duplicated PSSH found in initialization data, removing it."
+      );
     } else {
       result.push(currentItem);
     }
@@ -101,8 +102,7 @@ function getInitializationDataValues(
 
   if (offset !== initData.length) {
     log.warn("Compat: Unrecognized initialization data. Use as is.");
-    return [ { systemId: undefined,
-               data: initData } ];
+    return [{ systemId: undefined, data: initData }];
   }
   return result;
 }
@@ -116,15 +116,16 @@ function getInitializationDataValues(
  * @returns {boolean}
  */
 function isPSSHAlreadyEncountered(
-  encounteredPSSHs : Array<{ systemId : string | undefined; data : Uint8Array }>,
-  pssh : { systemId : string | undefined; data : Uint8Array }
-) : boolean {
+  encounteredPSSHs: Array<{ systemId: string | undefined; data: Uint8Array }>,
+  pssh: { systemId: string | undefined; data: Uint8Array }
+): boolean {
   for (let i = 0; i < encounteredPSSHs.length; i++) {
     const item = encounteredPSSHs[i];
-    if (pssh.systemId === undefined ||
-        item.systemId === undefined ||
-        pssh.systemId === item.systemId)
-    {
+    if (
+      pssh.systemId === undefined ||
+      item.systemId === undefined ||
+      pssh.systemId === item.systemId
+    ) {
       if (areArraysOfNumbersEqual(pssh.data, item.data)) {
         return true;
       }
@@ -145,8 +146,8 @@ function isPSSHAlreadyEncountered(
  * encountered in the given event.
  */
 export default function getInitData(
-  encryptedEvent : MediaEncryptedEvent
-) : IEncryptedEventData | null {
+  encryptedEvent: MediaEncryptedEvent
+): IEncryptedEventData | null {
   const { initData, initDataType } = encryptedEvent;
   if (initData == null) {
     log.warn("Compat: No init data found on media encrypted event.");

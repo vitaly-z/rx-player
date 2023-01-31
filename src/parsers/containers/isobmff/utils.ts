@@ -32,24 +32,15 @@ import {
 import { MAX_32_BIT_INT } from "./constants";
 import { createBox } from "./create_box";
 import { getPlayReadyKIDFromPrivateData } from "./drm";
-import {
-  getBoxContent,
-  getBoxOffsets,
-  getChildBox,
-} from "./get_box";
-import {
-  getEMSG,
-  getMDIA,
-  getTRAF,
-  getTRAFs,
-} from "./read";
+import { getBoxContent, getBoxOffsets, getChildBox } from "./get_box";
+import { getEMSG, getMDIA, getTRAF, getTRAFs } from "./read";
 
 /** Information related to a PSSH box. */
 export interface IISOBMFFPSSHInfo {
   /** Corresponding DRM's system ID, as an hexadecimal string. */
-  systemId : string;
+  systemId: string;
   /** Additional data contained in the PSSH Box. */
-  privateData : Uint8Array;
+  privateData: Uint8Array;
 }
 
 /**
@@ -70,16 +61,16 @@ export interface IEMSG {
 /** Segment information from a parsed sidx. */
 export interface ISidxSegment {
   /** This segment start time, timescaled. */
-  time : number;
+  time: number;
   /** This segment difference between its end and start time, timescaled. */
-  duration : number;
+  duration: number;
   /** Dividing `time` or `duration` with this value allows to obtain seconds. */
-  timescale : number;
+  timescale: number;
   /**
    * Start and ending bytes (included) for the segment in the whole ISOBMFF
    * buffer.
    */
-  range : [number, number];
+  range: [number, number];
 }
 
 /**
@@ -92,9 +83,9 @@ export interface ISidxSegment {
  * @returns {Object|null} {Array.<Object>} - Information about each subsegment.
  */
 function getSegmentsFromSidx(
-  buf : Uint8Array,
-  sidxOffsetInWholeSegment : number
-) : ISidxSegment[]|null {
+  buf: Uint8Array,
+  sidxOffsetInWholeSegment: number
+): ISidxSegment[] | null {
   const sidxOffsets = getBoxOffsets(buf, 0x73696478 /* "sidx" */);
   if (sidxOffsets === null) {
     return null;
@@ -107,25 +98,29 @@ function getSegmentsFromSidx(
   /* flags(24) */
   /* reference_ID(32); */
   /* timescale(32); */
-  const version = buf[cursor]; cursor += 4 + 4;
-  const timescale = be4toi(buf, cursor); cursor += 4;
+  const version = buf[cursor];
+  cursor += 4 + 4;
+  const timescale = be4toi(buf, cursor);
+  cursor += 4;
 
   /* earliest_presentation_time(32 / 64) */
   /* first_offset(32 / 64) */
   let time;
   if (version === 0) {
-    time    = be4toi(buf, cursor);           cursor += 4;
-    offset += be4toi(buf, cursor) + boxSize; cursor += 4;
-  }
-  else if (version === 1) {
-    time    = be8toi(buf, cursor);           cursor += 8;
-    offset += be8toi(buf, cursor) + boxSize; cursor += 8;
-  }
-  else {
+    time = be4toi(buf, cursor);
+    cursor += 4;
+    offset += be4toi(buf, cursor) + boxSize;
+    cursor += 4;
+  } else if (version === 1) {
+    time = be8toi(buf, cursor);
+    cursor += 8;
+    offset += be8toi(buf, cursor) + boxSize;
+    cursor += 8;
+  } else {
     return null;
   }
 
-  const segments : ISidxSegment[] = [];
+  const segments: ISidxSegment[] = [];
 
   /* reserved(16) */
   /* reference_count(16) */
@@ -140,7 +135,7 @@ function getSegmentsFromSidx(
     const refChunk = be4toi(buf, cursor);
     cursor += 4;
     const refType = (refChunk & 0x80000000) >>> 31;
-    const refSize = (refChunk & 0x7FFFFFFF);
+    const refSize = refChunk & 0x7fffffff;
 
     // when set to 1 indicates that the reference is to a sidx, else to media
     if (refType === 1) {
@@ -158,10 +153,12 @@ function getSegmentsFromSidx(
     // let sapType = (sapChunk & 0x70000000) >>> 28;
     // let sapDelta = sapChunk & 0x0FFFFFFF;
 
-    segments.push({ time,
-                    duration,
-                    timescale,
-                    range: [offset, offset + refSize - 1] });
+    segments.push({
+      time,
+      duration,
+      timescale,
+      range: [offset, offset + refSize - 1],
+    });
 
     time += duration;
     offset += refSize;
@@ -180,7 +177,7 @@ function getSegmentsFromSidx(
  * @param {Uint8Array} buffer
  * @returns {Number | undefined}
  */
-function getTrackFragmentDecodeTime(buffer : Uint8Array) : number | undefined {
+function getTrackFragmentDecodeTime(buffer: Uint8Array): number | undefined {
   const traf = getTRAF(buffer);
   if (traf === null) {
     return undefined;
@@ -190,9 +187,11 @@ function getTrackFragmentDecodeTime(buffer : Uint8Array) : number | undefined {
     return undefined;
   }
   const version = tfdt[0];
-  return version === 1 ? be8toi(tfdt, 4) :
-         version === 0 ? be4toi(tfdt, 4) :
-                         undefined;
+  return version === 1
+    ? be8toi(tfdt, 4)
+    : version === 0
+    ? be4toi(tfdt, 4)
+    : undefined;
 }
 
 /**
@@ -203,7 +202,9 @@ function getTrackFragmentDecodeTime(buffer : Uint8Array) : number | undefined {
  * @param {Uint8Array} traf
  * @returns {number|undefined}
  */
-function getDefaultDurationFromTFHDInTRAF(traf : Uint8Array) : number | undefined {
+function getDefaultDurationFromTFHDInTRAF(
+  traf: Uint8Array
+): number | undefined {
   const tfhd = getBoxContent(traf, 0x74666864 /* tfhd */);
   if (tfhd === null) {
     return undefined;
@@ -211,7 +212,8 @@ function getDefaultDurationFromTFHDInTRAF(traf : Uint8Array) : number | undefine
 
   let cursor = /* version */ 1;
 
-  const flags = be3toi(tfhd, cursor); cursor += 3;
+  const flags = be3toi(tfhd, cursor);
+  cursor += 3;
   const hasBaseDataOffset = (flags & 0x000001) > 0;
   const hasSampleDescriptionIndex = (flags & 0x000002) > 0;
   const hasDefaultSampleDuration = (flags & 0x000008) > 0;
@@ -241,28 +243,30 @@ function getDefaultDurationFromTFHDInTRAF(traf : Uint8Array) : number | undefine
  * @param {Uint8Array} buffer
  * @returns {number | undefined}
  */
-function getDurationFromTrun(buffer : Uint8Array) : number | undefined {
+function getDurationFromTrun(buffer: Uint8Array): number | undefined {
   const trafs = getTRAFs(buffer);
   if (trafs.length === 0) {
     return undefined;
   }
 
-  let completeDuration : number = 0;
+  let completeDuration: number = 0;
   for (const traf of trafs) {
-    const trun = getBoxContent(traf, 0x7472756E /* trun */);
+    const trun = getBoxContent(traf, 0x7472756e /* trun */);
     if (trun === null) {
       return undefined;
     }
     let cursor = 0;
-    const version = trun[cursor]; cursor += 1;
+    const version = trun[cursor];
+    cursor += 1;
     if (version > 1) {
       return undefined;
     }
 
-    const flags = be3toi(trun, cursor); cursor += 3;
+    const flags = be3toi(trun, cursor);
+    cursor += 3;
     const hasSampleDuration = (flags & 0x000100) > 0;
 
-    let defaultDuration : number | undefined = 0;
+    let defaultDuration: number | undefined = 0;
     if (!hasSampleDuration) {
       defaultDuration = getDefaultDurationFromTFHDInTRAF(traf);
       if (defaultDuration === undefined) {
@@ -276,7 +280,8 @@ function getDurationFromTrun(buffer : Uint8Array) : number | undefined {
     const hasSampleFlags = (flags & 0x000400) > 0;
     const hasSampleCompositionOffset = (flags & 0x000800) > 0;
 
-    const sampleCounts = be4toi(trun, cursor); cursor += 4;
+    const sampleCounts = be4toi(trun, cursor);
+    cursor += 4;
 
     if (hasDataOffset) {
       cursor += 4;
@@ -318,22 +323,25 @@ function getDurationFromTrun(buffer : Uint8Array) : number | undefined {
  * @param {Uint8Array} buffer
  * @returns {Number | undefined}
  */
-function getMDHDTimescale(buffer : Uint8Array) : number | undefined {
+function getMDHDTimescale(buffer: Uint8Array): number | undefined {
   const mdia = getMDIA(buffer);
   if (mdia === null) {
     return undefined;
   }
 
-  const mdhd = getBoxContent(mdia, 0x6D646864  /* "mdhd" */);
+  const mdhd = getBoxContent(mdia, 0x6d646864 /* "mdhd" */);
   if (mdhd === null) {
     return undefined;
   }
 
   let cursor = 0;
-  const version = mdhd[cursor]; cursor += 4;
-  return version === 1 ? be4toi(mdhd, cursor + 16) :
-         version === 0 ? be4toi(mdhd, cursor + 8) :
-                         undefined;
+  const version = mdhd[cursor];
+  cursor += 4;
+  return version === 1
+    ? be4toi(mdhd, cursor + 16)
+    : version === 0
+    ? be4toi(mdhd, cursor + 8)
+    : undefined;
 }
 
 /**
@@ -341,14 +349,19 @@ function getMDHDTimescale(buffer : Uint8Array) : number | undefined {
  * @param {Array.<Object>} psshInfo
  * @returns {Uint8Array}
  */
-function createPssh({ systemId, privateData } : IISOBMFFPSSHInfo) : Uint8Array {
+function createPssh({ systemId, privateData }: IISOBMFFPSSHInfo): Uint8Array {
   const _systemId = systemId.replace(/-/g, "");
 
   assert(_systemId.length === 32);
-  return createBox("pssh", concat(4, // 4 initial zeroed bytes
-                                  hexToBytes(_systemId),
-                                  itobe4(privateData.length),
-                                  privateData));
+  return createBox(
+    "pssh",
+    concat(
+      4, // 4 initial zeroed bytes
+      hexToBytes(_systemId),
+      itobe4(privateData.length),
+      privateData
+    )
+  );
 }
 
 /**
@@ -358,12 +371,12 @@ function createPssh({ systemId, privateData } : IISOBMFFPSSHInfo) : Uint8Array {
  * @param {Array.<Object>} psshList
  * @returns {Uint8Array} - The new ISOBMFF generated.
  */
-function patchPssh(buf : Uint8Array, psshList : IISOBMFFPSSHInfo[]) : Uint8Array {
+function patchPssh(buf: Uint8Array, psshList: IISOBMFFPSSHInfo[]): Uint8Array {
   if (psshList == null || psshList.length === 0) {
     return buf;
   }
 
-  const moovOffsets = getBoxOffsets(buf, 0x6D6F6F76 /* = "moov" */);
+  const moovOffsets = getBoxOffsets(buf, 0x6d6f6f76 /* = "moov" */);
   if (moovOffsets === null) {
     return buf;
   }
@@ -375,9 +388,11 @@ function patchPssh(buf : Uint8Array, psshList : IISOBMFFPSSHInfo[]) : Uint8Array
   }
   const newmoov = updateBoxLength(concat(...moovArr));
 
-  return concat(buf.subarray(0, moovOffsets[0]),
-                newmoov,
-                buf.subarray(moovOffsets[2]));
+  return concat(
+    buf.subarray(0, moovOffsets[0]),
+    newmoov,
+    buf.subarray(moovOffsets[2])
+  );
 }
 
 /**
@@ -392,7 +407,7 @@ function patchPssh(buf : Uint8Array, psshList : IISOBMFFPSSHInfo[]) : Uint8Array
  * @param {Uint8Array} buf - The ISOBMFF box
  * @returns {Uint8Array}
  */
-function updateBoxLength(buf : Uint8Array) : Uint8Array {
+function updateBoxLength(buf: Uint8Array): Uint8Array {
   const newLen = buf.length;
   if (newLen < 4) {
     throw new Error("Cannot update box length: box too short");
@@ -434,7 +449,7 @@ function updateBoxLength(buf : Uint8Array) : Uint8Array {
  * @param {Uint8Array} buffer
  * @returns {Array.<Object> | undefined}
  */
-function parseEmsgBoxes(buffer: Uint8Array) : IEMSG[] | undefined {
+function parseEmsgBoxes(buffer: Uint8Array): IEMSG[] | undefined {
   const emsgs: IEMSG[] = [];
   let offset = 0;
   while (offset < buffer.length) {
@@ -448,7 +463,9 @@ function parseEmsgBoxes(buffer: Uint8Array) : IEMSG[] | undefined {
 
     const version = emsg[0];
     if (version !== 0) {
-      log.warn("ISOBMFF: EMSG version " + version.toString() + " not supported.");
+      log.warn(
+        "ISOBMFF: EMSG version " + version.toString() + " not supported."
+      );
     } else {
       let position = 4; // skip version + flags
 
@@ -456,7 +473,10 @@ function parseEmsgBoxes(buffer: Uint8Array) : IEMSG[] | undefined {
         readNullTerminatedString(emsg, position);
       position = schemeIdEnd; // skip schemeIdUri
 
-      const { end: valueEnd, string: value } = readNullTerminatedString(emsg, position);
+      const { end: valueEnd, string: value } = readNullTerminatedString(
+        emsg,
+        position
+      );
       position = valueEnd; // skip value
 
       const timescale = be4toi(emsg, position);
@@ -473,13 +493,15 @@ function parseEmsgBoxes(buffer: Uint8Array) : IEMSG[] | undefined {
 
       const messageData = emsg.subarray(position, length);
 
-      const emsgData = { schemeIdUri,
-                         value,
-                         timescale,
-                         presentationTimeDelta,
-                         eventDuration,
-                         id,
-                         messageData };
+      const emsgData = {
+        schemeIdUri,
+        value,
+        timescale,
+        presentationTimeDelta,
+        eventDuration,
+        id,
+        messageData,
+      };
       emsgs.push(emsgData);
     }
   }
@@ -493,35 +515,40 @@ function parseEmsgBoxes(buffer: Uint8Array) : IEMSG[] | undefined {
  * @param {Uint8Array} segment
  * @returns {Uint8Array|null}
  */
-function getKeyIdFromInitSegment(
-  segment: Uint8Array
-): Uint8Array | null {
-  const stsd = getChildBox(segment, [ 0x6D6F6F76 /* moov */,
-                                      0x7472616B /* trak */,
-                                      0x6D646961 /* mdia */,
-                                      0x6D696E66 /* minf */,
-                                      0x7374626C /* stbl */,
-                                      0x73747364 /* stsd */ ]);
+function getKeyIdFromInitSegment(segment: Uint8Array): Uint8Array | null {
+  const stsd = getChildBox(
+    segment,
+    [
+      0x6d6f6f76 /* moov */, 0x7472616b /* trak */, 0x6d646961 /* mdia */,
+      0x6d696e66 /* minf */, 0x7374626c /* stbl */, 0x73747364 /* stsd */,
+    ]
+  );
   if (stsd === null) {
     return null;
   }
   const stsdSubBoxes = stsd.subarray(8);
-  let encBox = getBoxContent(stsdSubBoxes, 0x656E6376 /* encv */);
+  let encBox = getBoxContent(stsdSubBoxes, 0x656e6376 /* encv */);
   let encContentOffset = 0;
   if (encBox === null) {
-    encContentOffset = 8 + // sample entry header
+    encContentOffset =
+      8 + // sample entry header
       8 + // reserved
       2 + // channelcount
       2 + // samplesize
       2 + // predefined
       2 + // reserved
       4; // samplerate
-    encBox = getBoxContent(stsdSubBoxes, 0x656E6361 /* enca */);
+    encBox = getBoxContent(stsdSubBoxes, 0x656e6361 /* enca */);
   } else {
-    encContentOffset = 8 + // sample entry header
-      2 + 2 + 12 + // predefined + reserved + predefined
-      2 + 2 + // width + height
-      4 + 4 + // horizresolution + vertresolution
+    encContentOffset =
+      8 + // sample entry header
+      2 +
+      2 +
+      12 + // predefined + reserved + predefined
+      2 +
+      2 + // width + height
+      4 +
+      4 + // horizresolution + vertresolution
       4 + // reserved
       2 + // frame_count
       32 +
@@ -532,10 +559,10 @@ function getKeyIdFromInitSegment(
     // There's no encryption data here
     return null;
   }
-  const tenc = getChildBox(encBox.subarray(encContentOffset),
-                           [ 0x73696e66 /* sinf */,
-                             0x73636869 /* schi */,
-                             0x74656e63 /* tenc */ ]);
+  const tenc = getChildBox(
+    encBox.subarray(encContentOffset),
+    [0x73696e66 /* sinf */, 0x73636869 /* schi */, 0x74656e63 /* tenc */]
+  );
   if (tenc === null || tenc.byteLength < 24) {
     return null;
   }

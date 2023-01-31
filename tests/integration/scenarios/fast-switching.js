@@ -4,10 +4,7 @@ import RxPlayer from "../../../src";
 import XHRMock from "../../utils/request_mock";
 import sleep from "../../utils/sleep.js";
 import { waitForLoadedStateAfterLoadVideo } from "../../utils/waitForPlayerState";
-import {
-  lockHighestBitrates,
-  lockLowestBitrates,
-} from "../../utils/bitrates";
+import { lockHighestBitrates, lockLowestBitrates } from "../../utils/bitrates";
 
 let player;
 let xhrMock;
@@ -29,20 +26,21 @@ describe("Fast-switching", function () {
     this.timeout(3000);
     lockLowestBitrates(player);
     player.setWantedBufferAhead(10);
-    player.loadVideo({ url,
-                       transport,
-                       autoPlay: false });
+    player.loadVideo({ url, transport, autoPlay: false });
     await waitForLoadedStateAfterLoadVideo(player);
     await sleep(1000);
 
     player.setWantedBufferAhead(30);
     lockHighestBitrates(player, "lazy");
     await sleep(1000);
-    const videoSegmentBuffered = player.__priv_getSegmentBufferContent("video")
+    const videoSegmentBuffered = player
+      .__priv_getSegmentBufferContent("video")
       .map(({ infos }) => {
-        return { bitrate: infos.representation.bitrate,
-                 time: infos.segment.time,
-                 end: infos.segment.end };
+        return {
+          bitrate: infos.representation.bitrate,
+          time: infos.segment.time,
+          end: infos.segment.end,
+        };
       });
     expect(videoSegmentBuffered.length).to.be.at.least(3);
     expect(videoSegmentBuffered[1].bitrate).to.equal(1996000);
@@ -53,20 +51,25 @@ describe("Fast-switching", function () {
     this.timeout(3000);
     lockLowestBitrates(player);
     player.setWantedBufferAhead(10);
-    player.loadVideo({ url,
-                       transport,
-                       autoPlay: false,
-                       enableFastSwitching: true });
+    player.loadVideo({
+      url,
+      transport,
+      autoPlay: false,
+      enableFastSwitching: true,
+    });
     await waitForLoadedStateAfterLoadVideo(player);
     await sleep(1000);
     player.setWantedBufferAhead(30);
     lockHighestBitrates(player, "lazy");
     await sleep(1000);
-    const videoSegmentBuffered = player.__priv_getSegmentBufferContent("video")
+    const videoSegmentBuffered = player
+      .__priv_getSegmentBufferContent("video")
       .map(({ infos }) => {
-        return { bitrate: infos.representation.bitrate,
-                 time: infos.segment.time,
-                 end: infos.segment.end };
+        return {
+          bitrate: infos.representation.bitrate,
+          time: infos.segment.time,
+          end: infos.segment.end,
+        };
       });
     expect(videoSegmentBuffered.length).to.be.at.least(3);
     expect(videoSegmentBuffered[1].bitrate).to.equal(1996000);
@@ -77,20 +80,25 @@ describe("Fast-switching", function () {
     this.timeout(3000);
     lockLowestBitrates(player);
     player.setWantedBufferAhead(10);
-    player.loadVideo({ url,
-                       transport,
-                       autoPlay: false,
-                       enableFastSwitching: false });
+    player.loadVideo({
+      url,
+      transport,
+      autoPlay: false,
+      enableFastSwitching: false,
+    });
     await waitForLoadedStateAfterLoadVideo(player);
     await sleep(1000);
     player.setWantedBufferAhead(30);
     lockHighestBitrates(player, "lazy");
     await sleep(1000);
-    const videoSegmentBuffered = player.__priv_getSegmentBufferContent("video")
+    const videoSegmentBuffered = player
+      .__priv_getSegmentBufferContent("video")
       .map(({ infos }) => {
-        return { bitrate: infos.representation.bitrate,
-                 time: infos.segment.time,
-                 end: infos.segment.end };
+        return {
+          bitrate: infos.representation.bitrate,
+          time: infos.segment.time,
+          end: infos.segment.end,
+        };
       });
     expect(videoSegmentBuffered.length).to.be.at.least(3);
     expect(videoSegmentBuffered[0].bitrate).to.equal(400000);

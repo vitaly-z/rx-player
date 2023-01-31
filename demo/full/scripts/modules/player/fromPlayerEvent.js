@@ -8,7 +8,7 @@ import { Observable } from "rxjs";
  * @returns {Observable}
  */
 export default function fromPlayerEvent(player, event) {
-  return new Observable(obs => {
+  return new Observable((obs) => {
     const func = (payload) => obs.next(payload);
     player.addEventListener(event, func);
 

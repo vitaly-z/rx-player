@@ -17,7 +17,7 @@
 import { IFeaturesObject } from "../../features/types";
 import local from "../../transports/local";
 
-function addLocalManifestFeature(features: IFeaturesObject) : void {
+function addLocalManifestFeature(features: IFeaturesObject): void {
   features.transports.local = local;
 }
 

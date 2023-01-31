@@ -76,9 +76,7 @@ function getSearchDataForContent(contentHtml) {
 
   function anounceLastElement() {
     if (currentLevel === "h3") {
-      const body = currentBody.length > 0 ?
-        currentBody.join(" ") :
-        "";
+      const body = currentBody.length > 0 ? currentBody.join(" ") : "";
       indexForFile.push({
         h1: currentH1,
         h2: currentH2,
@@ -89,9 +87,7 @@ function getSearchDataForContent(contentHtml) {
         anchorH3: currentH3Anchor,
       });
     } else if (currentLevel === "h2") {
-      const body = currentBody.length > 0 ?
-        currentBody.join(" ") :
-        "";
+      const body = currentBody.length > 0 ? currentBody.join(" ") : "";
       indexForFile.push({
         h1: currentH1,
         h2: currentH2,
@@ -100,9 +96,7 @@ function getSearchDataForContent(contentHtml) {
         anchorH2: currentH2Anchor,
       });
     } else if (currentLevel === "h1") {
-      const body = currentBody.length > 0 ?
-        currentBody.join(" ") :
-        "";
+      const body = currentBody.length > 0 ? currentBody.join(" ") : "";
       indexForFile.push({
         h1: currentH1,
         body,

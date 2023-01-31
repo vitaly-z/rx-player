@@ -24,11 +24,11 @@ import MediaKeysInfosStore from "./utils/media_keys_infos_store";
  * @returns {Promise}
  */
 export default async function disposeDecryptionResources(
-  mediaElement : HTMLMediaElement
-) : Promise<void> {
+  mediaElement: HTMLMediaElement
+): Promise<void> {
   const currentState = MediaKeysInfosStore.getState(mediaElement);
   if (currentState === null) {
-    return ;
+    return;
   }
 
   log.info("DRM: Disposing of the current MediaKeys");

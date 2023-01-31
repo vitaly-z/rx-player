@@ -24,8 +24,7 @@ import RequestError from "../request_error";
 
 describe("Errors - isKnownError", () => {
   it("should return false for a regular error", () => {
-    expect(isKnownError(new Error("nope")))
-      .toBe(false);
+    expect(isKnownError(new Error("nope"))).toBe(false);
   });
 
   it("should return false for a RequestError", () => {
@@ -55,7 +54,10 @@ describe("Errors - isKnownError", () => {
   });
 
   it("should return true for an EncryptedMediaError", () => {
-    const encryptedMediaError = new EncryptedMediaError("KEY_UPDATE_ERROR", "toto");
+    const encryptedMediaError = new EncryptedMediaError(
+      "KEY_UPDATE_ERROR",
+      "toto"
+    );
     expect(isKnownError(encryptedMediaError)).toBe(true);
   });
 });

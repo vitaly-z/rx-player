@@ -134,7 +134,7 @@ const createModule = (module, payload) => {
     if (args.length === 1) {
       return moduleState[args[0]];
     }
-    return args.map(arg => moduleState[arg]);
+    return args.map((arg) => moduleState[arg]);
   };
 
   const $getFromModule = (...args) => {
@@ -143,19 +143,17 @@ const createModule = (module, payload) => {
     }
 
     if (args.length === 1) {
-      return $updates
-        .pipe(
-          map(state => state[args]),
-          distinctUntilChanged()
-        );
+      return $updates.pipe(
+        map((state) => state[args]),
+        distinctUntilChanged()
+      );
     }
 
-    const observables = args.map(arg =>
-      $updates
-        .pipe(
-          map(state => state[arg]),
-          distinctUntilChanged()
-        )
+    const observables = args.map((arg) =>
+      $updates.pipe(
+        map((state) => state[arg]),
+        distinctUntilChanged()
+      )
     );
 
     return observableCombineLatest(observables);
@@ -193,6 +191,4 @@ const createModule = (module, payload) => {
   };
 };
 
-export {
-  createModule,
-};
+export { createModule };

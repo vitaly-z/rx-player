@@ -19,11 +19,7 @@ import fetchRequest, {
   IFetchedDataObject,
   IFetchedStreamComplete,
 } from "./fetch";
-import xhr, {
-  IRequestOptions,
-  IProgressInfo,
-  IRequestResponse,
-} from "./xhr";
+import xhr, { IRequestOptions, IProgressInfo, IRequestResponse } from "./xhr";
 
 export default xhr;
 export {

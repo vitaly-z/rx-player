@@ -30,9 +30,10 @@ import hashBuffer from "../../../utils/hash_buffer";
  * certificate is attached to a MediaKeys instance (most likely because related
  * EME APIs failed or had an unexpected behavior).
  */
-const serverCertificateHashesMap =
-  new WeakMap<MediaKeys | ICustomMediaKeys,
-              { hash: number; serverCertificate: Uint8Array } | null>();
+const serverCertificateHashesMap = new WeakMap<
+  MediaKeys | ICustomMediaKeys,
+  { hash: number; serverCertificate: Uint8Array } | null
+>();
 
 /** ServerCertificateStore */
 export default {
@@ -48,7 +49,7 @@ export default {
    * server certificate attached to this MediaKeys is for now invalid.
    * @param {MediaKeys | Object} mediaKeys
    */
-  prepare(mediaKeys : MediaKeys | ICustomMediaKeys) : void {
+  prepare(mediaKeys: MediaKeys | ICustomMediaKeys): void {
     serverCertificateHashesMap.set(mediaKeys, null);
   },
 
@@ -66,16 +67,20 @@ export default {
   set(
     mediaKeys: MediaKeys | ICustomMediaKeys,
     serverCertificate: ArrayBufferView | BufferSource
-  ) : void {
+  ): void {
     const formattedServerCertificate: Uint8Array =
-    serverCertificate instanceof Uint8Array ?
-      serverCertificate :
-      new Uint8Array(
-        serverCertificate instanceof ArrayBuffer ? serverCertificate :
-                                                   serverCertificate.buffer);
+      serverCertificate instanceof Uint8Array
+        ? serverCertificate
+        : new Uint8Array(
+            serverCertificate instanceof ArrayBuffer
+              ? serverCertificate
+              : serverCertificate.buffer
+          );
     const hash = hashBuffer(formattedServerCertificate);
-    serverCertificateHashesMap.set(
-      mediaKeys, { hash, serverCertificate: formattedServerCertificate });
+    serverCertificateHashesMap.set(mediaKeys, {
+      hash,
+      serverCertificate: formattedServerCertificate,
+    });
   },
 
   /**
@@ -87,11 +92,13 @@ export default {
    * @param {MediaKeys} mediaKeys
    * @returns {Boolean|undefined}
    */
-  hasOne(mediaKeys : MediaKeys | ICustomMediaKeys) : boolean | undefined {
+  hasOne(mediaKeys: MediaKeys | ICustomMediaKeys): boolean | undefined {
     const currentServerCertificate = serverCertificateHashesMap.get(mediaKeys);
-    return currentServerCertificate === undefined ? false :
-           currentServerCertificate === null ? undefined :
-                                               true;
+    return currentServerCertificate === undefined
+      ? false
+      : currentServerCertificate === null
+      ? undefined
+      : true;
   },
 
   /**
@@ -113,14 +120,18 @@ export default {
     const { hash: oldHash, serverCertificate: oldServerCertificate } =
       serverCertificateHash;
     const newServerCertificate: Uint8Array =
-      serverCertificate instanceof Uint8Array ?
-        serverCertificate :
-        new Uint8Array(
-          serverCertificate instanceof ArrayBuffer ? serverCertificate :
-                                                     serverCertificate.buffer);
+      serverCertificate instanceof Uint8Array
+        ? serverCertificate
+        : new Uint8Array(
+            serverCertificate instanceof ArrayBuffer
+              ? serverCertificate
+              : serverCertificate.buffer
+          );
     const newHash = hashBuffer(newServerCertificate);
-    if (newHash !== oldHash ||
-        oldServerCertificate.length !== newServerCertificate.length) {
+    if (
+      newHash !== oldHash ||
+      oldServerCertificate.length !== newServerCertificate.length
+    ) {
       return false;
     }
     for (let i = 0; i < oldServerCertificate.length; i++) {

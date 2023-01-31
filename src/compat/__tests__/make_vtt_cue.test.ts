@@ -23,10 +23,10 @@
 
 describe("Compat - makeVTTCue", () => {
   class MockVTTCue {
-    public startTime : number;
-    public endTime : number;
-    public text : string;
-    constructor(start : number, end : number, text : string) {
+    public startTime: number;
+    public endTime: number;
+    public text: string;
+    constructor(start: number, end: number, text: string) {
       this.startTime = start;
       this.endTime = end;
       this.text = text;
@@ -34,8 +34,8 @@ describe("Compat - makeVTTCue", () => {
   }
 
   const win = window as {
-    VTTCue? : unknown;
-    TextTrackCue? : unknown;
+    VTTCue?: unknown;
+    TextTrackCue?: unknown;
   };
 
   const ogVTTuCue = win.VTTCue;
@@ -59,11 +59,13 @@ describe("Compat - makeVTTCue", () => {
     let error;
     try {
       result = makeCue(5, 10, "toto");
-    } catch (e : unknown) {
+    } catch (e: unknown) {
       error = e;
     }
     expect(error).toBeInstanceOf(Error);
-    expect((error as Error).message).toEqual("VTT cues not supported in your target");
+    expect((error as Error).message).toEqual(
+      "VTT cues not supported in your target"
+    );
     expect(result).toBe(undefined);
     expect(mockLog.warn).not.toHaveBeenCalled();
   });
@@ -79,7 +81,9 @@ describe("Compat - makeVTTCue", () => {
     const result = makeCue(12, 10, "toto");
     expect(result).toBeNull();
     expect(mockLog.warn).toHaveBeenCalledTimes(1);
-    expect(mockLog.warn).toHaveBeenCalledWith("Compat: Invalid cue times: 12 - 10");
+    expect(mockLog.warn).toHaveBeenCalledWith(
+      "Compat: Invalid cue times: 12 - 10"
+    );
   });
 
   it("should create a new VTT Cue in other cases", () => {

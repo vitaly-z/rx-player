@@ -23,31 +23,34 @@ import {
   createSharedReference,
   IReadOnlySharedReference,
 } from "../../../utils/reference";
-import { CancellationError, CancellationSignal } from "../../../utils/task_canceller";
+import {
+  CancellationError,
+  CancellationSignal,
+} from "../../../utils/task_canceller";
 import { PlaybackObserver } from "../../api";
 
 /** Event emitted when trying to perform the initial `play`. */
 export type IInitialPlayEvent =
   /** Autoplay is not enabled, but all required steps to do so are there. */
-  { type: "skipped" } |
+  | { type: "skipped" }
   /**
    * Tried to play, but autoplay is blocked by the browser.
    * A corresponding warning should have already been sent.
    */
-  { type: "autoplay-blocked" } |
+  | { type: "autoplay-blocked" }
   /** Autoplay was done with success. */
-  { type: "autoplay" };
+  | { type: "autoplay" };
 
 /** Object returned by `initialSeekAndPlay`. */
 export interface IInitialSeekAndPlayObject {
   /** Emit the result of the auto-play operation, once performed. */
-  autoPlayResult : Promise<IInitialPlayEvent>;
+  autoPlayResult: Promise<IInitialPlayEvent>;
 
   /**
    * Shared reference whose value becomes `true` once the initial seek has
    * been considered / has been done by `performInitialSeekAndPlay`.
    */
-  initialSeekPerformed : IReadOnlySharedReference<boolean>;
+  initialSeekPerformed: IReadOnlySharedReference<boolean>;
 
   /**
    * Shared reference whose value becomes `true` once the initial play has
@@ -68,15 +71,15 @@ export interface IInitialSeekAndPlayObject {
  * @returns {Object}
  */
 export default function performInitialSeekAndPlay(
-  mediaElement : HTMLMediaElement,
-  playbackObserver : PlaybackObserver,
-  startTime : number|(() => number),
-  mustAutoPlay : boolean,
-  onWarning : (err : IPlayerError) => void,
-  cancelSignal : CancellationSignal
-) : IInitialSeekAndPlayObject {
-  let resolveAutoPlay : (x : IInitialPlayEvent) => void;
-  let rejectAutoPlay : (x : unknown) => void;
+  mediaElement: HTMLMediaElement,
+  playbackObserver: PlaybackObserver,
+  startTime: number | (() => number),
+  mustAutoPlay: boolean,
+  onWarning: (err: IPlayerError) => void,
+  cancelSignal: CancellationSignal
+): IInitialSeekAndPlayObject {
+  let resolveAutoPlay: (x: IInitialPlayEvent) => void;
+  let rejectAutoPlay: (x: unknown) => void;
   const autoPlayResult = new Promise<IInitialPlayEvent>((res, rej) => {
     resolveAutoPlay = res;
     rejectAutoPlay = rej;
@@ -90,7 +93,7 @@ export default function performInitialSeekAndPlay(
     onLoadedMetadata();
   }
 
-  cancelSignal.register((err : CancellationError) => {
+  cancelSignal.register((err: CancellationError) => {
     mediaElement.removeEventListener("loadedmetadata", onLoadedMetadata);
     rejectAutoPlay(err);
   });
@@ -99,47 +102,55 @@ export default function performInitialSeekAndPlay(
 
   function onLoadedMetadata() {
     mediaElement.removeEventListener("loadedmetadata", onLoadedMetadata);
-    const initialTime = typeof startTime === "function" ? startTime() :
-                                                          startTime;
+    const initialTime =
+      typeof startTime === "function" ? startTime() : startTime;
     log.info("Init: Set initial time", initialTime);
     playbackObserver.setCurrentTime(initialTime);
     initialSeekPerformed.setValue(true);
     initialSeekPerformed.finish();
 
     if (shouldValidateMetadata() && mediaElement.duration === 0) {
-      const error = new MediaError("MEDIA_ERR_NOT_LOADED_METADATA",
-                                   "Cannot load automatically: your browser " +
-                                   "falsely announced having loaded the content.");
+      const error = new MediaError(
+        "MEDIA_ERR_NOT_LOADED_METADATA",
+        "Cannot load automatically: your browser " +
+          "falsely announced having loaded the content."
+      );
       onWarning(error);
     }
     if (cancelSignal.isCancelled) {
-      return ;
+      return;
     }
 
-    playbackObserver.listen((observation, stopListening) => {
-      if (!observation.seeking &&
+    playbackObserver.listen(
+      (observation, stopListening) => {
+        if (
+          !observation.seeking &&
           observation.rebuffering === null &&
-          observation.readyState >= 1)
-      {
-        stopListening();
-        onPlayable();
-      }
-    }, { includeLastObservation: true, clearSignal: cancelSignal });
+          observation.readyState >= 1
+        ) {
+          stopListening();
+          onPlayable();
+        }
+      },
+      { includeLastObservation: true, clearSignal: cancelSignal }
+    );
   }
 
   function onPlayable() {
     log.info("Init: Can begin to play content");
     if (!mustAutoPlay) {
       if (mediaElement.autoplay) {
-        log.warn("Init: autoplay is enabled on HTML media element. " +
-                 "Media will play as soon as possible.");
+        log.warn(
+          "Init: autoplay is enabled on HTML media element. " +
+            "Media will play as soon as possible."
+        );
       }
       initialPlayPerformed.setValue(true);
       initialPlayPerformed.finish();
       return resolveAutoPlay({ type: "skipped" as const });
     }
 
-    let playResult : Promise<unknown>;
+    let playResult: Promise<unknown>;
     try {
       playResult = mediaElement.play() ?? Promise.resolve();
     } catch (playError) {
@@ -154,18 +165,25 @@ export default function performInitialSeekAndPlay(
         initialPlayPerformed.finish();
         return resolveAutoPlay({ type: "autoplay" as const });
       })
-      .catch((playError : unknown) => {
+      .catch((playError: unknown) => {
         if (cancelSignal.isCancelled) {
           return;
         }
-        if (playError instanceof Error && playError.name === "NotAllowedError") {
+        if (
+          playError instanceof Error &&
+          playError.name === "NotAllowedError"
+        ) {
           // auto-play was probably prevented.
-          log.warn("Init: Media element can't play." +
-                   " It may be due to browser auto-play policies.");
+          log.warn(
+            "Init: Media element can't play." +
+              " It may be due to browser auto-play policies."
+          );
 
-          const error = new MediaError("MEDIA_ERR_BLOCKED_AUTOPLAY",
-                                       "Cannot trigger auto-play automatically: " +
-                                       "your browser does not allow it.");
+          const error = new MediaError(
+            "MEDIA_ERR_BLOCKED_AUTOPLAY",
+            "Cannot trigger auto-play automatically: " +
+              "your browser does not allow it."
+          );
           onWarning(error);
           if (cancelSignal.isCancelled) {
             return;

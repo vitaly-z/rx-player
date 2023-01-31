@@ -24,7 +24,6 @@
 
 import { ProberStatus } from "../../types";
 
-
 describe("MediaCapabilitiesProber probers - DRMInfos", () => {
   beforeEach(() => {
     jest.resetModules();
@@ -36,7 +35,7 @@ describe("MediaCapabilitiesProber probers - DRMInfos", () => {
     /* eslint-disable @typescript-eslint/no-floating-promises */
     expect(probeDRMInfos(configuration)).rejects.toEqual(
       "MediaCapabilitiesProber >>> API_CALL: " +
-      "Missing a type argument to request a media key system access."
+        "Missing a type argument to request a media key system access."
     );
     /* eslint-enable @typescript-eslint/no-floating-promises */
   });
@@ -49,7 +48,7 @@ describe("MediaCapabilitiesProber probers - DRMInfos", () => {
     /* eslint-disable @typescript-eslint/no-floating-promises */
     expect(probeDRMInfos(configuration)).rejects.toEqual(
       "MediaCapabilitiesProber >>> API_CALL: " +
-      "Missing a type argument to request a media key system access."
+        "Missing a type argument to request a media key system access."
     );
     /* eslint-enable @typescript-eslint/no-floating-promises */
   });
@@ -67,7 +66,7 @@ describe("MediaCapabilitiesProber probers - DRMInfos", () => {
     /* eslint-disable @typescript-eslint/no-floating-promises */
     expect(probeDRMInfos(configuration)).resolves.toEqual(
       [ProberStatus.NotSupported, { configuration: {}, type: "clearkick" }]
-    /* eslint-enable @typescript-eslint/no-floating-promises */
+      /* eslint-enable @typescript-eslint/no-floating-promises */
     );
   });
 
@@ -89,12 +88,10 @@ describe("MediaCapabilitiesProber probers - DRMInfos", () => {
     expect.assertions(2);
     probeDRMInfos(configuration)
       .then((res: unknown) => {
-        expect(res).toEqual(
-          [
-            ProberStatus.Supported,
-            { compatibleConfiguration: {}, configuration: {}, type: "clearkick" },
-          ]
-        );
+        expect(res).toEqual([
+          ProberStatus.Supported,
+          { compatibleConfiguration: {}, configuration: {}, type: "clearkick" },
+        ]);
         expect(mockRequestMediaKeySystemAccess).toHaveBeenCalledTimes(1);
         done();
       })
@@ -109,11 +106,9 @@ describe("MediaCapabilitiesProber probers - DRMInfos", () => {
         type: "clearkick",
       },
     };
-    const mockRequestMediaKeySystemAccess = jest.fn(
-      () => {
-        return Promise.reject(new Error());
-      }
-    );
+    const mockRequestMediaKeySystemAccess = jest.fn(() => {
+      return Promise.reject(new Error());
+    });
     jest.mock("../../../../../compat", () => ({
       requestMediaKeySystemAccess: mockRequestMediaKeySystemAccess,
     }));
@@ -122,12 +117,10 @@ describe("MediaCapabilitiesProber probers - DRMInfos", () => {
     expect.assertions(2);
     probeDRMInfos(configuration)
       .then((res: unknown) => {
-        expect(res).toEqual(
-          [
-            ProberStatus.NotSupported,
-            { configuration: {}, type: "clearkick" },
-          ]
-        );
+        expect(res).toEqual([
+          ProberStatus.NotSupported,
+          { configuration: {}, type: "clearkick" },
+        ]);
         expect(mockRequestMediaKeySystemAccess).toHaveBeenCalledTimes(1);
         done();
       })
@@ -136,4 +129,3 @@ describe("MediaCapabilitiesProber probers - DRMInfos", () => {
       });
   });
 });
-

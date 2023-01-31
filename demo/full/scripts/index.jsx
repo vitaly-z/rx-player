@@ -8,7 +8,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import Main from "./controllers/Main.jsx";
 
-window.onload = function() {
+window.onload = function () {
   const root = ReactDOM.createRoot(document.getElementById("player-container"));
   root.render(<Main />);
 };

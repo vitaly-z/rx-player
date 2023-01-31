@@ -37,11 +37,11 @@ describe("parsers - webvtt - createStyledElement", () => {
     const element = createStyledElement(node, styleElements);
     expect(element.outerHTML).toEqual(
       "<span>" +
-        "<u style=\"color: yellow\"></u>" +
-        "<i style=\"  color: green\"></i>" +
-        "<b style=\"color: red\"></b>" +
-        "<span style=\"color: blue\"></span>" +
-      "</span>"
+        '<u style="color: yellow"></u>' +
+        '<i style="  color: green"></i>' +
+        '<b style="color: red"></b>' +
+        '<span style="color: blue"></span>' +
+        "</span>"
     );
   });
 
@@ -59,12 +59,7 @@ describe("parsers - webvtt - createStyledElement", () => {
 
     const element = createStyledElement(node, styleElements);
     expect(element.outerHTML).toEqual(
-      "<span>" +
-        "<u></u>" +
-        "<i></i>" +
-        "<b></b>" +
-        "<span></span>" +
-      "</span>"
+      "<span>" + "<u></u>" + "<i></i>" + "<b></b>" + "<span></span>" + "</span>"
     );
   });
 
@@ -81,9 +76,7 @@ describe("parsers - webvtt - createStyledElement", () => {
 
     const element = createStyledElement(node, styleElements);
     expect(element.outerHTML).toEqual(
-      "<span>" +
-        "<span>Hello</span>" +
-      "</span>"
+      "<span>" + "<span>Hello</span>" + "</span>"
     );
   });
 
@@ -94,11 +87,7 @@ describe("parsers - webvtt - createStyledElement", () => {
     node.appendChild(textNode);
 
     const element = createStyledElement(node, {});
-    expect(element.outerHTML).toEqual(
-      "<span>" +
-        "<span></span>" +
-      "</span>"
-    );
+    expect(element.outerHTML).toEqual("<span>" + "<span></span>" + "</span>");
   });
 
   it("should add <br/> tags for text elements", () => {
@@ -108,11 +97,7 @@ describe("parsers - webvtt - createStyledElement", () => {
     node.appendChild(textNode);
     const element = createStyledElement(node, {});
     expect(element.outerHTML).toEqual(
-      "<span>" +
-        "<span>Hello" +
-        "<br>" +
-        "World!</span>" +
-      "</span>"
+      "<span>" + "<span>Hello" + "<br>" + "World!</span>" + "</span>"
     );
   });
 
@@ -131,10 +116,6 @@ describe("parsers - webvtt - createStyledElement", () => {
     const styleElements = {};
 
     const element = createStyledElement(node, styleElements);
-    expect(element.outerHTML).toEqual(
-      "<b>" +
-        "<b></b>" +
-      "</b>"
-    );
+    expect(element.outerHTML).toEqual("<b>" + "<b></b>" + "</b>");
   });
 });

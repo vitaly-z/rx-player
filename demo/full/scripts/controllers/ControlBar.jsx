@@ -1,7 +1,4 @@
-import React, {
-  useCallback,
-  useMemo,
-} from "react";
+import React, { useCallback, useMemo } from "react";
 import withModulesState from "../lib/withModulesState.jsx";
 import Button from "../components/Button.jsx";
 import PositionInfos from "../components/PositionInfos.jsx";
@@ -32,13 +29,16 @@ function ControlBar({
   toggleSettings,
   videoElement,
 }) {
-  const changeStickToLiveEdge = useCallback((shouldStick) => {
-    if (shouldStick) {
-      player.dispatch("ENABLE_LIVE_CATCH_UP");
-    } else {
-      player.dispatch("DISABLE_LIVE_CATCH_UP");
-    }
-  }, [player]);
+  const changeStickToLiveEdge = useCallback(
+    (shouldStick) => {
+      if (shouldStick) {
+        player.dispatch("ENABLE_LIVE_CATCH_UP");
+      } else {
+        player.dispatch("DISABLE_LIVE_CATCH_UP");
+      }
+    },
+    [player]
+  );
 
   let isCloseToLive = undefined;
   if (isLive && lowLatencyMode != null && liveGap != null) {
@@ -51,10 +51,7 @@ function ControlBar({
     } else if (isLive) {
       return <LivePosition />;
     } else {
-      return <PositionInfos
-        position={currentTime}
-        duration={duration}
-      />;
+      return <PositionInfos position={currentTime} duration={duration} />;
     }
   }, [isContentLoaded, isLive, currentTime, duration]);
 
@@ -68,10 +65,7 @@ function ControlBar({
         onSeek={() => changeStickToLiveEdge(false)}
       />
       <div className="controls-bar">
-        <PlayPauseButton
-          className={"control-button"}
-          player={player}
-        />
+        <PlayPauseButton className={"control-button"} player={player} />
         <Button
           className={"control-button"}
           ariaLabel="Stop playback"
@@ -79,48 +73,45 @@ function ControlBar({
           value={String.fromCharCode(0xf04d)}
           disabled={isStopped}
         />
-        {
-          (isContentLoaded && isLive && lowLatencyMode) ?
-            <StickToLiveEdgeButton
-              isStickingToTheLiveEdge={isCatchUpEnabled}
-              changeStickToLiveEdge={() =>
-                changeStickToLiveEdge(!isCatchUpEnabled)
-              }
-            /> : null
-        }
+        {isContentLoaded && isLive && lowLatencyMode ? (
+          <StickToLiveEdgeButton
+            isStickingToTheLiveEdge={isCatchUpEnabled}
+            changeStickToLiveEdge={() =>
+              changeStickToLiveEdge(!isCatchUpEnabled)
+            }
+          />
+        ) : null}
         {positionElement}
-        {isLive && isContentLoaded ?
+        {isLive && isContentLoaded ? (
           <Button
-            ariaLabel={ isAtLiveEdge ? undefined : "Go back to live"}
+            ariaLabel={isAtLiveEdge ? undefined : "Go back to live"}
             className={"dot" + (isAtLiveEdge ? " live" : "")}
             onClick={() => {
               if (!isAtLiveEdge) {
-                player.dispatch("SEEK", maximumPosition - (lowLatencyMode ? 4 : 10));
+                player.dispatch(
+                  "SEEK",
+                  maximumPosition - (lowLatencyMode ? 4 : 10)
+                );
               }
             }}
-          /> : null}
+          />
+        ) : null}
         <div className="controls-right-side">
-          {!isPaused && isCatchingUp && playbackRate > 1 ?
+          {!isPaused && isCatchingUp && playbackRate > 1 ? (
             <div className="catch-up">
               {"Catch-up playback rate: " + playbackRate}
-            </div> : null
-          }
+            </div>
+          ) : null}
           <Button
             ariaLabel="Display/Hide controls"
             disabled={!isContentLoaded}
-            className='control-button'
+            className="control-button"
             onClick={toggleSettings}
             value={String.fromCharCode(0xf013)}
           />
           <div className="volume">
-            <VolumeButton
-              className="control-button"
-              player={player}
-            />
-            <VolumeBar
-              className="control-button"
-              player={player}
-            />
+            <VolumeButton className="control-button" player={player} />
+            <VolumeBar className="control-button" player={player} />
           </div>
           <FullscreenButton
             className={"control-button"}
@@ -133,19 +124,21 @@ function ControlBar({
   );
 }
 
-export default React.memo(withModulesState({
-  player: {
-    currentTime: "currentTime",
-    duration: "duration",
-    isCatchUpEnabled: "isCatchUpEnabled",
-    isCatchingUp: "isCatchingUp",
-    isContentLoaded: "isContentLoaded",
-    isLive: "isLive",
-    isPaused: "isPaused",
-    isStopped: "isStopped",
-    liveGap: "liveGap",
-    lowLatencyMode: "lowLatencyMode",
-    maximumPosition: "maximumPosition",
-    playbackRate: "playbackRate",
-  },
-})(ControlBar));
+export default React.memo(
+  withModulesState({
+    player: {
+      currentTime: "currentTime",
+      duration: "duration",
+      isCatchUpEnabled: "isCatchUpEnabled",
+      isCatchingUp: "isCatchingUp",
+      isContentLoaded: "isContentLoaded",
+      isLive: "isLive",
+      isPaused: "isPaused",
+      isStopped: "isStopped",
+      liveGap: "liveGap",
+      lowLatencyMode: "lowLatencyMode",
+      maximumPosition: "maximumPosition",
+      playbackRate: "playbackRate",
+    },
+  })(ControlBar)
+);

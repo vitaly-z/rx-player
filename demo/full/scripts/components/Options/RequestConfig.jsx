@@ -101,8 +101,7 @@ function RequestConfig({
               ariaLabel="Reset option to default value"
               title="Reset option to default value"
               onClick={() => {
-                setSegmentRetryLimit(DEFAULT_VALUES.segmentRetry !==
-                  Infinity);
+                setSegmentRetryLimit(DEFAULT_VALUES.segmentRetry !== Infinity);
                 onSegmentRetryInput(DEFAULT_VALUES.segmentRetry);
               }}
               value={String.fromCharCode(0xf021)}
@@ -119,9 +118,9 @@ function RequestConfig({
           Do not limit
         </Checkbox>
         <span className="option-desc">
-          {parseFloat(segmentRetry) === Infinity || !isSegmentRetryLimited ?
-            "Retry \"retryable\" segment requests with no limit" :
-            `Retry "retryable" segment requests at most ${segmentRetry} time(s)`}
+          {parseFloat(segmentRetry) === Infinity || !isSegmentRetryLimited
+            ? 'Retry "retryable" segment requests with no limit'
+            : `Retry "retryable" segment requests at most ${segmentRetry} time(s)`}
         </span>
       </li>
 
@@ -149,8 +148,9 @@ function RequestConfig({
               ariaLabel="Reset option to default value"
               title="Reset option to default value"
               onClick={() => {
-                setSegmentTimeoutLimit(DEFAULT_VALUES.segmentTimeout !==
-                  Infinity);
+                setSegmentTimeoutLimit(
+                  DEFAULT_VALUES.segmentTimeout !== Infinity
+                );
                 onSegmentTimeoutInput(DEFAULT_VALUES.segmentTimeout);
               }}
               value={String.fromCharCode(0xf021)}
@@ -167,9 +167,9 @@ function RequestConfig({
           Do not limit
         </Checkbox>
         <span className="option-desc">
-          {parseFloat(segmentTimeout) === -1 || !isSegmentTimeoutLimited ?
-            "Perform segment requests without timeout" :
-            `Stop segment requests after ${segmentTimeout} millisecond(s)`}
+          {parseFloat(segmentTimeout) === -1 || !isSegmentTimeoutLimited
+            ? "Perform segment requests without timeout"
+            : `Stop segment requests after ${segmentTimeout} millisecond(s)`}
         </span>
       </li>
 
@@ -197,8 +197,9 @@ function RequestConfig({
               ariaLabel="Reset option to default value"
               title="Reset option to default value"
               onClick={() => {
-                setManifestRetryLimit(DEFAULT_VALUES.manifestRetry !==
-                  Infinity);
+                setManifestRetryLimit(
+                  DEFAULT_VALUES.manifestRetry !== Infinity
+                );
                 onManifestRetryInput(DEFAULT_VALUES.manifestRetry);
               }}
               value={String.fromCharCode(0xf021)}
@@ -215,9 +216,9 @@ function RequestConfig({
           Do not limit
         </Checkbox>
         <span className="option-desc">
-          {parseFloat(manifestRetry) === Infinity || !isManifestRetryLimited ?
-            "Retry \"retryable\" manifest requests with no limit" :
-            `Retry "retryable" manifest requests at most ${manifestRetry} time(s)`}
+          {parseFloat(manifestRetry) === Infinity || !isManifestRetryLimited
+            ? 'Retry "retryable" manifest requests with no limit'
+            : `Retry "retryable" manifest requests at most ${manifestRetry} time(s)`}
         </span>
       </li>
       <li>
@@ -244,8 +245,9 @@ function RequestConfig({
               ariaLabel="Reset option to default value"
               title="Reset option to default value"
               onClick={() => {
-                setManifestTimeoutLimit(DEFAULT_VALUES.manifestTimeout !==
-                  Infinity);
+                setManifestTimeoutLimit(
+                  DEFAULT_VALUES.manifestTimeout !== Infinity
+                );
                 onManifestTimeoutInput(DEFAULT_VALUES.manifestTimeout);
               }}
               value={String.fromCharCode(0xf021)}
@@ -262,9 +264,9 @@ function RequestConfig({
           Do not limit
         </Checkbox>
         <span className="option-desc">
-          {parseFloat(manifestTimeout) === -1 || !isManifestTimeoutLimited ?
-            "Perform manifest requests without timeout" :
-            `Stop manifest requests after ${manifestTimeout} millisecond(s)`}
+          {parseFloat(manifestTimeout) === -1 || !isManifestTimeoutLimited
+            ? "Perform manifest requests without timeout"
+            : `Stop manifest requests after ${manifestTimeout} millisecond(s)`}
         </span>
       </li>
 
@@ -292,8 +294,9 @@ function RequestConfig({
               ariaLabel="Reset option to default value"
               title="Reset option to default value"
               onClick={() => {
-                setManifestTimeoutLimit(DEFAULT_VALUES.manifestTimeout !==
-                  Infinity);
+                setManifestTimeoutLimit(
+                  DEFAULT_VALUES.manifestTimeout !== Infinity
+                );
                 onManifestTimeoutInput(DEFAULT_VALUES.manifestTimeout);
               }}
               value={String.fromCharCode(0xf021)}
@@ -310,9 +313,9 @@ function RequestConfig({
           Do not limit
         </Checkbox>
         <span className="option-desc">
-          {parseFloat(manifestTimeout) === -1 || !isManifestTimeoutLimited ?
-            "Perform manifest requests without timeout" :
-            `Stop manifest requests after ${manifestTimeout} millisecond(s)`}
+          {parseFloat(manifestTimeout) === -1 || !isManifestTimeoutLimited
+            ? "Perform manifest requests without timeout"
+            : `Stop manifest requests after ${manifestTimeout} millisecond(s)`}
         </span>
       </li>
     </Fragment>

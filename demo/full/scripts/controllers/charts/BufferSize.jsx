@@ -1,7 +1,4 @@
-import React, {
-  useEffect,
-  useRef,
-} from "react";
+import React, { useEffect, useRef } from "react";
 
 /**
  * Margin on the bottom of the canvas.
@@ -39,9 +36,8 @@ const TIME_SAMPLES_MS = 30000;
 const CANVAS_WIDTH = DRAWABLE_WIDTH;
 
 /** Full height of the canvas. */
-const CANVAS_HEIGHT = DRAWABLE_HEIGHT +
-  HEIGHT_MARGIN_TOP +
-  HEIGHT_MARGIN_BOTTOM;
+const CANVAS_HEIGHT =
+  DRAWABLE_HEIGHT + HEIGHT_MARGIN_TOP + HEIGHT_MARGIN_BOTTOM;
 
 /**
  * At minimum, that value will be taken in the chart as a maximum buffer size,
@@ -74,25 +70,22 @@ function BufferSizeChart({ module }) {
   }, []);
 
   useEffect(() => {
-    const subscription = module.$get("data")
-      .subscribe(data => {
-        if (data.length > 0) {
-          const lastDate = data.length === 0 ?
-            null :
-            data[data.length - 1].date;
-          const minimumTime = lastDate - TIME_SAMPLES_MS;
-          let i;
-          for (i = data.length - 1; i >= 1; i--) {
-            if (data[i].date <= minimumTime) {
-              break;
-            }
+    const subscription = module.$get("data").subscribe((data) => {
+      if (data.length > 0) {
+        const lastDate = data.length === 0 ? null : data[data.length - 1].date;
+        const minimumTime = lastDate - TIME_SAMPLES_MS;
+        let i;
+        for (i = data.length - 1; i >= 1; i--) {
+          if (data[i].date <= minimumTime) {
+            break;
           }
-          const consideredData = data.slice(i);
-          onNewData(consideredData);
-        } else {
-          onNewData([]);
         }
-      });
+        const consideredData = data.slice(i);
+        onNewData(consideredData);
+      } else {
+        onNewData([]);
+      }
+    });
     return function cleanUpSubscription() {
       subscription.unsubscribe();
     };
@@ -129,10 +122,10 @@ function BufferSizeChart({ module }) {
      * according to current data.
      */
     function getNewMaxBufferSize() {
-      const maxPoint = Math.max(...data.map(d => d.value || 0));
+      const maxPoint = Math.max(...data.map((d) => d.value || 0));
       if (maxPoint >= currentMaxSize) {
         return maxPoint + 5;
-      } else if (maxPoint < (currentMaxSize - 5)) {
+      } else if (maxPoint < currentMaxSize - 5) {
         return Math.max(maxPoint + 5, MINIMUM_MAX_BUFFER_SIZE);
       }
       return currentMaxSize;
@@ -141,7 +134,7 @@ function BufferSizeChart({ module }) {
     /**
      * Draw grid lines on canvas and their correspinding values.
      */
-    function drawGrid () {
+    function drawGrid() {
       canvasCtx.beginPath();
       canvasCtx.strokeStyle = "lightgrey";
       canvasCtx.lineWidth = 1;
@@ -151,8 +144,9 @@ function BufferSizeChart({ module }) {
         const height = stepHeight * i + HEIGHT_MARGIN_TOP;
         canvasCtx.moveTo(0, height);
         canvasCtx.font = "14px Arial";
-        const currStepVal = (stepVal * (NUMBER_GRID_LINES_HEIGHT - i))
-          .toFixed(1);
+        const currStepVal = (stepVal * (NUMBER_GRID_LINES_HEIGHT - i)).toFixed(
+          1
+        );
         canvasCtx.fillText(`${currStepVal} s`, 0, height - 5);
         canvasCtx.lineTo(CANVAS_WIDTH, height);
       }
@@ -179,8 +173,7 @@ function BufferSizeChart({ module }) {
      * @returns {number} - y coordinate
      */
     function bufferValueToY(bufferVal) {
-      return HEIGHT_MARGIN_TOP +
-        (currentMaxSize - bufferVal) * gridHeight;
+      return HEIGHT_MARGIN_TOP + (currentMaxSize - bufferVal) * gridHeight;
     }
 
     /**

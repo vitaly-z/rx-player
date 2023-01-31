@@ -23,9 +23,9 @@ import { REGXP_LENGTH } from "../regexps";
  * @param {string} padding
  */
 export default function applyPadding(
-  element : HTMLElement,
-  padding : string
-) : void {
+  element: HTMLElement,
+  padding: string
+): void {
   const trimmedPadding = padding.trim();
   const splittedPadding = trimmedPadding.split(" ");
   if (splittedPadding.length < 1) {
@@ -36,10 +36,11 @@ export default function applyPadding(
   if (firstPadding === null) {
     return;
   }
-  if (firstPadding[2] === "px" ||
-      firstPadding[2] === "%" ||
-      firstPadding[2] === "em")
-  {
+  if (
+    firstPadding[2] === "px" ||
+    firstPadding[2] === "%" ||
+    firstPadding[2] === "em"
+  ) {
     const firstPaddingValue = firstPadding[1] + firstPadding[2];
     if (splittedPadding.length === 1) {
       element.style.padding = firstPaddingValue;
@@ -74,10 +75,11 @@ export default function applyPadding(
   if (secondPadding === null) {
     return;
   }
-  if (secondPadding[2] === "px" ||
-      secondPadding[2] === "%" ||
-      secondPadding[2] === "em")
-  {
+  if (
+    secondPadding[2] === "px" ||
+    secondPadding[2] === "%" ||
+    secondPadding[2] === "em"
+  ) {
     const secondPaddingValue = secondPadding[1] + secondPadding[2];
     if (splittedPadding.length < 4) {
       element.style.paddingLeft = secondPaddingValue;
@@ -105,10 +107,11 @@ export default function applyPadding(
   if (thirdPadding === null) {
     return;
   }
-  if (thirdPadding[2] === "px" ||
-      thirdPadding[2] === "%" ||
-      thirdPadding[2] === "em")
-  {
+  if (
+    thirdPadding[2] === "px" ||
+    thirdPadding[2] === "%" ||
+    thirdPadding[2] === "em"
+  ) {
     const thirdPaddingValue = thirdPadding[1] + thirdPadding[2];
     element.style.paddingBottom = thirdPaddingValue;
   } else if (thirdPadding[2] === "c") {
@@ -126,10 +129,11 @@ export default function applyPadding(
   if (fourthPadding === null) {
     return;
   }
-  if (fourthPadding[2] === "px" ||
-      fourthPadding[2] === "%" ||
-      fourthPadding[2] === "em")
-  {
+  if (
+    fourthPadding[2] === "px" ||
+    fourthPadding[2] === "%" ||
+    fourthPadding[2] === "em"
+  ) {
     const fourthPaddingValue = fourthPadding[1] + fourthPadding[2];
     element.style.paddingLeft = fourthPaddingValue;
   } else if (fourthPadding[2] === "c") {

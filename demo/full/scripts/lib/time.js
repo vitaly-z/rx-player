@@ -1,6 +1,7 @@
 const toSeconds = (timeInSeconds) => {
   const toInt = parseInt(timeInSeconds);
-  if (!toInt) { // TODO differentiate NaN from 0?
+  if (!toInt) {
+    // TODO differentiate NaN from 0?
     return "00";
   }
 
@@ -9,7 +10,8 @@ const toSeconds = (timeInSeconds) => {
 
 const toMinutes = (timeInSeconds) => {
   const toInt = parseInt(timeInSeconds);
-  if (!toInt) { // TODO differentiate NaN from 0?
+  if (!toInt) {
+    // TODO differentiate NaN from 0?
     return "00:00";
   }
 
@@ -20,13 +22,17 @@ const toMinutes = (timeInSeconds) => {
 
   const numberOfMinutes = parseInt(toInt / 60);
   const numberOfSecondsRemaining = toInt % 60;
-  return String(numberOfMinutes).padStart(2, "0") +
-    ":" + String(numberOfSecondsRemaining).padStart(2, "0");
+  return (
+    String(numberOfMinutes).padStart(2, "0") +
+    ":" +
+    String(numberOfSecondsRemaining).padStart(2, "0")
+  );
 };
 
 const toHours = (timeInSeconds) => {
   const toInt = parseInt(timeInSeconds);
-  if (!toInt) { // TODO differentiate NaN from 0?
+  if (!toInt) {
+    // TODO differentiate NaN from 0?
     return "00:00";
   }
 
@@ -38,19 +44,22 @@ const toHours = (timeInSeconds) => {
   const numberOfMinutes = parseInt(toInt / 60);
   const numberOfSecondsRemaining = toInt % 60;
   if (numberOfMinutes < 60) {
-    return (String(numberOfMinutes)).padStart(2, "0") +
-      ":" + (String(numberOfSecondsRemaining)).padStart(2, "0");
+    return (
+      String(numberOfMinutes).padStart(2, "0") +
+      ":" +
+      String(numberOfSecondsRemaining).padStart(2, "0")
+    );
   }
 
   const numberOfHours = parseInt(numberOfMinutes / 60);
   const numberOfMinutesRemaining = numberOfMinutes % 60;
-  return (String(numberOfHours)).padStart(2, "0") +
-    ":" + (String(numberOfMinutesRemaining)).padStart(2, "0") +
-    ":" + (String(numberOfSecondsRemaining)).padStart(2, "0");
+  return (
+    String(numberOfHours).padStart(2, "0") +
+    ":" +
+    String(numberOfMinutesRemaining).padStart(2, "0") +
+    ":" +
+    String(numberOfSecondsRemaining).padStart(2, "0")
+  );
 };
 
-export {
-  toSeconds,
-  toMinutes,
-  toHours,
-};
+export { toSeconds, toMinutes, toHours };

@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-import {
-  ISegmentBaseIntermediateRepresentation,
-} from "../../../node_parser_types";
+import { ISegmentBaseIntermediateRepresentation } from "../../../node_parser_types";
 import { IAttributeParser } from "../parsers_stack";
 import { AttributeName } from "../types";
 import { parseString } from "../utils";
 
 export function generateSegmentBaseAttrParser(
-  segmentBaseAttrs : ISegmentBaseIntermediateRepresentation,
-  linearMemory : WebAssembly.Memory
-)  : IAttributeParser {
+  segmentBaseAttrs: ISegmentBaseIntermediateRepresentation,
+  linearMemory: WebAssembly.Memory
+): IAttributeParser {
   const textDecoder = new TextDecoder();
   return function onSegmentBaseAttribute(attr, ptr, len) {
     switch (attr) {
-
       case AttributeName.InitializationRange: {
         const dataView = new DataView(linearMemory.buffer);
         if (segmentBaseAttrs.initialization === undefined) {
@@ -45,14 +42,20 @@ export function generateSegmentBaseAttrParser(
         if (segmentBaseAttrs.initialization === undefined) {
           segmentBaseAttrs.initialization = {};
         }
-        segmentBaseAttrs.initialization.media =
-          parseString(textDecoder, linearMemory.buffer, ptr, len);
+        segmentBaseAttrs.initialization.media = parseString(
+          textDecoder,
+          linearMemory.buffer,
+          ptr,
+          len
+        );
         break;
 
       case AttributeName.AvailabilityTimeOffset: {
         const dataView = new DataView(linearMemory.buffer);
-        segmentBaseAttrs.availabilityTimeOffset =
-          dataView.getFloat64(ptr, true);
+        segmentBaseAttrs.availabilityTimeOffset = dataView.getFloat64(
+          ptr,
+          true
+        );
         break;
       }
 
@@ -64,15 +67,16 @@ export function generateSegmentBaseAttrParser(
 
       case AttributeName.PresentationTimeOffset: {
         const dataView = new DataView(linearMemory.buffer);
-        segmentBaseAttrs.presentationTimeOffset =
-          dataView.getFloat64(ptr, true);
+        segmentBaseAttrs.presentationTimeOffset = dataView.getFloat64(
+          ptr,
+          true
+        );
         break;
       }
 
       case AttributeName.TimeScale: {
         const dataView = new DataView(linearMemory.buffer);
-        segmentBaseAttrs.timescale =
-          dataView.getFloat64(ptr, true);
+        segmentBaseAttrs.timescale = dataView.getFloat64(ptr, true);
         break;
       }
 
@@ -93,8 +97,7 @@ export function generateSegmentBaseAttrParser(
 
       case AttributeName.Duration: {
         const dataView = new DataView(linearMemory.buffer);
-        segmentBaseAttrs.duration =
-          dataView.getFloat64(ptr, true);
+        segmentBaseAttrs.duration = dataView.getFloat64(ptr, true);
         break;
       }
 
@@ -109,7 +112,6 @@ export function generateSegmentBaseAttrParser(
         segmentBaseAttrs.endNumber = dataView.getFloat64(ptr, true);
         break;
       }
-
     }
   };
 }

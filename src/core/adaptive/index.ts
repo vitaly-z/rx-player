@@ -33,7 +33,6 @@ export {
   IAdaptiveRepresentationSelectorArguments,
   IABRThrottlers,
   IRepresentationEstimator,
-
   IAddedSegmentCallbackPayload,
   IABREstimate,
   IMetricsCallbackPayload,

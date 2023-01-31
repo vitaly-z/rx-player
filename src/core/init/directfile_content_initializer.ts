@@ -22,10 +22,7 @@
 import { clearElementSrc } from "../../compat";
 import { MediaError } from "../../errors";
 import log from "../../log";
-import {
-  IKeySystemOption,
-  IPlayerError,
-} from "../../public_types";
+import { IKeySystemOption, IPlayerError } from "../../public_types";
 import createSharedReference, {
   IReadOnlySharedReference,
 } from "../../utils/reference";
@@ -40,10 +37,10 @@ import RebufferingController from "./utils/rebuffering_controller";
 import listenToMediaError from "./utils/throw_on_media_error";
 
 export default class DirectFileContentInitializer extends ContentInitializer {
-  private _settings : IDirectFileOptions;
-  private _initCanceller : TaskCanceller;
+  private _settings: IDirectFileOptions;
+  private _initCanceller: TaskCanceller;
 
-  constructor(settings : IDirectFileOptions) {
+  constructor(settings: IDirectFileOptions) {
     super();
     this._settings = settings;
     this._initCanceller = new TaskCanceller();
@@ -54,8 +51,8 @@ export default class DirectFileContentInitializer extends ContentInitializer {
   }
 
   public start(
-    mediaElement : HTMLMediaElement,
-    playbackObserver : PlaybackObserver
+    mediaElement: HTMLMediaElement,
+    playbackObserver: PlaybackObserver
   ): void {
     const cancelSignal = this._initCanceller.signal;
     const { keySystems, speed, url } = this._settings;
@@ -68,64 +65,85 @@ export default class DirectFileContentInitializer extends ContentInitializer {
 
     const decryptionRef = createSharedReference(null);
     decryptionRef.finish();
-    const drmInitRef =
-      initializeContentDecryption(mediaElement, keySystems, decryptionRef, {
-        onError: (err) =>  this._onFatalError(err),
-        onWarning: (err : IPlayerError) => this.trigger("warning", err),
-      }, cancelSignal);
+    const drmInitRef = initializeContentDecryption(
+      mediaElement,
+      keySystems,
+      decryptionRef,
+      {
+        onError: (err) => this._onFatalError(err),
+        onWarning: (err: IPlayerError) => this.trigger("warning", err),
+      },
+      cancelSignal
+    );
 
     /** Translate errors coming from the media element into RxPlayer errors. */
-    listenToMediaError(mediaElement,
-                       (error : MediaError) => this._onFatalError(error),
-                       cancelSignal);
+    listenToMediaError(
+      mediaElement,
+      (error: MediaError) => this._onFatalError(error),
+      cancelSignal
+    );
 
     /**
      * Class trying to avoid various stalling situations, emitting "stalled"
      * events when it cannot, as well as "unstalled" events when it get out of one.
      */
-    const rebufferingController = new RebufferingController(playbackObserver,
-                                                            null,
-                                                            speed);
+    const rebufferingController = new RebufferingController(
+      playbackObserver,
+      null,
+      speed
+    );
     rebufferingController.addEventListener("stalled", (evt) =>
-      this.trigger("stalled", evt));
+      this.trigger("stalled", evt)
+    );
     rebufferingController.addEventListener("unstalled", () =>
-      this.trigger("unstalled", null));
+      this.trigger("unstalled", null)
+    );
     rebufferingController.addEventListener("warning", (err) =>
-      this.trigger("warning", err));
+      this.trigger("warning", err)
+    );
     cancelSignal.register(() => {
       rebufferingController.destroy();
     });
     rebufferingController.start();
 
-    drmInitRef.onUpdate((evt, stopListeningToDrmUpdates) => {
-      if (evt.initializationState.type === "uninitialized") {
-        return;
-      }
-      stopListeningToDrmUpdates();
+    drmInitRef.onUpdate(
+      (evt, stopListeningToDrmUpdates) => {
+        if (evt.initializationState.type === "uninitialized") {
+          return;
+        }
+        stopListeningToDrmUpdates();
 
-      // Start everything! (Just put the URL in the element's src).
-      log.info("Setting URL to HTMLMediaElement", url);
-      mediaElement.src = url;
-      cancelSignal.register(() => {
-        clearElementSrc(mediaElement);
-      });
-      if (evt.initializationState.type === "awaiting-media-link") {
-        evt.initializationState.value.isMediaLinked.setValue(true);
-        drmInitRef.onUpdate((newDrmStatus, stopListeningToDrmUpdatesAgain) => {
-          if (newDrmStatus.initializationState.type === "initialized") {
-            stopListeningToDrmUpdatesAgain();
-            this._seekAndPlay(mediaElement, playbackObserver);
-            return;
-          }
-        }, { emitCurrentValue: true, clearSignal: cancelSignal });
-      } else {
-        this._seekAndPlay(mediaElement, playbackObserver);
-        return;
-      }
-    }, { emitCurrentValue: true, clearSignal: cancelSignal });
+        // Start everything! (Just put the URL in the element's src).
+        log.info("Setting URL to HTMLMediaElement", url);
+        mediaElement.src = url;
+        cancelSignal.register(() => {
+          clearElementSrc(mediaElement);
+        });
+        if (evt.initializationState.type === "awaiting-media-link") {
+          evt.initializationState.value.isMediaLinked.setValue(true);
+          drmInitRef.onUpdate(
+            (newDrmStatus, stopListeningToDrmUpdatesAgain) => {
+              if (newDrmStatus.initializationState.type === "initialized") {
+                stopListeningToDrmUpdatesAgain();
+                this._seekAndPlay(mediaElement, playbackObserver);
+                return;
+              }
+            },
+            { emitCurrentValue: true, clearSignal: cancelSignal }
+          );
+        } else {
+          this._seekAndPlay(mediaElement, playbackObserver);
+          return;
+        }
+      },
+      { emitCurrentValue: true, clearSignal: cancelSignal }
+    );
   }
 
-  public updateContentUrls(_urls : string[] | undefined, _refreshNow : boolean) : void {
+  public updateContentUrls(
+    _urls: string[] | undefined,
+    _refreshNow: boolean
+  ): void {
     throw new Error("Cannot update content URL of directfile contents");
   }
 
@@ -133,14 +151,14 @@ export default class DirectFileContentInitializer extends ContentInitializer {
     this._initCanceller.cancel();
   }
 
-  private _onFatalError(err : unknown) {
+  private _onFatalError(err: unknown) {
     this._initCanceller.cancel();
     this.trigger("error", err);
   }
 
   private _seekAndPlay(
-    mediaElement : HTMLMediaElement,
-    playbackObserver : PlaybackObserver
+    mediaElement: HTMLMediaElement,
+    playbackObserver: PlaybackObserver
   ) {
     const cancelSignal = this._initCanceller.signal;
     const { autoPlay, startAt } = this._settings;
@@ -157,15 +175,23 @@ export default class DirectFileContentInitializer extends ContentInitializer {
       autoPlay,
       (err) => this.trigger("warning", err),
       cancelSignal
-    ).autoPlayResult
-      .then(() =>
-        getLoadedReference(playbackObserver, mediaElement, true, cancelSignal)
-          .onUpdate((isLoaded, stopListening) => {
+    )
+      .autoPlayResult.then(() =>
+        getLoadedReference(
+          playbackObserver,
+          mediaElement,
+          true,
+          cancelSignal
+        ).onUpdate(
+          (isLoaded, stopListening) => {
             if (isLoaded) {
               stopListening();
               this.trigger("loaded", { segmentBuffersStore: null });
             }
-          }, { emitCurrentValue: true, clearSignal: cancelSignal }))
+          },
+          { emitCurrentValue: true, clearSignal: cancelSignal }
+        )
+      )
       .catch((err) => {
         if (!cancelSignal.isCancelled) {
           this._onFatalError(err);
@@ -181,9 +207,9 @@ export default class DirectFileContentInitializer extends ContentInitializer {
  * @returns {number}
  */
 function getDirectFileInitialTime(
-  mediaElement : HTMLMediaElement,
-  startAt? : IInitialTimeOptions
-) : number {
+  mediaElement: HTMLMediaElement,
+  startAt?: IInitialTimeOptions
+): number {
   if (startAt == null) {
     return 0;
   }
@@ -198,8 +224,9 @@ function getDirectFileInitialTime(
 
   const duration = mediaElement.duration;
   if (duration == null || !isFinite(duration)) {
-    log.warn("startAt.fromLastPosition set but no known duration, " +
-             "beginning at 0.");
+    log.warn(
+      "startAt.fromLastPosition set but no known duration, " + "beginning at 0."
+    );
     return 0;
   }
 
@@ -221,9 +248,9 @@ function getDirectFileInitialTime(
 
 // Argument used by `initializeDirectfileContent`
 export interface IDirectFileOptions {
-  autoPlay : boolean;
-  keySystems : IKeySystemOption[];
-  speed : IReadOnlySharedReference<number>;
-  startAt? : IInitialTimeOptions | undefined;
-  url? : string | undefined;
+  autoPlay: boolean;
+  keySystems: IKeySystemOption[];
+  speed: IReadOnlySharedReference<number>;
+  startAt?: IInitialTimeOptions | undefined;
+  url?: string | undefined;
 }

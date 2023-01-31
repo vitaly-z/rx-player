@@ -12,9 +12,7 @@ function Knob({
 }) {
   return (
     <div className={`knob ${className}`}>
-      <span className="knob-name" >
-        {name}
-      </span>
+      <span className="knob-name">{name}</span>
       <Select
         ariaLabel={ariaLabel}
         className="knob-value"

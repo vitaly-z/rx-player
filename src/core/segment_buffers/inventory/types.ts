@@ -24,12 +24,11 @@ import {
 /** Content information for a single buffered chunk */
 export interface IChunkContext {
   /** Adaptation this chunk is related to. */
-  adaptation : Adaptation;
+  adaptation: Adaptation;
   /** Period this chunk is related to. */
-  period : Period;
+  period: Period;
   /** Representation this chunk is related to. */
-  representation : Representation;
+  representation: Representation;
   /** Segment this chunk is related to. */
-  segment : ISegment;
+  segment: ISegment;
 }
-

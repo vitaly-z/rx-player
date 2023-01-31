@@ -17,12 +17,10 @@
 import log from "../../../../../log";
 import assertUnreachable from "../../../../../utils/assert_unreachable";
 import noop from "../../../../../utils/noop";
-import parseMpdIr, {
-  IIrParserResponse,
-  ILoadedXlinkData,
-} from "../../common";
+import parseMpdIr, { IIrParserResponse, ILoadedXlinkData } from "../../common";
 import {
-  IMPDIntermediateRepresentation, IPeriodIntermediateRepresentation,
+  IMPDIntermediateRepresentation,
+  IPeriodIntermediateRepresentation,
 } from "../../node_parser_types";
 import {
   IDashParserResponse,
@@ -32,11 +30,7 @@ import {
 import { generateRootChildrenParser } from "./generators";
 import { generateXLinkChildrenParser } from "./generators/XLink";
 import ParsersStack from "./parsers_stack";
-import {
-  AttributeName,
-  CustomEventType,
-  TagName,
-} from "./types";
+import { AttributeName, CustomEventType, TagName } from "./types";
 
 const MAX_READ_SIZE = 15e3;
 
@@ -51,50 +45,47 @@ export default class DashWasmParser {
    *   - "initialized": The `DashWasmParser` is ready to parse.
    *   - "failure": The `DashWasmParser` initialization failed.
    */
-  public status : "uninitialized" |
-                  "initializing" |
-                  "initialized" |
-                  "failure";
+  public status: "uninitialized" | "initializing" | "initialized" | "failure";
 
   /**
    * Promise used to notify of the initialization status.
    * `null` when no initialization has happened yet.
    */
-  private _initProm : Promise<void> | null;
+  private _initProm: Promise<void> | null;
   /** Abstraction simplifying the exploitation of the DASH-WASM parser's events. */
-  private _parsersStack : ParsersStack;
+  private _parsersStack: ParsersStack;
   /**
    * Created WebAssembly instance.
    * `null` when no WebAssembly instance is created.
    */
-  private _instance : WebAssembly.WebAssemblyInstantiatedSource | null;
+  private _instance: WebAssembly.WebAssemblyInstantiatedSource | null;
   /**
    * Information about the data read by the DASH-WASM parser.
    * `null` if we're not parsing anything for the moment.
    */
-  private _mpdData : {
+  private _mpdData: {
     /**
      * First not-yet read position in `mpd`, in bytes.
      * When the parser asks for new data, we start giving data from that point
      * on.
      */
-    cursor : number;
+    cursor: number;
     /**
      * Complete data that needs to be parsed.
      * This is either the full MPD or xlinks.
      */
-    mpd : ArrayBuffer;
+    mpd: ArrayBuffer;
   } | null;
   /**
    * Warnings event currently encountered during parsing.
    * Emptied when no parsing is taking place.
    */
-  private _warnings : Error[];
+  private _warnings: Error[];
   /**
    * Memory used by the WebAssembly instance.
    * `null` when no WebAssembly instance is created.
    */
-  private _linearMemory : WebAssembly.Memory | null;
+  private _linearMemory: WebAssembly.Memory | null;
 
   /**
    * `true` if we're currently parsing a MPD.
@@ -106,7 +97,7 @@ export default class DashWasmParser {
    * Still, this property was added to make it much more explicit, in case of
    * future improvements.
    */
-  private _isParsing : boolean;
+  private _isParsing: boolean;
 
   /**
    * Create a new `DashWasmParser`.
@@ -133,17 +124,18 @@ export default class DashWasmParser {
    * If that method was never called, returns a rejecting Promise.
    * @returns {Promise}
    */
-  public waitForInitialization() : Promise<void> {
-    return this._initProm ??
-           Promise.reject("No initialization performed yet.");
+  public waitForInitialization(): Promise<void> {
+    return this._initProm ?? Promise.reject("No initialization performed yet.");
   }
 
-  public async initialize(opts : IDashWasmParserOptions) : Promise<void> {
+  public async initialize(opts: IDashWasmParserOptions): Promise<void> {
     if (this.status !== "uninitialized") {
       return Promise.reject(new Error("DashWasmParser already initialized."));
     } else if (!this.isCompatible()) {
       this.status = "failure";
-      return Promise.reject(new Error("Target not compatible with WebAssembly."));
+      return Promise.reject(
+        new Error("Target not compatible with WebAssembly.")
+      );
     }
     this.status = "initializing";
 
@@ -172,17 +164,24 @@ export default class DashWasmParser {
 
     const fetchedWasm = fetch(opts.wasmUrl);
 
-    const streamingProm = typeof WebAssembly.instantiateStreaming === "function" ?
-      WebAssembly.instantiateStreaming(fetchedWasm, imports) :
-      Promise.reject("`WebAssembly.instantiateStreaming` API not available");
+    const streamingProm =
+      typeof WebAssembly.instantiateStreaming === "function"
+        ? WebAssembly.instantiateStreaming(fetchedWasm, imports)
+        : Promise.reject(
+            "`WebAssembly.instantiateStreaming` API not available"
+          );
 
     this._initProm = streamingProm
       .catch(async (e) => {
-        log.warn("Unable to call `instantiateStreaming` on WASM",
-                 e instanceof Error ? e : "");
+        log.warn(
+          "Unable to call `instantiateStreaming` on WASM",
+          e instanceof Error ? e : ""
+        );
         const res = await fetchedWasm;
         if (res.status < 200 || res.status >= 300) {
-          throw new Error("WebAssembly request failed. status: " + String(res.status));
+          throw new Error(
+            "WebAssembly request failed. status: " + String(res.status)
+          );
         }
         const resAb = await res.arrayBuffer();
         return WebAssembly.instantiate(resAb, imports);
@@ -191,12 +190,13 @@ export default class DashWasmParser {
         this._instance = instanceWasm;
 
         // TODO better types?
-        this._linearMemory = this._instance.instance.exports.memory as WebAssembly.Memory;
+        this._linearMemory = this._instance.instance.exports
+          .memory as WebAssembly.Memory;
 
         this.status = "initialized";
-      }).catch((err : Error) => {
-        const message = err instanceof Error ? err.toString() :
-                                               "Unknown error";
+      })
+      .catch((err: Error) => {
+        const message = err instanceof Error ? err.toString() : "Unknown error";
         log.warn("DW: Could not create DASH-WASM parser:", message);
         this.status = "failure";
       });
@@ -207,7 +207,7 @@ export default class DashWasmParser {
      * Callback called when a new Element has been encountered by the WASM parser.
      * @param {number} tag - Identify the tag encountered (@see TagName)
      */
-    function onTagOpen(tag : TagName) : void {
+    function onTagOpen(tag: TagName): void {
       // Call the active "childrenParser"
       return parsersStack.childrenParser(tag);
     }
@@ -217,7 +217,7 @@ export default class DashWasmParser {
      * the WASM parser.
      * @param {number} tag - Identify the tag in question (@see TagName)
      */
-    function onTagClose(tag : TagName) : void {
+    function onTagClose(tag: TagName): void {
       // Only pop current parsers from the `parsersStack` if that tag was the
       // active one.
       return parsersStack.popIfCurrent(tag);
@@ -235,7 +235,7 @@ export default class DashWasmParser {
      * attribute's data in the WebAssembly's linear memory.
      * @param {number} len - Length of the attribute's value, in bytes.
      */
-    function onAttribute(attr : AttributeName, ptr : number, len : number) : void {
+    function onAttribute(attr: AttributeName, ptr: number, len: number): void {
       // Call the active "attributeParser"
       return parsersStack.attributeParser(attr, ptr, len);
     }
@@ -249,7 +249,11 @@ export default class DashWasmParser {
      * the WebAssembly's linear memory.
      * @param {number} len - Length of the payload, in bytes.
      */
-    function onCustomEvent(evt : CustomEventType, ptr : number, len : number) : void {
+    function onCustomEvent(
+      evt: CustomEventType,
+      ptr: number,
+      len: number
+    ): void {
       const linearMemory = self._linearMemory as WebAssembly.Memory;
       const arr = new Uint8Array(linearMemory.buffer, ptr, len);
       if (evt === CustomEventType.Error) {
@@ -275,15 +279,17 @@ export default class DashWasmParser {
      * @returns {number} - Return the number of bytes effectively read and set
      * in WebAssembly's linear memory (at the `ptr` offset).
      */
-    function readNext(ptr : number, wantedSize : number) : number {
-      if (self._mpdData === null)  {
+    function readNext(ptr: number, wantedSize: number): number {
+      if (self._mpdData === null) {
         throw new Error("DashWasmParser Error: No MPD to read.");
       }
       const linearMemory = self._linearMemory as WebAssembly.Memory;
       const { mpd, cursor } = self._mpdData;
-      const sizeToRead = Math.min(wantedSize,
-                                  MAX_READ_SIZE,
-                                  mpd.byteLength - cursor);
+      const sizeToRead = Math.min(
+        wantedSize,
+        MAX_READ_SIZE,
+        mpd.byteLength - cursor
+      );
       const arr = new Uint8Array(linearMemory.buffer, ptr, sizeToRead);
       arr.set(new Uint8Array(mpd, cursor, sizeToRead));
       self._mpdData.cursor += sizeToRead;
@@ -297,9 +303,9 @@ export default class DashWasmParser {
    * @returns {Object}
    */
   public runWasmParser(
-    mpd : ArrayBuffer,
-    args : IMPDParserArguments
-  ) : IDashParserResponse<string> | IDashParserResponse<ArrayBuffer> {
+    mpd: ArrayBuffer,
+    args: IMPDParserArguments
+  ): IDashParserResponse<string> | IDashParserResponse<ArrayBuffer> {
     const [mpdIR, warnings] = this._parseMpd(mpd);
     if (mpdIR === null) {
       throw new Error("DASH Parser: Unknown error while parsing the MPD");
@@ -314,17 +320,17 @@ export default class DashWasmParser {
    * for the `DashWasmParser`.
    * @returns {boolean}
    */
-  public isCompatible() : boolean {
-    return typeof WebAssembly === "object" &&
-           typeof WebAssembly.instantiate === "function" &&
-           typeof window.TextDecoder === "function";
+  public isCompatible(): boolean {
+    return (
+      typeof WebAssembly === "object" &&
+      typeof WebAssembly.instantiate === "function" &&
+      typeof window.TextDecoder === "function"
+    );
   }
 
   private _parseMpd(
-    mpd : ArrayBuffer
-  ) : [IMPDIntermediateRepresentation | null,
-       Error[]]
-  {
+    mpd: ArrayBuffer
+  ): [IMPDIntermediateRepresentation | null, Error[]] {
     if (this._instance === null) {
       throw new Error("DashWasmParser not initialized");
     }
@@ -334,13 +340,15 @@ export default class DashWasmParser {
     this._isParsing = true;
     this._mpdData = { mpd, cursor: 0 };
 
-    const rootObj : { mpd? : IMPDIntermediateRepresentation } = {};
+    const rootObj: { mpd?: IMPDIntermediateRepresentation } = {};
 
     const linearMemory = this._linearMemory as WebAssembly.Memory;
-    const rootChildrenParser = generateRootChildrenParser(rootObj,
-                                                          linearMemory,
-                                                          this._parsersStack,
-                                                          mpd);
+    const rootChildrenParser = generateRootChildrenParser(
+      rootObj,
+      linearMemory,
+      this._parsersStack,
+      mpd
+    );
     this._parsersStack.pushParsers(null, rootChildrenParser, noop);
     this._warnings = [];
 
@@ -365,10 +373,8 @@ export default class DashWasmParser {
   }
 
   private _parseXlink(
-    xlinkData : ArrayBuffer
-  ) : [IPeriodIntermediateRepresentation[],
-       Error[]]
-  {
+    xlinkData: ArrayBuffer
+  ): [IPeriodIntermediateRepresentation[], Error[]] {
     if (this._instance === null) {
       throw new Error("DashWasmParser not initialized");
     }
@@ -378,14 +384,17 @@ export default class DashWasmParser {
     this._isParsing = true;
     this._mpdData = { mpd: xlinkData, cursor: 0 };
 
-    const rootObj : { periods : IPeriodIntermediateRepresentation[] } =
-      { periods: [] };
+    const rootObj: { periods: IPeriodIntermediateRepresentation[] } = {
+      periods: [],
+    };
 
     const linearMemory = this._linearMemory as WebAssembly.Memory;
-    const xlinkParser = generateXLinkChildrenParser(rootObj,
-                                                    linearMemory,
-                                                    this._parsersStack,
-                                                    xlinkData);
+    const xlinkParser = generateXLinkChildrenParser(
+      rootObj,
+      linearMemory,
+      this._parsersStack,
+      xlinkData
+    );
     this._parsersStack.pushParsers(null, xlinkParser, noop);
     this._warnings = [];
 
@@ -415,55 +424,66 @@ export default class DashWasmParser {
    * @returns {Object}
    */
   private _processParserReturnValue(
-    initialRes : IIrParserResponse
-  ) : IDashParserResponse<string> | IDashParserResponse<ArrayBuffer> {
+    initialRes: IIrParserResponse
+  ): IDashParserResponse<string> | IDashParserResponse<ArrayBuffer> {
     if (initialRes.type === "done") {
       return initialRes;
-
     } else if (initialRes.type === "needs-clock") {
       const continueParsingMPD = (
-        loadedClock : Array<ILoadedResource<string>>
-      ) : IDashParserResponse<string> | IDashParserResponse<ArrayBuffer> => {
+        loadedClock: Array<ILoadedResource<string>>
+      ): IDashParserResponse<string> | IDashParserResponse<ArrayBuffer> => {
         if (loadedClock.length !== 1) {
           throw new Error("DASH parser: wrong number of loaded ressources.");
         }
         const newRet = initialRes.value.continue(loadedClock[0].responseData);
         return this._processParserReturnValue(newRet);
       };
-      return { type: "needs-resources",
-               value: { urls: [initialRes.value.url],
-                        format: "string",
-                        continue : continueParsingMPD } };
-
+      return {
+        type: "needs-resources",
+        value: {
+          urls: [initialRes.value.url],
+          format: "string",
+          continue: continueParsingMPD,
+        },
+      };
     } else if (initialRes.type === "needs-xlinks") {
       const continueParsingMPD = (
-        loadedXlinks : Array<ILoadedResource<ArrayBuffer>>
-      ) : IDashParserResponse<string> | IDashParserResponse<ArrayBuffer> => {
-        const resourceInfos : ILoadedXlinkData[] = [];
+        loadedXlinks: Array<ILoadedResource<ArrayBuffer>>
+      ): IDashParserResponse<string> | IDashParserResponse<ArrayBuffer> => {
+        const resourceInfos: ILoadedXlinkData[] = [];
         for (let i = 0; i < loadedXlinks.length; i++) {
-          const { responseData: xlinkResp,
-                  receivedTime,
-                  sendingTime,
-                  url } = loadedXlinks[i];
+          const {
+            responseData: xlinkResp,
+            receivedTime,
+            sendingTime,
+            url,
+          } = loadedXlinks[i];
           if (!xlinkResp.success) {
             throw xlinkResp.error;
           }
-          const [periodsIr,
-                 periodsIRWarnings] = this._parseXlink(xlinkResp.data);
-          resourceInfos.push({ url,
-                               receivedTime,
-                               sendingTime,
-                               parsed: periodsIr,
-                               warnings: periodsIRWarnings });
+          const [periodsIr, periodsIRWarnings] = this._parseXlink(
+            xlinkResp.data
+          );
+          resourceInfos.push({
+            url,
+            receivedTime,
+            sendingTime,
+            parsed: periodsIr,
+            warnings: periodsIRWarnings,
+          });
         }
         const newRet = initialRes.value.continue(resourceInfos);
         return this._processParserReturnValue(newRet);
       };
 
-      return { type: "needs-resources",
-               value: { urls: initialRes.value.xlinksUrls,
-                        format: "arraybuffer",
-                        continue : continueParsingMPD } };
+      return {
+        type: "needs-resources",
+        value: {
+          urls: initialRes.value.xlinksUrls,
+          format: "arraybuffer",
+          continue: continueParsingMPD,
+        },
+      };
     } else {
       assertUnreachable(initialRes);
     }
@@ -472,5 +492,5 @@ export default class DashWasmParser {
 
 /** Options needed when constructing the DASH-WASM parser. */
 export interface IDashWasmParserOptions {
-  wasmUrl : string;
+  wasmUrl: string;
 }

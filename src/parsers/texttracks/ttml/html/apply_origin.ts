@@ -23,9 +23,9 @@ import { REGXP_LENGTH } from "../regexps";
  * @param {string} origin
  */
 export default function applyOrigin(
-  element : HTMLElement,
-  origin : string
-) : void {
+  element: HTMLElement,
+  origin: string
+): void {
   const trimmedOrigin = origin.trim();
   if (trimmedOrigin === "auto") {
     return;
@@ -37,10 +37,11 @@ export default function applyOrigin(
   const firstOrigin = REGXP_LENGTH.exec(splittedOrigin[0]);
   const secondOrigin = REGXP_LENGTH.exec(splittedOrigin[1]);
   if (firstOrigin !== null && secondOrigin !== null) {
-    if (firstOrigin[2] === "px" ||
-        firstOrigin[2] === "%" ||
-        firstOrigin[2] === "em")
-    {
+    if (
+      firstOrigin[2] === "px" ||
+      firstOrigin[2] === "%" ||
+      firstOrigin[2] === "em"
+    ) {
       element.style.left = firstOrigin[1] + firstOrigin[2];
     } else if (firstOrigin[2] === "c") {
       addClassName(element, "proportional-style");
@@ -49,10 +50,11 @@ export default function applyOrigin(
       log.warn("TTML Parser: unhandled origin unit:", firstOrigin[2]);
     }
 
-    if (secondOrigin[2] === "px" ||
-        secondOrigin[2] === "%" ||
-        secondOrigin[2] === "em")
-    {
+    if (
+      secondOrigin[2] === "px" ||
+      secondOrigin[2] === "%" ||
+      secondOrigin[2] === "em"
+    ) {
       element.style.top = secondOrigin[1] + secondOrigin[2];
     } else if (secondOrigin[2] === "c") {
       addClassName(element, "proportional-style");

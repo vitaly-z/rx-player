@@ -15,19 +15,13 @@
  */
 
 import log from "../../../../log";
-import {
-  Period,
-  SUPPORTED_ADAPTATIONS_TYPE,
-} from "../../../../manifest";
+import { Period, SUPPORTED_ADAPTATIONS_TYPE } from "../../../../manifest";
 import { ITrackType } from "../../../../public_types";
 import arrayFind from "../../../../utils/array_find";
 import arrayFindIndex from "../../../../utils/array_find_index";
 import arrayIncludes from "../../../../utils/array_includes";
 import isNonEmptyString from "../../../../utils/is_non_empty_string";
-import {
-  IParsedAdaptation,
-  IParsedAdaptations,
-} from "../../types";
+import { IParsedAdaptation, IParsedAdaptations } from "../../types";
 import {
   IAdaptationSetIntermediateRepresentation,
   ISegmentTemplateIntermediateRepresentation,
@@ -60,18 +54,18 @@ import resolveBaseURLs from "./resolve_base_urls";
  * The RxPlayer moves that information down to the `Representation` level. As
  * such, it can merge AdaptationSets that look like they should be.
  */
-interface IAdaptationSwitchingInfos  {
+interface IAdaptationSwitchingInfos {
   /** `id` attribute of the AdaptationSet as announced in the MPD. */
-  [originalID : string] : {
+  [originalID: string]: {
     /** `id` property of the resulting parsed `Adaptation` object. */
-    newID : string;
+    newID: string;
     /**
      * `id` attribute (as announced in the MPD) of all the `AdaptationSet`s
      * this current one can seamlessly switch to.
      */
-    adaptationSetSwitchingIDs : string[]; // IDs (as announced in the MPD),
-                                          // this AdaptationSet can be
-                                          // seamlessly switched to
+    adaptationSetSwitchingIDs: string[]; // IDs (as announced in the MPD),
+    // this AdaptationSet can be
+    // seamlessly switched to
   };
 }
 
@@ -83,23 +77,21 @@ interface IAdaptationSwitchingInfos  {
  * @returns {Boolean}
  */
 function isVisuallyImpaired(
-  accessibility : { schemeIdUri? : string | undefined;
-                    value? : string | undefined; } |
-                  undefined
-) : boolean {
+  accessibility:
+    | { schemeIdUri?: string | undefined; value?: string | undefined }
+    | undefined
+): boolean {
   if (accessibility === undefined) {
     return false;
   }
 
-  const isVisuallyImpairedAudioDvbDash = (
+  const isVisuallyImpairedAudioDvbDash =
     accessibility.schemeIdUri === "urn:tva:metadata:cs:AudioPurposeCS:2007" &&
-    accessibility.value === "1"
-  );
+    accessibility.value === "1";
 
-  const isVisuallyImpairedDashIf = (
+  const isVisuallyImpairedDashIf =
     accessibility.schemeIdUri === "urn:mpeg:dash:role:2011" &&
-    accessibility.value === "description"
-  );
+    accessibility.value === "description";
 
   return isVisuallyImpairedAudioDvbDash || isVisuallyImpairedDashIf;
 }
@@ -113,25 +105,30 @@ function isVisuallyImpaired(
  * @returns {Boolean}
  */
 function isCaptionning(
-  accessibilities : Array<{ schemeIdUri? : string | undefined;
-                            value? : string | undefined; }> |
-                    undefined,
-  roles : Array<{ schemeIdUri? : string | undefined;
-                  value? : string | undefined; }> |
-         undefined
-) : boolean {
+  accessibilities:
+    | Array<{ schemeIdUri?: string | undefined; value?: string | undefined }>
+    | undefined,
+  roles:
+    | Array<{ schemeIdUri?: string | undefined; value?: string | undefined }>
+    | undefined
+): boolean {
   if (accessibilities !== undefined) {
-    const hasDvbClosedCaptionSignaling = accessibilities.some(accessibility =>
-      (accessibility.schemeIdUri === "urn:tva:metadata:cs:AudioPurposeCS:2007" &&
-       accessibility.value === "2"));
+    const hasDvbClosedCaptionSignaling = accessibilities.some(
+      (accessibility) =>
+        accessibility.schemeIdUri ===
+          "urn:tva:metadata:cs:AudioPurposeCS:2007" &&
+        accessibility.value === "2"
+    );
     if (hasDvbClosedCaptionSignaling) {
       return true;
     }
   }
   if (roles !== undefined) {
-    const hasDashCaptionSinaling = roles.some(role =>
-      (role.schemeIdUri === "urn:mpeg:dash:role:2011" &&
-       role.value === "caption"));
+    const hasDashCaptionSinaling = roles.some(
+      (role) =>
+        role.schemeIdUri === "urn:mpeg:dash:role:2011" &&
+        role.value === "caption"
+    );
     if (hasDashCaptionSinaling) {
       return true;
     }
@@ -147,16 +144,18 @@ function isCaptionning(
  * @returns {Boolean}
  */
 function hasSignLanguageInterpretation(
-  accessibility : { schemeIdUri? : string | undefined;
-                    value? : string | undefined; } |
-                  undefined
-) : boolean {
+  accessibility:
+    | { schemeIdUri?: string | undefined; value?: string | undefined }
+    | undefined
+): boolean {
   if (accessibility === undefined) {
     return false;
   }
 
-  return (accessibility.schemeIdUri === "urn:mpeg:dash:role:2011" &&
-    accessibility.value === "sign");
+  return (
+    accessibility.schemeIdUri === "urn:mpeg:dash:role:2011" &&
+    accessibility.value === "sign"
+  );
 }
 
 /**
@@ -166,24 +165,28 @@ function hasSignLanguageInterpretation(
  * @returns {string}
  */
 function getAdaptationID(
-  adaptation : IAdaptationSetIntermediateRepresentation,
-  infos : { isClosedCaption : boolean | undefined;
-            isForcedSubtitle : boolean | undefined;
-            isAudioDescription : boolean | undefined;
-            isSignInterpreted : boolean | undefined;
-            isTrickModeTrack: boolean;
-            type : string; }
-) : string {
+  adaptation: IAdaptationSetIntermediateRepresentation,
+  infos: {
+    isClosedCaption: boolean | undefined;
+    isForcedSubtitle: boolean | undefined;
+    isAudioDescription: boolean | undefined;
+    isSignInterpreted: boolean | undefined;
+    isTrickModeTrack: boolean;
+    type: string;
+  }
+): string {
   if (isNonEmptyString(adaptation.attributes.id)) {
     return adaptation.attributes.id;
   }
 
-  const { isClosedCaption,
-          isForcedSubtitle,
-          isAudioDescription,
-          isSignInterpreted,
-          isTrickModeTrack,
-          type } = infos;
+  const {
+    isClosedCaption,
+    isForcedSubtitle,
+    isAudioDescription,
+    isSignInterpreted,
+    isTrickModeTrack,
+    type,
+  } = infos;
 
   let idString = type;
   if (isNonEmptyString(adaptation.attributes.language)) {
@@ -225,19 +228,20 @@ function getAdaptationID(
  * @returns {Array.<string>}
  */
 function getAdaptationSetSwitchingIDs(
-  adaptation : IAdaptationSetIntermediateRepresentation
-) : string[] {
+  adaptation: IAdaptationSetIntermediateRepresentation
+): string[] {
   if (adaptation.children.supplementalProperties != null) {
     const { supplementalProperties } = adaptation.children;
     for (const supplementalProperty of supplementalProperties) {
       if (
         supplementalProperty.schemeIdUri ===
-        "urn:mpeg:dash:adaptation-set-switching:2016" &&
+          "urn:mpeg:dash:adaptation-set-switching:2016" &&
         supplementalProperty.value != null
       ) {
-        return supplementalProperty.value.split(",")
-          .map(id => id.trim())
-          .filter(id => id);
+        return supplementalProperty.value
+          .split(",")
+          .map((id) => id.trim())
+          .filter((id) => id);
       }
     }
   }
@@ -254,21 +258,20 @@ function getAdaptationSetSwitchingIDs(
  * @returns {Array.<Object>}
  */
 export default function parseAdaptationSets(
-  adaptationsIR : IAdaptationSetIntermediateRepresentation[],
-  context : IAdaptationSetContext
+  adaptationsIR: IAdaptationSetIntermediateRepresentation[],
+  context: IAdaptationSetContext
 ): IParsedAdaptations {
-  const parsedAdaptations : Record<
+  const parsedAdaptations: Record<
     ITrackType,
-    Array<[ IParsedAdaptation,
-            IAdaptationSetOrderingData ]>
-  > = { video: [],
-        audio: [],
-        text: [] };
-  const trickModeAdaptations: Array<{ adaptation: IParsedAdaptation;
-                                      trickModeAttachedAdaptationIds: string[]; }> = [];
-  const adaptationSwitchingInfos : IAdaptationSwitchingInfos = {};
+    Array<[IParsedAdaptation, IAdaptationSetOrderingData]>
+  > = { video: [], audio: [], text: [] };
+  const trickModeAdaptations: Array<{
+    adaptation: IParsedAdaptation;
+    trickModeAttachedAdaptationIds: string[];
+  }> = [];
+  const adaptationSwitchingInfos: IAdaptationSwitchingInfos = {};
 
-  const parsedAdaptationsIDs : string[] = [];
+  const parsedAdaptationsIDs: string[] = [];
 
   /**
    * Index of the last parsed Video AdaptationSet with a Role set as "main" in
@@ -279,13 +282,17 @@ export default function parseAdaptationSets(
    */
   let lastMainVideoAdapIdx = -1;
 
-  for (let adaptationIdx = 0; adaptationIdx < adaptationsIR.length; adaptationIdx++) {
+  for (
+    let adaptationIdx = 0;
+    adaptationIdx < adaptationsIR.length;
+    adaptationIdx++
+  ) {
     const adaptation = adaptationsIR[adaptationIdx];
     const adaptationChildren = adaptation.children;
-    const { essentialProperties,
-            roles, label } = adaptationChildren;
+    const { essentialProperties, roles, label } = adaptationChildren;
 
-    const isMainAdaptation = Array.isArray(roles) &&
+    const isMainAdaptation =
+      Array.isArray(roles) &&
       roles.some((role) => role.value === "main") &&
       roles.some((role) => role.schemeIdUri === "urn:mpeg:dash:role:2011");
 
@@ -299,23 +306,19 @@ export default function parseAdaptationSets(
 
     const adaptationMimeType = adaptation.attributes.mimeType;
     const adaptationCodecs = adaptation.attributes.codecs;
-    const type = inferAdaptationType(representationsIR,
-                                     isNonEmptyString(adaptationMimeType) ?
-                                       adaptationMimeType :
-                                       null,
-                                     isNonEmptyString(adaptationCodecs) ?
-                                       adaptationCodecs :
-                                       null,
-                                     adaptationChildren.roles != null ?
-                                       adaptationChildren.roles :
-                                       null);
+    const type = inferAdaptationType(
+      representationsIR,
+      isNonEmptyString(adaptationMimeType) ? adaptationMimeType : null,
+      isNonEmptyString(adaptationCodecs) ? adaptationCodecs : null,
+      adaptationChildren.roles != null ? adaptationChildren.roles : null
+    );
     if (type === undefined) {
       continue;
     }
 
     const priority = adaptation.attributes.selectionPriority ?? 1;
     const originalID = adaptation.attributes.id;
-    let newID : string;
+    let newID: string;
     const adaptationSetSwitchingIDs = getAdaptationSetSwitchingIDs(adaptation);
     const parentSegmentTemplates = [];
     if (context.segmentTemplate !== undefined) {
@@ -325,7 +328,7 @@ export default function parseAdaptationSets(
       parentSegmentTemplates.push(adaptation.children.segmentTemplate);
     }
 
-    const reprCtxt : IRepresentationContext = {
+    const reprCtxt: IRepresentationContext = {
       availabilityTimeComplete,
       availabilityTimeOffset,
       baseURLs: resolveBaseURLs(context.baseURLs, adaptationChildren.baseURLs),
@@ -341,40 +344,44 @@ export default function parseAdaptationSets(
       unsafelyBaseOnPreviousAdaptation: null,
     };
 
-    const trickModeProperty = Array.isArray(essentialProperties) ?
-    arrayFind(
-      essentialProperties,
-      (scheme) => {
-        return scheme.schemeIdUri === "http://dashif.org/guidelines/trickmode";
-      }
-    ) : undefined;
+    const trickModeProperty = Array.isArray(essentialProperties)
+      ? arrayFind(essentialProperties, (scheme) => {
+          return (
+            scheme.schemeIdUri === "http://dashif.org/guidelines/trickmode"
+          );
+        })
+      : undefined;
 
-    const trickModeAttachedAdaptationIds: string[]|undefined =
+    const trickModeAttachedAdaptationIds: string[] | undefined =
       trickModeProperty?.value?.split(" ");
 
     const isTrickModeTrack = trickModeAttachedAdaptationIds !== undefined;
 
-    if (type === "video" &&
-        isMainAdaptation &&
-        lastMainVideoAdapIdx >= 0 &&
-        parsedAdaptations.video.length > lastMainVideoAdapIdx &&
-        !isTrickModeTrack)
-    {
-      const videoMainAdaptation = parsedAdaptations.video[lastMainVideoAdapIdx][0];
-      reprCtxt.unsafelyBaseOnPreviousAdaptation = context
-        .unsafelyBaseOnPreviousPeriod?.getAdaptation(videoMainAdaptation.id) ?? null;
-      const representations = parseRepresentations(representationsIR,
-                                                   adaptation,
-                                                   reprCtxt);
+    if (
+      type === "video" &&
+      isMainAdaptation &&
+      lastMainVideoAdapIdx >= 0 &&
+      parsedAdaptations.video.length > lastMainVideoAdapIdx &&
+      !isTrickModeTrack
+    ) {
+      const videoMainAdaptation =
+        parsedAdaptations.video[lastMainVideoAdapIdx][0];
+      reprCtxt.unsafelyBaseOnPreviousAdaptation =
+        context.unsafelyBaseOnPreviousPeriod?.getAdaptation(
+          videoMainAdaptation.id
+        ) ?? null;
+      const representations = parseRepresentations(
+        representationsIR,
+        adaptation,
+        reprCtxt
+      );
       videoMainAdaptation.representations.push(...representations);
       newID = videoMainAdaptation.id;
     } else {
       const { accessibilities } = adaptationChildren;
 
-      let isDub : boolean|undefined;
-      if (roles !== undefined &&
-          roles.some((role) => role.value === "dub"))
-      {
+      let isDub: boolean | undefined;
+      if (roles !== undefined && roles.some((role) => role.value === "dub")) {
         isDub = true;
       }
 
@@ -386,11 +393,14 @@ export default function parseAdaptationSets(
       }
 
       let isForcedSubtitle;
-      if (type === "text" &&
-          roles !== undefined &&
-          roles.some((role) => role.value === "forced-subtitle" ||
-                               role.value === "forced_subtitle"))
-      {
+      if (
+        type === "text" &&
+        roles !== undefined &&
+        roles.some(
+          (role) =>
+            role.value === "forced-subtitle" || role.value === "forced_subtitle"
+        )
+      ) {
         isForcedSubtitle = true;
       }
 
@@ -408,13 +418,14 @@ export default function parseAdaptationSets(
         isSignInterpreted = accessibilities.some(hasSignLanguageInterpretation);
       }
 
-      let adaptationID = getAdaptationID(adaptation,
-                                         { isAudioDescription,
-                                           isForcedSubtitle,
-                                           isClosedCaption,
-                                           isSignInterpreted,
-                                           isTrickModeTrack,
-                                           type });
+      let adaptationID = getAdaptationID(adaptation, {
+        isAudioDescription,
+        isForcedSubtitle,
+        isClosedCaption,
+        isSignInterpreted,
+        isTrickModeTrack,
+        type,
+      });
 
       // Avoid duplicate IDs
       while (arrayIncludes(parsedAdaptationsIDs, adaptationID)) {
@@ -424,17 +435,21 @@ export default function parseAdaptationSets(
       newID = adaptationID;
       parsedAdaptationsIDs.push(adaptationID);
 
-      reprCtxt.unsafelyBaseOnPreviousAdaptation = context
-        .unsafelyBaseOnPreviousPeriod?.getAdaptation(adaptationID) ?? null;
+      reprCtxt.unsafelyBaseOnPreviousAdaptation =
+        context.unsafelyBaseOnPreviousPeriod?.getAdaptation(adaptationID) ??
+        null;
 
-      const representations = parseRepresentations(representationsIR,
-                                                   adaptation,
-                                                   reprCtxt);
-      const parsedAdaptationSet : IParsedAdaptation =
-        { id: adaptationID,
-          representations,
-          type,
-          isTrickModeTrack };
+      const representations = parseRepresentations(
+        representationsIR,
+        adaptation,
+        reprCtxt
+      );
+      const parsedAdaptationSet: IParsedAdaptation = {
+        id: adaptationID,
+        representations,
+        type,
+        isTrickModeTrack,
+      };
       if (adaptation.attributes.language != null) {
         parsedAdaptationSet.language = adaptation.attributes.language;
       }
@@ -459,41 +474,55 @@ export default function parseAdaptationSets(
       }
 
       if (trickModeAttachedAdaptationIds !== undefined) {
-        trickModeAdaptations.push({ adaptation: parsedAdaptationSet,
-                                    trickModeAttachedAdaptationIds });
+        trickModeAdaptations.push({
+          adaptation: parsedAdaptationSet,
+          trickModeAttachedAdaptationIds,
+        });
       } else {
-
         // look if we have to merge this into another Adaptation
         let mergedIntoIdx = -1;
         for (const id of adaptationSetSwitchingIDs) {
           const switchingInfos = adaptationSwitchingInfos[id];
-          if (switchingInfos !== undefined &&
-              switchingInfos.newID !== newID &&
-              arrayIncludes(switchingInfos.adaptationSetSwitchingIDs, originalID))
-          {
-            mergedIntoIdx = arrayFindIndex(parsedAdaptations[type],
-                                           (a) => a[0].id === id);
+          if (
+            switchingInfos !== undefined &&
+            switchingInfos.newID !== newID &&
+            arrayIncludes(switchingInfos.adaptationSetSwitchingIDs, originalID)
+          ) {
+            mergedIntoIdx = arrayFindIndex(
+              parsedAdaptations[type],
+              (a) => a[0].id === id
+            );
             const mergedInto = parsedAdaptations[type][mergedIntoIdx];
-            if (mergedInto !== undefined &&
-                mergedInto[0].audioDescription ===
-                  parsedAdaptationSet.audioDescription &&
-                mergedInto[0].closedCaption ===
-                  parsedAdaptationSet.closedCaption &&
-                mergedInto[0].language === parsedAdaptationSet.language)
-            {
-              log.info("DASH Parser: merging \"switchable\" AdaptationSets",
-                       originalID, id);
-              mergedInto[0].representations.push(...parsedAdaptationSet.representations);
-              if (type === "video" &&
-                  isMainAdaptation &&
-                  !mergedInto[1].isMainAdaptation)
-              {
-                lastMainVideoAdapIdx = Math.max(lastMainVideoAdapIdx, mergedIntoIdx);
+            if (
+              mergedInto !== undefined &&
+              mergedInto[0].audioDescription ===
+                parsedAdaptationSet.audioDescription &&
+              mergedInto[0].closedCaption ===
+                parsedAdaptationSet.closedCaption &&
+              mergedInto[0].language === parsedAdaptationSet.language
+            ) {
+              log.info(
+                'DASH Parser: merging "switchable" AdaptationSets',
+                originalID,
+                id
+              );
+              mergedInto[0].representations.push(
+                ...parsedAdaptationSet.representations
+              );
+              if (
+                type === "video" &&
+                isMainAdaptation &&
+                !mergedInto[1].isMainAdaptation
+              ) {
+                lastMainVideoAdapIdx = Math.max(
+                  lastMainVideoAdapIdx,
+                  mergedIntoIdx
+                );
               }
               mergedInto[1] = {
                 priority: Math.max(priority, mergedInto[1].priority),
-                isMainAdaptation: isMainAdaptation ||
-                                  mergedInto[1].isMainAdaptation,
+                isMainAdaptation:
+                  isMainAdaptation || mergedInto[1].isMainAdaptation,
                 indexInMpd: Math.min(adaptationIdx, mergedInto[1].indexInMpd),
               };
             }
@@ -501,10 +530,10 @@ export default function parseAdaptationSets(
         }
 
         if (mergedIntoIdx < 0) {
-          parsedAdaptations[type].push([ parsedAdaptationSet,
-                                         { priority,
-                                           isMainAdaptation,
-                                           indexInMpd: adaptationIdx }]);
+          parsedAdaptations[type].push([
+            parsedAdaptationSet,
+            { priority, isMainAdaptation, indexInMpd: adaptationIdx },
+          ]);
           if (type === "video" && isMainAdaptation) {
             lastMainVideoAdapIdx = parsedAdaptations.video.length - 1;
           }
@@ -513,21 +542,26 @@ export default function parseAdaptationSets(
     }
 
     if (originalID != null && adaptationSwitchingInfos[originalID] == null) {
-      adaptationSwitchingInfos[originalID] = { newID,
-                                               adaptationSetSwitchingIDs };
+      adaptationSwitchingInfos[originalID] = {
+        newID,
+        adaptationSetSwitchingIDs,
+      };
     }
   }
 
-  const adaptationsPerType = SUPPORTED_ADAPTATIONS_TYPE
-    .reduce((acc : IParsedAdaptations, adaptationType : ITrackType) => {
+  const adaptationsPerType = SUPPORTED_ADAPTATIONS_TYPE.reduce(
+    (acc: IParsedAdaptations, adaptationType: ITrackType) => {
       const adaptationsParsedForType = parsedAdaptations[adaptationType];
       if (adaptationsParsedForType.length > 0) {
         adaptationsParsedForType.sort(compareAdaptations);
-        acc[adaptationType] = adaptationsParsedForType
-          .map(([parsedAdaptation]) => parsedAdaptation);
+        acc[adaptationType] = adaptationsParsedForType.map(
+          ([parsedAdaptation]) => parsedAdaptation
+        );
       }
       return acc;
-    }, {});
+    },
+    {}
+  );
   parsedAdaptations.video.sort(compareAdaptations);
   attachTrickModeTrack(adaptationsPerType, trickModeAdaptations);
   return adaptationsPerType;
@@ -539,14 +573,14 @@ interface IAdaptationSetOrderingData {
    * If `true`, this AdaptationSet is considered as a "main" one (e.g. it had a
    * Role set to "main").
    */
-  isMainAdaptation : boolean;
+  isMainAdaptation: boolean;
   /**
    * Set to the `selectionPriority` attribute of the corresponding AdaptationSet
    * or to `1` by default.
    */
-  priority : number;
+  priority: number;
   /** Index of this AdaptationSet in the original MPD, starting from `0`. */
-  indexInMpd : number;
+  indexInMpd: number;
 }
 
 /**
@@ -558,16 +592,15 @@ interface IAdaptationSetOrderingData {
  * @returns {number}
  */
 function compareAdaptations(
-  a : [IParsedAdaptation, IAdaptationSetOrderingData],
-  b : [IParsedAdaptation, IAdaptationSetOrderingData]
-) : number {
+  a: [IParsedAdaptation, IAdaptationSetOrderingData],
+  b: [IParsedAdaptation, IAdaptationSetOrderingData]
+): number {
   const priorityDiff = b[1].priority - a[1].priority;
   if (priorityDiff !== 0) {
     return priorityDiff;
   }
   if (a[1].isMainAdaptation !== b[1].isMainAdaptation) {
-    return a[1].isMainAdaptation ? -1 :
-      1;
+    return a[1].isMainAdaptation ? -1 : 1;
   }
   return a[1].indexInMpd - b[1].indexInMpd;
 }
@@ -575,7 +608,7 @@ function compareAdaptations(
 /** Context needed when calling `parseAdaptationSets`. */
 export interface IAdaptationSetContext extends IInheritedRepresentationContext {
   /** SegmentTemplate parsed in the Period, if found. */
-  segmentTemplate? : ISegmentTemplateIntermediateRepresentation | undefined;
+  segmentTemplate?: ISegmentTemplateIntermediateRepresentation | undefined;
   /**
    * The parser should take this Period - which is from a previously parsed
    * Manifest for the same dynamic content - as a base to speed-up the parsing
@@ -584,13 +617,14 @@ export interface IAdaptationSetContext extends IInheritedRepresentationContext {
    * de-synchronization with what is actually on the server,
    * Use with moderation.
    */
-  unsafelyBaseOnPreviousPeriod : Period | null;
+  unsafelyBaseOnPreviousPeriod: Period | null;
 }
 
 /**
  * Supplementary context needed to parse a Representation common with
  * `IRepresentationContext`.
  */
-type IInheritedRepresentationContext = Omit<IRepresentationContext,
-                                            "unsafelyBaseOnPreviousAdaptation" |
-                                            "parentSegmentTemplates">;
+type IInheritedRepresentationContext = Omit<
+  IRepresentationContext,
+  "unsafelyBaseOnPreviousAdaptation" | "parentSegmentTemplates"
+>;

@@ -1,4 +1,4 @@
-# Typings ######################################################################
+# Typings
 
 This directory regroups type definitions for TypeScript.
 

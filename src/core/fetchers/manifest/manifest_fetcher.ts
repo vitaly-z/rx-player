@@ -49,27 +49,27 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
    * Will only have an effect if the Manifest has been fetched at least once.
    * @param {Object} settings - refresh configuration.
    */
-  public scheduleManualRefresh : (settings : IManifestRefreshSettings) => void;
+  public scheduleManualRefresh: (settings: IManifestRefreshSettings) => void;
 
   /** `ManifestFetcher` configuration. */
-  private _settings : IManifestFetcherSettings;
+  private _settings: IManifestFetcherSettings;
   /** URLs through which the Manifest may be reached, by order of priority. */
-  private _manifestUrls : string[] | undefined;
+  private _manifestUrls: string[] | undefined;
   /**
    * Manifest loading and parsing pipelines linked to the current transport
    * protocol used.
    */
-  private _pipelines : ITransportManifestPipeline;
+  private _pipelines: ITransportManifestPipeline;
   /**
    * `TaskCanceller` called when this `ManifestFetcher` is disposed, to clean
    * resources.
    */
-  private _canceller : TaskCanceller;
+  private _canceller: TaskCanceller;
   /**
    * Set to `true` once the Manifest has been fetched at least once through this
    * `ManifestFetcher`.
    */
-  private _isStarted : boolean;
+  private _isStarted: boolean;
   /**
    * Set to `true` when a Manifest refresh is currently pending.
    * Allows to avoid doing multiple concurrent Manifest refresh, as this is
@@ -82,7 +82,7 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
    * If set to a string or `undefined`, the given URL should be prioritized on
    * the next Manifest fetching operation, it can then be reset to `null`.
    */
-  private _prioritizedContentUrl : string | undefined | null;
+  private _prioritizedContentUrl: string | undefined | null;
 
   /**
    * Construct a new ManifestFetcher.
@@ -95,9 +95,9 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
    * @param {Object} settings - Configure the `ManifestFetcher`.
    */
   constructor(
-    urls : string[] | undefined,
-    pipelines : ITransportPipelines,
-    settings : IManifestFetcherSettings
+    urls: string[] | undefined,
+    pipelines: ITransportPipelines,
+    settings: IManifestFetcherSettings
   ) {
     super();
     this.scheduleManualRefresh = noop;
@@ -129,36 +129,37 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
    * Once `start` has been called, this mechanism can only be stopped by calling
    * `dispose`.
    */
-  public start() : void {
+  public start(): void {
     if (this._isStarted) {
       return;
     }
     this._isStarted = true;
 
-    let manifestProm : Promise<IManifestFetcherParsedResult>;
+    let manifestProm: Promise<IManifestFetcherParsedResult>;
 
     const initialManifest = this._settings.initialManifest;
     if (initialManifest instanceof Manifest) {
       manifestProm = Promise.resolve({ manifest: initialManifest });
     } else if (initialManifest !== undefined) {
-      manifestProm = this.parse(initialManifest,
-                                { previousManifest: null, unsafeMode: false },
-                                undefined);
+      manifestProm = this.parse(
+        initialManifest,
+        { previousManifest: null, unsafeMode: false },
+        undefined
+      );
     } else {
-      manifestProm = this._fetchManifest(undefined)
-        .then((val) => {
-          return val.parse({ previousManifest: null, unsafeMode: false });
-        });
+      manifestProm = this._fetchManifest(undefined).then((val) => {
+        return val.parse({ previousManifest: null, unsafeMode: false });
+      });
     }
 
     manifestProm
-      .then((val : IManifestFetcherParsedResult) => {
+      .then((val: IManifestFetcherParsedResult) => {
         this.trigger("manifestReady", val.manifest);
         if (!this._canceller.isUsed) {
           this._recursivelyRefreshManifest(val.manifest, val);
         }
       })
-      .catch((err : unknown) => this._onFatalError(err));
+      .catch((err: unknown) => this._onFatalError(err));
   }
 
   /**
@@ -168,7 +169,10 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
    * @param {boolean} refreshNow - If set to `true`, the next Manifest refresh
    * will be triggered immediately.
    */
-  public updateContentUrls(urls : string[] | undefined, refreshNow : boolean) : void {
+  public updateContentUrls(
+    urls: string[] | undefined,
+    refreshNow: boolean
+  ): void {
     this._prioritizedContentUrl = urls?.[0] ?? undefined;
     if (refreshNow) {
       this.scheduleManualRefresh({
@@ -192,8 +196,8 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
    * @returns {Promise}
    */
   private async _fetchManifest(
-    url : string | undefined
-  ) : Promise<IManifestFetcherResponse> {
+    url: string | undefined
+  ): Promise<IManifestFetcherResponse> {
     const cancelSignal = this._canceller.signal;
     const settings = this._settings;
     const pipelines = this._pipelines;
@@ -208,10 +212,8 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
     try {
       const response = await callLoaderWithRetries(requestUrl);
       return {
-        parse: (parserOptions : IManifestFetcherParserOptions) => {
-          return this._parseLoadedManifest(response,
-                                           parserOptions,
-                                           requestUrl);
+        parse: (parserOptions: IManifestFetcherParserOptions) => {
+          return this._parseLoadedManifest(response, parserOptions, requestUrl);
         },
       };
     } catch (err) {
@@ -226,19 +228,19 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
      * @returns {Promise}
      */
     function callLoaderWithRetries(
-      manifestUrl : string | undefined
-    ) : Promise<IRequestedData<ILoadedManifestFormat>> {
+      manifestUrl: string | undefined
+    ): Promise<IRequestedData<ILoadedManifestFormat>> {
       const { loadManifest } = pipelines;
-      let requestTimeout : number | undefined =
-        isNullOrUndefined(settings.requestTimeout) ?
-          config.getCurrent().DEFAULT_REQUEST_TIMEOUT :
-          settings.requestTimeout;
+      let requestTimeout: number | undefined = isNullOrUndefined(
+        settings.requestTimeout
+      )
+        ? config.getCurrent().DEFAULT_REQUEST_TIMEOUT
+        : settings.requestTimeout;
       if (requestTimeout < 0) {
         requestTimeout = undefined;
       }
-      const callLoader = () => loadManifest(manifestUrl,
-                                            { timeout: requestTimeout },
-                                            cancelSignal);
+      const callLoader = () =>
+        loadManifest(manifestUrl, { timeout: requestTimeout }, cancelSignal);
       return scheduleRequestPromise(callLoader, backoffSettings, cancelSignal);
     }
   }
@@ -256,16 +258,15 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
    * @returns {Promise}
    */
   private parse(
-    manifest : unknown,
-    parserOptions : IManifestFetcherParserOptions,
-    originalUrl : string | undefined
-  ) : Promise<IManifestFetcherParsedResult> {
-    return this._parseLoadedManifest({ responseData: manifest,
-                                       size: undefined,
-                                       requestDuration: undefined },
-                                     parserOptions,
-                                     originalUrl);
-
+    manifest: unknown,
+    parserOptions: IManifestFetcherParserOptions,
+    originalUrl: string | undefined
+  ): Promise<IManifestFetcherParsedResult> {
+    return this._parseLoadedManifest(
+      { responseData: manifest, size: undefined, requestDuration: undefined },
+      parserOptions,
+      originalUrl
+    );
   }
 
   /**
@@ -278,10 +279,10 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
    * @returns {Promise}
    */
   private async _parseLoadedManifest(
-    loaded : IRequestedData<unknown>,
-    parserOptions : IManifestFetcherParserOptions,
-    requestUrl : string | undefined
-  ) : Promise<IManifestFetcherParsedResult> {
+    loaded: IRequestedData<unknown>,
+    parserOptions: IManifestFetcherParserOptions,
+    requestUrl: string | undefined
+  ): Promise<IManifestFetcherParsedResult> {
     const parsingTimeStart = performance.now();
     const cancelSignal = this._canceller.signal;
     const trigger = this.trigger.bind(this);
@@ -291,16 +292,20 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
     });
 
     const originalUrl = requestUrl ?? this._manifestUrls?.[0];
-    const opts = { externalClockOffset: parserOptions.externalClockOffset,
-                   unsafeMode: parserOptions.unsafeMode,
-                   previousManifest: parserOptions.previousManifest,
-                   originalUrl };
+    const opts = {
+      externalClockOffset: parserOptions.externalClockOffset,
+      unsafeMode: parserOptions.unsafeMode,
+      previousManifest: parserOptions.previousManifest,
+      originalUrl,
+    };
     try {
-      const res = this._pipelines.parseManifest(loaded,
-                                                opts,
-                                                onWarnings,
-                                                cancelSignal,
-                                                scheduleRequest);
+      const res = this._pipelines.parseManifest(
+        loaded,
+        opts,
+        onWarnings,
+        cancelSignal,
+        scheduleRequest
+      );
       if (!isPromise(res)) {
         return finish(res.manifest);
       } else {
@@ -322,12 +327,14 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
      * @returns {Function}
      */
     async function scheduleRequest<T>(
-      performRequest : () => Promise<T>
-    ) : Promise<T> {
+      performRequest: () => Promise<T>
+    ): Promise<T> {
       try {
-        const data = await scheduleRequestPromise(performRequest,
-                                                  backoffSettings,
-                                                  cancelSignal);
+        const data = await scheduleRequestPromise(
+          performRequest,
+          backoffSettings,
+          cancelSignal
+        );
         return data;
       } catch (err) {
         throw errorSelector(err);
@@ -338,7 +345,7 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
      * Handle minor errors encountered by a Manifest parser.
      * @param {Array.<Error>} warnings
      */
-    function onWarnings(warnings : Error[]) : void {
+    function onWarnings(warnings: Error[]): void {
       for (const warning of warnings) {
         if (cancelSignal.isCancelled) {
           return;
@@ -356,15 +363,12 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
      * To call once the Manifest has been parsed.
      * @param {Object} manifest
      */
-    function finish(manifest : Manifest) : IManifestFetcherParsedResult {
+    function finish(manifest: Manifest): IManifestFetcherParsedResult {
       onWarnings(manifest.contentWarnings);
       const parsingTime = performance.now() - parsingTimeStart;
       log.info(`MF: Manifest parsed in ${parsingTime}ms`);
 
-      return { manifest,
-               sendingTime,
-               receivedTime,
-               parsingTime };
+      return { manifest, sendingTime, receivedTime, parsingTime };
     }
   }
 
@@ -374,21 +378,23 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
    * @param {Function} onRetry
    * @returns {Object}
    */
-  private _getBackoffSetting(onRetry : (err : unknown) => void) : IBackoffSettings {
-    const { DEFAULT_MAX_MANIFEST_REQUEST_RETRY,
-            INITIAL_BACKOFF_DELAY_BASE,
-            MAX_BACKOFF_DELAY_BASE } = config.getCurrent();
-    const { lowLatencyMode,
-            maxRetry : ogRegular } = this._settings;
-    const baseDelay = lowLatencyMode ? INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY :
-                                       INITIAL_BACKOFF_DELAY_BASE.REGULAR;
-    const maxDelay = lowLatencyMode ? MAX_BACKOFF_DELAY_BASE.LOW_LATENCY :
-                                      MAX_BACKOFF_DELAY_BASE.REGULAR;
+  private _getBackoffSetting(
+    onRetry: (err: unknown) => void
+  ): IBackoffSettings {
+    const {
+      DEFAULT_MAX_MANIFEST_REQUEST_RETRY,
+      INITIAL_BACKOFF_DELAY_BASE,
+      MAX_BACKOFF_DELAY_BASE,
+    } = config.getCurrent();
+    const { lowLatencyMode, maxRetry: ogRegular } = this._settings;
+    const baseDelay = lowLatencyMode
+      ? INITIAL_BACKOFF_DELAY_BASE.LOW_LATENCY
+      : INITIAL_BACKOFF_DELAY_BASE.REGULAR;
+    const maxDelay = lowLatencyMode
+      ? MAX_BACKOFF_DELAY_BASE.LOW_LATENCY
+      : MAX_BACKOFF_DELAY_BASE.REGULAR;
     const maxRetry = ogRegular ?? DEFAULT_MAX_MANIFEST_REQUEST_RETRY;
-    return { onRetry,
-             baseDelay,
-             maxDelay,
-             maxRetry };
+    return { onRetry, baseDelay, maxDelay, maxRetry };
   }
 
   /**
@@ -397,22 +403,29 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
    * @param {Object} manifestRequestInfos - Various information linked to the
    * last Manifest loading and parsing operations.
    */
-  private _recursivelyRefreshManifest (
-    manifest : Manifest,
-    { sendingTime, parsingTime, updatingTime } : { sendingTime?: number | undefined;
-                                                   parsingTime? : number | undefined;
-                                                   updatingTime? : number | undefined; }
-  ) : void {
-    const { MAX_CONSECUTIVE_MANIFEST_PARSING_IN_UNSAFE_MODE,
-            MIN_MANIFEST_PARSING_TIME_TO_ENTER_UNSAFE_MODE } = config.getCurrent();
+  private _recursivelyRefreshManifest(
+    manifest: Manifest,
+    {
+      sendingTime,
+      parsingTime,
+      updatingTime,
+    }: {
+      sendingTime?: number | undefined;
+      parsingTime?: number | undefined;
+      updatingTime?: number | undefined;
+    }
+  ): void {
+    const {
+      MAX_CONSECUTIVE_MANIFEST_PARSING_IN_UNSAFE_MODE,
+      MIN_MANIFEST_PARSING_TIME_TO_ENTER_UNSAFE_MODE,
+    } = config.getCurrent();
 
     /**
      * Total time taken to fully update the last Manifest, in milliseconds.
      * Note: this time also includes possible requests done by the parsers.
      */
-    const totalUpdateTime = parsingTime !== undefined ?
-      parsingTime + (updatingTime ?? 0) :
-      undefined;
+    const totalUpdateTime =
+      parsingTime !== undefined ? parsingTime + (updatingTime ?? 0) : undefined;
 
     /**
      * "unsafeMode" is a mode where we unlock advanced Manifest parsing
@@ -423,44 +436,51 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
      * lot of time and do not go higher than the maximum consecutive time.
      */
 
-    const unsafeModeEnabled = this._consecutiveUnsafeMode > 0 ?
-      this._consecutiveUnsafeMode < MAX_CONSECUTIVE_MANIFEST_PARSING_IN_UNSAFE_MODE :
-      totalUpdateTime !== undefined ?
-        (totalUpdateTime >= MIN_MANIFEST_PARSING_TIME_TO_ENTER_UNSAFE_MODE) :
-        false;
+    const unsafeModeEnabled =
+      this._consecutiveUnsafeMode > 0
+        ? this._consecutiveUnsafeMode <
+          MAX_CONSECUTIVE_MANIFEST_PARSING_IN_UNSAFE_MODE
+        : totalUpdateTime !== undefined
+        ? totalUpdateTime >= MIN_MANIFEST_PARSING_TIME_TO_ENTER_UNSAFE_MODE
+        : false;
 
     /** Time elapsed since the beginning of the Manifest request, in milliseconds. */
-    const timeSinceRequest = sendingTime === undefined ?
-      0 :
-      performance.now() - sendingTime;
+    const timeSinceRequest =
+      sendingTime === undefined ? 0 : performance.now() - sendingTime;
 
     /** Minimum update delay we should not go below, in milliseconds. */
-    const minInterval = Math.max(this._settings.minimumManifestUpdateInterval -
-                                   timeSinceRequest,
-                                 0);
+    const minInterval = Math.max(
+      this._settings.minimumManifestUpdateInterval - timeSinceRequest,
+      0
+    );
 
     /**
      * Multiple refresh trigger are scheduled here, but only the first one should
      * be effectively considered.
      * `nextRefreshCanceller` will allow to cancel every other when one is triggered.
      */
-    const nextRefreshCanceller = new TaskCanceller({ cancelOn: this._canceller.signal });
+    const nextRefreshCanceller = new TaskCanceller({
+      cancelOn: this._canceller.signal,
+    });
 
     /* Function to manually schedule a Manifest refresh */
-    this.scheduleManualRefresh = (settings : IManifestRefreshSettings) => {
+    this.scheduleManualRefresh = (settings: IManifestRefreshSettings) => {
       const { enablePartialRefresh, delay, canUseUnsafeMode } = settings;
       const unsafeMode = canUseUnsafeMode && unsafeModeEnabled;
       // The value allows to set a delay relatively to the last Manifest refresh
       // (to avoid asking for it too often).
-      const timeSinceLastRefresh = sendingTime === undefined ?
-                                     0 :
-                                     performance.now() - sendingTime;
-      const _minInterval = Math.max(this._settings.minimumManifestUpdateInterval -
-                                      timeSinceLastRefresh,
-                                    0);
+      const timeSinceLastRefresh =
+        sendingTime === undefined ? 0 : performance.now() - sendingTime;
+      const _minInterval = Math.max(
+        this._settings.minimumManifestUpdateInterval - timeSinceLastRefresh,
+        0
+      );
       const timeoutId = setTimeout(() => {
         nextRefreshCanceller.cancel();
-        this._triggerNextManifestRefresh(manifest, { enablePartialRefresh, unsafeMode });
+        this._triggerNextManifestRefresh(manifest, {
+          enablePartialRefresh,
+          unsafeMode,
+        });
       }, Math.max((delay ?? 0) - timeSinceLastRefresh, _minInterval));
       nextRefreshCanceller.signal.register(() => {
         clearTimeout(timeoutId);
@@ -472,8 +492,10 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
       const timeoutId = setTimeout(() => {
         manifest.expired?.then(() => {
           nextRefreshCanceller.cancel();
-          this._triggerNextManifestRefresh(manifest, { enablePartialRefresh: false,
-                                                       unsafeMode: unsafeModeEnabled });
+          this._triggerNextManifestRefresh(manifest, {
+            enablePartialRefresh: false,
+            unsafeMode: unsafeModeEnabled,
+          });
         }, noop /* `expired` should not reject */);
       }, minInterval);
       nextRefreshCanceller.signal.register(() => {
@@ -491,7 +513,7 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
       const regularRefreshDelay = manifest.lifetime * 1000 - timeSinceRequest;
 
       /** Actually choosen delay to refresh the Manifest. */
-      let actualRefreshInterval : number;
+      let actualRefreshInterval: number;
 
       if (totalUpdateTime === undefined) {
         actualRefreshInterval = regularRefreshDelay;
@@ -512,9 +534,11 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
           // performance seems to have been abysmal one time.
           regularRefreshDelay * 6
         );
-        log.info("MUS: Manifest update rythm is too frequent. Postponing next request.",
-                 regularRefreshDelay,
-                 actualRefreshInterval);
+        log.info(
+          "MUS: Manifest update rythm is too frequent. Postponing next request.",
+          regularRefreshDelay,
+          actualRefreshInterval
+        );
       } else if (totalUpdateTime >= (manifest.lifetime * 1000) / 10) {
         // If Manifest updating time is very long relative to its lifetime,
         // postpone it:
@@ -526,17 +550,22 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
           // to `regularRefreshDelay`.
           // This avoid perpetually postponing a Manifest update when
           // performance seems to have been abysmal one time.
-          regularRefreshDelay * 6);
-        log.info("MUS: Manifest took too long to parse. Postponing next request",
-                 actualRefreshInterval,
-                 actualRefreshInterval);
+          regularRefreshDelay * 6
+        );
+        log.info(
+          "MUS: Manifest took too long to parse. Postponing next request",
+          actualRefreshInterval,
+          actualRefreshInterval
+        );
       } else {
         actualRefreshInterval = regularRefreshDelay;
       }
       const timeoutId = setTimeout(() => {
         nextRefreshCanceller.cancel();
-        this._triggerNextManifestRefresh(manifest, { enablePartialRefresh: false,
-                                                     unsafeMode: unsafeModeEnabled });
+        this._triggerNextManifestRefresh(manifest, {
+          enablePartialRefresh: false,
+          unsafeMode: unsafeModeEnabled,
+        });
       }, Math.max(actualRefreshInterval, minInterval));
       nextRefreshCanceller.signal.register(() => {
         clearTimeout(timeoutId);
@@ -552,32 +581,38 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
    * @param {Object} refreshInformation
    */
   private _triggerNextManifestRefresh(
-    manifest : Manifest,
-    { enablePartialRefresh,
-      unsafeMode } : { enablePartialRefresh : boolean;
-                       unsafeMode : boolean; }
+    manifest: Manifest,
+    {
+      enablePartialRefresh,
+      unsafeMode,
+    }: { enablePartialRefresh: boolean; unsafeMode: boolean }
   ) {
     const manifestUpdateUrl = manifest.updateUrl;
-    let fullRefresh : boolean;
-    let refreshURL : string | undefined;
+    let fullRefresh: boolean;
+    let refreshURL: string | undefined;
     if (this._prioritizedContentUrl !== null) {
       fullRefresh = true;
       refreshURL = this._prioritizedContentUrl;
       this._prioritizedContentUrl = null;
     } else {
       fullRefresh = !enablePartialRefresh || manifestUpdateUrl === undefined;
-      refreshURL = fullRefresh ? manifest.getUrls()[0] :
-                                 manifestUpdateUrl;
+      refreshURL = fullRefresh ? manifest.getUrls()[0] : manifestUpdateUrl;
     }
     const externalClockOffset = manifest.clockOffset;
 
     if (unsafeMode) {
       this._consecutiveUnsafeMode += 1;
-      log.info("Init: Refreshing the Manifest in \"unsafeMode\" for the " +
-               String(this._consecutiveUnsafeMode) + " consecutive time.");
+      log.info(
+        'Init: Refreshing the Manifest in "unsafeMode" for the ' +
+          String(this._consecutiveUnsafeMode) +
+          " consecutive time."
+      );
     } else if (this._consecutiveUnsafeMode > 0) {
-      log.info("Init: Not parsing the Manifest in \"unsafeMode\" anymore after " +
-               String(this._consecutiveUnsafeMode) + " consecutive times.");
+      log.info(
+        'Init: Not parsing the Manifest in "unsafeMode" anymore after ' +
+          String(this._consecutiveUnsafeMode) +
+          " consecutive times."
+      );
       this._consecutiveUnsafeMode = 0;
     }
 
@@ -586,14 +621,20 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
     }
     this._isRefreshPending = true;
     this._fetchManifest(refreshURL)
-      .then(res => res.parse({ externalClockOffset,
-                               previousManifest: manifest,
-                               unsafeMode }))
-      .then(res => {
+      .then((res) =>
+        res.parse({
+          externalClockOffset,
+          previousManifest: manifest,
+          unsafeMode,
+        })
+      )
+      .then((res) => {
         this._isRefreshPending = false;
-        const { manifest: newManifest,
-                sendingTime: newSendingTime,
-                parsingTime } = res;
+        const {
+          manifest: newManifest,
+          sendingTime: newSendingTime,
+          parsingTime,
+        } = res;
         const updateTimeStart = performance.now();
 
         if (fullRefresh) {
@@ -602,29 +643,33 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
           try {
             manifest.update(newManifest);
           } catch (e) {
-            const message = e instanceof Error ? e.message :
-                                                 "unknown error";
-            log.warn(`MUS: Attempt to update Manifest failed: ${message}`,
-                     "Re-downloading the Manifest fully");
-            const { FAILED_PARTIAL_UPDATE_MANIFEST_REFRESH_DELAY } = config.getCurrent();
+            const message = e instanceof Error ? e.message : "unknown error";
+            log.warn(
+              `MUS: Attempt to update Manifest failed: ${message}`,
+              "Re-downloading the Manifest fully"
+            );
+            const { FAILED_PARTIAL_UPDATE_MANIFEST_REFRESH_DELAY } =
+              config.getCurrent();
 
             // The value allows to set a delay relatively to the last Manifest refresh
             // (to avoid asking for it too often).
-            const timeSinceLastRefresh = newSendingTime === undefined ?
-                                           0 :
-                                           performance.now() - newSendingTime;
-            const _minInterval = Math.max(this._settings.minimumManifestUpdateInterval -
-                                            timeSinceLastRefresh,
-                                          0);
+            const timeSinceLastRefresh =
+              newSendingTime === undefined
+                ? 0
+                : performance.now() - newSendingTime;
+            const _minInterval = Math.max(
+              this._settings.minimumManifestUpdateInterval -
+                timeSinceLastRefresh,
+              0
+            );
             let unregisterCanceller = noop;
             const timeoutId = setTimeout(() => {
               unregisterCanceller();
-              this._triggerNextManifestRefresh(manifest,
-                                               { enablePartialRefresh: false,
-                                                 unsafeMode: false });
-            }, Math.max(FAILED_PARTIAL_UPDATE_MANIFEST_REFRESH_DELAY -
-                          timeSinceLastRefresh,
-                        _minInterval));
+              this._triggerNextManifestRefresh(manifest, {
+                enablePartialRefresh: false,
+                unsafeMode: false,
+              });
+            }, Math.max(FAILED_PARTIAL_UPDATE_MANIFEST_REFRESH_DELAY - timeSinceLastRefresh, _minInterval));
             unregisterCanceller = this._canceller.signal.register(() => {
               clearTimeout(timeoutId);
             });
@@ -632,9 +677,11 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
           }
         }
         const updatingTime = performance.now() - updateTimeStart;
-        this._recursivelyRefreshManifest(manifest, { sendingTime: newSendingTime,
-                                                     parsingTime,
-                                                     updatingTime });
+        this._recursivelyRefreshManifest(manifest, {
+          sendingTime: newSendingTime,
+          parsingTime,
+          updatingTime,
+        });
       })
       .catch((err) => {
         this._isRefreshPending = false;
@@ -642,7 +689,7 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
       });
   }
 
-  private _onFatalError(err : unknown) : void {
+  private _onFatalError(err: unknown): void {
     if (this._canceller.isUsed) {
       return;
     }
@@ -657,30 +704,31 @@ export default class ManifestFetcher extends EventEmitter<IManifestFetcherEvent>
  * @param {*} val
  * @returns {boolean}
  */
-function isPromise<T>(val : T | Promise<T>) : val is Promise<T> {
+function isPromise<T>(val: T | Promise<T>): val is Promise<T> {
   return val instanceof Promise;
 }
 
 /** What will be sent once parsed. */
 interface IManifestFetcherParsedResult {
   /** The resulting Manifest */
-  manifest : Manifest;
+  manifest: Manifest;
   /**
    * The time (`performance.now()`) at which the request was started (at which
    * the JavaScript call was done).
    */
-  sendingTime? : number | undefined;
+  sendingTime?: number | undefined;
   /** The time (`performance.now()`) at which the request was fully received. */
-  receivedTime? : number | undefined;
+  receivedTime?: number | undefined;
   /* The time taken to parse the Manifest through the corresponding parse function. */
-  parsingTime? : number | undefined;
+  parsingTime?: number | undefined;
 }
 
 /** Response emitted by a Manifest fetcher. */
 interface IManifestFetcherResponse {
   /** Allows to parse a fetched Manifest into a `Manifest` structure. */
-  parse(parserOptions : IManifestFetcherParserOptions) :
-    Promise<IManifestFetcherParsedResult>;
+  parse(
+    parserOptions: IManifestFetcherParserOptions
+  ): Promise<IManifestFetcherParsedResult>;
 }
 
 interface IManifestFetcherParserOptions {
@@ -688,9 +736,9 @@ interface IManifestFetcherParserOptions {
    * If set, offset to add to `performance.now()` to obtain the current
    * server's time.
    */
-  externalClockOffset? : number | undefined;
+  externalClockOffset?: number | undefined;
   /** The previous value of the Manifest (when updating). */
-  previousManifest : Manifest | null;
+  previousManifest: Manifest | null;
   /**
    * If set to `true`, the Manifest parser can perform advanced optimizations
    * to speed-up the parsing process. Those optimizations might lead to a
@@ -698,7 +746,7 @@ interface IManifestFetcherParserOptions {
    * part.
    * To use with moderation and only when needed.
    */
-  unsafeMode : boolean;
+  unsafeMode: boolean;
 }
 
 /** Options used by `createManifestFetcher`. */
@@ -707,36 +755,36 @@ export interface IManifestFetcherSettings {
    * Whether the content is played in a low-latency mode.
    * This has an impact on default backoff delays.
    */
-  lowLatencyMode : boolean;
+  lowLatencyMode: boolean;
   /** Maximum number of time a request on error will be retried. */
-  maxRetry : number | undefined;
+  maxRetry: number | undefined;
   /**
    * Timeout after which request are aborted and, depending on other options,
    * retried.
    * To set to `-1` for no timeout.
    * `undefined` will lead to a default, large, timeout being used.
    */
-  requestTimeout : number | undefined;
+  requestTimeout: number | undefined;
   /** Limit the frequency of Manifest updates. */
-  minimumManifestUpdateInterval : number;
+  minimumManifestUpdateInterval: number;
   /**
    * Potential first Manifest to rely on, allowing to skip the initial Manifest
    * request.
    */
-  initialManifest : IInitialManifest | undefined;
+  initialManifest: IInitialManifest | undefined;
 }
 
 /** Event sent by the `ManifestFetcher`. */
 export interface IManifestFetcherEvent {
   /** Event sent by the `ManifestFetcher` when a minor error has been encountered. */
-  warning : IPlayerError;
+  warning: IPlayerError;
   /**
    * Event sent by the `ManifestFetcher` when a major error has been encountered,
    * leading to the `ManifestFetcher` being disposed.
    */
-  error : unknown;
+  error: unknown;
   /** Event sent after the Manifest has first been fetched. */
-  manifestReady : Manifest;
+  manifestReady: Manifest;
 }
 
 /** Argument defined when forcing a Manifest refresh. */
@@ -754,16 +802,16 @@ export interface IManifestRefreshSettings {
    * Manifest is available.
    * In other cases, setting this value to `true` won't have any effect.
    */
-  enablePartialRefresh : boolean;
+  enablePartialRefresh: boolean;
   /**
    * Optional wanted refresh delay, which is the minimum time you want to wait
    * before updating the Manifest
    */
-  delay? : number | undefined;
+  delay?: number | undefined;
   /**
    * Whether the parsing can be done in the more efficient "unsafeMode".
    * This mode is extremely fast but can lead to de-synchronisation with the
    * server.
    */
-  canUseUnsafeMode : boolean;
+  canUseUnsafeMode: boolean;
 }

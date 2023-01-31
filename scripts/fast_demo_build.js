@@ -54,59 +54,78 @@ function fastDemoBuild(options) {
   const includeWasmParser = !!options.includeWasmParser;
   let beforeTime = process.hrtime.bigint();
 
-  esbuild.build({
-    entryPoints: [path.join(__dirname, "../demo/full/scripts/index.jsx")],
-    bundle: true,
-    minify,
-    outfile: path.join(__dirname, "../demo/full/bundle.js"),
-    watch: !watch ? undefined : {
-      onRebuild(error, result) {
-        if (error) {
-          console.error(`\x1b[31m[${getHumanReadableHours()}]\x1b[0m Demo re-build failed:`,
-                        err);
-        } else {
-          if (result.errors > 0 || result.warnings > 0) {
-            const { errors, warnings } = result;
-            console.log(`\x1b[33m[${getHumanReadableHours()}]\x1b[0m ` +
-                        `Demo re-built with ${errors.length} error(s) and ` +
-                        ` ${warnings.length} warning(s) ` +
-                        `(in ${stats.endTime - stats.startTime} ms).`);
-          }
-          console.log(`\x1b[32m[${getHumanReadableHours()}]\x1b[0m ` +
-                      "Demo re-built!");
-        }
+  esbuild
+    .build({
+      entryPoints: [path.join(__dirname, "../demo/full/scripts/index.jsx")],
+      bundle: true,
+      minify,
+      outfile: path.join(__dirname, "../demo/full/bundle.js"),
+      watch: !watch
+        ? undefined
+        : {
+            onRebuild(error, result) {
+              if (error) {
+                console.error(
+                  `\x1b[31m[${getHumanReadableHours()}]\x1b[0m Demo re-build failed:`,
+                  err
+                );
+              } else {
+                if (result.errors > 0 || result.warnings > 0) {
+                  const { errors, warnings } = result;
+                  console.log(
+                    `\x1b[33m[${getHumanReadableHours()}]\x1b[0m ` +
+                      `Demo re-built with ${errors.length} error(s) and ` +
+                      ` ${warnings.length} warning(s) ` +
+                      `(in ${stats.endTime - stats.startTime} ms).`
+                  );
+                }
+                console.log(
+                  `\x1b[32m[${getHumanReadableHours()}]\x1b[0m ` +
+                    "Demo re-built!"
+                );
+              }
+            },
+          },
+      define: {
+        "process.env.NODE_ENV": JSON.stringify(
+          isDevMode ? "development" : "production"
+        ),
+        __INCLUDE_WASM_PARSER__: includeWasmParser,
+        __ENVIRONMENT__: JSON.stringify({
+          PRODUCTION: 0,
+          DEV: 1,
+          CURRENT_ENV: isDevMode ? 1 : 0,
+        }),
+        __LOGGER_LEVEL__: JSON.stringify({
+          CURRENT_LEVEL: "INFO",
+        }),
       },
-    },
-    define: {
-      "process.env.NODE_ENV": JSON.stringify(isDevMode ? "development" : "production"),
-      __INCLUDE_WASM_PARSER__: includeWasmParser,
-      __ENVIRONMENT__: JSON.stringify({
-        PRODUCTION: 0,
-        DEV: 1,
-        CURRENT_ENV: isDevMode ? 1 : 0,
-      }),
-      __LOGGER_LEVEL__: JSON.stringify({
-        CURRENT_LEVEL: "INFO",
-      }),
-    }
-  }).then(
-  (result) => {
-    if (result.errors > 0 || result.warnings > 0) {
-      const { errors, warnings } = result;
-      console.log(`\x1b[33m[${getHumanReadableHours()}]\x1b[0m ` +
-                  `Demo built with ${errors.length} error(s) and ` +
-                  ` ${warnings.length} warning(s) ` +
-                  `(in ${stats.endTime - stats.startTime} ms).`);
-    }
-    const fullTime = (process.hrtime.bigint() - beforeTime) / 1000000n;
-    console.log(`\x1b[32m[${getHumanReadableHours()}]\x1b[0m ` +
-                `Build done in ${fullTime}ms`);
-  },
-  (err) => {
-    console.error(`\x1b[31m[${getHumanReadableHours()}]\x1b[0m Demo build failed:`,
-                  err);
-    process.exit(1);
-  });
+    })
+    .then(
+      (result) => {
+        if (result.errors > 0 || result.warnings > 0) {
+          const { errors, warnings } = result;
+          console.log(
+            `\x1b[33m[${getHumanReadableHours()}]\x1b[0m ` +
+              `Demo built with ${errors.length} error(s) and ` +
+              ` ${warnings.length} warning(s) ` +
+              `(in ${stats.endTime - stats.startTime} ms).`
+          );
+        }
+        const fullTime = (process.hrtime.bigint() - beforeTime) / 1000000n;
+        console.log(
+          `\x1b[32m[${getHumanReadableHours()}]\x1b[0m ` +
+            `Build done in ${fullTime}ms`
+        );
+      },
+      (err) => {
+        console.error(
+          `\x1b[31m[${getHumanReadableHours()}]\x1b[0m Demo build failed:`,
+          err
+        );
+        process.exit(1);
+      }
+    );
 }
 
 /**
@@ -116,14 +135,14 @@ function fastDemoBuild(options) {
 function displayHelp() {
   /* eslint-disable no-console */
   console.log(
-  /* eslint-disable indent */
-`Usage: node generate_full_demo.js [options]
+    /* eslint-disable indent */
+    `Usage: node generate_full_demo.js [options]
 Options:
   -h, --help             Display this help
   -m, --minify           Minify the built demo
   -p, --production-mode  Build all files in production mode (less runtime checks, mostly).
-  -w, --watch            Re-build each time either the demo or library files change`,
-  /* eslint-enable indent */
+  -w, --watch            Re-build each time either the demo or library files change`
+    /* eslint-enable indent */
   );
   /* eslint-enable no-console */
 }

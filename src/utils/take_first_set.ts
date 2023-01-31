@@ -21,25 +21,23 @@ import isNullOrUndefined from "./is_null_or_undefined";
  * @param {...*} args
  * @returns {*}
  */
-export default function takeFirstSet<T>(
-  a : T,
-  b? : undefined | null | T
-) : T;
-export default function takeFirstSet<T>(a : T | undefined | null, b : T) : T;
+export default function takeFirstSet<T>(a: T, b?: undefined | null | T): T;
+export default function takeFirstSet<T>(a: T | undefined | null, b: T): T;
 export default function takeFirstSet(
-  a? : undefined|null,
-  b? : undefined|null
-) : undefined;
+  a?: undefined | null,
+  b?: undefined | null
+): undefined;
 export default function takeFirstSet<T>(
-  a : undefined|null|T,
-  b : undefined|null|T,
-  c : T
-) : T;
-export default function takeFirstSet<T>(...args : Array<T|null|undefined>) : T |
-                                                                             undefined;
+  a: undefined | null | T,
+  b: undefined | null | T,
+  c: T
+): T;
 export default function takeFirstSet<T>(
-  ...args : Array<T|null|undefined>
-) : T | undefined {
+  ...args: Array<T | null | undefined>
+): T | undefined;
+export default function takeFirstSet<T>(
+  ...args: Array<T | null | undefined>
+): T | undefined {
   let i = 0;
   const len = args.length;
   while (i < len) {

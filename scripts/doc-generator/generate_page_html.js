@@ -24,61 +24,65 @@ const { encode } = require("html-entities");
  * `undefined` if your page has no table of contents.
  * @returns {string} - Whole HTML string for the documentation page.
  */
-function generatePageHtml(
-  {
-    contentHtml,
-    cssUrls,
-    faviconUrl,
-    navBarHtml,
-    pageListHtml,
-    rootUrl,
-    scriptUrls,
-    sidebarHtml,
-    title,
-    tocHtml,
-  }
-) {
+function generatePageHtml({
+  contentHtml,
+  cssUrls,
+  faviconUrl,
+  navBarHtml,
+  pageListHtml,
+  rootUrl,
+  scriptUrls,
+  sidebarHtml,
+  title,
+  tocHtml,
+}) {
   const styles = constructStylesHtml(cssUrls);
   const scripts = constructScriptsHtml(scriptUrls);
-  const faviconHtml = typeof faviconUrl === "string" ?
-    `<link rel="icon" type="image/png" href="${encode(faviconUrl)}">` :
-    "";
+  const faviconHtml =
+    typeof faviconUrl === "string"
+      ? `<link rel="icon" type="image/png" href="${encode(faviconUrl)}">`
+      : "";
   const hamburgerHtml = constructHamburgerBarHtml(pageListHtml);
 
-  return "<!DOCTYPE html><html lang=\"en\"><head>" +
-           "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" +
-           "<meta charset=\"utf-8\">" +
-           styles +
-           "<title>" + encode(title) + "</title>" +
-           faviconHtml +
-         "</head>" +
-         "<body class=\"no-js\">" +
-         `<script type="text/javascript">` +
-         `document.body.className = "";` +
-         `window.rootUrl = "${rootUrl}";` +
-         "</script>" +
-           "<div class=\"page-wrapper\">" +
-             navBarHtml +
-             sidebarHtml +
-             "<div class=\"content-wrapper\">" +
-               "<div class=\"content\">" +
-                 `<div id="search-wrapper">` +
-                   `<input type="search" name="search" id="searchbar" ` +
-                   `placeholder="Search in this documentation" class="active" />` +
-                   `<div id="search-results"></div>` +
-                 `</div>` +
-                 contentHtml +
-               `</div>` +
-               tocHtml +
-             "</div>" +
-           "</div>" +
-           hamburgerHtml +
-           scripts +
-           "</body></html>";
-};
+  return (
+    '<!DOCTYPE html><html lang="en"><head>' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1">' +
+    '<meta charset="utf-8">' +
+    styles +
+    "<title>" +
+    encode(title) +
+    "</title>" +
+    faviconHtml +
+    "</head>" +
+    '<body class="no-js">' +
+    `<script type="text/javascript">` +
+    `document.body.className = "";` +
+    `window.rootUrl = "${rootUrl}";` +
+    "</script>" +
+    '<div class="page-wrapper">' +
+    navBarHtml +
+    sidebarHtml +
+    '<div class="content-wrapper">' +
+    '<div class="content">' +
+    `<div id="search-wrapper">` +
+    `<input type="search" name="search" id="searchbar" ` +
+    `placeholder="Search in this documentation" class="active" />` +
+    `<div id="search-results"></div>` +
+    `</div>` +
+    contentHtml +
+    `</div>` +
+    tocHtml +
+    "</div>" +
+    "</div>" +
+    hamburgerHtml +
+    scripts +
+    "</body></html>"
+  );
+}
 
 function constructHamburgerBarHtml(pageListHtml) {
-  return `<div class="hamburger-bar">` +
+  return (
+    `<div class="hamburger-bar">` +
     `<div class="hamburger-header">` +
     `<span class="hamburger-title">Page List</span>` +
     `<button aria-label="Close website index" type="button" class="hamburger-bar-closer">` +
@@ -87,7 +91,8 @@ function constructHamburgerBarHtml(pageListHtml) {
     `</svg></button>` +
     `</div>` +
     pageListHtml +
-    "</div>";
+    "</div>"
+  );
 }
 
 /**
@@ -96,8 +101,8 @@ function constructHamburgerBarHtml(pageListHtml) {
  * @returns {string}
  */
 function constructStylesHtml(cssUrls) {
-  return cssUrls.map(cssUrl =>
-    `<link rel="stylesheet" href="${encode(cssUrl)}"/>`)
+  return cssUrls
+    .map((cssUrl) => `<link rel="stylesheet" href="${encode(cssUrl)}"/>`)
     .join("");
 }
 
@@ -106,10 +111,13 @@ function constructStylesHtml(cssUrls) {
  * @returns {string}
  */
 function constructScriptsHtml(scriptUrls) {
-  return scriptUrls.map(scriptUrl =>
-    `<script type="text/javascript" src="${encode(scriptUrl)}" ` +
-    `charset="utf-8"></script>`
-  ).join("");
+  return scriptUrls
+    .map(
+      (scriptUrl) =>
+        `<script type="text/javascript" src="${encode(scriptUrl)}" ` +
+        `charset="utf-8"></script>`
+    )
+    .join("");
 }
 
 module.exports = generatePageHtml;

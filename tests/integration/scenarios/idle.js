@@ -54,7 +54,7 @@ describe("initial idle state", () => {
     });
 
     describe("getPlayerState", () => {
-      it("should return \"STOPPED\" in getPlayerState by default", () => {
+      it('should return "STOPPED" in getPlayerState by default', () => {
         expect(player.getPlayerState()).to.equal("STOPPED");
       });
     });
@@ -73,7 +73,6 @@ describe("initial idle state", () => {
 
     describe("getMediaDuration", () => {
       it("should return the video element initial duration in getMediaDuration by default", () => {
-
         // ! HAHA ! NaN is not === to NaN
         expect(player.getMediaDuration()).to.eql(
           player.getVideoElement().duration
@@ -261,7 +260,6 @@ describe("initial idle state", () => {
         player.setVolume(oldVolume);
       });
     });
-
 
     describe("getMaxBufferBehind/setMaxBufferBehind", () => {
       it("should update the max buffer behind through setMaxBufferBehind by default", () => {

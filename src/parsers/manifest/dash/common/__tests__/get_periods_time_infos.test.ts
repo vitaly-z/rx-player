@@ -61,56 +61,51 @@ describe("DASH Parser - getPeriodsTimeInformation", () => {
       {} as IParsedPeriodsContext
     );
     expect(timeInfos[0].periodStart).toEqual(periodsInfos[0].attributes.start);
-    expect(timeInfos[0].periodDuration).toEqual(periodsInfos[0].attributes.duration);
+    expect(timeInfos[0].periodDuration).toEqual(
+      periodsInfos[0].attributes.duration
+    );
     expect(timeInfos[1].periodStart).toEqual(periodsInfos[1].attributes.start);
-    expect(timeInfos[1].periodDuration).toEqual(periodsInfos[1].attributes.duration);
+    expect(timeInfos[1].periodDuration).toEqual(
+      periodsInfos[1].attributes.duration
+    );
   });
 
   it("should infer duration from manifest infos", () => {
-    const periodsInfos = [
-      { attributes: { start: 0 } },
-    ];
+    const periodsInfos = [{ attributes: { start: 0 } }];
     const manifestInfos = {
       duration: 20,
     };
-    const timeInfos =
-      getPeriodsTimeInformation(
-        periodsInfos as IPeriodIntermediateRepresentation[],
-        manifestInfos as IParsedPeriodsContext
-      );
+    const timeInfos = getPeriodsTimeInformation(
+      periodsInfos as IPeriodIntermediateRepresentation[],
+      manifestInfos as IParsedPeriodsContext
+    );
     expect(timeInfos[0].periodDuration).toEqual(manifestInfos.duration);
   });
 
   it("should infer start from availability start time", () => {
-    const periodsInfos = [
-      { attributes: { duration: 10 } },
-    ];
+    const periodsInfos = [{ attributes: { duration: 10 } }];
     const manifestInfos = {
       isDynamic: true,
       availabilityStartTime: 500,
     };
-    const timeInfos =
-      getPeriodsTimeInformation(
-        periodsInfos as IPeriodIntermediateRepresentation[],
-        manifestInfos as IParsedPeriodsContext
-      );
+    const timeInfos = getPeriodsTimeInformation(
+      periodsInfos as IPeriodIntermediateRepresentation[],
+      manifestInfos as IParsedPeriodsContext
+    );
     expect(timeInfos[0].periodStart).toBe(500);
     expect(timeInfos[0].periodDuration).toBe(10);
     expect(timeInfos[0].periodEnd).toBe(510);
   });
 
   it("should infer start from non-static manifest", () => {
-    const periodsInfos = [
-      { attributes: { duration: 10 } },
-    ];
+    const periodsInfos = [{ attributes: { duration: 10 } }];
     const manifestInfos = {
       isDynamic: false,
     };
-    const timeInfos =
-      getPeriodsTimeInformation(
-        periodsInfos as IPeriodIntermediateRepresentation[],
-        manifestInfos as IParsedPeriodsContext
-      );
+    const timeInfos = getPeriodsTimeInformation(
+      periodsInfos as IPeriodIntermediateRepresentation[],
+      manifestInfos as IParsedPeriodsContext
+    );
     expect(timeInfos[0].periodStart).toBe(0);
     expect(timeInfos[0].periodDuration).toBe(10);
     expect(timeInfos[0].periodEnd).toBe(10);

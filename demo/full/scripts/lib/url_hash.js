@@ -87,13 +87,13 @@ export function parseHashInURL(hashStr) {
     const unparsedStr = hashStr.substring(hashOffset);
     const nextSeparator = unparsedStr.indexOf(separatorChar);
     const nextUnderscore = unparsedStr.indexOf("_");
-    if (nextUnderscore <= 0 ||
-        (nextSeparator >= 0 && nextUnderscore > nextSeparator))
-    {
+    if (
+      nextUnderscore <= 0 ||
+      (nextSeparator >= 0 && nextUnderscore > nextSeparator)
+    ) {
       // this is a boolean
-      const fieldLength = nextSeparator >= 0 ?
-        nextSeparator :
-        unparsedStr.length;
+      const fieldLength =
+        nextSeparator >= 0 ? nextSeparator : unparsedStr.length;
       const fieldName = unparsedStr.substring(0, fieldLength);
       hashOffset += fieldLength; // skip field name
       parsed[fieldName] = true;
@@ -101,7 +101,7 @@ export function parseHashInURL(hashStr) {
       // data in a string form
       const fieldName = unparsedStr.substring(0, nextUnderscore);
       hashOffset += nextUnderscore + 1; // skip field name and its following
-                                        // underscore
+      // underscore
 
       const splitted = unparsedStr.substring(nextUnderscore + 1).split("=");
       if (!splitted.length) {
@@ -150,53 +150,59 @@ export function generateLinkForCustomContent({
   let drmTypeString = "";
   let customKeySystemString = "";
   if (manifestURL) {
-    urlString = "!manifest_" +
-                manifestURL.length.toString(36) +
-                "=" + manifestURL;
+    urlString =
+      "!manifest_" + manifestURL.length.toString(36) + "=" + manifestURL;
   }
   if (transport) {
-    transportString = "!tech_" +
-                      transport.length.toString(36) +
-                      "=" + transport;
+    transportString =
+      "!tech_" + transport.length.toString(36) + "=" + transport;
   }
   if (chosenDRMType) {
-    drmTypeString = "!drm_" +
-                    chosenDRMType.length.toString(36) +
-                    "=" + chosenDRMType;
+    drmTypeString =
+      "!drm_" + chosenDRMType.length.toString(36) + "=" + chosenDRMType;
   }
   if (customKeySystem) {
-    customKeySystemString = "!customKeySystem_" +
-                            customKeySystem.length.toString(36) +
-                            "=" + customKeySystem;
+    customKeySystemString =
+      "!customKeySystem_" +
+      customKeySystem.length.toString(36) +
+      "=" +
+      customKeySystem;
   }
   if (licenseServerUrl) {
-    licenseServerUrlString = "!licenseServ_" +
-                             licenseServerUrl.length.toString(36) +
-                             "=" + licenseServerUrl;
+    licenseServerUrlString =
+      "!licenseServ_" +
+      licenseServerUrl.length.toString(36) +
+      "=" +
+      licenseServerUrl;
   }
   if (serverCertificateUrl) {
-    serverCertificateUrlString = "!certServ_" +
-                                 serverCertificateUrl.length.toString(36) +
-                                 "=" + serverCertificateUrl;
+    serverCertificateUrlString =
+      "!certServ_" +
+      serverCertificateUrl.length.toString(36) +
+      "=" +
+      serverCertificateUrl;
   }
 
   if (!transportString) {
     return null;
   }
 
-  return location.protocol + "//" +
-         location.hostname +
-         (location.port ? ":" + location.port : "") +
-         location.pathname +
-         (location.search ? location.search : "") +
-         "#" +
-         (lowLatency ? "!lowLatency" : "") +
-         (fallbackKeyError ? "!fallbackKeyError" : "") +
-         (fallbackLicenseRequest ? "!fallbackLicenseRequest" : "") +
-         transportString +
-         urlString +
-         drmTypeString +
-         customKeySystemString +
-         licenseServerUrlString +
-         serverCertificateUrlString;
+  return (
+    location.protocol +
+    "//" +
+    location.hostname +
+    (location.port ? ":" + location.port : "") +
+    location.pathname +
+    (location.search ? location.search : "") +
+    "#" +
+    (lowLatency ? "!lowLatency" : "") +
+    (fallbackKeyError ? "!fallbackKeyError" : "") +
+    (fallbackLicenseRequest ? "!fallbackLicenseRequest" : "") +
+    transportString +
+    urlString +
+    drmTypeString +
+    customKeySystemString +
+    licenseServerUrlString +
+    serverCertificateUrlString
+  );
 }

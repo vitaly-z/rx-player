@@ -21,7 +21,7 @@ import { IFeaturesObject } from "../types";
  * Add ability to play Microsoft Smooth Streaming contents.
  * @param {Object} features
  */
-function addSmoothFeature(features : IFeaturesObject) : void {
+function addSmoothFeature(features: IFeaturesObject): void {
   features.transports.smooth = smooth;
 }
 

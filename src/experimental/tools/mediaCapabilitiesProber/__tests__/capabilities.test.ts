@@ -25,13 +25,18 @@ describe("MediaCapabilitiesProber - getProbedConfiguration", () => {
   it("should return result from filtered configuration", () => {
     const expectedResult = { key: "test" };
     const mockExtend = jest.fn(() => ({}));
-    const mockFilterConfigurationWithCapabilities = jest.fn(() => expectedResult);
+    const mockFilterConfigurationWithCapabilities = jest.fn(
+      () => expectedResult
+    );
     jest.mock("../utils.ts", () => ({
       extend: mockExtend,
-      filterConfigurationWithCapabilities: mockFilterConfigurationWithCapabilities,
+      filterConfigurationWithCapabilities:
+        mockFilterConfigurationWithCapabilities,
     }));
-    const getProbedConfiguration = jest.requireActual("../capabilities").default;
-    expect(getProbedConfiguration({}, ["Athos", "Portos", "Aramis"]))
-      .toEqual(expectedResult);
+    const getProbedConfiguration =
+      jest.requireActual("../capabilities").default;
+    expect(getProbedConfiguration({}, ["Athos", "Portos", "Aramis"])).toEqual(
+      expectedResult
+    );
   });
 });

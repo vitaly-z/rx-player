@@ -120,17 +120,17 @@ export default class TaskCanceller {
    * notified that it should be aborted when this `TaskCanceller` is triggered
    * (through its `cancel` method).
    */
-  public signal : CancellationSignal;
+  public signal: CancellationSignal;
   /**
    * `true` if this `TaskCanceller` has already been triggered.
    * `false` otherwise.
    */
-  public isUsed : boolean;
+  public isUsed: boolean;
   /**
    * @private
    * Internal function called when the `TaskCanceller` is triggered`.
    */
-  private _trigger : (error : CancellationError) => void;
+  private _trigger: (error: CancellationError) => void;
 
   /**
    * Creates a new `TaskCanceller`, with its own `CancellationSignal` created
@@ -138,13 +138,17 @@ export default class TaskCanceller {
    * You can then pass this property to async task you wish to be cancellable.
    * @param {Object|undefined} options
    */
-  constructor(options? : {
-    /**
-     * If set the TaskCanceller created here will automatically be triggered
-     * when that signal emits.
-     */
-    cancelOn? : CancellationSignal | undefined;
-  } | undefined) {
+  constructor(
+    options?:
+      | {
+          /**
+           * If set the TaskCanceller created here will automatically be triggered
+           * when that signal emits.
+           */
+          cancelOn?: CancellationSignal | undefined;
+        }
+      | undefined
+  ) {
     const [trigger, register] = createCancellationFunctions();
     this.isUsed = false;
     this._trigger = trigger;
@@ -158,7 +162,6 @@ export default class TaskCanceller {
     }
   }
 
-
   /**
    * "Trigger" the `TaskCanceller`, notify through its associated
    * `CancellationSignal` (its `signal` property) that a task should be aborted.
@@ -170,9 +173,9 @@ export default class TaskCanceller {
    * cancellation.
    * @param {Error} [srcError]
    */
-  public cancel(srcError? : CancellationError) : void {
+  public cancel(srcError?: CancellationError): void {
     if (this.isUsed) {
-      return ;
+      return;
     }
     this.isUsed = true;
     const cancellationError = srcError ?? new CancellationError();
@@ -186,7 +189,7 @@ export default class TaskCanceller {
    * @param {*} error
    * @returns {boolean}
    */
-  static isCancellationError(error : unknown) : boolean {
+  static isCancellationError(error: unknown): boolean {
     return error instanceof CancellationError;
   }
 }
@@ -200,7 +203,7 @@ export class CancellationSignal {
    * True when the cancellation order was already triggered, meaning that the
    * linked task needs to be aborted.
    */
-  public isCancelled : boolean;
+  public isCancelled: boolean;
   /**
    * Error associated to the cancellation, only set if the `CancellationSignal`
    * has been used (which means that the task has been cancelled).
@@ -210,7 +213,7 @@ export class CancellationSignal {
    *
    * Always set if `isCancelled` is equal to `true`.
    */
-  public cancellationError : CancellationError | null;
+  public cancellationError: CancellationError | null;
 
   /**
    * @private
@@ -218,7 +221,7 @@ export class CancellationSignal {
    * Those should perform all logic allowing to cancel the current task(s)
    * which depend on this CancellationSignal.
    */
-  private _listeners : Array<(error : CancellationError) => void>;
+  private _listeners: Array<(error: CancellationError) => void>;
 
   /**
    * Creates a new CancellationSignal.
@@ -226,16 +229,19 @@ export class CancellationSignal {
    * @param {Function} registerToSource - Function called when the task is
    * cancelled.
    */
-  constructor(registerToSource : (listener: ICancellationListener) => void) {
+  constructor(registerToSource: (listener: ICancellationListener) => void) {
     this.isCancelled = false;
     this.cancellationError = null;
     this._listeners = [];
 
-    registerToSource((cancellationError : CancellationError) : void => {
+    registerToSource((cancellationError: CancellationError): void => {
       this.cancellationError = cancellationError;
       this.isCancelled = true;
       while (this._listeners.length > 0) {
-        const listener = this._listeners.splice(this._listeners.length - 1, 1)[0];
+        const listener = this._listeners.splice(
+          this._listeners.length - 1,
+          1
+        )[0];
         listener(cancellationError);
       }
     });
@@ -262,7 +268,7 @@ export class CancellationSignal {
    * You don't need to call that function when cancellation has already been
    * performed.
    */
-  public register(fn : ICancellationListener) : () => void {
+  public register(fn: ICancellationListener): () => void {
     if (this.isCancelled) {
       assert(this.cancellationError !== null);
       fn(this.cancellationError);
@@ -279,7 +285,7 @@ export class CancellationSignal {
    * practical.
    * @param {Function} fn
    */
-  public deregister(fn : ICancellationListener) : void {
+  public deregister(fn: ICancellationListener): void {
     if (this.isCancelled) {
       return;
     }
@@ -296,7 +302,7 @@ export class CancellationSignal {
  * Helper type allowing a `CancellationSignal` to register to a cancellation asked
  * by a `TaskCanceller`.
  */
-export type ICancellationListener = (error : CancellationError) => void;
+export type ICancellationListener = (error: CancellationError) => void;
 
 /**
  * Error created when a task is cancelled.
@@ -304,8 +310,8 @@ export type ICancellationListener = (error : CancellationError) => void;
  * @extends Error
  */
 export class CancellationError extends Error {
-  public readonly name : "CancellationError";
-  public readonly message : string;
+  public readonly name: "CancellationError";
+  public readonly message: string;
 
   constructor() {
     super();
@@ -322,16 +328,16 @@ export class CancellationError extends Error {
  * `CancellationSignal`.
  * @returns {Array.<Function>}
  */
-function createCancellationFunctions() : [
-  (error : CancellationError) => void,
-  (newListener : ICancellationListener) => void
+function createCancellationFunctions(): [
+  (error: CancellationError) => void,
+  (newListener: ICancellationListener) => void
 ] {
-  let listener : (error : CancellationError) => void = noop;
+  let listener: (error: CancellationError) => void = noop;
   return [
-    function trigger(error : CancellationError) {
+    function trigger(error: CancellationError) {
       listener(error);
     },
-    function register(newListener : ICancellationListener) {
+    function register(newListener: ICancellationListener) {
       listener = newListener;
     },
   ];

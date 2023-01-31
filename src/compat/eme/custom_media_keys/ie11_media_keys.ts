@@ -57,10 +57,12 @@ class IE11MediaKeySession
         }
         try {
           resolve(
-            (this._ss.update as (
-              license : Uint8Array,
-              sessionId : string
-            ) => void)(license, "")
+            (
+              this._ss.update as (
+                license: Uint8Array,
+                sessionId: string
+              ) => void
+            )(license, "")
           );
         } catch (err) {
           reject(err);
@@ -68,22 +70,39 @@ class IE11MediaKeySession
       });
     };
   }
-  generateRequest(_initDataType: string, initData: BufferSource): Promise<void> {
+  generateRequest(
+    _initDataType: string,
+    initData: BufferSource
+  ): Promise<void> {
     return new Promise((resolve) => {
       const initDataU8 =
-        initData instanceof Uint8Array  ? initData :
-        initData instanceof ArrayBuffer ? new Uint8Array(initData) :
-                                          new Uint8Array(initData.buffer);
+        initData instanceof Uint8Array
+          ? initData
+          : initData instanceof ArrayBuffer
+          ? new Uint8Array(initData)
+          : new Uint8Array(initData.buffer);
       this._ss = this._mk.createSession("video/mp4", initDataU8);
-      events.onKeyMessage(this._ss, (evt) => {
-        this.trigger((evt as Event).type ?? "message", evt as Event);
-      }, this._sessionClosingCanceller.signal);
-      events.onKeyAdded(this._ss, (evt) => {
-        this.trigger((evt as Event).type ?? "keyadded", evt as Event);
-      }, this._sessionClosingCanceller.signal);
-      events.onKeyError(this._ss, (evt) => {
-        this.trigger((evt as Event).type ?? "keyerror", evt as Event);
-      }, this._sessionClosingCanceller.signal);
+      events.onKeyMessage(
+        this._ss,
+        (evt) => {
+          this.trigger((evt as Event).type ?? "message", evt as Event);
+        },
+        this._sessionClosingCanceller.signal
+      );
+      events.onKeyAdded(
+        this._ss,
+        (evt) => {
+          this.trigger((evt as Event).type ?? "keyadded", evt as Event);
+        },
+        this._sessionClosingCanceller.signal
+      );
+      events.onKeyError(
+        this._ss,
+        (evt) => {
+          this.trigger((evt as Event).type ?? "keyerror", evt as Event);
+        },
+        this._sessionClosingCanceller.signal
+      );
       resolve();
     });
   }
@@ -138,15 +157,15 @@ class IE11CustomMediaKeys implements ICustomMediaKeys {
   }
 }
 
-export default function getIE11MediaKeysCallbacks() : {
+export default function getIE11MediaKeysCallbacks(): {
   isTypeSupported: (keyType: string) => boolean;
   createCustomMediaKeys: (keyType: string) => IE11CustomMediaKeys;
   setMediaKeys: (
     elt: HTMLMediaElement,
-    mediaKeys: MediaKeys|ICustomMediaKeys|null
+    mediaKeys: MediaKeys | ICustomMediaKeys | null
   ) => void;
 } {
-  const isTypeSupported = (keySystem: string, type?: string|null) => {
+  const isTypeSupported = (keySystem: string, type?: string | null) => {
     if (MSMediaKeysConstructor === undefined) {
       throw new Error("No MSMediaKeys API.");
     }
@@ -159,7 +178,7 @@ export default function getIE11MediaKeysCallbacks() : {
     new IE11CustomMediaKeys(keyType);
   const setMediaKeys = (
     elt: HTMLMediaElement,
-    mediaKeys: MediaKeys|ICustomMediaKeys|null
+    mediaKeys: MediaKeys | ICustomMediaKeys | null
   ): void => {
     if (mediaKeys === null) {
       // msSetMediaKeys only accepts native MSMediaKeys as argument.
@@ -168,8 +187,10 @@ export default function getIE11MediaKeysCallbacks() : {
       return;
     }
     if (!(mediaKeys instanceof IE11CustomMediaKeys)) {
-      throw new Error("Custom setMediaKeys is supposed to be called " +
-                      "with IE11 custom MediaKeys.");
+      throw new Error(
+        "Custom setMediaKeys is supposed to be called " +
+          "with IE11 custom MediaKeys."
+      );
     }
     return mediaKeys._setVideo(elt);
   };

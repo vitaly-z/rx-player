@@ -26,14 +26,14 @@ import LoadedSessionsStore from "./loaded_sessions_store";
  * @returns {Promise}
  */
 export default async function cleanOldLoadedSessions(
-  loadedSessionsStore : LoadedSessionsStore,
-  limit : number
-) : Promise<void> {
+  loadedSessionsStore: LoadedSessionsStore,
+  limit: number
+): Promise<void> {
   if (limit < 0 || limit >= loadedSessionsStore.getLength()) {
-    return ;
+    return;
   }
 
-  const proms : Array<Promise<unknown>> = [];
+  const proms: Array<Promise<unknown>> = [];
   const entries = loadedSessionsStore.getAll().slice(); // clone
   const toDelete = entries.length - limit;
   for (let i = 0; i < toDelete; i++) {

@@ -18,14 +18,14 @@ run();
 async function run() {
   const pkg = getPackageJSONContent();
   if (!("scripts-list" in pkg)) {
-    console.log("No \"scripts-list\" key in the `package.json` file.");
+    console.log('No "scripts-list" key in the `package.json` file.');
     process.exit(0);
   }
 
   const scriptsList = pkg["scripts-list"];
   const groupNames = Object.keys(scriptsList);
   if (groupNames.length === 0) {
-    console.log("Nothing found in \"scripts-list\" in the `package.json` file.");
+    console.log('Nothing found in "scripts-list" in the `package.json` file.');
     process.exit(0);
   }
   console.log("\x1b[33m~~~~~~~~~~~~~~~~ RxPlayer scripts ~~~~~~~~~~~~~~~~\n");
@@ -60,10 +60,7 @@ async function run() {
   process.exit(0);
 }
 
-function displayGroupCommands(
-  groupEntries,
-  indentation = ""
-) {
+function displayGroupCommands(groupEntries, indentation = "") {
   groupEntries.forEach(([name, val]) => {
     if (typeof val === "string") {
       console.log(`${indentation}[\x1b[32mnpm run ${name}\x1b[37m]:`);
@@ -83,17 +80,20 @@ function readInput(query) {
     output: process.stdout,
   });
 
-  return new Promise(resolve => rl.question(query, ans => {
-    rl.close();
-    resolve(ans);
-  }));
+  return new Promise((resolve) =>
+    rl.question(query, (ans) => {
+      rl.close();
+      resolve(ans);
+    })
+  );
 }
 
 function getPackageJSONContent() {
-  const filename = path.join(process.cwd(), 'package.json');
+  const filename = path.join(process.cwd(), "package.json");
   if (!fs.existsSync(filename)) {
-    throw new Error('`package.json` was not found in the current working directory.');
+    throw new Error(
+      "`package.json` was not found in the current working directory."
+    );
   }
-  return JSON.parse(fs.readFileSync(filename, 'utf8'));
+  return JSON.parse(fs.readFileSync(filename, "utf8"));
 }
-

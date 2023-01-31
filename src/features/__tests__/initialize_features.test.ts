@@ -54,9 +54,13 @@ describe("Features - initializeFeaturesObject", () => {
       SMOOTH: 0,
     };
     const feat = {};
-    jest.mock("../features_object", () => ({ default: feat,
-                                             __esModule: true as const }));
-    const initializeFeaturesObject = jest.requireActual("../initialize_features").default;
+    jest.mock("../features_object", () => ({
+      default: feat,
+      __esModule: true as const,
+    }));
+    const initializeFeaturesObject = jest.requireActual(
+      "../initialize_features"
+    ).default;
     initializeFeaturesObject();
     expect<unknown>(feat).toEqual({});
     delete win.__FEATURES__;
@@ -96,11 +100,14 @@ describe("Features - initializeFeaturesObject", () => {
       __esModule: true as const,
       default: feat,
     }));
-    const initializeFeaturesObject = jest.requireActual("../initialize_features").default;
+    const initializeFeaturesObject = jest.requireActual(
+      "../initialize_features"
+    ).default;
     initializeFeaturesObject();
     expect(feat).toEqual({
       transports: {
-        metaplaylist: jest.requireActual("../../transports/metaplaylist/index").default,
+        metaplaylist: jest.requireActual("../../transports/metaplaylist/index")
+          .default,
         dash: jest.requireActual("../../transports/dash/index").default,
         smooth: jest.requireActual("../../transports/smooth/index").default,
         local: jest.requireActual("../../transports/local/index").default,
@@ -111,23 +118,33 @@ describe("Features - initializeFeaturesObject", () => {
       },
       ContentDecryptor: jest.requireActual("../../core/decrypt/index").default,
       directfile: {
-        initDirectFile: jest.requireActual("../../core/init/directfile_content_initializer").default,
-        mediaElementTracksStore:
-          jest.requireActual("../../core/api/track_management/media_element_tracks_store").default,
+        initDirectFile: jest.requireActual(
+          "../../core/init/directfile_content_initializer"
+        ).default,
+        mediaElementTracksStore: jest.requireActual(
+          "../../core/api/track_management/media_element_tracks_store"
+        ).default,
       },
-      nativeTextTracksBuffer: jest.requireActual("../../core/segment_buffers/implementations/text/native/index")
-        .default,
+      nativeTextTracksBuffer: jest.requireActual(
+        "../../core/segment_buffers/implementations/text/native/index"
+      ).default,
       nativeTextTracksParsers: {
-        vtt: jest.requireActual("../../parsers/texttracks/webvtt/native/index").default,
-        ttml: jest.requireActual("../../parsers/texttracks/ttml/native/index").default,
-        sami: jest.requireActual("../../parsers/texttracks/sami/native").default,
+        vtt: jest.requireActual("../../parsers/texttracks/webvtt/native/index")
+          .default,
+        ttml: jest.requireActual("../../parsers/texttracks/ttml/native/index")
+          .default,
+        sami: jest.requireActual("../../parsers/texttracks/sami/native")
+          .default,
         srt: jest.requireActual("../../parsers/texttracks/srt/native").default,
       },
-      htmlTextTracksBuffer: jest.requireActual("../../core/segment_buffers/implementations/text/html/index")
-        .default,
+      htmlTextTracksBuffer: jest.requireActual(
+        "../../core/segment_buffers/implementations/text/html/index"
+      ).default,
       htmlTextTracksParsers: {
-        vtt: jest.requireActual("../../parsers/texttracks/webvtt/html/index").default,
-        ttml: jest.requireActual("../../parsers/texttracks/ttml/html/index").default,
+        vtt: jest.requireActual("../../parsers/texttracks/webvtt/html/index")
+          .default,
+        ttml: jest.requireActual("../../parsers/texttracks/ttml/html/index")
+          .default,
         sami: jest.requireActual("../../parsers/texttracks/sami/html").default,
         srt: jest.requireActual("../../parsers/texttracks/srt/html").default,
       },
@@ -164,13 +181,17 @@ describe("Features - initializeFeaturesObject", () => {
       __esModule: true as const,
       default: feat,
     }));
-    const initializeFeaturesObject = jest.requireActual("../initialize_features").default;
+    const initializeFeaturesObject = jest.requireActual(
+      "../initialize_features"
+    ).default;
     initializeFeaturesObject();
     expect(feat).toEqual({
-      htmlTextTracksBuffer: jest.requireActual("../../core/segment_buffers/implementations/text/html/index")
-        .default,
+      htmlTextTracksBuffer: jest.requireActual(
+        "../../core/segment_buffers/implementations/text/html/index"
+      ).default,
       htmlTextTracksParsers: {
-        vtt: jest.requireActual("../../parsers/texttracks/webvtt/html/index").default,
+        vtt: jest.requireActual("../../parsers/texttracks/webvtt/html/index")
+          .default,
       },
     });
 
@@ -205,11 +226,14 @@ describe("Features - initializeFeaturesObject", () => {
       __esModule: true as const,
       default: feat,
     }));
-    const initializeFeaturesObject = jest.requireActual("../initialize_features").default;
+    const initializeFeaturesObject = jest.requireActual(
+      "../initialize_features"
+    ).default;
     initializeFeaturesObject();
     expect(feat).toEqual({
-      htmlTextTracksBuffer: jest.requireActual("../../core/segment_buffers/implementations/text/html/index")
-        .default,
+      htmlTextTracksBuffer: jest.requireActual(
+        "../../core/segment_buffers/implementations/text/html/index"
+      ).default,
       htmlTextTracksParsers: {
         sami: jest.requireActual("../../parsers/texttracks/sami/html").default,
       },
@@ -246,13 +270,17 @@ describe("Features - initializeFeaturesObject", () => {
       __esModule: true as const,
       default: feat,
     }));
-    const initializeFeaturesObject = jest.requireActual("../initialize_features").default;
+    const initializeFeaturesObject = jest.requireActual(
+      "../initialize_features"
+    ).default;
     initializeFeaturesObject();
     expect(feat).toEqual({
-      htmlTextTracksBuffer: jest.requireActual("../../core/segment_buffers/implementations/text/html/index")
-        .default,
+      htmlTextTracksBuffer: jest.requireActual(
+        "../../core/segment_buffers/implementations/text/html/index"
+      ).default,
       htmlTextTracksParsers: {
-        ttml: jest.requireActual("../../parsers/texttracks/ttml/html/index").default,
+        ttml: jest.requireActual("../../parsers/texttracks/ttml/html/index")
+          .default,
       },
     });
 
@@ -287,11 +315,14 @@ describe("Features - initializeFeaturesObject", () => {
       __esModule: true as const,
       default: feat,
     }));
-    const initializeFeaturesObject = jest.requireActual("../initialize_features").default;
+    const initializeFeaturesObject = jest.requireActual(
+      "../initialize_features"
+    ).default;
     initializeFeaturesObject();
     expect(feat).toEqual({
-      htmlTextTracksBuffer: jest.requireActual("../../core/segment_buffers/implementations/text/html/index")
-        .default,
+      htmlTextTracksBuffer: jest.requireActual(
+        "../../core/segment_buffers/implementations/text/html/index"
+      ).default,
       htmlTextTracksParsers: {
         srt: jest.requireActual("../../parsers/texttracks/srt/html").default,
       },
@@ -328,13 +359,17 @@ describe("Features - initializeFeaturesObject", () => {
       __esModule: true as const,
       default: feat,
     }));
-    const initializeFeaturesObject = jest.requireActual("../initialize_features").default;
+    const initializeFeaturesObject = jest.requireActual(
+      "../initialize_features"
+    ).default;
     initializeFeaturesObject();
     expect(feat).toEqual({
-      nativeTextTracksBuffer: jest.requireActual("../../core/segment_buffers/implementations/text/native/index")
-        .default,
+      nativeTextTracksBuffer: jest.requireActual(
+        "../../core/segment_buffers/implementations/text/native/index"
+      ).default,
       nativeTextTracksParsers: {
-        vtt: jest.requireActual("../../parsers/texttracks/webvtt/native/index").default,
+        vtt: jest.requireActual("../../parsers/texttracks/webvtt/native/index")
+          .default,
       },
     });
 
@@ -369,13 +404,17 @@ describe("Features - initializeFeaturesObject", () => {
       __esModule: true as const,
       default: feat,
     }));
-    const initializeFeaturesObject = jest.requireActual("../initialize_features").default;
+    const initializeFeaturesObject = jest.requireActual(
+      "../initialize_features"
+    ).default;
     initializeFeaturesObject();
     expect(feat).toEqual({
-      nativeTextTracksBuffer: jest.requireActual("../../core/segment_buffers/implementations/text/native/index")
-        .default,
+      nativeTextTracksBuffer: jest.requireActual(
+        "../../core/segment_buffers/implementations/text/native/index"
+      ).default,
       nativeTextTracksParsers: {
-        sami: jest.requireActual("../../parsers/texttracks/sami/native").default,
+        sami: jest.requireActual("../../parsers/texttracks/sami/native")
+          .default,
       },
     });
 
@@ -410,13 +449,17 @@ describe("Features - initializeFeaturesObject", () => {
       __esModule: true as const,
       default: feat,
     }));
-    const initializeFeaturesObject = jest.requireActual("../initialize_features").default;
+    const initializeFeaturesObject = jest.requireActual(
+      "../initialize_features"
+    ).default;
     initializeFeaturesObject();
     expect(feat).toEqual({
-      nativeTextTracksBuffer: jest.requireActual("../../core/segment_buffers/implementations/text/native/index")
-        .default,
+      nativeTextTracksBuffer: jest.requireActual(
+        "../../core/segment_buffers/implementations/text/native/index"
+      ).default,
       nativeTextTracksParsers: {
-        ttml: jest.requireActual("../../parsers/texttracks/ttml/native/index").default,
+        ttml: jest.requireActual("../../parsers/texttracks/ttml/native/index")
+          .default,
       },
     });
 
@@ -451,11 +494,14 @@ describe("Features - initializeFeaturesObject", () => {
       __esModule: true as const,
       default: feat,
     }));
-    const initializeFeaturesObject = jest.requireActual("../initialize_features").default;
+    const initializeFeaturesObject = jest.requireActual(
+      "../initialize_features"
+    ).default;
     initializeFeaturesObject();
     expect(feat).toEqual({
-      nativeTextTracksBuffer: jest.requireActual("../../core/segment_buffers/implementations/text/native/index")
-        .default,
+      nativeTextTracksBuffer: jest.requireActual(
+        "../../core/segment_buffers/implementations/text/native/index"
+      ).default,
       nativeTextTracksParsers: {
         srt: jest.requireActual("../../parsers/texttracks/srt/native").default,
       },

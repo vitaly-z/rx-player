@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import Manifest, {
-  Adaptation,
-  Period,
-  Representation,
-} from "../../manifest";
+import Manifest, { Adaptation, Period, Representation } from "../../manifest";
 import InitDataValuesContainer from "./utils/init_data_values_container";
 import LoadedSessionsStore from "./utils/loaded_sessions_store";
 import PersistentSessionsStore from "./utils/persistent_sessions_store";
@@ -30,7 +26,7 @@ export interface IProtectionData {
    * "cenc").
    * `undefined` if unknown.
    */
-  type : string | undefined;
+  type: string | undefined;
   /**
    * The key ids linked to those initialization data.
    * This should be the key ids for the key concerned by the media which have
@@ -39,15 +35,16 @@ export interface IProtectionData {
    * `undefined` when not known (different from an empty array - which would
    * just mean that there's no key id involved).
    */
-  keyIds? : Uint8Array[] | undefined;
+  keyIds?: Uint8Array[] | undefined;
   /** The content linked to that segment protection data. */
-  content? : IContent;
+  content?: IContent;
   /** Every initialization data for that type. */
   values: IInitDataValue[];
 }
 
 /** Protection initialization data actually processed by the `ContentDecryptor`. */
-export interface IProcessedProtectionData extends Omit<IProtectionData, "values"> {
+export interface IProcessedProtectionData
+  extends Omit<IProtectionData, "values"> {
   values: InitDataValuesContainer;
 }
 
@@ -70,16 +67,15 @@ export interface IInitDataValue {
    * For example, with "cenc" initialization data found in an ISOBMFF file,
    * this will be the whole PSSH box.
    */
-   data: Uint8Array;
+  data: Uint8Array;
 }
 
-export type ILicense = BufferSource |
-                       ArrayBuffer;
+export type ILicense = BufferSource | ArrayBuffer;
 
 /** Segment protection sent by the RxPlayer to the `ContentDecryptor`. */
 export interface IContentProtection {
   /** The content linked to that segment protection data. */
-  content : IContent;
+  content: IContent;
   /**
    * Initialization data type.
    * String describing the format of the initialization data sent through this
@@ -95,7 +91,7 @@ export interface IContentProtection {
    * `undefined` when not known (different from an empty array - which would
    * just mean that there's no key id involved).
    */
-  keyIds : Uint8Array[] | undefined;
+  keyIds: Uint8Array[] | undefined;
   /** Every initialization data for that type. */
   values: Array<{
     /**
@@ -108,29 +104,28 @@ export interface IContentProtection {
      * For example, with "cenc" initialization data found in an ISOBMFF file,
      * this will be the whole PSSH box.
      */
-     data: Uint8Array;
+    data: Uint8Array;
   }>;
 }
 
 /** Content linked to protection data. */
 export interface IContent {
   /** Manifest object associated to the protection data. */
-  manifest : Manifest;
+  manifest: Manifest;
   /** Period object associated to the protection data. */
-  period : Period;
+  period: Period;
   /** Adaptation object associated to the protection data. */
-  adaptation : Adaptation;
+  adaptation: Adaptation;
   /** Representation object associated to the protection data. */
-  representation : Representation;
+  representation: Representation;
 }
 
 /** Stores helping to create and retrieve MediaKeySessions. */
 export interface IMediaKeySessionStores {
   /** Retrieve MediaKeySessions already loaded on the current MediaKeys instance. */
-  loadedSessionsStore : LoadedSessionsStore;
+  loadedSessionsStore: LoadedSessionsStore;
   /** Retrieve persistent MediaKeySessions already created. */
-  persistentSessionsStore : PersistentSessionsStore |
-                            null;
+  persistentSessionsStore: PersistentSessionsStore | null;
 }
 
 /** Enum identifying the way a new MediaKeySession has been loaded. */
@@ -162,7 +157,7 @@ interface ByteArrayContainer {
    * Here named `initData` even when it's not always initialization data for
    * backward-compatible reasons.
    */
-  initData : Uint8Array;
+  initData: Uint8Array;
 
   /**
    * Convert it to base64.
@@ -170,7 +165,7 @@ interface ByteArrayContainer {
    * on it when calling `JSON.stringify` on it or any of its parent objects:
    * https://tc39.es/ecma262/#sec-serializejsonproperty
    */
-  toJSON() : string;
+  toJSON(): string;
 }
 
 /**
@@ -179,13 +174,13 @@ interface ByteArrayContainer {
  */
 export interface IPersistentSessionInfoV4 {
   /** Version for this object. */
-  version : 4;
+  version: 4;
 
   /** The persisted MediaKeySession's `id`. Used to load it at a later time. */
-  sessionId : string;
+  sessionId: string;
 
   /** Type giving information about the format of the initialization data. */
-  initDataType : string | undefined;
+  initDataType: string | undefined;
 
   /** All key ids linked to that `MediaKeySession`. */
   keyIds: Array<ByteArrayContainer | string>;
@@ -204,18 +199,18 @@ export interface IPersistentSessionInfoV4 {
      * In that case, the initialization data might even be a concatenation of
      * the initialization data from multiple system ids.
      */
-    systemId : string | undefined;
+    systemId: string | undefined;
     /**
      * A hash of the initialization data (generated by the `hashBuffer` function,
      * at the time of v3.20.1 at least). Allows for a faster comparison than just
      * comparing initialization data multiple times.
      */
-    hash : number;
+    hash: number;
     /**
      * The initialization data associated to the systemId, wrapped in a
      * container to allow efficient serialization.
      */
-    data : ByteArrayContainer | string;
+    data: ByteArrayContainer | string;
   }>;
 }
 
@@ -225,13 +220,13 @@ export interface IPersistentSessionInfoV4 {
  */
 export interface IPersistentSessionInfoV3 {
   /** Version for this object. */
-  version : 3;
+  version: 3;
 
   /** The persisted MediaKeySession's `id`. Used to load it at a later time. */
-  sessionId : string;
+  sessionId: string;
 
   /** Type giving information about the format of the initialization data. */
-  initDataType : string | undefined;
+  initDataType: string | undefined;
 
   /**
    * Every saved initialization data for that session, used as IDs.
@@ -247,18 +242,18 @@ export interface IPersistentSessionInfoV3 {
      * In that case, the initialization data might even be a concatenation of
      * the initialization data from multiple system ids.
      */
-    systemId : string | undefined;
+    systemId: string | undefined;
     /**
      * A hash of the initialization data (generated by the `hashBuffer` function,
      * at the time of v3.20.1 at least). Allows for a faster comparison than just
      * comparing initialization data multiple times.
      */
-    hash : number;
+    hash: number;
     /**
      * The initialization data associated to the systemId, wrapped in a
      * container to allow efficient serialization.
      */
-    data : ByteArrayContainer | string;
+    data: ByteArrayContainer | string;
   }>;
 }
 
@@ -272,22 +267,22 @@ export interface IPersistentSessionInfoV3 {
  */
 export interface IPersistentSessionInfoV2 {
   /** Version for this object. */
-  version : 2;
+  version: 2;
   /** The persisted MediaKeySession's `id`. Used to load it at a later time. */
-  sessionId : string;
+  sessionId: string;
   /**
    * The initialization data associated to the `MediaKeySession`, wrapped in a
    * container to allow efficient linearization.
    */
-  initData : ByteArrayContainer;
+  initData: ByteArrayContainer;
   /**
    * A hash of the initialization data (generated by the `hashBuffer` function,
    * at the time of v3.20.1 at least). Allows for a faster comparison than just
    * comparing initialization data multiple times.
    */
-  initDataHash : number;
+  initDataHash: number;
   /** Type giving information about the format of the initialization data. */
-  initDataType? : string | undefined;
+  initDataType?: string | undefined;
 }
 
 /**
@@ -302,19 +297,19 @@ export interface IPersistentSessionInfoV2 {
  */
 export interface IPersistentSessionInfoV1 {
   /** Version for this object. */
-  version : 1;
+  version: 1;
   /** The persisted MediaKeySession's `id`. Used to load it at a later time. */
-  sessionId : string;
+  sessionId: string;
   /** The initialization data associated to the `MediaKeySession`, untouched. */
-  initData : Uint8Array;
+  initData: Uint8Array;
   /**
    * A hash of the initialization data (generated by the `hashBuffer` function,
    * at the time of v3.20.1 at least). Allows for a faster comparison than just
    * comparing initialization data multiple times.
    */
-  initDataHash : number;
+  initDataHash: number;
   /** Type giving information about the format of the initialization data. */
-  initDataType? : string | undefined;
+  initDataType?: string | undefined;
 }
 
 /**
@@ -325,11 +320,11 @@ export interface IPersistentSessionInfoV1 {
  */
 export interface IPersistentSessionInfoV0 {
   /** Version for this object. Usually not defined here. */
-  version? : undefined;
+  version?: undefined;
   /** The persisted MediaKeySession's `id`. Used to load it at a later time. */
-  sessionId : string;
+  sessionId: string;
   /** This initData is a hash of a real one. Here we don't handle collision. */
-  initData : number;
+  initData: number;
   /** Type giving information about the format of the initialization data. */
-  initDataType? : string | undefined;
+  initDataType?: string | undefined;
 }

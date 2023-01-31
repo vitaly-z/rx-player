@@ -6,7 +6,7 @@ import Knob from "../../components/Knob.jsx";
 const CLOSED_CAPTION_ICON = "(CC)"; // String.fromCharCode(0xf2a4);
 
 const findLanguageIndex = (currentSubtitle, languages) => {
-  return languages.findIndex(ln => ln.id === currentSubtitle.id);
+  return languages.findIndex((ln) => ln.id === currentSubtitle.id);
 };
 
 const SubtitlesKnobBase = ({
@@ -17,16 +17,16 @@ const SubtitlesKnobBase = ({
 }) => {
   const options = [
     "no subtitles",
-    ...availableSubtitles
-      .map(subtitle => {
-        return translateLanguageCode(subtitle.normalized) +
-          (subtitle.closedCaption ?
-            (" " + CLOSED_CAPTION_ICON) : "");
-      }),
+    ...availableSubtitles.map((subtitle) => {
+      return (
+        translateLanguageCode(subtitle.normalized) +
+        (subtitle.closedCaption ? " " + CLOSED_CAPTION_ICON : "")
+      );
+    }),
   ];
 
-  const currentLanguageIndex = currentSubtitle ?
-    findLanguageIndex(currentSubtitle, availableSubtitles) + 1
+  const currentLanguageIndex = currentSubtitle
+    ? findLanguageIndex(currentSubtitle, availableSubtitles) + 1
     : 0;
 
   const onLanguageChange = ({ index }) => {
@@ -51,9 +51,11 @@ const SubtitlesKnobBase = ({
   );
 };
 
-export default React.memo(withModulesState({
-  player: {
-    subtitle: "currentSubtitle",
-    availableSubtitles: "availableSubtitles",
-  },
-})(SubtitlesKnobBase));
+export default React.memo(
+  withModulesState({
+    player: {
+      subtitle: "currentSubtitle",
+      availableSubtitles: "availableSubtitles",
+    },
+  })(SubtitlesKnobBase)
+);

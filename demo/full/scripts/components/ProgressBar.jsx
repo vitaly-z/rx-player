@@ -24,7 +24,7 @@ function ProgressBar({
   maximumPosition,
   onMouseOut, // callback called when the mouse stops hovering
   onMouseMove, // callback called when the mouse starts hovering, with the
-               // position and the event in arguments
+  // position and the event in arguments
 }) {
   let element;
 
@@ -38,37 +38,36 @@ function ProgressBar({
     if (!endPointPx) {
       return 0;
     }
-    return ((clickPosPx / endPointPx) * duration) + minimumPosition;
+    return (clickPosPx / endPointPx) * duration + minimumPosition;
   };
 
   // weird rx-player design decision. Should be fixed (or done in the
   // module)
   const bufferGapHotFix = isFinite(bufferGap) ? bufferGap : 0;
   const relativePosition = Math.max(position - minimumPosition, 0);
-  const percentBuffered = Math.min(
-    (bufferGapHotFix + relativePosition) / duration
-    , 1) * 100;
+  const percentBuffered =
+    Math.min((bufferGapHotFix + relativePosition) / duration, 1) * 100;
 
   const percentPosition = Math.min(relativePosition / duration, 1) * 100;
 
   return (
     <div
       className="progress-bar-wrapper"
-      ref={el => element = el }
+      ref={(el) => (element = el)}
       onClick={(event) => seek(getMousePosition(event))}
       onMouseOut={onMouseOut}
-      onMouseMove={evt => onMouseMove(getMousePosition(evt), evt)}
+      onMouseMove={(evt) => onMouseMove(getMousePosition(evt), evt)}
     >
       <div
         className="progress-bar-current"
         style={{
-          "width": percentPosition + "%",
+          width: percentPosition + "%",
         }}
       />
       <div
         className="progress-bar-buffered"
         style={{
-          "width": percentBuffered + "%",
+          width: percentBuffered + "%",
         }}
       />
     </div>

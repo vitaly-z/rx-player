@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Button from "../components/Button.jsx";
 import withModulesState from "../lib/withModulesState.jsx";
 
@@ -97,16 +92,11 @@ function exitFullscreen() {
  * @param {Object} props
  * @returns {Object}
  */
-function FullscreenButton({
-  videoElement,
-  hasCurrentContent,
-  className,
-}) {
+function FullscreenButton({ videoElement, hasCurrentContent, className }) {
   const isInitiallyFullscreen = useMemo(() => isFullscreen(), []);
-  const [
-    isCurrentlyFullScreen,
-    setFullscreenValue,
-  ] = useState(isInitiallyFullscreen);
+  const [isCurrentlyFullScreen, setFullscreenValue] = useState(
+    isInitiallyFullscreen
+  );
 
   useEffect(() => {
     const fullscreenListener = () => {
@@ -133,17 +123,17 @@ function FullscreenButton({
     <Button
       ariaLabel="Go/Quit fullscreen"
       className={"fullscreen-button " + className}
-      onClick={isCurrentlyFullScreen ?
-        exitFullscreen :
-        setFullscreen }
+      onClick={isCurrentlyFullScreen ? exitFullscreen : setFullscreen}
       disabled={!hasCurrentContent}
       value={String.fromCharCode(isCurrentlyFullScreen ? 0xf066 : 0xf065)}
     />
   );
 }
 
-export default React.memo(withModulesState({
-  player: {
-    hasCurrentContent: "hasCurrentContent",
-  },
-})(FullscreenButton));
+export default React.memo(
+  withModulesState({
+    player: {
+      hasCurrentContent: "hasCurrentContent",
+    },
+  })(FullscreenButton)
+);

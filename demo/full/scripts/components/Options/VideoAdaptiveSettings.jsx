@@ -33,8 +33,7 @@ function VideoAdaptiveSettings({
         "Smooth transition when video Representations are manually changed";
       break;
     default:
-      defaultVideoRepresentationsSwitchingModeDescMsg =
-        "Unknown value";
+      defaultVideoRepresentationsSwitchingModeDescMsg = "Unknown value";
       break;
   }
 
@@ -45,11 +44,12 @@ function VideoAdaptiveSettings({
           className="playerOptionInput"
           name="defaultVideoRepresentationsSwitchingMode"
           onChange={({ value }) =>
-            onDefaultVideoRepresentationsSwitchingModeChange(value)}
+            onDefaultVideoRepresentationsSwitchingModeChange(value)
+          }
           selected={{ value: defaultVideoRepresentationsSwitchingMode }}
           options={["seamless", "lazy", "direct", "reload"]}
         >
-            Default Video Representations switching mode
+          Default Video Representations switching mode
         </Select>
         <span className="option-desc">
           {defaultVideoRepresentationsSwitchingModeDescMsg}
@@ -68,15 +68,15 @@ function VideoAdaptiveSettings({
             Limit Video Width
           </Checkbox>
           <span className="option-desc">
-            {limitVideoWidth ?
-              "Limiting video width to the current <video> element's width" :
-              "Not limiting video width to the current <video> element's width"}
+            {limitVideoWidth
+              ? "Limiting video width to the current <video> element's width"
+              : "Not limiting video width to the current <video> element's width"}
           </span>
         </div>
         <span className="option-desc">
-          {limitVideoWidth ?
-            "Limiting video width to the current <video> element's width" :
-            "Not limiting video width to the current <video> element's width"}
+          {limitVideoWidth
+            ? "Limiting video width to the current <video> element's width"
+            : "Not limiting video width to the current <video> element's width"}
         </span>
       </li>
       <li>
@@ -91,9 +91,9 @@ function VideoAdaptiveSettings({
             Throttle Video Bitrate When Hidden
           </Checkbox>
           <span className="option-desc">
-            {throttleVideoBitrateWhenHidden ?
-              "Throttling the video bitrate when the page is hidden for a time" :
-              "Not throttling the video bitrate when the page is hidden for a time"}
+            {throttleVideoBitrateWhenHidden
+              ? "Throttling the video bitrate when the page is hidden for a time"
+              : "Not throttling the video bitrate when the page is hidden for a time"}
           </span>
         </div>
       </li>

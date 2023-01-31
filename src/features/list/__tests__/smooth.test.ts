@@ -28,7 +28,7 @@ jest.mock("../../../transports/smooth", () => ({
 describe("Features list - Smooth", () => {
   it("should add Smooth in the current features", () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const featureObject : any = { transports: {} };
+    const featureObject: any = { transports: {} };
     addSmoothFeature(featureObject);
     expect(featureObject).toEqual({ transports: { smooth: SmoothFeature } });
     expect(featureObject.transports.smooth).toBe(SmoothFeature);

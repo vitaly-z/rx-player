@@ -15,18 +15,12 @@
  */
 
 import noop from "../../../../../../utils/noop";
-import {
-  IMPDAttributes,
-  IMPDChildren,
-} from "../../../node_parser_types";
+import { IMPDAttributes, IMPDChildren } from "../../../node_parser_types";
 import ParsersStack, {
   IAttributeParser,
   IChildrenParser,
 } from "../parsers_stack";
-import {
-  AttributeName,
-  TagName,
-} from "../types";
+import { AttributeName, TagName } from "../types";
 import { parseString } from "../utils";
 import { generateBaseUrlAttrParser } from "./BaseURL";
 import {
@@ -44,35 +38,42 @@ import { generateSchemeAttrParser } from "./Scheme";
  * @returns {Function}
  */
 export function generateMPDChildrenParser(
-  mpdChildren : IMPDChildren,
-  linearMemory : WebAssembly.Memory,
-  parsersStack : ParsersStack,
-  fullMpd : ArrayBuffer
-)  : IChildrenParser {
-  return function onRootChildren(nodeId : number) {
+  mpdChildren: IMPDChildren,
+  linearMemory: WebAssembly.Memory,
+  parsersStack: ParsersStack,
+  fullMpd: ArrayBuffer
+): IChildrenParser {
+  return function onRootChildren(nodeId: number) {
     switch (nodeId) {
-
       case TagName.BaseURL: {
         const baseUrl = { value: "", attributes: {} };
         mpdChildren.baseURLs.push(baseUrl);
 
         const childrenParser = noop; // BaseURL have no sub-element
-        const attributeParser = generateBaseUrlAttrParser(baseUrl, linearMemory);
+        const attributeParser = generateBaseUrlAttrParser(
+          baseUrl,
+          linearMemory
+        );
         parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
         break;
       }
 
       case TagName.Period: {
-        const period = { children: { adaptations: [],
-                                     baseURLs: [],
-                                     eventStreams: [] },
-                         attributes: {} };
+        const period = {
+          children: { adaptations: [], baseURLs: [], eventStreams: [] },
+          attributes: {},
+        };
         mpdChildren.periods.push(period);
-        const childrenParser = generatePeriodChildrenParser(period.children,
-                                                            linearMemory,
-                                                            parsersStack,
-                                                            fullMpd);
-        const attributeParser = generatePeriodAttrParser(period.attributes, linearMemory);
+        const childrenParser = generatePeriodChildrenParser(
+          period.children,
+          linearMemory,
+          parsersStack,
+          fullMpd
+        );
+        const attributeParser = generatePeriodAttrParser(
+          period.attributes,
+          linearMemory
+        );
         parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
         break;
       }
@@ -82,7 +83,10 @@ export function generateMPDChildrenParser(
         mpdChildren.utcTimings.push(utcTiming);
 
         const childrenParser = noop; // UTCTiming have no sub-element
-        const attributeParser = generateSchemeAttrParser(utcTiming, linearMemory);
+        const attributeParser = generateSchemeAttrParser(
+          utcTiming,
+          linearMemory
+        );
         parsersStack.pushParsers(nodeId, childrenParser, attributeParser);
         break;
       }
@@ -97,25 +101,35 @@ export function generateMPDChildrenParser(
 }
 
 export function generateMPDAttrParser(
-  mpdChildren : IMPDChildren,
-  mpdAttrs : IMPDAttributes,
-  linearMemory : WebAssembly.Memory
-)  : IAttributeParser {
+  mpdChildren: IMPDChildren,
+  mpdAttrs: IMPDAttributes,
+  linearMemory: WebAssembly.Memory
+): IAttributeParser {
   let dataView;
   const textDecoder = new TextDecoder();
-  return function onMPDAttribute(attr : number, ptr : number, len : number) {
+  return function onMPDAttribute(attr: number, ptr: number, len: number) {
     switch (attr) {
       case AttributeName.Id:
         mpdAttrs.id = parseString(textDecoder, linearMemory.buffer, ptr, len);
         break;
       case AttributeName.Profiles:
-        mpdAttrs.profiles = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        mpdAttrs.profiles = parseString(
+          textDecoder,
+          linearMemory.buffer,
+          ptr,
+          len
+        );
         break;
       case AttributeName.Type:
         mpdAttrs.type = parseString(textDecoder, linearMemory.buffer, ptr, len);
         break;
       case AttributeName.AvailabilityStartTime:
-        const startTime = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        const startTime = parseString(
+          textDecoder,
+          linearMemory.buffer,
+          ptr,
+          len
+        );
         mpdAttrs.availabilityStartTime = new Date(startTime).getTime() / 1000;
         break;
       case AttributeName.AvailabilityEndTime:
@@ -123,7 +137,12 @@ export function generateMPDAttrParser(
         mpdAttrs.availabilityEndTime = new Date(endTime).getTime() / 1000;
         break;
       case AttributeName.PublishTime:
-        const publishTime = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        const publishTime = parseString(
+          textDecoder,
+          linearMemory.buffer,
+          ptr,
+          len
+        );
         mpdAttrs.publishTime = new Date(publishTime).getTime() / 1000;
         break;
       case AttributeName.MediaPresentationDuration:
@@ -155,7 +174,12 @@ export function generateMPDAttrParser(
         mpdAttrs.maxSubsegmentDuration = dataView.getFloat64(ptr, true);
         break;
       case AttributeName.Location:
-        const location = parseString(textDecoder, linearMemory.buffer, ptr, len);
+        const location = parseString(
+          textDecoder,
+          linearMemory.buffer,
+          ptr,
+          len
+        );
         mpdChildren.locations.push(location);
         break;
       case AttributeName.Namespace:
@@ -165,12 +189,22 @@ export function generateMPDAttrParser(
         const keySize = dataView.getUint32(offset);
         offset += 4;
 
-        xmlNs.key = parseString(textDecoder, linearMemory.buffer, offset, keySize);
+        xmlNs.key = parseString(
+          textDecoder,
+          linearMemory.buffer,
+          offset,
+          keySize
+        );
         offset += keySize;
 
         const valSize = dataView.getUint32(offset);
         offset += 4;
-        xmlNs.value = parseString(textDecoder, linearMemory.buffer, offset, valSize);
+        xmlNs.value = parseString(
+          textDecoder,
+          linearMemory.buffer,
+          offset,
+          valSize
+        );
 
         if (mpdAttrs.namespaces === undefined) {
           mpdAttrs.namespaces = [xmlNs];

@@ -19,7 +19,7 @@ import ManifestBoundsCalculator from "../manifest_bounds_calculator";
 describe("DASH parsers - ManifestBoundsCalculator", () => {
   /* eslint-disable max-len */
   it("should return undefined through `estimateMinimumBound` if the live edge was never set for a dynamic content with a timeShiftBufferDepth", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
     const manifestBoundsCalculator = new ManifestBoundsCalculator({
       isDynamic: true,
       timeShiftBufferDepth: 5,
@@ -31,7 +31,7 @@ describe("DASH parsers - ManifestBoundsCalculator", () => {
 
   /* eslint-disable max-len */
   it("should return 0 through `estimateMinimumBound` if the live edge was never set for a static content", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
     const manifestBoundsCalculator = new ManifestBoundsCalculator({
       isDynamic: false,
       timeShiftBufferDepth: 5,
@@ -43,7 +43,7 @@ describe("DASH parsers - ManifestBoundsCalculator", () => {
 
   /* eslint-disable max-len */
   it("should return 0 through `estimateMinimumBound` if the live edge was never set for a dynamic content with no timeShiftBufferDepth", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
     const manifestBoundsCalculator = new ManifestBoundsCalculator({
       isDynamic: false,
       timeShiftBufferDepth: undefined,
@@ -55,7 +55,7 @@ describe("DASH parsers - ManifestBoundsCalculator", () => {
 
   /* eslint-disable max-len */
   it("should return `false` through `lastPositionIsKnown` if `setLastPositionOffset` was never called", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
     const manifestBoundsCalculator = new ManifestBoundsCalculator({
       isDynamic: true,
       timeShiftBufferDepth: 5,
@@ -67,7 +67,7 @@ describe("DASH parsers - ManifestBoundsCalculator", () => {
 
   /* eslint-disable max-len */
   it("should return `true` through `lastPositionIsKnown` if `setLastPositionOffset` was called for a dynamic content", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
     const manifestBoundsCalculator = new ManifestBoundsCalculator({
       isDynamic: true,
       timeShiftBufferDepth: 5,
@@ -78,7 +78,7 @@ describe("DASH parsers - ManifestBoundsCalculator", () => {
 
   /* eslint-disable max-len */
   it("should return `true` through `lastPositionIsKnown` if `setLastPositionOffset` was called for a non dynamic content", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
     const manifestBoundsCalculator = new ManifestBoundsCalculator({
       isDynamic: false,
       timeShiftBufferDepth: 5,
@@ -89,9 +89,10 @@ describe("DASH parsers - ManifestBoundsCalculator", () => {
 
   /* eslint-disable max-len */
   it("should return how much time has elapsed through `estimateMinimumBound` since the live edge was set for a dynamic content", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
     let date = 5000;
-    const mockPerformanceNow = jest.spyOn(performance, "now")
+    const mockPerformanceNow = jest
+      .spyOn(performance, "now")
       .mockImplementation(jest.fn(() => date));
     const manifestBoundsCalculator = new ManifestBoundsCalculator({
       isDynamic: true,
@@ -107,9 +108,10 @@ describe("DASH parsers - ManifestBoundsCalculator", () => {
 
   /* eslint-disable max-len */
   it("should return 0 even when a last position has been set for a static content", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
     let date = 5000;
-    const mockPerformanceNow = jest.spyOn(performance, "now")
+    const mockPerformanceNow = jest
+      .spyOn(performance, "now")
       .mockImplementation(jest.fn(() => date));
     const manifestBoundsCalculator = new ManifestBoundsCalculator({
       isDynamic: false,
@@ -125,9 +127,10 @@ describe("DASH parsers - ManifestBoundsCalculator", () => {
 
   /* eslint-disable max-len */
   it("should authorize and handle multiple `setLastPositionOffset` calls for dynamic contents", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
     let date = 5000;
-    const mockPerformanceNow = jest.spyOn(performance, "now")
+    const mockPerformanceNow = jest
+      .spyOn(performance, "now")
       .mockImplementation(jest.fn(() => date));
     const manifestBoundsCalculator = new ManifestBoundsCalculator({
       isDynamic: true,

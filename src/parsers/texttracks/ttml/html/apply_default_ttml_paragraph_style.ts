@@ -26,12 +26,14 @@
 export function shouldApplyDefaultTTMLStyle(
   paragraphStyle: Partial<Record<string, string>>
 ): boolean {
-  return paragraphStyle.extent === undefined &&
-         paragraphStyle.origin === undefined &&
-         paragraphStyle.displayAlign === undefined &&
-         paragraphStyle.display === undefined &&
-         paragraphStyle.textAlign === undefined &&
-         paragraphStyle.fontSize === undefined;
+  return (
+    paragraphStyle.extent === undefined &&
+    paragraphStyle.origin === undefined &&
+    paragraphStyle.displayAlign === undefined &&
+    paragraphStyle.display === undefined &&
+    paragraphStyle.textAlign === undefined &&
+    paragraphStyle.fontSize === undefined
+  );
 }
 
 /**

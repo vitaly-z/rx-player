@@ -24,12 +24,11 @@ import { IBaseUrlIntermediateRepresentation } from "../../node_parser_types";
  */
 export default function parseBaseURL(
   root: Element
-) : [IBaseUrlIntermediateRepresentation | undefined, Error[]] {
+): [IBaseUrlIntermediateRepresentation | undefined, Error[]] {
   const value = root.textContent;
-  const warnings : Error[] = [];
+  const warnings: Error[] = [];
   if (value === null || value.length === 0) {
     return [undefined, warnings];
   }
-  return [ { value },
-           warnings ];
+  return [{ value }, warnings];
 }

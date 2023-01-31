@@ -17,9 +17,9 @@ import { ICustomMediaKeys } from "./custom_media_keys";
 
 // MediaKeySystemAccess implementation
 export interface ICustomMediaKeySystemAccess {
-  readonly keySystem : string;
-  getConfiguration() : MediaKeySystemConfiguration;
-  createMediaKeys() : Promise<MediaKeys|ICustomMediaKeys>;
+  readonly keySystem: string;
+  getConfiguration(): MediaKeySystemConfiguration;
+  createMediaKeys(): Promise<MediaKeys | ICustomMediaKeys>;
 }
 
 /**
@@ -28,7 +28,9 @@ export interface ICustomMediaKeySystemAccess {
  * All needed arguments are given to the constructor
  * @class CustomMediaKeySystemAccess
  */
-export default class CustomMediaKeySystemAccess implements ICustomMediaKeySystemAccess {
+export default class CustomMediaKeySystemAccess
+  implements ICustomMediaKeySystemAccess
+{
   /**
    * @param {string} _keyType - type of key system (e.g. "widevine" or
    * "com.widevine.alpha").
@@ -38,7 +40,7 @@ export default class CustomMediaKeySystemAccess implements ICustomMediaKeySystem
    */
   constructor(
     private readonly _keyType: string,
-    private readonly _mediaKeys: ICustomMediaKeys|MediaKeys,
+    private readonly _mediaKeys: ICustomMediaKeys | MediaKeys,
     private readonly _configuration: MediaKeySystemConfiguration
   ) {}
 
@@ -46,7 +48,7 @@ export default class CustomMediaKeySystemAccess implements ICustomMediaKeySystem
    * @returns {string} - current key system type (e.g. "widevine" or
    * "com.widevine.alpha").
    */
-  get keySystem() : string {
+  get keySystem(): string {
     return this._keyType;
   }
 
@@ -54,14 +56,14 @@ export default class CustomMediaKeySystemAccess implements ICustomMediaKeySystem
    * @returns {Promise.<Object>} - Promise wrapping the MediaKeys for this
    * MediaKeySystemAccess. Never rejects.
    */
-  public createMediaKeys() : Promise<ICustomMediaKeys|MediaKeys> {
+  public createMediaKeys(): Promise<ICustomMediaKeys | MediaKeys> {
     return new Promise((res) => res(this._mediaKeys));
   }
 
   /**
    * @returns {Object} - Configuration accepted for this MediaKeySystemAccess.
    */
-  public getConfiguration() : MediaKeySystemConfiguration {
+  public getConfiguration(): MediaKeySystemConfiguration {
     return this._configuration;
   }
 }

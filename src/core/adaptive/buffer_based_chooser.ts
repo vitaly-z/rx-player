@@ -32,18 +32,21 @@ import getBufferLevels from "./utils/get_buffer_levels";
  * @class BufferBasedChooser
  */
 export default class BufferBasedChooser {
-  private _levelsMap : number[];
-  private _bitrates : number[];
+  private _levelsMap: number[];
+  private _bitrates: number[];
 
   /**
    * @param {Array.<number>} bitrates
    */
-  constructor(bitrates : number[]) {
+  constructor(bitrates: number[]) {
     this._levelsMap = getBufferLevels(bitrates);
     this._bitrates = bitrates;
-    log.debug("ABR: Steps for buffer based chooser.",
-              this._levelsMap.map((l, i) => `bufferLevel: ${l}, bitrate: ${bitrates[i]}`)
-                .join(" ,"));
+    log.debug(
+      "ABR: Steps for buffer based chooser.",
+      this._levelsMap
+        .map((l, i) => `bufferLevel: ${l}, bitrate: ${bitrates[i]}`)
+        .join(" ,")
+    );
   }
 
   /**
@@ -51,23 +54,27 @@ export default class BufferBasedChooser {
    * @returns {number|undefined}
    */
   public getEstimate(
-    playbackObservation : IBufferBasedChooserPlaybackObservation
-  ) : number | undefined {
+    playbackObservation: IBufferBasedChooserPlaybackObservation
+  ): number | undefined {
     const bufferLevels = this._levelsMap;
     const bitrates = this._bitrates;
-    const { bufferGap, currentBitrate, currentScore, speed } = playbackObservation;
+    const { bufferGap, currentBitrate, currentScore, speed } =
+      playbackObservation;
     if (currentBitrate == null) {
       return bitrates[0];
     }
-    const currentBitrateIndex = arrayFindIndex(bitrates, b => b === currentBitrate);
+    const currentBitrateIndex = arrayFindIndex(
+      bitrates,
+      (b) => b === currentBitrate
+    );
     if (currentBitrateIndex < 0 || bitrates.length !== bufferLevels.length) {
       log.error("ABR: Current Bitrate not found in the calculated levels");
       return bitrates[0];
     }
 
-    let scaledScore : number|undefined;
+    let scaledScore: number | undefined;
     if (currentScore != null) {
-      scaledScore = speed === 0 ? currentScore : (currentScore / speed);
+      scaledScore = speed === 0 ? currentScore : currentScore / speed;
     }
 
     if (scaledScore != null && scaledScore > 1) {
@@ -109,11 +116,11 @@ export interface IBufferBasedChooserPlaybackObservation {
    * non-buffered position in the buffer for the currently-considered
    * media type.
    */
-  bufferGap : number;
+  bufferGap: number;
   /** The bitrate of the currently downloaded segments, in bps. */
-  currentBitrate? : number | undefined;
+  currentBitrate?: number | undefined;
   /** The "maintainability score" of the currently downloaded segments. */
-  currentScore? : number | undefined;
+  currentScore?: number | undefined;
   /** Playback rate wanted (e.g. `1` is regular playback, `2` is double speed etc.). */
-  speed : number;
+  speed: number;
 }

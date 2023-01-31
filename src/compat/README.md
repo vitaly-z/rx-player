@@ -1,4 +1,4 @@
-# Compatibility files ##########################################################
+# Compatibility files
 
 Those are "Compat" files, which concentrates any compatibility-related logic.
 

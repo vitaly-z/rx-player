@@ -51,7 +51,7 @@ describe("API - Public API", () => {
     });
 
     describe("getPlayerState", () => {
-      it("should return \"STOPPED\" in getPlayerState by default", () => {
+      it('should return "STOPPED" in getPlayerState by default', () => {
         const PublicAPI = jest.requireActual("../public_api").default;
         const player = new PublicAPI();
         expect(player.getPlayerState()).toBe("STOPPED");
@@ -77,7 +77,7 @@ describe("API - Public API", () => {
     describe("getMediaDuration", () => {
       /* eslint-disable max-len */
       it("should return the video element initial duration in getMediaDuration by default", () => {
-      /* eslint-enable max-len */
+        /* eslint-enable max-len */
         const PublicAPI = jest.requireActual("../public_api").default;
         const player = new PublicAPI();
 
@@ -86,9 +86,7 @@ describe("API - Public API", () => {
         if (videoElement == null) {
           throw new Error("The API is disposed");
         }
-        expect(player.getMediaDuration()).toEqual(
-          videoElement.duration
-        );
+        expect(player.getMediaDuration()).toEqual(videoElement.duration);
       });
     });
 
@@ -217,7 +215,7 @@ describe("API - Public API", () => {
 
       /* eslint-disable max-len */
       it("should set the volume in setVolume by default if a volume has been given", () => {
-      /* eslint-enable max-len */
+        /* eslint-enable max-len */
         const PublicAPI = jest.requireActual("../public_api").default;
         const player = new PublicAPI();
         const videoElement = player.getVideoElement();
@@ -326,7 +324,7 @@ describe("API - Public API", () => {
     describe("getMaxBufferBehind/setMaxBufferBehind", () => {
       /* eslint-disable max-len */
       it("should update the max buffer behind through setMaxBufferBehind by default", () => {
-      /* eslint-enable max-len */
+        /* eslint-enable max-len */
         const PublicAPI = jest.requireActual("../public_api").default;
         const player = new PublicAPI();
         player.setMaxBufferBehind(50);
@@ -340,7 +338,7 @@ describe("API - Public API", () => {
     describe("getMaxBufferAhead/setMaxBufferAhead", () => {
       /* eslint-disable max-len */
       it("should update the max buffer behind through setMaxBufferAhead by default", () => {
-      /* eslint-enable max-len */
+        /* eslint-enable max-len */
         const PublicAPI = jest.requireActual("../public_api").default;
         const player = new PublicAPI();
         player.setMaxBufferAhead(50);
@@ -366,7 +364,7 @@ describe("API - Public API", () => {
     describe("getAvailableAudioTracks", () => {
       /* eslint-disable max-len */
       it("should return an empty array through getAvailableAudioTracks by default", () => {
-      /* eslint-enable max-len */
+        /* eslint-enable max-len */
         const PublicAPI = jest.requireActual("../public_api").default;
         const player = new PublicAPI();
         expect(player.getAvailableAudioTracks()).toEqual([]);
@@ -384,7 +382,7 @@ describe("API - Public API", () => {
     describe("getAvailableVideoTracks", () => {
       /* eslint-disable max-len */
       it("should return an empty array through getAvailableVideoTracks by default", () => {
-      /* eslint-enable max-len */
+        /* eslint-enable max-len */
         const PublicAPI = jest.requireActual("../public_api").default;
         const player = new PublicAPI();
         expect(player.getAvailableVideoTracks()).toEqual([]);

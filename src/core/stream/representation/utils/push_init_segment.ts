@@ -22,10 +22,7 @@ import Manifest, {
 } from "../../../../manifest";
 import { CancellationSignal } from "../../../../utils/task_canceller";
 import { IReadOnlyPlaybackObserver } from "../../../api";
-import {
-  IPushedChunkData,
-  SegmentBuffer,
-} from "../../../segment_buffers";
+import { IPushedChunkData, SegmentBuffer } from "../../../segment_buffers";
 import {
   IRepresentationStreamPlaybackObservation,
   IStreamEventAddedSegmentPayload,
@@ -45,20 +42,20 @@ export default async function pushInitSegment<T>(
     segment,
     segmentData,
     segmentBuffer,
-  } : {
-    playbackObserver : IReadOnlyPlaybackObserver<
-      IRepresentationStreamPlaybackObservation
-    >;
-    content: { adaptation : Adaptation;
-               manifest : Manifest;
-               period : Period;
-               representation : Representation; };
-    segmentData : T | null;
-    segment : ISegment;
-    segmentBuffer : SegmentBuffer;
+  }: {
+    playbackObserver: IReadOnlyPlaybackObserver<IRepresentationStreamPlaybackObservation>;
+    content: {
+      adaptation: Adaptation;
+      manifest: Manifest;
+      period: Period;
+      representation: Representation;
+    };
+    segmentData: T | null;
+    segment: ISegment;
+    segmentBuffer: SegmentBuffer;
   },
-  cancelSignal : CancellationSignal
-) : Promise< IStreamEventAddedSegmentPayload<T> | null > {
+  cancelSignal: CancellationSignal
+): Promise<IStreamEventAddedSegmentPayload<T> | null> {
   if (segmentData === null) {
     return null;
   }
@@ -66,15 +63,19 @@ export default async function pushInitSegment<T>(
     throw cancelSignal.cancellationError;
   }
   const codec = content.representation.getMimeTypeString();
-  const data : IPushedChunkData<T> = { initSegment: segmentData,
-                                       chunk: null,
-                                       timestampOffset: 0,
-                                       appendWindow: [ undefined, undefined ],
-                                       codec };
-  await appendSegmentToBuffer(playbackObserver,
-                              segmentBuffer,
-                              { data, inventoryInfos: null },
-                              cancelSignal);
+  const data: IPushedChunkData<T> = {
+    initSegment: segmentData,
+    chunk: null,
+    timestampOffset: 0,
+    appendWindow: [undefined, undefined],
+    codec,
+  };
+  await appendSegmentToBuffer(
+    playbackObserver,
+    segmentBuffer,
+    { data, inventoryInfos: null },
+    cancelSignal
+  );
   const buffered = segmentBuffer.getBufferedRanges();
   return { content, segment, buffered, segmentData };
 }

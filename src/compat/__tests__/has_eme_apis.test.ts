@@ -28,7 +28,7 @@ describe("compat - hasEMEAPIs", () => {
 
   /* eslint-disable max-len */
   it("should return true if we could define a requestMediaKeySystemAccess function", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
 
     jest.mock("../eme", () => {
       return {
@@ -42,7 +42,7 @@ describe("compat - hasEMEAPIs", () => {
 
   /* eslint-disable max-len */
   it("should return false if we could not define a requestMediaKeySystemAccess function", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
 
     jest.mock("../eme", () => {
       return {

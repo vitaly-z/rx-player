@@ -24,16 +24,20 @@ import getMinimumPosition from "../../utils/get_minimum_position";
  */
 export default function getMinimumAndMaximumPositions(
   periods: IParsedPeriod[]
-) : { minimumSafePosition : number | undefined;
-      maximumSafePosition : number | undefined;
-      maximumUnsafePosition : number | undefined; } {
+): {
+  minimumSafePosition: number | undefined;
+  maximumSafePosition: number | undefined;
+  maximumUnsafePosition: number | undefined;
+} {
   if (periods.length === 0) {
     throw new Error("DASH Parser: no period available for a dynamic content");
   }
 
   const minimumSafePosition = getMinimumPosition(periods);
   const maxPositions = getMaximumPositions(periods);
-  return { minimumSafePosition,
-           maximumSafePosition: maxPositions.safe,
-           maximumUnsafePosition: maxPositions.unsafe };
+  return {
+    minimumSafePosition,
+    maximumSafePosition: maxPositions.safe,
+    maximumUnsafePosition: maxPositions.unsafe,
+  };
 }

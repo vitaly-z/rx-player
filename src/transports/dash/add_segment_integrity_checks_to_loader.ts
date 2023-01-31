@@ -27,11 +27,13 @@ import inferSegmentContainer from "../utils/infer_segment_container";
  * @returns {Function}
  */
 export default function addSegmentIntegrityChecks<T>(
-  segmentLoader : ISegmentLoader<T>
-) : ISegmentLoader<T> {
+  segmentLoader: ISegmentLoader<T>
+): ISegmentLoader<T> {
   return (url, context, loaderOptions, initialCancelSignal, callbacks) => {
     return new Promise((resolve, reject) => {
-      const requestCanceller = new TaskCanceller({ cancelOn: initialCancelSignal });
+      const requestCanceller = new TaskCanceller({
+        cancelOn: initialCancelSignal,
+      });
 
       // Reject the `CancellationError` when `requestCanceller`'s signal emits
       // `stopRejectingOnCancel` here is a function allowing to stop this mechanism
@@ -52,34 +54,38 @@ export default function addSegmentIntegrityChecks<T>(
             reject(err);
           }
         },
-      }).then((info) => {
-        if (requestCanceller.isUsed) {
-          return;
-        }
-        stopRejectingOnCancel();
-        if (info.resultType === "segment-loaded") {
-          try {
-            trowOnIntegrityError(info.resultData.responseData);
-          } catch (err) {
-            reject(err);
+      }).then(
+        (info) => {
+          if (requestCanceller.isUsed) {
             return;
           }
+          stopRejectingOnCancel();
+          if (info.resultType === "segment-loaded") {
+            try {
+              trowOnIntegrityError(info.resultData.responseData);
+            } catch (err) {
+              reject(err);
+              return;
+            }
+          }
+          resolve(info);
+        },
+        (error: unknown) => {
+          stopRejectingOnCancel();
+          reject(error);
         }
-        resolve(info);
-      }, (error : unknown) => {
-        stopRejectingOnCancel();
-        reject(error);
-      });
+      );
     });
 
     /**
      * If the data's seems to be corrupted, throws an `INTEGRITY_ERROR` error.
      * @param {*} data
      */
-    function trowOnIntegrityError(data : T) : void {
-      if (!(data instanceof ArrayBuffer) && !(data instanceof Uint8Array) ||
-          inferSegmentContainer(context.type, context.mimeType) !== "mp4")
-      {
+    function trowOnIntegrityError(data: T): void {
+      if (
+        (!(data instanceof ArrayBuffer) && !(data instanceof Uint8Array)) ||
+        inferSegmentContainer(context.type, context.mimeType) !== "mp4"
+      ) {
         return;
       }
       checkISOBMFFIntegrity(new Uint8Array(data), context.segment.isInit);

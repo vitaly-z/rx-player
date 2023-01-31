@@ -26,8 +26,8 @@ import MediaKeysInfosStore from "./utils/media_keys_infos_store";
  * @returns {Promise}
  */
 export default function clearOnStop(
-  mediaElement : HTMLMediaElement
-) : Promise<void> {
+  mediaElement: HTMLMediaElement
+): Promise<void> {
   log.info("DRM: Clearing-up DRM session.");
   if (shouldUnsetMediaKeys()) {
     log.info("DRM: disposing current MediaKeys.");
@@ -35,13 +35,16 @@ export default function clearOnStop(
   }
 
   const currentState = MediaKeysInfosStore.getState(mediaElement);
-  if (currentState !== null &&
-      currentState.keySystemOptions.closeSessionsOnStop === true)
-  {
+  if (
+    currentState !== null &&
+    currentState.keySystemOptions.closeSessionsOnStop === true
+  ) {
     log.info("DRM: closing all current sessions.");
     return currentState.loadedSessionsStore.closeAllSessions();
   }
-  log.info("DRM: Nothing to clear. Returning right away. No state =",
-           currentState === null);
+  log.info(
+    "DRM: Nothing to clear. Returning right away. No state =",
+    currentState === null
+  );
   return Promise.resolve();
 }

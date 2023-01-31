@@ -21,11 +21,7 @@ import {
 } from "../../node_parser_types";
 import parseSegmentBase from "./SegmentBase";
 import createSegmentTimelineParser from "./SegmentTimeline";
-import {
-  parseBoolean,
-  parseMPDFloat,
-  ValueParser,
-} from "./utils";
+import { parseBoolean, parseMPDFloat, ValueParser } from "./utils";
 
 /**
  * Parse a SegmentTemplate element into a SegmentTemplate intermediate
@@ -35,11 +31,11 @@ import {
  */
 export default function parseSegmentTemplate(
   root: Element
-) : [ISegmentTemplateIntermediateRepresentation, Error[]] {
+): [ISegmentTemplateIntermediateRepresentation, Error[]] {
   const [base, segmentBaseWarnings] = parseSegmentBase(root);
-  const warnings : Error[] = segmentBaseWarnings;
+  const warnings: Error[] = segmentBaseWarnings;
 
-  let timelineParser : ITimelineParser|undefined;
+  let timelineParser: ITimelineParser | undefined;
 
   // First look for a possible SegmentTimeline
   for (let i = 0; i < root.childNodes.length; i++) {
@@ -51,15 +47,17 @@ export default function parseSegmentTemplate(
     }
   }
 
-  const ret : ISegmentTemplateIntermediateRepresentation =
-    objectAssign({}, base, { duration: base.duration, timelineParser });
+  const ret: ISegmentTemplateIntermediateRepresentation = objectAssign(
+    {},
+    base,
+    { duration: base.duration, timelineParser }
+  );
 
   const parseValue = ValueParser(ret, warnings);
   for (let i = 0; i < root.attributes.length; i++) {
     const attribute = root.attributes[i];
 
     switch (attribute.nodeName) {
-
       case "initialization":
         if (ret.initialization == null) {
           ret.initialization = { media: attribute.value };
@@ -71,15 +69,19 @@ export default function parseSegmentTemplate(
         break;
 
       case "availabilityTimeOffset":
-        parseValue(attribute.value, { asKey: "availabilityTimeOffset",
-                                      parser: parseMPDFloat,
-                                      dashName: "availabilityTimeOffset" });
+        parseValue(attribute.value, {
+          asKey: "availabilityTimeOffset",
+          parser: parseMPDFloat,
+          dashName: "availabilityTimeOffset",
+        });
         break;
 
       case "availabilityTimeComplete":
-        parseValue(attribute.value, { asKey: "availabilityTimeComplete",
-                                      parser: parseBoolean,
-                                      dashName: "availabilityTimeComplete" });
+        parseValue(attribute.value, {
+          asKey: "availabilityTimeComplete",
+          parser: parseBoolean,
+          dashName: "availabilityTimeComplete",
+        });
         break;
 
       case "media":
@@ -87,9 +89,11 @@ export default function parseSegmentTemplate(
         break;
 
       case "bitstreamSwitching":
-        parseValue(attribute.value, { asKey: "bitstreamSwitching",
-                                      parser: parseBoolean,
-                                      dashName: "bitstreamSwitching" });
+        parseValue(attribute.value, {
+          asKey: "bitstreamSwitching",
+          parser: parseBoolean,
+          dashName: "bitstreamSwitching",
+        });
         break;
     }
   }

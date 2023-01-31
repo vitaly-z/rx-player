@@ -26,15 +26,18 @@
  * @returns {boolean}
  */
 export default function updateProportionalElements(
-  currentHeight : number,
-  currentWidth : number,
-  resolution : { columns : number; rows : number },
-  textTrackElement : HTMLElement
-) : boolean {
-  const cellUnit = [ currentWidth / resolution.columns,
-                     currentHeight / resolution.rows];
+  currentHeight: number,
+  currentWidth: number,
+  resolution: { columns: number; rows: number },
+  textTrackElement: HTMLElement
+): boolean {
+  const cellUnit = [
+    currentWidth / resolution.columns,
+    currentHeight / resolution.rows,
+  ];
 
-  const proportElts = textTrackElement.getElementsByClassName("proportional-style");
+  const proportElts =
+    textTrackElement.getElementsByClassName("proportional-style");
   for (let eltIdx = 0; eltIdx < proportElts.length; eltIdx++) {
     const elt = proportElts[eltIdx];
     if (elt instanceof HTMLElement) {
@@ -73,9 +76,12 @@ export default function updateProportionalElements(
         elt.style.paddingTop = String(+paddingTopVal * cellUnit[1]) + "px";
       }
 
-      const paddingBottomVal = elt.getAttribute("data-proportional-padding-bottom");
+      const paddingBottomVal = elt.getAttribute(
+        "data-proportional-padding-bottom"
+      );
       if (paddingBottomVal !== null && !isNaN(+paddingBottomVal)) {
-        elt.style.paddingBottom = String(+paddingBottomVal * cellUnit[1]) + "px";
+        elt.style.paddingBottom =
+          String(+paddingBottomVal * cellUnit[1]) + "px";
       }
 
       const paddingLeftVal = elt.getAttribute("data-proportional-padding-left");
@@ -83,7 +89,9 @@ export default function updateProportionalElements(
         elt.style.paddingLeft = String(+paddingLeftVal * cellUnit[0]) + "px";
       }
 
-      const paddingRightVal = elt.getAttribute("data-proportional-padding-right");
+      const paddingRightVal = elt.getAttribute(
+        "data-proportional-padding-right"
+      );
       if (paddingRightVal !== null && !isNaN(+paddingRightVal)) {
         elt.style.paddingRight = String(+paddingRightVal * cellUnit[0]) + "px";
       }

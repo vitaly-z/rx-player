@@ -19,15 +19,12 @@ function Select({
   function onSelectChange(evt) {
     const index = +evt.target.value;
     const valueObj = options[index];
-    const value = typeof valueObj === "object" ?
-      valueObj.name :
-      valueObj;
+    const value = typeof valueObj === "object" ? valueObj.name : valueObj;
     onChange({ index, value });
   }
 
-  let selectedIndex = typeof selected.index === "number" ?
-    selected.index :
-    undefined;
+  let selectedIndex =
+    typeof selected.index === "number" ? selected.index : undefined;
 
   const optionsEl = options.map((val, index) => {
     let optName;
@@ -41,9 +38,11 @@ function Select({
     if (selectedIndex === undefined && selected.value === optName) {
       selectedIndex = index;
     }
-    return <option key={index} value={index} disabled={optDisabled}>
-      {optName}
-    </option>;
+    return (
+      <option key={index} value={index} disabled={optDisabled}>
+        {optName}
+      </option>
+    );
   });
 
   selectedIndex = selectedIndex || 0;
@@ -66,19 +65,18 @@ function Select({
       onChange={onSelectChange}
     >
       {optionsEl}
-    </select>);
+    </select>
+  );
 
   if (children) {
     return (
       <section className={"select " + className}>
         <label htmlFor={name}>{children}</label>
         {selectEl}
-      </section>);
+      </section>
+    );
   }
-  return (
-    <section className={"select " + className}>
-      {selectEl}
-    </section>);
+  return <section className={"select " + className}>{selectEl}</section>;
 }
 
 export default React.memo(Select);

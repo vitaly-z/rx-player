@@ -123,7 +123,7 @@ class Settings extends React.Component {
   }
 
   onMaxVideoBufferSizeInput(value) {
-    this.setState({ maxVideoBufferSize: value});
+    this.setState({ maxVideoBufferSize: value });
   }
 
   onMaxBufferBehindInput(value) {
@@ -195,12 +195,10 @@ class Settings extends React.Component {
 
     return (
       <div className="settingsWrapper">
-        <div className="settings-title">
-          Content options
-        </div>
+        <div className="settings-title">Content options</div>
         <div className="settings-note">
-          Note: Those options won't be retroactively applied to
-          already-loaded contents
+          Note: Those options won't be retroactively applied to already-loaded
+          contents
         </div>
         <div style={{ display: "flex" }}>
           <Option title="Playback">
@@ -229,14 +227,14 @@ class Settings extends React.Component {
               maxVideoBufferSize={maxVideoBufferSize}
               maxBufferAhead={maxBufferAhead}
               maxBufferBehind={maxBufferBehind}
-              onWantedBufferAheadInput={
-                this.onWantedBufferAheadInput.bind(this)
-              }
+              onWantedBufferAheadInput={this.onWantedBufferAheadInput.bind(
+                this
+              )}
               onMaxBufferAheadInput={this.onMaxBufferAheadInput.bind(this)}
               onMaxBufferBehindInput={this.onMaxBufferBehindInput.bind(this)}
-              onMaxVideoBufferSizeInput={
-                this.onMaxVideoBufferSizeInput.bind(this)
-              }
+              onMaxVideoBufferSizeInput={this.onMaxVideoBufferSizeInput.bind(
+                this
+              )}
             />
           </Option>
         </div>

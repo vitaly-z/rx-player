@@ -40,11 +40,11 @@ import RepresentationScoreCalculator, {
  * @class GuessBasedChooser
  */
 export default class GuessBasedChooser {
-  private _lastAbrEstimate : LastEstimateStorage;
-  private _scoreCalculator : RepresentationScoreCalculator;
-  private _consecutiveWrongGuesses : number;
-  private _blockGuessesUntil : number;
-  private _lastMaintanableBitrate : number | null;
+  private _lastAbrEstimate: LastEstimateStorage;
+  private _scoreCalculator: RepresentationScoreCalculator;
+  private _consecutiveWrongGuesses: number;
+  private _blockGuessesUntil: number;
+  private _lastMaintanableBitrate: number | null;
 
   /**
    * Create a new `GuessBasedChooser`.
@@ -52,8 +52,8 @@ export default class GuessBasedChooser {
    * @param {Object} prevEstimate
    */
   constructor(
-    scoreCalculator : RepresentationScoreCalculator,
-    prevEstimate : LastEstimateStorage
+    scoreCalculator: RepresentationScoreCalculator,
+    prevEstimate: LastEstimateStorage
   ) {
     this._scoreCalculator = scoreCalculator;
     this._lastAbrEstimate = prevEstimate;
@@ -81,8 +81,8 @@ export default class GuessBasedChooser {
    * algorithm).
    */
   public getGuess(
-    representations : Representation[],
-    observation : {
+    representations: Representation[],
+    observation: {
       /**
        * For the concerned media buffer, difference in seconds between the next
        * position where no segment data is available and the current position.
@@ -94,10 +94,10 @@ export default class GuessBasedChooser {
        */
       speed: number;
     },
-    currentRepresentation : Representation,
-    incomingBestBitrate : number,
-    requests : IRequestInfo[]
-  ) : Representation | null {
+    currentRepresentation: Representation,
+    incomingBestBitrate: number,
+    requests: IRequestInfo[]
+  ): Representation | null {
     const { bufferGap, speed } = observation;
     const lastChosenRep = this._lastAbrEstimate.representation;
     if (lastChosenRep === null) {
@@ -109,7 +109,8 @@ export default class GuessBasedChooser {
       // we'll be doing here, so no need to guess
       if (this._lastAbrEstimate.algorithmType === ABRAlgorithmType.GuessBased) {
         if (this._lastAbrEstimate.representation !== null) {
-          this._lastMaintanableBitrate = this._lastAbrEstimate.representation.bitrate;
+          this._lastMaintanableBitrate =
+            this._lastAbrEstimate.representation.bitrate;
         }
         this._consecutiveWrongGuesses = 0;
       }
@@ -122,8 +123,10 @@ export default class GuessBasedChooser {
         return null; // not enough information to start guessing
       }
       if (this._canGuessHigher(bufferGap, speed, scoreData)) {
-        const nextRepresentation = getNextRepresentation(representations,
-                                                         currentRepresentation);
+        const nextRepresentation = getNextRepresentation(
+          representations,
+          currentRepresentation
+        );
         if (nextRepresentation !== null) {
           return nextRepresentation;
         }
@@ -133,7 +136,9 @@ export default class GuessBasedChooser {
 
     // If we reached here, we're currently already in guessing mode
 
-    if (this._isLastGuessValidated(lastChosenRep, incomingBestBitrate, scoreData)) {
+    if (
+      this._isLastGuessValidated(lastChosenRep, incomingBestBitrate, scoreData)
+    ) {
       log.debug("ABR: Guessed Representation validated", lastChosenRep.bitrate);
       this._lastMaintanableBitrate = lastChosenRep.bitrate;
       this._consecutiveWrongGuesses = 0;
@@ -143,14 +148,17 @@ export default class GuessBasedChooser {
       return lastChosenRep;
     }
 
-    const shouldStopGuess = this._shouldStopGuess(currentRepresentation,
-                                                  scoreData,
-                                                  bufferGap,
-                                                  requests);
+    const shouldStopGuess = this._shouldStopGuess(
+      currentRepresentation,
+      scoreData,
+      bufferGap,
+      requests
+    );
     if (shouldStopGuess) {
       // Block guesses for a time
       this._consecutiveWrongGuesses++;
-      this._blockGuessesUntil = performance.now() +
+      this._blockGuessesUntil =
+        performance.now() +
         Math.min(this._consecutiveWrongGuesses * 15000, 120000);
       return getPreviousRepresentation(representations, currentRepresentation);
     } else if (scoreData === undefined) {
@@ -158,8 +166,10 @@ export default class GuessBasedChooser {
     }
 
     if (this._canGuessHigher(bufferGap, speed, scoreData)) {
-      const nextRepresentation = getNextRepresentation(representations,
-                                                       currentRepresentation);
+      const nextRepresentation = getNextRepresentation(
+        representations,
+        currentRepresentation
+      );
       if (nextRepresentation !== null) {
         return nextRepresentation;
       }
@@ -176,14 +186,17 @@ export default class GuessBasedChooser {
    * @returns {boolean}
    */
   private _canGuessHigher(
-    bufferGap : number,
-    speed : number,
-    [score, scoreConfidenceLevel] : [number, ScoreConfidenceLevel]
-  ) : boolean {
-    return isFinite(bufferGap) && bufferGap >= 2.5 &&
-           performance.now() > this._blockGuessesUntil &&
-           scoreConfidenceLevel === ScoreConfidenceLevel.HIGH &&
-           score / speed > 1.01;
+    bufferGap: number,
+    speed: number,
+    [score, scoreConfidenceLevel]: [number, ScoreConfidenceLevel]
+  ): boolean {
+    return (
+      isFinite(bufferGap) &&
+      bufferGap >= 2.5 &&
+      performance.now() > this._blockGuessesUntil &&
+      scoreConfidenceLevel === ScoreConfidenceLevel.HIGH &&
+      score / speed > 1.01
+    );
   }
 
   /**
@@ -196,18 +209,21 @@ export default class GuessBasedChooser {
    * @returns {boolean}
    */
   private _shouldStopGuess(
-    lastGuess : Representation,
-    scoreData : [number, ScoreConfidenceLevel] | undefined,
-    bufferGap : number,
-    requests : IRequestInfo[]
-  ) : boolean {
+    lastGuess: Representation,
+    scoreData: [number, ScoreConfidenceLevel] | undefined,
+    bufferGap: number,
+    requests: IRequestInfo[]
+  ): boolean {
     if (scoreData !== undefined && scoreData[0] < 1.01) {
       return true;
-    } else if ((scoreData === undefined || scoreData[0] < 1.2) && bufferGap < 0.6) {
+    } else if (
+      (scoreData === undefined || scoreData[0] < 1.2) &&
+      bufferGap < 0.6
+    ) {
       return true;
     }
 
-    const guessedRepresentationRequests = requests.filter(req => {
+    const guessedRepresentationRequests = requests.filter((req) => {
       return req.content.representation.id === lastGuess.id;
     });
 
@@ -218,7 +234,10 @@ export default class GuessBasedChooser {
         if (requestElapsedTime > 1000) {
           return true;
         }
-      } else if (requestElapsedTime > req.content.segment.duration * 1000 + 200) {
+      } else if (
+        requestElapsedTime >
+        req.content.segment.duration * 1000 + 200
+      ) {
         return true;
       } else {
         const fastBw = estimateRequestBandwidth(req);
@@ -231,19 +250,22 @@ export default class GuessBasedChooser {
   }
 
   private _isLastGuessValidated(
-    lastGuess : Representation,
-    incomingBestBitrate : number,
-    scoreData : [number, ScoreConfidenceLevel] | undefined
-  ) : boolean {
-    if (scoreData !== undefined &&
-        scoreData[1] === ScoreConfidenceLevel.HIGH &&
-        scoreData[0] > 1.5)
-    {
+    lastGuess: Representation,
+    incomingBestBitrate: number,
+    scoreData: [number, ScoreConfidenceLevel] | undefined
+  ): boolean {
+    if (
+      scoreData !== undefined &&
+      scoreData[1] === ScoreConfidenceLevel.HIGH &&
+      scoreData[0] > 1.5
+    ) {
       return true;
     }
-    return incomingBestBitrate >= lastGuess.bitrate &&
+    return (
+      incomingBestBitrate >= lastGuess.bitrate &&
       (this._lastMaintanableBitrate === null ||
-        this._lastMaintanableBitrate < lastGuess.bitrate);
+        this._lastMaintanableBitrate < lastGuess.bitrate)
+    );
   }
 }
 
@@ -261,12 +283,14 @@ export default class GuessBasedChooser {
  * @returns {Object|null}
  */
 function getNextRepresentation(
-  representations : Representation[],
-  currentRepresentation : Representation
-) : Representation | null {
+  representations: Representation[],
+  currentRepresentation: Representation
+): Representation | null {
   const len = representations.length;
-  let index = arrayFindIndex(representations,
-                             ({ id }) => id === currentRepresentation.id);
+  let index = arrayFindIndex(
+    representations,
+    ({ id }) => id === currentRepresentation.id
+  );
   if (index < 0) {
     log.error("ABR: Current Representation not found.");
     return null;
@@ -289,11 +313,13 @@ function getNextRepresentation(
  * @returns {Object|null}
  */
 function getPreviousRepresentation(
-  representations : Representation[],
-  currentRepresentation : Representation
-) : Representation | null {
-  let index = arrayFindIndex(representations,
-                             ({ id }) => id === currentRepresentation.id);
+  representations: Representation[],
+  currentRepresentation: Representation
+): Representation | null {
+  let index = arrayFindIndex(
+    representations,
+    ({ id }) => id === currentRepresentation.id
+  );
   if (index < 0) {
     log.error("ABR: Current Representation not found.");
     return null;

@@ -17,72 +17,69 @@
 import isNode from "./is_node";
 
 interface IIE11WindowObject extends Window {
-  MSInputMethodContext? : unknown;
+  MSInputMethodContext?: unknown;
 }
 
 interface IIE11Document extends Document {
-  documentMode? : unknown;
+  documentMode?: unknown;
 }
 
 // true on IE11
 // false on Edge and other IEs/browsers.
-const isIE11 : boolean =
+const isIE11: boolean =
   !isNode &&
   typeof (window as IIE11WindowObject).MSInputMethodContext !== "undefined" &&
   typeof (document as IIE11Document).documentMode !== "undefined";
 
 // true for IE / Edge
-const isIEOrEdge : boolean = isNode ?
-  false :
-  navigator.appName === "Microsoft Internet Explorer" ||
-  navigator.appName === "Netscape" &&
-  /(Trident|Edge)\//.test(navigator.userAgent);
+const isIEOrEdge: boolean = isNode
+  ? false
+  : navigator.appName === "Microsoft Internet Explorer" ||
+    (navigator.appName === "Netscape" &&
+      /(Trident|Edge)\//.test(navigator.userAgent));
 
-const isEdgeChromium: boolean = !isNode &&
-                                navigator.userAgent.toLowerCase().indexOf("edg/") !== -1;
+const isEdgeChromium: boolean =
+  !isNode && navigator.userAgent.toLowerCase().indexOf("edg/") !== -1;
 
-const isFirefox : boolean = !isNode &&
-                            navigator.userAgent.toLowerCase().indexOf("firefox") !== -1;
+const isFirefox: boolean =
+  !isNode && navigator.userAgent.toLowerCase().indexOf("firefox") !== -1;
 
-const isSamsungBrowser : boolean = !isNode &&
-                                   /SamsungBrowser/.test(navigator.userAgent);
+const isSamsungBrowser: boolean =
+  !isNode && /SamsungBrowser/.test(navigator.userAgent);
 
-const isTizen : boolean = !isNode &&
-                          /Tizen/.test(navigator.userAgent);
+const isTizen: boolean = !isNode && /Tizen/.test(navigator.userAgent);
 
-const isWebOs : boolean = !isNode &&
-                          navigator.userAgent.indexOf("Web0S") >= 0;
+const isWebOs: boolean = !isNode && navigator.userAgent.indexOf("Web0S") >= 0;
 
 // Inspired form: http://webostv.developer.lge.com/discover/specifications/web-engine/
 // Note: even that page doesn't correspond to what we've actually seen in the
 // wild
-const isWebOs2021 : boolean = isWebOs &&
-                              (
-                                /[Ww]eb[O0]S.TV-2021/.test(navigator.userAgent) ||
-                                /[Cc]hr[o0]me\/79/.test(navigator.userAgent)
-                              );
-const isWebOs2022 : boolean = isWebOs &&
-                              (
-                                /[Ww]eb[O0]S.TV-2022/.test(navigator.userAgent) ||
-                                /[Cc]hr[o0]me\/87/.test(navigator.userAgent)
-                              );
+const isWebOs2021: boolean =
+  isWebOs &&
+  (/[Ww]eb[O0]S.TV-2021/.test(navigator.userAgent) ||
+    /[Cc]hr[o0]me\/79/.test(navigator.userAgent));
+const isWebOs2022: boolean =
+  isWebOs &&
+  (/[Ww]eb[O0]S.TV-2022/.test(navigator.userAgent) ||
+    /[Cc]hr[o0]me\/87/.test(navigator.userAgent));
 
 interface ISafariWindowObject extends Window {
-  safari? : { pushNotification? : { toString() : string } };
+  safari?: { pushNotification?: { toString(): string } };
 }
 
 /** `true` on Safari on a PC platform (i.e. not iPhone / iPad etc.) */
-const isSafariDesktop : boolean =
-  !isNode && (
-    Object.prototype.toString.call(window.HTMLElement).indexOf("Constructor") >= 0 ||
+const isSafariDesktop: boolean =
+  !isNode &&
+  (Object.prototype.toString.call(window.HTMLElement).indexOf("Constructor") >=
+    0 ||
     (window as ISafariWindowObject).safari?.pushNotification?.toString() ===
-      "[object SafariRemoteNotification]"
-  );
+      "[object SafariRemoteNotification]");
 
 /** `true` on Safari on an iPhone, iPad & iPod platform */
-const isSafariMobile : boolean = !isNode &&
-                                 typeof navigator.platform === "string" &&
-                                 /iPad|iPhone|iPod/.test(navigator.platform);
+const isSafariMobile: boolean =
+  !isNode &&
+  typeof navigator.platform === "string" &&
+  /iPad|iPhone|iPod/.test(navigator.platform);
 
 export {
   isEdgeChromium,

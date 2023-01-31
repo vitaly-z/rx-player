@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-import {
-  ICapabilities,
-  IMediaConfiguration,
-} from "./types";
-import {
-  extend,
-  filterConfigurationWithCapabilities,
-} from "./utils";
+import { ICapabilities, IMediaConfiguration } from "./types";
+import { extend, filterConfigurationWithCapabilities } from "./utils";
 
 export type ICapabilitiesTypes =
-  "decodingInfos" |
-  "getStatusForPolicy" |
-  "isTypeSupported" |
-  "isTypeSupportedWithFeatures" |
-  "matchMedia" |
-  "requestMediaKeySystemAccess";
+  | "decodingInfos"
+  | "getStatusForPolicy"
+  | "isTypeSupported"
+  | "isTypeSupportedWithFeatures"
+  | "matchMedia"
+  | "requestMediaKeySystemAccess";
 
 const decodingInfos: ICapabilities = [
   "type",
@@ -44,37 +38,24 @@ const decodingInfos: ICapabilities = [
     ],
   },
   {
-    audio: [
-      "contentType",
-      "channels",
-      "bitrate",
-      "samplerate",
-    ],
+    audio: ["contentType", "channels", "bitrate", "samplerate"],
   },
 ];
 
-const getStatusForPolicy: ICapabilities = [
-  "hdcp",
-];
+const getStatusForPolicy: ICapabilities = ["hdcp"];
 
 const isTypeSupported: ICapabilities = [
   {
-    video: [
-      "contentType",
-    ],
+    video: ["contentType"],
   },
   {
-    audio: [
-      "contentType",
-    ],
+    audio: ["contentType"],
   },
 ];
 
 const matchMedia: ICapabilities = [
   {
-    display: [
-      "colorSpace",
-    ],
+    display: ["colorSpace"],
   },
 ];
 
@@ -110,12 +91,7 @@ const isTypeSupportedWithFeatures: ICapabilities = [
     ],
   },
   {
-    audio: [
-      "contentType",
-      "channels",
-      "bitrate",
-      "samplerate",
-    ],
+    audio: ["contentType", "channels", "bitrate", "samplerate"],
   },
   "hdcp",
   {
@@ -135,16 +111,11 @@ const isTypeSupportedWithFeatures: ICapabilities = [
     ],
   },
   {
-    display: [
-      "colorSpace",
-      "width",
-      "height",
-      "bitsPerComponent",
-    ],
+    display: ["colorSpace", "width", "height", "bitsPerComponent"],
   },
 ];
 
-const capabilites: {[key: string]: ICapabilities} = {
+const capabilites: { [key: string]: ICapabilities } = {
   decodingInfos,
   getStatusForPolicy,
   isTypeSupported,
@@ -162,8 +133,11 @@ const capabilites: {[key: string]: ICapabilities} = {
 export default function getProbedConfiguration(
   config: IMediaConfiguration,
   probers: ICapabilitiesTypes[]
-) : IMediaConfiguration {
+): IMediaConfiguration {
   const target: ICapabilities = [];
-  extend(target, probers.map((prober) => capabilites[prober]));
+  extend(
+    target,
+    probers.map((prober) => capabilites[prober])
+  );
   return filterConfigurationWithCapabilities(target, config);
 }

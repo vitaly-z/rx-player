@@ -1,9 +1,4 @@
-import React, {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import capitalizeFirstLetter from "../lib/capitalizeFirstLetter.js";
 import shuffleArray from "../lib/shuffleArray.js";
 import ToolTip from "./ToolTip.jsx";
@@ -50,19 +45,22 @@ function paintCurrentPosition(
   position,
   minimumPosition,
   maximumPosition,
-  canvasCtx,
+  canvasCtx
 ) {
-  if (typeof position === "number" &&
-      position >= minimumPosition &&
-      position < maximumPosition)
-  {
+  if (
+    typeof position === "number" &&
+    position >= minimumPosition &&
+    position < maximumPosition
+  ) {
     const lengthCanvas = maximumPosition - minimumPosition;
     canvasCtx.fillStyle = COLOR_CURRENT_POSITION;
-    canvasCtx.fillRect(Math.ceil((position - minimumPosition) /
-                                    lengthCanvas * CANVAS_WIDTH) - 1,
-                       0,
-                       2,
-                       CANVAS_HEIGHT);
+    canvasCtx.fillRect(
+      Math.ceil(((position - minimumPosition) / lengthCanvas) * CANVAS_WIDTH) -
+        1,
+      0,
+      2,
+      CANVAS_HEIGHT
+    );
   }
 }
 
@@ -79,20 +77,20 @@ function scaleSegments(bufferedData, minimumPosition, maximumPosition) {
   const wholeDuration = maximumPosition - minimumPosition;
   for (let i = 0; i < bufferedData.length; i++) {
     const bufferedInfos = bufferedData[i];
-    const start = bufferedInfos.bufferedStart === undefined ?
-      bufferedInfos.start :
-      bufferedInfos.bufferedStart;
-    const end = bufferedInfos.bufferedEnd === undefined ?
-      bufferedInfos.end :
-      bufferedInfos.bufferedEnd;
+    const start =
+      bufferedInfos.bufferedStart === undefined
+        ? bufferedInfos.start
+        : bufferedInfos.bufferedStart;
+    const end =
+      bufferedInfos.bufferedEnd === undefined
+        ? bufferedInfos.end
+        : bufferedInfos.bufferedEnd;
     if (end > minimumPosition && start < maximumPosition) {
       const startPoint = Math.max(start - minimumPosition, 0);
       const endPoint = Math.min(end - minimumPosition, maximumPosition);
       const scaledStart = startPoint / wholeDuration;
       const scaledEnd = endPoint / wholeDuration;
-      scaledSegments.push({ scaledStart,
-                            scaledEnd,
-                            bufferedInfos });
+      scaledSegments.push({ scaledStart, scaledEnd, bufferedInfos });
     }
   }
   return scaledSegments;
@@ -113,10 +111,10 @@ export default function BufferContentGraph({
   seek, // function allowing to seek in the content
   type, // The type of buffer (e.g. "audio", "video" or "text")
 }) {
-  const [ randomColors ] = useState(shuffleArray(COLORS));
-  const [ tipVisible, setTipVisible ] = useState(false);
-  const [ tipPosition, setTipPosition ] = useState(0);
-  const [ tipText, setTipText ] = useState("");
+  const [randomColors] = useState(shuffleArray(COLORS));
+  const [tipVisible, setTipVisible] = useState(false);
+  const [tipPosition, setTipPosition] = useState(0);
+  const [tipText, setTipText] = useState("");
   const canvasEl = useRef(null);
   const representationsEncountered = useRef([]);
   const duration = Math.max(maximumPosition - minimumPosition, 0);
@@ -129,9 +127,8 @@ export default function BufferContentGraph({
    */
   function paintSegment(scaledSegment, canvasCtx) {
     const representation = scaledSegment.bufferedInfos.infos.representation;
-    let indexOfRepr = representationsEncountered
-      .current
-      .indexOf(representation);
+    let indexOfRepr =
+      representationsEncountered.current.indexOf(representation);
     if (indexOfRepr < 0) {
       representationsEncountered.current.push(representation);
       indexOfRepr = representationsEncountered.current.length - 1;
@@ -141,10 +138,12 @@ export default function BufferContentGraph({
     const startX = scaledSegment.scaledStart * CANVAS_WIDTH;
     const endX = scaledSegment.scaledEnd * CANVAS_WIDTH;
     canvasCtx.fillStyle = color;
-    canvasCtx.fillRect(Math.ceil(startX),
-                       0,
-                       Math.ceil(endX - startX),
-                       CANVAS_HEIGHT);
+    canvasCtx.fillRect(
+      Math.ceil(startX),
+      0,
+      Math.ceil(endX - startX),
+      CANVAS_HEIGHT
+    );
   }
 
   const currentSegmentsScaled = useMemo(() => {
@@ -153,7 +152,7 @@ export default function BufferContentGraph({
 
   useEffect(() => {
     if (canvasEl === null || canvasEl === undefined) {
-      return ;
+      return;
     }
     const ctx = canvasEl.current.getContext("2d");
     if (ctx === null) {
@@ -163,10 +162,11 @@ export default function BufferContentGraph({
     canvasEl.current.height = CANVAS_HEIGHT;
     clearCanvas(ctx);
 
-    if (minimumPosition === undefined ||
-        maximumPosition === undefined ||
-        minimumPosition >= maximumPosition)
-    {
+    if (
+      minimumPosition === undefined ||
+      maximumPosition === undefined ||
+      minimumPosition >= maximumPosition
+    ) {
       return;
     }
     for (let i = 0; i < currentSegmentsScaled.length; i++) {
@@ -191,45 +191,60 @@ export default function BufferContentGraph({
 
   const getMousePosition = (event) => {
     const mousePercent = getMousePositionInPercentage(event);
-    return mousePercent === undefined ?
-      undefined :
-      mousePercent * duration + minimumPosition;
+    return mousePercent === undefined
+      ? undefined
+      : mousePercent * duration + minimumPosition;
   };
 
-  const toolTipOffset = canvasEl !== null && canvasEl.current !== null ?
-    canvasEl.current.getBoundingClientRect().left :
-    0;
+  const toolTipOffset =
+    canvasEl !== null && canvasEl.current !== null
+      ? canvasEl.current.getBoundingClientRect().left
+      : 0;
 
   const onMouseMove = (event) => {
     const mousePercent = getMousePositionInPercentage(event);
     for (let i = 0; i < currentSegmentsScaled.length; i++) {
       const scaledSegment = currentSegmentsScaled[i];
-      if (mousePercent >= scaledSegment.scaledStart &&
-          mousePercent < scaledSegment.scaledEnd)
-      {
+      if (
+        mousePercent >= scaledSegment.scaledStart &&
+        mousePercent < scaledSegment.scaledEnd
+      ) {
         const { start, end } = scaledSegment.bufferedInfos;
-        const { adaptation,
-                representation } = scaledSegment.bufferedInfos.infos;
+        const { adaptation, representation } =
+          scaledSegment.bufferedInfos.infos;
         setTipVisible(true);
         setTipPosition(event.clientX);
 
         let newTipText = "";
         switch (adaptation.type) {
           case "video":
-            newTipText += `width: ${representation.width}` + "\n" +
-                          `height: ${representation.height}` + "\n" +
-                          `codec: ${representation.codec}` + "\n" +
-                          `bitrate: ${representation.bitrate}` + "\n";
+            newTipText +=
+              `width: ${representation.width}` +
+              "\n" +
+              `height: ${representation.height}` +
+              "\n" +
+              `codec: ${representation.codec}` +
+              "\n" +
+              `bitrate: ${representation.bitrate}` +
+              "\n";
             break;
           case "audio":
-            newTipText += `language: ${adaptation.language}` + "\n" +
-                          `audioDescription: ${!!adaptation.isAudioDescription}` + "\n" +
-                          `codec: ${representation.codec}` + "\n" +
-                          `bitrate: ${representation.bitrate}` + "\n";
+            newTipText +=
+              `language: ${adaptation.language}` +
+              "\n" +
+              `audioDescription: ${!!adaptation.isAudioDescription}` +
+              "\n" +
+              `codec: ${representation.codec}` +
+              "\n" +
+              `bitrate: ${representation.bitrate}` +
+              "\n";
             break;
           case "text":
-            newTipText += `language: ${adaptation.language}` + "\n" +
-                          `closedCaption: ${!!adaptation.isClosedCaption}` + "\n";
+            newTipText +=
+              `language: ${adaptation.language}` +
+              "\n" +
+              `closedCaption: ${!!adaptation.isClosedCaption}` +
+              "\n";
             break;
         }
         newTipText += `segment: [${start.toFixed(1)}, ${end.toFixed(1)}]`;
@@ -256,20 +271,21 @@ export default function BufferContentGraph({
         onMouseLeave={hideTip}
         onMouseMove={onMouseMove}
       >
-        { tipVisible ?
+        {tipVisible ? (
           <ToolTip
             className="buffer-content-tip"
             text={tipText}
             xPosition={tipPosition}
             offset={toolTipOffset}
-          /> :
-          null }
+          />
+        ) : null}
         <canvas
           onClick={(event) => seek(getMousePosition(event))}
           height={String(CANVAS_HEIGHT)}
           width={String(CANVAS_WIDTH)}
           className="canvas-buffer-graph"
-          ref={canvasEl} />
+          ref={canvasEl}
+        />
       </div>
     </div>
   );

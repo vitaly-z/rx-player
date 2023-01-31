@@ -32,7 +32,6 @@ describe("utils - takeFirstSet", () => {
     const obj1 = { a: 4 };
     const obj2 = { b: 12 };
 
-    expect(takeFirstSet<unknown>(undefined, null, obj1, obj2))
-      .toEqual(obj1);
+    expect(takeFirstSet<unknown>(undefined, null, obj1, obj2)).toEqual(obj1);
   });
 });

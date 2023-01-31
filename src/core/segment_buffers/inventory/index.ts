@@ -20,10 +20,7 @@ import SegmentInventory, {
 } from "./segment_inventory";
 
 export default SegmentInventory;
-export {
-  IBufferedChunk,
-  IInsertedChunkInfos,
-};
+export { IBufferedChunk, IInsertedChunkInfos };
 export { IBufferedHistoryEntry } from "./buffered_history";
 export { IChunkContext } from "./types";
 export {

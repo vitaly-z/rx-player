@@ -10,14 +10,14 @@ function BufferContentChart({
   minimumPosition,
 }) {
   if (bufferedData === null || Object.keys(bufferedData).length === 0) {
-    return (<div className="buffer-content-no-content"> No content yet </div>);
+    return <div className="buffer-content-no-content"> No content yet </div>;
   }
-  const seek = position => {
+  const seek = (position) => {
     player.dispatch("SEEK", position);
   };
   const subCharts = Object.keys(bufferedData)
-    .filter(type => bufferedData[type] !== null)
-    .map(type => {
+    .filter((type) => bufferedData[type] !== null)
+    .map((type) => {
       return (
         <BufferContentGraph
           key={type}
@@ -31,18 +31,18 @@ function BufferContentChart({
       );
     });
   if (subCharts.length === 0) {
-    return (<div className="buffer-content-no-content"> No content yet </div>);
+    return <div className="buffer-content-no-content"> No content yet </div>;
   }
-  return (
-    <div className="buffer-content-graphs-parent">
-      {subCharts}
-    </div>
-  );
+  return <div className="buffer-content-graphs-parent">{subCharts}</div>;
 }
 
-export default React.memo(withModulesState({
-  player: { bufferedData: "bufferedData",
-            currentTime: "currentTime",
-            minimumPosition: "minimumPosition",
-            maximumPosition: "maximumPosition" },
-})(BufferContentChart));
+export default React.memo(
+  withModulesState({
+    player: {
+      bufferedData: "bufferedData",
+      currentTime: "currentTime",
+      minimumPosition: "minimumPosition",
+      maximumPosition: "maximumPosition",
+    },
+  })(BufferContentChart)
+);

@@ -30,7 +30,7 @@ import MediaKeysInfosStore from "./utils/media_keys_infos_store";
  * one.
  * @param {Object} mediaElement
  */
-export function disableMediaKeys(mediaElement : HTMLMediaElement): void {
+export function disableMediaKeys(mediaElement: HTMLMediaElement): void {
   MediaKeysInfosStore.setState(mediaElement, null);
   setMediaKeys(mediaElement, null);
 }
@@ -45,18 +45,21 @@ export function disableMediaKeys(mediaElement : HTMLMediaElement): void {
  * @returns {Promise}
  */
 export default async function attachMediaKeys(
-  mediaElement : HTMLMediaElement,
-  { keySystemOptions,
+  mediaElement: HTMLMediaElement,
+  {
+    keySystemOptions,
     loadedSessionsStore,
     mediaKeySystemAccess,
-    mediaKeys } : IMediaKeysState,
-  cancelSignal : CancellationSignal
-) : Promise<void> {
+    mediaKeys,
+  }: IMediaKeysState,
+  cancelSignal: CancellationSignal
+): Promise<void> {
   const previousState = MediaKeysInfosStore.getState(mediaElement);
-  const closeAllSessions = previousState !== null &&
-                           previousState.loadedSessionsStore !== loadedSessionsStore ?
-                             previousState.loadedSessionsStore.closeAllSessions() :
-                             Promise.resolve();
+  const closeAllSessions =
+    previousState !== null &&
+    previousState.loadedSessionsStore !== loadedSessionsStore
+      ? previousState.loadedSessionsStore.closeAllSessions()
+      : Promise.resolve();
 
   await closeAllSessions;
 
@@ -66,12 +69,14 @@ export default async function attachMediaKeys(
     throw cancelSignal.cancellationError;
   }
 
-  MediaKeysInfosStore.setState(mediaElement, { keySystemOptions,
-                                               mediaKeySystemAccess,
-                                               mediaKeys,
-                                               loadedSessionsStore });
+  MediaKeysInfosStore.setState(mediaElement, {
+    keySystemOptions,
+    mediaKeySystemAccess,
+    mediaKeys,
+    loadedSessionsStore,
+  });
   if (mediaElement.mediaKeys === mediaKeys) {
-    return ;
+    return;
   }
   log.info("DRM: Attaching MediaKeys to the media element");
   setMediaKeys(mediaElement, mediaKeys);
@@ -81,13 +86,11 @@ export default async function attachMediaKeys(
 /** MediaKeys and associated state attached to a media element. */
 export interface IMediaKeysState {
   /** Options set when the MediaKeys has been attached. */
-  keySystemOptions : IKeySystemOption;
+  keySystemOptions: IKeySystemOption;
   /** LoadedSessionsStore associated to the MediaKeys instance. */
-  loadedSessionsStore : LoadedSessionsStore;
+  loadedSessionsStore: LoadedSessionsStore;
   /** The MediaKeySystemAccess allowing to create MediaKeys instances. */
-  mediaKeySystemAccess: MediaKeySystemAccess |
-                        ICustomMediaKeySystemAccess;
+  mediaKeySystemAccess: MediaKeySystemAccess | ICustomMediaKeySystemAccess;
   /** The MediaKeys instance to attach to the media element. */
-  mediaKeys : MediaKeys |
-              ICustomMediaKeys;
+  mediaKeys: MediaKeys | ICustomMediaKeys;
 }

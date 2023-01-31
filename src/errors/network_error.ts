@@ -30,20 +30,20 @@ import RequestError from "./request_error";
  * @extends Error
  */
 export default class NetworkError extends Error {
-  public readonly name : "NetworkError";
-  public readonly type : "NETWORK_ERROR";
-  public readonly message : string;
-  public readonly code : INetworkErrorCode;
-  public readonly url : string;
-  public readonly status : number;
-  public readonly errorType : INetworkErrorType;
-  public fatal : boolean;
+  public readonly name: "NetworkError";
+  public readonly type: "NETWORK_ERROR";
+  public readonly message: string;
+  public readonly code: INetworkErrorCode;
+  public readonly url: string;
+  public readonly status: number;
+  public readonly errorType: INetworkErrorType;
+  public fatal: boolean;
 
   /**
    * @param {string} code
    * @param {Error} baseError
    */
-  constructor(code : INetworkErrorCode, baseError : RequestError) {
+  constructor(code: INetworkErrorCode, baseError: RequestError) {
     super();
     // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
     Object.setPrototypeOf(this, NetworkError.prototype);
@@ -65,8 +65,10 @@ export default class NetworkError extends Error {
    * @param {number} httpErrorCode
    * @returns {Boolean}
    */
-  isHttpError(httpErrorCode : number) : boolean {
-    return this.errorType === NetworkErrorTypes.ERROR_HTTP_CODE &&
-           this.status === httpErrorCode;
+  isHttpError(httpErrorCode: number): boolean {
+    return (
+      this.errorType === NetworkErrorTypes.ERROR_HTTP_CODE &&
+      this.status === httpErrorCode
+    );
   }
 }

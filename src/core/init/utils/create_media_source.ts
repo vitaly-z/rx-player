@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  clearElementSrc,
-  events,
-  MediaSource_,
-} from "../../../compat";
+import { clearElementSrc, events, MediaSource_ } from "../../../compat";
 import { MediaError } from "../../../errors";
 import log from "../../../log";
 import isNonEmptyString from "../../../utils/is_non_empty_string";
@@ -36,10 +32,10 @@ import TaskCanceller, {
  * @param {string|null} mediaSourceURL
  */
 export function resetMediaSource(
-  mediaElement : HTMLMediaElement,
-  mediaSource : MediaSource | null,
-  mediaSourceURL : string | null
-) : void {
+  mediaElement: HTMLMediaElement,
+  mediaSource: MediaSource | null,
+  mediaSourceURL: string | null
+): void {
   if (mediaSource !== null && mediaSource.readyState !== "closed") {
     const { readyState, sourceBuffers } = mediaSource;
     for (let i = sourceBuffers.length - 1; i >= 0; i--) {
@@ -50,10 +46,11 @@ export function resetMediaSource(
           sourceBuffer.abort();
         }
         mediaSource.removeSourceBuffer(sourceBuffer);
-      }
-      catch (e) {
-        log.warn("Init: Error while disposing SourceBuffer",
-                 e instanceof Error ? e : "");
+      } catch (e) {
+        log.warn(
+          "Init: Error while disposing SourceBuffer",
+          e instanceof Error ? e : ""
+        );
       }
     }
     if (sourceBuffers.length > 0) {
@@ -68,8 +65,10 @@ export function resetMediaSource(
       log.debug("Init: Revoking previous URL");
       URL.revokeObjectURL(mediaSourceURL);
     } catch (e) {
-      log.warn("Init: Error while revoking the media source URL",
-               e instanceof Error ? e : "");
+      log.warn(
+        "Init: Error while revoking the media source URL",
+        e instanceof Error ? e : ""
+      );
     }
   }
 }
@@ -88,17 +87,18 @@ export function resetMediaSource(
  * @returns {MediaSource}
  */
 function createMediaSource(
-  mediaElement : HTMLMediaElement,
-  unlinkSignal : CancellationSignal
-) : MediaSource {
+  mediaElement: HTMLMediaElement,
+  unlinkSignal: CancellationSignal
+): MediaSource {
   if (MediaSource_ == null) {
-    throw new MediaError("MEDIA_SOURCE_NOT_SUPPORTED",
-                         "No MediaSource Object was found in the current browser.");
+    throw new MediaError(
+      "MEDIA_SOURCE_NOT_SUPPORTED",
+      "No MediaSource Object was found in the current browser."
+    );
   }
 
   // make sure the media has been correctly reset
-  const oldSrc = isNonEmptyString(mediaElement.src) ? mediaElement.src :
-                                                      null;
+  const oldSrc = isNonEmptyString(mediaElement.src) ? mediaElement.src : null;
   resetMediaSource(mediaElement, null, oldSrc);
 
   log.info("Init: Creating MediaSource");
@@ -125,19 +125,25 @@ function createMediaSource(
  * @returns {Promise}
  */
 export default function openMediaSource(
-  mediaElement : HTMLMediaElement,
-  unlinkSignal : CancellationSignal
-) : Promise<MediaSource> {
+  mediaElement: HTMLMediaElement,
+  unlinkSignal: CancellationSignal
+): Promise<MediaSource> {
   return new Promise((resolve, reject) => {
     let hasResolved = false;
     const mediaSource = createMediaSource(mediaElement, unlinkSignal);
-    const eventListenerCanceller = new TaskCanceller({ cancelOn: unlinkSignal });
+    const eventListenerCanceller = new TaskCanceller({
+      cancelOn: unlinkSignal,
+    });
 
-    events.onSourceOpen(mediaSource, () => {
-      eventListenerCanceller.cancel();
-      hasResolved = true;
-      resolve(mediaSource);
-    }, eventListenerCanceller.signal);
+    events.onSourceOpen(
+      mediaSource,
+      () => {
+        eventListenerCanceller.cancel();
+        hasResolved = true;
+        resolve(mediaSource);
+      },
+      eventListenerCanceller.signal
+    );
 
     unlinkSignal.register((error) => {
       if (!hasResolved) {

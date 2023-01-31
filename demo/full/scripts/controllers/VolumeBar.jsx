@@ -16,7 +16,6 @@ function VolumeBar({
 }) {
   let element;
 
-
   const getMouseVolume = (event) => {
     const rect = element.getBoundingClientRect();
     const point0 = rect.left;
@@ -31,21 +30,21 @@ function VolumeBar({
   return (
     <div
       className="volume-bar-wrapper"
-      ref={el => element = el }
-      onClick={evt =>
-        player.dispatch("SET_VOLUME", getMouseVolume(evt))
-      }
+      ref={(el) => (element = el)}
+      onClick={(evt) => player.dispatch("SET_VOLUME", getMouseVolume(evt))}
     >
       <div
         className="volume-bar-current"
-        style={{ "width": (volume * 100) + "%" }}
+        style={{ width: volume * 100 + "%" }}
       />
     </div>
   );
 }
 
-export default React.memo(withModulesState({
-  player: {
-    volume: "volume",
-  },
-})(VolumeBar));
+export default React.memo(
+  withModulesState({
+    player: {
+      volume: "volume",
+    },
+  })(VolumeBar)
+);

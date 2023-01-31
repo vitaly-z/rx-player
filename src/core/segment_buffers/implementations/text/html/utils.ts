@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  ICuesGroup,
-  IHTMLCue,
-} from "./types";
+import { ICuesGroup, IHTMLCue } from "./types";
 
 /**
  * Maximum time difference, in seconds, between two text segment's start times
@@ -60,7 +57,7 @@ const MAX_DELTA_BUFFER_TIME = 0.2;
  * @param {Number} b
  * @returns {Boolean}
  */
-export function areNearlyEqual(a : number, b : number) : boolean {
+export function areNearlyEqual(a: number, b: number): boolean {
   return Math.abs(a - b) <= MAX_DELTA_BUFFER_TIME;
 }
 
@@ -70,7 +67,7 @@ export function areNearlyEqual(a : number, b : number) : boolean {
  * @param {Number} time
  * @returns {Array.<Object>}
  */
-export function getCuesBefore(cues : IHTMLCue[], time : number) : IHTMLCue[] {
+export function getCuesBefore(cues: IHTMLCue[], time: number): IHTMLCue[] {
   for (let i = cues.length - 1; i >= 0; i--) {
     const cue = cues[i];
     if (cue.start < time) {
@@ -86,7 +83,7 @@ export function getCuesBefore(cues : IHTMLCue[], time : number) : IHTMLCue[] {
  * @param {Number} time
  * @returns {Array.<Object>}
  */
-export function getCuesAfter(cues : IHTMLCue[], time : number) : IHTMLCue[] {
+export function getCuesAfter(cues: IHTMLCue[], time: number): IHTMLCue[] {
   for (let i = 0; i < cues.length; i++) {
     const cue = cues[i];
     if (cue.end > time) {
@@ -103,20 +100,24 @@ export function getCuesAfter(cues : IHTMLCue[], time : number) : IHTMLCue[] {
  * @returns {Array.<Object>}
  */
 export function removeCuesInfosBetween(
-  cuesInfos : ICuesGroup,
-  start : number,
-  end : number
-) : [ICuesGroup, ICuesGroup] {
+  cuesInfos: ICuesGroup,
+  start: number,
+  end: number
+): [ICuesGroup, ICuesGroup] {
   const endCuesInfos1 = Math.max(cuesInfos.start, start);
   const cues1 = getCuesBefore(cuesInfos.cues, start);
-  const cuesInfos1 = { start: cuesInfos.start,
-                       end: endCuesInfos1,
-                       cues: cues1 };
+  const cuesInfos1 = {
+    start: cuesInfos.start,
+    end: endCuesInfos1,
+    cues: cues1,
+  };
 
   const startCuesInfos2 = Math.min(end, cuesInfos.end);
   const cues2 = getCuesAfter(cuesInfos.cues, end);
-  const cuesInfos2 = { start: startCuesInfos2,
-                       end: cuesInfos.end,
-                       cues: cues2 };
+  const cuesInfos2 = {
+    start: startCuesInfos2,
+    end: cuesInfos.end,
+    cues: cues2,
+  };
   return [cuesInfos1, cuesInfos2];
 }

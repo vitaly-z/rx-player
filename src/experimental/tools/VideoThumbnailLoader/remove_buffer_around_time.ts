@@ -41,14 +41,19 @@ export default function removeBufferAroundTime(
     return Promise.resolve();
   }
   const bufferRemovals = [];
-  if ((time - removalMargin) > 0) {
+  if (time - removalMargin > 0) {
     bufferRemovals.push(
-      sourceBuffer.removeBuffer(0, time - removalMargin, cancelSignal));
+      sourceBuffer.removeBuffer(0, time - removalMargin, cancelSignal)
+    );
   }
-  if ((time + removalMargin) < videoElement.duration) {
-    bufferRemovals.push(sourceBuffer.removeBuffer(time + removalMargin,
-                                                  videoElement.duration,
-                                                  cancelSignal));
+  if (time + removalMargin < videoElement.duration) {
+    bufferRemovals.push(
+      sourceBuffer.removeBuffer(
+        time + removalMargin,
+        videoElement.duration,
+        cancelSignal
+      )
+    );
   }
   return Promise.all(bufferRemovals);
 }

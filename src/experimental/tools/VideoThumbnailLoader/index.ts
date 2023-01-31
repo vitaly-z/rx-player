@@ -18,8 +18,5 @@ import VideoThumbnailLoader, {
   DASH_LOADER,
   MPL_LOADER,
 } from "./video_thumbnail_loader";
-export {
-  DASH_LOADER,
-  MPL_LOADER,
-};
+export { DASH_LOADER, MPL_LOADER };
 export default VideoThumbnailLoader;

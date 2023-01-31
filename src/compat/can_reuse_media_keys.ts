@@ -12,6 +12,6 @@ import { isWebOs } from "./browser_detection";
  *
  * @returns {boolean}
  */
-export default function canReuseMediaKeys() : boolean {
+export default function canReuseMediaKeys(): boolean {
   return !isWebOs;
 }

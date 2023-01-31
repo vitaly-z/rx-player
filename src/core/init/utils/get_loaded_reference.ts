@@ -1,4 +1,3 @@
-
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -22,11 +21,10 @@ import {
 import createSharedReference, {
   IReadOnlySharedReference,
 } from "../../../utils/reference";
-import TaskCanceller, { CancellationSignal } from "../../../utils/task_canceller";
-import {
-  IPlaybackObservation,
-  IReadOnlyPlaybackObserver,
-} from "../../api";
+import TaskCanceller, {
+  CancellationSignal,
+} from "../../../utils/task_canceller";
+import { IPlaybackObservation, IReadOnlyPlaybackObserver } from "../../api";
 
 /**
  * Returns an `IReadOnlySharedReference` that switches to `true` once the
@@ -38,39 +36,46 @@ import {
  * @returns {Object}
  */
 export default function getLoadedReference(
-  playbackObserver : IReadOnlyPlaybackObserver<IPlaybackObservation>,
-  mediaElement : HTMLMediaElement,
-  isDirectfile : boolean,
-  cancelSignal : CancellationSignal
-) : IReadOnlySharedReference<boolean> {
+  playbackObserver: IReadOnlyPlaybackObserver<IPlaybackObservation>,
+  mediaElement: HTMLMediaElement,
+  isDirectfile: boolean,
+  cancelSignal: CancellationSignal
+): IReadOnlySharedReference<boolean> {
   const listenCanceller = new TaskCanceller({ cancelOn: cancelSignal });
   const isLoaded = createSharedReference(false, listenCanceller.signal);
-  playbackObserver.listen((observation) => {
-    if (observation.rebuffering !== null ||
+  playbackObserver.listen(
+    (observation) => {
+      if (
+        observation.rebuffering !== null ||
         observation.freezing !== null ||
-        observation.readyState === 0)
-    {
-      return ;
-    }
-
-    if (!shouldWaitForDataBeforeLoaded(isDirectfile,
-                                       mediaElement.hasAttribute("playsinline")))
-    {
-      if (mediaElement.duration > 0) {
-        isLoaded.setValue(true);
-        listenCanceller.cancel();
+        observation.readyState === 0
+      ) {
         return;
       }
-    }
 
-    if (observation.readyState >= 3 && observation.currentRange !== null) {
-      if (!shouldValidateMetadata() || mediaElement.duration > 0) {
-        isLoaded.setValue(true);
-        listenCanceller.cancel();
-        return;
+      if (
+        !shouldWaitForDataBeforeLoaded(
+          isDirectfile,
+          mediaElement.hasAttribute("playsinline")
+        )
+      ) {
+        if (mediaElement.duration > 0) {
+          isLoaded.setValue(true);
+          listenCanceller.cancel();
+          return;
+        }
       }
-    }
-  }, { includeLastObservation: true, clearSignal: listenCanceller.signal });
+
+      if (observation.readyState >= 3 && observation.currentRange !== null) {
+        if (!shouldValidateMetadata() || mediaElement.duration > 0) {
+          isLoaded.setValue(true);
+          listenCanceller.cancel();
+          return;
+        }
+      }
+    },
+    { includeLastObservation: true, clearSignal: listenCanceller.signal }
+  );
 
   return isLoaded;
 }

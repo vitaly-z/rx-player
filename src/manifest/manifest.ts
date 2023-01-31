@@ -25,9 +25,7 @@ import EventEmitter from "../utils/event_emitter";
 import idGenerator from "../utils/id_generator";
 import warnOnce from "../utils/warn_once";
 import Adaptation from "./adaptation";
-import Period, {
-  IManifestAdaptations,
-} from "./period";
+import Period, { IManifestAdaptations } from "./period";
 import Representation from "./representation";
 import { MANIFEST_UPDATE_TYPE } from "./types";
 import {
@@ -41,27 +39,29 @@ const generateNewManifestId = idGenerator();
 /** Options given to the `Manifest` constructor. */
 interface IManifestParsingOptions {
   /** External callback peforming an automatic filtering of wanted Representations. */
-  representationFilter? : IRepresentationFilter | undefined;
+  representationFilter?: IRepresentationFilter | undefined;
   /** Optional URL that points to a shorter version of the Manifest used
    * for updates only. When using this URL for refresh, the manifest will be
    * updated with the partial update type. If this URL is undefined, then the
    * manifest will be updated fully when it needs to be refreshed, and it will
    * fetched through the original URL. */
-  manifestUpdateUrl? : string | undefined;
+  manifestUpdateUrl?: string | undefined;
 }
 
 /** Representation affected by a `decipherabilityUpdate` event. */
-export interface IDecipherabilityUpdateElement { manifest : Manifest;
-                                                 period : Period;
-                                                 adaptation : Adaptation;
-                                                 representation : Representation; }
+export interface IDecipherabilityUpdateElement {
+  manifest: Manifest;
+  period: Period;
+  adaptation: Adaptation;
+  representation: Representation;
+}
 
 /** Events emitted by a `Manifest` instance */
 export interface IManifestEvents {
   /** The Manifest has been updated */
-  manifestUpdate : IPeriodsUpdateResult;
+  manifestUpdate: IPeriodsUpdateResult;
   /** Some Representation's decipherability status has been updated */
-  decipherabilityUpdate : IDecipherabilityUpdateElement[];
+  decipherabilityUpdate: IDecipherabilityUpdateElement[];
 }
 
 /**
@@ -90,7 +90,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * This ID is automatically calculated each time a `Manifest` instance is
    * created.
    */
-  public readonly id : string;
+  public readonly id: string;
 
   /**
    * Type of transport used by this Manifest (e.g. `"dash"` or `"smooth"`).
@@ -98,33 +98,33 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * TODO This should never be needed as this structure is transport-agnostic.
    * But it is specified in the Manifest API. Deprecate?
    */
-  public transport : string;
+  public transport: string;
 
   /**
    * List every Period in that Manifest chronologically (from start to end).
    * A Period contains information about the content available for a specific
    * period of time.
    */
-  public readonly periods : Period[];
+  public readonly periods: Period[];
 
   /**
    * When that promise resolves, the whole Manifest needs to be requested again
    * so it can be refreshed.
    */
-  public expired : Promise<void> | null;
+  public expired: Promise<void> | null;
 
   /**
    * Deprecated. Equivalent to `manifest.periods[0].adaptations`.
    * @deprecated
    */
-  public adaptations : IManifestAdaptations;
+  public adaptations: IManifestAdaptations;
 
   /**
    * If true, the Manifest can evolve over time:
    * New segments can become available in the future, properties of the manifest
    * can change...
    */
-  public isDynamic : boolean;
+  public isDynamic: boolean;
 
   /**
    * If true, this Manifest describes a live content.
@@ -132,25 +132,25 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * close to the maximum position (here called the "live edge").
    * E.g., a TV channel is a live content.
    */
-  public isLive : boolean;
+  public isLive: boolean;
 
   /**
    * If `true`, no more periods will be added after the current last manifest's
    * Period.
    * `false` if we know that more Period is coming or if we don't know.
    */
-  public isLastPeriodKnown : boolean;
+  public isLastPeriodKnown: boolean;
 
   /*
    * Every URI linking to that Manifest.
    * They can be used for refreshing the Manifest.
    * Listed from the most important to the least important.
    */
-  public uris : string[];
+  public uris: string[];
 
   /** Optional URL that points to a shorter version of the Manifest used
    * for updates only. */
-  public updateUrl : string | undefined;
+  public updateUrl: string | undefined;
 
   /**
    * Suggested delay from the "live edge" (i.e. the position corresponding to
@@ -158,7 +158,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * from.
    * This only applies to live contents.
    */
-  public suggestedPresentationDelay : number | undefined;
+  public suggestedPresentationDelay: number | undefined;
 
   /**
    * Amount of time, in seconds, this Manifest is valid from the time when it
@@ -166,7 +166,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * If no lifetime is set, this Manifest does not become invalid after an
    * amount of time.
    */
-  public lifetime : number | undefined;
+  public lifetime: number | undefined;
 
   /**
    * Minimum time, in seconds, at which a segment defined in the Manifest
@@ -174,7 +174,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * This is also used as an offset for live content to apply to a segment's
    * time.
    */
-  public availabilityStartTime : number | undefined;
+  public availabilityStartTime: number | undefined;
 
   /**
    * It specifies the wall-clock time when the manifest was generated and published
@@ -187,7 +187,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * Array containing every minor errors that happened when the Manifest has
    * been created, in the order they have happened.
    */
-  public contentWarnings : IPlayerError[];
+  public contentWarnings: IPlayerError[];
 
   /*
    * Difference between the server's clock in milliseconds and the return of the
@@ -195,13 +195,13 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * This property allows to calculate the server time at any moment.
    * `undefined` if we did not obtain the server's time
    */
-  public clockOffset : number | undefined;
+  public clockOffset: number | undefined;
 
   /**
    * Data allowing to calculate the minimum and maximum seekable positions at
    * any given time.
    */
-  private _timeBounds : {
+  private _timeBounds: {
     /**
      * This is the theoretical minimum playable position on the content
      * regardless of the current Adaptation chosen, as estimated at parsing
@@ -227,7 +227,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
      *      segment, and `timeshiftDepth` would be the whole depth that will
      *      become available once enough segments have been generated.
      */
-    minimumSafePosition? : number | undefined;
+    minimumSafePosition?: number | undefined;
     /**
      * Some dynamic contents have the concept of a "window depth" (or "buffer
      * depth") which allows to set a minimum position for all reachable
@@ -244,16 +244,16 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
      *
      * If set to `null`, this content has no concept of a "window depth".
      */
-    timeshiftDepth : number | null;
+    timeshiftDepth: number | null;
     /** Data allowing to calculate the maximum playable position at any given time. */
-    maximumTimeData : {
+    maximumTimeData: {
       /**
        * Current position representing live content.
        * Only makes sense for un-ended live contents.
        *
        * `undefined` if unknown or if it doesn't make sense in the current context.
        */
-      livePosition : number | undefined;
+      livePosition: number | undefined;
       /**
        * Whether the maximum positions should evolve linearly over time.
        *
@@ -277,14 +277,14 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
        * This can for example be understood as the safe maximum playable
        * position through all possible tacks.
        */
-      maximumSafePosition : number;
+      maximumSafePosition: number;
       /**
        * `Performance.now()` output at the time both `maximumSafePosition` and
        * `livePosition` were calculated.
        * This can be used to retrieve a new maximum position from them when they
        * linearly evolves over time (see `isLinear` property).
        */
-      time : number;
+      time: number;
     };
   };
 
@@ -297,37 +297,40 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @param {Object} parsedManifest
    * @param {Object} options
    */
-  constructor(parsedManifest : IParsedManifest, options : IManifestParsingOptions) {
+  constructor(
+    parsedManifest: IParsedManifest,
+    options: IManifestParsingOptions
+  ) {
     super();
-    const { representationFilter,
-            manifestUpdateUrl } = options;
+    const { representationFilter, manifestUpdateUrl } = options;
     this.contentWarnings = [];
     this.id = generateNewManifestId();
     this.expired = parsedManifest.expired ?? null;
     this.transport = parsedManifest.transportType;
     this.clockOffset = parsedManifest.clockOffset;
 
-    this.periods = parsedManifest.periods.map((parsedPeriod) => {
-      const period = new Period(parsedPeriod, representationFilter);
-      this.contentWarnings.push(...period.contentWarnings);
-      return period;
-    }).sort((a, b) => a.start - b.start);
+    this.periods = parsedManifest.periods
+      .map((parsedPeriod) => {
+        const period = new Period(parsedPeriod, representationFilter);
+        this.contentWarnings.push(...period.contentWarnings);
+        return period;
+      })
+      .sort((a, b) => a.start - b.start);
 
     /**
      * @deprecated It is here to ensure compatibility with the way the
      * v3.x.x manages adaptations at the Manifest level
      */
     /* eslint-disable import/no-deprecated */
-    this.adaptations = this.periods[0] === undefined ? {} :
-                                                       this.periods[0].adaptations;
+    this.adaptations =
+      this.periods[0] === undefined ? {} : this.periods[0].adaptations;
     /* eslint-enable import/no-deprecated */
 
     this._timeBounds = parsedManifest.timeBounds;
     this.isDynamic = parsedManifest.isDynamic;
     this.isLive = parsedManifest.isLive;
     this.isLastPeriodKnown = parsedManifest.isLastPeriodKnown;
-    this.uris = parsedManifest.uris === undefined ? [] :
-                                                    parsedManifest.uris;
+    this.uris = parsedManifest.uris === undefined ? [] : parsedManifest.uris;
 
     this.updateUrl = manifestUpdateUrl;
     this.lifetime = parsedManifest.lifetime;
@@ -342,7 +345,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @param {string} id
    * @returns {Object|undefined}
    */
-  public getPeriod(id : string) : Period | undefined {
+  public getPeriod(id: string): Period | undefined {
     return arrayFind(this.periods, (period) => {
       return id === period.id;
     });
@@ -354,10 +357,11 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @param {number} time
    * @returns {Object|undefined}
    */
-  public getPeriodForTime(time : number) : Period | undefined {
+  public getPeriodForTime(time: number): Period | undefined {
     return arrayFind(this.periods, (period) => {
-      return time >= period.start &&
-             (period.end === undefined || period.end > time);
+      return (
+        time >= period.start && (period.end === undefined || period.end > time)
+      );
     });
   }
 
@@ -367,7 +371,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @param {number} time
    * @returns {Object|undefined}
    */
-  public getNextPeriod(time : number) : Period | undefined {
+  public getNextPeriod(time: number): Period | undefined {
     return arrayFind(this.periods, (period) => {
       return period.start > time;
     });
@@ -379,9 +383,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @param {Object} period
    * @returns {Object|null}
    */
-  public getPeriodAfter(
-    period : Period
-  ) : Period | null {
+  public getPeriodAfter(period: Period): Period | null {
     const endOfPeriod = period.end;
     if (endOfPeriod === undefined) {
       return null;
@@ -389,8 +391,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
     const nextPeriod = arrayFind(this.periods, (_period) => {
       return _period.end === undefined || endOfPeriod < _period.end;
     });
-    return nextPeriod === undefined ? null :
-                                      nextPeriod;
+    return nextPeriod === undefined ? null : nextPeriod;
   }
 
   /**
@@ -398,7 +399,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * `undefined` if no URL is found.
    * @returns {Array.<string>}
    */
-  public getUrls() : string[] {
+  public getUrls(): string[] {
     return this.uris;
   }
 
@@ -407,7 +408,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * This instance will be updated with the new information coming from it.
    * @param {Object} newManifest
    */
-  public replace(newManifest : Manifest) : void {
+  public replace(newManifest: Manifest): void {
     this._performUpdate(newManifest, MANIFEST_UPDATE_TYPE.Full);
   }
 
@@ -421,7 +422,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * update the Manifest.
    * @param {Object} newManifest
    */
-  public update(newManifest : Manifest) : void {
+  public update(newManifest: Manifest): void {
     this._performUpdate(newManifest, MANIFEST_UPDATE_TYPE.Partial);
   }
 
@@ -431,14 +432,14 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * time.
    * @returns {number}
    */
-  public getMinimumSafePosition() : number {
+  public getMinimumSafePosition(): number {
     const windowData = this._timeBounds;
     if (windowData.timeshiftDepth === null) {
       return windowData.minimumSafePosition ?? 0;
     }
 
     const { maximumTimeData } = windowData;
-    let maximumTime : number;
+    let maximumTime: number;
     if (!windowData.maximumTimeData.isLinear) {
       maximumTime = maximumTimeData.maximumSafePosition;
     } else {
@@ -454,7 +455,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * currently being broadcasted, in seconds.
    * @returns {number|undefined}
    */
-  public getLivePosition() : number | undefined {
+  public getLivePosition(): number | undefined {
     const { maximumTimeData } = this._timeBounds;
     if (!this.isLive || maximumTimeData.livePosition === undefined) {
       return undefined;
@@ -471,7 +472,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * regardless of the current Adaptation chosen, as estimated at parsing
    * time.
    */
-  public getMaximumSafePosition() : number {
+  public getMaximumSafePosition(): number {
     const { maximumTimeData } = this._timeBounds;
     if (!maximumTimeData.isLinear) {
       return maximumTimeData.maximumSafePosition;
@@ -488,8 +489,8 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @param {Function} isDecipherableCb
    */
   public updateRepresentationsDeciperability(
-    isDecipherableCb : (rep : Representation) => boolean | undefined
-  ) : void {
+    isDecipherableCb: (rep: Representation) => boolean | undefined
+  ): void {
     const updates = updateDeciperability(this, isDecipherableCb);
     if (updates.length > 0) {
       this.trigger("decipherabilityUpdate", updates);
@@ -500,19 +501,22 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @deprecated only returns adaptations for the first period
    * @returns {Array.<Object>}
    */
-  public getAdaptations() : Adaptation[] {
-    warnOnce("manifest.getAdaptations() is deprecated." +
-             " Please use manifest.period[].getAdaptations() instead");
+  public getAdaptations(): Adaptation[] {
+    warnOnce(
+      "manifest.getAdaptations() is deprecated." +
+        " Please use manifest.period[].getAdaptations() instead"
+    );
     const firstPeriod = this.periods[0];
     if (firstPeriod === undefined) {
       return [];
     }
     const adaptationsByType = firstPeriod.adaptations;
-    const adaptationsList : Adaptation[] = [];
+    const adaptationsList: Adaptation[] = [];
     for (const adaptationType in adaptationsByType) {
       if (adaptationsByType.hasOwnProperty(adaptationType)) {
-        const adaptations =
-          adaptationsByType[adaptationType as ITrackType] as Adaptation[];
+        const adaptations = adaptationsByType[
+          adaptationType as ITrackType
+        ] as Adaptation[];
         adaptationsList.push(...adaptations);
       }
     }
@@ -523,25 +527,28 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @deprecated only returns adaptations for the first period
    * @returns {Array.<Object>}
    */
-  public getAdaptationsForType(adaptationType : ITrackType) : Adaptation[] {
-    warnOnce("manifest.getAdaptationsForType(type) is deprecated." +
-             " Please use manifest.period[].getAdaptationsForType(type) instead");
+  public getAdaptationsForType(adaptationType: ITrackType): Adaptation[] {
+    warnOnce(
+      "manifest.getAdaptationsForType(type) is deprecated." +
+        " Please use manifest.period[].getAdaptationsForType(type) instead"
+    );
     const firstPeriod = this.periods[0];
     if (firstPeriod === undefined) {
       return [];
     }
     const adaptationsForType = firstPeriod.adaptations[adaptationType];
-    return adaptationsForType === undefined ? [] :
-                                              adaptationsForType;
+    return adaptationsForType === undefined ? [] : adaptationsForType;
   }
 
   /**
    * @deprecated only returns adaptations for the first period
    * @returns {Array.<Object>}
    */
-  public getAdaptation(wantedId : number|string) : Adaptation|undefined {
-    warnOnce("manifest.getAdaptation(id) is deprecated." +
-             " Please use manifest.period[].getAdaptation(id) instead");
+  public getAdaptation(wantedId: number | string): Adaptation | undefined {
+    warnOnce(
+      "manifest.getAdaptation(id) is deprecated." +
+        " Please use manifest.period[].getAdaptation(id) instead"
+    );
     /* eslint-disable import/no-deprecated */
     return arrayFind(this.getAdaptations(), ({ id }) => wantedId === id);
     /* eslint-enable import/no-deprecated */
@@ -552,9 +559,9 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @param {number} updateType
    */
   private _performUpdate(
-    newManifest : Manifest,
-    updateType : MANIFEST_UPDATE_TYPE
-  ) : void {
+    newManifest: Manifest,
+    updateType: MANIFEST_UPDATE_TYPE
+  ): void {
     this.availabilityStartTime = newManifest.availabilityStartTime;
     this.expired = newManifest.expired;
     this.isDynamic = newManifest.isDynamic;
@@ -572,7 +579,8 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
       this.uris = newManifest.uris;
       updatedPeriodsResult = replacePeriods(this.periods, newManifest.periods);
     } else {
-      this._timeBounds.maximumTimeData = newManifest._timeBounds.maximumTimeData;
+      this._timeBounds.maximumTimeData =
+        newManifest._timeBounds.maximumTimeData;
       this.updateUrl = newManifest.uris[0];
       updatedPeriodsResult = updatePeriods(this.periods, newManifest.periods);
 
@@ -591,9 +599,8 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
 
     // Re-set this.adaptations for retro-compatibility in v3.x.x
     /* eslint-disable import/no-deprecated */
-    this.adaptations = this.periods[0] === undefined ?
-                         {} :
-                         this.periods[0].adaptations;
+    this.adaptations =
+      this.periods[0] === undefined ? {} : this.periods[0].adaptations;
     /* eslint-enable import/no-deprecated */
 
     // Let's trigger events at the end, as those can trigger side-effects.
@@ -615,10 +622,10 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
  * @returns {Array.<Object>}
  */
 function updateDeciperability(
-  manifest : Manifest,
-  isDecipherable : (rep : Representation) => boolean | undefined
-) : IDecipherabilityUpdateElement[] {
-  const updates : IDecipherabilityUpdateElement[] = [];
+  manifest: Manifest,
+  isDecipherable: (rep: Representation) => boolean | undefined
+): IDecipherabilityUpdateElement[] {
+  const updates: IDecipherabilityUpdateElement[] = [];
   for (const period of manifest.periods) {
     for (const adaptation of period.getAdaptations()) {
       for (const representation of adaptation.representations) {

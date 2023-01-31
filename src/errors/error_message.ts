@@ -22,9 +22,9 @@
  * @returns {string}
  */
 export default function errorMessage(
-  name : string,
-  code : string,
-  reason : string
-) : string {
+  name: string,
+  code: string,
+  reason: string
+): string {
   return `${name} (${code}) ${reason}`;
 }

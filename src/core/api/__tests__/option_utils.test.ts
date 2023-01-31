@@ -122,11 +122,15 @@ describe("API - parseConstructorOptions", () => {
   });
 
   it("should authorize setting a videoResolutionLimit option", () => {
-    expect(parseConstructorOptions({ videoResolutionLimit: "screen" })).toEqual({
-      ...defaultConstructorOptions,
-      videoResolutionLimit: "screen",
-    });
-    expect(parseConstructorOptions({ videoResolutionLimit: "videoElement" })).toEqual({
+    expect(parseConstructorOptions({ videoResolutionLimit: "screen" })).toEqual(
+      {
+        ...defaultConstructorOptions,
+        videoResolutionLimit: "screen",
+      }
+    );
+    expect(
+      parseConstructorOptions({ videoResolutionLimit: "videoElement" })
+    ).toEqual({
       ...defaultConstructorOptions,
       videoResolutionLimit: "videoElement",
     });
@@ -137,11 +141,15 @@ describe("API - parseConstructorOptions", () => {
   });
 
   it("should authorize setting a throttleVideoBitrateWhenHidden option", () => {
-    expect(parseConstructorOptions({ throttleVideoBitrateWhenHidden: false })).toEqual({
+    expect(
+      parseConstructorOptions({ throttleVideoBitrateWhenHidden: false })
+    ).toEqual({
       ...defaultConstructorOptions,
       throttleVideoBitrateWhenHidden: false,
     });
-    expect(parseConstructorOptions({ throttleVideoBitrateWhenHidden: true })).toEqual({
+    expect(
+      parseConstructorOptions({ throttleVideoBitrateWhenHidden: true })
+    ).toEqual({
       ...defaultConstructorOptions,
       throttleVideoBitrateWhenHidden: true,
     });
@@ -149,7 +157,7 @@ describe("API - parseConstructorOptions", () => {
 
   /* eslint-disable max-len */
   it("should authorize setting a videoElement option which can be any media element", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
     const _videoElement = document.createElement("video");
     const parsed1 = parseConstructorOptions({ videoElement: _videoElement });
     expect(parsed1).toEqual({
@@ -187,38 +195,72 @@ describe("API - parseConstructorOptions", () => {
   });
 
   it("should throw if the maxBufferAhead given is not a number", () => {
-    expect(() => parseConstructorOptions({ maxBufferAhead: "a" as any })).toThrow();
-    expect(() => parseConstructorOptions({ maxBufferAhead: /a/ as any })).toThrow();
-    expect(() => parseConstructorOptions({ maxBufferAhead: {} as any })).toThrow();
+    expect(() =>
+      parseConstructorOptions({ maxBufferAhead: "a" as any })
+    ).toThrow();
+    expect(() =>
+      parseConstructorOptions({ maxBufferAhead: /a/ as any })
+    ).toThrow();
+    expect(() =>
+      parseConstructorOptions({ maxBufferAhead: {} as any })
+    ).toThrow();
   });
 
   it("should throw if the maxBufferBehind given is not a number", () => {
-    expect(() => parseConstructorOptions({ maxBufferBehind: "a" as any })).toThrow();
-    expect(() => parseConstructorOptions({ maxBufferBehind: /a/ as any })).toThrow();
-    expect(() => parseConstructorOptions({ maxBufferBehind: {} as any })).toThrow();
+    expect(() =>
+      parseConstructorOptions({ maxBufferBehind: "a" as any })
+    ).toThrow();
+    expect(() =>
+      parseConstructorOptions({ maxBufferBehind: /a/ as any })
+    ).toThrow();
+    expect(() =>
+      parseConstructorOptions({ maxBufferBehind: {} as any })
+    ).toThrow();
   });
 
   it("should throw if the wantedBufferAhead given is not a number", () => {
-    expect(() => parseConstructorOptions({ wantedBufferAhead: "a" as any })).toThrow();
-    expect(() => parseConstructorOptions({ wantedBufferAhead: /a/ as any })).toThrow();
-    expect(() => parseConstructorOptions({ wantedBufferAhead: {} as any })).toThrow();
+    expect(() =>
+      parseConstructorOptions({ wantedBufferAhead: "a" as any })
+    ).toThrow();
+    expect(() =>
+      parseConstructorOptions({ wantedBufferAhead: /a/ as any })
+    ).toThrow();
+    expect(() =>
+      parseConstructorOptions({ wantedBufferAhead: {} as any })
+    ).toThrow();
   });
 
   it("should throw if the videoElement given is not an HTMLMediaElement", () => {
-    expect(() => parseConstructorOptions({ videoElement: "a" as any })).toThrow();
-    expect(() => parseConstructorOptions({ videoElement: /a/ as any })).toThrow();
-    expect(() => parseConstructorOptions({ videoElement: {} as any })).toThrow();
-    expect(() => parseConstructorOptions({ videoElement: [] as any })).toThrow();
+    expect(() =>
+      parseConstructorOptions({ videoElement: "a" as any })
+    ).toThrow();
+    expect(() =>
+      parseConstructorOptions({ videoElement: /a/ as any })
+    ).toThrow();
+    expect(() =>
+      parseConstructorOptions({ videoElement: {} as any })
+    ).toThrow();
+    expect(() =>
+      parseConstructorOptions({ videoElement: [] as any })
+    ).toThrow();
     expect(() => parseConstructorOptions({ videoElement: 0 as any })).toThrow();
-    expect(() => parseConstructorOptions({
-      videoElement: document.createElement("div") as any,
-    })).toThrow();
+    expect(() =>
+      parseConstructorOptions({
+        videoElement: document.createElement("div") as any,
+      })
+    ).toThrow();
   });
 
   it("should throw if the baseBandwidth given is not a number", () => {
-    expect(() => parseConstructorOptions({ baseBandwidth: "a" as any })).toThrow();
-    expect(() => parseConstructorOptions({ baseBandwidth: /a/ as any })).toThrow();
-    expect(() => parseConstructorOptions({ baseBandwidth: {} as any })).toThrow();
+    expect(() =>
+      parseConstructorOptions({ baseBandwidth: "a" as any })
+    ).toThrow();
+    expect(() =>
+      parseConstructorOptions({ baseBandwidth: /a/ as any })
+    ).toThrow();
+    expect(() =>
+      parseConstructorOptions({ baseBandwidth: {} as any })
+    ).toThrow();
   });
 });
 
@@ -289,9 +331,9 @@ describe("API - parseLoadVideoOptions", () => {
     }
     expect(err1.message).toEqual(
       "Unable to load a content: no url set on loadVideo.\n" +
-      "Please provide at least either an `url` argument, a " +
-      "`initialManifest` option or a " +
-      "`manifestLoader` option so the RxPlayer can load the content."
+        "Please provide at least either an `url` argument, a " +
+        "`initialManifest` option or a " +
+        "`manifestLoader` option so the RxPlayer can load the content."
     );
     expect(opt2).not.toBeDefined();
     expect(err2).toBeInstanceOf(Error);
@@ -302,9 +344,9 @@ describe("API - parseLoadVideoOptions", () => {
     }
     expect(err2.message).toEqual(
       "Unable to load a content: no url set on loadVideo.\n" +
-      "Please provide at least either an `url` argument, a " +
-      "`initialManifest` option or a " +
-      "`manifestLoader` option so the RxPlayer can load the content."
+        "Please provide at least either an `url` argument, a " +
+        "`initialManifest` option or a " +
+        "`manifestLoader` option so the RxPlayer can load the content."
     );
   });
 
@@ -327,10 +369,12 @@ describe("API - parseLoadVideoOptions", () => {
   });
 
   it("should set a default object if both an url and transport is given", () => {
-    expect(parseLoadVideoOptions({
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -339,14 +383,16 @@ describe("API - parseLoadVideoOptions", () => {
 
   /* eslint-disable max-len */
   it("should set a default object if both a Manifest loader and transport is given", () => {
-  /* eslint-enable max-len */
-    const manifestLoader = () : never => {
+    /* eslint-enable max-len */
+    const manifestLoader = (): never => {
       throw new Error("Should not execute");
     };
-    expect(parseLoadVideoOptions({
-      transport: "bar",
-      manifestLoader,
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        transport: "bar",
+        manifestLoader,
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       transport: "bar",
       lowLatencyMode: false,
@@ -356,11 +402,13 @@ describe("API - parseLoadVideoOptions", () => {
 
   /* eslint-disable max-len */
   it("should set a default object if both an initialManifest and transport is given", () => {
-  /* eslint-enable max-len */
-    expect(parseLoadVideoOptions({
-      transport: "bar",
-      initialManifest: "test",
-    })).toEqual({
+    /* eslint-enable max-len */
+    expect(
+      parseLoadVideoOptions({
+        transport: "bar",
+        initialManifest: "test",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       transport: "bar",
       initialManifest: "test",
@@ -368,21 +416,25 @@ describe("API - parseLoadVideoOptions", () => {
   });
 
   it("should authorize setting an initialManifest option", () => {
-    expect(parseLoadVideoOptions({
-      initialManifest: "baz",
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        initialManifest: "baz",
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       initialManifest: "baz",
     });
-    expect(parseLoadVideoOptions({
-      url: "foo",
-      transport: "bar",
-      initialManifest: "",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        url: "foo",
+        transport: "bar",
+        initialManifest: "",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -391,21 +443,25 @@ describe("API - parseLoadVideoOptions", () => {
   });
 
   it("should authorize setting a autoPlay option", () => {
-    expect(parseLoadVideoOptions({
-      autoPlay: false,
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        autoPlay: false,
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       autoPlay: false,
     });
-    expect(parseLoadVideoOptions({
-      autoPlay: true,
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        autoPlay: true,
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -416,27 +472,35 @@ describe("API - parseLoadVideoOptions", () => {
   it("should authorize setting a keySystem option", () => {
     const keySystem1 = {
       type: "foo",
-      getLicense: () => { return new Uint8Array([]); },
+      getLicense: () => {
+        return new Uint8Array([]);
+      },
     };
     const keySystem2 = {
       type: "bar",
-      getLicense: () => { return new Uint8Array([]); },
+      getLicense: () => {
+        return new Uint8Array([]);
+      },
     };
-    expect(parseLoadVideoOptions({
-      keySystems: keySystem1 as any,
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        keySystems: keySystem1 as any,
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       keySystems: [keySystem1],
     });
-    expect(parseLoadVideoOptions({
-      keySystems: [keySystem1, keySystem2],
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        keySystems: [keySystem1, keySystem2],
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -465,7 +529,8 @@ describe("API - parseLoadVideoOptions", () => {
         throw new Error("Impossible: already checked it was an Error instance");
       }
       expect(err.message).toEqual(
-        "Invalid key system given: Missing type string or getLicense callback");
+        "Invalid key system given: Missing type string or getLicense callback"
+      );
     }
     {
       let err;
@@ -487,7 +552,8 @@ describe("API - parseLoadVideoOptions", () => {
         throw new Error("Impossible: already checked it was an Error instance");
       }
       expect(err.message).toEqual(
-        "Invalid key system given: Missing type string or getLicense callback");
+        "Invalid key system given: Missing type string or getLicense callback"
+      );
     }
     {
       let err;
@@ -496,7 +562,11 @@ describe("API - parseLoadVideoOptions", () => {
         opt = parseLoadVideoOptions({
           url: "foo",
           transport: "bar",
-          keySystems: { getLicense: () => { return new Uint8Array([]); } } as any ,
+          keySystems: {
+            getLicense: () => {
+              return new Uint8Array([]);
+            },
+          } as any,
         });
       } catch (e) {
         err = e;
@@ -509,26 +579,31 @@ describe("API - parseLoadVideoOptions", () => {
         throw new Error("Impossible: already checked it was an Error instance");
       }
       expect(err.message).toEqual(
-        "Invalid key system given: Missing type string or getLicense callback");
+        "Invalid key system given: Missing type string or getLicense callback"
+      );
     }
   });
 
   it("should authorize setting a lowLatencyMode option", () => {
-    expect(parseLoadVideoOptions({
-      lowLatencyMode: false,
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        lowLatencyMode: false,
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       lowLatencyMode: false,
     });
-    expect(parseLoadVideoOptions({
-      lowLatencyMode: true,
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        lowLatencyMode: true,
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       lowLatencyMode: true,
       transport: "bar",
@@ -537,11 +612,13 @@ describe("API - parseLoadVideoOptions", () => {
   });
 
   it("should authorize setting a minimumManifestUpdateInterval option", () => {
-    expect(parseLoadVideoOptions({
-      url: "foo",
-      transport: "bar",
-      minimumManifestUpdateInterval: 5400,
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        url: "foo",
+        transport: "bar",
+        minimumManifestUpdateInterval: 5400,
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       minimumManifestUpdateInterval: 5400,
       url: "foo",
@@ -551,33 +628,39 @@ describe("API - parseLoadVideoOptions", () => {
   });
 
   it("should authorize setting a valid defaultAudioTrackSwitchingMode option", () => {
-    expect(parseLoadVideoOptions({
-      defaultAudioTrackSwitchingMode: "direct",
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        defaultAudioTrackSwitchingMode: "direct",
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       defaultAudioTrackSwitchingMode: "direct",
     });
 
-    expect(parseLoadVideoOptions({
-      defaultAudioTrackSwitchingMode: "reload",
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        defaultAudioTrackSwitchingMode: "reload",
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       defaultAudioTrackSwitchingMode: "reload",
     });
 
-    expect(parseLoadVideoOptions({
-      defaultAudioTrackSwitchingMode: "seamless",
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        defaultAudioTrackSwitchingMode: "seamless",
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -588,31 +671,35 @@ describe("API - parseLoadVideoOptions", () => {
   // eslint-disable-next-line max-len
   it("should set an 'undefined' defaultAudioTrackSwitchingMode mode when the parameter is invalid or not specified", () => {
     logWarnMock.mockReturnValue(undefined);
-    expect(parseLoadVideoOptions({
-      defaultAudioTrackSwitchingMode: "foo-bar" as any,
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        defaultAudioTrackSwitchingMode: "foo-bar" as any,
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       defaultAudioTrackSwitchingMode: undefined,
     });
     expect(logWarnMock).toHaveBeenCalledTimes(1);
-    expect(logWarnMock)
-      .toHaveBeenCalledWith(
-        "The `defaultAudioTrackSwitchingMode` loadVideo option must match one of " +
+    expect(logWarnMock).toHaveBeenCalledWith(
+      "The `defaultAudioTrackSwitchingMode` loadVideo option must match one of " +
         `the following strategy name:
 - \`seamless\`
 - \`direct\`
-- \`reload\``);
+- \`reload\``
+    );
     logWarnMock.mockReset();
     logWarnMock.mockReturnValue(undefined);
 
-    expect(parseLoadVideoOptions({
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -622,22 +709,26 @@ describe("API - parseLoadVideoOptions", () => {
   });
 
   it("should authorize setting a valid onCodecSwitch option", () => {
-    expect(parseLoadVideoOptions({
-      onCodecSwitch: "reload",
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        onCodecSwitch: "reload",
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       onCodecSwitch: "reload",
     });
 
-    expect(parseLoadVideoOptions({
-      onCodecSwitch: "continue",
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        onCodecSwitch: "continue",
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -648,30 +739,35 @@ describe("API - parseLoadVideoOptions", () => {
   /* eslint-disable-next-line max-len */
   it("should set a 'continue' onCodecSwitch when the parameter is invalid or not specified", () => {
     logWarnMock.mockReturnValue(undefined);
-    expect(parseLoadVideoOptions({
-      onCodecSwitch: "foo-bar" as any,
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        onCodecSwitch: "foo-bar" as any,
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       onCodecSwitch: "continue",
     });
     expect(logWarnMock).toHaveBeenCalledTimes(1);
-    expect(logWarnMock)
-      .toHaveBeenCalledWith("The `onCodecSwitch` loadVideo option must match one " +
-                            `of the following string:
+    expect(logWarnMock).toHaveBeenCalledWith(
+      "The `onCodecSwitch` loadVideo option must match one " +
+        `of the following string:
 - \`continue\`
 - \`reload\`
-If badly set, continue will be used as default`);
+If badly set, continue will be used as default`
+    );
     logWarnMock.mockReset();
     logWarnMock.mockReturnValue(undefined);
 
-    expect(parseLoadVideoOptions({
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -681,22 +777,26 @@ If badly set, continue will be used as default`);
   });
 
   it("should authorize setting a valid enableFastSwitching option", () => {
-    expect(parseLoadVideoOptions({
-      enableFastSwitching: false,
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        enableFastSwitching: false,
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       enableFastSwitching: false,
     });
 
-    expect(parseLoadVideoOptions({
-      enableFastSwitching: true,
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        enableFastSwitching: true,
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -705,44 +805,52 @@ If badly set, continue will be used as default`);
   });
 
   it("should authorize setting a requestConfig", () => {
-    expect(parseLoadVideoOptions({
-      url: "foo",
-      transport: "bar",
-      requestConfig: {},
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        url: "foo",
+        transport: "bar",
+        requestConfig: {},
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       requestConfig: {},
     });
-    expect(parseLoadVideoOptions({
-      url: "foo",
-      transport: "bar",
-      requestConfig: { manifest: { maxRetry: 4 } },
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        url: "foo",
+        transport: "bar",
+        requestConfig: { manifest: { maxRetry: 4 } },
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       requestConfig: { manifest: { maxRetry: 4 } },
     });
-    expect(parseLoadVideoOptions({
-      url: "foo",
-      transport: "bar",
-      requestConfig: { segment: { maxRetry: 3 } },
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        url: "foo",
+        transport: "bar",
+        requestConfig: { segment: { maxRetry: 3 } },
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       requestConfig: { segment: { maxRetry: 3 } },
     });
-    expect(parseLoadVideoOptions({
-      url: "foo",
-      transport: "bar",
-      requestConfig: {
-        segment: { maxRetry: 3 },
-        manifest: { maxRetry: 5 },
-      },
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        url: "foo",
+        transport: "bar",
+        requestConfig: {
+          segment: { maxRetry: 3 },
+          manifest: { maxRetry: 5 },
+        },
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -754,42 +862,50 @@ If badly set, continue will be used as default`);
   });
 
   it("should authorize setting a valid startAt option", () => {
-    expect(parseLoadVideoOptions({
-      url: "foo",
-      transport: "bar",
-      startAt: { a: 12 } as any,
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        url: "foo",
+        transport: "bar",
+        startAt: { a: 12 } as any,
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       startAt: { a: 12 },
     });
-    expect(parseLoadVideoOptions({
-      url: "foo",
-      transport: "bar",
-      startAt: { wallClockTime: 19 },
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        url: "foo",
+        transport: "bar",
+        startAt: { wallClockTime: 19 },
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       startAt: { wallClockTime: 19 },
     });
     const a = new Date();
-    expect(parseLoadVideoOptions({
-      url: "foo",
-      transport: "bar",
-      startAt: { wallClockTime: a },
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        url: "foo",
+        transport: "bar",
+        startAt: { wallClockTime: a },
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
       startAt: { wallClockTime: a.getTime() / 1000 },
     });
-    expect(parseLoadVideoOptions({
-      url: "foo",
-      transport: "bar",
-      startAt: { position: 4, wallClockTime: a },
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        url: "foo",
+        transport: "bar",
+        startAt: { position: 4, wallClockTime: a },
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -799,11 +915,13 @@ If badly set, continue will be used as default`);
 
   it("should authorize setting a `segmentLoader` option", () => {
     const func = jest.fn();
-    expect(parseLoadVideoOptions({
-      segmentLoader: func,
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        segmentLoader: func,
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -813,11 +931,13 @@ If badly set, continue will be used as default`);
   });
 
   it("should authorize setting a valid textTrackMode option", () => {
-    expect(parseLoadVideoOptions({
-      textTrackMode: "native",
-      url: "foo",
-      transport: "bar",
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        textTrackMode: "native",
+        url: "foo",
+        transport: "bar",
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -825,12 +945,14 @@ If badly set, continue will be used as default`);
     });
 
     const textTrackElement = document.createElement("div");
-    expect(parseLoadVideoOptions({
-      textTrackMode: "html",
-      url: "foo",
-      transport: "bar",
-      textTrackElement,
-    })).toEqual({
+    expect(
+      parseLoadVideoOptions({
+        textTrackMode: "html",
+        url: "foo",
+        transport: "bar",
+        textTrackElement,
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -863,7 +985,7 @@ If badly set, continue will be used as default`);
 
   /* eslint-disable max-len */
   it("should throw when setting an html textTrackMode option with no textTrackElement", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
     let err;
     let opt;
     try {
@@ -882,13 +1004,14 @@ If badly set, continue will be used as default`);
     if (!(err instanceof Error)) {
       throw new Error("Impossible: already checked it was an Error instance");
     }
-    expect(err.message)
-      .toEqual("You have to provide a textTrackElement in \"html\" textTrackMode.");
+    expect(err.message).toEqual(
+      'You have to provide a textTrackElement in "html" textTrackMode.'
+    );
   });
 
   /* eslint-disable max-len */
   it("should throw when setting an html textTrackMode option with no textTrackElement", () => {
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
     let err;
     let opt;
     const textTrackElement = {};
@@ -909,23 +1032,28 @@ If badly set, continue will be used as default`);
     if (!(err instanceof Error)) {
       throw new Error("Impossible: already checked it was an Error instance");
     }
-    expect(err.message)
-      .toEqual("textTrackElement should be an HTMLElement.");
+    expect(err.message).toEqual("textTrackElement should be an HTMLElement.");
   });
 
   it("should warn when setting a textTrackElement with a `native` textTrackMode", () => {
     logWarnMock.mockReturnValue(undefined);
     const textTrackElement = document.createElement("div");
 
-    parseLoadVideoOptions({ textTrackMode: "native", url: "foo", transport: "bar" });
-    expect(logWarnMock).not.toHaveBeenCalled();
-
-    expect(parseLoadVideoOptions({
+    parseLoadVideoOptions({
       textTrackMode: "native",
       url: "foo",
       transport: "bar",
-      textTrackElement,
-    })).toEqual({
+    });
+    expect(logWarnMock).not.toHaveBeenCalled();
+
+    expect(
+      parseLoadVideoOptions({
+        textTrackMode: "native",
+        url: "foo",
+        transport: "bar",
+        textTrackElement,
+      })
+    ).toEqual({
       ...defaultLoadVideoOptions,
       url: "foo",
       transport: "bar",
@@ -933,8 +1061,10 @@ If badly set, continue will be used as default`);
     });
 
     expect(logWarnMock).toHaveBeenCalledTimes(1);
-    expect(logWarnMock).toHaveBeenCalledWith("API: You have set a textTrackElement " +
-      "without being in an \"html\" textTrackMode. It will be ignored.");
+    expect(logWarnMock).toHaveBeenCalledWith(
+      "API: You have set a textTrackElement " +
+        'without being in an "html" textTrackMode. It will be ignored.'
+    );
   });
 });
 
@@ -965,15 +1095,17 @@ describe("API - checkReloadOptions", () => {
   });
   it("Should throw when invalid options", () => {
     const options = null;
-    expect(() => checkReloadOptions(options as any))
-      .toThrow("API: reload - Invalid options format.");
+    expect(() => checkReloadOptions(options as any)).toThrow(
+      "API: reload - Invalid options format."
+    );
   });
   it("Should throw when invalid reloatAt", () => {
     const options = {
       reloadAt: 3,
     };
-    expect(() => checkReloadOptions(options as any))
-      .toThrow("API: reload - Invalid 'reloadAt' option format.");
+    expect(() => checkReloadOptions(options as any)).toThrow(
+      "API: reload - Invalid 'reloadAt' option format."
+    );
   });
   it("Should throw when invalid position", () => {
     const options = {
@@ -981,8 +1113,9 @@ describe("API - checkReloadOptions", () => {
         position: "3",
       },
     };
-    expect(() => checkReloadOptions(options as any))
-      .toThrow("API: reload - Invalid 'reloadAt.position' option format.");
+    expect(() => checkReloadOptions(options as any)).toThrow(
+      "API: reload - Invalid 'reloadAt.position' option format."
+    );
   });
   it("Should throw when invalid relative position", () => {
     const options = {
@@ -990,7 +1123,8 @@ describe("API - checkReloadOptions", () => {
         relative: "3",
       },
     };
-    expect(() => checkReloadOptions(options as any))
-      .toThrow("API: reload - Invalid 'reloadAt.relative' option format.");
+    expect(() => checkReloadOptions(options as any)).toThrow(
+      "API: reload - Invalid 'reloadAt.relative' option format."
+    );
   });
 });

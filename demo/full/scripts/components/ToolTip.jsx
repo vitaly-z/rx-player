@@ -1,7 +1,4 @@
-import React, {
-  useEffect,
-  useRef,
-} from "react";
+import React, { useEffect, useRef } from "react";
 
 /**
  * Props:
@@ -10,12 +7,7 @@ import React, {
  *   - xPosition {number}
  * @class ToolTip
  */
-function ToolTip({
-  className,
-  offset,
-  text,
-  xPosition,
-}) {
+function ToolTip({ className, offset, text, xPosition }) {
   const wrapperEl = useRef(null);
   useEffect(() => {
     if (isNaN(+xPosition) || !wrapperEl.current) {
@@ -30,10 +22,8 @@ function ToolTip({
     wrapperEl.current.style.transform = `translate(${toSlideX}px, ${toSlideY}px)`;
   });
   return (
-    <div className="tooltip-wrapper" ref={wrapperEl} >
-      <pre className={"tooltip " + className} >
-        {text}
-      </pre>
+    <div className="tooltip-wrapper" ref={wrapperEl}>
+      <pre className={"tooltip " + className}>{text}</pre>
     </div>
   );
 }

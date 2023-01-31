@@ -36,25 +36,26 @@
  */
 export default class ManifestBoundsCalculator {
   /** Value of MPD@timeShiftBufferDepth. */
-  private _timeShiftBufferDepth : number | null;
+  private _timeShiftBufferDepth: number | null;
   /** Value of `performance.now` at the time `lastPosition` was calculated. */
-  private _positionTime : number | undefined;
+  private _positionTime: number | undefined;
   /** Last position calculated at a given moment (itself indicated by `_positionTime`. */
-  private _lastPosition : number | undefined;
+  private _lastPosition: number | undefined;
   /** `true` if MPD@type is equal to "dynamic". */
-  private _isDynamic : boolean;
+  private _isDynamic: boolean;
 
   /**
    * @param {Object} args
    */
-  constructor(args : { timeShiftBufferDepth : number | undefined;
-                       isDynamic : boolean; }
-  ) {
+  constructor(args: {
+    timeShiftBufferDepth: number | undefined;
+    isDynamic: boolean;
+  }) {
     this._isDynamic = args.isDynamic;
-    this._timeShiftBufferDepth = !args.isDynamic ||
-                                 args.timeShiftBufferDepth === undefined ?
-                                   null :
-                                   args.timeShiftBufferDepth;
+    this._timeShiftBufferDepth =
+      !args.isDynamic || args.timeShiftBufferDepth === undefined
+        ? null
+        : args.timeShiftBufferDepth;
   }
 
   /**
@@ -72,7 +73,7 @@ export default class ManifestBoundsCalculator {
    * @param {number} lastPosition
    * @param {number|undefined} positionTime
    */
-  setLastPosition(lastPosition : number, positionTime?: number) : void {
+  setLastPosition(lastPosition: number, positionTime?: number): void {
     this._lastPosition = lastPosition;
     this._positionTime = positionTime;
   }
@@ -83,7 +84,7 @@ export default class ManifestBoundsCalculator {
    * `false` otherwise.
    * @returns {boolean}
    */
-  lastPositionIsKnown() : boolean {
+  lastPositionIsKnown(): boolean {
     if (this._isDynamic) {
       return this._positionTime != null && this._lastPosition != null;
     }
@@ -113,14 +114,16 @@ export default class ManifestBoundsCalculator {
    * Consider that it is only an estimation, not the real value.
    * @return {number|undefined}
    */
-  estimateMaximumBound() : number | undefined {
-    if (this._isDynamic &&
-        this._positionTime != null &&
-        this._lastPosition != null)
-    {
-      return Math.max((this._lastPosition - this._positionTime) +
-                        (performance.now() / 1000),
-                      0);
+  estimateMaximumBound(): number | undefined {
+    if (
+      this._isDynamic &&
+      this._positionTime != null &&
+      this._lastPosition != null
+    ) {
+      return Math.max(
+        this._lastPosition - this._positionTime + performance.now() / 1000,
+        0
+      );
     }
     return this._lastPosition;
   }

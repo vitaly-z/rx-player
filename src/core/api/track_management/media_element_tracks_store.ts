@@ -46,9 +46,9 @@ interface IMediaElementTracksStoreEvents {
   availableVideoTracksChange: IAvailableVideoTrack[];
   availableAudioTracksChange: IAvailableAudioTrack[];
   availableTextTracksChange: IAvailableTextTrack[];
-  videoTrackChange: IVideoTrack|null;
-  audioTrackChange: IAudioTrack|null;
-  textTrackChange: ITextTrack|null;
+  videoTrackChange: IVideoTrack | null;
+  audioTrackChange: IAudioTrack | null;
+  textTrackChange: ITextTrack | null;
 }
 
 /**
@@ -58,8 +58,12 @@ interface IMediaElementTracksStoreEvents {
  * @returns {boolean}
  */
 function areTrackArraysDifferent(
-  oldTrackArray: Array<{ nativeTrack: ICompatVideoTrack|ICompatAudioTrack|TextTrack }>,
-  newTrackArray: Array<{ nativeTrack: ICompatVideoTrack|ICompatAudioTrack|TextTrack }>
+  oldTrackArray: Array<{
+    nativeTrack: ICompatVideoTrack | ICompatAudioTrack | TextTrack;
+  }>,
+  newTrackArray: Array<{
+    nativeTrack: ICompatVideoTrack | ICompatAudioTrack | TextTrack;
+  }>
 ): boolean {
   if (newTrackArray.length !== oldTrackArray.length) {
     return true;
@@ -79,34 +83,37 @@ function areTrackArraysDifferent(
  */
 function createAudioTracks(
   audioTracks: ICompatAudioTrackList
-): Array<{ track: { id: string;
-                    normalized: string;
-                    language: string;
-                    audioDescription: boolean;
-                    representations: Representation[]; };
-           nativeTrack: ICompatAudioTrack; }> {
+): Array<{
+  track: {
+    id: string;
+    normalized: string;
+    language: string;
+    audioDescription: boolean;
+    representations: Representation[];
+  };
+  nativeTrack: ICompatAudioTrack;
+}> {
   const newAudioTracks = [];
   const languagesOccurences: Partial<Record<string, number>> = {};
   for (let i = 0; i < audioTracks.length; i++) {
     const audioTrack = audioTracks[i];
-    const language = audioTrack.language === "" ? "nolang" :
-                                                  audioTrack.language;
+    const language =
+      audioTrack.language === "" ? "nolang" : audioTrack.language;
     const occurences = languagesOccurences[language] ?? 1;
-    const id = "gen_audio_" +
-               language +
-               "_" +
-               occurences.toString();
+    const id = "gen_audio_" + language + "_" + occurences.toString();
     languagesOccurences[language] = occurences + 1;
-    const track = { language: audioTrack.language,
-                    id,
-                    normalized: normalizeLanguage(audioTrack.language),
-                    audioDescription: audioTrack.kind === "descriptions" ||
-                      // Safari seem to prefer the non-standard singular
-                      // version, funnily enough
-                      audioTrack.kind === "description",
-                    representations: [] as Representation[] };
-    newAudioTracks.push({ track,
-                          nativeTrack: audioTrack });
+    const track = {
+      language: audioTrack.language,
+      id,
+      normalized: normalizeLanguage(audioTrack.language),
+      audioDescription:
+        audioTrack.kind === "descriptions" ||
+        // Safari seem to prefer the non-standard singular
+        // version, funnily enough
+        audioTrack.kind === "description",
+      representations: [] as Representation[],
+    };
+    newAudioTracks.push({ track, nativeTrack: audioTrack });
   }
   return newAudioTracks;
 }
@@ -118,29 +125,30 @@ function createAudioTracks(
  */
 function createTextTracks(
   textTracks: ICompatTextTrackList
-): Array<{ track: { id: string;
-                    normalized: string;
-                    language: string;
-                    closedCaption: boolean; };
-           nativeTrack: TextTrack; }> {
+): Array<{
+  track: {
+    id: string;
+    normalized: string;
+    language: string;
+    closedCaption: boolean;
+  };
+  nativeTrack: TextTrack;
+}> {
   const newTextTracks = [];
   const languagesOccurences: Partial<Record<string, number>> = {};
   for (let i = 0; i < textTracks.length; i++) {
     const textTrack = textTracks[i];
-    const language = textTrack.language === "" ? "nolang" :
-                                                 textTrack.language;
+    const language = textTrack.language === "" ? "nolang" : textTrack.language;
     const occurences = languagesOccurences[language] ?? 1;
-    const id = "gen_text_" +
-               language +
-               "_" +
-               occurences.toString();
+    const id = "gen_text_" + language + "_" + occurences.toString();
     languagesOccurences[language] = occurences + 1;
-    const track =  { language: textTrack.language,
-                     id,
-                     normalized: normalizeLanguage(textTrack.language),
-                     closedCaption: textTrack.kind === "captions" };
-    newTextTracks.push({ track,
-                         nativeTrack: textTrack });
+    const track = {
+      language: textTrack.language,
+      id,
+      normalized: normalizeLanguage(textTrack.language),
+      closedCaption: textTrack.kind === "captions",
+    };
+    newTextTracks.push({ track, nativeTrack: textTrack });
   }
   return newTextTracks;
 }
@@ -152,24 +160,23 @@ function createTextTracks(
  */
 function createVideoTracks(
   videoTracks: ICompatVideoTrackList
-): Array<{ track: { id: string;
-                    representations: Representation[]; };
-           nativeTrack: ICompatVideoTrack; }> {
+): Array<{
+  track: { id: string; representations: Representation[] };
+  nativeTrack: ICompatVideoTrack;
+}> {
   const newVideoTracks = [];
   const languagesOccurences: Partial<Record<string, number>> = {};
   for (let i = 0; i < videoTracks.length; i++) {
     const videoTrack = videoTracks[i];
-    const language = videoTrack.language === "" ? "nolang" :
-                                                  videoTrack.language;
+    const language =
+      videoTrack.language === "" ? "nolang" : videoTrack.language;
     const occurences = languagesOccurences[language] ?? 1;
-    const id = "gen_video_" +
-               language +
-               "_" +
-               occurences.toString();
+    const id = "gen_video_" + language + "_" + occurences.toString();
     languagesOccurences[language] = occurences + 1;
-    newVideoTracks.push({ track: { id,
-                                   representations: [] as Representation[] },
-                          nativeTrack: videoTrack });
+    newVideoTracks.push({
+      track: { id, representations: [] as Representation[] },
+      nativeTrack: videoTrack,
+    });
   }
   return newVideoTracks;
 }
@@ -178,29 +185,33 @@ function createVideoTracks(
  * Manage video, audio and text tracks for current direct file content.
  * @class MediaElementTracksStore
  */
-export default class MediaElementTracksStore
-  extends EventEmitter<IMediaElementTracksStoreEvents> {
-
+export default class MediaElementTracksStore extends EventEmitter<IMediaElementTracksStoreEvents> {
   /** List every available audio tracks available on the media element. */
-  private _audioTracks : Array<{ track: IAudioTrack; nativeTrack: ICompatAudioTrack }>;
+  private _audioTracks: Array<{
+    track: IAudioTrack;
+    nativeTrack: ICompatAudioTrack;
+  }>;
   /** List every available text tracks available on the media element. */
-  private _textTracks : Array<{ track: ITextTrack; nativeTrack: TextTrack }>;
+  private _textTracks: Array<{ track: ITextTrack; nativeTrack: TextTrack }>;
   /** List every available video tracks available on the media element. */
-  private _videoTracks : Array<{ track: IVideoTrack; nativeTrack: ICompatVideoTrack }>;
+  private _videoTracks: Array<{
+    track: IVideoTrack;
+    nativeTrack: ICompatVideoTrack;
+  }>;
 
   /** Last audio track emitted as active. */
-  private _lastEmittedNativeAudioTrack : ICompatAudioTrack | null | undefined;
+  private _lastEmittedNativeAudioTrack: ICompatAudioTrack | null | undefined;
   /** Last video track emitted as active. */
-  private _lastEmittedNativeVideoTrack : ICompatVideoTrack | null | undefined;
+  private _lastEmittedNativeVideoTrack: ICompatVideoTrack | null | undefined;
   /** Last text track emitted as active. */
-  private _lastEmittedNativeTextTrack : TextTrack | null | undefined;
+  private _lastEmittedNativeTextTrack: TextTrack | null | undefined;
 
   /** Native `AudioTrackList` implemented on the media element. */
-  private _nativeAudioTracks : ICompatAudioTrackList | undefined;
+  private _nativeAudioTracks: ICompatAudioTrackList | undefined;
   /** Native `VideoTrackList` implemented on the media element. */
-  private _nativeVideoTracks : ICompatVideoTrackList | undefined;
+  private _nativeVideoTracks: ICompatVideoTrackList | undefined;
   /** Native `TextTrackList` implemented on the media element. */
-  private _nativeTextTracks : ICompatTextTrackList|undefined;
+  private _nativeTextTracks: ICompatTextTrackList | undefined;
 
   /**
    * Last audio track manually set active through the corresponding
@@ -209,7 +220,7 @@ export default class MediaElementTracksStore
    * through audio track list updates, as long as it is still available.
    * `undefined` if the audio track was not manually set.
    */
-  private _audioTrackLockedOn : ICompatAudioTrack | undefined;
+  private _audioTrackLockedOn: ICompatAudioTrack | undefined;
 
   /**
    * Last text track manually set active through the corresponding
@@ -219,7 +230,7 @@ export default class MediaElementTracksStore
    * `null` if the text track was disabled.
    * `undefined` if the text track was not manually set.
    */
-  private _textTrackLockedOn : TextTrack | undefined | null;
+  private _textTrackLockedOn: TextTrack | undefined | null;
 
   /**
    * Last video track manually set active through the corresponding
@@ -229,29 +240,40 @@ export default class MediaElementTracksStore
    * `null` if the video track was disabled.
    * `undefined` if the video track was not manually set.
    */
-  private _videoTrackLockedOn : ICompatVideoTrack | undefined | null;
+  private _videoTrackLockedOn: ICompatVideoTrack | undefined | null;
 
   constructor(mediaElement: HTMLMediaElement) {
     super();
     // TODO In practice, the audio/video/text tracks API are not always implemented on
     // the media element, although Typescript HTMLMediaElement types tend to mean
     // that can't be undefined.
-    this._nativeAudioTracks = (mediaElement as ICompatHTMLMediaElement).audioTracks;
-    this._nativeVideoTracks = (mediaElement as ICompatHTMLMediaElement).videoTracks;
-    this._nativeTextTracks = mediaElement.textTracks as ICompatTextTrackList|undefined;
+    this._nativeAudioTracks = (
+      mediaElement as ICompatHTMLMediaElement
+    ).audioTracks;
+    this._nativeVideoTracks = (
+      mediaElement as ICompatHTMLMediaElement
+    ).videoTracks;
+    this._nativeTextTracks = mediaElement.textTracks as
+      | ICompatTextTrackList
+      | undefined;
 
     this._audioTracks =
-      this._nativeAudioTracks !== undefined ? createAudioTracks(this._nativeAudioTracks) :
-                                              [];
+      this._nativeAudioTracks !== undefined
+        ? createAudioTracks(this._nativeAudioTracks)
+        : [];
     this._videoTracks =
-      this._nativeVideoTracks !== undefined ? createVideoTracks(this._nativeVideoTracks) :
-                                              [];
+      this._nativeVideoTracks !== undefined
+        ? createVideoTracks(this._nativeVideoTracks)
+        : [];
     this._textTracks =
-      this._nativeTextTracks !== undefined ? createTextTracks(this._nativeTextTracks) :
-                                             [];
+      this._nativeTextTracks !== undefined
+        ? createTextTracks(this._nativeTextTracks)
+        : [];
 
-    this._lastEmittedNativeAudioTrack = this._getCurrentAudioTrack()?.nativeTrack;
-    this._lastEmittedNativeVideoTrack = this._getCurrentVideoTrack()?.nativeTrack;
+    this._lastEmittedNativeAudioTrack =
+      this._getCurrentAudioTrack()?.nativeTrack;
+    this._lastEmittedNativeVideoTrack =
+      this._getCurrentVideoTrack()?.nativeTrack;
     this._lastEmittedNativeTextTrack = this._getCurrentTextTrack()?.nativeTrack;
 
     this._handleNativeTracksCallbacks();
@@ -263,7 +285,7 @@ export default class MediaElementTracksStore
    * Throws if the wanted audio track is not found.
    * @param {string|number|undefined} id
    */
-  public setAudioTrackById(id?: string|number): void {
+  public setAudioTrackById(id?: string | number): void {
     for (let i = 0; i < this._audioTracks.length; i++) {
       const { track, nativeTrack } = this._audioTracks[i];
       if (track.id === id) {
@@ -289,7 +311,7 @@ export default class MediaElementTracksStore
    * Throws if the wanted text track is not found.
    * @param {string|number|undefined} id
    */
-  public setTextTrackById(id?: string|number): void {
+  public setTextTrackById(id?: string | number): void {
     let hasSetTrack = false;
     for (let i = 0; i < this._textTracks.length; i++) {
       const { track, nativeTrack } = this._textTracks[i];
@@ -297,7 +319,10 @@ export default class MediaElementTracksStore
         nativeTrack.mode = "showing";
         hasSetTrack = true;
         this._textTrackLockedOn = nativeTrack;
-      } else if (nativeTrack.mode === "showing" || nativeTrack.mode === "hidden") {
+      } else if (
+        nativeTrack.mode === "showing" ||
+        nativeTrack.mode === "hidden"
+      ) {
         nativeTrack.mode = "disabled";
       }
     }
@@ -338,11 +363,11 @@ export default class MediaElementTracksStore
    * Returns `undefined` if we cannot know which audio track is active.
    * @returns {Object|null|undefined}
    */
-  public getChosenAudioTrack(): IAudioTrack|null|undefined {
+  public getChosenAudioTrack(): IAudioTrack | null | undefined {
     const currentAudioTrack = this._getCurrentAudioTrack();
-    return isNullOrUndefined(currentAudioTrack) ?
-      currentAudioTrack :
-      currentAudioTrack.track;
+    return isNullOrUndefined(currentAudioTrack)
+      ? currentAudioTrack
+      : currentAudioTrack.track;
   }
 
   /**
@@ -351,11 +376,11 @@ export default class MediaElementTracksStore
    * Returns `undefined` if we cannot know which text track is active.
    * @returns {Object|null|undefined}
    */
-  public getChosenTextTrack(): ITextTrack|null|undefined {
+  public getChosenTextTrack(): ITextTrack | null | undefined {
     const currentTextTrack = this._getCurrentTextTrack();
-    return isNullOrUndefined(currentTextTrack) ?
-      currentTextTrack :
-      currentTextTrack.track;
+    return isNullOrUndefined(currentTextTrack)
+      ? currentTextTrack
+      : currentTextTrack.track;
   }
 
   /**
@@ -364,11 +389,11 @@ export default class MediaElementTracksStore
    * Returns `undefined` if we cannot know which video track is active.
    * @returns {Object|null|undefined}
    */
-  public getChosenVideoTrack(): IVideoTrack|null|undefined {
+  public getChosenVideoTrack(): IVideoTrack | null | undefined {
     const currentVideoTrack = this._getCurrentVideoTrack();
-    return isNullOrUndefined(currentVideoTrack) ?
-      currentVideoTrack :
-      currentVideoTrack.track;
+    return isNullOrUndefined(currentVideoTrack)
+      ? currentVideoTrack
+      : currentVideoTrack.track;
   }
 
   /**
@@ -377,12 +402,14 @@ export default class MediaElementTracksStore
    */
   public getAvailableAudioTracks(): IAvailableAudioTrack[] {
     return this._audioTracks.map(({ track, nativeTrack }) => {
-      return { id: track.id,
-               language: track.language,
-               normalized: track.normalized,
-               audioDescription: track.audioDescription,
-               active: nativeTrack.enabled,
-               representations: track.representations };
+      return {
+        id: track.id,
+        language: track.language,
+        normalized: track.normalized,
+        audioDescription: track.audioDescription,
+        active: nativeTrack.enabled,
+        representations: track.representations,
+      };
     });
   }
 
@@ -392,11 +419,13 @@ export default class MediaElementTracksStore
    */
   public getAvailableTextTracks(): IAvailableTextTrack[] {
     return this._textTracks.map(({ track, nativeTrack }) => {
-      return { id: track.id,
-               language: track.language,
-               normalized: track.normalized,
-               closedCaption: track.closedCaption,
-               active: nativeTrack.mode === "showing" };
+      return {
+        id: track.id,
+        language: track.language,
+        normalized: track.normalized,
+        closedCaption: track.closedCaption,
+        active: nativeTrack.mode === "showing",
+      };
     });
   }
 
@@ -406,9 +435,11 @@ export default class MediaElementTracksStore
    */
   public getAvailableVideoTracks(): IAvailableVideoTrack[] {
     return this._videoTracks.map(({ track, nativeTrack }) => {
-      return { id: track.id,
-               representations: track.representations,
-               active: nativeTrack.selected };
+      return {
+        id: track.id,
+        representations: track.representations,
+        active: nativeTrack.selected,
+      };
     });
   }
 
@@ -443,11 +474,10 @@ export default class MediaElementTracksStore
    * `null` if no audio track is chosen.
    * @returns {Object|undefined|null}
    */
-  private _getCurrentAudioTrack(): { track: IAudioTrack;
-                                     nativeTrack: ICompatAudioTrack; } |
-                                   undefined |
-                                   null
-  {
+  private _getCurrentAudioTrack():
+    | { track: IAudioTrack; nativeTrack: ICompatAudioTrack }
+    | undefined
+    | null {
     if (this._nativeAudioTracks === undefined) {
       return undefined;
     }
@@ -466,10 +496,10 @@ export default class MediaElementTracksStore
    * `null` if no video track is chosen.
    * @returns {Object|undefined|null}
    */
-  private _getCurrentVideoTrack(): { track: IVideoTrack;
-                                     nativeTrack: ICompatVideoTrack; } |
-                                         undefined |
-                                         null {
+  private _getCurrentVideoTrack():
+    | { track: IVideoTrack; nativeTrack: ICompatVideoTrack }
+    | undefined
+    | null {
     if (this._nativeVideoTracks === undefined) {
       return undefined;
     }
@@ -488,10 +518,10 @@ export default class MediaElementTracksStore
    * `null` if no text track is chosen.
    * @returns {Object|undefined|null}
    */
-  private _getCurrentTextTrack(): { track: ITextTrack;
-                                    nativeTrack: TextTrack; } |
-                                  undefined |
-                                  null {
+  private _getCurrentTextTrack():
+    | { track: ITextTrack; nativeTrack: TextTrack }
+    | undefined
+    | null {
     if (this._nativeTextTracks === undefined) {
       return undefined;
     }
@@ -509,7 +539,7 @@ export default class MediaElementTracksStore
    *   - if the last manually set audio track is found, set that one.
    *   - if we still do not find an optimal track, let the one chosen by default
    */
-  private _setPreviouslyLockedAudioTrack() : void {
+  private _setPreviouslyLockedAudioTrack(): void {
     if (this._audioTrackLockedOn === undefined) {
       return;
     } else if (this._audioTrackLockedOn === null) {
@@ -533,7 +563,7 @@ export default class MediaElementTracksStore
    *   - if the last manually set text track is found, set that one.
    *   - if we still do not find an optimal track, just disable it.
    */
-  private _setPreviouslyLockedTextTrack() : void {
+  private _setPreviouslyLockedTextTrack(): void {
     if (this._textTrackLockedOn === undefined) {
       return;
     } else if (this._textTrackLockedOn === null) {
@@ -560,7 +590,7 @@ export default class MediaElementTracksStore
    *   - if the last manually set video track is found, set that one.
    *   - if we still do not find an optimal track, let the one chosen by default
    */
-  private _setPreviouslyLockedVideoTrack() : void {
+  private _setPreviouslyLockedVideoTrack(): void {
     if (this._videoTrackLockedOn === undefined) {
       return;
     } else if (this._videoTrackLockedOn === null) {
@@ -589,11 +619,18 @@ export default class MediaElementTracksStore
           if (areTrackArraysDifferent(this._audioTracks, newAudioTracks)) {
             this._audioTracks = newAudioTracks;
             this._setPreviouslyLockedAudioTrack();
-            this.trigger("availableAudioTracksChange", this.getAvailableAudioTracks());
+            this.trigger(
+              "availableAudioTracksChange",
+              this.getAvailableAudioTracks()
+            );
             const chosenAudioTrack = this._getCurrentAudioTrack();
-            if (chosenAudioTrack?.nativeTrack !== this._lastEmittedNativeAudioTrack) {
+            if (
+              chosenAudioTrack?.nativeTrack !==
+              this._lastEmittedNativeAudioTrack
+            ) {
               this.trigger("audioTrackChange", chosenAudioTrack?.track ?? null);
-              this._lastEmittedNativeAudioTrack = chosenAudioTrack?.nativeTrack ?? null;
+              this._lastEmittedNativeAudioTrack =
+                chosenAudioTrack?.nativeTrack ?? null;
             }
           }
         }
@@ -603,11 +640,18 @@ export default class MediaElementTracksStore
           const newAudioTracks = createAudioTracks(this._nativeAudioTracks);
           if (areTrackArraysDifferent(this._audioTracks, newAudioTracks)) {
             this._audioTracks = newAudioTracks;
-            this.trigger("availableAudioTracksChange", this.getAvailableAudioTracks());
+            this.trigger(
+              "availableAudioTracksChange",
+              this.getAvailableAudioTracks()
+            );
             const chosenAudioTrack = this._getCurrentAudioTrack();
-            if (chosenAudioTrack?.nativeTrack !== this._lastEmittedNativeAudioTrack) {
+            if (
+              chosenAudioTrack?.nativeTrack !==
+              this._lastEmittedNativeAudioTrack
+            ) {
               this.trigger("audioTrackChange", chosenAudioTrack?.track ?? null);
-              this._lastEmittedNativeAudioTrack = chosenAudioTrack?.nativeTrack ?? null;
+              this._lastEmittedNativeAudioTrack =
+                chosenAudioTrack?.nativeTrack ?? null;
             }
           }
         }
@@ -640,11 +684,17 @@ export default class MediaElementTracksStore
           if (areTrackArraysDifferent(this._textTracks, newTextTracks)) {
             this._textTracks = newTextTracks;
             this._setPreviouslyLockedTextTrack();
-            this.trigger("availableTextTracksChange", this.getAvailableTextTracks());
+            this.trigger(
+              "availableTextTracksChange",
+              this.getAvailableTextTracks()
+            );
             const chosenTextTrack = this._getCurrentTextTrack();
-            if (chosenTextTrack?.nativeTrack !== this._lastEmittedNativeTextTrack) {
+            if (
+              chosenTextTrack?.nativeTrack !== this._lastEmittedNativeTextTrack
+            ) {
               this.trigger("textTrackChange", chosenTextTrack?.track ?? null);
-              this._lastEmittedNativeTextTrack = chosenTextTrack?.nativeTrack ?? null;
+              this._lastEmittedNativeTextTrack =
+                chosenTextTrack?.nativeTrack ?? null;
             }
           }
         }
@@ -655,11 +705,17 @@ export default class MediaElementTracksStore
           if (areTrackArraysDifferent(this._textTracks, newTextTracks)) {
             this._textTracks = newTextTracks;
             this._setPreviouslyLockedTextTrack();
-            this.trigger("availableTextTracksChange", this.getAvailableTextTracks());
+            this.trigger(
+              "availableTextTracksChange",
+              this.getAvailableTextTracks()
+            );
             const chosenTextTrack = this._getCurrentTextTrack();
-            if (chosenTextTrack?.nativeTrack !== this._lastEmittedNativeTextTrack) {
+            if (
+              chosenTextTrack?.nativeTrack !== this._lastEmittedNativeTextTrack
+            ) {
               this.trigger("textTrackChange", chosenTextTrack?.track ?? null);
-              this._lastEmittedNativeTextTrack = chosenTextTrack?.nativeTrack ?? null;
+              this._lastEmittedNativeTextTrack =
+                chosenTextTrack?.nativeTrack ?? null;
             }
           }
         }
@@ -692,11 +748,18 @@ export default class MediaElementTracksStore
           if (areTrackArraysDifferent(this._videoTracks, newVideoTracks)) {
             this._videoTracks = newVideoTracks;
             this._setPreviouslyLockedVideoTrack();
-            this.trigger("availableVideoTracksChange", this.getAvailableVideoTracks());
+            this.trigger(
+              "availableVideoTracksChange",
+              this.getAvailableVideoTracks()
+            );
             const chosenVideoTrack = this._getCurrentVideoTrack();
-            if (chosenVideoTrack?.nativeTrack !== this._lastEmittedNativeVideoTrack) {
+            if (
+              chosenVideoTrack?.nativeTrack !==
+              this._lastEmittedNativeVideoTrack
+            ) {
               this.trigger("videoTrackChange", chosenVideoTrack?.track ?? null);
-              this._lastEmittedNativeVideoTrack = chosenVideoTrack?.nativeTrack ?? null;
+              this._lastEmittedNativeVideoTrack =
+                chosenVideoTrack?.nativeTrack ?? null;
             }
           }
         }
@@ -707,11 +770,18 @@ export default class MediaElementTracksStore
           if (areTrackArraysDifferent(this._videoTracks, newVideoTracks)) {
             this._videoTracks = newVideoTracks;
             this._setPreviouslyLockedVideoTrack();
-            this.trigger("availableVideoTracksChange", this.getAvailableVideoTracks());
+            this.trigger(
+              "availableVideoTracksChange",
+              this.getAvailableVideoTracks()
+            );
             const chosenVideoTrack = this._getCurrentVideoTrack();
-            if (chosenVideoTrack?.nativeTrack !== this._lastEmittedNativeVideoTrack) {
+            if (
+              chosenVideoTrack?.nativeTrack !==
+              this._lastEmittedNativeVideoTrack
+            ) {
               this.trigger("videoTrackChange", chosenVideoTrack?.track ?? null);
-              this._lastEmittedNativeVideoTrack = chosenVideoTrack?.nativeTrack ?? null;
+              this._lastEmittedNativeVideoTrack =
+                chosenVideoTrack?.nativeTrack ?? null;
             }
           }
         }
@@ -743,9 +813,11 @@ export default class MediaElementTracksStore
    * `this._audioTracks` array.
    * @param {number} index}
    */
-  private _enableAudioTrackFromIndex(index : number) : void {
-    enableAudioTrack(this._audioTracks.map(({ nativeTrack }) => nativeTrack),
-                     index);
+  private _enableAudioTrackFromIndex(index: number): void {
+    enableAudioTrack(
+      this._audioTracks.map(({ nativeTrack }) => nativeTrack),
+      index
+    );
   }
 }
 
@@ -753,9 +825,7 @@ export default class MediaElementTracksStore
  * Disable all text track elements in the given array from showing.
  * @param {Array.<Object>} textTracks
  */
-function disableTextTracks(
-  textTracks : Array<{ nativeTrack : TextTrack }>
-) {
+function disableTextTracks(textTracks: Array<{ nativeTrack: TextTrack }>) {
   for (let i = 0; i < textTracks.length; i++) {
     const { nativeTrack } = textTracks[i];
     nativeTrack.mode = "disabled";
@@ -769,14 +839,15 @@ function disableTextTracks(
  * @param {TextTrack} track
  */
 function disableAllTextTracksBut(
-  textTracks : Array<{ nativeTrack : TextTrack }>,
-  track : TextTrack
+  textTracks: Array<{ nativeTrack: TextTrack }>,
+  track: TextTrack
 ) {
   for (let i = 0; i < textTracks.length; i++) {
     const { nativeTrack } = textTracks[i];
-    if (nativeTrack !== track &&
-        (nativeTrack.mode === "showing" || nativeTrack.mode === "hidden"))
-    {
+    if (
+      nativeTrack !== track &&
+      (nativeTrack.mode === "showing" || nativeTrack.mode === "hidden")
+    ) {
       nativeTrack.mode = "disabled";
     }
   }
@@ -788,7 +859,7 @@ function disableAllTextTracksBut(
  * @param {Array.<Object>} videoTracks
  */
 function disableVideoTracks(
-  videoTracks : Array<{ nativeTrack : ICompatVideoTrack }>
+  videoTracks: Array<{ nativeTrack: ICompatVideoTrack }>
 ) {
   for (let i = 0; i < videoTracks.length; i++) {
     const { nativeTrack } = videoTracks[i];

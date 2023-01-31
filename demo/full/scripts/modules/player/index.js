@@ -6,10 +6,7 @@
  * application.
  */
 
-import {
-  Subject,
-  takeUntil,
-} from "rxjs";
+import { Subject, takeUntil } from "rxjs";
 import {
   DASH,
   DIRECTFILE,
@@ -29,7 +26,7 @@ import RxPlayer from "../../../../../src/minimal.ts";
 import { linkPlayerEventsToState } from "./events.js";
 import $handleCatchUpMode from "./catchUp";
 import VideoThumbnailLoader, {
-  DASH_LOADER
+  DASH_LOADER,
 } from "../../../../../src/experimental/tools/VideoThumbnailLoader";
 
 RxPlayer.addFeatures([
@@ -47,7 +44,7 @@ RxPlayer.addFeatures([
 
 /* eslint-disable no-undef */
 if (__INCLUDE_WASM_PARSER__) {
-/* eslint-enable no-undef */
+  /* eslint-enable no-undef */
 
   RxPlayer.addFeatures([DASH_WASM]);
   DASH_WASM.initialize({ wasmUrl: "./mpd-parser.wasm" });
@@ -162,10 +159,15 @@ const PLAYER = ({ $destroy, state }, initOpts) => {
 
     LOAD: (arg) => {
       dettachVideoThumbnailLoader();
-      player.loadVideo(Object.assign({
-        textTrackElement,
-        transportOptions: { checkMediaSegmentIntegrity: true },
-      }, arg));
+      player.loadVideo(
+        Object.assign(
+          {
+            textTrackElement,
+            transportOptions: { checkMediaSegmentIntegrity: true },
+          },
+          arg
+        )
+      );
       const newState = {
         loadedVideo: arg,
         lowLatencyMode: arg.lowLatencyMode === true,
@@ -218,12 +220,12 @@ const PLAYER = ({ $destroy, state }, initOpts) => {
 
     LOCK_VIDEO_REPRESENTATIONS: (reps) => {
       player.lockVideoRepresentations({
-        representations: reps.map(r => r.id),
+        representations: reps.map((r) => r.id),
         switchingMode: state.get().defaultVideoRepresentationsSwitchingMode,
       });
       state.set({
         videoRepresentationsLocked:
-          player.getLockedVideoRepresentations() !== null
+          player.getLockedVideoRepresentations() !== null,
       });
     },
 
@@ -237,7 +239,7 @@ const PLAYER = ({ $destroy, state }, initOpts) => {
 
     LOCK_AUDIO_REPRESENTATIONS: (reps) => {
       player.lockAudioRepresentations({
-        representations: reps.map(r => r.id),
+        representations: reps.map((r) => r.id),
         switchingMode: state.get().defaultAudioRepresentationsSwitchingMode,
       });
       state.set({

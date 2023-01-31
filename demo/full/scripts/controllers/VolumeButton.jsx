@@ -14,11 +14,7 @@ import withModulesState from "../lib/withModulesState.jsx";
  * @param {Object} props
  * @returns {Object}
  */
-function VolumeButton({
-  className = "",
-  player,
-  volume,
-}) {
+function VolumeButton({ className = "", player, volume }) {
   let volumeLevelClass;
   let charCode;
   if (volume === 0) {
@@ -34,20 +30,21 @@ function VolumeButton({
   return (
     <Button
       ariaLabel="Mute/Unmute audio"
-      className={
-        `volume-button ${className} ${volumeLevelClass}`
-      }
-      onClick={volume === 0 ?
-        () => player.dispatch("UNMUTE") :
-        () => player.dispatch("MUTE")
+      className={`volume-button ${className} ${volumeLevelClass}`}
+      onClick={
+        volume === 0
+          ? () => player.dispatch("UNMUTE")
+          : () => player.dispatch("MUTE")
       }
       value={String.fromCharCode(charCode)}
     />
   );
 }
 
-export default React.memo(withModulesState({
-  player: {
-    volume: "volume",
-  },
-})(VolumeButton));
+export default React.memo(
+  withModulesState({
+    player: {
+      volume: "volume",
+    },
+  })(VolumeButton)
+);

@@ -1,7 +1,4 @@
-import React, {
-  useEffect,
-  useState,
-} from "react";
+import React, { useEffect, useState } from "react";
 import { createModule } from "../../lib/vespertine.js";
 import ChartDataModule from "../../modules/ChartData.js";
 import BufferContentChart from "./BufferContent.jsx";
@@ -11,19 +8,19 @@ const BUFFER_GAP_REFRESH_TIME = 500;
 const MAX_BUFFER_SIZE_LENGTH = 2000;
 
 function ChartsManager({ player }) {
-  const [displayBufferContentChart,
-         updateDisplayBufferContentChart] = useState(false);
-  const [displayBufferSizeChart,
-         updateDisplayBufferSizeChart] = useState(false);
-  const [bufferSizeChart,
-         updateBufferSizeChart] = useState(null);
+  const [displayBufferContentChart, updateDisplayBufferContentChart] =
+    useState(false);
+  const [displayBufferSizeChart, updateDisplayBufferSizeChart] =
+    useState(false);
+  const [bufferSizeChart, updateBufferSizeChart] = useState(null);
 
   useEffect(() => {
     if (!player) {
       return;
     }
-    const newChartModule = createModule(ChartDataModule,
-                                        { maxSize: MAX_BUFFER_SIZE_LENGTH });
+    const newChartModule = createModule(ChartDataModule, {
+      maxSize: MAX_BUFFER_SIZE_LENGTH,
+    });
     newChartModule.dispatch("ADD_DATA", player.get("bufferGap"));
     const interval = setInterval(() => {
       newChartModule.dispatch("ADD_DATA", player.get("bufferGap"));
@@ -39,14 +36,12 @@ function ChartsManager({ player }) {
 
   const onBufferContentCheckBoxChange = (e) => {
     const target = e.target;
-    const value = target.type === "checkbox" ?
-      target.checked : target.value;
+    const value = target.type === "checkbox" ? target.checked : target.value;
     updateDisplayBufferContentChart(value);
   };
   const onBufferSizeCheckBoxChange = (e) => {
     const target = e.target;
-    const value = target.type === "checkbox" ?
-      target.checked : target.value;
+    const value = target.type === "checkbox" ? target.checked : target.value;
     updateDisplayBufferSizeChart(value);
   };
 
@@ -66,13 +61,12 @@ function ChartsManager({ player }) {
             <span className="slider round"></span>
           </label>
         </div>
-        { displayBufferContentChart && player ?
-          <BufferContentChart
-            player={player}
-          /> : null }
+        {displayBufferContentChart && player ? (
+          <BufferContentChart player={player} />
+        ) : null}
       </div>
       <div className="player-box">
-        <div className="chart-checkbox" >
+        <div className="chart-checkbox">
           Buffer size chart
           <label className="switch">
             <input
@@ -85,10 +79,9 @@ function ChartsManager({ player }) {
             <span className="slider round"></span>
           </label>
         </div>
-        { displayBufferSizeChart && bufferSizeChart !== null ?
-          <BufferSizeChart
-            module={bufferSizeChart}
-          /> : null }
+        {displayBufferSizeChart && bufferSizeChart !== null ? (
+          <BufferSizeChart module={bufferSizeChart} />
+        ) : null}
       </div>
     </div>
   );

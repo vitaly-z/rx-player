@@ -29,10 +29,9 @@ import {
  * @param {Uint8Array} chunkBytes
  * @returns {string}
  */
-export function extractTextTrackFromISOBMFF(chunkBytes : Uint8Array) : string {
+export function extractTextTrackFromISOBMFF(chunkBytes: Uint8Array): string {
   const mdat = getMDAT(chunkBytes);
-  return mdat === null ? "" :
-                         utf8ToStr(mdat);
+  return mdat === null ? "" : utf8ToStr(mdat);
 }
 
 /**
@@ -42,8 +41,8 @@ export function extractTextTrackFromISOBMFF(chunkBytes : Uint8Array) : string {
  * @returns {string}
  */
 export function getISOBMFFTextTrackFormat(
-  codecs : string | undefined
-) : "ttml" | "vtt" {
+  codecs: string | undefined
+): "ttml" | "vtt" {
   if (codecs === undefined) {
     throw new Error("Cannot parse subtitles: unknown format");
   }
@@ -54,8 +53,9 @@ export function getISOBMFFTextTrackFormat(
     case "wvtt": // wvtt === WebVTT in MP4
       return "vtt";
   }
-  throw new Error("The codec used for the subtitles " +
-                  `"${codecs}" is not managed yet.`);
+  throw new Error(
+    "The codec used for the subtitles " + `"${codecs}" is not managed yet.`
+  );
 }
 
 /**
@@ -64,9 +64,9 @@ export function getISOBMFFTextTrackFormat(
  * @returns {string}
  */
 export function getPlainTextTrackFormat(
-  codecs : string | undefined,
-  mimeType : string | undefined
-) : "ttml" | "sami" | "vtt" | "srt" {
+  codecs: string | undefined,
+  mimeType: string | undefined
+): "ttml" | "sami" | "vtt" | "srt" {
   switch (mimeType) {
     case "application/ttml+xml":
       return "ttml";
@@ -83,7 +83,9 @@ export function getPlainTextTrackFormat(
       return "srt";
     }
   }
-  throw new Error(`could not find a text-track parser for the type ${mimeType ?? ""}`);
+  throw new Error(
+    `could not find a text-track parser for the type ${mimeType ?? ""}`
+  );
 }
 
 /**
@@ -94,20 +96,24 @@ export function getPlainTextTrackFormat(
  * @returns {Object|null}
  */
 export function getISOBMFFEmbeddedTextTrackData(
-  { segment,
+  {
+    segment,
     language,
-    codecs } : { segment : ISegment;
-                 codecs? : string | undefined;
-                 language? : string | undefined; },
-  chunkBytes : Uint8Array,
-  chunkInfos : IChunkTimeInfo | null,
-  isChunked : boolean
-) : ITextTrackSegmentData | null {
+    codecs,
+  }: {
+    segment: ISegment;
+    codecs?: string | undefined;
+    language?: string | undefined;
+  },
+  chunkBytes: Uint8Array,
+  chunkInfos: IChunkTimeInfo | null,
+  isChunked: boolean
+): ITextTrackSegmentData | null {
   if (segment.isInit) {
     return null;
   }
-  let startTime : number | undefined;
-  let endTime : number | undefined;
+  let startTime: number | undefined;
+  let endTime: number | undefined;
   if (chunkInfos === null) {
     if (!isChunked) {
       log.warn("Transport: Unavailable time data for current text track.");
@@ -126,11 +132,7 @@ export function getISOBMFFEmbeddedTextTrackData(
 
   const type = getISOBMFFTextTrackFormat(codecs);
   const textData = extractTextTrackFromISOBMFF(chunkBytes);
-  return { data: textData,
-           type,
-           language,
-           start: startTime,
-           end: endTime } ;
+  return { data: textData, type, language, start: startTime, end: endTime };
 }
 
 /**
@@ -141,10 +143,10 @@ export function getISOBMFFEmbeddedTextTrackData(
  * @returns {Object|null}
  */
 export function getPlainTextTrackData(
-  context : ISegmentContext,
-  textTrackData : string,
-  isChunked : boolean
-) : ITextTrackSegmentData | null {
+  context: ISegmentContext,
+  textTrackData: string,
+  isChunked: boolean
+): ITextTrackSegmentData | null {
   const { segment } = context;
   if (segment.isInit) {
     return null;
@@ -162,9 +164,5 @@ export function getPlainTextTrackData(
   }
 
   const type = getPlainTextTrackFormat(context.codecs, context.mimeType);
-  return { data: textTrackData,
-           type,
-           language: context.language,
-           start,
-           end };
+  return { data: textTrackData, type, language: context.language, start, end };
 }

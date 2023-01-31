@@ -26,9 +26,9 @@ import arrayFindIndex from "../../../utils/array_find_index";
  * @returns {Array.<Object>}
  */
 export default function filterByBitrate(
-  representations : Representation[],
-  bitrate : number
-) : Representation[] {
+  representations: Representation[],
+  bitrate: number
+): Representation[] {
   if (representations.length === 0) {
     return [];
   }

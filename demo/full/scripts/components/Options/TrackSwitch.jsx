@@ -29,8 +29,7 @@ function TrackSwitchConfig({
         "Smooth transition when the audio track is changed";
       break;
     default:
-      defaultAudioTrackSwitchingModeDescMsg =
-        "Unknown value";
+      defaultAudioTrackSwitchingModeDescMsg = "Unknown value";
       break;
   }
 
@@ -44,8 +43,7 @@ function TrackSwitchConfig({
         "Keeping the same buffers even when the codec changes";
       break;
     default:
-      onCodecSwitchDescMsg =
-        "Unknown value";
+      onCodecSwitchDescMsg = "Unknown value";
       break;
   }
 
@@ -63,9 +61,9 @@ function TrackSwitchConfig({
           Fast Switching
         </Checkbox>
         <span className="option-desc">
-          {enableFastSwitching ?
-            "Fast quality switch by replacing lower qualities in the buffer by higher ones when possible." :
-            "Not replacing lower qualities in the buffer by an higher one when possible."}
+          {enableFastSwitching
+            ? "Fast quality switch by replacing lower qualities in the buffer by higher ones when possible."
+            : "Not replacing lower qualities in the buffer by an higher one when possible."}
         </span>
       </li>
       <li className="featureWrapperWithSelectMode">
@@ -73,11 +71,12 @@ function TrackSwitchConfig({
           className="playerOptionInput"
           name="defaultAudioTrackSwitchingMode"
           onChange={({ value }) =>
-            onDefaultAudioTrackSwitchingModeChange(value)}
+            onDefaultAudioTrackSwitchingModeChange(value)
+          }
           selected={{ value: defaultAudioTrackSwitchingMode }}
           options={["seamless", "direct", "reload"]}
         >
-            Default Audio track switching mode
+          Default Audio track switching mode
         </Select>
         <span className="option-desc">
           {defaultAudioTrackSwitchingModeDescMsg}
@@ -93,9 +92,7 @@ function TrackSwitchConfig({
         >
           On Codec Switch
         </Select>
-        <span className="option-desc">
-          {onCodecSwitchDescMsg}
-        </span>
+        <span className="option-desc">{onCodecSwitchDescMsg}</span>
       </li>
     </Fragment>
   );

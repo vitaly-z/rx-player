@@ -55,65 +55,74 @@ export default function $handleCatchUpMode(
     return observableOf(false);
   }
 
-  return $switchCatchUpMode.pipe(switchMap((isCatchUpEnabled) => {
-    return fromPlayerEvent(rxPlayer, "playerStateChange").pipe(
-      startWith(rxPlayer.getPlayerState()),
-      distinctUntilChanged(),
-      map((playerState) => {
-        return playerState === "LOADED" ||
-               playerState === "PLAYING" ||
-               playerState === "PAUSED" ||
-               playerState === "BUFFERING" ||
-               playerState === "FREEZING" ||
-               playerState === "SEEKING";
-      }),
-      switchMap(canCatchUp => {
-        if (!rxPlayer.isLive()) {
-          state.set({ isCatchUpEnabled: false });
-          return stopCatchingUp();
-        }
-        state.set({ isCatchUpEnabled });
+  return $switchCatchUpMode.pipe(
+    switchMap((isCatchUpEnabled) => {
+      return fromPlayerEvent(rxPlayer, "playerStateChange").pipe(
+        startWith(rxPlayer.getPlayerState()),
+        distinctUntilChanged(),
+        map((playerState) => {
+          return (
+            playerState === "LOADED" ||
+            playerState === "PLAYING" ||
+            playerState === "PAUSED" ||
+            playerState === "BUFFERING" ||
+            playerState === "FREEZING" ||
+            playerState === "SEEKING"
+          );
+        }),
+        switchMap((canCatchUp) => {
+          if (!rxPlayer.isLive()) {
+            state.set({ isCatchUpEnabled: false });
+            return stopCatchingUp();
+          }
+          state.set({ isCatchUpEnabled });
 
-        if (!isCatchUpEnabled || !canCatchUp) {
-          return stopCatchingUp();
-        }
+          if (!isCatchUpEnabled || !canCatchUp) {
+            return stopCatchingUp();
+          }
 
-        return interval(200).pipe(
-          startWith(0),
-          map(() => [ rxPlayer.getMaximumPosition(), rxPlayer.getPosition() ]),
-          switchMap(([maximumPosition, position]) => {
-            const liveGap = maximumPosition - position;
-            if (liveGap >= CATCH_UP_SEEKING_STEP) {
-              rxPlayer.seekTo(maximumPosition - LIVE_GAP_GOAL_WHEN_CATCHING_UP);
-              return stopCatchingUp();
-            }
-
-            if (isCatchingUp) {
-              if (liveGap <= LIVE_GAP_GOAL_WHEN_CATCHING_UP) {
+          return interval(200).pipe(
+            startWith(0),
+            map(() => [rxPlayer.getMaximumPosition(), rxPlayer.getPosition()]),
+            switchMap(([maximumPosition, position]) => {
+              const liveGap = maximumPosition - position;
+              if (liveGap >= CATCH_UP_SEEKING_STEP) {
+                rxPlayer.seekTo(
+                  maximumPosition - LIVE_GAP_GOAL_WHEN_CATCHING_UP
+                );
                 return stopCatchingUp();
               }
-            } else if (liveGap < CATCH_UP_CHANGE_RATE_STEP) {
-              return stopCatchingUp();
-            }
 
-            const factor = (liveGap - LIVE_GAP_GOAL_WHEN_CATCHING_UP) / 4;
-            const rate = Math.round(Math.min(MAX_RATE, 1.1 + factor) * 10) / 10;
-            if (rate <= 1) {
-              return stopCatchingUp();
-            }
+              if (isCatchingUp) {
+                if (liveGap <= LIVE_GAP_GOAL_WHEN_CATCHING_UP) {
+                  return stopCatchingUp();
+                }
+              } else if (liveGap < CATCH_UP_CHANGE_RATE_STEP) {
+                return stopCatchingUp();
+              }
 
-            if (!isCatchingUp) {
-              isCatchingUp = true;
-              state.set({ isCatchingUp: true });
-            }
+              const factor = (liveGap - LIVE_GAP_GOAL_WHEN_CATCHING_UP) / 4;
+              const rate =
+                Math.round(Math.min(MAX_RATE, 1.1 + factor) * 10) / 10;
+              if (rate <= 1) {
+                return stopCatchingUp();
+              }
 
-            state.set({ playbackRate: rate });
-            const currentPlaybackRate = rxPlayer.getPlaybackRate();
-            if (rate !== currentPlaybackRate) {
-              rxPlayer.setPlaybackRate(rate);
-            }
-            return observableOf(true);
-          }));
-      }));
-  }));
+              if (!isCatchingUp) {
+                isCatchingUp = true;
+                state.set({ isCatchingUp: true });
+              }
+
+              state.set({ playbackRate: rate });
+              const currentPlaybackRate = rxPlayer.getPlaybackRate();
+              if (rate !== currentPlaybackRate) {
+                rxPlayer.setPlaybackRate(rate);
+              }
+              return observableOf(true);
+            })
+          );
+        })
+      );
+    })
+  );
 }
