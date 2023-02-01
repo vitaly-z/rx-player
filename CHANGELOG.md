@@ -1,6 +1,6 @@
 # Changelog
 
-## v3.30.0-canal.2023020100 (2023-01-17)
+## v3.30.0-canal.2023020600 (2023-02-01)
 
 ### Features
 
@@ -30,6 +30,8 @@
   - Completely remove RxJS dependency from the RxPlayer's source code [#1193]
   - DRM: Request PR recommendation when PlayReady is asked and try default recommendation robustnesses [#1189]
   - TTML: put saner values for extent and origins when weird ones are found
+  - DASH: Do not merge "main" video AdaptationSet anymore
+
 
 
 ## v3.29.0 (2022-11-16)
