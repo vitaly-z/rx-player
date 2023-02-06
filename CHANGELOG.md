@@ -1,11 +1,12 @@
 # Changelog
 
-## v3.29.1-canal.2022120500 (2022-12-05)
+## v3.29.1-canal.2023020600 (2023-02-06)
 
 ### Bug fixes
 
   - Compat/DRM: On WebOS (mostly LG TVs), generalize the renewal of MediaKeys to fix compatibility issues [#1188]
   - subtitles/TTML: Set default values for tts:extent and tts:origin when improbable values are found
+  - DASH: Do not merge "main" video AdaptationSet anymore
 
 
 ## v3.29.0 (2022-11-16)
