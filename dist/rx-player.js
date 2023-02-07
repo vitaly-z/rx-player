@@ -1276,7 +1276,7 @@ function createCompatibleEventListener(eventNames, prefixes) {
   var mem;
   var prefixedEvents = eventPrefixed(eventNames, prefixes);
   return function (element, listener, cancelSignal) {
-    if (cancelSignal.isCancelled) {
+    if (cancelSignal.isCancelled()) {
       return;
     }
     // if the element is a HTMLElement we can detect
@@ -4147,7 +4147,7 @@ function _attachMediaKeys() {
             _context.next = 5;
             return closeAllSessions;
           case 5:
-            if (!cancelSignal.isCancelled) {
+            if (!cancelSignal.isCancelled()) {
               _context.next = 7;
               break;
             }
@@ -5311,7 +5311,7 @@ function closeSession(session) {
             case 5:
               _context2.prev = 5;
               _context2.t0 = _context2["catch"](0);
-              if (!timeoutCanceller.isUsed) {
+              if (!timeoutCanceller.isUsed()) {
                 _context2.next = 9;
                 break;
               }
@@ -5326,7 +5326,7 @@ function closeSession(session) {
               _context2.next = 13;
               return (0,cancellable_sleep/* default */.Z)(1000, timeoutCanceller.signal);
             case 13:
-              if (!timeoutCanceller.isUsed) {
+              if (!timeoutCanceller.isUsed()) {
                 _context2.next = 15;
                 break;
               }
@@ -7358,14 +7358,13 @@ function SessionEventsListener(session, keySystemOptions, keySystem, callbacks, 
   var _keySystemOptions$get = keySystemOptions.getLicenseConfig,
     getLicenseConfig = _keySystemOptions$get === void 0 ? {} : _keySystemOptions$get;
   /** Allows to manually cancel everything the `SessionEventsListener` is doing. */
-  var manualCanceller = new task_canceller/* default */.ZP({
-    cancelOn: cancelSignal
-  });
+  var manualCanceller = new task_canceller/* default */.ZP();
+  manualCanceller.linkToSignal(cancelSignal);
   if (!(0,is_null_or_undefined/* default */.Z)(session.closed)) {
     session.closed.then(function () {
       return manualCanceller.cancel();
     })["catch"](function (err) {
-      if (cancelSignal.isCancelled) {
+      if (cancelSignal.isCancelled()) {
         return;
       }
       manualCanceller.cancel();
@@ -7378,7 +7377,7 @@ function SessionEventsListener(session, keySystemOptions, keySystem, callbacks, 
   }, manualCanceller.signal);
   onKeyStatusesChange(session, function (keyStatusesEvent) {
     handleKeyStatusesChangeEvent(keyStatusesEvent)["catch"](function (error) {
-      if (cancelSignal.isCancelled || manualCanceller.isUsed && error instanceof task_canceller/* CancellationSignal */.XG) {
+      if (cancelSignal.isCancelled() || manualCanceller.isUsed() && error instanceof task_canceller/* CancellationSignal */.XG) {
         return;
       }
       manualCanceller.cancel();
@@ -7394,7 +7393,7 @@ function SessionEventsListener(session, keySystemOptions, keySystem, callbacks, 
     retryPromiseWithBackoff(function () {
       return runGetLicense(message, messageType);
     }, backoffOptions, manualCanceller.signal).then(function (licenseObject) {
-      if (manualCanceller.isUsed) {
+      if (manualCanceller.isUsed()) {
         return Promise.resolve();
       }
       if ((0,is_null_or_undefined/* default */.Z)(licenseObject)) {
@@ -7403,7 +7402,7 @@ function SessionEventsListener(session, keySystemOptions, keySystem, callbacks, 
         return updateSessionWithMessage(session, licenseObject);
       }
     })["catch"](function (err) {
-      if (manualCanceller.isUsed) {
+      if (manualCanceller.isUsed()) {
         return;
       }
       manualCanceller.cancel();
@@ -7434,7 +7433,7 @@ function SessionEventsListener(session, keySystemOptions, keySystem, callbacks, 
           switch (_context2.prev = _context2.next) {
             case 0:
               handleKeyStatusEvent = function _handleKeyStatusEvent() {
-                if (manualCanceller.isUsed || session.keyStatuses.size === 0) {
+                if (manualCanceller.isUsed() || session.keyStatuses.size === 0) {
                   return;
                 }
                 var _checkKeyStatuses = checkKeyStatuses(session, keySystemOptions, keySystem),
@@ -7443,7 +7442,7 @@ function SessionEventsListener(session, keySystemOptions, keySystem, callbacks, 
                   whitelistedKeyIds = _checkKeyStatuses.whitelistedKeyIds;
                 if (warning !== undefined) {
                   callbacks.onWarning(warning);
-                  if (manualCanceller.isUsed) {
+                  if (manualCanceller.isUsed()) {
                     return;
                   }
                 }
@@ -7459,7 +7458,7 @@ function SessionEventsListener(session, keySystemOptions, keySystem, callbacks, 
                     while (1) {
                       switch (_context.prev = _context.next) {
                         case 0:
-                          if (!manualCanceller.isUsed) {
+                          if (!manualCanceller.isUsed()) {
                             _context.next = 2;
                             break;
                           }
@@ -7474,7 +7473,7 @@ function SessionEventsListener(session, keySystemOptions, keySystem, callbacks, 
                           return keySystemOptions.onKeyStatusesChange(keyStatusesEvent, session);
                         case 6:
                           ret = _context.sent;
-                          if (!manualCanceller.isUsed) {
+                          if (!manualCanceller.isUsed()) {
                             _context.next = 9;
                             break;
                           }
@@ -7485,7 +7484,7 @@ function SessionEventsListener(session, keySystemOptions, keySystem, callbacks, 
                         case 11:
                           _context.prev = 11;
                           _context.t0 = _context["catch"](3);
-                          if (!cancelSignal.isCancelled) {
+                          if (!cancelSignal.isCancelled()) {
                             _context.next = 15;
                             break;
                           }
@@ -8630,7 +8629,7 @@ var ContentDecryptor = /*#__PURE__*/function (_EventEmitter) {
    * formatted and sent in an "error" event.
    */;
   _proto._onFatalError = function _onFatalError(err) {
-    if (this._canceller.isUsed) {
+    if (this._canceller.isUsed()) {
       return;
     }
     var formattedErr = err instanceof Error ? err : new other_error/* default */.Z("NONE", "Unknown decryption error");
@@ -9270,7 +9269,7 @@ var DirectFileContentInitializer = /*#__PURE__*/function (_ContentInitializer) {
         clearSignal: cancelSignal
       });
     })["catch"](function (err) {
-      if (!cancelSignal.isCancelled) {
+      if (!cancelSignal.isCancelled()) {
         _this3._onFatalError(err);
       }
     });
@@ -9443,9 +9442,8 @@ var task_canceller = __webpack_require__(288);
  * @returns {Object}
  */
 function getLoadedReference(playbackObserver, mediaElement, isDirectfile, cancelSignal) {
-  var listenCanceller = new task_canceller/* default */.ZP({
-    cancelOn: cancelSignal
-  });
+  var listenCanceller = new task_canceller/* default */.ZP();
+  listenCanceller.linkToSignal(cancelSignal);
   var isLoaded = (0,reference/* default */.ZP)(false, listenCanceller.signal);
   playbackObserver.listen(function (observation) {
     if (observation.rebuffering !== null || observation.freezing !== null || observation.readyState === 0) {
@@ -9530,7 +9528,7 @@ function performInitialSeekAndPlay(mediaElement, playbackObserver, startTime, mu
   if (mediaElement.readyState >= _compat_browser_compatibility_types__WEBPACK_IMPORTED_MODULE_1__/* .READY_STATES.HAVE_METADATA */ .c.HAVE_METADATA) {
     onLoadedMetadata();
   }
-  cancelSignal.register(function (err) {
+  var deregisterCancellation = cancelSignal.register(function (err) {
     mediaElement.removeEventListener("loadedmetadata", onLoadedMetadata);
     rejectAutoPlay(err);
   });
@@ -9550,7 +9548,7 @@ function performInitialSeekAndPlay(mediaElement, playbackObserver, startTime, mu
       var error = new _errors__WEBPACK_IMPORTED_MODULE_4__/* ["default"] */ .Z("MEDIA_ERR_NOT_LOADED_METADATA", "Cannot load automatically: your browser " + "falsely announced having loaded the content.");
       onWarning(error);
     }
-    if (cancelSignal.isCancelled) {
+    if (cancelSignal.isCancelled()) {
       return;
     }
     playbackObserver.listen(function (observation, stopListening) {
@@ -9572,6 +9570,7 @@ function performInitialSeekAndPlay(mediaElement, playbackObserver, startTime, mu
       }
       initialPlayPerformed.setValue(true);
       initialPlayPerformed.finish();
+      deregisterCancellation();
       return resolveAutoPlay({
         type: "skipped"
       });
@@ -9580,19 +9579,22 @@ function performInitialSeekAndPlay(mediaElement, playbackObserver, startTime, mu
     try {
       playResult = (_a = mediaElement.play()) !== null && _a !== void 0 ? _a : Promise.resolve();
     } catch (playError) {
+      deregisterCancellation();
       return rejectAutoPlay(playError);
     }
     playResult.then(function () {
-      if (cancelSignal.isCancelled) {
+      if (cancelSignal.isCancelled()) {
         return;
       }
       initialPlayPerformed.setValue(true);
       initialPlayPerformed.finish();
+      deregisterCancellation();
       return resolveAutoPlay({
         type: "autoplay"
       });
     })["catch"](function (playError) {
-      if (cancelSignal.isCancelled) {
+      deregisterCancellation();
+      if (cancelSignal.isCancelled()) {
         return;
       }
       if (playError instanceof Error && playError.name === "NotAllowedError") {
@@ -9600,7 +9602,7 @@ function performInitialSeekAndPlay(mediaElement, playbackObserver, startTime, mu
         _log__WEBPACK_IMPORTED_MODULE_2__/* ["default"].warn */ .Z.warn("Init: Media element can't play." + " It may be due to browser auto-play policies.");
         var error = new _errors__WEBPACK_IMPORTED_MODULE_4__/* ["default"] */ .Z("MEDIA_ERR_BLOCKED_AUTOPLAY", "Cannot trigger auto-play automatically: " + "your browser does not allow it.");
         onWarning(error);
-        if (cancelSignal.isCancelled) {
+        if (cancelSignal.isCancelled()) {
           return;
         }
         return resolveAutoPlay({
@@ -9740,9 +9742,8 @@ function initializeContentDecryption(mediaElement, keySystems, protectionRef, ca
     _ref.finish(); // We know that no new value will be triggered
     return _ref;
   }
-  var decryptorCanceller = new task_canceller/* default */.ZP({
-    cancelOn: cancelSignal
-  });
+  var decryptorCanceller = new task_canceller/* default */.ZP();
+  decryptorCanceller.linkToSignal(cancelSignal);
   var drmStatusRef = (0,reference/* default */.ZP)({
     initializationState: {
       type: "uninitialized",
@@ -10356,7 +10357,7 @@ var PlaybackRateUpdater = /*#__PURE__*/function () {
  * @param {Object} cancelSignal
  */
 function listenToMediaError(mediaElement, onError, cancelSignal) {
-  if (cancelSignal.isCancelled) {
+  if (cancelSignal.isCancelled()) {
     return;
   }
   mediaElement.addEventListener("error", onMediaError);
@@ -11485,9 +11486,8 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
       return cue.resolution !== null;
     });
     if (proportionalCues.length > 0) {
-      this._sizeUpdateCanceller = new task_canceller/* default */.ZP({
-        cancelOn: this._canceller.signal
-      });
+      this._sizeUpdateCanceller = new task_canceller/* default */.ZP();
+      this._sizeUpdateCanceller.linkToSignal(this._canceller.signal);
       var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
         TEXT_TRACK_SIZE_CHECKS_INTERVAL = _config$getCurrent.TEXT_TRACK_SIZE_CHECKS_INTERVAL;
       // update propertionally-sized elements periodically
@@ -11519,9 +11519,8 @@ var HTMLTextSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
       MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL = _config$getCurrent2.MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL;
     var startAutoRefresh = function startAutoRefresh() {
       stopAutoRefresh();
-      autoRefreshCanceller = new task_canceller/* default */.ZP({
-        cancelOn: cancellationSignal
-      });
+      autoRefreshCanceller = new task_canceller/* default */.ZP();
+      autoRefreshCanceller.linkToSignal(cancellationSignal);
       var intervalId = setInterval(function () {
         return _this2.refreshSubtitles();
       }, MAXIMUM_HTML_TEXT_TRACK_UPDATE_INTERVAL);
@@ -19941,12 +19940,11 @@ function combineInbandEventStreams(representation, adaptation) {
  */
 function getHDRInformation(_ref) {
   var adaptationProfiles = _ref.adaptationProfiles,
+    essentialProperties = _ref.essentialProperties,
+    supplementalProperties = _ref.supplementalProperties,
     manifestProfiles = _ref.manifestProfiles,
     codecs = _ref.codecs;
   var profiles = (adaptationProfiles !== null && adaptationProfiles !== void 0 ? adaptationProfiles : "") + (manifestProfiles !== null && manifestProfiles !== void 0 ? manifestProfiles : "");
-  if (codecs === undefined) {
-    return undefined;
-  }
   if (profiles.indexOf("http://dashif.org/guidelines/dash-if-uhd#hevc-hdr-pq10") !== -1) {
     if (codecs === "hvc1.2.4.L153.B0" || codecs === "hev1.2.4.L153.B0") {
       return {
@@ -19956,7 +19954,25 @@ function getHDRInformation(_ref) {
       };
     }
   }
-  if (/^vp(08|09|10)/.exec(codecs)) {
+  var transferCharacteristicScheme = (0,array_find/* default */.Z)([].concat(essentialProperties !== null && essentialProperties !== void 0 ? essentialProperties : [], supplementalProperties !== null && supplementalProperties !== void 0 ? supplementalProperties : []), function (p) {
+    return p.schemeIdUri === "urn:mpeg:mpegB:cicp:TransferCharacteristics";
+  });
+  if (transferCharacteristicScheme !== undefined) {
+    switch (transferCharacteristicScheme.value) {
+      case "15":
+        return undefined;
+      // SDR
+      case "16":
+        return {
+          eotf: "pq"
+        };
+      case "18":
+        return {
+          eotf: "hlg"
+        };
+    }
+  }
+  if (codecs !== undefined && /^vp(08|09|10)/.exec(codecs)) {
     return getWEBMHDRInformation(codecs);
   }
 }
@@ -20110,6 +20126,8 @@ function parseRepresentations(representationsIR, adaptation, context) {
     }
     parsedRepresentation.hdrInfo = getHDRInformation({
       adaptationProfiles: adaptation.attributes.profiles,
+      supplementalProperties: adaptation.children.supplementalProperties,
+      essentialProperties: adaptation.children.essentialProperties,
       manifestProfiles: context.manifestProfiles,
       codecs: codecs
     });
@@ -27945,7 +27963,7 @@ function generateManifestParser(options) {
         if (parserResponse.value.warnings.length > 0) {
           onWarnings(parserResponse.value.warnings);
         }
-        if (cancelSignal.isCancelled) {
+        if (cancelSignal.isCancelled()) {
           return Promise.reject(cancelSignal.cancellationError);
         }
         var manifest = new src_manifest/* default */.ZP(parserResponse.value.parsed, options);
@@ -28374,12 +28392,9 @@ var check_isobmff_integrity = __webpack_require__(4460);
 function addSegmentIntegrityChecks(segmentLoader) {
   return function (url, content, loaderOptions, initialCancelSignal, callbacks) {
     return new Promise(function (resolve, reject) {
-      var requestCanceller = new task_canceller/* default */.ZP({
-        cancelOn: initialCancelSignal
-      });
-      // Reject the `CancellationError` when `requestCanceller`'s signal emits
-      // `stopRejectingOnCancel` here is a function allowing to stop this mechanism
-      var stopRejectingOnCancel = requestCanceller.signal.register(reject);
+      var requestCanceller = new task_canceller/* default */.ZP();
+      var unlinkCanceller = requestCanceller.linkToSignal(initialCancelSignal);
+      requestCanceller.signal.register(reject);
       segmentLoader(url, content, loaderOptions, requestCanceller.signal, Object.assign(Object.assign({}, callbacks), {
         onNewChunk: function onNewChunk(data) {
           try {
@@ -28387,7 +28402,7 @@ function addSegmentIntegrityChecks(segmentLoader) {
             callbacks.onNewChunk(data);
           } catch (err) {
             // Do not reject with a `CancellationError` after cancelling the request
-            stopRejectingOnCancel();
+            cleanUpCancellers();
             // Cancel the request
             requestCanceller.cancel();
             // Reject with thrown error
@@ -28395,10 +28410,10 @@ function addSegmentIntegrityChecks(segmentLoader) {
           }
         }
       })).then(function (info) {
-        if (requestCanceller.isUsed) {
+        cleanUpCancellers();
+        if (requestCanceller.isUsed()) {
           return;
         }
-        stopRejectingOnCancel();
         if (info.resultType === "segment-loaded") {
           try {
             trowOnIntegrityError(info.resultData.responseData);
@@ -28409,9 +28424,13 @@ function addSegmentIntegrityChecks(segmentLoader) {
         }
         resolve(info);
       }, function (error) {
-        stopRejectingOnCancel();
+        cleanUpCancellers();
         reject(error);
       });
+      function cleanUpCancellers() {
+        requestCanceller.signal.deregister(reject);
+        unlinkCanceller();
+      }
     });
     /**
      * If the data's seems to be corrupted, throws an `INTEGRITY_ERROR` error.
@@ -28656,7 +28675,7 @@ function lowLatencySegmentLoader(url, content, options, callbacks, cancelSignal)
     partialChunk = res[1];
     for (var i = 0; i < completeChunks.length; i++) {
       callbacks.onNewChunk(completeChunks[i]);
-      if (cancelSignal.isCancelled) {
+      if (cancelSignal.isCancelled()) {
         return;
       }
     }
@@ -28665,7 +28684,7 @@ function lowLatencySegmentLoader(url, content, options, callbacks, cancelSignal)
       size: info.size,
       totalSize: info.totalSize
     });
-    if (cancelSignal.isCancelled) {
+    if (cancelSignal.isCancelled()) {
       return;
     }
   }
@@ -28788,7 +28807,7 @@ function generateSegmentLoader(_ref) {
        * @param {Object} _args
        */
       var resolve = function resolve(_args) {
-        if (hasFinished || cancelSignal.isCancelled) {
+        if (hasFinished || cancelSignal.isCancelled()) {
           return;
         }
         hasFinished = true;
@@ -28808,7 +28827,7 @@ function generateSegmentLoader(_ref) {
        */
       var reject = function reject(err) {
         var _a, _b, _c;
-        if (hasFinished || cancelSignal.isCancelled) {
+        if (hasFinished || cancelSignal.isCancelled()) {
           return;
         }
         hasFinished = true;
@@ -28820,7 +28839,7 @@ function generateSegmentLoader(_ref) {
         rej(emittedErr);
       };
       var progress = function progress(_args) {
-        if (hasFinished || cancelSignal.isCancelled) {
+        if (hasFinished || cancelSignal.isCancelled()) {
           return;
         }
         callbacks.onProgress({
@@ -28834,7 +28853,7 @@ function generateSegmentLoader(_ref) {
        * the "regular" implementation
        */
       var fallback = function fallback() {
-        if (hasFinished || cancelSignal.isCancelled) {
+        if (hasFinished || cancelSignal.isCancelled()) {
           return;
         }
         hasFinished = true;
@@ -32687,7 +32706,7 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
          * @param {Object} args
          */
         var resolve = function resolve(_args) {
-          if (hasFinished || cancelSignal.isCancelled) {
+          if (hasFinished || cancelSignal.isCancelled()) {
             return;
           }
           hasFinished = true;
@@ -32720,7 +32739,7 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
          */
         var reject = function reject(err) {
           var _a, _b, _c;
-          if (hasFinished || cancelSignal.isCancelled) {
+          if (hasFinished || cancelSignal.isCancelled()) {
             return;
           }
           hasFinished = true;
@@ -32732,7 +32751,7 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
           rej(emittedErr);
         };
         var progress = function progress(_args) {
-          if (hasFinished || cancelSignal.isCancelled) {
+          if (hasFinished || cancelSignal.isCancelled()) {
             return;
           }
           callbacks.onProgress({
@@ -32742,7 +32761,7 @@ var generateSegmentLoader = function generateSegmentLoader(_ref) {
           });
         };
         var fallback = function fallback() {
-          if (hasFinished || cancelSignal.isCancelled) {
+          if (hasFinished || cancelSignal.isCancelled()) {
             return;
           }
           hasFinished = true;
@@ -33465,7 +33484,7 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
        * @param {Object} args
        */
       var resolve = function resolve(_args) {
-        if (hasFinished || cancelSignal.isCancelled) {
+        if (hasFinished || cancelSignal.isCancelled()) {
           return;
         }
         hasFinished = true;
@@ -33487,7 +33506,7 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
        */
       var reject = function reject(err) {
         var _a, _b, _c;
-        if (hasFinished || cancelSignal.isCancelled) {
+        if (hasFinished || cancelSignal.isCancelled()) {
           return;
         }
         hasFinished = true;
@@ -33503,7 +33522,7 @@ function callCustomManifestLoader(customManifestLoader, fallbackManifestLoader) 
        * the "regular" implementation
        */
       var fallback = function fallback() {
-        if (hasFinished || cancelSignal.isCancelled) {
+        if (hasFinished || cancelSignal.isCancelled()) {
           return;
         }
         hasFinished = true;
@@ -35895,6 +35914,9 @@ function createSharedReference(initialValue, cancelSignal) {
       }
       options.clearSignal.register(unlisten);
       function unlisten() {
+        if ((options === null || options === void 0 ? void 0 : options.clearSignal) !== undefined) {
+          options.clearSignal.deregister(unlisten);
+        }
         if (cbObj.hasBeenCleared) {
           return;
         }
@@ -35937,6 +35959,9 @@ function createSharedReference(initialValue, cancelSignal) {
     finish: finish
   };
   function finish() {
+    if (cancelSignal !== undefined) {
+      cancelSignal.deregister(finish);
+    }
     isFinished = true;
     var clonedCbs = cbs.slice();
     for (var _iterator2 = _createForOfIteratorHelperLoose(clonedCbs), _step2; !(_step2 = _iterator2()).done;) {
@@ -36070,7 +36095,7 @@ function request(options) {
         }
         reject(err);
       });
-      if (cancelSignal.isCancelled) {
+      if (cancelSignal.isCancelled()) {
         return;
       }
     }
@@ -36772,11 +36797,12 @@ function takeFirstSet() {
 /* harmony export */   "XG": function() { return /* binding */ CancellationSignal; },
 /* harmony export */   "ZP": function() { return /* binding */ TaskCanceller; }
 /* harmony export */ });
-/* harmony import */ var _babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(7326);
-/* harmony import */ var _babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4578);
-/* harmony import */ var _babel_runtime_helpers_wrapNativeSuper__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(2146);
-/* harmony import */ var _assert__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(811);
-/* harmony import */ var _noop__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(8894);
+/* harmony import */ var _babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(7326);
+/* harmony import */ var _babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(4578);
+/* harmony import */ var _babel_runtime_helpers_wrapNativeSuper__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(2146);
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3887);
+/* harmony import */ var _assert__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(811);
+/* harmony import */ var _noop__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(8894);
 
 
 
@@ -36795,6 +36821,7 @@ function takeFirstSet() {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 /**
@@ -36899,22 +36926,44 @@ var TaskCanceller = /*#__PURE__*/function () {
    * Creates a new `TaskCanceller`, with its own `CancellationSignal` created
    * as its `signal` provide.
    * You can then pass this property to async task you wish to be cancellable.
-   * @param {Object|undefined} options
    */
-  function TaskCanceller(options) {
-    var _this = this;
+  function TaskCanceller() {
     var _createCancellationFu = createCancellationFunctions(),
       trigger = _createCancellationFu[0],
       register = _createCancellationFu[1];
-    this.isUsed = false;
+    this._isUsed = false;
     this._trigger = trigger;
     this.signal = new CancellationSignal(register);
-    if ((options === null || options === void 0 ? void 0 : options.cancelOn) !== undefined) {
-      var unregisterParent = options.cancelOn.register(function () {
-        _this.cancel();
-      });
-      this.signal.register(unregisterParent);
-    }
+  }
+  /**
+   * Returns `true` if this `TaskCanceller` has already been triggered.
+   * `false` otherwise.
+   */
+  var _proto = TaskCanceller.prototype;
+  _proto.isUsed = function isUsed() {
+    return this._isUsed;
+  }
+  /**
+   * Bind this `TaskCanceller` to a `CancellationSignal`, so the former
+   * is automatically cancelled when the latter is triggered.
+   *
+   * Note that this call registers a callback on the given signal, until either
+   * the current `TaskCanceller` is cancelled or until this given
+   * `CancellationSignal` is triggered.
+   * To avoid leaking memory, the returned callback allow to undo this link.
+   * It should be called if/when that link is not needed anymore, such as when
+   * there is no need for this `TaskCanceller` anymore.
+   *
+   * @param {Object} signal
+   * @returns {Function}
+   */;
+  _proto.linkToSignal = function linkToSignal(signal) {
+    var _this = this;
+    var unregister = signal.register(function () {
+      _this.cancel();
+    });
+    this.signal.register(unregister);
+    return unregister;
   }
   /**
    * "Trigger" the `TaskCanceller`, notify through its associated
@@ -36926,13 +36975,12 @@ var TaskCanceller = /*#__PURE__*/function () {
    * cancellation is actually triggered as a chain reaction from a previous
    * cancellation.
    * @param {Error} [srcError]
-   */
-  var _proto = TaskCanceller.prototype;
+   */;
   _proto.cancel = function cancel(srcError) {
-    if (this.isUsed) {
+    if (this._isUsed) {
       return;
     }
-    this.isUsed = true;
+    this._isUsed = true;
     var cancellationError = srcError !== null && srcError !== void 0 ? srcError : new CancellationError();
     this._trigger(cancellationError);
   }
@@ -36962,17 +37010,30 @@ var CancellationSignal = /*#__PURE__*/function () {
    */
   function CancellationSignal(registerToSource) {
     var _this2 = this;
-    this.isCancelled = false;
+    this._isCancelled = false;
     this.cancellationError = null;
     this._listeners = [];
     registerToSource(function (cancellationError) {
       _this2.cancellationError = cancellationError;
-      _this2.isCancelled = true;
+      _this2._isCancelled = true;
       while (_this2._listeners.length > 0) {
-        var listener = _this2._listeners.splice(_this2._listeners.length - 1, 1)[0];
-        listener(cancellationError);
+        try {
+          var listener = _this2._listeners.pop();
+          listener === null || listener === void 0 ? void 0 : listener(cancellationError);
+        } catch (err) {
+          _log__WEBPACK_IMPORTED_MODULE_0__/* ["default"].error */ .Z.error("Error while calling clean up listener", err instanceof Error ? err.toString() : "Unknown error");
+        }
       }
     });
+  }
+  /**
+   * Returns `true` when the cancellation order was already triggered, meaning
+   * that the linked task needs to be aborted.
+   * @returns boolean
+   */
+  var _proto2 = CancellationSignal.prototype;
+  _proto2.isCancelled = function isCancelled() {
+    return this._isCancelled;
   }
   /**
    * Registers a function that will be called when/if the current task is
@@ -36994,13 +37055,13 @@ var CancellationSignal = /*#__PURE__*/function () {
    * task succeeded or failed).
    * You don't need to call that function when cancellation has already been
    * performed.
-   */
-  var _proto2 = CancellationSignal.prototype;
+   */;
   _proto2.register = function register(fn) {
     var _this3 = this;
-    if (this.isCancelled) {
-      (0,_assert__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z)(this.cancellationError !== null);
+    if (this._isCancelled) {
+      (0,_assert__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .Z)(this.cancellationError !== null);
       fn(this.cancellationError);
+      return _noop__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z;
     }
     this._listeners.push(fn);
     return function () {
@@ -37016,13 +37077,9 @@ var CancellationSignal = /*#__PURE__*/function () {
    * @param {Function} fn
    */;
   _proto2.deregister = function deregister(fn) {
-    if (this.isCancelled) {
-      return;
-    }
-    for (var i = 0; i < this._listeners.length; i++) {
+    for (var i = this._listeners.length - 1; i >= 0; i--) {
       if (this._listeners[i] === fn) {
         this._listeners.splice(i, 1);
-        return;
       }
     }
   };
@@ -37034,25 +37091,25 @@ var CancellationSignal = /*#__PURE__*/function () {
  * @extends Error
  */
 var CancellationError = /*#__PURE__*/function (_Error) {
-  (0,_babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .Z)(CancellationError, _Error);
+  (0,_babel_runtime_helpers_inheritsLoose__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .Z)(CancellationError, _Error);
   function CancellationError() {
     var _this4;
     _this4 = _Error.call(this) || this;
     // @see https://stackoverflow.com/questions/41102060/typescript-extending-error-class
-    Object.setPrototypeOf((0,_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z)(_this4), CancellationError.prototype);
+    Object.setPrototypeOf((0,_babel_runtime_helpers_assertThisInitialized__WEBPACK_IMPORTED_MODULE_4__/* ["default"] */ .Z)(_this4), CancellationError.prototype);
     _this4.name = "CancellationError";
     _this4.message = "This task was cancelled.";
     return _this4;
   }
   return CancellationError;
-}( /*#__PURE__*/(0,_babel_runtime_helpers_wrapNativeSuper__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .Z)(Error));
+}( /*#__PURE__*/(0,_babel_runtime_helpers_wrapNativeSuper__WEBPACK_IMPORTED_MODULE_5__/* ["default"] */ .Z)(Error));
 /**
  * Helper function allowing communication between a `TaskCanceller` and a
  * `CancellationSignal`.
  * @returns {Array.<Function>}
  */
 function createCancellationFunctions() {
-  var listener = _noop__WEBPACK_IMPORTED_MODULE_4__/* ["default"] */ .Z;
+  var listener = _noop__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z;
   return [function trigger(error) {
     listener(error);
   }, function register(newListener) {
@@ -39714,9 +39771,8 @@ function getEstimateReference(_ref, stopAllEstimates) {
    * This TaskCanceller is used both for restarting estimates with a new
    * configuration and to cancel them altogether.
    */
-  var currentEstimatesCanceller = new task_canceller/* default */.ZP({
-    cancelOn: stopAllEstimates
-  });
+  var currentEstimatesCanceller = new task_canceller/* default */.ZP();
+  currentEstimatesCanceller.linkToSignal(stopAllEstimates);
   // Create `ISharedReference` on which estimates will be emitted.
   var estimateRef = createEstimateReference(manualBitrate.getValue(), representationsRef.getValue(), currentEstimatesCanceller.signal);
   manualBitrate.onUpdate(restartEstimatesProductionFromCurrentConditions, {
@@ -39942,9 +39998,8 @@ function getEstimateReference(_ref, stopAllEstimates) {
     var manualBitrateVal = manualBitrate.getValue();
     var representations = representationsRef.getValue();
     currentEstimatesCanceller.cancel();
-    currentEstimatesCanceller = new task_canceller/* default */.ZP({
-      cancelOn: stopAllEstimates
-    });
+    currentEstimatesCanceller = new task_canceller/* default */.ZP();
+    currentEstimatesCanceller.linkToSignal(stopAllEstimates);
     var newRef = createEstimateReference(manualBitrateVal, representations, currentEstimatesCanceller.signal);
     newRef.onUpdate(function onNewEstimate(newEstimate) {
       estimateRef.setValue(newEstimate);
@@ -40302,27 +40357,34 @@ function _scheduleRequestWithCdns() {
               if (blockedFor <= 0) {
                 return requestCdn(nextWantedCdn);
               }
-              var canceller = new task_canceller/* default */.ZP({
-                cancelOn: cancellationSignal
-              });
               return new Promise(function (res, rej) {
+                var canceller = new task_canceller/* default */.ZP();
+                var unlinkCanceller = canceller.linkToSignal(cancellationSignal);
                 /* eslint-disable-next-line @typescript-eslint/no-misused-promises */
                 cdnPrioritizer === null || cdnPrioritizer === void 0 ? void 0 : cdnPrioritizer.addEventListener("priorityChange", function () {
                   var updatedPrioritaryCdn = getCdnToRequest();
-                  if (cancellationSignal.isCancelled) {
+                  if (cancellationSignal.isCancelled()) {
                     throw cancellationSignal.cancellationError;
                   }
                   if (updatedPrioritaryCdn === undefined) {
-                    return rej(prevRequestError);
+                    return reject(prevRequestError);
                   }
                   if (updatedPrioritaryCdn !== nextWantedCdn) {
                     canceller.cancel();
-                    waitPotentialBackoffAndRequest(updatedPrioritaryCdn, prevRequestError).then(res, rej);
+                    waitPotentialBackoffAndRequest(updatedPrioritaryCdn, prevRequestError).then(resolve, reject);
                   }
                 }, canceller.signal);
                 (0,cancellable_sleep/* default */.Z)(blockedFor, canceller.signal).then(function () {
-                  return requestCdn(nextWantedCdn).then(res, rej);
+                  return requestCdn(nextWantedCdn).then(resolve, reject);
                 }, noop/* default */.Z);
+                function resolve(val) {
+                  unlinkCanceller();
+                  res(val);
+                }
+                function reject(err) {
+                  unlinkCanceller();
+                  rej(err);
+                }
               });
             };
             _retryWithNextCdn = function _retryWithNextCdn3() {
@@ -40333,7 +40395,7 @@ function _scheduleRequestWithCdns() {
                     switch (_context2.prev = _context2.next) {
                       case 0:
                         nextCdn = getCdnToRequest();
-                        if (!cancellationSignal.isCancelled) {
+                        if (!cancellationSignal.isCancelled()) {
                           _context2.next = 3;
                           break;
                         }
@@ -40346,7 +40408,7 @@ function _scheduleRequestWithCdns() {
                         throw prevRequestError;
                       case 5:
                         onRetry(prevRequestError);
-                        if (!cancellationSignal.isCancelled) {
+                        if (!cancellationSignal.isCancelled()) {
                           _context2.next = 8;
                           break;
                         }
@@ -40596,7 +40658,7 @@ var ManifestFetcher = /*#__PURE__*/function (_EventEmitter) {
     }
     manifestProm.then(function (val) {
       _this2.trigger("manifestReady", val.manifest);
-      if (!_this2._canceller.isUsed) {
+      if (!_this2._canceller.isUsed()) {
         _this2._recursivelyRefreshManifest(val.manifest, val);
       }
     })["catch"](function (err) {
@@ -40751,7 +40813,7 @@ var ManifestFetcher = /*#__PURE__*/function (_EventEmitter) {
               onWarnings = function _onWarnings(warnings) {
                 for (var _iterator = manifest_fetcher_createForOfIteratorHelperLoose(warnings), _step; !(_step = _iterator()).done;) {
                   var warning = _step.value;
-                  if (cancelSignal.isCancelled) {
+                  if (cancelSignal.isCancelled()) {
                     return;
                   }
                   var _formattedError = (0,format_error/* default */.Z)(warning, {
@@ -40907,9 +40969,8 @@ var ManifestFetcher = /*#__PURE__*/function (_EventEmitter) {
      * be effectively considered.
      * `nextRefreshCanceller` will allow to cancel every other when one is triggered.
      */
-    var nextRefreshCanceller = new task_canceller/* default */.ZP({
-      cancelOn: this._canceller.signal
-    });
+    var nextRefreshCanceller = new task_canceller/* default */.ZP();
+    nextRefreshCanceller.linkToSignal(this._canceller.signal);
     /* Function to manually schedule a Manifest refresh */
     this.scheduleManualRefresh = function (settings) {
       var enablePartialRefresh = settings.enablePartialRefresh,
@@ -41086,7 +41147,7 @@ var ManifestFetcher = /*#__PURE__*/function (_EventEmitter) {
     });
   };
   _proto._onFatalError = function _onFatalError(err) {
-    if (this._canceller.isUsed) {
+    if (this._canceller.isUsed()) {
       return;
     }
     this.trigger("error", err);
@@ -41490,7 +41551,7 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, cdnPrioritiz
    */
   return /*#__PURE__*/function () {
     var _fetchSegment = (0,asyncToGenerator/* default */.Z)( /*#__PURE__*/regenerator_default().mark(function _callee(content, fetcherCallbacks, cancellationSignal) {
-      var _a, _b, segmentIdString, requestId, requestInfo, parsedChunks, segmentDurationAcc, metricsSent, loaderCallbacks, cached, res, loadedData, callLoaderWithUrl, generateParserFunction, onRetry, sendNetworkMetricsIfAvailable;
+      var _a, _b, _c, segmentIdString, requestId, requestInfo, parsedChunks, segmentDurationAcc, metricsSent, loaderCallbacks, cached, res, loadedData, onCancellation, callLoaderWithUrl, generateParserFunction, onRetry, sendNetworkMetricsIfAvailable;
       return regenerator_default().wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -41541,6 +41602,18 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, cdnPrioritiz
               };
               callLoaderWithUrl = function _callLoaderWithUrl(cdnMetadata) {
                 return loadSegment(cdnMetadata, content, requestOptions, cancellationSignal, loaderCallbacks);
+              };
+              onCancellation = function _onCancellation() {
+                var _a;
+                if (requestInfo !== undefined) {
+                  return; // Request already terminated
+                }
+
+                log/* default.debug */.Z.debug("SF: Segment request cancelled", segmentIdString);
+                requestInfo = null;
+                (_a = lifecycleCallbacks.onRequestEnd) === null || _a === void 0 ? void 0 : _a.call(lifecycleCallbacks, {
+                  id: requestId
+                });
               };
               // used by logs
               segmentIdString = (0,utils/* getLoggableSegmentId */.K)(content);
@@ -41605,37 +41678,26 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, cdnPrioritiz
               }; // Retrieve from cache if it exists
               cached = cache !== undefined ? cache.get(content) : null;
               if (!(cached !== null)) {
-                _context.next = 15;
+                _context.next = 16;
                 break;
               }
               log/* default.debug */.Z.debug("SF: Found wanted segment in cache", segmentIdString);
               fetcherCallbacks.onChunk(generateParserFunction(cached, false));
               return _context.abrupt("return", Promise.resolve());
-            case 15:
+            case 16:
               log/* default.debug */.Z.debug("SF: Beginning request", segmentIdString);
               (_a = lifecycleCallbacks.onRequestBegin) === null || _a === void 0 ? void 0 : _a.call(lifecycleCallbacks, {
                 requestTimestamp: performance.now(),
                 id: requestId,
                 content: content
               });
-              cancellationSignal.register(function () {
-                var _a;
-                if (requestInfo !== undefined) {
-                  return; // Request already terminated
-                }
-
-                log/* default.debug */.Z.debug("SF: Segment request cancelled", segmentIdString);
-                requestInfo = null;
-                (_a = lifecycleCallbacks.onRequestEnd) === null || _a === void 0 ? void 0 : _a.call(lifecycleCallbacks, {
-                  id: requestId
-                });
-              });
-              _context.prev = 18;
-              _context.next = 21;
+              cancellationSignal.register(onCancellation);
+              _context.prev = 19;
+              _context.next = 22;
               return scheduleRequestWithCdns(content.representation.cdnMetadata, cdnPrioritizer, callLoaderWithUrl, (0,object_assign/* default */.Z)({
                 onRetry: onRetry
               }, options), cancellationSignal);
-            case 21:
+            case 22:
               res = _context.sent;
               if (res.resultType === "segment-loaded") {
                 loadedData = res.resultData.responseData;
@@ -41654,7 +41716,7 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, cdnPrioritiz
               } else {
                 requestInfo = null;
               }
-              if (!cancellationSignal.isCancelled) {
+              if (!cancellationSignal.isCancelled()) {
                 // The current task could have been canceled as a result of one
                 // of the previous callbacks call. In that case, we don't want to send
                 // a "requestEnd" again as it has already been sent on cancellation.
@@ -41662,27 +41724,32 @@ function segment_fetcher_createSegmentFetcher(bufferType, pipeline, cdnPrioritiz
                   id: requestId
                 });
               }
-              _context.next = 37;
+              cancellationSignal.deregister(onCancellation);
+              _context.next = 41;
               break;
-            case 29:
-              _context.prev = 29;
-              _context.t0 = _context["catch"](18);
+            case 31:
+              _context.prev = 31;
+              _context.t0 = _context["catch"](19);
+              cancellationSignal.deregister(onCancellation);
               requestInfo = null;
               if (!(_context.t0 instanceof task_canceller/* CancellationError */.FU)) {
-                _context.next = 35;
+                _context.next = 38;
                 break;
               }
               log/* default.debug */.Z.debug("SF: Segment request aborted", segmentIdString);
               throw _context.t0;
-            case 35:
+            case 38:
               log/* default.debug */.Z.debug("SF: Segment request failed", segmentIdString);
+              (_c = lifecycleCallbacks.onRequestEnd) === null || _c === void 0 ? void 0 : _c.call(lifecycleCallbacks, {
+                id: requestId
+              });
               throw errorSelector(_context.t0);
-            case 37:
+            case 41:
             case "end":
               return _context.stop();
           }
         }
-      }, _callee, null, [[18, 29]]);
+      }, _callee, null, [[19, 31]]);
     }));
     function fetchSegment(_x, _x2, _x3) {
       return _fetchSegment.apply(this, arguments);
@@ -41765,20 +41832,33 @@ var TaskPrioritizer = /*#__PURE__*/function () {
           unregisterCancelSignal();
           return;
         }
-        var interrupter = new task_canceller/* default */.ZP({
-          cancelOn: cancelSignal
-        });
+        var finishTask = function finishTask() {
+          unlinkInterrupter();
+          unregisterCancelSignal();
+          _this._endTask(newTask);
+        };
+        var onResolve = function onResolve(value) {
+          callbacks.beforeEnded();
+          finishTask();
+          resolve(value);
+        };
+        var onReject = function onReject(err) {
+          finishTask();
+          reject(err);
+        };
+        var interrupter = new task_canceller/* default */.ZP();
+        var unlinkInterrupter = interrupter.linkToSignal(cancelSignal);
         newTask.interrupter = interrupter;
         interrupter.signal.register(function () {
           newTask.interrupter = null;
-          if (!cancelSignal.isCancelled) {
+          if (!cancelSignal.isCancelled()) {
             callbacks.beforeInterrupted();
           }
         });
         _this._minPendingPriority = _this._minPendingPriority === null ? newTask.priority : Math.min(_this._minPendingPriority, newTask.priority);
         _this._pendingTasks.push(newTask);
         newTask.taskFn(interrupter.signal).then(onResolve)["catch"](function (err) {
-          if (!cancelSignal.isCancelled && interrupter.isUsed && err instanceof task_canceller/* CancellationError */.FU) {
+          if (!cancelSignal.isCancelled() && interrupter.isUsed() && err instanceof task_canceller/* CancellationError */.FU) {
             return;
           }
           onReject(err);
@@ -41788,19 +41868,6 @@ var TaskPrioritizer = /*#__PURE__*/function () {
         _this._endTask(newTask);
         reject(cancellationError);
       });
-      var finishTask = function finishTask() {
-        unregisterCancelSignal();
-        _this._endTask(newTask);
-      };
-      var onResolve = function onResolve(value) {
-        callbacks.beforeEnded();
-        finishTask();
-        resolve(value);
-      };
-      var onReject = function onReject(err) {
-        finishTask();
-        reject(err);
-      };
       newTask = {
         hasEnded: false,
         priority: priority,
@@ -42394,17 +42461,12 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
    */;
   _proto._addToQueue = function _addToQueue(operation, cancellationSignal) {
     var _this2 = this;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (_resolve, _reject) {
       if (cancellationSignal.cancellationError !== null) {
-        return reject(cancellationSignal.cancellationError);
+        return _reject(cancellationSignal.cancellationError);
       }
       var shouldRestartQueue = _this2._queue.length === 0 && _this2._pendingTask === null;
-      var queueItem = (0,object_assign/* default */.Z)({
-        resolve: resolve,
-        reject: reject
-      }, operation);
-      _this2._queue.push(queueItem);
-      cancellationSignal.register(function (error) {
+      var onCancellation = function onCancellation(error) {
         // Remove the corresponding element from the AudioVideoSegmentBuffer's
         // queue.
         // If the operation was a pending task, it should still continue to not
@@ -42415,8 +42477,20 @@ var AudioVideoSegmentBuffer = /*#__PURE__*/function (_SegmentBuffer) {
         }
         queueItem.resolve = noop/* default */.Z;
         queueItem.reject = noop/* default */.Z;
-        reject(error);
-      });
+        _reject(error);
+      };
+      var queueItem = (0,object_assign/* default */.Z)({
+        resolve: function resolve() {
+          cancellationSignal.deregister(onCancellation);
+          _resolve();
+        },
+        reject: function reject(err) {
+          cancellationSignal.deregister(onCancellation);
+          _reject(err);
+        }
+      }, operation);
+      _this2._queue.push(queueItem);
+      cancellationSignal.register(onCancellation);
       if (shouldRestartQueue) {
         _this2._flush();
       }
@@ -42784,19 +42858,27 @@ var SegmentBuffersStore = /*#__PURE__*/function () {
       return Promise.resolve();
     }
     return new Promise(function (res, rej) {
-      var onAddedOrDisabled = function onAddedOrDisabled() {
-        if (_this._areNativeBuffersUsable()) {
-          res();
-        }
-      };
-      _this._onNativeBufferAddedOrDisabled.push(onAddedOrDisabled);
-      cancelWaitSignal.register(function (error) {
+      /* eslint-disable-next-line prefer-const */
+      var onAddedOrDisabled;
+      var removeCallback = function removeCallback() {
         var indexOf = _this._onNativeBufferAddedOrDisabled.indexOf(onAddedOrDisabled);
         if (indexOf >= 0) {
           _this._onNativeBufferAddedOrDisabled.splice(indexOf, 1);
         }
+      };
+      var onCancellation = function onCancellation(error) {
+        removeCallback();
         rej(error);
-      });
+      };
+      onAddedOrDisabled = function onAddedOrDisabled() {
+        if (_this._areNativeBuffersUsable()) {
+          removeCallback();
+          cancelWaitSignal.deregister(onCancellation);
+          res();
+        }
+      };
+      _this._onNativeBufferAddedOrDisabled.push(onAddedOrDisabled);
+      cancelWaitSignal.register(onCancellation);
     });
   }
   /**
@@ -43444,6 +43526,7 @@ function _clearBuffer() {
 
 
 
+
 /**
  * Class scheduling segment downloads for a single Representation.
  *
@@ -43583,6 +43666,7 @@ var DownloadingQueue = /*#__PURE__*/function (_EventEmitter) {
   _proto.stop = function stop() {
     var _a;
     (_a = this._currentCanceller) === null || _a === void 0 ? void 0 : _a.cancel();
+    this._currentCanceller = null;
   }
   /**
    * Internal logic performing media segment requests.
@@ -43596,8 +43680,7 @@ var DownloadingQueue = /*#__PURE__*/function (_EventEmitter) {
       segmentQueue = _this$_downloadQueue$.segmentQueue;
     var currentNeededSegment = segmentQueue[0];
     var recursivelyRequestSegments = function recursivelyRequestSegments(startingSegment) {
-      var _a;
-      if (_this3._currentCanceller !== null && _this3._currentCanceller.isUsed) {
+      if (_this3._currentCanceller !== null && _this3._currentCanceller.isUsed()) {
         _this3._mediaSegmentRequest = null;
         return;
       }
@@ -43606,9 +43689,8 @@ var DownloadingQueue = /*#__PURE__*/function (_EventEmitter) {
         _this3.trigger("emptyQueue", null);
         return;
       }
-      var canceller = new task_canceller/* default */.ZP({
-        cancelOn: (_a = _this3._currentCanceller) === null || _a === void 0 ? void 0 : _a.signal
-      });
+      var canceller = new task_canceller/* default */.ZP();
+      var unlinkCanceller = _this3._currentCanceller === null ? noop/* default */.Z : canceller.linkToSignal(_this3._currentCanceller.signal);
       var segment = startingSegment.segment,
         priority = startingSegment.priority;
       var context = (0,object_assign/* default */.Z)({
@@ -43713,6 +43795,7 @@ var DownloadingQueue = /*#__PURE__*/function (_EventEmitter) {
          * requests are scheduled. It is used to schedule the next segment.
          */
         beforeEnded: function beforeEnded() {
+          unlinkCanceller();
           _this3._mediaSegmentRequest = null;
           if (isWaitingOnInitSegment) {
             _this3._initSegmentInfoRef.waitUntilDefined(continueToNextSegment, {
@@ -43724,6 +43807,7 @@ var DownloadingQueue = /*#__PURE__*/function (_EventEmitter) {
         }
       }, canceller.signal);
       request["catch"](function (error) {
+        unlinkCanceller();
         if (!isComplete) {
           isComplete = true;
           _this3.stop();
@@ -43745,8 +43829,7 @@ var DownloadingQueue = /*#__PURE__*/function (_EventEmitter) {
    */;
   _proto._restartInitSegmentDownloadingQueue = function _restartInitSegmentDownloadingQueue(queuedInitSegment) {
     var _this4 = this;
-    var _a;
-    if (this._currentCanceller !== null && this._currentCanceller.isUsed) {
+    if (this._currentCanceller !== null && this._currentCanceller.isUsed()) {
       return;
     }
     if (this._initSegmentRequest !== null) {
@@ -43755,9 +43838,8 @@ var DownloadingQueue = /*#__PURE__*/function (_EventEmitter) {
     if (queuedInitSegment === null) {
       return;
     }
-    var canceller = new task_canceller/* default */.ZP({
-      cancelOn: (_a = this._currentCanceller) === null || _a === void 0 ? void 0 : _a.signal
-    });
+    var canceller = new task_canceller/* default */.ZP();
+    var unlinkCanceller = this._currentCanceller === null ? noop/* default */.Z : canceller.linkToSignal(this._currentCanceller.signal);
     var segment = queuedInitSegment.segment,
       priority = queuedInitSegment.priority;
     var context = (0,object_assign/* default */.Z)({
@@ -43779,6 +43861,7 @@ var DownloadingQueue = /*#__PURE__*/function (_EventEmitter) {
         log/* default.info */.Z.info("Stream: init segment request interrupted temporarly.", segment.id);
       },
       beforeEnded: function beforeEnded() {
+        unlinkCanceller();
         _this4._initSegmentRequest = null;
         isComplete = true;
       },
@@ -43798,6 +43881,7 @@ var DownloadingQueue = /*#__PURE__*/function (_EventEmitter) {
       }
     }, canceller.signal);
     request["catch"](function (error) {
+      unlinkCanceller();
       if (!isComplete) {
         isComplete = true;
         _this4.stop();
@@ -44924,7 +45008,7 @@ function _appendSegmentToBuffer() {
           case 5:
             _context.prev = 5;
             _context.t0 = _context["catch"](0);
-            if (!(cancellationSignal.isCancelled && _context.t0 instanceof task_canceller/* CancellationError */.FU)) {
+            if (!(cancellationSignal.isCancelled() && _context.t0 instanceof task_canceller/* CancellationError */.FU)) {
               _context.next = 11;
               break;
             }
@@ -45225,17 +45309,15 @@ function RepresentationStream(_ref, callbacks, parentCancelSignal) {
     fastSwitchThreshold = options.fastSwitchThreshold;
   var bufferType = adaptation.type;
   /** `TaskCanceller` stopping ALL operations performed by the `RepresentationStream` */
-  var globalCanceller = new task_canceller/* default */.ZP({
-    cancelOn: parentCancelSignal
-  });
+  var globalCanceller = new task_canceller/* default */.ZP();
+  globalCanceller.linkToSignal(parentCancelSignal);
   /**
    * `TaskCanceller` allowing to only stop segment loading and checking operations.
    * This allows to stop only tasks linked to network resource usage, which is
    * often a limited resource, while still letting buffer operations to finish.
    */
-  var segmentsLoadingCanceller = new task_canceller/* default */.ZP({
-    cancelOn: globalCanceller.signal
-  });
+  var segmentsLoadingCanceller = new task_canceller/* default */.ZP();
+  segmentsLoadingCanceller.linkToSignal(globalCanceller.signal);
   /** Saved initialization segment state for this representation. */
   var initSegmentState = {
     segment: representation.index.getInitSegment(),
@@ -45275,7 +45357,7 @@ function RepresentationStream(_ref, callbacks, parentCancelSignal) {
           content: content
         }, d);
       }));
-      if (globalCanceller.isUsed) {
+      if (globalCanceller.isUsed()) {
         return; // previous callback has stopped everything by side-effect
       }
     }
@@ -45283,7 +45365,7 @@ function RepresentationStream(_ref, callbacks, parentCancelSignal) {
   /** Will load every segments in `lastSegmentQueue` */
   var downloadingQueue = new DownloadingQueue(content, lastSegmentQueue, segmentFetcher, hasInitSegment);
   downloadingQueue.addEventListener("error", function (err) {
-    if (segmentsLoadingCanceller.signal.isCancelled) {
+    if (segmentsLoadingCanceller.signal.isCancelled()) {
       return; // ignore post requests-cancellation loading-related errors,
     }
 
@@ -45295,7 +45377,7 @@ function RepresentationStream(_ref, callbacks, parentCancelSignal) {
   downloadingQueue.addEventListener("emptyQueue", checkStatus);
   downloadingQueue.addEventListener("requestRetry", function (payload) {
     callbacks.warning(payload.error);
-    if (segmentsLoadingCanceller.signal.isCancelled) {
+    if (segmentsLoadingCanceller.signal.isCancelled()) {
       return; // If the previous callback led to loading operations being stopped, skip
     }
 
@@ -45342,7 +45424,7 @@ function RepresentationStream(_ref, callbacks, parentCancelSignal) {
    */
   function checkStatus() {
     var _a, _b;
-    if (segmentsLoadingCanceller.isUsed) {
+    if (segmentsLoadingCanceller.isUsed()) {
       return; // Stop all buffer status checking if load operations are stopped
     }
 
@@ -45418,7 +45500,7 @@ function RepresentationStream(_ref, callbacks, parentCancelSignal) {
       hasFinishedLoading: status.hasFinishedLoading,
       neededSegments: status.neededSegments
     });
-    if (segmentsLoadingCanceller.signal.isCancelled) {
+    if (segmentsLoadingCanceller.signal.isCancelled()) {
       return; // previous callback has stopped loading operations by side-effect
     }
 
@@ -45440,7 +45522,7 @@ function RepresentationStream(_ref, callbacks, parentCancelSignal) {
    * @param {Object} evt
    */
   function onParsedChunk(evt) {
-    if (globalCanceller.isUsed) {
+    if (globalCanceller.isUsed()) {
       // We should not do anything with segments if the `RepresentationStream`
       // is not running anymore.
       return;
@@ -45489,7 +45571,7 @@ function RepresentationStream(_ref, callbacks, parentCancelSignal) {
               content: content
             }, p);
           }));
-          if (globalCanceller.isUsed) {
+          if (globalCanceller.isUsed()) {
             return; // previous callback has stopped everything by side-effect
           }
         }
@@ -45497,14 +45579,14 @@ function RepresentationStream(_ref, callbacks, parentCancelSignal) {
 
       if (needsManifestRefresh === true) {
         callbacks.needsManifestRefresh();
-        if (globalCanceller.isUsed) {
+        if (globalCanceller.isUsed()) {
           return; // previous callback has stopped everything by side-effect
         }
       }
 
       if (inbandEvents !== undefined && inbandEvents.length > 0) {
         callbacks.inbandEvent(inbandEvents);
-        if (globalCanceller.isUsed) {
+        if (globalCanceller.isUsed()) {
           return; // previous callback has stopped everything by side-effect
         }
       }
@@ -45531,7 +45613,7 @@ function RepresentationStream(_ref, callbacks, parentCancelSignal) {
    * @param {*} err
    */
   function onFatalBufferError(err) {
-    if (globalCanceller.isUsed && err instanceof task_canceller/* CancellationError */.FU) {
+    if (globalCanceller.isUsed() && err instanceof task_canceller/* CancellationError */.FU) {
       // The error is linked to cancellation AND we explicitely cancelled buffer
       // operations.
       // We can thus ignore it, it is very unlikely to lead to true buffer issues.
@@ -45707,9 +45789,8 @@ function AdaptationStream(_ref, callbacks, parentCancelSignal) {
     period = content.period,
     adaptation = content.adaptation;
   /** Allows to cancel everything the `AdaptationStream` is doing. */
-  var adapStreamCanceller = new task_canceller/* default */.ZP({
-    cancelOn: parentCancelSignal
-  });
+  var adapStreamCanceller = new task_canceller/* default */.ZP();
+  adapStreamCanceller.linkToSignal(parentCancelSignal);
   /**
    * The buffer goal ratio base itself on the value given by `wantedBufferAhead`
    * to determine a more dynamic buffer goal for a given Representation.
@@ -45777,9 +45858,8 @@ function AdaptationStream(_ref, callbacks, parentCancelSignal) {
      * terminating and as such the next one might be immediately created
      * recursively.
      */
-    var repStreamTerminatingCanceller = new task_canceller/* default */.ZP({
-      cancelOn: adapStreamCanceller.signal
-    });
+    var repStreamTerminatingCanceller = new task_canceller/* default */.ZP();
+    repStreamTerminatingCanceller.linkToSignal(adapStreamCanceller.signal);
     var _estimateRef$getValue = estimateRef.getValue(),
       representation = _estimateRef$getValue.representation,
       manual = _estimateRef$getValue.manual;
@@ -45871,12 +45951,12 @@ function AdaptationStream(_ref, callbacks, parentCancelSignal) {
       representation: representation
     };
     currentRepresentation.setValue(representation);
-    if (adapStreamCanceller.isUsed) {
+    if (adapStreamCanceller.isUsed()) {
       return; // previous callback has stopped everything by side-effect
     }
 
     callbacks.representationChange(repInfo);
-    if (adapStreamCanceller.isUsed) {
+    if (adapStreamCanceller.isUsed()) {
       return; // previous callback has stopped everything by side-effect
     }
 
@@ -45893,13 +45973,13 @@ function AdaptationStream(_ref, callbacks, parentCancelSignal) {
       },
       addedSegment: function addedSegment(segmentInfo) {
         abrCallbacks.addedSegment(segmentInfo);
-        if (adapStreamCanceller.isUsed) {
+        if (adapStreamCanceller.isUsed()) {
           return;
         }
         callbacks.addedSegment(segmentInfo);
       },
       terminating: function terminating() {
-        if (repStreamTerminatingCanceller.isUsed) {
+        if (repStreamTerminatingCanceller.isUsed()) {
           return; // Already handled
         }
 
@@ -45922,9 +46002,8 @@ function AdaptationStream(_ref, callbacks, parentCancelSignal) {
      * `TaskCanceller` triggered when the `RepresentationStream` calls its
      * `terminating` callback.
      */
-    var terminatingRepStreamCanceller = new task_canceller/* default */.ZP({
-      cancelOn: adapStreamCanceller.signal
-    });
+    var terminatingRepStreamCanceller = new task_canceller/* default */.ZP();
+    terminatingRepStreamCanceller.linkToSignal(adapStreamCanceller.signal);
     var bufferGoal = (0,reference/* createMappedReference */.lR)(wantedBufferAhead, function (prev) {
       return prev * getBufferGoalRatio(representation);
     }, terminatingRepStreamCanceller.signal);
@@ -46381,7 +46460,7 @@ function PeriodStream(_ref, callbacks, parentCancelSignal) {
     period: period,
     adaptationRef: adaptationRef
   });
-  if (parentCancelSignal.isCancelled) {
+  if (parentCancelSignal.isCancelled()) {
     return;
   }
   var currentStreamCanceller;
@@ -46400,76 +46479,75 @@ function PeriodStream(_ref, callbacks, parentCancelSignal) {
               }
               return _context.abrupt("return");
             case 2:
-              streamCanceller = new task_canceller/* default */.ZP({
-                cancelOn: parentCancelSignal
-              });
+              streamCanceller = new task_canceller/* default */.ZP();
+              streamCanceller.linkToSignal(parentCancelSignal);
               currentStreamCanceller === null || currentStreamCanceller === void 0 ? void 0 : currentStreamCanceller.cancel(); // Cancel oreviously created stream if one
               currentStreamCanceller = streamCanceller;
               if (!(adaptation === null)) {
-                _context.next = 33;
+                _context.next = 34;
                 break;
               }
               // Current type is disabled for that Period
               log/* default.info */.Z.info("Stream: Set no " + bufferType + " Adaptation. P:", period.start);
               segmentBufferStatus = segmentBuffersStore.getStatus(bufferType);
               if (!(segmentBufferStatus.type === "initialized")) {
-                _context.next = 25;
+                _context.next = 26;
                 break;
               }
               log/* default.info */.Z.info("Stream: Clearing previous " + bufferType + " SegmentBuffer");
               if (!segment_buffers.isNative(bufferType)) {
-                _context.next = 14;
+                _context.next = 15;
                 break;
               }
               return _context.abrupt("return", askForMediaSourceReload(0, streamCanceller.signal));
-            case 14:
+            case 15:
               periodEnd = (_a = period.end) !== null && _a !== void 0 ? _a : Infinity;
               if (!(period.start > periodEnd)) {
-                _context.next = 19;
+                _context.next = 20;
                 break;
               }
               log/* default.warn */.Z.warn("Stream: Can't free buffer: period's start is after its end");
-              _context.next = 23;
+              _context.next = 24;
               break;
-            case 19:
-              _context.next = 21;
+            case 20:
+              _context.next = 22;
               return segmentBufferStatus.value.removeBuffer(period.start, periodEnd, streamCanceller.signal);
-            case 21:
-              if (!streamCanceller.isUsed) {
-                _context.next = 23;
+            case 22:
+              if (!streamCanceller.isUsed()) {
+                _context.next = 24;
                 break;
               }
               return _context.abrupt("return");
-            case 23:
-              _context.next = 29;
+            case 24:
+              _context.next = 30;
               break;
-            case 25:
+            case 26:
               if (!(segmentBufferStatus.type === "uninitialized")) {
-                _context.next = 29;
+                _context.next = 30;
                 break;
               }
               segmentBuffersStore.disableSegmentBuffer(bufferType);
-              if (!streamCanceller.isUsed) {
-                _context.next = 29;
+              if (!streamCanceller.isUsed()) {
+                _context.next = 30;
                 break;
               }
               return _context.abrupt("return");
-            case 29:
+            case 30:
               callbacks.adaptationChange({
                 type: bufferType,
                 adaptation: null,
                 period: period
               });
-              if (!streamCanceller.isUsed) {
-                _context.next = 32;
+              if (!streamCanceller.isUsed()) {
+                _context.next = 33;
                 break;
               }
               return _context.abrupt("return");
-            case 32:
+            case 33:
               return _context.abrupt("return", createEmptyAdaptationStream(playbackObserver, wantedBufferAhead, bufferType, {
                 period: period
               }, callbacks, streamCanceller.signal));
-            case 33:
+            case 34:
               /**
                * If this is not the first Adaptation choice, we might want to apply a
                * delta to the current position so we can re-play back some media in the
@@ -46481,23 +46559,23 @@ function PeriodStream(_ref, callbacks, parentCancelSignal) {
               relativePosAfterSwitch = isFirstAdaptationSwitch ? 0 : bufferType === "audio" ? DELTA_POSITION_AFTER_RELOAD.trackSwitch.audio : bufferType === "video" ? DELTA_POSITION_AFTER_RELOAD.trackSwitch.video : DELTA_POSITION_AFTER_RELOAD.trackSwitch.other;
               isFirstAdaptationSwitch = false;
               if (!(segment_buffers.isNative(bufferType) && segmentBuffersStore.getStatus(bufferType).type === "disabled")) {
-                _context.next = 38;
+                _context.next = 39;
                 break;
               }
               return _context.abrupt("return", askForMediaSourceReload(relativePosAfterSwitch, streamCanceller.signal));
-            case 38:
+            case 39:
               log/* default.info */.Z.info("Stream: Updating " + bufferType + " adaptation", "A: " + adaptation.id, "P: " + period.start);
               callbacks.adaptationChange({
                 type: bufferType,
                 adaptation: adaptation,
                 period: period
               });
-              if (!streamCanceller.isUsed) {
-                _context.next = 42;
+              if (!streamCanceller.isUsed()) {
+                _context.next = 43;
                 break;
               }
               return _context.abrupt("return");
-            case 42:
+            case 43:
               readyState = playbackObserver.getReadyState();
               segmentBuffer = createOrReuseSegmentBuffer(segmentBuffersStore, bufferType, adaptation, options);
               playbackInfos = {
@@ -46506,57 +46584,57 @@ function PeriodStream(_ref, callbacks, parentCancelSignal) {
               };
               strategy = getAdaptationSwitchStrategy(segmentBuffer, period, adaptation, playbackInfos, options);
               if (!(strategy.type === "needs-reload")) {
-                _context.next = 48;
+                _context.next = 49;
                 break;
               }
               return _context.abrupt("return", askForMediaSourceReload(relativePosAfterSwitch, streamCanceller.signal));
-            case 48:
-              _context.next = 50;
+            case 49:
+              _context.next = 51;
               return segmentBuffersStore.waitForUsableBuffers(streamCanceller.signal);
-            case 50:
-              if (!streamCanceller.isUsed) {
-                _context.next = 52;
+            case 51:
+              if (!streamCanceller.isUsed()) {
+                _context.next = 53;
                 break;
               }
               return _context.abrupt("return");
-            case 52:
+            case 53:
               if (!(strategy.type === "flush-buffer" || strategy.type === "clean-buffer")) {
-                _context.next = 66;
+                _context.next = 67;
                 break;
               }
               _iterator = period_stream_createForOfIteratorHelperLoose(strategy.value);
-            case 54:
+            case 55:
               if ((_step = _iterator()).done) {
-                _context.next = 62;
+                _context.next = 63;
                 break;
               }
               _step$value = _step.value, start = _step$value.start, end = _step$value.end;
-              _context.next = 58;
+              _context.next = 59;
               return segmentBuffer.removeBuffer(start, end, streamCanceller.signal);
-            case 58:
-              if (!streamCanceller.isUsed) {
-                _context.next = 60;
+            case 59:
+              if (!streamCanceller.isUsed()) {
+                _context.next = 61;
                 break;
               }
               return _context.abrupt("return");
-            case 60:
-              _context.next = 54;
+            case 61:
+              _context.next = 55;
               break;
-            case 62:
+            case 63:
               if (!(strategy.type === "flush-buffer")) {
-                _context.next = 66;
+                _context.next = 67;
                 break;
               }
               callbacks.needsBufferFlush();
-              if (!streamCanceller.isUsed) {
-                _context.next = 66;
+              if (!streamCanceller.isUsed()) {
+                _context.next = 67;
                 break;
               }
               return _context.abrupt("return");
-            case 66:
+            case 67:
               garbageCollectors.get(segmentBuffer)(streamCanceller.signal);
               createAdaptationStream(adaptation, segmentBuffer, streamCanceller.signal);
-            case 68:
+            case 69:
             case "end":
               return _context.stop();
           }
@@ -46609,7 +46687,7 @@ function PeriodStream(_ref, callbacks, parentCancelSignal) {
           defaultReason: "Unknown `AdaptationStream` error"
         });
         callbacks.warning(formattedError);
-        if (cancelSignal.isCancelled) {
+        if (cancelSignal.isCancelled()) {
           return; // Previous callback cancelled the Stream by side-effect
         }
 
@@ -46985,9 +47063,8 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
      */
     var enableOutOfBoundsCheck = false;
     /** Cancels currently created `PeriodStream`s. */
-    var currentCanceller = new task_canceller/* default */.ZP({
-      cancelOn: orchestratorCancelSignal
-    });
+    var currentCanceller = new task_canceller/* default */.ZP();
+    currentCanceller.linkToSignal(orchestratorCancelSignal);
     // Restart the current Stream when the wanted time is in another period
     // than the ones already considered
     playbackObserver.listen(function (_ref) {
@@ -47008,9 +47085,8 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
         });
       }
       currentCanceller.cancel();
-      currentCanceller = new task_canceller/* default */.ZP({
-        cancelOn: orchestratorCancelSignal
-      });
+      currentCanceller = new task_canceller/* default */.ZP();
+      currentCanceller.linkToSignal(orchestratorCancelSignal);
       var nextPeriod = (_b = manifest.getPeriodForTime(time)) !== null && _b !== void 0 ? _b : manifest.getNextPeriod(time);
       if (nextPeriod === undefined) {
         log/* default.warn */.Z.warn("Stream: The wanted position is not found in the Manifest.");
@@ -47141,34 +47217,33 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
                   });
                 }
                 currentCanceller.cancel();
-                currentCanceller = new task_canceller/* default */.ZP({
-                  cancelOn: orchestratorCancelSignal
-                });
+                currentCanceller = new task_canceller/* default */.ZP();
+                currentCanceller.linkToSignal(orchestratorCancelSignal);
                 /** Remove from the `SegmentBuffer` all the concerned time ranges. */
                 _i = 0, _arr = [].concat(undecipherableRanges, rangesToRemove);
-              case 15:
+              case 16:
                 if (!(_i < _arr.length)) {
-                  _context.next = 23;
+                  _context.next = 24;
                   break;
                 }
                 _arr$_i = _arr[_i], start = _arr$_i.start, end = _arr$_i.end;
                 if (!(start < end)) {
-                  _context.next = 20;
+                  _context.next = 21;
                   break;
                 }
-                _context.next = 20;
+                _context.next = 21;
                 return segmentBuffer.removeBuffer(start, end, orchestratorCancelSignal);
-              case 20:
+              case 21:
                 _i++;
-                _context.next = 15;
+                _context.next = 16;
                 break;
-              case 23:
+              case 24:
                 // Schedule micro task before checking the last playback observation
                 // to reduce the risk of race conditions where the next observation
                 // was going to be emitted synchronously.
                 next_tick_default()(function () {
                   var _a, _b;
-                  if (orchestratorCancelSignal.isCancelled) {
+                  if (orchestratorCancelSignal.isCancelled()) {
                     return;
                   }
                   var observation = playbackObserver.getReference().getValue();
@@ -47179,12 +47254,12 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
                       autoPlay: shouldAutoPlay,
                       duration: observation.duration
                     });
-                    if (orchestratorCancelSignal.isCancelled) {
+                    if (orchestratorCancelSignal.isCancelled()) {
                       return;
                     }
                   } else if (needsFlushingAfterClean(observation, rangesToRemove)) {
                     callbacks.needsBufferFlush();
-                    if (orchestratorCancelSignal.isCancelled) {
+                    if (orchestratorCancelSignal.isCancelled()) {
                       return;
                     }
                   }
@@ -47196,7 +47271,7 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
                   }
                   launchConsecutiveStreamsForPeriod(newInitialPeriod);
                 });
-              case 24:
+              case 25:
               case "end":
                 return _context.stop();
             }
@@ -47245,9 +47320,8 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
      */
     var nextStreamInfo = null;
     /** Emits when the `PeriodStream` linked to `basePeriod` should be destroyed. */
-    var currentStreamCanceller = new task_canceller/* default */.ZP({
-      cancelOn: cancelSignal
-    });
+    var currentStreamCanceller = new task_canceller/* default */.ZP();
+    currentStreamCanceller.linkToSignal(cancelSignal);
     // Stop current PeriodStream when the current position goes over the end of
     // that Period.
     playbackObserver.listen(function (_ref2, stopListeningObservations) {
@@ -47324,10 +47398,10 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
         });
         nextStreamInfo.canceller.cancel();
       }
+      var nextStreamCanceller = new task_canceller/* default */.ZP();
+      nextStreamCanceller.linkToSignal(cancelSignal);
       nextStreamInfo = {
-        canceller: new task_canceller/* default */.ZP({
-          cancelOn: cancelSignal
-        }),
+        canceller: nextStreamCanceller,
         period: nextPeriod
       };
       manageConsecutivePeriodStreams(bufferType, nextPeriod, consecutivePeriodStreamCb, nextStreamInfo.canceller.signal);
@@ -47467,7 +47541,7 @@ var ContentTimeBoundariesObserver = /*#__PURE__*/function (_EventEmitter) {
     });
     manifest.addEventListener("manifestUpdate", function () {
       _this.trigger("durationUpdate", getManifestDuration());
-      if (cancelSignal.isCancelled) {
+      if (cancelSignal.isCancelled()) {
         return;
       }
       _this._checkEndOfStream();
@@ -47506,7 +47580,7 @@ var ContentTimeBoundariesObserver = /*#__PURE__*/function (_EventEmitter) {
         }
       }
     }
-    if (this._canceller.isUsed) {
+    if (this._canceller.isUsed()) {
       return;
     }
     if (adaptation === null) {
@@ -47879,7 +47953,6 @@ var is_non_empty_string = __webpack_require__(6923);
 
 
 
-
 /**
  * Dispose of ressources taken by the MediaSource:
  *   - Clear the MediaSource' SourceBuffers
@@ -47961,21 +48034,12 @@ function createMediaSource(mediaElement, unlinkSignal) {
  */
 function openMediaSource(mediaElement, unlinkSignal) {
   return new Promise(function (resolve, reject) {
-    var hasResolved = false;
     var mediaSource = createMediaSource(mediaElement, unlinkSignal);
-    var eventListenerCanceller = new task_canceller/* default */.ZP({
-      cancelOn: unlinkSignal
-    });
     event_listeners/* onSourceOpen */.u_(mediaSource, function () {
-      eventListenerCanceller.cancel();
-      hasResolved = true;
+      unlinkSignal.deregister(reject);
       resolve(mediaSource);
-    }, eventListenerCanceller.signal);
-    unlinkSignal.register(function (error) {
-      if (!hasResolved) {
-        reject(error);
-      }
-    });
+    }, unlinkSignal);
+    unlinkSignal.register(reject);
   });
 }
 ;// CONCATENATED MODULE: ./src/core/init/utils/create_stream_playback_observer.ts
@@ -48121,9 +48185,8 @@ function triggerEndOfStream(mediaSource, cancelSignal) {
     return;
   }
   log/* default.debug */.Z.debug("Init: Waiting SourceBuffers to be updated before calling endOfStream.");
-  var innerCanceller = new task_canceller/* default */.ZP({
-    cancelOn: cancelSignal
-  });
+  var innerCanceller = new task_canceller/* default */.ZP();
+  innerCanceller.linkToSignal(cancelSignal);
   for (var _iterator = end_of_stream_createForOfIteratorHelperLoose(updatingSourceBuffers), _step; !(_step = _iterator()).done;) {
     var sourceBuffer = _step.value;
     onSourceBufferUpdate(sourceBuffer, function () {
@@ -48143,14 +48206,12 @@ function triggerEndOfStream(mediaSource, cancelSignal) {
  * @param {Object} cancelSignal
  */
 function maintainEndOfStream(mediaSource, cancelSignal) {
-  var endOfStreamCanceller = new task_canceller/* default */.ZP({
-    cancelOn: cancelSignal
-  });
+  var endOfStreamCanceller = new task_canceller/* default */.ZP();
+  endOfStreamCanceller.linkToSignal(cancelSignal);
   onSourceOpen(mediaSource, function () {
     endOfStreamCanceller.cancel();
-    endOfStreamCanceller = new task_canceller/* default */.ZP({
-      cancelOn: cancelSignal
-    });
+    endOfStreamCanceller = new task_canceller/* default */.ZP();
+    endOfStreamCanceller.linkToSignal(cancelSignal);
     triggerEndOfStream(mediaSource, endOfStreamCanceller.signal);
   }, cancelSignal);
   triggerEndOfStream(mediaSource, endOfStreamCanceller.signal);
@@ -48299,9 +48360,8 @@ var MediaDurationUpdater = /*#__PURE__*/function () {
     this._currentKnownDuration = currentKnownDuration;
     var isMediaSourceOpened = createMediaSourceOpenReference(mediaSource, this._canceller.signal);
     /** TaskCanceller triggered each time the MediaSource open status changes. */
-    var msUpdateCanceller = new task_canceller/* default */.ZP({
-      cancelOn: this._canceller.signal
-    });
+    var msUpdateCanceller = new task_canceller/* default */.ZP();
+    msUpdateCanceller.linkToSignal(this._canceller.signal);
     isMediaSourceOpened.onUpdate(onMediaSourceOpenedStatusChanged, {
       emitCurrentValue: true,
       clearSignal: this._canceller.signal
@@ -48311,18 +48371,15 @@ var MediaDurationUpdater = /*#__PURE__*/function () {
       if (!isMediaSourceOpened.getValue()) {
         return;
       }
-      msUpdateCanceller = new task_canceller/* default */.ZP({
-        cancelOn: canceller.signal
-      });
-      /** TaskCanceller triggered each time the content's duration may have change */
-      var durationChangeCanceller = new task_canceller/* default */.ZP({
-        cancelOn: msUpdateCanceller.signal
-      });
+      msUpdateCanceller = new task_canceller/* default */.ZP();
+      msUpdateCanceller.linkToSignal(canceller.signal);
+      /** TaskCanceller triggered each time the content's duration may have changed */
+      var durationChangeCanceller = new task_canceller/* default */.ZP();
+      durationChangeCanceller.linkToSignal(msUpdateCanceller.signal);
       var reSetDuration = function reSetDuration() {
         durationChangeCanceller.cancel();
-        durationChangeCanceller = new task_canceller/* default */.ZP({
-          cancelOn: msUpdateCanceller.signal
-        });
+        durationChangeCanceller = new task_canceller/* default */.ZP();
+        durationChangeCanceller.linkToSignal(msUpdateCanceller.signal);
         onDurationMayHaveChanged(durationChangeCanceller.signal);
       };
       currentKnownDuration.onUpdate(reSetDuration, {
@@ -48335,14 +48392,12 @@ var MediaDurationUpdater = /*#__PURE__*/function () {
     function onDurationMayHaveChanged(cancelSignal) {
       var areSourceBuffersUpdating = createSourceBuffersUpdatingReference(mediaSource.sourceBuffers, cancelSignal);
       /** TaskCanceller triggered each time SourceBuffers' updating status changes */
-      var sourceBuffersUpdatingCanceller = new task_canceller/* default */.ZP({
-        cancelOn: cancelSignal
-      });
+      var sourceBuffersUpdatingCanceller = new task_canceller/* default */.ZP();
+      sourceBuffersUpdatingCanceller.linkToSignal(cancelSignal);
       return areSourceBuffersUpdating.onUpdate(function (areUpdating) {
         sourceBuffersUpdatingCanceller.cancel();
-        sourceBuffersUpdatingCanceller = new task_canceller/* default */.ZP({
-          cancelOn: cancelSignal
-        });
+        sourceBuffersUpdatingCanceller = new task_canceller/* default */.ZP();
+        sourceBuffersUpdatingCanceller.linkToSignal(cancelSignal);
         if (areUpdating) {
           return;
         }
@@ -48684,17 +48739,15 @@ function streamEventsEmitter(manifest, mediaElement, playbackObserver, onEvent, 
     scheduledEventsRef.setValue(refresh_scheduled_events_list(prev, manifest));
   }, cancelSignal);
   var isPollingEvents = false;
-  var cancelCurrentPolling = new task_canceller/* default */.ZP({
-    cancelOn: cancelSignal
-  });
+  var cancelCurrentPolling = new task_canceller/* default */.ZP();
+  cancelCurrentPolling.linkToSignal(cancelSignal);
   scheduledEventsRef.onUpdate(function (_ref) {
     var scheduledEventsLength = _ref.length;
     if (scheduledEventsLength === 0) {
       if (isPollingEvents) {
         cancelCurrentPolling.cancel();
-        cancelCurrentPolling = new task_canceller/* default */.ZP({
-          cancelOn: cancelSignal
-        });
+        cancelCurrentPolling = new task_canceller/* default */.ZP();
+        cancelCurrentPolling.linkToSignal(cancelSignal);
         isPollingEvents = false;
       }
       return;
@@ -48786,7 +48839,7 @@ function streamEventsEmitter(manifest, mediaElement, playbackObserver, onEvent, 
         } else {
           onEventSkip(_event.value);
         }
-        if (stopSignal.isCancelled) {
+        if (stopSignal.isCancelled()) {
           return;
         }
       }
@@ -48797,7 +48850,7 @@ function streamEventsEmitter(manifest, mediaElement, playbackObserver, onEvent, 
         if (typeof _event2.onExit === "function") {
           _event2.onExit();
         }
-        if (stopSignal.isCancelled) {
+        if (stopSignal.isCancelled()) {
           return;
         }
       }
@@ -48969,7 +49022,7 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
     this._initCanceller.cancel();
   };
   _proto._onFatalError = function _onFatalError(err) {
-    if (this._initCanceller.isUsed) {
+    if (this._initCanceller.isUsed()) {
       return;
     }
     this._initCanceller.cancel();
@@ -48997,9 +49050,8 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
           return;
         }
         stopListeningToDrmUpdates();
-        var mediaSourceCanceller = new task_canceller/* default */.ZP({
-          cancelOn: initCanceller.signal
-        });
+        var mediaSourceCanceller = new task_canceller/* default */.ZP();
+        mediaSourceCanceller.linkToSignal(initCanceller.signal);
         openMediaSource(mediaElement, mediaSourceCanceller.signal).then(function (mediaSource) {
           var lastDrmStatus = drmInitRef.getValue();
           if (lastDrmStatus.initializationState.type === "awaiting-media-link") {
@@ -49029,7 +49081,7 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
             return;
           }
         })["catch"](function (err) {
-          if (mediaSourceCanceller.isUsed) {
+          if (mediaSourceCanceller.isUsed()) {
             return;
           }
           _this4._onFatalError(err);
@@ -49065,20 +49117,19 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
                 bufferOnMediaSource(opts, onReloadMediaSource, currentCanceller.signal);
                 function onReloadMediaSource(reloadOrder) {
                   currentCanceller.cancel();
-                  if (initCanceller.isUsed) {
+                  if (initCanceller.isUsed()) {
                     return;
                   }
                   triggerEvent("reloadingMediaSource", null);
-                  if (initCanceller.isUsed) {
+                  if (initCanceller.isUsed()) {
                     return;
                   }
-                  var newCanceller = new task_canceller/* default */.ZP({
-                    cancelOn: initCanceller.signal
-                  });
+                  var newCanceller = new task_canceller/* default */.ZP();
+                  newCanceller.linkToSignal(initCanceller.signal);
                   openMediaSource(mediaElement, newCanceller.signal).then(function (newMediaSource) {
                     recursivelyLoadOnMediaSource(newMediaSource, reloadOrder.position, reloadOrder.autoPlay, newCanceller);
                   })["catch"](function (err) {
-                    if (newCanceller.isUsed) {
+                    if (newCanceller.isUsed()) {
                       return;
                     }
                     onFatalError(err);
@@ -49118,7 +49169,7 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
               }, bufferOptions);
               segmentFetcherCreator = new segment(transport, segmentRequestOptions, initCanceller.signal);
               this.trigger("manifestReady", manifest);
-              if (!initCanceller.isUsed) {
+              if (!initCanceller.isUsed()) {
                 _context.next = 25;
                 break;
               }
@@ -49187,7 +49238,7 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
       autoPlayResult = _performInitialSeekAn.autoPlayResult,
       initialPlayPerformed = _performInitialSeekAn.initialPlayPerformed,
       initialSeekPerformed = _performInitialSeekAn.initialSeekPerformed;
-    if (cancelSignal.isCancelled) {
+    if (cancelSignal.isCancelled()) {
       return;
     }
     initialPlayPerformed.onUpdate(function (isPerformed, stopListening) {
@@ -49230,7 +49281,7 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
         clearSignal: cancelSignal
       });
     })["catch"](function (err) {
-      if (cancelSignal.isCancelled) {
+      if (cancelSignal.isCancelled()) {
         return; // Current loading cancelled, no need to trigger the error
       }
 
@@ -49264,7 +49315,7 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
             discontinuity: imminentDiscontinuity,
             position: position
           });
-          if (cancelSignal.isCancelled) {
+          if (cancelSignal.isCancelled()) {
             return; // Previous call has stopped streams due to a side-effect
           }
           // If the status for the last Period indicates that segments are all loaded
@@ -49299,7 +49350,7 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
         },
         adaptationChange: function adaptationChange(value) {
           self.trigger("adaptationChange", value);
-          if (cancelSignal.isCancelled) {
+          if (cancelSignal.isCancelled()) {
             return; // Previous call has stopped streams due to a side-effect
           }
 
@@ -49307,7 +49358,7 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
         },
         representationChange: function representationChange(value) {
           self.trigger("representationChange", value);
-          if (cancelSignal.isCancelled) {
+          if (cancelSignal.isCancelled()) {
             return; // Previous call has stopped streams due to a side-effect
           }
 
@@ -49324,7 +49375,7 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
         },
         periodStreamCleared: function periodStreamCleared(value) {
           contentTimeBoundariesObserver.onPeriodCleared(value.type, value.period);
-          if (cancelSignal.isCancelled) {
+          if (cancelSignal.isCancelled()) {
             return; // Previous call has stopped streams due to a side-effect
           }
 
@@ -49357,7 +49408,7 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
           for (var _iterator = media_source_content_initializer_createForOfIteratorHelperLoose(value), _step; !(_step = _iterator()).done;) {
             var protectionData = _step.value;
             protectionRef.setValue(protectionData);
-            if (cancelSignal.isCancelled) {
+            if (cancelSignal.isCancelled()) {
               return; // Previous call has stopped streams due to a side-effect
             }
           }
@@ -49411,9 +49462,8 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
     });
     contentTimeBoundariesObserver.addEventListener("endOfStream", function () {
       if (endOfStreamCanceller === null) {
-        endOfStreamCanceller = new task_canceller/* default */.ZP({
-          cancelOn: cancelSignal
-        });
+        endOfStreamCanceller = new task_canceller/* default */.ZP();
+        endOfStreamCanceller.linkToSignal(cancelSignal);
         log/* default.debug */.Z.debug("Init: end-of-stream order received.");
         maintainEndOfStream(mediaSource, endOfStreamCanceller.signal);
       }
@@ -50062,7 +50112,7 @@ var PlaybackObserver = /*#__PURE__*/function () {
    */;
   _proto.listen = function listen(cb, options) {
     var _a;
-    if (this._canceller.isUsed || ((_a = options === null || options === void 0 ? void 0 : options.clearSignal) === null || _a === void 0 ? void 0 : _a.isCancelled) === true) {
+    if (this._canceller.isUsed() || ((_a = options === null || options === void 0 ? void 0 : options.clearSignal) === null || _a === void 0 ? void 0 : _a.isCancelled()) === true) {
       return noop/* default */.Z;
     }
     this._observationRef.onUpdate(cb, {
@@ -50479,7 +50529,7 @@ function generateReadOnlyObserver(src, transform, cancellationSignal) {
     },
     listen: function listen(cb, options) {
       var _a;
-      if (cancellationSignal.isCancelled || ((_a = options === null || options === void 0 ? void 0 : options.clearSignal) === null || _a === void 0 ? void 0 : _a.isCancelled) === true) {
+      if (cancellationSignal.isCancelled() || ((_a = options === null || options === void 0 ? void 0 : options.clearSignal) === null || _a === void 0 ? void 0 : _a.isCancelled()) === true) {
         return;
       }
       mappedRef.onUpdate(cb, {
@@ -51608,13 +51658,13 @@ function getRightVideoTrack(adaptation, isTrickModeEnabled) {
  * remove all listeners this function has registered.
  */
 function emitSeekEvents(mediaElement, playbackObserver, onSeeking, onSeeked, cancelSignal) {
-  if (cancelSignal.isCancelled || mediaElement === null) {
+  if (cancelSignal.isCancelled() || mediaElement === null) {
     return;
   }
   var wasSeeking = playbackObserver.getReference().getValue().seeking;
   if (wasSeeking) {
     onSeeking();
-    if (cancelSignal.isCancelled) {
+    if (cancelSignal.isCancelled()) {
       return;
     }
   }
@@ -51636,7 +51686,7 @@ function constructPlayerStateReference(initializer, mediaElement, playbackObserv
   initializer.addEventListener("loaded", function () {
     if (playerStateRef.getValue() === "LOADING" /* PLAYER_STATES.LOADING */) {
       playerStateRef.setValue("LOADED" /* PLAYER_STATES.LOADED */);
-      if (!cancelSignal.isCancelled) {
+      if (!cancelSignal.isCancelled()) {
         var newState = getLoadedContentState(mediaElement, null);
         if (newState !== "PAUSED" /* PLAYER_STATES.PAUSED */) {
           playerStateRef.setValue(newState);
@@ -51813,7 +51863,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     // Workaround to support Firefox autoplay on FF 42.
     // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1194624
     videoElement.preload = "auto";
-    _this.version = /* PLAYER_VERSION */"3.30.0-canal.2023020600";
+    _this.version = /* PLAYER_VERSION */"3.30.0-canal.2023020701";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -52158,7 +52208,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
         throw new Error("DirectFile feature not activated in your build.");
       }
       mediaElementTrackChoiceManager = this._priv_initializeMediaElementTrackChoiceManager(defaultAudioTrack, defaultTextTrack, currentContentCanceller.signal);
-      if (currentContentCanceller.isUsed) {
+      if (currentContentCanceller.isUsed()) {
         return;
       }
       initializer = new features/* default.directfile.initDirectFile */.Z.directfile.initDirectFile({
@@ -52333,7 +52383,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     playerStateRef.onUpdate(function (newState) {
       updateReloadingMetadata(newState);
       _this2._priv_setPlayerState(newState);
-      if (currentContentCanceller.isUsed) {
+      if (currentContentCanceller.isUsed()) {
         return;
       }
       if (seekEventsCanceller !== null) {
@@ -52342,9 +52392,8 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
           seekEventsCanceller = null;
         }
       } else if (isLoadedState(_this2.state)) {
-        seekEventsCanceller = new task_canceller/* default */.ZP({
-          cancelOn: currentContentCanceller.signal
-        });
+        seekEventsCanceller = new task_canceller/* default */.ZP();
+        seekEventsCanceller.linkToSignal(currentContentCanceller.signal);
         emitSeekEvents(videoElement, playbackObserver, function () {
           return _this2.trigger("seeking", null);
         }, function () {
@@ -53705,16 +53754,16 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
       this._priv_triggerEventIfNotStopped("videoTrackChange", null, cancelSignal);
     }
     this._priv_triggerAvailableBitratesChangeEvent("availableAudioBitratesChange", this.getAvailableAudioBitrates(), cancelSignal);
-    if (contentInfos.currentContentCanceller.isUsed) {
+    if (contentInfos.currentContentCanceller.isUsed()) {
       return;
     }
     this._priv_triggerAvailableBitratesChangeEvent("availableVideoBitratesChange", this.getAvailableVideoBitrates(), cancelSignal);
-    if (contentInfos.currentContentCanceller.isUsed) {
+    if (contentInfos.currentContentCanceller.isUsed()) {
       return;
     }
     var audioBitrate = (_e = (_d = (_c = this._priv_getCurrentRepresentations()) === null || _c === void 0 ? void 0 : _c.audio) === null || _d === void 0 ? void 0 : _d.bitrate) !== null && _e !== void 0 ? _e : -1;
     this._priv_triggerCurrentBitrateChangeEvent("audioBitrateChange", audioBitrate, cancelSignal);
-    if (contentInfos.currentContentCanceller.isUsed) {
+    if (contentInfos.currentContentCanceller.isUsed()) {
       return;
     }
     var videoBitrate = (_h = (_g = (_f = this._priv_getCurrentRepresentations()) === null || _f === void 0 ? void 0 : _f.video) === null || _g === void 0 ? void 0 : _g.bitrate) !== null && _h !== void 0 ? _h : -1;
@@ -54000,7 +54049,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
    */;
   _proto._priv_triggerAvailableBitratesChangeEvent = function _priv_triggerAvailableBitratesChangeEvent(event, newVal, currentContentCancelSignal) {
     var prevVal = this._priv_contentEventsMemory[event];
-    if (!currentContentCancelSignal.isCancelled && (prevVal === undefined || !(0,are_arrays_of_numbers_equal/* default */.Z)(newVal, prevVal))) {
+    if (!currentContentCancelSignal.isCancelled() && (prevVal === undefined || !(0,are_arrays_of_numbers_equal/* default */.Z)(newVal, prevVal))) {
       this._priv_contentEventsMemory[event] = newVal;
       this.trigger(event, newVal);
     }
@@ -54013,7 +54062,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
    * @param {Object} currentContentCancelSignal
    */;
   _proto._priv_triggerCurrentBitrateChangeEvent = function _priv_triggerCurrentBitrateChangeEvent(event, newVal, currentContentCancelSignal) {
-    if (!currentContentCancelSignal.isCancelled && newVal !== this._priv_contentEventsMemory[event]) {
+    if (!currentContentCancelSignal.isCancelled() && newVal !== this._priv_contentEventsMemory[event]) {
       this._priv_contentEventsMemory[event] = newVal;
       this.trigger(event, newVal);
     }
@@ -54036,7 +54085,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
    * @param {Object} currentContentCancelSignal
    */;
   _proto._priv_triggerEventIfNotStopped = function _priv_triggerEventIfNotStopped(evt, arg, currentContentCancelSignal) {
-    if (!currentContentCancelSignal.isCancelled) {
+    if (!currentContentCancelSignal.isCancelled()) {
       this.trigger(evt, arg);
     }
   }
@@ -54117,7 +54166,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   }]);
   return Player;
 }(event_emitter/* default */.Z);
-Player.version = /* PLAYER_VERSION */"3.30.0-canal.2023020600";
+Player.version = /* PLAYER_VERSION */"3.30.0-canal.2023020701";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
