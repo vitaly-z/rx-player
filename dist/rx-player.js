@@ -7182,6 +7182,7 @@ var assert_unreachable = __webpack_require__(7904);
 
 
 
+
 /**
  * Error thrown when the MediaKeySession has to be closed due to a trigger
  * specified by user configuration.
@@ -7244,6 +7245,9 @@ function checkKeyStatuses(session, options, keySystem) {
       keyId: keyId.buffer,
       keyStatus: keyStatus
     };
+    if (log/* default.hasLevel */.Z.hasLevel("DEBUG")) {
+      log/* default.debug */.Z.debug("DRM: key status update (" + (0,string_parsing/* bytesToHex */.ci)(keyId) + ":", keyStatus);
+    }
     switch (keyStatus) {
       case KEY_STATUSES.EXPIRED:
         {
@@ -51863,7 +51867,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     // Workaround to support Firefox autoplay on FF 42.
     // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1194624
     videoElement.preload = "auto";
-    _this.version = /* PLAYER_VERSION */"3.30.0-canal.2023020701";
+    _this.version = /* PLAYER_VERSION */"3.30.0-canal.2023020800";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -54166,7 +54170,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   }]);
   return Player;
 }(event_emitter/* default */.Z);
-Player.version = /* PLAYER_VERSION */"3.30.0-canal.2023020701";
+Player.version = /* PLAYER_VERSION */"3.30.0-canal.2023020800";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
