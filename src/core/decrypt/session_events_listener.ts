@@ -223,11 +223,7 @@ export default function SessionEventsListener(
           ));
         }, getLicenseTimeout) as unknown as number;
       }
-      try {
-        Promise.resolve(getLicense).then(res, rej);
-      } catch (err) {
-        rej(err);
-      }
+      Promise.resolve(getLicense).then(res, rej);
     }).finally(() => {
       if (timeoutId !== undefined) {
         clearTimeout(timeoutId);
