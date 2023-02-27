@@ -3,6 +3,7 @@ import {
   IPeriod,
   IRepresentation,
 } from "../../../../public_types";
+import arrayFind from "../../../../utils/array_find";
 import isNullOrUndefined from "../../../../utils/is_null_or_undefined";
 import { CancellationSignal } from "../../../../utils/task_canceller";
 import { IBufferType } from "../../../segment_buffers";
@@ -94,7 +95,10 @@ export default function createSegmentBufferGraph(
       const adap = instance.getCurrentAdaptations()?.[bufferType];
       const manifest = instance.getManifest();
       if (manifest !== null && !isNullOrUndefined(rep) && !isNullOrUndefined(adap)) {
-        const period = manifest.getPeriodForTime(currentTime);
+        const period = arrayFind(manifest.periods, (p) => {
+          return currentTime >= p.start &&
+                 (p.end === undefined || p.end > currentTime);
+        });
         if (period !== undefined) {
           loadingRangeRepInfoElt.appendChild(createMetricTitle("load"));
           loadingRangeRepInfoElt.appendChild(createElement("span", {

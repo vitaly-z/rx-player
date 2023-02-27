@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import isWorker from "../utils/is_worker";
 import { MediaSource_ } from "./browser_compatibility_types";
 
 /**
@@ -26,6 +27,10 @@ import { MediaSource_ } from "./browser_compatibility_types";
  * @returns {Boolean}
  */
 export default function isCodecSupported(mimeType : string) : boolean {
+  if (isWorker()) {
+    // XXX TODO
+    return mimeType.indexOf("ec-3") < 0;
+  }
   if (MediaSource_ == null) {
     return false;
   }

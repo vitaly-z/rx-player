@@ -210,7 +210,7 @@ function hasCompatibleCodec(
 /**
  * Returns buffered ranges of what we know correspond to the given `adaptation`
  * in the SegmentBuffer.
- * @param {Object} segmentBuffer
+ * @param {Object} inventory
  * @param {Object} period
  * @param {Object} adaptation
  * @returns {Array.<Object>}

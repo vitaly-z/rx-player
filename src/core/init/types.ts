@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import Manifest, {
+import {
   Adaptation,
   ISegment,
   Period,
@@ -23,6 +23,10 @@ import Manifest, {
 import { IPlayerError } from "../../public_types";
 import EventEmitter from "../../utils/event_emitter";
 import { ISharedReference } from "../../utils/reference";
+import {
+  ISentAdaptation,
+  ISentManifest,
+} from "../../worker";
 import { PlaybackObserver } from "../api";
 import SegmentBuffersStore, {
   IBufferType,
@@ -110,7 +114,7 @@ export interface IContentInitializerEvents {
   /** A fatal error occured, leading to the current content being stopped. */
   error : unknown;
   /** Event sent after the Manifest has been loaded and parsed for the first time. */
-  manifestReady : Manifest;
+  manifestReady : ISentManifest;
   /** Event sent after the Manifest has been updated. */
   manifestUpdate: null;
   /**
@@ -133,7 +137,7 @@ export interface IContentInitializerEvents {
    * This generally means that some Representation(s) were detected to be
    * undecipherable on the current device.
    */
-  decipherabilityUpdate: Array<{ manifest : Manifest;
+  decipherabilityUpdate: Array<{ manifest : ISentManifest;
                                  period : Period;
                                  adaptation : Adaptation;
                                  representation : Representation; }>;
@@ -167,7 +171,7 @@ export interface IContentInitializerEvents {
      * It is set to `undefined` by default, you SHOULD NOT set it to `undefined`
      * yourself.
      */
-    adaptationRef : ISharedReference<Adaptation|null|undefined>;
+    adaptationRef : ISharedReference<ISentAdaptation|null|undefined>;
   };
   /**
    * A `PeriodStream` has been removed.

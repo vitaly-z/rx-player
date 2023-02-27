@@ -23,9 +23,16 @@ import {
   IRepresentationFilter,
 } from "../public_types";
 import arrayFind from "../utils/array_find";
-import objectValues from "../utils/object_values";
+import {
+  ISentAdaptation,
+  ISentPeriod,
+} from "../worker";
 import Adaptation from "./adaptation";
 import { IAdaptationType } from "./types";
+import {
+  getAdaptations,
+  getSupportedAdaptations,
+} from "./utils";
 
 /** Structure listing every `Adaptation` in a Period. */
 export type IManifestAdaptations = Partial<Record<IAdaptationType, Adaptation[]>>;
@@ -135,12 +142,7 @@ export default class Period {
    * @returns {Array.<Object>}
    */
   getAdaptations() : Adaptation[] {
-    const adaptationsByType = this.adaptations;
-    return objectValues(adaptationsByType).reduce<Adaptation[]>(
-      // Note: the second case cannot happen. TS is just being dumb here
-      (acc, adaptations) => adaptations != null ? acc.concat(adaptations) :
-                                                  acc,
-      []);
+    return getAdaptations(this);
   }
 
   /**
@@ -170,19 +172,8 @@ export default class Period {
    * type. Will return for all types if `undefined`.
    * @returns {Array.<Adaptation>}
    */
-  getSupportedAdaptations(type? : IAdaptationType) : Adaptation[] {
-    if (type === undefined) {
-      return this.getAdaptations().filter(ada => {
-        return ada.isSupported;
-      });
-    }
-    const adaptationsForType = this.adaptations[type];
-    if (adaptationsForType === undefined) {
-      return [];
-    }
-    return adaptationsForType.filter(ada => {
-      return ada.isSupported;
-    });
+  getSupportedAdaptations(type? : IAdaptationType | undefined) : Adaptation[] {
+    return getSupportedAdaptations(this, type);
   }
 
   /**
@@ -193,5 +184,22 @@ export default class Period {
   containsTime(time : number) : boolean {
     return time >= this.start && (this.end === undefined ||
                                   time < this.end);
+  }
+
+  public getShareablePeriod() : ISentPeriod {
+    const adaptations : Partial<Record<IAdaptationType, ISentAdaptation[]>> = {};
+    const baseAdaptations = this.getAdaptations();
+    for (const adaptation of baseAdaptations) {
+      let currentAdaps : ISentAdaptation[] | undefined = adaptations[adaptation.type];
+      if (currentAdaps === undefined) {
+        currentAdaps = [];
+        adaptations[adaptation.type] = currentAdaps;
+      }
+      currentAdaps.push(adaptation.getShareableAdaptation());
+    }
+    return { start: this.start,
+             end: this.end,
+             id: this.id,
+             adaptations };
   }
 }

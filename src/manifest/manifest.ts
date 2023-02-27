@@ -26,6 +26,10 @@ import EventEmitter from "../utils/event_emitter";
 import idGenerator from "../utils/id_generator";
 import { getFilenameIndexInUrl } from "../utils/resolve_url";
 import warnOnce from "../utils/warn_once";
+import {
+  ISentManifest,
+  ISentPeriod,
+} from "../worker";
 import Adaptation from "./adaptation";
 import Period, {
   IManifestAdaptations,
@@ -41,6 +45,11 @@ import {
   replacePeriods,
   updatePeriods,
 } from "./update_periods";
+import {
+  getLivePosition,
+  getMaximumSafePosition,
+  getMinimumSafePosition,
+} from "./utils";
 
 const generateSupplementaryTrackID = idGenerator();
 const generateNewManifestId = idGenerator();
@@ -130,7 +139,9 @@ export interface IManifestEvents {
  *
  * @class Manifest
  */
-export default class Manifest extends EventEmitter<IManifestEvents> {
+export default class Manifest extends EventEmitter<IManifestEvents>
+  implements ISentManifest
+{
   /**
    * ID uniquely identifying this Manifest.
    * No two Manifests should have this ID.
@@ -248,7 +259,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * Data allowing to calculate the minimum and maximum seekable positions at
    * any given time.
    */
-  private _timeBounds : {
+  public timeBounds : {
     /**
      * This is the theoretical minimum playable position on the content
      * regardless of the current Adaptation chosen, as estimated at parsing
@@ -371,7 +382,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
                                                        this.periods[0].adaptations;
     /* eslint-enable import/no-deprecated */
 
-    this._timeBounds = parsedManifest.timeBounds;
+    this.timeBounds = parsedManifest.timeBounds;
     this.isDynamic = parsedManifest.isDynamic;
     this.isLive = parsedManifest.isLive;
     this.isLastPeriodKnown = parsedManifest.isLastPeriodKnown;
@@ -487,21 +498,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @returns {number}
    */
   public getMinimumSafePosition() : number {
-    const windowData = this._timeBounds;
-    if (windowData.timeshiftDepth === null) {
-      return windowData.minimumSafePosition ?? 0;
-    }
-
-    const { maximumTimeData } = windowData;
-    let maximumTime : number;
-    if (!windowData.maximumTimeData.isLinear) {
-      maximumTime = maximumTimeData.maximumSafePosition;
-    } else {
-      const timeDiff = performance.now() - maximumTimeData.time;
-      maximumTime = maximumTimeData.maximumSafePosition + timeDiff / 1000;
-    }
-    const theoricalMinimum = maximumTime - windowData.timeshiftDepth;
-    return Math.max(windowData.minimumSafePosition ?? 0, theoricalMinimum);
+    return getMinimumSafePosition(this);
   }
 
   /**
@@ -510,15 +507,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @returns {number|undefined}
    */
   public getLivePosition() : number | undefined {
-    const { maximumTimeData } = this._timeBounds;
-    if (!this.isLive || maximumTimeData.livePosition === undefined) {
-      return undefined;
-    }
-    if (!maximumTimeData.isLinear) {
-      return maximumTimeData.livePosition;
-    }
-    const timeDiff = performance.now() - maximumTimeData.time;
-    return maximumTimeData.livePosition + timeDiff / 1000;
+    return getLivePosition(this);
   }
 
   /**
@@ -527,12 +516,7 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * time.
    */
   public getMaximumSafePosition() : number {
-    const { maximumTimeData } = this._timeBounds;
-    if (!maximumTimeData.isLinear) {
-      return maximumTimeData.maximumSafePosition;
-    }
-    const timeDiff = performance.now() - maximumTimeData.time;
-    return maximumTimeData.maximumSafePosition + timeDiff / 1000;
+    return getMaximumSafePosition(this);
   }
 
   /**
@@ -543,7 +527,12 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
    * @param {Function} isDecipherableCb
    */
   public updateRepresentationsDeciperability(
-    isDecipherableCb : (rep : Representation) => boolean | undefined
+    isDecipherableCb : (content : {
+      manifest : Manifest;
+      period : Period;
+      adaptation : Adaptation;
+      representation : Representation;
+    }) => boolean | undefined
   ) : void {
     const updates = updateDeciperability(this, isDecipherableCb);
     if (updates.length > 0) {
@@ -600,6 +589,26 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
     /* eslint-disable import/no-deprecated */
     return arrayFind(this.getAdaptations(), ({ id }) => wantedId === id);
     /* eslint-enable import/no-deprecated */
+  }
+
+  public getShareableManifest() : ISentManifest {
+    const periods : ISentPeriod[] = [];
+    for (const period of this.periods) {
+      periods.push(period.getShareablePeriod());
+    }
+
+    return {
+      id: this.id,
+      periods,
+      isDynamic: this.isDynamic,
+      isLive: this.isLive,
+      isLastPeriodKnown: this.isLastPeriodKnown,
+      suggestedPresentationDelay: this.suggestedPresentationDelay,
+      clockOffset: this.clockOffset,
+      uris: this.uris,
+      availabilityStartTime: this.availabilityStartTime,
+      timeBounds: this.timeBounds,
+    };
   }
 
   /**
@@ -730,11 +739,11 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
 
     let updatedPeriodsResult;
     if (updateType === MANIFEST_UPDATE_TYPE.Full) {
-      this._timeBounds = newManifest._timeBounds;
+      this.timeBounds = newManifest.timeBounds;
       this.uris = newManifest.uris;
       updatedPeriodsResult = replacePeriods(this.periods, newManifest.periods);
     } else {
-      this._timeBounds.maximumTimeData = newManifest._timeBounds.maximumTimeData;
+      this.timeBounds.maximumTimeData = newManifest.timeBounds.maximumTimeData;
       this.updateUrl = newManifest.uris[0];
       updatedPeriodsResult = updatePeriods(this.periods, newManifest.periods);
 
@@ -778,15 +787,21 @@ export default class Manifest extends EventEmitter<IManifestEvents> {
  */
 function updateDeciperability(
   manifest : Manifest,
-  isDecipherable : (rep : Representation) => boolean | undefined
+  isDecipherable : (content : {
+    manifest : Manifest;
+    period : Period;
+    adaptation : Adaptation;
+    representation : Representation;
+  }) => boolean | undefined
 ) : IDecipherabilityUpdateElement[] {
   const updates : IDecipherabilityUpdateElement[] = [];
   for (const period of manifest.periods) {
     for (const adaptation of period.getAdaptations()) {
       for (const representation of adaptation.representations) {
-        const result = isDecipherable(representation);
+        const content = { manifest, period, adaptation, representation };
+        const result = isDecipherable(content);
         if (result !== representation.decipherable) {
-          updates.push({ manifest, period, adaptation, representation });
+          updates.push(content);
           log.debug(`Decipherability changed for "${representation.id}"`,
                     `(${representation.bitrate})`,
                     String(representation.decipherable));

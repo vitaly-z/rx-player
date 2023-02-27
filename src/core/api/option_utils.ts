@@ -98,6 +98,7 @@ export interface IParsedConstructorOptions {
   maxAudioBitrate : number;
   maxVideoBitrate : number;
   stopAtEnd : boolean;
+  workerUrl : string | undefined;
 }
 
 /**
@@ -376,6 +377,7 @@ function parseConstructorOptions(
            videoElement,
            wantedBufferAhead,
            maxVideoBufferSize,
+           workerUrl: options.workerUrl,
            throttleWhenHidden,
            throttleVideoBitrateWhenHidden,
            preferredAudioTracks,

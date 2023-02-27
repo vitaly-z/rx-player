@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import config from "../../config";
 import { formatError } from "../../errors";
-import features from "../../features";
 import log from "../../log";
 import Manifest from "../../manifest";
 import {
@@ -75,7 +81,10 @@ export default function generateManifestParser(
                              referenceDateTime,
                              externalClockOffset };
 
-    const parsers = features.dashParsers;
+    const parsers = {
+      wasm: (globalThis as any).parser,
+      js: null,
+    };
     if (parsers.wasm === null ||
         parsers.wasm.status === "uninitialized" ||
         parsers.wasm.status === "failure")
@@ -107,7 +116,7 @@ export default function generateManifestParser(
           log.debug("DASH: Running WASM MPD Parser.");
           const parsed = parsers.wasm.runWasmParser(manifestAB, dashParserOpts);
           return processMpdParserResponse(parsed);
-        });
+        }) as Promise<IManifestParserResult>;
       }
     }
 
@@ -122,7 +131,7 @@ export default function generateManifestParser(
         throw new Error("No MPD parser is imported");
       }
       const manifestDoc = getManifestAsDocument(responseData);
-      const parsedManifest = parsers.js(manifestDoc, dashParserOpts);
+      const parsedManifest = (parsers as any).js(manifestDoc, dashParserOpts);
       return processMpdParserResponse(parsedManifest);
     }
 

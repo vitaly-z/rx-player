@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import Manifest, {
-  Adaptation,
-  Period,
-  Representation,
-} from "../../manifest";
+import {
+  ISentAdaptation,
+  ISentManifest,
+  ISentPeriod,
+  ISentRepresentation,
+} from "../../worker";
 import InitDataValuesContainer from "./utils/init_data_values_container";
 import LoadedSessionsStore from "./utils/loaded_sessions_store";
 import PersistentSessionsStore from "./utils/persistent_sessions_store";
@@ -115,13 +116,13 @@ export interface IContentProtection {
 /** Content linked to protection data. */
 export interface IContent {
   /** Manifest object associated to the protection data. */
-  manifest : Manifest;
+  manifest : ISentManifest;
   /** Period object associated to the protection data. */
-  period : Period;
+  period : ISentPeriod;
   /** Adaptation object associated to the protection data. */
-  adaptation : Adaptation;
+  adaptation : ISentAdaptation;
   /** Representation object associated to the protection data. */
-  representation : Representation;
+  representation : ISentRepresentation;
 }
 
 /** Stores helping to create and retrieve MediaKeySessions. */

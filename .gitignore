@@ -24,6 +24,8 @@
 
 /dist/_esm5.processed
 /dist/_esm5.raw
+/dist/multithread
+!/dist/multithread/index.html
 
 /doc/generated
 

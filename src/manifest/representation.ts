@@ -23,6 +23,7 @@ import {
 } from "../parsers/manifest";
 import { IHDRInformation } from "../public_types";
 import areArraysOfNumbersEqual from "../utils/are_arrays_of_numbers_equal";
+import { ISentRepresentation } from "../worker";
 import { IRepresentationIndex } from "./representation_index";
 import {
   IAdaptationType,
@@ -333,6 +334,18 @@ class Representation {
     this.contentProtections.initData.push({ type: initDataType,
                                             values: data });
     return true;
+  }
+
+  getShareableRepresentation() : ISentRepresentation {
+    return { id: this.id,
+             bitrate: this.bitrate,
+             codec: this.codec,
+             width: this.width,
+             height: this.height,
+             frameRate: this.frameRate,
+             hdrInfo: this.hdrInfo,
+             contentProtections: this.contentProtections,
+             decipherable: this.decipherable };
   }
 }
 
