@@ -1,6 +1,6 @@
 # Changelog
 
-## v3.30.0
+## v3.30.0-canal.2023030200
 
 ### Features
 
@@ -34,6 +34,7 @@
   - API: send available...TracksChange events in the very unlikely scenario where tracks are added after a manifest update [#1197]
   - Completely remove RxJS dependency from the RxPlayer's source code [#1193]
   - DRM: Request PR recommendation when PlayReady is asked and try default recommendation robustnesses [#1189]
+  - TTML: put saner values for extent and origins when weird ones are found
 
 
 ## v3.29.0 (2022-11-16)
