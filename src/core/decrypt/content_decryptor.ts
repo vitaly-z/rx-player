@@ -252,18 +252,6 @@ export default class ContentDecryptor extends EventEmitter<IContentDecryptorEven
                              mediaKeys,
                              keySystemOptions: options };
 
-    const shouldDisableLock = options.disableMediaKeysAttachmentLock === true;
-    if (shouldDisableLock) {
-      this._stateData = { state: ContentDecryptorState.ReadyForContent,
-                          isInitDataQueueLocked: true,
-                          isMediaKeysAttached: false,
-                          data: null };
-      this.trigger("stateChange", this._stateData.state);
-      if (this._isStopped()) { // previous trigger might have lead to disposal
-        return ;
-      }
-    }
-
     log.debug("DRM: Attaching current MediaKeys");
     attachMediaKeys(mediaElement, stateToAttatch, this._canceller.signal)
       .then(async () => {

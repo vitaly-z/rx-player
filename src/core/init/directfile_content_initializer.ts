@@ -102,18 +102,19 @@ export default class DirectFileContentInitializer extends ContentInitializer {
         return;
       }
       stopListeningToDrmUpdates();
-
-      // Start everything! (Just put the URL in the element's src).
-      log.info("Setting URL to HTMLMediaElement", url);
-      mediaElement.src = url;
-      cancelSignal.register(() => {
-        clearElementSrc(mediaElement);
-      });
       if (evt.initializationState.type === "awaiting-media-link") {
         evt.initializationState.value.isMediaLinked.setValue(true);
         drmInitRef.onUpdate((newDrmStatus, stopListeningToDrmUpdatesAgain) => {
           if (newDrmStatus.initializationState.type === "initialized") {
             stopListeningToDrmUpdatesAgain();
+
+
+            // Start everything! (Just put the URL in the element's src).
+            log.warn("!!!!!CHANGED Setting URL to HTMLMediaElement", url);
+            mediaElement.src = url;
+            cancelSignal.register(() => {
+              clearElementSrc(mediaElement);
+            });
             this._seekAndPlay(mediaElement, playbackObserver);
             return;
           }
