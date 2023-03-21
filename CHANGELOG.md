@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.30.1-canal.2023032100
+
+### Other improvements
+
+  - Perform several tweaks to the adaptive logic to limit quality switches
+  - TTML: put saner values for extent and origins when weird ones are found
+
+
 ## v3.30.0 (2023-03-07)
 
 ### Features
