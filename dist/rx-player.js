@@ -2361,8 +2361,8 @@ var DEFAULT_CONFIG = {
    * @type {Object}
    */
   ABR_REGULAR_FACTOR: {
-    DEFAULT: 0.8,
-    LOW_LATENCY: 0.8
+    DEFAULT: 0.72,
+    LOW_LATENCY: 0.72
   },
   /**
    * If a media buffer has less than ABR_STARVATION_GAP in seconds ahead of the
@@ -15672,8 +15672,8 @@ function updateDeciperability(manifest, isDecipherable) {
             adaptation: adaptation,
             representation: representation
           });
-          log/* default.debug */.Z.debug("Decipherability changed for \"" + representation.id + "\"", "(" + representation.bitrate + ")", String(representation.decipherable));
           representation.decipherable = result;
+          log/* default.debug */.Z.debug("Decipherability changed for \"" + representation.id + "\"", "(" + representation.bitrate + ")", String(representation.decipherable));
         }
       }
     }
@@ -24889,7 +24889,12 @@ function applyExtent(element, extent) {
       log/* default.warn */.Z.warn("TTML Parser: unhandled extent unit:", firstExtent[2]);
     }
     if (secondExtent[2] === "px" || secondExtent[2] === "%" || secondExtent[2] === "em") {
-      element.style.height = secondExtent[1] + secondExtent[2];
+      var toNum = Number(secondExtent[1]);
+      if (secondExtent[2] === "%" && !isNaN(toNum) && (toNum < 0 || toNum > 100)) {
+        element.style.width = "80%";
+      } else {
+        element.style.height = secondExtent[1] + secondExtent[2];
+      }
     } else if (secondExtent[2] === "c") {
       addClassName(element, "proportional-style");
       element.setAttribute("data-proportional-height", secondExtent[1]);
@@ -25036,7 +25041,13 @@ function applyOrigin(element, origin) {
       log/* default.warn */.Z.warn("TTML Parser: unhandled origin unit:", firstOrigin[2]);
     }
     if (secondOrigin[2] === "px" || secondOrigin[2] === "%" || secondOrigin[2] === "em") {
-      element.style.top = secondOrigin[1] + secondOrigin[2];
+      var toNum = Number(secondOrigin[1]);
+      if (secondOrigin[2] === "%" && !isNaN(toNum) && (toNum < 0 || toNum > 100)) {
+        element.style.bottom = "5%";
+        element.style.left = "10%";
+      } else {
+        element.style.top = secondOrigin[1] + secondOrigin[2];
+      }
     } else if (secondOrigin[2] === "c") {
       addClassName(element, "proportional-style");
       element.setAttribute("data-proportional-top", secondOrigin[1]);
@@ -34905,7 +34916,7 @@ function isNonEmptyString(x) {
  * not always understood by newcomers to the code, and which can be overused when
  * only one of the possibility can arise.
  * @param {*} x
- * @returns {*}
+ * @returns {boolean}
  */
 function isNullOrUndefined(x) {
   return x === null || x === undefined;
@@ -38864,6 +38875,12 @@ function estimateStarvationModeBitrate(pendingRequests, playbackInfo, currentRep
   }
   var concernedRequest = concernedRequests[0];
   var now = performance.now();
+  var minimumRequestTime = concernedRequest.content.segment.duration * 1.5;
+  minimumRequestTime = Math.min(minimumRequestTime, 3000);
+  minimumRequestTime = Math.max(minimumRequestTime, 12000);
+  if (now - concernedRequest.requestTimestamp < minimumRequestTime) {
+    return undefined;
+  }
   var lastProgressEvent = concernedRequest.progress.length > 0 ? concernedRequest.progress[concernedRequest.progress.length - 1] : undefined;
   // first, try to do a quick estimate from progress events
   var bandwidthEstimate = estimateRequestBandwidth(concernedRequest);
@@ -38873,7 +38890,7 @@ function estimateStarvationModeBitrate(pendingRequests, playbackInfo, currentRep
     if ((now - lastProgressEvent.timestamp) / 1000 <= remainingTime) {
       // Calculate estimated time spent rebuffering if we continue doing that request.
       var expectedRebufferingTime = remainingTime - realBufferGap / speed;
-      if (expectedRebufferingTime > 2000) {
+      if (expectedRebufferingTime > 2500) {
         return bandwidthEstimate;
       }
     }
@@ -39048,10 +39065,8 @@ var NetworkAnalyzer = /*#__PURE__*/function () {
   _proto.isUrgent = function isUrgent(bitrate, currentRepresentation, currentRequests, playbackInfo) {
     if (currentRepresentation === null) {
       return true;
-    } else if (bitrate === currentRepresentation.bitrate) {
+    } else if (bitrate >= currentRepresentation.bitrate) {
       return false;
-    } else if (bitrate > currentRepresentation.bitrate) {
-      return !this._inStarvationMode;
     }
     return shouldDirectlySwitchToLowBitrate(playbackInfo, currentRequests, this._lowLatencyMode);
   };
@@ -40049,9 +40064,9 @@ function getEstimateReference(_ref, stopAllEstimates) {
         bitrateChosen = _networkAnalyzer$getB.bitrateChosen;
       var stableRepresentation = scoreCalculator.getLastStableRepresentation();
       var knownStableBitrate = stableRepresentation === null ? undefined : stableRepresentation.bitrate / (lastPlaybackObservation.speed > 0 ? lastPlaybackObservation.speed : 1);
-      if (allowBufferBasedEstimates && bufferGap <= 5) {
+      if (allowBufferBasedEstimates && bufferGap <= 8) {
         allowBufferBasedEstimates = false;
-      } else if (!allowBufferBasedEstimates && isFinite(bufferGap) && bufferGap > 10) {
+      } else if (!allowBufferBasedEstimates && isFinite(bufferGap) && bufferGap > 15) {
         allowBufferBasedEstimates = true;
       }
       /**
@@ -52017,7 +52032,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     // Workaround to support Firefox autoplay on FF 42.
     // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1194624
     videoElement.preload = "auto";
-    _this.version = /* PLAYER_VERSION */"3.30.0";
+    _this.version = /* PLAYER_VERSION */"3.30.1-canal.2023032100";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -54332,7 +54347,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   }]);
   return Player;
 }(event_emitter/* default */.Z);
-Player.version = /* PLAYER_VERSION */"3.30.0";
+Player.version = /* PLAYER_VERSION */"3.30.1-canal.2023032100";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
