@@ -15672,8 +15672,8 @@ function updateDeciperability(manifest, isDecipherable) {
             adaptation: adaptation,
             representation: representation
           });
-          log/* default.debug */.Z.debug("Decipherability changed for \"" + representation.id + "\"", "(" + representation.bitrate + ")", String(representation.decipherable));
           representation.decipherable = result;
+          log/* default.debug */.Z.debug("Decipherability changed for \"" + representation.id + "\"", "(" + representation.bitrate + ")", String(representation.decipherable));
         }
       }
     }
@@ -47549,7 +47549,10 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
      */
     function createNextPeriodStream(nextPeriod) {
       if (nextStreamInfo !== null) {
-        log/* default.warn */.Z.warn("Stream: Creating next `PeriodStream` while it was already created.");
+        if (nextStreamInfo.period.id === nextPeriod.id) {
+          return;
+        }
+        log/* default.warn */.Z.warn("Stream: Creating next `PeriodStream` while it was already created.", bufferType);
         consecutivePeriodStreamCb.periodStreamCleared({
           type: bufferType,
           period: nextStreamInfo.period
@@ -52017,7 +52020,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     // Workaround to support Firefox autoplay on FF 42.
     // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1194624
     videoElement.preload = "auto";
-    _this.version = /* PLAYER_VERSION */"3.30.0";
+    _this.version = /* PLAYER_VERSION */"3.30.1-dev.2023032300";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -54332,7 +54335,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   }]);
   return Player;
 }(event_emitter/* default */.Z);
-Player.version = /* PLAYER_VERSION */"3.30.0";
+Player.version = /* PLAYER_VERSION */"3.30.1-dev.2023032300";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
