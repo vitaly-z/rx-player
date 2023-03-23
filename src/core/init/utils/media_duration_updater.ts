@@ -180,11 +180,6 @@ function setMediaSourceDuration(
     } else {
       newDuration = manifest.getMaximumSafePosition();
     }
-  } else if (manifest.isDynamic) {
-    const livePosition = manifest.getLivePosition();
-    if (livePosition !== undefined) {
-      newDuration = Math.max(livePosition, newDuration);
-    }
   }
 
   if (manifest.isDynamic) {
