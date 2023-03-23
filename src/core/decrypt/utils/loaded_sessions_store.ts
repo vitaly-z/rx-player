@@ -73,6 +73,8 @@ export default class LoadedSessionsStore {
     if (!isNullOrUndefined(mediaKeySession.closed)) {
       mediaKeySession.closed
         .then(() => {
+          log.info("DRM-LSS: session was closed, removing it.",
+                   mediaKeySession.sessionId);
           const index = this.getIndex(keySessionRecord);
           if (index >= 0 &&
               this._storage[index].mediaKeySession === mediaKeySession)
