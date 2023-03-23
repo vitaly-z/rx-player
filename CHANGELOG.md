@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.30.1 (2023-03-23)
+
+### Bug fixes
+
+  - DASH: Fix issue which could lead to infinite rebuffering when switching between multiple Periods
+
 ## v3.30.0 (2023-03-07)
 
 ### Features
