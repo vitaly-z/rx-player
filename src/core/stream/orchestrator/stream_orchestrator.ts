@@ -497,7 +497,11 @@ export default function StreamOrchestrator(
      */
     function createNextPeriodStream(nextPeriod : Period) : void {
       if (nextStreamInfo !== null) {
-        log.warn("Stream: Creating next `PeriodStream` while it was already created.");
+        if (nextStreamInfo.period.id === nextPeriod.id) {
+          return;
+        }
+        log.warn("Stream: Creating next `PeriodStream` while it was already created.",
+                 bufferType);
         consecutivePeriodStreamCb.periodStreamCleared({ type: bufferType,
                                                         period: nextStreamInfo.period });
         nextStreamInfo.canceller.cancel();
