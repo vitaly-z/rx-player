@@ -1,5 +1,17 @@
 # Changelog
 
+## v3.30.1-dev.2023032800 (2023-03-28)
+
+### Bug fixes
+
+  - DASH: Fix issue which could lead to infinite rebuffering when switching between multiple Periods [#1232]
+  - Return actual ending duration through the `getVideoDuration` method when playing dynamic contents whose future end is already known [#1235]
+
+### Other improvements
+
+  - adaptive: Perform various adaptive tweaks to avoid switching too much between qualities in some conditions
+
+
 ## v3.30.0 (2023-03-07)
 
 ### Features
