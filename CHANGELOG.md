@@ -10,6 +10,7 @@
 ### Other improvements
 
   - adaptive: Perform various adaptive tweaks to avoid switching too much between qualities in some conditions
+  - TTML: put saner values for extent and origins when weird ones are found
 
 
 ## v3.30.0 (2023-03-07)
