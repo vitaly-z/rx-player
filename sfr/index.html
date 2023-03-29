@@ -69,6 +69,11 @@
                 type: "com.microsoft.playready.hardware",
                 fallbackOn: { keyInternalError: true, keyOutputRestricted: true },
                 getLicense,
+              },
+              {
+                type: "com.microsoft.playready",
+                fallbackOn: { keyInternalError: true, keyOutputRestricted: true },
+                getLicense,
               }
             ],
           });
