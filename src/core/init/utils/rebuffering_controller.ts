@@ -153,13 +153,13 @@ export default class RebufferingController
         ignoredStallTimeStamp = now;
       }
 
-      lastSeekingPosition = observation.seeking ?
-        Math.max(observation.pendingInternalSeek ?? 0, observation.position) :
-        null;
-
       if (this._checkDecipherabilityFreeze(observation)) {
         return ;
       }
+
+      lastSeekingPosition = observation.seeking ?
+        Math.max(observation.pendingInternalSeek ?? 0, observation.position) :
+        null;
 
       if (freezing !== null) {
         const now = performance.now();
@@ -413,10 +413,10 @@ export default class RebufferingController
     if (rebufferingForTooLong || frozenForTooLong) {
       const statusAudio = this._segmentBuffersStore.getStatus("audio");
       const statusVideo = this._segmentBuffersStore.getStatus("video");
-      let hasOnlyDecipherableSegments = true;
-      let isClear = true;
       for (const status of [statusAudio, statusVideo]) {
         if (status.type === "initialized") {
+          let hasOnlyDecipherableSegments = true;
+          let isClear = true;
           for (const segment of status.value.getInventory()) {
             const { representation } = segment.infos;
             if (representation.decipherable === false) {
@@ -432,16 +432,15 @@ export default class RebufferingController
               }
             }
           }
+          if (!isClear && hasOnlyDecipherableSegments) {
+            log.warn(
+              "Init: we are frozen despite only having decipherable " +
+              "segments left in the buffer, reloading"
+            );
+            this.trigger("needsReload", null);
+            return true;
+          }
         }
-      }
-
-      if (!isClear && hasOnlyDecipherableSegments) {
-        log.warn(
-          "Init: we are frozen despite only having decipherable " +
-          "segments left in the buffer, reloading"
-        );
-        this.trigger("needsReload", null);
-        return true;
       }
     }
     return false;
