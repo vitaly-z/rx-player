@@ -27,7 +27,8 @@
 3: PADDINGTON2 (15min) - H264 FHD - DASH MKPC (4 keys: AU/SD/HD/FHD)
 4: PADDINGTON2 (15min) - HEVC UHD - DASH MKPC (4 keys: SD/HD/FHD/UHD)
 5: PADDINGTON2 (15min) - HEVC UHD - DASH MKPC (5 keys: AU/SD/HD/FHD/UHD)
-6: Live SD/HD/FHD`;
+6: Live SD/HD/FHD
+7: Clear Tears of Steel demo`;
 
         const contentInfosElt = document.getElementById("contentInfos");
         contentInfosElt.style.border = "5px solid #555";
@@ -52,7 +53,7 @@
         window.player = player;
 
         const licenseServerUrl = "https://secure-webtv.canal-bis.com/WebPortal-vabf/TestDRMDASH/api/PlayReady";
-        function loadContent(url) {
+        function loadEncryptedContent(url) {
           player.loadVideo({
             url: url,
             transport: "dash",
@@ -78,34 +79,45 @@
             ],
           });
         }
+        function loadClearContent(url) {
+          player.loadVideo({
+            url: url,
+            transport: "dash",
+            autoPlay: true,
+          });
+        }
         document.addEventListener("keydown", (evt) => {
           if (evt.keyCode === 13 || evt.keyCode === 179) {
             togglePlayPause();
           }
           switch (evt.keyCode) {
             case 49: // 1
-              loadContent("https://dashmkpc-od-aka-canalplus.akamaized.net/tests/MKPC/FHD/index.mpd");
+              loadEncryptedContent("https://dashmkpc-od-aka-canalplus.akamaized.net/tests/MKPC/FHD/index.mpd");
               contentInfosElt.textContent = `1: VoD Multiple Keys PlayReady`;
             break;
             case 50: // 2
-              loadContent("https://dash-od-aka-canalplus.akamaized.net/MDRM/MKPC/CLEAR_AUDIO/H264/index.mpd");
+              loadEncryptedContent("https://dash-od-aka-canalplus.akamaized.net/MDRM/MKPC/CLEAR_AUDIO/H264/index.mpd");
               contentInfosElt.textContent = `2: PADDINGTON2 (15min) - H264 FHD - DASH MKPC (3 keys: SD/HD/FHD)`;
             break;
             case 51: // 3
-              loadContent("https://dashmkpc-od-aka-canalplus.akamaized.net/tests/MKPC/HD/HDVM20SME.mpd");
+              loadEncryptedContent("https://dashmkpc-od-aka-canalplus.akamaized.net/tests/MKPC/HD/HDVM20SME.mpd");
               contentInfosElt.textContent = `3: PADDINGTON2 (15min) - H264 FHD - DASH MKPC (4 keys: AU/SD/HD/FHD)`;
             break;
             case 52: // 4
-              loadContent("https://dash-od-aka-canalplus.akamaized.net/MDRM/MKPC/CLEAR_AUDIO/HEVC/SDR_CRYPT/index.mpd");
+              loadEncryptedContent("https://dash-od-aka-canalplus.akamaized.net/MDRM/MKPC/CLEAR_AUDIO/HEVC/SDR_CRYPT/index.mpd");
               contentInfosElt.textContent = `4: PADDINGTON2 (15min) - HEVC UHD - DASH MKPC (4 keys: SD/HD/FHD/UHD)`;
             break;
             case 53: // 5
-              loadContent("https://dashmkpc-od-aka-canalplus.akamaized.net/tests/MKPC/UHD/cplay_1188168_1_MKPC_UHD_SDR_SME.mpd");
+              loadEncryptedContent("https://dashmkpc-od-aka-canalplus.akamaized.net/tests/MKPC/UHD/cplay_1188168_1_MKPC_UHD_SDR_SME.mpd");
               contentInfosElt.textContent = `5: PADDINGTON2 (15min) - HEVC UHD - DASH MKPC (5 keys: AU/SD/HD/FHD/UHD)`;
             break;
             case 54: // 6
-              loadContent("https://dsh-m005-live-aka-canalplus.akamaized.net/live/disk/tvbreizh-hd/dash-fhddvr/tvbreizh-hd.mpd");
+              loadEncryptedContent("https://dsh-m005-live-aka-canalplus.akamaized.net/live/disk/tvbreizh-hd/dash-fhddvr/tvbreizh-hd.mpd");
               contentInfosElt.textContent = `6: Live SD/HD/FHD`;
+            break;
+            case 55: // 7
+              loadClearContent("https://www.bok.net/dash/tears_of_steel/cleartext/stream.mpd");
+              contentInfosElt.textContent = `7: Clear Tears of Steel demo`;
             break;
           }
         });
