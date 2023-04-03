@@ -7,6 +7,7 @@ import * as React from "react";
  */
 function Button({
   ariaLabel,
+  children,
   className = "",
   onClick,
   value,
@@ -14,9 +15,10 @@ function Button({
   title,
 }: {
   ariaLabel: string;
+  children?: JSX.Element[] | JSX.Element | string;
   className?: string;
   onClick: () => void;
-  value: string;
+  value?: string;
   disabled: boolean;
   title?: string;
 }): JSX.Element {
@@ -33,6 +35,7 @@ function Button({
     );
   }
 
+  const inner = children ?? value;
   return (
     <button
       aria-label={ariaLabel}
@@ -40,7 +43,7 @@ function Button({
       onClick={onClick}
       title={title}
     >
-      {value}
+      {inner}
     </button>
   );
 }

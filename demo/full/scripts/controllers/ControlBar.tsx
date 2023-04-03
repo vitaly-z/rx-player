@@ -10,6 +10,7 @@ import VolumeButton from "./VolumeButton";
 import VolumeBar from "./VolumeBar";
 import type { IPlayerModule } from "../modules/player/index";
 import useModuleState from "../lib/useModuleState";
+import StopButton from "../components/StopButton";
 
 const {
   useCallback,
@@ -101,11 +102,9 @@ function ControlBar({
           className={"control-button"}
           player={player}
         />
-        <Button
+        <StopButton
           className={"control-button"}
-          ariaLabel="Stop playback"
           onClick={stopVideo}
-          value={String.fromCharCode(0xf04d)}
           disabled={isStopped}
         />
         {
