@@ -2327,6 +2327,31 @@ var DEFAULT_CONFIG = {
    */
   SAMPLING_INTERVAL_NO_MEDIASOURCE: 500,
   /**
+   * Amount of buffer to have ahead of the current position before we may
+   * consider buffer-based adaptive estimates, in seconds.
+   *
+   * For example setting it to `10` means that we need to have ten seconds of
+   * buffer ahead of the current position before relying on buffer-based
+   * adaptive estimates.
+   *
+   * To avoid getting in-and-out of the buffer-based logic all the time, it
+   * should be set higher than `ABR_EXIT_BUFFER_BASED_ALGO`.
+   */
+  ABR_ENTER_BUFFER_BASED_ALGO: 10,
+  /**
+   * Below this amount of buffer ahead of the current position, in seconds, we
+   * will stop using buffer-based estimate in our adaptive logic to select a
+   * quality.
+   *
+   * For example setting it to `5` means that if we have less than 5 seconds of
+   * buffer ahead of the current position, we should stop relying on
+   * buffer-based estimates to choose a quality.
+   *
+   * To avoid getting in-and-out of the buffer-based logic all the time, it
+   * should be set lower than `ABR_ENTER_BUFFER_BASED_ALGO`.
+   */
+  ABR_EXIT_BUFFER_BASED_ALGO: 5,
+  /**
    * Minimum number of bytes sampled before we trust the estimate.
    * If we have not sampled much data, our estimate may not be accurate
    * enough to trust.
@@ -2361,8 +2386,8 @@ var DEFAULT_CONFIG = {
    * @type {Object}
    */
   ABR_REGULAR_FACTOR: {
-    DEFAULT: 0.8,
-    LOW_LATENCY: 0.8
+    DEFAULT: 0.72,
+    LOW_LATENCY: 0.72
   },
   /**
    * If a media buffer has less than ABR_STARVATION_GAP in seconds ahead of the
@@ -4515,6 +4540,7 @@ function _createAndTryToRetrievePersistentSession() {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
  * Close sessions from the loadedSessionsStore to allow at maximum `limit`
  * stored MediaKeySessions in it.
@@ -4540,6 +4566,7 @@ function _cleanOldLoadedSessions() {
             }
             return _context.abrupt("return");
           case 2:
+            log/* default.info */.Z.info("DRM: LSS cache limit exceeded", limit, loadedSessionsStore.getLength());
             proms = [];
             entries = loadedSessionsStore.getAll().slice(); // clone
             toDelete = entries.length - limit;
@@ -4547,9 +4574,9 @@ function _cleanOldLoadedSessions() {
               entry = entries[i];
               proms.push(loadedSessionsStore.closeSession(entry.mediaKeySession));
             }
-            _context.next = 8;
+            _context.next = 9;
             return Promise.all(proms);
-          case 8:
+          case 9:
           case "end":
             return _context.stop();
         }
@@ -5217,7 +5244,7 @@ function _loadSession() {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            log/* default.info */.Z.info("Compat/DRM: Load persisted session", sessionId);
+            log/* default.info */.Z.info("DRM: Load persisted session", sessionId);
             _context.next = 3;
             return session.load(sessionId);
           case 3:
@@ -5705,6 +5732,7 @@ var LoadedSessionsStore = /*#__PURE__*/function () {
   _proto.createSession = function createSession(initData, sessionType) {
     var _this = this;
     var keySessionRecord = new KeySessionRecord(initData);
+    log/* default.debug */.Z.debug("DRM-LSS: calling `createSession`", sessionType);
     var mediaKeySession = this._mediaKeys.createSession(sessionType);
     var entry = {
       mediaKeySession: mediaKeySession,
@@ -5718,6 +5746,7 @@ var LoadedSessionsStore = /*#__PURE__*/function () {
     };
     if (!(0,is_null_or_undefined/* default */.Z)(mediaKeySession.closed)) {
       mediaKeySession.closed.then(function () {
+        log/* default.info */.Z.info("DRM-LSS: session was closed, removing it.", mediaKeySession.sessionId);
         var index = _this.getIndex(keySessionRecord);
         if (index >= 0 && _this._storage[index].mediaKeySession === mediaKeySession) {
           _this._storage.splice(index, 1);
@@ -5727,8 +5756,8 @@ var LoadedSessionsStore = /*#__PURE__*/function () {
         log/* default.warn */.Z.warn("DRM-LSS: MediaKeySession.closed rejected: " + e);
       });
     }
-    log/* default.debug */.Z.debug("DRM-LSS: Add MediaKeySession", entry.sessionType);
     this._storage.push(Object.assign({}, entry));
+    log/* default.debug */.Z.debug("DRM-LSS: MediaKeySession added", entry.sessionType, this._storage.length);
     return entry;
   }
   /**
@@ -5749,6 +5778,7 @@ var LoadedSessionsStore = /*#__PURE__*/function () {
       if (stored.keySessionRecord.isCompatibleWith(initializationData)) {
         this._storage.splice(i, 1);
         this._storage.push(stored);
+        log/* default.debug */.Z.debug("DRM-LSS: Reusing session:", stored.mediaKeySession.sessionId, stored.sessionType);
         return Object.assign({}, stored);
       }
     }
@@ -6086,6 +6116,7 @@ var LoadedSessionsStore = /*#__PURE__*/function () {
     for (var i = this._storage.length - 1; i >= 0; i--) {
       var stored = this._storage[i];
       if (stored.mediaKeySession === mediaKeySession) {
+        log/* default.debug */.Z.debug("DRM-LSS: Removing session without closing it", mediaKeySession.sessionId);
         this._storage.splice(i, 1);
         return true;
       }
@@ -9257,7 +9288,7 @@ var DirectFileContentInitializer = /*#__PURE__*/function (_ContentInitializer) {
      * Class trying to avoid various stalling situations, emitting "stalled"
      * events when it cannot, as well as "unstalled" events when it get out of one.
      */
-    var rebufferingController = new _utils_rebuffering_controller__WEBPACK_IMPORTED_MODULE_6__/* ["default"] */ .Z(playbackObserver, null, speed);
+    var rebufferingController = new _utils_rebuffering_controller__WEBPACK_IMPORTED_MODULE_6__/* ["default"] */ .Z(playbackObserver, null, null, speed);
     rebufferingController.addEventListener("stalled", function (evt) {
       return _this2.trigger("stalled", evt);
     });
@@ -9938,6 +9969,9 @@ var ranges = __webpack_require__(2829);
 var task_canceller = __webpack_require__(288);
 ;// CONCATENATED MODULE: ./src/core/init/utils/rebuffering_controller.ts
 
+function _createForOfIteratorHelperLoose(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (it) return (it = it.call(o)).next.bind(it); if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; return function () { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -9980,11 +10014,12 @@ var RebufferingController = /*#__PURE__*/function (_EventEmitter) {
    * @param {Object} manifest - The Manifest of the currently-played content.
    * @param {Object} speed - The last speed set by the user
    */
-  function RebufferingController(playbackObserver, manifest, speed) {
+  function RebufferingController(playbackObserver, manifest, segmentBuffersStore, speed) {
     var _this;
     _this = _EventEmitter.call(this) || this;
     _this._playbackObserver = playbackObserver;
     _this._manifest = manifest;
+    _this._segmentBuffersStore = segmentBuffersStore;
     _this._speed = speed;
     _this._discontinuitiesStore = [];
     _this._isStarted = false;
@@ -10048,6 +10083,9 @@ var RebufferingController = /*#__PURE__*/function (_EventEmitter) {
         ignoredStallTimeStamp = now;
       }
       lastSeekingPosition = observation.seeking ? Math.max((_a = observation.pendingInternalSeek) !== null && _a !== void 0 ? _a : 0, observation.position) : null;
+      if (_this2._checkDecipherabilityFreeze(observation)) {
+        return;
+      }
       if (freezing !== null) {
         var _now = performance.now();
         var referenceTimestamp = prevFreezingState === null ? freezing.timestamp : prevFreezingState.attemptTimestamp;
@@ -10098,7 +10136,7 @@ var RebufferingController = /*#__PURE__*/function (_EventEmitter) {
           _this2.trigger("stalled", stalledReason);
           return;
         } else {
-          log/* default.warn */.Z.warn("Init: ignored stall for too long, checking discontinuity", _now2 - ignoredStallTimeStamp);
+          log/* default.warn */.Z.warn("Init: ignored stall for too long, considering it", _now2 - ignoredStallTimeStamp);
         }
       }
       ignoredStallTimeStamp = null;
@@ -10205,6 +10243,69 @@ var RebufferingController = /*#__PURE__*/function (_EventEmitter) {
    */;
   _proto.destroy = function destroy() {
     this._canceller.cancel();
+  }
+  /**
+   * Support of contents with DRM on all the platforms out there is a pain in
+   * the *ss considering all the DRM-related bugs there are.
+   *
+   * We found out a frequent issue which is to be unable to play despite having
+   * all the decryption keys to play what is currently buffered.
+   * When this happens, re-creating the buffers from scratch, with a reload, is
+   * usually sufficient to unlock the situation.
+   *
+   * Although we prefer providing more targeted fixes or telling to platform
+   * developpers to fix their implementation, it's not always possible.
+   * We thus resorted to developping an heuristic which detects such situation
+   * and reload in that case.
+   *
+   * @param {Object} observation - The last playback observation produced, it
+   * has to be recent (just triggered for example).
+   * @returns {boolean} - Returns `true` if it seems to be such kind of
+   * decipherability freeze, in which case this method already performed the
+   * right handling steps.
+   */;
+  _proto._checkDecipherabilityFreeze = function _checkDecipherabilityFreeze(observation) {
+    var readyState = observation.readyState,
+      rebuffering = observation.rebuffering,
+      freezing = observation.freezing;
+    var bufferGap = observation.bufferGap !== undefined && isFinite(observation.bufferGap) ? observation.bufferGap : 0;
+    if (this._segmentBuffersStore === null || bufferGap < 6 || rebuffering === null && freezing === null || readyState > 1) {
+      return false;
+    }
+    var now = performance.now();
+    var rebufferingForTooLong = rebuffering !== null && now - rebuffering.timestamp > 4000;
+    var frozenForTooLong = freezing !== null && now - freezing.timestamp > 4000;
+    if (rebufferingForTooLong || frozenForTooLong) {
+      var statusAudio = this._segmentBuffersStore.getStatus("audio");
+      var statusVideo = this._segmentBuffersStore.getStatus("video");
+      var hasOnlyDecipherableSegments = true;
+      var isClear = true;
+      for (var _i = 0, _arr = [statusAudio, statusVideo]; _i < _arr.length; _i++) {
+        var status = _arr[_i];
+        if (status.type === "initialized") {
+          for (var _iterator = _createForOfIteratorHelperLoose(status.value.getInventory()), _step; !(_step = _iterator()).done;) {
+            var segment = _step.value;
+            var representation = segment.infos.representation;
+            if (representation.decipherable === false) {
+              log/* default.warn */.Z.warn("Init: we have undecipherable segments left in the buffer, reloading");
+              this.trigger("needsReload", null);
+              return true;
+            } else if (representation.contentProtections !== undefined) {
+              isClear = false;
+              if (representation.decipherable !== true) {
+                hasOnlyDecipherableSegments = false;
+              }
+            }
+          }
+        }
+      }
+      if (!isClear && hasOnlyDecipherableSegments) {
+        log/* default.warn */.Z.warn("Init: we are frozen despite only having decipherable " + "segments left in the buffer, reloading");
+        this.trigger("needsReload", null);
+        return true;
+      }
+    }
+    return false;
   };
   return RebufferingController;
 }(event_emitter/* default */.Z);
@@ -15672,8 +15773,8 @@ function updateDeciperability(manifest, isDecipherable) {
             adaptation: adaptation,
             representation: representation
           });
-          log/* default.debug */.Z.debug("Decipherability changed for \"" + representation.id + "\"", "(" + representation.bitrate + ")", String(representation.decipherable));
           representation.decipherable = result;
+          log/* default.debug */.Z.debug("Decipherability changed for \"" + representation.id + "\"", "(" + representation.bitrate + ")", String(representation.decipherable));
         }
       }
     }
@@ -24889,7 +24990,12 @@ function applyExtent(element, extent) {
       log/* default.warn */.Z.warn("TTML Parser: unhandled extent unit:", firstExtent[2]);
     }
     if (secondExtent[2] === "px" || secondExtent[2] === "%" || secondExtent[2] === "em") {
-      element.style.height = secondExtent[1] + secondExtent[2];
+      var toNum = Number(secondExtent[1]);
+      if (secondExtent[2] === "%" && !isNaN(toNum) && (toNum < 0 || toNum > 100)) {
+        element.style.width = "80%";
+      } else {
+        element.style.height = secondExtent[1] + secondExtent[2];
+      }
     } else if (secondExtent[2] === "c") {
       addClassName(element, "proportional-style");
       element.setAttribute("data-proportional-height", secondExtent[1]);
@@ -25036,7 +25142,13 @@ function applyOrigin(element, origin) {
       log/* default.warn */.Z.warn("TTML Parser: unhandled origin unit:", firstOrigin[2]);
     }
     if (secondOrigin[2] === "px" || secondOrigin[2] === "%" || secondOrigin[2] === "em") {
-      element.style.top = secondOrigin[1] + secondOrigin[2];
+      var toNum = Number(secondOrigin[1]);
+      if (secondOrigin[2] === "%" && !isNaN(toNum) && (toNum < 0 || toNum > 100)) {
+        element.style.bottom = "5%";
+        element.style.left = "10%";
+      } else {
+        element.style.top = secondOrigin[1] + secondOrigin[2];
+      }
     } else if (secondOrigin[2] === "c") {
       addClassName(element, "proportional-style");
       element.setAttribute("data-proportional-top", secondOrigin[1]);
@@ -34905,7 +35017,7 @@ function isNonEmptyString(x) {
  * not always understood by newcomers to the code, and which can be overused when
  * only one of the possibility can arise.
  * @param {*} x
- * @returns {*}
+ * @returns {boolean}
  */
 function isNullOrUndefined(x) {
   return x === null || x === undefined;
@@ -38596,6 +38708,45 @@ function getBufferLevels(bitrates) {
 
 
 /**
+ * Minimum amount of time, in milliseconds, during which we are blocked from
+ * raising in quality after it had been considered as too high.
+ */
+var MINIMUM_BLOCK_RAISE_DELAY = 6000;
+/**
+ * Maximum amount of time, in milliseconds, during which we are blocked from
+ * raising in quality after it had been considered as too high.
+ */
+var MAXIMUM_BLOCK_RAISE_DELAY = 15000;
+/**
+ * Amount of time, in milliseconds, with which the blocking time in raising
+ * the quality will be incremented if the current quality estimate is seen
+ * as too unstable.
+ */
+var RAISE_BLOCKING_DELAY_INCREMENT = 3000;
+/**
+ * Amount of time, in milliseconds, with which the blocking time in raising
+ * the quality will be dcremented if the current quality estimate is seen
+ * as relatively stable, until `MINIMUM_BLOCK_RAISE_DELAY` is reached.
+ */
+var RAISE_BLOCKING_DELAY_DECREMENT = 1000;
+/**
+ * Amount of time, in milliseconds, after the "raise blocking delay" currently
+ * in place (during which it is forbidden to raise up in quality), during which
+ * we might want to raise the "raise blocking delay" if the last chosen quality
+ * seems unsuitable.
+ *
+ * For example, let's consider that the current raise blocking delay is at
+ * `4000`, or 4 seconds, and that this `STABILITY_CHECK_DELAY` is at `5000`, or
+ * 5 seconds.
+ * Here it means that if the estimated quality is found to be unsuitable less
+ * than 4+5 = 9 seconds after it last was, we will increment the raise blocking
+ * delay by `RAISE_BLOCKING_DELAY_INCREMENT` (unless `MAXIMUM_BLOCK_RAISE_DELAY`
+ * is reached).
+ * Else, if takes more than 9 seconds, the raise blocking delay might be
+ * decremented.
+ */
+var STABILITY_CHECK_DELAY = 9000;
+/**
  * Choose a bitrate based on the currently available buffer.
  *
  * This algorithm is based on a deviation of the BOLA algorithm.
@@ -38606,6 +38757,8 @@ function getBufferLevels(bitrates) {
  * "maintanable" or not.
  * If so, we may switch to a better quality, or conversely to a worse quality.
  *
+ * It also rely on mechanisms to avoid fluctuating too much between qualities.
+ *
  * @class BufferBasedChooser
  */
 var BufferBasedChooser = /*#__PURE__*/function () {
@@ -38613,8 +38766,14 @@ var BufferBasedChooser = /*#__PURE__*/function () {
    * @param {Array.<number>} bitrates
    */
   function BufferBasedChooser(bitrates) {
-    this._levelsMap = getBufferLevels(bitrates);
+    this._levelsMap = getBufferLevels(bitrates).map(function (bl) {
+      return bl + 4; // Add some buffer security as it will be used conjointly with
+      // other algorithms anyway
+    });
+
     this._bitrates = bitrates;
+    this._lastUnsuitableQualityTimestamp = undefined;
+    this._blockRaiseDelay = MINIMUM_BLOCK_RAISE_DELAY;
     log/* default.debug */.Z.debug("ABR: Steps for buffer based chooser.", this._levelsMap.map(function (l, i) {
       return "bufferLevel: " + l + ", bitrate: " + bitrates[i];
     }).join(" ,"));
@@ -38634,42 +38793,65 @@ var BufferBasedChooser = /*#__PURE__*/function () {
     if (currentBitrate == null) {
       return bitrates[0];
     }
-    var currentBitrateIndex = (0,array_find_index/* default */.Z)(bitrates, function (b) {
-      return b === currentBitrate;
-    });
+    var currentBitrateIndex = -1;
+    for (var i = 0; i < bitrates.length; i++) {
+      // There could be bitrate duplicates. Only take the last one to simplify
+      var bitrate = bitrates[i];
+      if (bitrate === currentBitrate) {
+        currentBitrateIndex = i;
+      } else if (bitrate > currentBitrate) {
+        break;
+      }
+    }
     if (currentBitrateIndex < 0 || bitrates.length !== bufferLevels.length) {
       log/* default.error */.Z.error("ABR: Current Bitrate not found in the calculated levels");
       return bitrates[0];
     }
     var scaledScore;
-    if (currentScore != null) {
-      scaledScore = speed === 0 ? currentScore : currentScore / speed;
+    if (currentScore !== undefined) {
+      scaledScore = speed === 0 ? currentScore.score : currentScore.score / speed;
     }
-    if (scaledScore != null && scaledScore > 1) {
-      var currentBufferLevel = bufferLevels[currentBitrateIndex];
-      var nextIndex = function () {
-        for (var i = currentBitrateIndex + 1; i < bufferLevels.length; i++) {
-          if (bufferLevels[i] > currentBufferLevel) {
-            return i;
-          }
-        }
-      }();
-      if (nextIndex != null) {
-        var nextBufferLevel = bufferLevels[nextIndex];
-        if (bufferGap >= nextBufferLevel) {
-          return bitrates[nextIndex];
+    var actualBufferGap = isFinite(bufferGap) ? bufferGap : 0;
+    var now = performance.now();
+    if (actualBufferGap < bufferLevels[currentBitrateIndex] || scaledScore !== undefined && scaledScore < 1 && (currentScore === null || currentScore === void 0 ? void 0 : currentScore.confidenceLevel) === 1 /* ScoreConfidenceLevel.HIGH */) {
+      var timeSincePrev = this._lastUnsuitableQualityTimestamp === undefined ? -1 : now - this._lastUnsuitableQualityTimestamp;
+      if (timeSincePrev < this._blockRaiseDelay + STABILITY_CHECK_DELAY) {
+        var newDelay = this._blockRaiseDelay + RAISE_BLOCKING_DELAY_INCREMENT;
+        this._blockRaiseDelay = Math.min(newDelay, MAXIMUM_BLOCK_RAISE_DELAY);
+        log/* default.debug */.Z.debug("ABR: Incrementing blocking raise in BufferBasedChooser due " + "to unstable quality", this._blockRaiseDelay);
+      } else {
+        var _newDelay = this._blockRaiseDelay - RAISE_BLOCKING_DELAY_DECREMENT;
+        this._blockRaiseDelay = Math.max(MINIMUM_BLOCK_RAISE_DELAY, _newDelay);
+        log/* default.debug */.Z.debug("ABR: Lowering quality in BufferBasedChooser", this._blockRaiseDelay);
+      }
+      this._lastUnsuitableQualityTimestamp = now;
+      // Security if multiple bitrates are equal, we now take the first one
+      var baseIndex = (0,array_find_index/* default */.Z)(bitrates, function (b) {
+        return b === currentBitrate;
+      });
+      for (var _i = baseIndex - 1; _i >= 0; _i--) {
+        if (actualBufferGap >= bufferLevels[_i]) {
+          return bitrates[_i];
         }
       }
+      return bitrates[0];
     }
-    if (scaledScore == null || scaledScore < 1.15) {
-      var _currentBufferLevel = bufferLevels[currentBitrateIndex];
-      if (bufferGap < _currentBufferLevel) {
-        for (var i = currentBitrateIndex - 1; i >= 0; i--) {
-          if (bitrates[i] < currentBitrate) {
-            return bitrates[i];
-          }
+    if (this._lastUnsuitableQualityTimestamp !== undefined && now - this._lastUnsuitableQualityTimestamp < this._blockRaiseDelay || scaledScore === undefined || scaledScore < 1.15 || (currentScore === null || currentScore === void 0 ? void 0 : currentScore.confidenceLevel) !== 1 /* ScoreConfidenceLevel.HIGH */) {
+      return currentBitrate;
+    }
+    var currentBufferLevel = bufferLevels[currentBitrateIndex];
+    var nextIndex = function () {
+      for (var _i2 = currentBitrateIndex + 1; _i2 < bufferLevels.length; _i2++) {
+        if (bufferLevels[_i2] > currentBufferLevel) {
+          return _i2;
         }
-        return currentBitrate;
+      }
+    }();
+    if (nextIndex !== undefined) {
+      var nextBufferLevel = bufferLevels[nextIndex];
+      if (bufferGap >= nextBufferLevel) {
+        log/* default.debug */.Z.debug("ABR: Raising quality in BufferBasedChooser", bitrates[nextIndex]);
+        return bitrates[nextIndex];
       }
     }
     return currentBitrate;
@@ -38864,6 +39046,12 @@ function estimateStarvationModeBitrate(pendingRequests, playbackInfo, currentRep
   }
   var concernedRequest = concernedRequests[0];
   var now = performance.now();
+  var minimumRequestTime = concernedRequest.content.segment.duration * 1.5;
+  minimumRequestTime = Math.min(minimumRequestTime, 3000);
+  minimumRequestTime = Math.max(minimumRequestTime, 12000);
+  if (now - concernedRequest.requestTimestamp < minimumRequestTime) {
+    return undefined;
+  }
   var lastProgressEvent = concernedRequest.progress.length > 0 ? concernedRequest.progress[concernedRequest.progress.length - 1] : undefined;
   // first, try to do a quick estimate from progress events
   var bandwidthEstimate = estimateRequestBandwidth(concernedRequest);
@@ -38873,7 +39061,7 @@ function estimateStarvationModeBitrate(pendingRequests, playbackInfo, currentRep
     if ((now - lastProgressEvent.timestamp) / 1000 <= remainingTime) {
       // Calculate estimated time spent rebuffering if we continue doing that request.
       var expectedRebufferingTime = remainingTime - realBufferGap / speed;
-      if (expectedRebufferingTime > 2000) {
+      if (expectedRebufferingTime > 2500) {
         return bandwidthEstimate;
       }
     }
@@ -39048,10 +39236,8 @@ var NetworkAnalyzer = /*#__PURE__*/function () {
   _proto.isUrgent = function isUrgent(bitrate, currentRepresentation, currentRequests, playbackInfo) {
     if (currentRepresentation === null) {
       return true;
-    } else if (bitrate === currentRepresentation.bitrate) {
+    } else if (bitrate >= currentRepresentation.bitrate) {
       return false;
-    } else if (bitrate > currentRepresentation.bitrate) {
-      return !this._inStarvationMode;
     }
     return shouldDirectlySwitchToLowBitrate(playbackInfo, currentRequests, this._lowLatencyMode);
   };
@@ -39193,9 +39379,9 @@ var GuessBasedChooser = /*#__PURE__*/function () {
    * @returns {boolean}
    */;
   _proto._canGuessHigher = function _canGuessHigher(bufferGap, speed, _ref) {
-    var score = _ref[0],
-      scoreConfidenceLevel = _ref[1];
-    return isFinite(bufferGap) && bufferGap >= 2.5 && performance.now() > this._blockGuessesUntil && scoreConfidenceLevel === 1 /* ScoreConfidenceLevel.HIGH */ && score / speed > 1.01;
+    var score = _ref.score,
+      confidenceLevel = _ref.confidenceLevel;
+    return isFinite(bufferGap) && bufferGap >= 2.5 && performance.now() > this._blockGuessesUntil && confidenceLevel === 1 /* ScoreConfidenceLevel.HIGH */ && score / speed > 1.01;
   }
   /**
    * Returns `true` if the pending guess of `lastGuess` seems to not
@@ -39207,9 +39393,9 @@ var GuessBasedChooser = /*#__PURE__*/function () {
    * @returns {boolean}
    */;
   _proto._shouldStopGuess = function _shouldStopGuess(lastGuess, scoreData, bufferGap, requests) {
-    if (scoreData !== undefined && scoreData[0] < 1.01) {
+    if (scoreData !== undefined && scoreData.score < 1.01) {
       return true;
-    } else if ((scoreData === undefined || scoreData[0] < 1.2) && bufferGap < 0.6) {
+    } else if ((scoreData === undefined || scoreData.score < 1.2) && bufferGap < 0.6) {
       return true;
     }
     var guessedRepresentationRequests = requests.filter(function (req) {
@@ -39235,7 +39421,7 @@ var GuessBasedChooser = /*#__PURE__*/function () {
     return false;
   };
   _proto._isLastGuessValidated = function _isLastGuessValidated(lastGuess, incomingBestBitrate, scoreData) {
-    if (scoreData !== undefined && scoreData[1] === 1 /* ScoreConfidenceLevel.HIGH */ && scoreData[0] > 1.5) {
+    if (scoreData !== undefined && scoreData.confidenceLevel === 1 /* ScoreConfidenceLevel.HIGH */ && scoreData.score > 1.5) {
       return true;
     }
     return incomingBestBitrate >= lastGuess.bitrate && (this._lastMaintanableBitrate === null || this._lastMaintanableBitrate < lastGuess.bitrate);
@@ -39684,7 +39870,10 @@ var RepresentationScoreCalculator = /*#__PURE__*/function () {
       loadedDuration = _this$_currentReprese.loadedDuration;
     var estimate = ewma.getEstimate();
     var confidenceLevel = loadedSegments >= 5 && loadedDuration >= 10 ? 1 /* ScoreConfidenceLevel.HIGH */ : 0 /* ScoreConfidenceLevel.LOW */;
-    return [estimate, confidenceLevel];
+    return {
+      score: estimate,
+      confidenceLevel: confidenceLevel
+    };
   }
   /**
    * Returns last Representation which had reached a score superior to 1.
@@ -39761,6 +39950,7 @@ function selectOptimalRepresentation(representations, optimalBitrate, minBitrate
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 
 
 
@@ -40003,8 +40193,7 @@ function getEstimateReference(_ref, stopAllEstimates) {
       var timeRanges = val.buffered;
       var bufferGap = (0,ranges/* getLeftSizeOfRange */.L7)(timeRanges, position.last);
       var representation = val.content.representation;
-      var scoreData = scoreCalculator.getEstimate(representation);
-      var currentScore = scoreData === null || scoreData === void 0 ? void 0 : scoreData[0];
+      var currentScore = scoreCalculator.getEstimate(representation);
       var currentBitrate = representation.bitrate;
       var observation = {
         bufferGap: bufferGap,
@@ -40049,9 +40238,12 @@ function getEstimateReference(_ref, stopAllEstimates) {
         bitrateChosen = _networkAnalyzer$getB.bitrateChosen;
       var stableRepresentation = scoreCalculator.getLastStableRepresentation();
       var knownStableBitrate = stableRepresentation === null ? undefined : stableRepresentation.bitrate / (lastPlaybackObservation.speed > 0 ? lastPlaybackObservation.speed : 1);
-      if (allowBufferBasedEstimates && bufferGap <= 5) {
+      var _config$getCurrent = config/* default.getCurrent */.Z.getCurrent(),
+        ABR_ENTER_BUFFER_BASED_ALGO = _config$getCurrent.ABR_ENTER_BUFFER_BASED_ALGO,
+        ABR_EXIT_BUFFER_BASED_ALGO = _config$getCurrent.ABR_EXIT_BUFFER_BASED_ALGO;
+      if (allowBufferBasedEstimates && bufferGap <= ABR_EXIT_BUFFER_BASED_ALGO) {
         allowBufferBasedEstimates = false;
-      } else if (!allowBufferBasedEstimates && isFinite(bufferGap) && bufferGap > 10) {
+      } else if (!allowBufferBasedEstimates && isFinite(bufferGap) && bufferGap >= ABR_ENTER_BUFFER_BASED_ALGO) {
         allowBufferBasedEstimates = true;
       }
       /**
@@ -47519,7 +47711,7 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
           var nextPeriod = manifest.getPeriodAfter(basePeriod);
           if (nextPeriod !== null) {
             // current Stream is full, create the next one if not
-            createNextPeriodStream(nextPeriod);
+            checkOrCreateNextPeriodStream(nextPeriod);
           }
         } else if (nextStreamInfo !== null) {
           // current Stream is active, destroy next Stream if created
@@ -47547,9 +47739,12 @@ function StreamOrchestrator(content, playbackObserver, representationEstimator, 
      * Create `PeriodStream` for the next Period, specified under `nextPeriod`.
      * @param {Object} nextPeriod
      */
-    function createNextPeriodStream(nextPeriod) {
+    function checkOrCreateNextPeriodStream(nextPeriod) {
       if (nextStreamInfo !== null) {
-        log/* default.warn */.Z.warn("Stream: Creating next `PeriodStream` while it was already created.");
+        if (nextStreamInfo.period.id === nextPeriod.id) {
+          return;
+        }
+        log/* default.warn */.Z.warn("Stream: Creating next `PeriodStream` while one was already created.", bufferType, nextPeriod.id, nextStreamInfo.period.id);
         consecutivePeriodStreamCb.periodStreamCleared({
           type: bufferType,
           period: nextStreamInfo.period
@@ -47698,16 +47893,21 @@ var ContentTimeBoundariesObserver = /*#__PURE__*/function (_EventEmitter) {
       clearSignal: cancelSignal
     });
     manifest.addEventListener("manifestUpdate", function () {
-      _this.trigger("durationUpdate", getManifestDuration());
+      _this.trigger("durationUpdate", _this._getManifestDuration());
       if (cancelSignal.isCancelled()) {
         return;
       }
       _this._checkEndOfStream();
     }, cancelSignal);
-    function getManifestDuration() {
-      return manifest.isDynamic ? maximumPositionCalculator.getMaximumAvailablePosition() : maximumPositionCalculator.getEndingPosition();
-    }
     return _this;
+  }
+  /**
+   * Returns an estimate of the current duration of the content.
+   * @returns {Object}
+   */
+  var _proto = ContentTimeBoundariesObserver.prototype;
+  _proto.getCurrentDuration = function getCurrentDuration() {
+    return this._getManifestDuration();
   }
   /**
    * Method to call any time an Adaptation has been selected.
@@ -47721,8 +47921,7 @@ var ContentTimeBoundariesObserver = /*#__PURE__*/function (_EventEmitter) {
    * @param {Object|null} adaptation - The Adaptation selected. `null` if the
    * absence of `Adaptation` has been explicitely selected for this Period and
    * buffer type (e.g. no video).
-   */
-  var _proto = ContentTimeBoundariesObserver.prototype;
+   */;
   _proto.onAdaptationChange = function onAdaptationChange(bufferType, period, adaptation) {
     if (this._manifest.isLastPeriodKnown) {
       var lastPeriod = this._manifest.periods[this._manifest.periods.length - 1];
@@ -47733,7 +47932,14 @@ var ContentTimeBoundariesObserver = /*#__PURE__*/function (_EventEmitter) {
           } else {
             this._maximumPositionCalculator.updateLastVideoAdaptation(adaptation);
           }
-          var newDuration = this._manifest.isDynamic ? this._maximumPositionCalculator.getMaximumAvailablePosition() : this._maximumPositionCalculator.getEndingPosition();
+          var endingPosition = this._maximumPositionCalculator.getEndingPosition();
+          var newDuration = endingPosition !== undefined ? {
+            isEnd: true,
+            duration: endingPosition
+          } : {
+            isEnd: false,
+            duration: this._maximumPositionCalculator.getMaximumAvailablePosition()
+          };
           this.trigger("durationUpdate", newDuration);
         }
       }
@@ -47872,6 +48078,16 @@ var ContentTimeBoundariesObserver = /*#__PURE__*/function (_EventEmitter) {
       var _ret = _loop();
       if (typeof _ret === "object") return _ret.v;
     }
+  };
+  _proto._getManifestDuration = function _getManifestDuration() {
+    var endingPosition = this._maximumPositionCalculator.getEndingPosition();
+    return endingPosition !== undefined ? {
+      isEnd: true,
+      duration: endingPosition
+    } : {
+      isEnd: false,
+      duration: this._maximumPositionCalculator.getMaximumAvailablePosition()
+    };
   };
   _proto._lazilyCreateActiveStreamInfo = function _lazilyCreateActiveStreamInfo(bufferType) {
     var streamInfo = this._activeStreams.get(bufferType);
@@ -48474,7 +48690,7 @@ var get_loaded_reference = __webpack_require__(1757);
 var initial_seek_and_play = __webpack_require__(8833);
 // EXTERNAL MODULE: ./src/core/init/utils/initialize_content_decryption.ts + 1 modules
 var initialize_content_decryption = __webpack_require__(8799);
-;// CONCATENATED MODULE: ./src/core/init/utils/media_duration_updater.ts
+;// CONCATENATED MODULE: ./src/core/init/utils/media_source_duration_updater.ts
 /**
  * Copyright 2015 CANAL+ Group
  *
@@ -48497,96 +48713,87 @@ var initialize_content_decryption = __webpack_require__(8799);
 /** Number of seconds in a regular year. */
 var YEAR_IN_SECONDS = 365 * 24 * 3600;
 /**
- * Keep the MediaSource's duration up-to-date with what is being played.
- * @class MediaDurationUpdater
+ * Keep the MediaSource's `duration` attribute up-to-date with the duration of
+ * the content played on it.
+ * @class MediaSourceDurationUpdater
  */
-var MediaDurationUpdater = /*#__PURE__*/function () {
+var MediaSourceDurationUpdater = /*#__PURE__*/function () {
   /**
-   * Create a new `MediaDurationUpdater` that will keep the given MediaSource's
-   * duration as soon as possible.
-   * This duration will be updated until the `stop` method is called.
-   * @param {Object} manifest - The Manifest currently played.
-   * For another content, you will have to create another `MediaDurationUpdater`.
+   * Create a new `MediaSourceDurationUpdater`,
    * @param {MediaSource} mediaSource - The MediaSource on which the content is
-   * pushed.
+   * played.
    */
-  function MediaDurationUpdater(manifest, mediaSource) {
-    var canceller = new task_canceller/* default */.ZP();
-    var currentKnownDuration = (0,reference/* default */.ZP)(undefined, canceller.signal);
-    this._canceller = canceller;
-    this._currentKnownDuration = currentKnownDuration;
-    var isMediaSourceOpened = createMediaSourceOpenReference(mediaSource, this._canceller.signal);
-    /** TaskCanceller triggered each time the MediaSource open status changes. */
-    var msUpdateCanceller = new task_canceller/* default */.ZP();
-    msUpdateCanceller.linkToSignal(this._canceller.signal);
+  function MediaSourceDurationUpdater(mediaSource) {
+    this._mediaSource = mediaSource;
+    this._currentMediaSourceDurationUpdateCanceller = null;
+  }
+  /**
+   * Indicate to the `MediaSourceDurationUpdater` the currently known duration
+   * of the content.
+   *
+   * The `MediaSourceDurationUpdater` will then use that value to determine
+   * which `duration` attribute should be set on the `MediaSource` associated
+   *
+   * @param {number} newDuration
+   * @param {boolean} addTimeMargin - If set to `true`, the current content is
+   * a dynamic content (it might evolve in the future) and the `newDuration`
+   * communicated might be greater still. In effect the
+   * `MediaSourceDurationUpdater` will actually set a much higher value to the
+   * `MediaSource`'s duration to prevent being annoyed by the HTML-related
+   * side-effects of having a too low duration (such as the impossibility to
+   * seek over that value).
+   */
+  var _proto = MediaSourceDurationUpdater.prototype;
+  _proto.updateDuration = function updateDuration(newDuration, addTimeMargin) {
+    if (this._currentMediaSourceDurationUpdateCanceller !== null) {
+      this._currentMediaSourceDurationUpdateCanceller.cancel();
+    }
+    this._currentMediaSourceDurationUpdateCanceller = new task_canceller/* default */.ZP();
+    var mediaSource = this._mediaSource;
+    var currentSignal = this._currentMediaSourceDurationUpdateCanceller.signal;
+    var isMediaSourceOpened = createMediaSourceOpenReference(mediaSource, currentSignal);
+    /** TaskCanceller triggered each time the MediaSource switches to and from "open". */
+    var msOpenStatusCanceller = new task_canceller/* default */.ZP();
+    msOpenStatusCanceller.linkToSignal(currentSignal);
     isMediaSourceOpened.onUpdate(onMediaSourceOpenedStatusChanged, {
       emitCurrentValue: true,
-      clearSignal: this._canceller.signal
+      clearSignal: currentSignal
     });
     function onMediaSourceOpenedStatusChanged() {
-      msUpdateCanceller.cancel();
+      msOpenStatusCanceller.cancel();
       if (!isMediaSourceOpened.getValue()) {
         return;
       }
-      msUpdateCanceller = new task_canceller/* default */.ZP();
-      msUpdateCanceller.linkToSignal(canceller.signal);
-      /** TaskCanceller triggered each time the content's duration may have changed */
-      var durationChangeCanceller = new task_canceller/* default */.ZP();
-      durationChangeCanceller.linkToSignal(msUpdateCanceller.signal);
-      var reSetDuration = function reSetDuration() {
-        durationChangeCanceller.cancel();
-        durationChangeCanceller = new task_canceller/* default */.ZP();
-        durationChangeCanceller.linkToSignal(msUpdateCanceller.signal);
-        onDurationMayHaveChanged(durationChangeCanceller.signal);
-      };
-      currentKnownDuration.onUpdate(reSetDuration, {
-        emitCurrentValue: false,
-        clearSignal: msUpdateCanceller.signal
-      });
-      manifest.addEventListener("manifestUpdate", reSetDuration, msUpdateCanceller.signal);
-      onDurationMayHaveChanged(durationChangeCanceller.signal);
-    }
-    function onDurationMayHaveChanged(cancelSignal) {
-      var areSourceBuffersUpdating = createSourceBuffersUpdatingReference(mediaSource.sourceBuffers, cancelSignal);
+      msOpenStatusCanceller = new task_canceller/* default */.ZP();
+      msOpenStatusCanceller.linkToSignal(currentSignal);
+      var areSourceBuffersUpdating = createSourceBuffersUpdatingReference(mediaSource.sourceBuffers, msOpenStatusCanceller.signal);
       /** TaskCanceller triggered each time SourceBuffers' updating status changes */
       var sourceBuffersUpdatingCanceller = new task_canceller/* default */.ZP();
-      sourceBuffersUpdatingCanceller.linkToSignal(cancelSignal);
+      sourceBuffersUpdatingCanceller.linkToSignal(msOpenStatusCanceller.signal);
       return areSourceBuffersUpdating.onUpdate(function (areUpdating) {
         sourceBuffersUpdatingCanceller.cancel();
         sourceBuffersUpdatingCanceller = new task_canceller/* default */.ZP();
-        sourceBuffersUpdatingCanceller.linkToSignal(cancelSignal);
+        sourceBuffersUpdatingCanceller.linkToSignal(msOpenStatusCanceller.signal);
         if (areUpdating) {
           return;
         }
-        recursivelyForceDurationUpdate(mediaSource, manifest, currentKnownDuration.getValue(), cancelSignal);
+        recursivelyForceDurationUpdate(mediaSource, newDuration, addTimeMargin, sourceBuffersUpdatingCanceller.signal);
       }, {
-        clearSignal: cancelSignal,
+        clearSignal: msOpenStatusCanceller.signal,
         emitCurrentValue: true
       });
     }
   }
   /**
-   * By default, the `MediaDurationUpdater` only set a safe estimate for the
-   * MediaSource's duration.
-   * A more precize duration can be set by communicating to it a more precize
-   * media duration through `updateKnownDuration`.
-   * If the duration becomes unknown, `undefined` can be given to it so the
-   * `MediaDurationUpdater` goes back to a safe estimate.
-   * @param {number | undefined} newDuration
-   */
-  var _proto = MediaDurationUpdater.prototype;
-  _proto.updateKnownDuration = function updateKnownDuration(newDuration) {
-    this._currentKnownDuration.setValueIfChanged(newDuration);
-  }
-  /**
-   * Stop the `MediaDurationUpdater` from updating and free its resources.
-   * Once stopped, it is not possible to start it again, beside creating another
-   * `MediaDurationUpdater`.
+   * Abort the last duration-setting operation and free its resources.
    */;
-  _proto.stop = function stop() {
-    this._canceller.cancel();
+  _proto.stopUpdating = function stopUpdating() {
+    if (this._currentMediaSourceDurationUpdateCanceller !== null) {
+      this._currentMediaSourceDurationUpdateCanceller.cancel();
+      this._currentMediaSourceDurationUpdateCanceller = null;
+    }
   };
-  return MediaDurationUpdater;
+  return MediaSourceDurationUpdater;
 }();
 /**
  * Checks that duration can be updated on the MediaSource, and then
@@ -48597,27 +48804,21 @@ var MediaDurationUpdater = /*#__PURE__*/function () {
  *   - `null` if it hasn'nt been updated
  *
  * @param {MediaSource} mediaSource
- * @param {Object} manifest
+ * @param {number} duration
+ * @param {boolean} addTimeMargin
  * @returns {string}
  */
 
-function setMediaSourceDuration(mediaSource, manifest, knownDuration) {
-  var _a;
-  var newDuration = knownDuration;
-  if (newDuration === undefined) {
-    if (manifest.isDynamic) {
-      newDuration = (_a = manifest.getLivePosition()) !== null && _a !== void 0 ? _a : manifest.getMaximumSafePosition();
-    } else {
-      newDuration = manifest.getMaximumSafePosition();
-    }
-  }
-  if (manifest.isDynamic) {
+function setMediaSourceDuration(mediaSource, duration, addTimeMargin) {
+  var newDuration = duration;
+  if (addTimeMargin) {
     // Some targets poorly support setting a very high number for durations.
-    // Yet, in dynamic contents, we would prefer setting a value as high as possible
-    // to still be able to seek anywhere we want to (even ahead of the Manifest if
-    // we want to). As such, we put it at a safe default value of 2^32 excepted
-    // when the maximum position is already relatively close to that value, where
-    // we authorize exceptionally going over it.
+    // Yet, in contents whose end is not yet known (e.g. live contents), we
+    // would prefer setting a value as high as possible to still be able to
+    // seek anywhere we want to (even ahead of the Manifest if we want to).
+    // As such, we put it at a safe default value of 2^32 excepted when the
+    // maximum position is already relatively close to that value, where we
+    // authorize exceptionally going over it.
     newDuration = Math.max(Math.pow(2, 32), newDuration + YEAR_IN_SECONDS);
   }
   var maxBufferedEnd = 0;
@@ -48724,23 +48925,23 @@ function createMediaSourceOpenReference(mediaSource, cancelSignal) {
 }
 /**
  * Immediately tries to set the MediaSource's duration to the most appropriate
- * one according to the Manifest and duration given.
+ * one.
  *
  * If it fails, wait 2 seconds and retries.
  *
  * @param {MediaSource} mediaSource
- * @param {Object} manifest
- * @param {number|undefined} duration
+ * @param {number} duration
+ * @param {boolean} addTimeMargin
  * @param {Object} cancelSignal
  */
-function recursivelyForceDurationUpdate(mediaSource, manifest, duration, cancelSignal) {
-  var res = setMediaSourceDuration(mediaSource, manifest, duration);
+function recursivelyForceDurationUpdate(mediaSource, duration, addTimeMargin, cancelSignal) {
+  var res = setMediaSourceDuration(mediaSource, duration, addTimeMargin);
   if (res === "success" /* MediaSourceDurationUpdateStatus.Success */) {
     return;
   }
   var timeoutId = setTimeout(function () {
     unregisterClear();
-    recursivelyForceDurationUpdate(mediaSource, manifest, duration, cancelSignal);
+    recursivelyForceDurationUpdate(mediaSource, duration, addTimeMargin, cancelSignal);
   }, 2000);
   var unregisterClear = cancelSignal.register(function () {
     clearTimeout(timeoutId);
@@ -49415,7 +49616,17 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
       speed: speed,
       startTime: initialTime
     });
-    var rebufferingController = this._createRebufferingController(playbackObserver, manifest, speed, cancelSignal);
+    var rebufferingController = this._createRebufferingController(playbackObserver, manifest, segmentBuffersStore, speed, cancelSignal);
+    rebufferingController.addEventListener("needsReload", function () {
+      // NOTE couldn't both be always calculated at event destination?
+      // Maybe there are exceptions?
+      var position = initialSeekPerformed.getValue() ? playbackObserver.getCurrentTime() : initialTime;
+      var autoplay = initialPlayPerformed.getValue() ? !playbackObserver.getIsPaused() : autoPlay;
+      onReloadOrder({
+        position: position,
+        autoPlay: autoplay
+      });
+    }, cancelSignal);
     var contentTimeBoundariesObserver = this._createContentTimeBoundariesObserver(manifest, mediaSource, streamObserver, segmentBuffersStore, cancelSignal);
     /**
      * Emit a "loaded" events once the initial play has been performed and the
@@ -49592,9 +49803,9 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
   _proto._createContentTimeBoundariesObserver = function _createContentTimeBoundariesObserver(manifest, mediaSource, streamObserver, segmentBuffersStore, cancelSignal) {
     var _this7 = this;
     /** Maintains the MediaSource's duration up-to-date with the Manifest */
-    var mediaDurationUpdater = new MediaDurationUpdater(manifest, mediaSource);
+    var mediaSourceDurationUpdater = new MediaSourceDurationUpdater(mediaSource);
     cancelSignal.register(function () {
-      mediaDurationUpdater.stop();
+      mediaSourceDurationUpdater.stopUpdating();
     });
     /** Allows to cancel a pending `end-of-stream` operation. */
     var endOfStreamCanceller = null;
@@ -49611,8 +49822,7 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
       });
     });
     contentTimeBoundariesObserver.addEventListener("durationUpdate", function (newDuration) {
-      log/* default.debug */.Z.debug("Init: Duration has to be updated.", newDuration);
-      mediaDurationUpdater.updateKnownDuration(newDuration);
+      mediaSourceDurationUpdater.updateDuration(newDuration.duration, !newDuration.isEnd);
     });
     contentTimeBoundariesObserver.addEventListener("endOfStream", function () {
       if (endOfStreamCanceller === null) {
@@ -49629,6 +49839,8 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
         endOfStreamCanceller = null;
       }
     });
+    var currentDuration = contentTimeBoundariesObserver.getCurrentDuration();
+    mediaSourceDurationUpdater.updateDuration(currentDuration.duration, !currentDuration.isEnd);
     return contentTimeBoundariesObserver;
   }
   /**
@@ -49649,9 +49861,9 @@ var MediaSourceContentInitializer = /*#__PURE__*/function (_ContentInitializer) 
    * @param {Object} cancelSignal
    * @returns {Object}
    */;
-  _proto._createRebufferingController = function _createRebufferingController(playbackObserver, manifest, speed, cancelSignal) {
+  _proto._createRebufferingController = function _createRebufferingController(playbackObserver, manifest, segmentBuffersStore, speed, cancelSignal) {
     var _this8 = this;
-    var rebufferingController = new rebuffering_controller/* default */.Z(playbackObserver, manifest, speed);
+    var rebufferingController = new rebuffering_controller/* default */.Z(playbackObserver, manifest, segmentBuffersStore, speed);
     // Bubble-up events
     rebufferingController.addEventListener("stalled", function (evt) {
       return _this8.trigger("stalled", evt);
@@ -50226,6 +50438,7 @@ var PlaybackObserver = /*#__PURE__*/function () {
    */;
   _proto.setCurrentTime = function setCurrentTime(time) {
     this._internalSeeksIncoming.push(time);
+    log/* default.info */.Z.info("API: Seeking internally", time);
     this._mediaElement.currentTime = time;
   }
   /**
@@ -52017,7 +52230,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     // Workaround to support Firefox autoplay on FF 42.
     // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1194624
     videoElement.preload = "auto";
-    _this.version = /* PLAYER_VERSION */"3.30.0";
+    _this.version = /* PLAYER_VERSION */"3.30.1-canal.2023040400";
     _this.log = log/* default */.Z;
     _this.state = "STOPPED";
     _this.videoElement = videoElement;
@@ -53120,6 +53333,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
     if (positionWanted === undefined) {
       throw new Error("invalid time given");
     }
+    log/* default.info */.Z.info("API: API Seek to", positionWanted);
     this.videoElement.currentTime = positionWanted;
     return positionWanted;
   }
@@ -54332,7 +54546,7 @@ var Player = /*#__PURE__*/function (_EventEmitter) {
   }]);
   return Player;
 }(event_emitter/* default */.Z);
-Player.version = /* PLAYER_VERSION */"3.30.0";
+Player.version = /* PLAYER_VERSION */"3.30.1-canal.2023040400";
 /* harmony default export */ var public_api = (Player);
 ;// CONCATENATED MODULE: ./src/core/api/index.ts
 /**
