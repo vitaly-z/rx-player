@@ -362,11 +362,11 @@ function getEstimateReference(
                                           lastPlaybackObservation.speed :
                                           1);
 
-      if (allowBufferBasedEstimates && bufferGap <= 8) {
+      if (allowBufferBasedEstimates && bufferGap <= 5) {
         allowBufferBasedEstimates = false;
       } else if (!allowBufferBasedEstimates &&
                  isFinite(bufferGap) &&
-                  bufferGap > 15)
+                  bufferGap > 10)
       {
         allowBufferBasedEstimates = true;
       }
